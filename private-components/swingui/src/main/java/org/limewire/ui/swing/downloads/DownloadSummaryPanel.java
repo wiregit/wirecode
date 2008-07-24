@@ -17,6 +17,7 @@ import javax.swing.table.TableCellRenderer;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 import org.limewire.ui.swing.util.FontUtils;
@@ -37,8 +38,9 @@ public class DownloadSummaryPanel extends JPanel {
 
 	
 	private JLabel titleLabel;
-	private EventList<DownloadItem> itemList;
-	private EventList<DownloadItem> warningList;
+	private EventList<DownloadItem> allList;
+    private EventList<DownloadItem> warningList;
+    private EventList<DownloadItem> unfinishedList;
 
     @Resource
     private Icon warningIcon;
@@ -48,9 +50,12 @@ public class DownloadSummaryPanel extends JPanel {
 	 */
 	public DownloadSummaryPanel(final EventList<DownloadItem> itemList) {
 	    GuiUtils.assignResources(this);
+
+        setLayout(new BorderLayout());
 	    
-	    this.itemList = itemList;
-		setLayout(new BorderLayout());
+	    this.allList = itemList;
+	    unfinishedList = new FilterList<DownloadItem>(itemList, new DownloadStateExcluder(DownloadState.DONE));
+        warningList = new FilterList<DownloadItem>(itemList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		
 		titleLabel = new JLabel();
 		titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -58,28 +63,23 @@ public class DownloadSummaryPanel extends JPanel {
 		add(titleLabel, BorderLayout.NORTH);
 			
 
-		table = new JTable(new DownloadTableModel(itemList));
+		table = new JTable(new DownloadTableModel(unfinishedList));
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);
 		
-		warningList = new FilterList<DownloadItem>(itemList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		//update title when number of downloads changes and hide or show panel as necessary
-		itemList.addListEventListener(new ListEventListener<DownloadItem>(){
+		allList.addListEventListener(new ListEventListener<DownloadItem>(){
 
 			@Override
-			public void listChanged(ListEvent<DownloadItem> listChanges) {
+			public void listChanged(ListEvent<DownloadItem> listChanges) {			   
 				updateTitle();
-				adjustVisibility();  
+				adjustVisibility(); 
 			}
 			
 		});
 		
 		
-		//TODO: sorting and filtering
-		
-//		TableRowSorter<DownloadTableModel> sorter = new TableRowSorter<DownloadTableModel>(
-//				model);
-//		sorter.setRowFilter(new DownloadStateRowFilter(DownloadState.DOWNLOADING));
+		//TODO: sorting
 		table.setDefaultRenderer(DownloadItem.class, new DownloadStatusPanelRenderer());		
 		add(table, BorderLayout.CENTER);
 		
@@ -89,7 +89,7 @@ public class DownloadSummaryPanel extends JPanel {
     
 	//hide panel if there are no downloads.  show it if there are
     private void adjustVisibility() {
-        setVisible(itemList.size()>0);
+        setVisible(allList.size()>0);
     }
 
     //Overridden to add listener to all components in this container so that mouse clicks will work anywhere
@@ -102,7 +102,7 @@ public class DownloadSummaryPanel extends JPanel {
     }
 
 	private void updateTitle(){
-		titleLabel.setText(I18n.tr("Downloads ({0})", itemList.size()));
+		titleLabel.setText(I18n.tr("Downloads ({0})", unfinishedList.size()));
         if(warningList.size()>0){
             titleLabel.setIcon(warningIcon);
         } else {

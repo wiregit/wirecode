@@ -18,9 +18,9 @@ public class DownloadTable extends JXTable {
 
 	public DownloadTable(TableModel model) {
 		super(model);
-		setRolloverEnabled(true);
+		setRolloverEnabled(false);
 		setFocusable(false);
-		setEditable(false);
+		setEditable(true);
 		setShowGrid(false, false);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setHighlighters(HighlighterFactory.createSimpleStriping());
@@ -70,37 +70,37 @@ public class DownloadTable extends JXTable {
 	}
 	
 	//TODO: get rid of this hack.  GlazedLists isn't playing nicely with the editor
-	@Override
-	public void setValueAt(Object aValue, int row, int column) {}
+	//@Override
+	//public void setValueAt(Object aValue, int row, int column) {}
 
 	
-	//TODO  get rid of these (switch to glazed lists)
-	//JXTable screws up java 6 sorting and filtering
-	@Override
-	public int convertRowIndexToModel(int viewRowIndex) {
-		if (getRowSorter() == null) {
-			return viewRowIndex;
-		}
-		return getRowSorter().convertRowIndexToModel(viewRowIndex);
-	}
-
-	//JXTable screws up java 6 sorting and filtering
-	@Override
-	public int convertRowIndexToView(int modelRowIndex) {
-		if (getRowSorter() == null) {
-			return modelRowIndex;
-		}
-		return getRowSorter().convertRowIndexToView(modelRowIndex);
-	}
-
-	//JXTable screws up java 6 sorting and filtering
-	@Override
-	public int getRowCount() {
-		if (getRowSorter() == null) {
-			return getModel().getRowCount();
-		}
-		return getRowSorter().getViewRowCount();
-	}
+//	these are necessary if we use java 6 filtering and swingx (switched to glazed lists)
+//	//JXTable screws up java 6 sorting and filtering
+//	@Override
+//	public int convertRowIndexToModel(int viewRowIndex) {
+//		if (getRowSorter() == null) {
+//			return viewRowIndex;
+//		}
+//		return getRowSorter().convertRowIndexToModel(viewRowIndex);
+//	}
+//
+//	//JXTable screws up java 6 sorting and filtering
+//	@Override
+//	public int convertRowIndexToView(int modelRowIndex) {
+//		if (getRowSorter() == null) {
+//			return modelRowIndex;
+//		}
+//		return getRowSorter().convertRowIndexToView(modelRowIndex);
+//	}
+//
+//	//JXTable screws up java 6 sorting and filtering
+//	@Override
+//	public int getRowCount() {
+//		if (getRowSorter() == null) {
+//			return getModel().getRowCount();
+//		}
+//		return getRowSorter().getViewRowCount();
+//	}
 
 	//overridden so that cell editor buttons will always work
 	@Override

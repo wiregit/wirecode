@@ -8,6 +8,7 @@ import javax.swing.JTextField;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -31,7 +32,7 @@ class DownloadMediator {
 	
 	public DownloadMediator(DownloadListManager downloadManager) {
 	
-		commonBaseList= downloadManager.getDownloads();	
+		commonBaseList= new FilterList<DownloadItem>(downloadManager.getDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));	
 		
 		searchBar = new JTextField();
 		filteredList = new FilterList<DownloadItem>(commonBaseList, 
@@ -41,21 +42,33 @@ class DownloadMediator {
 	
 
 	public void pauseAll() {
-		for (DownloadItem item : commonBaseList) {
-			if (item.getState().isPausable()) {
-				item.pause();
-			}
-		}
-	}
+        // lock list to ensure it is not modified elsewhere
+        commonBaseList.getReadWriteLock().readLock().lock();
+        try {
+            for (DownloadItem item : commonBaseList) {
+                if (item.getState().isPausable()) {
+                    item.pause();
+                }
+            }
+        } finally {
+            commonBaseList.getReadWriteLock().readLock().unlock();
+        }
+    }
 
 
-	public void resumeAll(){
-		for (DownloadItem item : commonBaseList) {
-			if (item.getState().isResumable()) {
-				item.resume();
-			}
-		}
-	}
+	public void resumeAll() {
+        // lock list to ensure it is not modified elsewhere
+        commonBaseList.getReadWriteLock().readLock().lock();
+        try {
+            for (DownloadItem item : commonBaseList) {
+                if (item.getState().isResumable()) {
+                    item.resume();
+                }
+            }
+        } finally {
+            commonBaseList.getReadWriteLock().readLock().unlock();
+        }
+    }
 	
 	public void clearFinished() {
 		List<DownloadItem> finishedItems = new ArrayList<DownloadItem>();

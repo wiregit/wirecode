@@ -84,6 +84,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	
 	@Override
 	public EventList<DownloadItem> getDownloads() {
+	    System.out.println(this);
 		return downloadItems;
 	}
 

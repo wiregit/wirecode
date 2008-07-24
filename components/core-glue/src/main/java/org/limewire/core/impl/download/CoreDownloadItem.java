@@ -8,36 +8,42 @@ import java.util.List;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 
 public class CoreDownloadItem implements DownloadItem {
    
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private Downloader downloader;
     private volatile int hashCode = 0;
-//    private long size = 0;
+    private volatile boolean cancelled = false;
+    /**
+     * size in bytes.  FINISHING state is only shown for files greater than this size.
+     */
+    //TODO: actual size for finishing threshold
+    private final int finishingThreshold = 999999999;
+  //  private DownloadState state;
 
     public CoreDownloadItem(Downloader downloader) {
         this.downloader = downloader;
-        //TODO: put this back in - using timer for now
-//        downloader.addListener(new EventListener<DownloadStatusEvent>(){
-//
-//            @Override
-//            public void handleEvent(DownloadStatusEvent event) {
-//                //TODO: fire correct property
-//                long oldSize = size;
-//                size = event.getSource().getAmountRead();
-//                support.firePropertyChange("size", oldSize, size);
-//            }
-//            
-//        });
+        
+        downloader.addListener(new EventListener<DownloadStatusEvent>(){
+
+            @Override
+            public void handleEvent(DownloadStatusEvent event) {
+                //broadcast the status has changed
+                support.firePropertyChange("state", null, getState());
+            }
+            
+        });
     }
 
-    public Downloader getDownloader(){
+    private Downloader getDownloader(){
         return downloader;
     }
     
@@ -53,6 +59,8 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public void cancel() {
+       cancelled = true;
+       support.firePropertyChange("state", null, getState());
        downloader.stop();
     }
 
@@ -64,8 +72,11 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public double getCurrentSize() {
-        // TODO right method?
-        return downloader.getAmountRead();
+        if(getState() == DownloadState.DONE){
+            return getTotalSize();
+        } else {
+            return downloader.getAmountRead();
+        }
     }
 
     @Override
@@ -109,6 +120,9 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public DownloadState getState() {
+        if(cancelled){
+            return DownloadState.CANCELLED;
+        }
         return convertState(downloader.getState());
     }
 
@@ -140,13 +154,17 @@ public class CoreDownloadItem implements DownloadItem {
         return downloader.getQueuePosition();
     }
     
-    private static DownloadState convertState(DownloadStatus status) {
+    private DownloadState convertState(DownloadStatus status) {
         // TODO: double check states
         switch (status) {
 
         case SAVING:
         case HASHING:
-            return DownloadState.FINISHING;
+            if (getTotalSize() > finishingThreshold) {
+                return DownloadState.FINISHING;
+            } else {
+                return DownloadState.DONE;
+            }
 
         case DOWNLOADING:
         case FETCHING://"FETCHING" is downloading .torrent file
