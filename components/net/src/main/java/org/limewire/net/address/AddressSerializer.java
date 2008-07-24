@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import com.google.inject.Inject;
 
+/**
+ * Used to (de)serialize <code>Addresses</code> over a network connection
+ */
 public interface AddressSerializer {
     @Inject
     public void register(AddressFactory factory);

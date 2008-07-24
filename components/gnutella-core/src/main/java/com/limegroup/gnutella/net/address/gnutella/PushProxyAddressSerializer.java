@@ -9,7 +9,7 @@ import org.limewire.net.address.DirectConnectionAddressSerializer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.PushProxyAddressImpl;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressImpl;
 
 @Singleton
 public class PushProxyAddressSerializer extends DirectConnectionAddressSerializer {

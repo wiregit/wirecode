@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.net.address.gnutella;
 
 import java.net.UnknownHostException;
 

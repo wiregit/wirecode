@@ -21,6 +21,7 @@ import com.limegroup.gnutella.net.address.gnutella.PushProxyAddress;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressImpl;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
