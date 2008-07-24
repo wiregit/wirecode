@@ -51,6 +51,7 @@ public class AppFrame extends SingleFrameApplication {
         LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
         show(ui);
         ui.goHome();
+        ui.focusOnSearch();
         
         // Keep this here while building UI - ensures we test 
         // with proper sizes.

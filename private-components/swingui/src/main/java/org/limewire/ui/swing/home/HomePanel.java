@@ -9,64 +9,46 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.Box;
-import javax.swing.JPanel;
 
-import org.limewire.ui.swing.search.SearchHandler;
+import org.jdesktop.swingx.JXPanel;
 
 import com.google.inject.Inject;
 
 /**
  * The main home page.
  */
-public class HomePanel extends JPanel {
+public class HomePanel extends JXPanel {
 
     public static final String NAME = "Home";
-    private final HomeSearchPanel hsPanel;
 
     @Inject
-    public HomePanel(SearchHandler searchHandler) {
-        this.hsPanel = new HomeSearchPanel(searchHandler);
-
+    public HomePanel() {
         setPreferredSize(new Dimension(500, 500));
 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.insets = new Insets(0, 0, 100, 0);
-        add(hsPanel, gbc);
-
-        JPanel bottomPanel = new JPanel();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.CENTER;
-        bottomPanel.setMinimumSize(new Dimension(700, 200));
-        bottomPanel.setPreferredSize(new Dimension(700, 200));
-        bottomPanel.setOpaque(false);
-        bottomPanel.setLayout(new GridBagLayout());
-        add(bottomPanel, gbc);
 
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridwidth = 1;
-        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.insets = new Insets(50, 25, 0, 0);
         gbc.weightx = 1;
         gbc.weighty = 1;
-        bottomPanel.add(new RecentActivityPanel(), gbc);
+        add(new RecentActivityPanel(), gbc);
         
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         gbc.weightx = 0.0;
-        gbc.ipadx = 100;
-        bottomPanel.add(Box.createGlue(), gbc);
-
+        gbc.ipadx = 25;
+        gbc.insets = new Insets(50, 0, 0, 0);
+        gbc.ipady = 0;
+        add(Box.createGlue(), gbc);
+        
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx = 1;
         gbc.ipadx = 0;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        bottomPanel.add(new NewAtLimePanel(), gbc);
-
-    }
-
-    @Override
-    public boolean requestFocusInWindow() {
-        return hsPanel.requestFocusInWindow();
+        gbc.insets = new Insets(50, 0, 0, 25);
+        add(new RecentActivityPanel(), gbc);
+        
+        gbc.insets = new Insets(50, 25, 50, 25);
+        gbc.ipady = 0;
+        add(new NewAtLimePanel(), gbc);
     }
 }

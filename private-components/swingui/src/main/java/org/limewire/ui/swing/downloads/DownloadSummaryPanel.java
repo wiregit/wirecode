@@ -60,6 +60,7 @@ public class DownloadSummaryPanel extends JPanel {
 
 		table = new JTable(new DownloadTableModel(itemList));
 		table.setShowHorizontalLines(false);
+		table.setShowVerticalLines(false);
 		
 		warningList = new FilterList<DownloadItem>(itemList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		//update title when number of downloads changes and hide or show panel as necessary

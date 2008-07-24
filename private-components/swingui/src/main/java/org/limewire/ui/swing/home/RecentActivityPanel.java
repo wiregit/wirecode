@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.home;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -29,6 +30,10 @@ public class RecentActivityPanel extends JPanel {
         RecentActivityBox raBox = new RecentActivityBox();
         raBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         add(raBox, gbc);
+        
+        setMinimumSize(new Dimension(Integer.MAX_VALUE, 150));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
+        setPreferredSize(new Dimension(Integer.MAX_VALUE, 150));
     }
 
 }

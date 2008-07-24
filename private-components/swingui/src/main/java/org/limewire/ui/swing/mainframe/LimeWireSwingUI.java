@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 public class LimeWireSwingUI extends JPanel {
     
     private final LeftPanel leftPanel;
+    private final TopPanel topPanel;
     
     /**
 	 * The color of the lines separating the GUI panels
@@ -32,6 +33,7 @@ public class LimeWireSwingUI extends JPanel {
             MainDownloadPanel mainDownloadPanel) {
     	GuiUtils.assignResources(this);
     	        
+    	this.topPanel = topPanel;
     	this.leftPanel = leftPanel;
         
         //TODO:move this and have clicks on DownloadSummaryPanel navigate to downloadPanel
@@ -41,57 +43,73 @@ public class LimeWireSwingUI extends JPanel {
         setLayout(layout);
 
         GridBagConstraints gbc = new GridBagConstraints();
+        
+        // Line above the top area
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;        
         add(new Line(lineColor), gbc);
         
+        // The left panel
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.weightx = 0;
+        gbc.weighty = 1;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 3;
+        add(leftPanel, gbc);
+        
+        // The top panel
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight = 1;
         add(topPanel, gbc);
         
+        // Line below the top panel
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         add(new Line(lineColor), gbc);
         
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.weightx = 0;
-        gbc.weighty = 1;
-        gbc.gridwidth = 1;
-        add(leftPanel, gbc);
-        
+        // Line between left & main panel
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.weightx = 0;
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         add(new Line(lineColor), gbc);
         
+        // The main panel
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         add(mainPanel, gbc);
         
+        // Line below the left & main panel
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         add(new Line(lineColor), gbc);
         
+        // The statusbar
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight = GridBagConstraints.REMAINDER;
         add(statusPanel, gbc);
     }
     
     public void goHome() {        
         leftPanel.goHome();
+    }
+
+    public void focusOnSearch() {
+        topPanel.requestFocusInWindow();
     }
     
     

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.home;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -33,6 +34,10 @@ public class NewAtLimePanel extends JPanel {
         browser.load("http://www.limewire.com");
         browser.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         add(browser, gbc);
+        
+        setMinimumSize(new Dimension(Integer.MAX_VALUE, 250));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 250));
+        setPreferredSize(new Dimension(Integer.MAX_VALUE, 250));
     }
 
 }

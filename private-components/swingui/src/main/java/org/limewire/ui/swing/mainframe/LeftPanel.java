@@ -5,8 +5,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -15,17 +13,13 @@ import javax.swing.JScrollPane;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectionListener;
 import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.nav.NavigableTree;
-import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
-import org.limewire.ui.swing.search.DefaultSearchInfo;
-import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
 
@@ -36,8 +30,6 @@ import com.google.inject.Singleton;
 class LeftPanel extends JPanel implements NavigableTree {
 
     private final NavTree navTree;
-
-    private SearchHandler searchHandler;
     
     /** The color of the lines separating the GUI panels */
     @Resource
@@ -46,22 +38,13 @@ class LeftPanel extends JPanel implements NavigableTree {
     @Inject
     public LeftPanel(DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel) {
     	GuiUtils.assignResources(this);
-        final SearchBar searchBar = new SearchBar();
         this.navTree = new NavTree();
         DownloadSummaryPanel downloadPanel =  new DownloadSummaryPanel(downloadListManager.getDownloads());
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));
         
-        searchBar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                searchHandler.doSearch(new DefaultSearchInfo(searchBar.getText(), SearchCategory.ALL));
-            }
-        });
-        
         downloadPanel.addMouseListener(new MouseAdapter(){
-
             public void mouseClicked(MouseEvent arg0) {
                 showDownloads();
             }            
@@ -72,17 +55,11 @@ class LeftPanel extends JPanel implements NavigableTree {
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weightx = 1;
-        
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weighty = 0;
-        gbc.gridx = GridBagConstraints.REMAINDER;
-        gbc.insets = new Insets(15, 10, 15, 10);
-        add(searchBar, gbc);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
         
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weighty = 1;
-        gbc.gridx = GridBagConstraints.REMAINDER;
-        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.insets = new Insets(19, 0, 0, 0);
         JScrollPane scrollableNav = new JScrollPane(navTree);
         scrollableNav.setOpaque(false);
         scrollableNav.getViewport().setOpaque(false);
@@ -93,31 +70,23 @@ class LeftPanel extends JPanel implements NavigableTree {
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weighty = 0;
-        gbc.gridx = GridBagConstraints.REMAINDER;
+        gbc.insets = new Insets(0, 0, 0, 0);
         add(new Line(lineColor), gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(0, 5, 0, 0);
         gbc.weighty = 0;
-        gbc.gridx = GridBagConstraints.REMAINDER;
         add(downloadPanel, gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(0, 0, 0, 0);
         gbc.weighty = 0;
-        gbc.gridx = GridBagConstraints.REMAINDER;
         add(new Line(lineColor), gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(2, 5, 2, 0);
         gbc.weighty = 0;
-        gbc.gridx = GridBagConstraints.REMAINDER;
         add(filesSharingPanel, gbc);
-    }
-
-    @Inject
-    public void setSearchHandler(SearchHandler searchHandler) {
-        this.searchHandler = searchHandler;
     }
 
     @Override
