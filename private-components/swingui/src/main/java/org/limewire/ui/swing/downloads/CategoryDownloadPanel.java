@@ -18,7 +18,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -33,6 +32,7 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -76,8 +76,8 @@ public class CategoryDownloadPanel extends JPanel {
 		list.addListEventListener(new ListEventListener<DownloadItem>() {
 			@Override
 			public void listChanged(ListEvent<DownloadItem> listChanges) {
-				//TODO:confirm which thread we're on
-				SwingUtilities.invokeLater(new Runnable() {
+			    //list events probably won't be on EDT
+			    GuiUtils.safeInvokeLater(new Runnable() {
 					public void run() {
 						for (int i = 0; i < titles.size() && i < tables.size(); i++) {
 							boolean isVisible = tables.get(i).getRowCount() > 0;

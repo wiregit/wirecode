@@ -68,15 +68,21 @@ public class DownloadSummaryPanel extends JPanel {
 		table.setShowVerticalLines(false);
 		
 		//update title when number of downloads changes and hide or show panel as necessary
-		allList.addListEventListener(new ListEventListener<DownloadItem>(){
+		allList.addListEventListener(new ListEventListener<DownloadItem>() {
 
-			@Override
-			public void listChanged(ListEvent<DownloadItem> listChanges) {			   
-				updateTitle();
-				adjustVisibility(); 
-			}
-			
-		});
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+              //list events probably won't be on EDT
+                GuiUtils.safeInvokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateTitle();
+                        adjustVisibility();
+                    }
+                });
+            }
+
+        });
 		
 		
 		//TODO: sorting
