@@ -15,6 +15,10 @@ public class TorrentFile extends File {
 	 * of the torrent this file occupies
 	 */
 	private int begin, end;
+	
+	private long startByte, endByte;
+	
+	private String torrentPath = null;
 
 	TorrentFile(long length, String path) {
 		super(path);
@@ -28,20 +32,48 @@ public class TorrentFile extends File {
 		return length;
 	}
 	
-	public void setBegin(int begin) {
+	public void setBeginPiece(int begin) {
 		this.begin = begin;
 	}
 	
-	public int getBegin() {
+	public int getBeginPiece() {
 		return begin;
 	}
 	
-	public void setEnd(int end) {
+	public void setEndPiece(int end) {
 		this.end = end;
 	}
 	
-	public int getEnd() {
+	public int getEndPiece() {
 		return end;
 	}
+
+    public long getStartByte() {
+        return startByte;
+    }
+
+    public void setStartByte(long startByte) {
+        this.startByte = startByte;
+    }
+
+    public long getEndByte() {
+        return endByte;
+    }
+
+    public void setEndByte(long endByte) {
+        this.endByte = endByte;
+    }
+
+    public String getTorrentPath() {
+        return torrentPath;
+    }
+
+    public void setTorrentPath(String torrentPath) {
+        this.torrentPath = torrentPath;
+    }
+    
+    
+
+	
 	
 }

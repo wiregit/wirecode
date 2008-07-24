@@ -107,7 +107,10 @@ public class TorrentFileSystem {
             List<BTData.BTFileData> files = data.getFiles();
             List<TorrentFile> torrents = new ArrayList<TorrentFile>(files.size());
             for(BTData.BTFileData file : files) {
+                
             	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath());
+            	String torrentPath = _name + file.getPath();
+            	f.setTorrentPath(torrentPath);
             	if (!FileUtils.isReallyInParentPath(_completeFile, f))
             		throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, f);
                 torrents.add(f);
@@ -119,9 +122,11 @@ public class TorrentFileSystem {
 			// add the beginning and ending chunks for each file.
 			long position = 0;
 			for (TorrentFile file : torrents) {
-				file.setBegin((int) (position / pieceLength));
+				file.setBeginPiece((int) (position / pieceLength));
+				file.setStartByte(position);
 				position += file.length();
-				file.setEnd((int) (position / pieceLength));
+				file.setEndPiece((int) (position / pieceLength));
+				file.setEndByte(position-1);
 			}
 			
 			_files = torrents;
@@ -132,9 +137,12 @@ public class TorrentFileSystem {
 			_folders.add(_completeFile);
 		} else {
             TorrentFile f = new TorrentFile(data.getLength(), _completeFile.getAbsolutePath());
-            f.setBegin(0);
-            f.setEnd(numHashes);
-            
+            String torrentPath = data.getName();
+            f.setTorrentPath(torrentPath);
+            f.setBeginPiece(0);
+            f.setStartByte(0);
+            f.setEndPiece(numHashes);
+            f.setEndByte(f.length());
             _files = new ArrayList<TorrentFile>(1);
             _files.add(f);
 		}
@@ -259,8 +267,11 @@ public class TorrentFileSystem {
 			TorrentFile current = l.get(i);
 			TorrentFile updated = new TorrentFile(current.length(), newPath
 					+ current.getPath().substring(offset));
-			updated.setBegin(current.getBegin());
-			updated.setEnd(current.getEnd());
+			updated.setBeginPiece(current.getBeginPiece());
+			updated.setEndPiece(current.getEndPiece());
+			updated.setStartByte(current.getStartByte());
+			updated.setEndByte(current.getEndByte());
+			updated.setTorrentPath(current.getTorrentPath());
 			l.set(i,updated);
 		}
 	}
