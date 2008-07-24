@@ -337,11 +337,15 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     public void newMediatedConnectionAddress(MediatorAddress newMediatorAddress) {        
-        if(!maybeFireNewHolePunchAddress()) {
-            if(mediatedAddress == null || !mediatedAddress.equals(newMediatorAddress)) {
-                fireMediatedConenctionAddressEvent(newMediatorAddress);
-            }            
-        }
+        if(supportsFWTVersion() > 0) {
+            mediatedAddress = newMediatorAddress;
+            PushProxyHolePunchAddress newHolePunchAddress = getPushProxyHolePunchAddress();
+            if(holePunchAddress == null || !holePunchAddress.equals(newHolePunchAddress)) {
+                fireHolePunchAddressEvent(newHolePunchAddress);
+            }
+        } else if(mediatedAddress == null || !mediatedAddress.equals(newMediatorAddress)) {
+            fireMediatedConenctionAddressEvent(newMediatorAddress);
+        }           
     }
     
     private void fireMediatedConenctionAddressEvent(MediatorAddress address) {

@@ -28,7 +28,6 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
@@ -2617,10 +2616,5 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         }
         networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxyAddresses));
     }
-    
-    private class PushProxyAddressImpl extends ConnectableImpl implements PushProxyAddress {
-        public PushProxyAddressImpl(Connectable connectable) {
-            super(connectable);
-        }
-    }
+
 }

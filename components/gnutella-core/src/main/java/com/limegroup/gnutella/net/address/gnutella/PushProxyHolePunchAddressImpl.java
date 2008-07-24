@@ -34,4 +34,12 @@ public class PushProxyHolePunchAddressImpl implements PushProxyHolePunchAddress{
         return version == other.getVersion() && directConnectionAddress.equals(other.getDirectConnectionAddress()) 
                 && mediatorAddress.equals(other.getMediatorAddress());
     }
+    
+    public int hashCode() {
+        int hash = 7;
+        hash = hash * 31 + version;
+        hash = hash * 31 + directConnectionAddress.hashCode();
+        hash = hash * 31 + mediatorAddress.hashCode();
+        return hash;
+    }
 }

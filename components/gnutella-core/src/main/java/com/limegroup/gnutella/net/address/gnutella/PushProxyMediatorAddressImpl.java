@@ -28,4 +28,13 @@ public class PushProxyMediatorAddressImpl implements PushProxyMediatorAddress{
         PushProxyMediatorAddress other = (PushProxyMediatorAddress)o;
         return guid.equals(other.getClientID()) && proxies.equals(other.getPushProxies());
     }
+    
+    public int hashCode() {
+        // TODO push up - but what are the side affects,
+        // TODO especially for existing callers.
+        int hash = 7;
+        hash = hash * 31 + guid.hashCode();
+        hash = hash * 31 + proxies.hashCode();
+        return hash;
+    }
 }
