@@ -4,9 +4,6 @@ import java.net.Socket;
 
 import org.limewire.net.SocketsManager.ConnectType;
 
-import com.google.inject.Singleton;
-
-@Singleton
 public interface BlockingConnectionFactory {
 
     public BlockingConnection createConnection(Socket socket);
