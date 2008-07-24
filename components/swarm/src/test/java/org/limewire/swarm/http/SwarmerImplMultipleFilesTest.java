@@ -22,8 +22,6 @@ import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
-import org.limewire.swarm.SwarmCoordinatorListener;
-import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
 import org.limewire.swarm.file.SwarmFileSystemImpl;
@@ -33,6 +31,10 @@ import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
+/**
+ * 
+ *
+ */
 public class SwarmerImplMultipleFilesTest extends BaseTestCase {
 
     public SwarmerImplMultipleFilesTest(String name) {
@@ -55,8 +57,8 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         Range range2 = Range.createRange(fileSize1, fileSize1 + fileSize2 - 1);
         final SwarmSource swarmSource = new SourceImpl(uri, (fileSize1 + fileSize2));
         MD5SumFileVerifier swarmBlockVerifier = new MD5SumFileVerifier();
-        swarmBlockVerifier.addMD5(range1, md51);
-        swarmBlockVerifier.addMD5(range2, md52);
+        swarmBlockVerifier.addMD5Check(range1, md51);
+        swarmBlockVerifier.addMD5Check(range2, md52);
         final Swarmer swarmer = createSwarmer(fileSize1, fileSize2, file1, file2, swarmSource,
                 swarmBlockVerifier);
 

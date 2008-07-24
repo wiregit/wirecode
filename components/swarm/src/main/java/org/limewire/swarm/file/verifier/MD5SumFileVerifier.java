@@ -12,19 +12,23 @@ import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.util.FileUtils;
 
+/**
+ * This class allows for adding various ranges to check against an MD5Sum.
+ * 
+ */
 public class MD5SumFileVerifier implements SwarmBlockVerifier {
 
     private Map<Range, String> rangeMD5s = new HashMap<Range, String>();
 
-    public MD5SumFileVerifier()
-    {
-        
-    }
-    public MD5SumFileVerifier(Range range, String md5String) {
-        addMD5(range, md5String);
+    public MD5SumFileVerifier() {
+
     }
 
-    public void addMD5(Range range, String md5String) {
+    public MD5SumFileVerifier(Range range, String md5String) {
+        addMD5Check(range, md5String);
+    }
+
+    public void addMD5Check(Range range, String md5String) {
         rangeMD5s.put(range, md5String);
     }
 

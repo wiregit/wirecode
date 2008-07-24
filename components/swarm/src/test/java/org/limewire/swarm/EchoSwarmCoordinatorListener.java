@@ -8,6 +8,12 @@ import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmCoordinatorListener;
 import org.limewire.swarm.SwarmFileSystem;
 
+/**
+ * Class used to track what is happening inside of the swarm coordinator. It
+ * echos out events as they happen.
+ * 
+ * 
+ */
 public final class EchoSwarmCoordinatorListener implements SwarmCoordinatorListener {
     public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block leased: " + block.toString());

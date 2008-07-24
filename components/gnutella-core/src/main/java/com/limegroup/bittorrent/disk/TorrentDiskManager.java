@@ -134,4 +134,12 @@ public interface TorrentDiskManager {
      */
     public long getLastVerifiedOffset();
 
+    /**
+     * 
+     * @param oldInterval
+     * @param newInterval
+     * @return
+     */
+    public BTInterval renewLease(BTInterval oldInterval, BTInterval newInterval);
+
 }

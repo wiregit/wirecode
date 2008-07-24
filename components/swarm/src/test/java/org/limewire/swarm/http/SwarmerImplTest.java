@@ -35,6 +35,11 @@ import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
+/**
+ * 
+ * @author pvertenten
+ * 
+ */
 public class SwarmerImplTest extends BaseTestCase {
 
     public SwarmerImplTest(String name) {
@@ -50,6 +55,11 @@ public class SwarmerImplTest extends BaseTestCase {
         System.out.println("===================================");
     }
 
+    /**
+     * Tests fully downloading a small file from 1 source.
+     * 
+     * @throws Exception
+     */
     public void testBasic() throws Exception {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/gnutella_protocol_0.4.pdf");
@@ -62,6 +72,11 @@ public class SwarmerImplTest extends BaseTestCase {
         assertSwarmer(md5, file, fileSize);
     }
 
+    /**
+     * Tests downloading only the beginning of a file from 1 source.
+     * 
+     * @throws Exception
+     */
     public void testRangesStart() throws Exception {
         String md5 = "cea47a73ebb7b0da41feef1d030a4c7a";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testRangesStart.pdf");
@@ -74,6 +89,11 @@ public class SwarmerImplTest extends BaseTestCase {
         assertSwarmer(md5, file, fileSize);
     }
 
+    /**
+     * Tests downloading only the middle of a file from 1 source.
+     * 
+     * @throws Exception
+     */
     public void testRangesMiddle() throws Exception {
         String md5 = "bff2db0947dabf7978f55eebd7e3b2b4";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testRangesMiddle.pdf");
@@ -86,6 +106,11 @@ public class SwarmerImplTest extends BaseTestCase {
         assertSwarmer(md5, file, fileSize);
     }
 
+    /**
+     * Tests downloading only the end of a file from 1 source.
+     * 
+     * @throws Exception
+     */
     public void testRangesEnd() throws Exception {
         String md5 = "c68ab8fbc3f712207774b33367d10f03";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testRangesEnd.pdf");
@@ -98,6 +123,12 @@ public class SwarmerImplTest extends BaseTestCase {
         assertSwarmer(md5, file, fileSize);
     }
 
+    /**
+     * Tests downloading 1 file from multiple sources with differant ranges of
+     * bytes.
+     * 
+     * @throws Exception
+     */
     public void testMultipleRanges() throws Exception {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testMultipleRanges.pdf");
@@ -119,6 +150,12 @@ public class SwarmerImplTest extends BaseTestCase {
         assertSwarmer(md5, file, fileSize);
     }
 
+    /**
+     * Tests downloading 1 file from multiple sources with differant ranges of
+     * bytes.
+     * 
+     * @throws Exception
+     */
     public void testMultipleRanges2() throws Exception {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testMultipleRanges2.pdf");
@@ -145,6 +182,11 @@ public class SwarmerImplTest extends BaseTestCase {
         assertSwarmer(md5, file, fileSize);
     }
 
+    /**
+     * Tests fully downloading a small file from 1 source.
+     * 
+     * @throws Exception
+     */
     public void testSimpleSmallFileSwarm() throws Exception {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleSmallFileSwarm.pdf");
@@ -153,12 +195,24 @@ public class SwarmerImplTest extends BaseTestCase {
         int highByte = 44425 - 1;
         long fileSize = highByte + 1;
         Range range = Range.createRange(lowByte, highByte);
-        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize, new MD5SumFileVerifier(range,md5));
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize,
+                new MD5SumFileVerifier(range, md5));
         swarmer.addSource(new SourceImpl(uri, range));
         assertSwarmer(md5, file, fileSize);
     }
 
-    private void assertSwarmer(String md5, File file, long fileSize) throws InterruptedException,
+    /**
+     * Asserts that the given file has the correct size, and matches the given
+     * md5sum.
+     * 
+     * @param md5
+     * @param file
+     * @param fileSize
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
+    public static void assertSwarmer(String md5, File file, long fileSize) throws InterruptedException,
             NoSuchAlgorithmException, IOException {
         long sleepTime = (long) ((fileSize * 0.0001) + 3000);
         Thread.sleep(sleepTime);
@@ -168,33 +222,41 @@ public class SwarmerImplTest extends BaseTestCase {
         Assert.assertEquals(md5, testmd5);
     }
 
+    /**
+     * Creates a swarmerImpl for the given file using a default block verifier.
+     * 
+     * @param file
+     * @param path
+     * @param fileSize
+     * @return
+     * @throws InterruptedException
+     * @throws IOException
+     */
     private Swarmer createSwarmer(File file, String path, long fileSize)
-    throws InterruptedException, IOException {
-       return  createSwarmer(file,path,fileSize,new RandomFailFileVerifier());
-    }
-    private Swarmer createSwarmer(File file, String path, long fileSize, SwarmBlockVerifier swarmFileVerifier)
             throws InterruptedException, IOException {
+        return createSwarmer(file, path, fileSize, new RandomFailFileVerifier());
+    }
+
+    /**
+     * Creates a swarmerImpl for the given file and block verifier.
+     * 
+     * @param file
+     * @param path
+     * @param fileSize
+     * @param swarmFileVerifier
+     * @return
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    private Swarmer createSwarmer(File file, String path, long fileSize,
+            SwarmBlockVerifier swarmFileVerifier) throws InterruptedException, IOException {
         System.out.println("-----------------------------------");
-        HttpParams params = new BasicHttpParams();
-        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
-                CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
-                CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
-                CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
-                CoreProtocolPNames.USER_AGENT, "LimeTest/1.1");
-        ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
-                .instance().getScheduledExecutorService(), new SocketsManagerImpl());
-
         file.delete();
-
         
-        SwarmFileSystem swarmfilesystem = new SwarmFileSystemImpl(new SwarmFileImpl(file, path,
-                fileSize));
-
-        SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
-
-        SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,
-                swarmFileVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
-                selectionStrategy);
+        HttpParams params = createHttpParams();
+        ConnectingIOReactor ioReactor = createIOReactor(params);
+        SwarmCoordinator swarmCoordinator = createSwarmCoordinator(file, path, fileSize,
+                swarmFileVerifier);
 
         SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(swarmCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
@@ -205,5 +267,34 @@ public class SwarmerImplTest extends BaseTestCase {
 
         swarmer.start();
         return swarmer;
+    }
+
+    public static ConnectingIOReactor createIOReactor(HttpParams params) {
+        ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
+                .instance().getScheduledExecutorService(), new SocketsManagerImpl());
+        return ioReactor;
+    }
+
+    public static HttpParams createHttpParams() {
+        HttpParams params = new BasicHttpParams();
+        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
+                CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
+                CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
+                CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
+                CoreProtocolPNames.USER_AGENT, "LimeTest/1.1");
+        return params;
+    }
+
+    private SwarmCoordinator createSwarmCoordinator(File file, String path, long fileSize,
+            SwarmBlockVerifier swarmFileVerifier) {
+        SwarmFileSystem swarmfilesystem = new SwarmFileSystemImpl(new SwarmFileImpl(file, path,
+                fileSize));
+
+        SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
+
+        SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,
+                swarmFileVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
+                selectionStrategy);
+        return swarmCoordinator;
     }
 }

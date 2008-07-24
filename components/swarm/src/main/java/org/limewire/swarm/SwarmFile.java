@@ -2,10 +2,14 @@ package org.limewire.swarm;
 
 import java.io.File;
 
+/**
+ * 
+ *
+ */
 public interface SwarmFile {
 
     /**
-     * Returns the local file backing this file.
+     * Returns the local file backing this download.
      * 
      * @return
      */

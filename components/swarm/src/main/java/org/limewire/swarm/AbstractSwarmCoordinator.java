@@ -3,7 +3,6 @@ package org.limewire.swarm;
 /**
  * Abstract Swarm Coordinator that will hold some common functionality accross Coordinators.
  * 
- * @author pvertenten
  */
 public abstract class AbstractSwarmCoordinator implements SwarmCoordinator {
     

@@ -369,9 +369,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	private void closeAnyCompletedFiles(int pieceNum) throws IOException {
 		List<TorrentFile> possiblyCompleted = null;
 		for (TorrentFile t : _files) {
-			if (t.getBegin() > pieceNum)
+			if (t.getBeginPiece() > pieceNum)
 				continue;
-			if (t.getEnd() < pieceNum)
+			if (t.getEndPiece() < pieceNum)
 				break;
 			
 			if (possiblyCompleted == null)
@@ -385,7 +385,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		
 		for (TorrentFile file : possiblyCompleted) {
 			boolean done = true;
-			for(int i = file.getBegin(); i <= file.getEnd(); i++) {
+			for(int i = file.getBeginPiece(); i <= file.getEndPiece(); i++) {
 				if (!hasBlock(i)) {
 					done = false;
 					break;
@@ -672,9 +672,11 @@ class VerifyingFolder implements TorrentDiskManager {
 				needed.delete(pending);
 			
 			// exclude any specified intervals 
-			for (Range excluded : exclude) 
-				needed.delete(excluded);
-			
+			if(exclude != null) {
+    			for (Range excluded : exclude) {
+    				needed.delete(excluded);
+    			}
+			}
 			// try not to request any parts that are already requested
 			if (requested != null) {
 				needed.delete(requested);
@@ -687,8 +689,10 @@ class VerifyingFolder implements TorrentDiskManager {
 					needed = requested.clone();
 					
 					// exclude the specified intervals again
-					for (Range excluded : exclude) 
-						needed.delete(excluded);
+					if(exclude != null) {
+    					for (Range excluded : exclude) 
+    						needed.delete(excluded);
+					}
 				}
 			}
 			
@@ -786,7 +790,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			lastSet = verifiedBlocks.length();
 		}
 		for (TorrentFile f : l) {
-			for (int i = Math.max(lastSet,f.getBegin()); i <= f.getEnd(); i++) 
+			for (int i = Math.max(lastSet,f.getBeginPiece()); i <= f.getEndPiece(); i++) 
 				VERIFY_QUEUE.execute(new VerifyJob(i),context.getMetaInfo().getURN());
 		}
 	}
@@ -954,4 +958,9 @@ class VerifyingFolder implements TorrentDiskManager {
 			return clone;
 		}
 	}
+    public BTInterval renewLease(BTInterval oldInterval, BTInterval newInterval) {
+       requestedRanges.removeInterval(oldInterval);
+       requestedRanges.addInterval(newInterval);
+        return newInterval;
+    }
 }

@@ -5,7 +5,6 @@ import org.limewire.collection.Range;
 /**
  * Listener for events in the SwarmCoordinator.
  * 
- * @author pvertenten
  */
 public interface SwarmCoordinatorListener {
 

@@ -59,6 +59,7 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
                     .getAttribute(RESPONSE_LISTENER);
             listener.finished();
             context.setAttribute(RESPONSE_LISTENER, null);
+            //TODO we need to handle this and not go into infinite loop
             return null;
         }
     }

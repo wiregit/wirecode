@@ -7,7 +7,6 @@ import org.limewire.collection.Range;
 /**
  * Wrapper class to help fire various events to the SwarmCoordinatorListeners
  * 
- * @author pvertenten
  * 
  */
 public class SwarmCoordinatorListenerList {

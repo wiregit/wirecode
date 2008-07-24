@@ -13,7 +13,7 @@ import org.limewire.nio.ByteBufferCache;
 
 /**
  * 
- * @author pvertenten
+ * 
  *
  */
 public class SwarmWriteJobImpl implements SwarmWriteJob {
