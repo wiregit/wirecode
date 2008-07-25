@@ -68,13 +68,17 @@ public class FileChannelSwarmFileSystem implements SwarmFileSystem {
         return swarmFile;
     }
 
-    public List<SwarmFile> getSwarmFilesInRange(Range range) {
-        return getSwarmFiles();
-    }
-    
     public List<SwarmFile> getSwarmFiles() {
         ArrayList<SwarmFile> files = new ArrayList<SwarmFile>();
         files.add(swarmFile);
         return files;
+    }
+
+    public void closeSwarmFile(SwarmFile swarmFile) throws IOException {
+        close();
+    }
+
+    public List<SwarmFile> getSwarmFiles(Range range) {
+        return getSwarmFiles();
     }
 }

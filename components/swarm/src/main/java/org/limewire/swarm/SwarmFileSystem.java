@@ -2,6 +2,9 @@ package org.limewire.swarm;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
+
+import org.limewire.collection.Range;
 
 
 public interface SwarmFileSystem {
@@ -35,6 +38,14 @@ public interface SwarmFileSystem {
      * @throws IOException
      */
     void close() throws IOException;
+    
+    /**
+     * Closes the given swarmFile for writing/reading.
+     * 
+     * @param swarmFile
+     * @throws IOException
+     */
+    void closeSwarmFile(SwarmFile swarmFile) throws IOException;
 
     /**
      * Initializes this filesystem for use.
@@ -57,5 +68,10 @@ public interface SwarmFileSystem {
      * @return
      */
     SwarmFile getSwarmFile(long position);
+
+    
+    List<SwarmFile> getSwarmFiles(Range range);
+    
+    List<SwarmFile> getSwarmFiles();
 
 }

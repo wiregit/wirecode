@@ -50,23 +50,6 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         return swarmFiles;
     }
 
-    public List<SwarmFile> getSwarmFilesInRange(Range range) {
-        ArrayList<SwarmFile> filesRet = new ArrayList<SwarmFile>();
-
-        long rangeStart = range.getLow();
-        long rangeEnd = range.getHigh();
-
-        for (SwarmFile swarmFile : swarmFiles) {
-            long startByte = swarmFile.getStartByte();
-            long endByte = swarmFile.getEndByte();
-            if (startByte <= rangeEnd && endByte >= rangeStart) {
-                filesRet.add(swarmFile);
-            }
-        }
-
-        return filesRet;
-    }
-
     public synchronized void addSwarmFile(SwarmFileImpl swarmFile) {
         swarmFiles.add(swarmFile);
         swarmFile.setStartByte(completeSize);
@@ -95,10 +78,15 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         return read;
     }
 
+    public void closeSwarmFile(SwarmFile swarmFile) throws IOException {
+        FileHandle fileHandle = getFileHandle(swarmFile);
+        fileHandle.close();
+        fileHandles.put(swarmFile, null);
+    }
+
     public void close() throws IOException {
         for (SwarmFile swarmFile : swarmFiles) {
-            FileHandle fileHandle = getFileHandle(swarmFile);
-            fileHandle.close();
+            closeSwarmFile(swarmFile);
         }
     }
 
@@ -145,7 +133,6 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             raFile = null;
         }
 
-
         public void flush() throws IOException {
             synchronized (LOCK) {
                 initialize();
@@ -183,6 +170,23 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
                 return wrote;
             }
         }
+    }
+
+    public List<SwarmFile> getSwarmFiles(Range range) {
+        ArrayList<SwarmFile> filesRet = new ArrayList<SwarmFile>();
+
+        long rangeStart = range.getLow();
+        long rangeEnd = range.getHigh();
+
+        for (SwarmFile swarmFile : swarmFiles) {
+            long startByte = swarmFile.getStartByte();
+            long endByte = swarmFile.getEndByte();
+            if (startByte <= rangeEnd && endByte >= rangeStart) {
+                filesRet.add(swarmFile);
+            }
+        }
+
+        return filesRet;
     }
 
 }

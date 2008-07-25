@@ -244,6 +244,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
                     verifiedBlocks.add(rangeToVerify);
                     complete = isComplete();
                     listeners().blockVerified(rangeToVerify);
+                    handleVerifiedPieces();
                 } else {
                     listeners().blockVerificationFailed(rangeToVerify);
                     // TODO: Add a toggle for keeping lost ranges, and do not
@@ -258,6 +259,23 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
         if (complete) {
             listeners().downloadCompleted(fileSystem);
+        }
+    }
+
+    private void handleVerifiedPieces() {
+        List<SwarmFile> swarmFiles = fileSystem.getSwarmFiles();
+        for (SwarmFile swarmFile : swarmFiles) {
+            Range fileRange = Range.createRange(swarmFile.getStartByte(), swarmFile.getEndByte());
+            if (verifiedBlocks.contains(fileRange)) {
+                try {
+                    fileSystem.closeSwarmFile(swarmFile);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    //TODO need to figure out what we will do in this case,
+                    //most likely  jsut log the message
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
