@@ -15,7 +15,7 @@ import javax.swing.Box;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.ui.swing.components.TextTabPanel;
+import org.limewire.ui.swing.components.FancyTabList;
 
 class SearchTabItems extends JXPanel {
     
@@ -45,7 +45,7 @@ class SearchTabItems extends JXPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         
-        TextTabPanel ttp = new TextTabPanel(searchTabs);
+        FancyTabList ttp = new FancyTabList(searchTabs);
         // Tweak the insets of the buttons & painter to make the
         // highlight selection bleed into the tab below.
         ttp.setButtonInsets(new Insets(2, 2, 0, 5));

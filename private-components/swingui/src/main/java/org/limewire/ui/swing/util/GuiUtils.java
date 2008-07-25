@@ -1,6 +1,16 @@
 package org.limewire.ui.swing.util;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.NumberFormat;
+import java.util.Locale;
+
+import javax.swing.JComponent;
 
 import org.jdesktop.application.Application;
 import org.limewire.ui.swing.mainframe.AppFrame;
@@ -190,5 +200,65 @@ public class GuiUtils {
 //            return -1;
 //        }
     }
+    
+    /**
+     * Returns a {@link MouseListener} that listens for events
+     * and changes the mouse into a hand (or out of a hand)
+     * when it enters or exits the component the listener is added
+     * to.  If the mouse is clicked, it forwards the action
+     * to the listener.
+     */
+    public static MouseListener getActionHandListener(final ActionListener listener) {
+        return new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                JComponent comp = (JComponent) e.getComponent();
+                comp.getTopLevelAncestor()
+                        .setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
 
+            @Override
+            public void mouseExited(MouseEvent e) {
+                JComponent comp = (JComponent) e.getComponent();
+                comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                listener.actionPerformed(new ActionEvent(e.getComponent(),
+                        ActionEvent.ACTION_PERFORMED, null));
+            }
+        };
+    }
+    
+    /**
+     * Convert a color object to a hex string
+     */
+    public static String colorToHex(Color colorCode){
+        int r = colorCode.getRed();
+        int g = colorCode.getGreen();
+        int b = colorCode.getBlue();
+        
+        return toHex(r) + toHex(g) + toHex(b);   
+    }   
+
+    
+    /**
+     * Returns the int as a hex string.
+     */
+    public static String toHex(int i) {
+        String hex = Integer.toHexString(i).toUpperCase(Locale.US);
+        if (hex.length() == 1)
+            return "0" + hex;
+        else
+            return hex;
+    }
+    /**
+     * Convert a hex string to a color object
+     */
+    public static Color hexToColor(String hexString){
+        int decimalColor;
+        decimalColor = Integer.parseInt(hexString, 16);
+        return new Color(decimalColor);
+    }
 }

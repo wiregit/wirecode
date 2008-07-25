@@ -8,6 +8,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
@@ -16,6 +17,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -85,11 +87,26 @@ class TopPanel extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 0;
         add(Box.createGlue(), gbc);
+        
+        FancyTabList actionList = new FancyTabList();
+        actionList.setActions(new Act("This is a search result"), new Act("Search result 2"), new Act("Me Three"));
+        
+        add(actionList, gbc);
     }
     
     @Override
     public boolean requestFocusInWindow() {
         return searchBar.requestFocusInWindow();
+    }
+    
+    private static class Act extends AbstractAction {
+        Act(String name) {
+            super(name);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        }
     }
 
 }
