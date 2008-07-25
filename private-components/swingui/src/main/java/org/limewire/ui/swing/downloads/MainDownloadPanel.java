@@ -127,7 +127,7 @@ public class MainDownloadPanel extends JPanel {
 			clearFinishedButton = new JButton(clearAction);
 			categorizeCheckBox = new JCheckBox(categorizeAction);
 			titleLabel = new JLabel(I18n.tr("Downloads"));
-			FontUtils.changeStyle(titleLabel, Font.BOLD);
+			FontUtils.changeFontStyle(titleLabel, Font.BOLD);
 			FontUtils.changeFontSize(titleLabel, 5);
 			searchBar = downloadMediator.getFilterBar();
 			//TODO: make SearchBar work with filtering

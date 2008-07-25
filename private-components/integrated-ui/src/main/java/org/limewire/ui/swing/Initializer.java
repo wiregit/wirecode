@@ -1,29 +1,33 @@
 package org.limewire.ui.swing;
 
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicHTML;
+import javax.swing.text.View;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.swingx.JXLabel;
-import org.limewire.i18n.I18nMarker;
 import org.limewire.io.IOUtils;
-import org.limewire.lifecycle.Service;
-import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.lifecycle.ServiceRegistryListener;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.browser.WinCreatorHook;
 import org.limewire.ui.swing.mainframe.AppFrame;
+import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SplashWindow;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -65,6 +69,9 @@ public final class Initializer {
     /** A stopwatch for debug logging. */
     private final Stopwatch stopwatch;
     
+    /** The SplashWindow reference. */
+    private final AtomicReference<SplashWindow> splashRef = new AtomicReference<SplashWindow>();
+    
     Initializer() {
         // If Log4J is available then remove the NoOpLog
         if (LogUtils.isLog4JAvailable()) {
@@ -88,7 +95,7 @@ public final class Initializer {
      * If this throws any exceptions, then LimeWire was not able to construct
      * properly and must be shut down.
      */
-    void initialize(String args[], Frame awtSplash) throws Throwable {
+    void initialize(String args[], Frame awtSplash, Image splashImage) throws Throwable {
         // ** THE VERY BEGINNING -- DO NOT ADD THINGS BEFORE THIS **
         preinit();
         
@@ -120,7 +127,7 @@ public final class Initializer {
 //        stopwatch.resetAndLog("construct SetupManager");
 
         // Move from the AWT splash to the Swing splash & start early core.
-        switchSplashes(awtSplash);
+        switchSplashes(awtSplash, splashImage);
         startEarlyCore(/*setupManager,*/ limeWireCore);
         
         // Initialize early UI components, display the setup manager (if necessary),
@@ -131,7 +138,7 @@ public final class Initializer {
         
         // Load the UI, system tray & notification handlers,
         // and hide the splash screen & display the UI.
-        loadUI(awtSplash);
+        loadUI();
         loadTrayAndNotifications();
         hideSplashAndShowUI();
         
@@ -154,7 +161,19 @@ public final class Initializer {
      * PREINSTALL MUST BE DONE BEFORE ANYTHING ELSE IS REFERENCED.
      * (Because it sets the preference directory in CommonUtils.)
      */
-    private void preinit() {        
+    private void preinit() {
+        // Before anything, set a default L&F, so that
+        // if an error occurs, we can display the error
+        // message with the right L&F.
+        SwingUtils.invokeLater(new Runnable() {
+            public void run() {
+                String name = UIManager.getSystemLookAndFeelClassName();
+                try {
+                    UIManager.setLookAndFeel(name);
+                } catch(Throwable ignored) {}
+            }
+        });
+        
         // Make sure the settings directory is set.
         try {
             LimeCoreGlue.preinstall();
@@ -251,22 +270,22 @@ public final class Initializer {
         limeWireCore.getLimeCoreGlue().install();
         stopwatch.resetAndLog("Install core glue");
 
-        ServiceRegistry registry = limeWireCore.getServiceRegistry();
-        registry.addListener(new ServiceRegistryListener() {
-            public void initializing(final Service service) {}
-            
-            public void starting(final Service service) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-//                        GUIMediator.setSplashScreenString(I18n.tr("Starting {0}", I18n.tr(service.getServiceName())));
-                        System.out.println("Starting: " + service.getServiceName());
-                    }
-                });
-            }
-            
-            public void stopping(final Service service) {}
-        });
-        stopwatch.resetAndLog("add service registry listener");
+// TODO: Do we want to update the UI (which is visible at this point) ?
+//        ServiceRegistry registry = limeWireCore.getServiceRegistry();
+//        registry.addListener(new ServiceRegistryListener() {
+//            public void initializing(final Service service) {}
+//            
+//            public void starting(final Service service) {
+//                SwingUtilities.invokeLater(new Runnable() {
+//                    public void run() {
+//                        splashRef.get().setStatusText(I18n.tr("Starting {0}", I18n.tr(service.getServiceName())));
+//                    }
+//                });
+//            }
+//            
+//            public void stopping(final Service service) {}
+//        });
+//        stopwatch.resetAndLog("add service registry listener");
     }
     
     /** Tasks that can be done after core is created, before it's started. */
@@ -330,39 +349,40 @@ public final class Initializer {
     /** Starts any early core-related functionality. */
     private void startEarlyCore(/*SetupManager setupManager, */LimeWireCore limeWireCore) {        
         // Add this running program to the Windows Firewall Exceptions list
-        /*boolean inFirewallException = */limeWireCore.getFirewallService().addToFirewall();
+        boolean inFirewallException = limeWireCore.getFirewallService().addToFirewall();
         stopwatch.resetAndLog("add firewall exception");
         
-//        if(!inFirewallException && !setupManager.shouldShowFirewallWindow()) {
-//            limeWireCore.getLifecycleManager().loadBackgroundTasks();
-//            stopwatch.resetAndLog("load background tasks");
-//        }
+        if(!inFirewallException /*&& !setupManager.shouldShowFirewallWindow()*/) {
+            limeWireCore.getLifecycleManager().loadBackgroundTasks();
+            stopwatch.resetAndLog("load background tasks");
+        }
     }
     
     /** Switches from the AWT splash to the Swing splash. */
-    private void switchSplashes(Frame awtSplash) {
-//        GUIMediator.safeInvokeAndWait(new Runnable() {
-//            public void run() {
-//                // Show the splash screen if we're not starting automatically on 
-//                // system startup
-//                if(!isStartup) {
-//                    SplashWindow.instance().begin();
-//                    stopwatch.resetAndLog("begin splash window");
-//                }
-//            }
-//        });
-//        
-//        if(awtSplash != null) {
-//            awtSplash.dispose();
-//            stopwatch.resetAndLog("dispose AWT splash");
-//        }
+    private void switchSplashes(final Frame awtSplash, final Image splashImage) {
+        SwingUtils.invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                // TODO: Get the correct locale
+                splashRef.set(new SplashWindow(splashImage, new Locale("en"), 4));
+                if(!isStartup) {
+                    splashRef.get().begin();
+                    stopwatch.resetAndLog("begin splash window");
+                }
+            }
+        });
+        
+        if(awtSplash != null) {
+            awtSplash.dispose();
+            stopwatch.resetAndLog("dispose AWT splash");
+        }
     }
     
     /** Initializes any early UI tasks, such as HTML loading & the Bug Manager. */
     private void initializeEarlyUI() {
         // Load up the HTML engine.
-//        GUIMediator.setSplashScreenString(I18n.tr("Loading HTML Engine..."));
-//        stopwatch.resetAndLog("update splash for HTML engine");
+        splashRef.get().setStatusText(I18n.tr("Loading HTML Engine..."));
+        stopwatch.resetAndLog("update splash for HTML engine");
 
         SwingUtils.invokeAndWait(new Runnable() {
             public void run() {
@@ -384,7 +404,7 @@ public final class Initializer {
 //        BugManager.instance();
 //        stopwatch.resetAndLog("BugManager instance");
 //        
-//        GUIMediator.setSplashScreenString(I18n.tr("Loading Browser..."));
+        splashRef.get().setStatusText(I18n.tr("Loading Browser..."));
         // Not pretty but Mozilla initialization errors should not crash the
         // program
         try {
@@ -426,9 +446,11 @@ public final class Initializer {
     }
     
     /** Loads the UI. */
-    private void loadUI(Frame awtSplash) {
+    private void loadUI() {
+        splashRef.get().setStatusText(I18n.tr("Loading User Interface..."));
+        stopwatch.resetAndLog("update splash for UI");
         Application.launch(AppFrame.class, new String[0]);
-        awtSplash.dispose();
+        splashRef.get().dispose();
         
         SwingUtils.invokeAndWait(new Runnable() {
             public void run() {
@@ -437,8 +459,6 @@ public final class Initializer {
                 }
             }
         });
-//        GUIMediator.setSplashScreenString(I18n.tr("Loading User Interface..."));
-//        stopwatch.resetAndLog("update splash for UI");
 //
 //        // To prevent deadlocks, the GUI must be constructed in the Swing thread.
 //        // (Except on OS X, which is strange.)
@@ -583,19 +603,18 @@ public final class Initializer {
     
     /** Fails because alpha expired. */
     private void failExpired() {
-        fail(I18nMarker.marktr("This Alpha version has expired.  Press Ok to exit. "));
+        fail(I18n.tr("This Alpha version has expired.  Press Ok to exit. "));
     }
     
     /** Fails because internet is blocked. */
     private void failInternetBlocked() {
-        fail(I18nMarker
-                .marktr("LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire\'s access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire."));
+        fail(I18n
+                .tr("LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire\'s access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire."));
     }
     
     /** Fails because preferences can't be set. */
     private void failPreferencesPermissions() {
-        fail(I18nMarker
-                .marktr("LimeWire could not create a temporary preferences folder.\n\nThis is generally caused by a lack of permissions.  Please make sure that LimeWire (and you) have access to create files/folders on your computer.  If the problem persists, please visit www.limewire.com and click the \'Support\' link.\n\nLimeWire will now exit.  Thank You."));
+        fail(I18n.tr("LimeWire could not create a temporary preferences folder.\n\nThis is generally caused by a lack of permissions.  Please make sure that LimeWire (and you) have access to create files/folders on your computer.  If the problem persists, please visit www.limewire.com and click the \'Support\' link.\n\nLimeWire will now exit.  Thank You."));
     }
     
     /** Shows a msg & fails. */
@@ -604,9 +623,20 @@ public final class Initializer {
             SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
                     JXLabel label = new JXLabel(msgKey);
+                    label.setMaxLineSpan(300);
                     label.setLineWrap(true);
+                    Object viewObj = label.getClientProperty(BasicHTML.propertyKey);
+                    // JXLabel, by default, doesn't size the width or height according
+                    // to the max line span.  The internal View does, though.
+                    // So we want to take the dimension from the view & set that
+                    // as our preferred size.
+                    if(viewObj instanceof View) {
+                        View view = (View)viewObj;
+                        int width = (int)view.getPreferredSpan(View.X_AXIS);
+                        int height = (int)view.getPreferredSpan(View.Y_AXIS);
+                        label.setPreferredSize(new Dimension(width, height));
+                    }
                     JOptionPane.showMessageDialog(null,
-                            // TODO: missing I18n.tr
                             label,
                             "Error",
                             JOptionPane.ERROR_MESSAGE);

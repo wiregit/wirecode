@@ -1,13 +1,8 @@
 package org.limewire.ui.swing.util;
 
-import java.awt.EventQueue;
-import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 
-import javax.swing.SwingUtilities;
-
 import org.jdesktop.application.Application;
-import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.mainframe.AppFrame;
 
 
@@ -194,37 +189,6 @@ public class GuiUtils {
 //            //GUIMediator.showError(I18n.tr("LimeWire could not locate your web browser to display the following webpage: {0}.", url));
 //            return -1;
 //        }
-    }
-    
-    /**
-     * safely run code synchronously in the event dispatching thread.
-     */
-    public static void safeInvokeAndWait(Runnable runnable) {
-        if (EventQueue.isDispatchThread())
-            runnable.run();
-        else {
-            try {
-                SwingUtilities.invokeAndWait(runnable);
-            } catch (InvocationTargetException ite) {
-                Throwable t = ite.getTargetException();
-                if(t instanceof Error)
-                    throw (Error)t;
-                else if(t instanceof RuntimeException)
-                    throw (RuntimeException)t;
-                else
-                    ErrorService.error(t);
-            } catch(InterruptedException ignored) {}
-        }
-    }
-    
-    /**
-     * InvokesLater if not already in the dispatch thread.
-     */
-    public static void safeInvokeLater(Runnable runnable) {
-        if (EventQueue.isDispatchThread())
-            runnable.run();
-        else
-            SwingUtilities.invokeLater(runnable);
     }
 
 }

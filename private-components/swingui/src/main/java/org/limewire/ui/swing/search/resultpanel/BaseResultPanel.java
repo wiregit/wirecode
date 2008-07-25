@@ -45,7 +45,7 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         gbc.insets = new Insets(5, 5, 5, 0);
         JLabel titleLabel = new JLabel(title);
         FontUtils.changeFontSize(titleLabel, 5);
-        FontUtils.changeStyle(titleLabel, Font.BOLD);
+        FontUtils.changeFontStyle(titleLabel, Font.BOLD);
         add(titleLabel, gbc);
                 
         gbc.gridwidth = GridBagConstraints.RELATIVE;

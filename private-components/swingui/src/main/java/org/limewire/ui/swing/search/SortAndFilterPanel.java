@@ -40,7 +40,7 @@ class SortAndFilterPanel extends JXPanel {
         
         JLabel sortLabel = new JLabel("Sort by");
         FontUtils.changeFontSize(sortLabel, 1);
-        FontUtils.changeStyle(sortLabel, Font.BOLD);
+        FontUtils.changeFontStyle(sortLabel, Font.BOLD);
         sortLabel.setForeground(Color.WHITE);
         gbc.insets = new Insets(5, 10, 5, 5);
         add(sortLabel, gbc);
@@ -49,7 +49,7 @@ class SortAndFilterPanel extends JXPanel {
         
         JLabel filterLabel = new JLabel("Filter by");
         FontUtils.changeFontSize(filterLabel, 1);
-        FontUtils.changeStyle(filterLabel, Font.BOLD);
+        FontUtils.changeFontStyle(filterLabel, Font.BOLD);
         filterLabel.setForeground(Color.WHITE);
         gbc.insets = new Insets(5, 0, 5, 5);
         add(filterLabel, gbc);

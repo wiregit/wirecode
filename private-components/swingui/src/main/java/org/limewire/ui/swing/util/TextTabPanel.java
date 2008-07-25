@@ -157,7 +157,7 @@ public class TextTabPanel extends JXPanel {
             if(textFont != null) {
                 setFont(textFont);
             } else {
-                FontUtils.changeStyle(this, Font.BOLD);
+                FontUtils.changeFontStyle(this, Font.BOLD);
                 FontUtils.changeFontSize(this, 2);
             }
             addItemListener(new ItemListener() {

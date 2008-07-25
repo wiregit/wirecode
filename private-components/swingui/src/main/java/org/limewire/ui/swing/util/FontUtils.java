@@ -10,7 +10,7 @@ public class FontUtils {
         component.setFont(component.getFont().deriveFont(component.getFont().getSize() + increment));
     }
     
-    public static void changeStyle(JComponent component, int style) {
+    public static void changeFontStyle(JComponent component, int style) {
         component.setFont(component.getFont().deriveFont(style));
     }
 

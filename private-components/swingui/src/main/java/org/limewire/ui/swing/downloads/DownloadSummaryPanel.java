@@ -22,6 +22,7 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -59,7 +60,7 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		titleLabel = new JLabel();
 		titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-        FontUtils.changeStyle(titleLabel, Font.BOLD);
+        FontUtils.changeFontStyle(titleLabel, Font.BOLD);
 		add(titleLabel, BorderLayout.NORTH);
 			
 
@@ -73,7 +74,7 @@ public class DownloadSummaryPanel extends JPanel {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
               //list events probably won't be on EDT
-                GuiUtils.safeInvokeLater(new Runnable() {
+                SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
                         updateTitle();

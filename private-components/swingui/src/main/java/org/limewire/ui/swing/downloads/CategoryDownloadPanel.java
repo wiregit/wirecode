@@ -31,9 +31,8 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
-
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -77,7 +76,7 @@ public class CategoryDownloadPanel extends JPanel {
 			@Override
 			public void listChanged(ListEvent<DownloadItem> listChanges) {
 			    //list events probably won't be on EDT
-			    GuiUtils.safeInvokeLater(new Runnable() {
+			    SwingUtils.invokeLater(new Runnable() {
 					public void run() {
 						for (int i = 0; i < titles.size() && i < tables.size(); i++) {
 							boolean isVisible = tables.get(i).getRowCount() > 0;

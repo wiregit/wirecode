@@ -9,13 +9,18 @@ public class Main {
     
     public static void main(String[] args) throws Throwable {
         Frame splash = null;
+        Image splashImage = null;
         
         // show initial splash screen only if there are no arguments
-        if (args == null || args.length == 0)
-            splash = showInitialSplash();
+        if (args == null || args.length == 0) {
+            splashImage = getSplashImage();
+            if(splashImage != null) {
+                splash = AWTSplashWindow.splash(splashImage);
+            }
+        }
         
         try {
-            new Initializer().initialize(args, splash);
+            new Initializer().initialize(args, splash, splashImage);
         } catch(Throwable t) {
             if(splash != null) {
                 try {
@@ -29,21 +34,15 @@ public class Main {
     }
     
     /**
-     * Shows the initial splash window.
+     * Gets the image to be used as the splash.
      */
-    private static Frame showInitialSplash() {
-        Frame splashFrame = null;
-        Image image = null;
+    private static Image getSplashImage() {
         URL imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png");
         if (imageURL != null) {
-            image = Toolkit.getDefaultToolkit().createImage(imageURL);
-            if (image != null) {
-                splashFrame = AWTSplashWindow.splash(image);
-            }
+            return Toolkit.getDefaultToolkit().createImage(imageURL);
+        } else {
+            return null;
         }
-
-            
-        return splashFrame;
     }
 
 }
