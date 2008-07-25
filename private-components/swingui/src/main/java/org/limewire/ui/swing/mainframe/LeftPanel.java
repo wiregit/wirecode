@@ -13,6 +13,7 @@ import javax.swing.JScrollPane;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavItem;
@@ -21,7 +22,6 @@ import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.Line;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

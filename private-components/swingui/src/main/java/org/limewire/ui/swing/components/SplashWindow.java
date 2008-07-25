@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.util;
+package org.limewire.ui.swing.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -16,6 +16,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
+
+import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 /**
  * Window that displays the splash screen.  This loads the splash screen

@@ -7,10 +7,10 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.Line;
 
 import com.google.inject.Inject;
 

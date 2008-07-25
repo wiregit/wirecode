@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.util;
+package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -21,6 +21,7 @@ import javax.swing.JToggleButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.ui.swing.util.FontUtils;
 
 public class TextTabPanel extends JXPanel {
     

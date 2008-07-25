@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.util;
+package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Dimension;
