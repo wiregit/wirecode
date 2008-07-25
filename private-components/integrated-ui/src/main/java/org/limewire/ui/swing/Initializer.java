@@ -31,6 +31,7 @@ import org.limewire.ui.swing.util.SplashWindow;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
@@ -387,11 +388,9 @@ public final class Initializer {
         SwingUtils.invokeAndWait(new Runnable() {
             public void run() {
                 stopwatch.resetAndLog("enter evt queue");
-
                 JLabel label = new JLabel();
                 // setting font and color to null to minimize generated css
-                // script
-                // which causes a parser exception under circumstances
+                // script, which causes a parser exception under circumstances
                 label.setFont(null);
                 label.setForeground(null);
                 BasicHTML.createHTMLView(label, "<html>.</html>");
@@ -537,10 +536,10 @@ public final class Initializer {
 //        });
 //        stopwatch.resetAndLog("IconManager instance");
 //
-//        // Touch the I18N stuff to ensure it loads properly.
-//        GUIMediator.setSplashScreenString(I18n.tr("Loading Internationalization Support..."));
-//        I18NConvert.instance();
-//        stopwatch.resetAndLog("I18nConvert instance");
+        // Touch the I18N stuff to ensure it loads properly.
+        splashRef.get().setStatusText(I18n.tr("Loading Internationalization Support..."));
+        I18NConvert.instance();
+        stopwatch.resetAndLog("I18nConvert instance");
     }
     
     /** Sets up any listeners for the UI. */
