@@ -1,0 +1,95 @@
+package com.limegroup.bittorrent.handshaking.piecestrategy;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.limewire.collection.BitField;
+
+import com.limegroup.bittorrent.BTConnection;
+import com.limegroup.bittorrent.BTInterval;
+import com.limegroup.bittorrent.BTLinkManager;
+import com.limegroup.bittorrent.BTMetaInfo;
+
+public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
+
+    private final BTLinkManager btLinkManager;
+
+    public RarestPieceFirstStrategy(BTMetaInfo btMetaInfo, BTLinkManager btLinkManager,
+            BitField interestingPieces) {
+        super(btMetaInfo, interestingPieces);
+        this.btLinkManager = btLinkManager;
+    }
+
+    public List<BTInterval> getNextPieces() {
+        List<BTInterval> nextPieces = new ArrayList<BTInterval>();
+        int rarestPiece = getCurrentRarestPiece(1);
+
+        if (rarestPiece > -1) {
+            BTInterval nextPiece = getBtMetaInfo().getPiece(rarestPiece);
+            nextPieces.add(nextPiece);
+        }
+        return nextPieces;
+    }
+
+    /**
+     * 
+     * Gets the rareness of an individual piece. A smaller number means it is
+     * more rare. The number indicates how many of your peers has the piece. The
+     * algorithm stops after the specified max rareness is reached, and the max
+     * is returned.
+     * 
+     * @param pieceIndex the piece in the bit torrent file to test.
+     * @param max - number of peers having piece to assume not rare at all
+     * @return
+     */
+    public int getPieceRareness(int pieceIndex, int max) {
+        int rareness = 0;
+        for (BTConnection connection : getBTLinkManager().getConnections()) {
+            if (connection.hasPiece(pieceIndex)) {
+                rareness++;
+                if (rareness >= max) {
+                    return max;
+                }
+            }
+
+        }
+        return rareness;
+    }
+
+    /**
+     * This algorithm attempts to find the rarest piece among your peers. It
+     * will return the first piece that matches the minimum indicated rareness
+     * for returning. Otherwise it will iterate through all pieces and rareness
+     * combinations until the rarest is found. Pieces with a rareness of zero(no
+     * peers having the piece) are excluded from the results.
+     * 
+     * @param numBlocks
+     * @return
+     */
+    private int getCurrentRarestPiece(int min) {
+        int currentRarestPiece = -1;
+
+        int mostRare = Integer.MAX_VALUE;
+
+        BitField available = getInterestingPieces();
+
+        for (int pieceIndex = available.nextSetBit(0); pieceIndex >= 0; pieceIndex = available
+                .nextSetBit(pieceIndex + 1)) {
+            int currentPieceRareness = getPieceRareness(pieceIndex, mostRare);
+            if (currentPieceRareness < mostRare) {
+                mostRare = currentPieceRareness;
+                currentRarestPiece = pieceIndex;
+                if (mostRare <= min) {
+                    break;
+                }
+            }
+        }
+
+        return currentRarestPiece;
+    }
+
+    public BTLinkManager getBTLinkManager() {
+        return btLinkManager;
+    }
+
+}

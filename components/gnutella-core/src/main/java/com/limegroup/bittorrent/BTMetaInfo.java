@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.net.URI;
 import java.security.MessageDigest;
 
+import com.limegroup.bittorrent.disk.BlockRangeMap;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
@@ -91,6 +92,12 @@ public interface BTMetaInfo {
 
     public abstract boolean isMultiFileTorrent();
 
-    abstract void setWebSeeds(URI[] uris);
+    public abstract void setWebSeeds(URI[] uris);
+    
+    public abstract BTInterval getPiece(int pieceIndex);
+    
+    public abstract int getPieceSize(int pieceIndex);
+    
+    public abstract boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck);
 
 }

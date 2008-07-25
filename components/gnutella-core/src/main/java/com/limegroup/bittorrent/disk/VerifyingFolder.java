@@ -38,6 +38,7 @@ import com.limegroup.bittorrent.PieceReadListener;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
+import com.limegroup.bittorrent.handshaking.piecestrategy.EndGamePieceStrategy;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
@@ -88,10 +89,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	private BlockRangeMap requestedRanges;
 	
-	/**
-	 * A view of the blocks the requested and partial blocks.
-	 */
-	private Iterable<Integer> requestedAndPartial;
+	
 	
 	/**
 	 * Mapping of the index of each block pending write and 
@@ -162,11 +160,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		requestedRanges = new BlockRangeMap();
 		pendingRanges = new BlockRangeMap();
 		this.diskController = diskController;
-		
-		requestedAndPartial = 
-			new MultiIterable<Integer>(partialBlocks.keySet(), 
-					requestedRanges.keySet());
-		
+				
 		if (complete) {
 			verifiedBlocks = context.getFullBitSet();
 			verified = context.getFullBitField();
@@ -260,7 +254,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		synchronized(this) {
 			pendingRanges.removeInterval(in);
 			partialBlocks.addInterval(in);
-			if (!isCompleteBlock(in.getId(), partialBlocks))
+			if (!context.getMetaInfo().isCompleteBlock(in.getId(), partialBlocks))
 				return;
 		}
 		
@@ -271,7 +265,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			if (verified) 
 				markPieceCompleted(in.getId());
 			else 
-				_corruptedBytes += getPieceSize(in.getId());
+				_corruptedBytes += context.getMetaInfo().getPieceSize(in.getId());
 		}
 		if (verified)
 			handleVerified(in.getId());
@@ -319,7 +313,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	throws IOException, InterruptedException {
 		MessageDigest md = context.getMetaInfo().getMessageDigest();
 		md.reset();
-		int pieceSize = getPieceSize(pieceNum);
+		int pieceSize = context.getMetaInfo().getPieceSize(pieceNum);
 		byte [] buf = new byte[Math.min(65536,pieceSize)];
 		int read = 0;
 		long offset = (long)pieceNum * context.getMetaInfo().getPieceLength();
@@ -396,10 +390,6 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 	}
 	
-	private boolean isCompleteBlock(Range in, int id) {
-		return in.getLow() == 0 && in.getHigh() == getPieceSize(id) - 1;
-	}
-	
 	public synchronized boolean hasBlock(int block) {
 		return verified.get(block);
 	}
@@ -434,7 +424,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		// always verify any partial blocks that are large enough
 		// (could happen if lw was shutdown during verification)
 		for (int block : partialBlocks.keySet() ) {
-			if (isCompleteBlock(block, partialBlocks)) {
+			if (context.getMetaInfo().isCompleteBlock(block, partialBlocks)) {
 				isVerifying = true;
 				VERIFY_QUEUE.execute(new VerifyJob(block),context.getMetaInfo().getURN());
 			}
@@ -582,21 +572,35 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	private BTInterval findRandom(BitField bs, Set<BTInterval> exclude) {
+		EndGamePieceStrategy endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),bs,exclude,false,partialBlocks,pendingRanges,requestedRanges);
 		
-		// first try to complete any partial pieces that are not requested
-		BTInterval ret = assignEndgame(bs, exclude, false);
-		if (ret != null)
-			return ret;
+		//first try to complete any partial pieces that are not requested
+		List<BTInterval> nextPieces = endGamePieceStrategy.getNextPieces();
+		BTInterval ret = null;
+		if(nextPieces.size() > 0) {
+    		ret = nextPieces.get(0);
+    		if (ret != null) {
+    			return ret;
+    		}
+		}
 		LOG.debug("couldn't find partial, looking for unnassigned");
 		
 		// then see if the remote has any pieces that are neither 
 		// partial nor already requested
 		ret = findUnassigned(bs);
-		if (ret != null)
+		if (ret != null) {
 			return ret;
+		}
 		LOG.debug("couldn't find unassigned, looking for already requested");
 		
-		return assignEndgame(bs, exclude, true);
+		endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),bs,exclude,true,partialBlocks,pendingRanges,requestedRanges);
+		nextPieces = endGamePieceStrategy.getNextPieces();
+		
+		if(nextPieces.size() > 0) {
+            ret = nextPieces.get(0);
+		}
+		
+		return ret;
 	}
 	
 	private BTInterval findUnassigned(BitField available) {
@@ -617,129 +621,9 @@ class VerifyingFolder implements TorrentDiskManager {
 		if (LOG.isDebugEnabled())
 			LOG.debug("selecting unassigned piece "+selected);
 
-		return new BTInterval(0,getPieceSize(selected) - 1,selected);
+		return context.getMetaInfo().getPiece(selected);
 	}
 	
-	/**
-	 * Picks an interval that is already requested by another connection.  This is
-	 * referred to as "Endgame mode" and is done when there are no other pieces to 
-	 * request. 
-	 */
-	private BTInterval assignEndgame(BitField bs, Set<BTInterval>exclude, boolean endgame) {
-		
-		BTInterval ret = null;
-		
-		// prepare a list of partial or requested blocks the remote host has
-		Collection<Integer> available = null;
-		for (int requested : requestedAndPartial) {
-			if (!bs.get(requested) || 
-				(!endgame && isCompleteBlock(requested,requestedRanges)) ||
-				isCompleteBlock(requested, partialBlocks)) // during verification of block
-				continue;
-
-			if (available == null)
-				available = new HashSet<Integer>(requestedRanges.size()+partialBlocks.size());
-			available.add(requested);
-		}
-
-		if (available == null)
-			return null;
-	
-		if (LOG.isDebugEnabled())
-			LOG.debug("available partial and requested blocks to attempt: "+available);
-		
-		available = new ArrayList<Integer>(available);
-		Collections.shuffle((List<Integer>)available);
-		
-		// go through and find a block that we can request something from.
-		for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext() && ret == null;) {
-			int block = iterator.next();
-			
-			// figure out which parts of the chunks we need.
-			IntervalSet needed = new IntervalSet();
-			needed = needed.invert(getPieceSize(block));
-			
-			IntervalSet partial = partialBlocks.get(block);
-			IntervalSet pending = pendingRanges.get(block);
-			IntervalSet requested = requestedRanges.get(block);
-			
-			// get the parts of the block we're missing
-			if (partial != null)
-				needed.delete(partial);
-			
-			// don't request any parts pending write
-			if (pending != null)
-				needed.delete(pending);
-			
-			// exclude any specified intervals 
-			if(exclude != null) {
-    			for (Range excluded : exclude) {
-    				needed.delete(excluded);
-    			}
-			}
-			// try not to request any parts that are already requested
-			if (requested != null) {
-				needed.delete(requested);
-				
-				// now, if we still have some parts of the chunk, get one of them
-				// if not and this is the last partial chunk, doubly-assign some
-				// part of it (a.k.a. endgame?)
-				if (endgame && needed.isEmpty() && !iterator.hasNext()) {
-					LOG.debug("endgame");
-					needed = requested.clone();
-					
-					// exclude the specified intervals again
-					if(exclude != null) {
-    					for (Range excluded : exclude) 
-    						needed.delete(excluded);
-					}
-				}
-			}
-			
-			if (needed.isEmpty()) 
-				continue;
-			
-			ret = new BTInterval(needed.getFirst(),block);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("selected partial/requested interval "+ret+
-						" with partial "+partialBlocks.get(ret.getId())+
-						" requested "+requestedRanges.get(ret.getId())+
-						" pending "+pendingRanges.get(ret.getId()));
-			}
-		}
-		
-		// couldn't find anything to assign.
-		return ret;
-	}
-
-	/**
-	 * @return whether the specified <code>BlockRangeMap</code> contains an 
-	 * interval that represents a complete piece.
-	 */	
-	private boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck) {
-		IntervalSet set = toCheck.get(pieceNum);
-		if (set == null)
-			return false;
-		if (set.getNumberOfIntervals() != 1)
-			return false;
-		Range i = set.getFirst();
-		return isCompleteBlock(i, pieceNum);
-	}
-
-	/**
-	 * @return the size of the piece with given number.  All pieces
-	 * except the last one have the same size.
-	 */
-	private int getPieceSize(int pieceNum) {
-		BTMetaInfo info = context.getMetaInfo();
-		if (pieceNum == info.getNumBlocks() - 1) {
-			int ret =(int)(context.getFileSystem().getTotalSize() % 
-					info.getPieceLength());
-			if (ret != 0)
-				return ret;
-		} 
-		return info.getPieceLength();
-	}
 	
 	/**
 	 * Removes an interval from the internal list of already requested intervals.
@@ -816,7 +700,7 @@ class VerifyingFolder implements TorrentDiskManager {
 					markPieceCompleted(pieceNum);
 					handleVerified(pieceNum);
 				} else 
-					_corruptedBytes += getPieceSize(pieceNum);
+					_corruptedBytes += context.getMetaInfo().getPieceSize(pieceNum);
 			} catch (IOException bad) {
 				storedException = bad;
 			} catch (InterruptedException iex) { // should not happen
@@ -836,7 +720,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		long ret = verified.cardinality() * (long)info.getPieceLength();
 		if (verified.get(info.getNumBlocks() - 1)) {
 			ret = ret - info.getPieceLength() + 
-				getPieceSize(info.getNumBlocks() -1 );
+				info.getPieceSize(info.getNumBlocks() -1 );
 		}
 		return ret;
 	}
@@ -913,52 +797,7 @@ class VerifyingFolder implements TorrentDiskManager {
         return lastVerifiedOffset;
     }
     
-	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {
-		
-		private static final long serialVersionUID = 4006274480019024111L;
-
-		BlockRangeMap() {
-			super();
-		}
-		
-		private BlockRangeMap(int size) {
-			super(size);
-		}
-		
-		public void addInterval(BTInterval in) {
-			IntervalSet s = get(in.getBlockId());
-			if (s == null) {
-				s = new IntervalSet();
-				put(in.getBlockId(),s);
-			}
-			s.add(in);
-		}
-		
-		public void removeInterval(BTInterval in) {
-			IntervalSet s = get(in.getBlockId());
-			if (s == null)
-				return;
-			s.delete(in);
-			if (s.isEmpty())
-				remove(in.getBlockId());
-		}
-		
-		public long byteSize() {
-			long ret = 0;
-			for (IntervalSet set : values()) 
-				ret += set.getSize();
-			return ret;
-		}
-		
-		@Override
-        public BlockRangeMap clone() {
-			BlockRangeMap clone = new BlockRangeMap(size());
-			for (Map.Entry<Integer, IntervalSet> e : entrySet())
-				clone.put(e.getKey(), e.getValue().clone());
-			return clone;
-		}
-	}
-    public BTInterval renewLease(BTInterval oldInterval, BTInterval newInterval) {
+	public BTInterval renewLease(BTInterval oldInterval, BTInterval newInterval) {
         synchronized(VerifyingFolder.this) {
            requestedRanges.removeInterval(oldInterval);
            requestedRanges.addInterval(newInterval);

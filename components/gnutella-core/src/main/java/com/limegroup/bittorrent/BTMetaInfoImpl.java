@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import org.limewire.collection.IntervalSet;
+import org.limewire.collection.Range;
 import org.limewire.io.InvalidDataException;
 
+import com.limegroup.bittorrent.disk.BlockRangeMap;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
@@ -381,5 +384,45 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 
     public void setWebSeeds(URI[] uris) {
        this._webSeeds = uris;
-    }	
+    }
+
+    public BTInterval getPiece(int pieceIndex) {
+        BTInterval piece = new BTInterval(0,getPieceSize(pieceIndex) - 1,pieceIndex);
+        return piece;
+    }
+    
+    /**
+     * @return the size of the piece with given number.  All pieces
+     * except the last one have the same size.
+     */
+    public int getPieceSize(int pieceIndex) {
+        BTMetaInfo info = context.getMetaInfo();
+        if (pieceIndex == info.getNumBlocks() - 1) {
+            int ret =(int)(context.getFileSystem().getTotalSize() % 
+                    info.getPieceLength());
+            if (ret != 0)
+                return ret;
+        } 
+        return info.getPieceLength();
+    }
+    
+    private boolean isCompleteBlock(Range in, int id) {
+        return in.getLow() == 0 && in.getHigh() == getPieceSize(id) - 1;
+    }
+    
+    /**
+     * @return whether the specified <code>BlockRangeMap</code> contains an 
+     * interval that represents a complete piece.
+     */ 
+    public boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck) {
+        IntervalSet set = toCheck.get(pieceNum);
+        if (set == null)
+            return false;
+        if (set.getNumberOfIntervals() != 1)
+            return false;
+        Range i = set.getFirst();
+        return isCompleteBlock(i, pieceNum);
+    }
+    
+    
 }
