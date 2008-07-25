@@ -732,7 +732,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * 
      * @see com.limegroup.bittorrent.ManagedTorrent#addConnection(com.limegroup.bittorrent.BTLink)
      */
-    public boolean addConnection(final BTLink btc) {
+    public boolean addConnection(final BTConnection btc) {
         if (LOG.isDebugEnabled())
             LOG.debug("trying to add connection " + btc.toString());
 

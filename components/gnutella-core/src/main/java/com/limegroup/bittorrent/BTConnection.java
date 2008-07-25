@@ -915,4 +915,8 @@ PieceSendListener, PieceReadListener {
 		sendNotInterested();
 		choke();
 	}
+
+    public boolean hasPiece(int pieceIndex) {
+        return _available.get(pieceIndex);
+    }
 }
