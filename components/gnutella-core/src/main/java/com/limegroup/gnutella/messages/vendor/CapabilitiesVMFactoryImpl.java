@@ -12,7 +12,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.FeatureSearchData;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -75,7 +74,7 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
             supported.put(mode.getCapabilityName(), dhtManager.get().getVersion().shortValue());
         }
 
-        if (SSLSettings.isIncomingTLSEnabled()) {
+        if (networkManager.get().isIncomingTLSEnabled()) {
             supported.put(CapabilitiesVM.TLS_SUPPORT_BYTES, 1);
         }
 

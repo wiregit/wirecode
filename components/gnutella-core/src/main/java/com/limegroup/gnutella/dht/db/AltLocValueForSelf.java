@@ -3,10 +3,10 @@ package com.limegroup.gnutella.dht.db;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
+
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.security.MerkleTree;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 /**
  * An {@LINK AltLocValue} for the localhost.
@@ -84,6 +84,6 @@ class AltLocValueForSelf extends AbstractAltLocValue {
     
     @Override
     public boolean supportsTLS() {
-        return SSLSettings.isIncomingTLSEnabled();
+        return networkManager.isIncomingTLSEnabled();
     }
 }

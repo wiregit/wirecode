@@ -31,7 +31,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 public class PingReplyFactoryImpl implements PingReplyFactory {
@@ -365,7 +364,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         addDHTExtension(ggep);
 
         // add our support of TLS
-        if (SSLSettings.isIncomingTLSEnabled())
+        if (networkManager.isIncomingTLSEnabled())
             ggep.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
 
         return ggep;

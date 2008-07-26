@@ -229,31 +229,24 @@ public class MagnetOptionsTest extends BaseTestCase {
         final URN urn = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB");
         final FileDetails fileDetails = context.mock(FileDetails.class);
         context.checking(new Expectations() {{
-            allowing(fileDetails).getClientGUID();
-            will(returnValue(guid.bytes()));
             allowing(fileDetails).getFileName();
             will(returnValue("filename"));
             allowing(fileDetails).getSHA1Urn();
             will(returnValue(urn));
-            one(fileDetails).getInetSocketAddress();
-            will(returnValue(null));
-            // second time around with url
-            allowing(fileDetails).getInetSocketAddress();
-            will(returnValue(new InetSocketAddress("127.0.0.1", 5555)));
             // first time a zero file size
-            one(fileDetails).getFileSize();
+            one(fileDetails).getSize();
             will(returnValue(-1L));
-            one(fileDetails).getFileSize();
+            one(fileDetails).getSize();
             will(returnValue(123456789L));
         }});
-        MagnetOptions magnet = MagnetOptions.createMagnet(fileDetails);
+        MagnetOptions magnet = MagnetOptions.createMagnet(fileDetails, null, guid.bytes());
         assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
         assertEquals(urn, magnet.getSHA1Urn());
         assertEquals(URN.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
         assertFalse(magnet.toExternalForm().contains("xl"));
         assertEquals(-1, magnet.getFileSize());
         
-        magnet = MagnetOptions.createMagnet(fileDetails);
+        magnet = MagnetOptions.createMagnet(fileDetails, new InetSocketAddress("127.0.0.1", 5555), guid.bytes());
         assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
         assertEquals(urn, magnet.getSHA1Urn());
         assertEquals(URN.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
@@ -284,6 +277,5 @@ public class MagnetOptionsTest extends BaseTestCase {
             buffer.append(opts[i].toString());
         }
         return buffer.toString();
-    }
-    
+    }    
 }

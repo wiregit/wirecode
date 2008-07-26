@@ -12,7 +12,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 public class PingRequestFactoryImpl implements PingRequestFactory {
@@ -125,8 +124,8 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
             data[0] = PingRequest.SCP_ULTRAPEER;
         else
             data[0] = PingRequest.SCP_LEAF;
-        
-        if(SSLSettings.isIncomingTLSEnabled())
+
+        if(networkManager.isIncomingTLSEnabled())
             data[0] |= PingRequest.SCP_TLS; // add our support for TLS.
         
         return data;

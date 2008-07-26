@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
@@ -46,7 +47,6 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.SpeedConstants;
@@ -1139,7 +1139,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected boolean hostIsAllowed(RemoteFileDesc other) {
          // If this host is banned, don't add.
-        if ( !ipFilter.allow(other.getHost()) )
+        if ( !ipFilter.allow(other.getAddress()) )
             return false;            
 
         if (networkManager.acceptedIncomingConnection() ||
@@ -1149,7 +1149,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // This is only done if the location we're trying is an alternate..
             synchronized(altLock) {
                 if (other.isFromAlternateLocation() && 
-                        invalidAlts.contains(other.getRemoteHostData())) {
+                        invalidAlts.contains(new RemoteHostData(other.getAddress(), other.getPort(), other.getClientGUID()))) {
                     return false;
                 }
             }
@@ -1183,7 +1183,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // get other info...
 		final URN otherUrn = other.getSHA1Urn();
         final String otherName = other.getFileName();
-        final long otherLength = other.getFileSize();
+        final long otherLength = other.getSize();
 
         synchronized (this) {
             long ourLength = getContentLength();
@@ -1197,7 +1197,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // compare to previously cached rfds
             for(RemoteFileDesc rfd : cachedRFDs) {
                 final String thisName = rfd.getFileName();
-                final long thisLength = rfd.getFileSize();
+                final long thisLength = rfd.getSize();
 				
                 // if they are similarly named and same length
                 // do length check first, much less expensive.....
@@ -1610,7 +1610,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // downloads may have the same port and host, we also check their
             // push endpoints
             if(! (local instanceof PushAltLoc) ? 
-                    (r.getHost().equals(rfd.getHost()) && r.getPort()==rfd.getPort()) :
+                    (r.getAddress().equals(rfd.getAddress()) && r.getPort()==rfd.getPort()) :
                     r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
                 continue;
             
@@ -1634,7 +1634,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 }
             }  else {
                     validAlts.remove(local);
-                    invalidAlts.add(rfd.getRemoteHostData());
+                    invalidAlts.add(new RemoteHostData(rfd.getAddress(), rfd.getPort(), rfd.getClientGUID()));
                     recentInvalidAlts.add(local);
             }
         }
@@ -3156,5 +3156,82 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected SourceRanker getSourceRanker() {
         return ranker;
+    }
+    
+    /**
+     * Simple representation of a remote host.
+     */
+    private class RemoteHostData {
+    
+        /**
+         * The host's address.
+         */
+        private final String _host;
+        
+        /**
+         * The host's port.
+         */
+        private final int _port;
+    
+        /**
+         * The host's clientGUID.
+         */
+        private final byte[] _clientGUID;
+    
+        /**
+         * The cached hashCode.
+         */
+        private volatile int _hashcode = 0;
+    
+        /**
+         * Constructs a new RemoteHostData with the specified host, port & guid.
+         */
+        public RemoteHostData(String host, int port, byte[] guid) {
+            _host = host;
+            _port = port;
+            _clientGUID = guid.clone();
+        }
+        
+        
+        //////accessors
+        public String getHost() {
+            return _host;
+        }
+        
+        public int getPort() {
+            return _port;
+        }
+    
+        public byte[] getClientGUID() {
+            return _clientGUID;
+        }
+        
+    
+        //////////////////hashtable  methods///////////////
+    
+        @Override
+        public boolean equals(Object o) {
+            if(this == o)
+                return true;
+            
+            RemoteHostData other = (RemoteHostData)o;//dont catch ClassCastException
+            return (_host.equals(other._host) &&
+                    _port==other._port &&
+                    Arrays.equals(_clientGUID, other._clientGUID) );
+        }
+    
+        @Override
+        public int hashCode() {
+            if(_hashcode == 0) {
+                int result = 17;
+                result = (37* result)+_host.hashCode();
+                result = (37* result)+_port;
+                for(int i=0; i < _clientGUID.length; i++) 
+                    result = (37* result)+_clientGUID[i];
+                _hashcode = result;
+            }
+            return _hashcode;
+        }
+    
     }
 }

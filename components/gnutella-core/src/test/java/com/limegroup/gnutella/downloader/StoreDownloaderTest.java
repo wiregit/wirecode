@@ -131,7 +131,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         
         assertEquals( "test.txt", rfd.getFileName());
         
-        assertEquals( 10L, rfd.getFileSize() );
+        assertEquals( 10L, rfd.getSize() );
         
         
     }

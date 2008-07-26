@@ -39,7 +39,6 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -176,7 +175,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
         _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
-        boolean supportsTLS = SSLSettings.isIncomingTLSEnabled();
+        boolean supportsTLS = networkManager.isIncomingTLSEnabled();
         _data.setTLSCapable(supportsTLS);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

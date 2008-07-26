@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 @Singleton
@@ -21,21 +22,23 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
     private final SocketsManager socketsManager;
     @InspectionPoint("download connection stats")
     private final DownloadStatsTracker statsTracker;
+    private final NetworkManager networkManager;
 
     @Inject
     public DownloadWorkerFactoryImpl(
             HTTPDownloaderFactory httpDownloaderFactory,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            @Named("nioExecutor") ScheduledExecutorService nioExecutor,
+            @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor,
+            @Named("nioExecutor")ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager,
             SocketsManager socketsManager,
-            DownloadStatsTracker statsTracker) {
+            DownloadStatsTracker statsTracker, NetworkManager networkManager) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
         this.pushDownloadManager = pushDownloadManager;
         this.socketsManager = socketsManager;
         this.statsTracker = statsTracker;
+        this.networkManager = networkManager;
     }
     
 
@@ -46,7 +49,7 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
             RemoteFileDesc rfd, VerifyingFile vf) {
         return new DownloadWorker(manager, rfd, vf, httpDownloaderFactory,
                 backgroundExecutor, nioExecutor, pushDownloadManager,
-                socketsManager, statsTracker);
+                socketsManager, statsTracker, networkManager);
     }
 
 }

@@ -3,11 +3,8 @@ package com.limegroup.gnutella;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
-import org.limewire.io.Connectable;
-import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.downloader.DownloadStatsTracker;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
@@ -17,7 +14,7 @@ import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
  * RemoteFileDesc is similar to a URL, but it contains Gnutella-
  * specific data as well, such as the server's 16-byte GUID.<p>
  */
-public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
+public interface RemoteFileDesc extends RemoteFileDetails {
 
     /** bogus IP we assign to RFDs whose real ip is unknown */
     public static final String BOGUS_IP = "1.1.1.1";
@@ -26,21 +23,6 @@ public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
     public static final List<RemoteFileDesc> EMPTY_LIST = Collections.emptyList();
 
     public void setSerializeProxies();
-
-    /** Sets whether or not this host is TLS capable. */
-    public void setTLSCapable(boolean tlsCapable);
-
-    /** 
-     * Accessor for HTTP11.
-     *
-     * @return Whether or not we think this host supports HTTP11.
-     */
-    public boolean isHTTP11();
-
-    /**
-     * Mutator for HTTP11.  Should be set after connecting.
-     */
-    public void setHTTP11(boolean http11);
 
     /**
      * Returns true if this is a partial source
@@ -103,11 +85,6 @@ public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
     public void setRetryAfter(int seconds);
 
     /**
-     * The creation time of this file.
-     */
-    public long getCreationTime();
-
-    /**
      * @return Returns the _THEXFailed.
      */
     public boolean hasTHEXFailed();
@@ -131,71 +108,11 @@ public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
     public boolean isDownloading();
 
     /**
-     * Accessor for the host ip with this file.
-     *
-     * @return the host ip with this file
-     */
-    public String getHost();
-
-    /**
-     * Accessor for the index this file, which can be <tt>null</tt>.
-     *
-     * @return the file name for this file, which can be <tt>null</tt>
-     */
-    public long getIndex();
-
-    /**
-     * Accessor for the size in bytes of this file.
-     *
-     * @return the size in bytes of this file
-     */
-    public long getSize();
-
-    /**
-     * Accessor for the client guid for this file, which can be <tt>null</tt>.
-     *
-     * @return the client guid for this file, which can be <tt>null</tt>
-     */
-    public byte[] getClientGUID();
-
-    /**
-     * Accessor for the speed of the host with this file, which can be 
-     * <tt>null</tt>.
-     *
-     * @return the speed of the host with this file, which can be 
-     *  <tt>null</tt>
-     */
-    public int getSpeed();
-
-    public String getVendor();
-
-    public boolean isChatEnabled();
-
-    public boolean isBrowseHostEnabled();
-
-    /**
-     * Returns the "quality" of the remote file in terms of firewalled status,
-     * whether or not the remote host has open slots, etc.
-     * 
-     * @return the current "quality" of the remote file in terms of the 
-     *  determined likelihood of the request succeeding
-     */
-    public int getQuality();
-
-    /**
      * Returns an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>.
      *
      * @return an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>
      */
     public URL getUrl();
-
-    /**
-     * Determines whether or not this RFD was a reply to a multicast query.
-     *
-     * @return <tt>true</tt> if this RFD was in reply to a multicast query,
-     *  otherwise <tt>false</tt>
-     */
-    public boolean isReplyToMulticast();
 
     /**
      * Determines whether or not this host reported a private address.
@@ -209,27 +126,6 @@ public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
      * it it's a private address
      */
     public boolean isPrivate();
-
-    /**
-     * Accessor for the <tt>Set</tt> of <tt>PushProxyInterface</tt>s for this
-     * file -- can be empty, but is guaranteed to be non-null.
-     *
-     * @return the <tt>Set</tt> of proxy hosts that will accept push requests
-     *  for this host -- can be empty
-     */
-    public Set<? extends IpPort> getPushProxies();
-
-    /**
-     * @return whether this RFD supports firewall-to-firewall transfer.
-     * For this to be true we need to have some push proxies, indication that
-     * the host supports FWT and we need to know that hosts' external address.
-     */
-    public boolean supportsFWTransfer();
-
-    /**
-     * Creates the _hostData lazily and uses as necessary
-     */
-    public RemoteHostData getRemoteHostData();
 
     /**
      * @return true if I am not a multicast host and have a hash.

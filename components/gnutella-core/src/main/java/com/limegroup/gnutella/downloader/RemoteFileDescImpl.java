@@ -23,7 +23,6 @@ import org.limewire.util.Objects;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -115,11 +114,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      * Whether or not THEX retrieval has failed with this host.
      */
     private boolean _THEXFailed = false;
-
-    /**
-     * The cached RemoteHostData for this rfd.
-     */
-    private RemoteHostData _hostData = null;
     
     /**
      * Whether or not this RFD is/was used for downloading.
@@ -238,7 +232,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     public boolean isMe(byte[] myClientGUID) {
         return needsPush() ? 
                 Arrays.equals(_clientGUID, myClientGUID) :
-                    networkInstanceUtils.isMe(getHost(),getPort());
+                    networkInstanceUtils.isMe(getAddress(),getPort());
     }
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getAvailableRanges()
@@ -351,7 +345,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getHost()
      */
-	public final String getHost() {return _host;}
+	public final String getAddress() {return _host;}
 
 	/**
 	 * Accessor for the port of the host with this file.
@@ -365,12 +359,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      */
 	public final long getIndex() {return _index;}
 
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getSize()
-     */
-	public final long getSize() {return _size;}
 	
-	public final long getFileSize() { return _size; }
+	public final long getSize() { return _size; }
 
 	/**
 	 * Accessor for the file name for this file, which can be <tt>null</tt>.
@@ -505,15 +495,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getRemoteHostData()
-     */ 
-    public final RemoteHostData getRemoteHostData() {
-        if(_hostData == null)
-            _hostData = new RemoteHostData(_host, _port, _clientGUID);
-        return _hostData;
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#isAltLocCapable()
      */
     public final boolean isAltLocCapable() {
@@ -603,7 +584,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         if (! (o instanceof RemoteFileDesc))
             return false;
         RemoteFileDesc other=(RemoteFileDesc)o;
-        if (! (nullEquals(_host, other.getHost()) && (_port==other.getPort())) )
+        if (! (nullEquals(_host, other.getAddress()) && (_port==other.getPort())) )
             return false;
 
         if (_size != other.getSize())
@@ -652,12 +633,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 
     @Override
     public String toString() {
-        return  ("<"+getHost()+":"+getPort()+", "
+        return  ("<"+ getAddress() +":"+getPort()+", "
 				 +getFileName() + ">");
-    }
-
-    public String getAddress() {
-        return getHost();
     }
 
     public InetAddress getInetAddress() {

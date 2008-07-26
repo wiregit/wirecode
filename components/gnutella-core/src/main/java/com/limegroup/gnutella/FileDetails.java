@@ -1,13 +1,9 @@
 package com.limegroup.gnutella;
 
-import java.net.InetSocketAddress;
 import java.util.Set;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-/**
- * Common interface implemented by {@link FileDesc} and {@link RemoteFileDesc}.
- */
 public interface FileDetails {
 
 	/**
@@ -24,7 +20,7 @@ public interface FileDetails {
 	 * Returns the size of the file.
 	 * @return
 	 */
-	long getFileSize();
+	long getSize();
 	/**
 	 * Returns the set of urns.
 	 * @return
@@ -36,20 +32,17 @@ public interface FileDetails {
 	 * @return
 	 */
 	LimeXMLDocument getXMLDocument();
-	/**
-	 * Returns address of the host that holds the file.
-	 * @return
-	 */
-	InetSocketAddress getInetSocketAddress();
-	/**
-	 * Returns whether or not the host that holds this file is firewalled.
-	 * @return
-	 */	
-	boolean isFirewalled();
 	
-	/**
-	 * Returns the client guid of the remote host, could be <code>null</code> if
-	 * not available. 
-	 */
-	byte[] getClientGUID();
+    
+    /**
+     * Accessor for the index this file, which can be <tt>null</tt>.
+     *
+     * @return the file name for this file, which can be <tt>null</tt>
+     */
+    public long getIndex();
+    
+    /**
+     * The creation time of this file.
+     */
+    public long getCreationTime();
 }

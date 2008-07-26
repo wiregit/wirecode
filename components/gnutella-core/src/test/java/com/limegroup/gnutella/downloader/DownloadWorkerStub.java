@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.Provider;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 class DownloadWorkerStub extends DownloadWorker {
@@ -14,9 +15,10 @@ class DownloadWorkerStub extends DownloadWorker {
     public DownloadWorkerStub(DownloadWorkerSupport manager, RemoteFileDesc rfd, VerifyingFile vf,
             HTTPDownloaderFactory httpDownloaderFactory,
             ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
-            Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager) {
+            Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,
+            NetworkManager networkManager) {
         super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
-                pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl());
+                pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl(), networkManager);
     }
 
     @Override
