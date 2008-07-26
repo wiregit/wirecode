@@ -57,7 +57,7 @@ class TopPanel extends JPanel implements SearchNavigator {
         combo.setName("TopPanel.combo");
         JLabel search = new JLabel(I18n.tr("Search"));
         search.setName("TopPanel.SearchLabel");
-        
+
         combo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list, Object value, int index,

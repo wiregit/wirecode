@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.util.Enumeration;
 
+import javax.swing.JPopupMenu;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
@@ -42,6 +43,9 @@ public class AppFrame extends SingleFrameApplication {
     protected void startup() {
     	GuiUtils.assignResources(this);
     	initColors();
+    	// Because we use a browser heavily, which is heavyweight,
+    	// we must disable all lightweight popups.
+    	JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     	
     	Injector injector = createInjector();
         
