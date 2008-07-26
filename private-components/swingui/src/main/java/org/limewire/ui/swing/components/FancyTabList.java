@@ -7,14 +7,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Group;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 
+/** A horizontal list of {@link FancyTab FancyTabs}. */
 public class FancyTabList extends JXPanel {
     
     private final List<Action> actions = new ArrayList<Action>();
@@ -22,15 +26,30 @@ public class FancyTabList extends JXPanel {
     private final ButtonGroup tabGroup = new ButtonGroup();
     
     private FancyTabProperties props;
-    private Insets tabInsets;
     private int maxActionsToList;
+    
+    private LayoutStyle layoutStyle;
+
+    private int minimumWidth;
+    private int maximumWidth;
+    private int preferredWidth;
+    
+    private Insets tabInsets;
+    
+    public static enum LayoutStyle {
+        FIXED, FLOWED;
+    }
     
     public FancyTabList(Iterable<? extends Action> actions) {
         setOpaque(false);
-        setLayout(new GridBagLayout());
+        
+        minimumWidth = 30;
+        maximumWidth = 150;
+        preferredWidth = 150;
+        layoutStyle = LayoutStyle.FIXED;
+        
         props = new FancyTabProperties();
-        tabInsets = new Insets(0, 1, 5, 1);
-        maxActionsToList = 10;
+        maxActionsToList = Integer.MAX_VALUE;
         setActions(actions);
     }
     
@@ -40,56 +59,115 @@ public class FancyTabList extends JXPanel {
     
     public void setMaxActionsToList(int max) {
         this.maxActionsToList = max;
-        setActions(actions);
+        layoutTabs();
+    }
+
+    public void addActionAt(Action action, int i) {
+        this.actions.add(i, action);
+        this.tabs.add(i, new FancyTab(action, tabGroup, props));
+        layoutTabs();
+    }
+
+    public void removeAction(Action action) {
+        this.actions.remove(action);
+        for(Iterator<FancyTab> iter = tabs.iterator(); iter.hasNext(); ) {
+            if(iter.next().getAction().equals(action)) {
+                iter.remove();
+                break;
+            }
+        }
+        layoutTabs();
     }
     
-    public void setButtonInsets(Insets insets) {
-        tabInsets = insets;
-        removeAll();
-        addTabs();
-    }
     
     public void setActions(Iterable<? extends Action> actions) {
         this.actions.clear();
-        clearTab();
+        this.tabs.clear();
 
-        int i = 0;
         for(Action action : actions) {
             this.actions.add(action);
-            if(i < maxActionsToList) {
-                tabs.add(new FancyTab(action, tabGroup, props));
-            }
-            i++;
+            tabs.add(new FancyTab(action, tabGroup, props));
         }
-        addTabs();
+        
+        layoutTabs();
     }
     
     public void setActions(Action... actions) {
         setActions(Arrays.asList(actions));
     }
     
-    private void addTabs() {
+    public List<Action> getActions() {
+        return new ArrayList<Action>(actions);
+    }
+    
+    public void setFixedLayout(int min, int pref, int max) {
+        this.layoutStyle = LayoutStyle.FIXED;
+        this.minimumWidth = min;
+        this.maximumWidth = max;
+        this.preferredWidth = pref;
+        layoutTabs();
+    }
+    
+    public void setFlowedLayout(Insets insets) {
+        this.layoutStyle = LayoutStyle.FLOWED;
+        if(insets != null) {
+            this.tabInsets = insets;
+        } else {
+            this.tabInsets = new Insets(0, 1, 5, 1);
+        }
+        layoutTabs();
+    }
+    
+    private void layoutTabs() {
+        removeAll();
+        
+        switch(layoutStyle) {
+        case FIXED:
+            layoutFixed();
+            break;
+        case FLOWED:
+            layoutFlowed();
+            break;
+        }
+    }
+    
+    private void layoutFlowed() {
+        setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = tabInsets;
-        gbc.ipadx = 50;
+        int i = 0;
         for(FancyTab tab : tabs) {
-          //  tab.setPreferredSize(new Dimension(200, 50));
-            add(tab, gbc);
+            if(i < maxActionsToList) {
+                add(tab, gbc);
+            }
+            i++;
         }
-        
-//        if(actions.size() > maxActionsToList) {
-//            add(new ButtonBed())
-//        }
     }
     
-    public void clearTab() {
-        removeAll();        
+    private void layoutFixed() {
+        GroupLayout layout = new GroupLayout(this);
+        setLayout(layout);
+
+        layout.setAutoCreateGaps(false);
+        layout.setAutoCreateContainerGaps(false);
+        
+        Group seqGroup = layout.createSequentialGroup();
+        layout.setHorizontalGroup(seqGroup);
+        
+        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
+        layout.setVerticalGroup(layout.createSequentialGroup()
+                .addGroup(verGroup));
+        
+        int i = 0;
         for(FancyTab tab : tabs) {
-            tab.removeFromGroup(tabGroup);
+            if(i < maxActionsToList) {
+                seqGroup.addComponent(tab, minimumWidth, preferredWidth, maximumWidth);
+                verGroup.addComponent(tab);
+            }
+            i++;
         }
-        tabs.clear();
     }
     
     public void setHighlightPainter(Painter<?> highlightPainter) {
@@ -133,5 +211,4 @@ public class FancyTabList extends JXPanel {
             tab.setFont(font);
         }
     }
-
 }

@@ -19,33 +19,38 @@ import javax.swing.JToggleButton;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.util.FontUtils;
-import org.limewire.ui.swing.util.GuiUtils;
 
 /**
- * A fancy 'tab', for use showing search result titles.
+ * A fancy 'tab' for use in a {@link FancyTabList}.
  */
 public class FancyTab extends JXPanel {
 
+    private final Action action;
     private final TextButton button;
     private boolean highlighted;
     private FancyTabProperties props;
 
     public FancyTab(Action action, ButtonGroup group, FancyTabProperties fancyTabProperties) {
+        this.action = action;
         this.props = fancyTabProperties;
         this.button = new TextButton(action, group, this);
             
         setOpaque(false);
         setLayout(new GridBagLayout());
+        setToolTipText(getTitle());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.weightx = 1;
         add(button, gbc);
         
         addMouseListener(new HighlightListener());
-        
-     //   setMaximumSize(new Dimension(props.getWidth(), Integer.MAX_VALUE));
     }
 
+    /** Gets the action underlying this tab. */
+    Action getAction() {
+        return action;
+    }
+    
     /** Selects this tab. */
     void setSelected(boolean selected) {
         button.setSelected(selected);
@@ -82,14 +87,13 @@ public class FancyTab extends JXPanel {
             setFocusPainted(false);
             setContentAreaFilled(false);
             setMargin(new Insets(2, 5, 2, 5));
-            setHideActionText(true);
-            setRolloverIcon(null);
+            setToolTipText(getTitle());
 
             if (props.getTextFont() != null) {
                 setFont(props.getTextFont());
             } else {
-                FontUtils.changeFontStyle(this, Font.BOLD);
-                FontUtils.changeFontSize(this, 2);
+                FontUtils.changeStyle(this, Font.BOLD);
+                FontUtils.changeSize(this, 2);
             }
 
             addPropertyChangeListener(Action.NAME, new PropertyChangeListener() {
@@ -103,11 +107,12 @@ public class FancyTab extends JXPanel {
                 @Override
                 public void itemStateChanged(ItemEvent e) {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
+                        FontUtils.removeUnderline(TextButton.this);
                         setForeground(props.getSelectionColor());
-                        setText((String) getAction().getValue(Action.NAME));
                         parent.setBackgroundPainter(props.getSelectedPainter());
                     } else {
-                        setText(toHtml((String) getAction().getValue(Action.NAME), props.getNormalColor()));
+                        FontUtils.underline(TextButton.this);
+                        setForeground(props.getNormalColor());
                         parent.setBackgroundPainter(props.getNormalPainter());
                     }
                 }
@@ -122,12 +127,6 @@ public class FancyTab extends JXPanel {
         private void fireCurrentState() {
             fireItemStateChanged(new ItemEvent(TextButton.this, ItemEvent.ITEM_STATE_CHANGED,
                     TextButton.this, isSelected() ? ItemEvent.SELECTED : ItemEvent.DESELECTED));
-        }
-
-        private String toHtml(String text, Color color) {
-            String colorText = color != null ? " color=\"#" + GuiUtils.colorToHex(color) + "\" "
-                    : "";
-            return "<html><a href=\"\"" + colorText + ">" + text + "</a></html>";
         }
     }
     
@@ -153,12 +152,14 @@ public class FancyTab extends JXPanel {
         
         @Override
         public void mouseClicked(MouseEvent e) {
-            System.out.println("e: " + e);
-            if(!e.isConsumed()) {
-                e.consume();
+            if(e.getSource() != button) {
                 button.doClick();
             }
         }
+    }
+
+    public String getTitle() {
+        return (String)action.getValue(Action.NAME);
     }
 
 }

@@ -46,9 +46,7 @@ class SearchTabItems extends JXPanel {
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         
         FancyTabList ttp = new FancyTabList(searchTabs);
-        // Tweak the insets of the buttons & painter to make the
-        // highlight selection bleed into the tab below.
-        ttp.setButtonInsets(new Insets(2, 2, 0, 5));
+        ttp.setFlowedLayout(new Insets(2, 2, 0, 5));
         ttp.setHighlightPainter(new RectanglePainter<JXPanel>(2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
         add(ttp, gbc);
         

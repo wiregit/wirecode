@@ -60,7 +60,7 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		titleLabel = new JLabel();
 		titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-        FontUtils.changeFontStyle(titleLabel, Font.BOLD);
+        FontUtils.changeStyle(titleLabel, Font.BOLD);
 		add(titleLabel, BorderLayout.NORTH);
 			
 
@@ -126,8 +126,8 @@ public class DownloadSummaryPanel extends JPanel {
 		public DownloadStatusPanelRenderer() {
 			super(new GridBagLayout());
 
-	        FontUtils.changeFontSize(nameLabel, -1);
-	        FontUtils.changeFontSize(percentLabel, -1);
+	        FontUtils.changeSize(nameLabel, -1);
+	        FontUtils.changeSize(percentLabel, -1);
 			setOpaque(false);
 			GridBagConstraints gbc = new GridBagConstraints();
 

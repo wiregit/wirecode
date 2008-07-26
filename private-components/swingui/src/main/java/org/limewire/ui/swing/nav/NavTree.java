@@ -25,17 +25,14 @@ public class NavTree extends JXPanel implements NavigableTree {
         setLayout(new GridBagLayout());
         
         addNavList(new NavList("LimeWire", Navigator.NavCategory.LIMEWIRE));
-        addNavList(new NavList("Search", Navigator.NavCategory.SEARCH));
         addNavList(new NavList("Library", Navigator.NavCategory.LIBRARY));
         
-        NavList hiddenList = new NavList("None", Navigator.NavCategory.NONE){
-            //force invisibility
-            @Override
-            public boolean isVisible(){
-                return false;
-            }
-            
-        };
+        NavList hiddenList = new NavList("None", Navigator.NavCategory.DOWNLOAD);
+        hiddenList.setVisible(false);
+        addNavList(hiddenList);
+        
+        hiddenList = new NavList("Search", Navigator.NavCategory.SEARCH);
+        hiddenList.setVisible(false);
         addNavList(hiddenList);
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -104,7 +101,7 @@ public class NavTree extends JXPanel implements NavigableTree {
     }
     
     public void showDownloads(){
-        selectNavigableItemByName(NavCategory.NONE, MainDownloadPanel.NAME);
+        selectNavigableItemByName(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
     }
     
     

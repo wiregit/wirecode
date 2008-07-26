@@ -9,22 +9,21 @@ import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 
 import com.google.inject.Inject;
 
 class SearchHandlerImpl implements SearchHandler {
     
-    private final Navigator navigator;
     private final SearchFactory searchFactory;
     private final SearchResultsPanelFactory panelFactory;
+    private final SearchNavigator searchNavigator;
     
     @Inject
-    SearchHandlerImpl(Navigator navigator, SearchFactory searchFactory,
-            SearchResultsPanelFactory panelFactory) {
-        this.navigator = navigator;
+    SearchHandlerImpl(SearchFactory searchFactory,
+            SearchResultsPanelFactory panelFactory,
+            SearchNavigator searchNavigator) {
+        this.searchNavigator = searchNavigator;
         this.searchFactory = searchFactory;
         this.panelFactory = panelFactory;
     }
@@ -46,7 +45,7 @@ class SearchHandlerImpl implements SearchHandler {
         String panelTitle = info.getTitle();
         final BasicSearchResultsModel model = new BasicSearchResultsModel();
         SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(info, model.getVisualSearchResults(), search);
-        NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, panelTitle, searchPanel, true);
+        NavItem item = searchNavigator.addSearch(panelTitle, searchPanel);
         item.select();
         
         search.start(new SearchListener() {

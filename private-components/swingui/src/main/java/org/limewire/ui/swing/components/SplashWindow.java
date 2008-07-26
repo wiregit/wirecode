@@ -57,7 +57,7 @@ public class SplashWindow {
         
         textLabel = new JLabel();
         textLabel.setOpaque(false);
-        FontUtils.changeFontStyle(textLabel, Font.BOLD);
+        FontUtils.changeStyle(textLabel, Font.BOLD);
         
         progressBar = new LimeJProgressBar();
         progressBar.setOpaque(false);

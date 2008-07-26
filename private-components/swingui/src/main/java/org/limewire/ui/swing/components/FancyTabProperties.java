@@ -15,7 +15,6 @@ public class FancyTabProperties implements Cloneable {
     private Color selectionColor;
     private Color normalColor;
     private Font textFont;
-    private int width;
     
     public FancyTabProperties() {
         highlightPainter = new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY);
@@ -23,7 +22,6 @@ public class FancyTabProperties implements Cloneable {
         normalPainter = null;
         selectionColor = new Color(0, 100, 0);
         normalColor = Color.BLUE;
-        width = 20;
     }
     
     public FancyTabProperties clone() {
@@ -82,12 +80,5 @@ public class FancyTabProperties implements Cloneable {
         this.textFont = textFont;
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
 
 }

@@ -37,6 +37,7 @@ class NavList extends JXPanel {
     private final DefaultTableModel listModel;
     private final Navigator.NavCategory navCategory;
     private final List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
+    private boolean vizSet = false;
     
     @Resource
     private Icon killIcon;
@@ -88,7 +89,7 @@ class NavList extends JXPanel {
         
         // Start out invisible - will become visible
         // when an item is added.
-        setVisible(false);
+        super.setVisible(false);
     }
     
     public NavCategory getCategory() {
@@ -98,15 +99,25 @@ class NavList extends JXPanel {
     public void addNavItem(NavItem navItem, boolean userRemovable) {
         listModel.addRow(new Object[] { null, navItem, userRemovable });
         if(listModel.getRowCount() == 1) {
-            setVisible(true);
+            if(!vizSet) {
+                super.setVisible(true);
+            }
         }
     }
     
     public void removeNavItem(NavItem navItem) {
         listModel.removeRow(getRowForNavItem(navItem));
         if(listModel.getRowCount() == 0) {
-            setVisible(false);
+            if(!vizSet) {
+                super.setVisible(false);
+            }
         }
+    }
+    
+    @Override
+    public void setVisible(boolean flag) {
+        vizSet = true;
+        super.setVisible(flag);
     }
     
     public void addListSelectionListener(ListSelectionListener listener) {

@@ -3,7 +3,9 @@
  */
 package org.limewire.ui.swing.nav;
 
-import javax.swing.JPanel;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.swing.JComponent;
 
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.home.HomePanel;
@@ -23,6 +25,7 @@ class NavigatorImpl implements Navigator {
 
     private final NavigableTarget navTarget;
     private final NavigableTree navTree;
+    private final CopyOnWriteArrayList<NavSelectionListener> listeners = new CopyOnWriteArrayList<NavSelectionListener>();
 
     @Inject
     public NavigatorImpl(@Named("MainTarget") NavigableTarget navTarget, @Named("MainTree") NavigableTree navTree) {
@@ -33,6 +36,9 @@ class NavigatorImpl implements Navigator {
             @Override
             public void navItemSelected(Navigator.NavCategory category, NavItem navItem) {
                 showNavigablePanel(category, navItem);
+                for(NavSelectionListener listener : listeners) {
+                    listener.navItemSelected(category, navItem);
+                }
             }
         });
     }
@@ -40,7 +46,7 @@ class NavigatorImpl implements Navigator {
     /* (non-Javadoc)
      * @see org.limewire.ui.swing.nav.Navigator#addNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String, javax.swing.JPanel)
      */
-    public NavItem addNavigablePanel(final NavCategory category, final String name, JPanel panel, boolean userRemovable) {
+    public NavItem addNavigablePanel(final NavCategory category, final String name, JComponent panel, boolean userRemovable) {
         NavItem item = new NavItem() {
             @Override
             public String getName() {
@@ -62,16 +68,12 @@ class NavigatorImpl implements Navigator {
         return item;
     }
 
-    /* (non-Javadoc)
-     * @see org.limewire.ui.swing.nav.Navigator#removeNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String)
-     */
-    public void removeNavigablePanel(NavCategory category, NavItem navItem) {
+    private void removeNavigablePanel(NavCategory category, NavItem navItem) {
         navTree.removeNavigableItem(category, navItem);
         navTarget.removeNavigablePanel(navItem);
     }
     
-    @Override
-    public void selectNavigablePanel(NavCategory category, NavItem navItem) {
+    private void selectNavigablePanel(NavCategory category, NavItem navItem) {
         navTree.selectNavigableItem(category, navItem);
     }
 
@@ -94,6 +96,16 @@ class NavigatorImpl implements Navigator {
         addNavigablePanel(NavCategory.LIBRARY, ImagePanel.NAME, imagePanel, false);
         addNavigablePanel(NavCategory.LIBRARY, DocumentPanel.NAME, documentPanel, false);
         
-        addNavigablePanel(NavCategory.NONE, MainDownloadPanel.NAME, mainDownloadPanel, false);
+        addNavigablePanel(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel, false);
+    }
+
+    @Override
+    public void addNavListener(NavSelectionListener itemListener) {
+        listeners.add(itemListener);
+    }
+    
+    @Override
+    public void removeNavListener(NavSelectionListener itemListener) {
+        listeners.remove(itemListener);
     }
 }

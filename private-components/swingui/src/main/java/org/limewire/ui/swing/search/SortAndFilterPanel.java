@@ -39,8 +39,8 @@ class SortAndFilterPanel extends JXPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         
         JLabel sortLabel = new JLabel("Sort by");
-        FontUtils.changeFontSize(sortLabel, 1);
-        FontUtils.changeFontStyle(sortLabel, Font.BOLD);
+        FontUtils.changeSize(sortLabel, 1);
+        FontUtils.changeStyle(sortLabel, Font.BOLD);
         sortLabel.setForeground(Color.WHITE);
         gbc.insets = new Insets(5, 10, 5, 5);
         add(sortLabel, gbc);
@@ -48,8 +48,8 @@ class SortAndFilterPanel extends JXPanel {
         add(sortBox, gbc);
         
         JLabel filterLabel = new JLabel("Filter by");
-        FontUtils.changeFontSize(filterLabel, 1);
-        FontUtils.changeFontStyle(filterLabel, Font.BOLD);
+        FontUtils.changeSize(filterLabel, 1);
+        FontUtils.changeStyle(filterLabel, Font.BOLD);
         filterLabel.setForeground(Color.WHITE);
         gbc.insets = new Insets(5, 0, 5, 5);
         add(filterLabel, gbc);
