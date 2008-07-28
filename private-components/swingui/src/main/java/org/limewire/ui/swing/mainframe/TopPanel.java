@@ -20,8 +20,10 @@ import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectionListener;
 import org.limewire.ui.swing.nav.Navigator;
@@ -116,10 +118,11 @@ class TopPanel extends JPanel implements SearchNavigator {
     }
     
     @Override
-    public NavItem addSearch(String title, JComponent search) {
-        final NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, title, search, true);
-        final SearchAction action = new SearchAction(item);
-        searchList.addActionAt(action, 0);
+    public NavItem addSearch(String title, JComponent searchPanel, Search search) {
+        final NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, title, searchPanel, false);
+        final SearchAction action = new SearchAction(item, search);
+        final TabActionMap actionMap = new TabActionMap(action, action);
+        searchList.addActionAt(actionMap, 0);
         return new NavItem() {
             @Override
             public String getName() {
@@ -128,26 +131,37 @@ class TopPanel extends JPanel implements SearchNavigator {
             
             @Override
             public void remove() {
-                item.remove();
-                searchList.removeAction(action);
+                searchList.removeAction(actionMap);
+                action.remove();
             }
             
             @Override
             public void select() {
-                action.actionPerformed(null);
+                action.select();
             }
         };
     }
     
     private class SearchAction extends AbstractAction {
         private final NavItem item;
-        public SearchAction(NavItem item) {
+        private final Search search;
+        
+        public SearchAction(NavItem item, Search search) {
             super(item.getName());
             this.item = item;
+            this.search = search;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            if(e.getActionCommand().equals(TabActionMap.SELECT_COMMAND)) {
+                select();
+            } else if(e.getActionCommand().equals(TabActionMap.REMOVE_COMMAND)) {
+                remove();
+            }
+        }
+        
+        public void select() {
             item.select();
             putValue(Action.SELECTED_KEY, true);
             searchBar.setText(item.getName());
@@ -160,6 +174,11 @@ class TopPanel extends JPanel implements SearchNavigator {
                     }
                 }
             });
+        }
+        
+        public void remove() {
+            item.remove();
+            search.stop();
         }
     }
     

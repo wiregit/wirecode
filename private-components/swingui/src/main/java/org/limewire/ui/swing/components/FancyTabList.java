@@ -5,12 +5,13 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Group;
@@ -21,9 +22,10 @@ import org.jdesktop.swingx.painter.Painter;
 /** A horizontal list of {@link FancyTab FancyTabs}. */
 public class FancyTabList extends JXPanel {
     
-    private final List<Action> actions = new ArrayList<Action>();
+    private final List<TabActionMap> actions = new ArrayList<TabActionMap>();
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
+    private final ActionListener tabRemoveListener = new RemoveListener();
     
     private FancyTabProperties props;
     private int maxTabs;
@@ -40,7 +42,7 @@ public class FancyTabList extends JXPanel {
         FIXED, FLOWED;
     }
     
-    public FancyTabList(Iterable<? extends Action> actions) {
+    public FancyTabList(Iterable<? extends TabActionMap> actions) {
         setOpaque(false);
         
         minimumWidth = 30;
@@ -53,30 +55,41 @@ public class FancyTabList extends JXPanel {
         setActions(actions);
     }
     
-    public FancyTabList(Action... actions) {
+    public FancyTabList(TabActionMap... actions) {
         this(Arrays.asList(actions));
     }
-    
+
+    /** Sets the maximum number of tabs to render at once. */
     public void setMaxTabs(int max) {
         this.maxTabs = max;
         layoutTabs();
     }
     
+    /** Sets whether or not the tabs should render a 'remove' icon. */
     public void setRemovable(boolean removable) {
         props.setRemovable(removable);
         setActions(actions);
     }
 
-    public void addActionAt(Action action, int i) {
+    /** Adds a new tab based on the given action at the specified index. */
+    public void addActionAt(TabActionMap action, int i) {
         this.actions.add(i, action);
-        this.tabs.add(i, new FancyTab(action, tabGroup, props));
+        FancyTab tab = new FancyTab(action, tabGroup, props);
+        tab.addRemoveActionListener(tabRemoveListener);
+        this.tabs.add(i, tab);
         layoutTabs();
     }
 
-    public void removeAction(Action action) {
-        this.actions.remove(action);
+    /**
+     * Removes the tab based on the given action. This will not trigger an
+     * action from the {@link TabActionMap#getRemoveAction()} action.
+     */
+    public void removeAction(TabActionMap action) {
+        actions.remove(action);
         for(Iterator<FancyTab> iter = tabs.iterator(); iter.hasNext(); ) {
-            if(iter.next().getAction().equals(action)) {
+            FancyTab tab = iter.next();
+            if(tab.getAction().equals(action)) {
+                tab.removeFromGroup(tabGroup);
                 iter.remove();
                 break;
             }
@@ -84,27 +97,38 @@ public class FancyTabList extends JXPanel {
         layoutTabs();
     }
     
-    
-    public void setActions(Iterable<? extends Action> actions) {
-        this.actions.clear();
-        this.tabs.clear();
+    /**
+     * Sets a new list of tabs based on the given actions.
+     */
+    public void setActions(Iterable<? extends TabActionMap> newActions) {
+        actions.clear();
+        
+        for(FancyTab tab : tabs) {
+            tab.removeFromGroup(tabGroup);
+        }
+        tabs.clear();
 
-        for(Action action : actions) {
+        for(TabActionMap action : newActions) {
             this.actions.add(action);
-            tabs.add(new FancyTab(action, tabGroup, props));
+            FancyTab tab = new FancyTab(action, tabGroup, props);
+            tab.addRemoveActionListener(tabRemoveListener);
+            tabs.add(tab);
         }
         
         layoutTabs();
     }
-    
-    public void setActions(Action... actions) {
+
+    /**
+     * Sets a new list of tabs based on the given actions.
+     */
+    public void setActions(TabActionMap... actions) {
         setActions(Arrays.asList(actions));
     }
     
-    public List<Action> getActions() {
-        return new ArrayList<Action>(actions);
-    }
-    
+    /**
+     * Renders the tabs in a fixed layout, using the given minimum, preferred
+     * and maximum width.
+     */
     public void setFixedLayout(int min, int pref, int max) {
         this.layoutStyle = LayoutStyle.FIXED;
         this.minimumWidth = min;
@@ -113,6 +137,10 @@ public class FancyTabList extends JXPanel {
         layoutTabs();
     }
     
+    /**
+     * Renders the tabs in a flowed layout, placing each tab next to each other,
+     * using the given insets around each tab.
+     */
     public void setFlowedLayout(Insets insets) {
         this.layoutStyle = LayoutStyle.FLOWED;
         if(insets != null) {
@@ -123,6 +151,7 @@ public class FancyTabList extends JXPanel {
         layoutTabs();
     }
     
+    /** Removes all visible tabs and lays them out again. */
     private void layoutTabs() {
         removeAll();
         
@@ -136,6 +165,10 @@ public class FancyTabList extends JXPanel {
         }
     }
     
+    /**
+     * Renders the tabs in a flowed layout, placing each tab next to each other,
+     * using the given insets around each tab.
+     */
     private void layoutFlowed() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -150,7 +183,11 @@ public class FancyTabList extends JXPanel {
             i++;
         }
     }
-    
+
+    /**
+     * Renders the tabs in a fixed layout, using the given minimum, preferred
+     * and maximum width.
+     */
     private void layoutFixed() {
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
@@ -175,15 +212,19 @@ public class FancyTabList extends JXPanel {
         }
     }
     
+    /**
+     * Sets the painter to be used when the tab is rolled over.
+     */
     public void setHighlightPainter(Painter<?> highlightPainter) {
-        for(FancyTab tab : tabs) {
-            if(tab.isHighlighted()) {
+        for (FancyTab tab : tabs) {
+            if (tab.isHighlighted()) {
                 tab.setBackgroundPainter(highlightPainter);
             }
         }
         props.setHighlightPainter(highlightPainter);
     }
     
+    /** Sets the painter to be used when the tab is selected. */
     public void setSelectionPainter(Painter<?> selectedPainter) {
         for(FancyTab tab : tabs) {
             if(tab.isHighlighted()) {
@@ -193,7 +234,8 @@ public class FancyTabList extends JXPanel {
         props.setSelectedPainter(selectedPainter);
     }
     
-    public void setActionForeground(Color normalColor) {
+    /** Sets the color used to render the tab's text when it is not selected. */
+    public void setTabTextColor(Color normalColor) {
         for(FancyTab tab : tabs) {
             if(!tab.isSelected()) {
                 tab.setButtonForeground(normalColor);
@@ -202,7 +244,8 @@ public class FancyTabList extends JXPanel {
         props.setNormalColor(normalColor);
     }
     
-    public void setSelectionColor(Color selectionColor) {
+    /** Sets the color used to render the tab's text when it is selected. */
+    public void setTabTextSelectedColor(Color selectionColor) {
         for(FancyTab tab : tabs) {
             if(tab.isSelected()) {
                 tab.setButtonForeground(selectionColor);
@@ -211,9 +254,21 @@ public class FancyTabList extends JXPanel {
         props.setSelectionColor(selectionColor);
     }
     
+    /** Sets the font used to render the tab's text. */
     public void setTextFont(Font font) {
         for(FancyTab tab : tabs) {
             tab.setFont(font);
+        }
+    }
+    
+    private class RemoveListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            FancyTab tab = (FancyTab)e.getSource();
+            actions.remove(tab.getAction());
+            tabs.remove(tab);
+            tab.removeFromGroup(tabGroup);
+            layoutTabs();
         }
     }
 }

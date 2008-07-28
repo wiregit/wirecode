@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -29,7 +31,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class FancyTab extends JXPanel {
 
-    private final Action selectedAction;
+    private final TabActionMap tabActions;
     private final TextButton mainButton;
     private final JButton removeButton;
     private FancyTabProperties props;
@@ -51,14 +53,13 @@ public class FancyTab extends JXPanel {
     
     //@Resource // Currently not picked up -- background is not shown.
     private Icon removeBackgroundIcon = null;
-    
 
-    public FancyTab(Action action, ButtonGroup group, FancyTabProperties fancyTabProperties) {
+    public FancyTab(TabActionMap actionMap, ButtonGroup group, FancyTabProperties fancyTabProperties) {
         GuiUtils.assignResources(this);
         
-        this.selectedAction = action;
+        this.tabActions = actionMap;
         this.props = fancyTabProperties;
-        this.mainButton = new TextButton(action, group);
+        this.mainButton = new TextButton(actionMap.getSelectAction(), group);
             
         setOpaque(false);
         setLayout(new GridBagLayout());
@@ -70,16 +71,8 @@ public class FancyTab extends JXPanel {
         
         HighlightListener highlightListener = new HighlightListener();
         
-        removeButton = new JButton();
+        removeButton = createRemoveButton();
         if(props.isRemovable()) {
-            removeButton.setBorderPainted(false);
-            removeButton.setContentAreaFilled(false);
-            removeButton.setFocusPainted(false);
-            removeButton.setRolloverEnabled(true);
-            removeButton.setIcon(removeBackgroundIcon);
-            removeButton.setRolloverIcon(removeRolloverIcon);
-            removeButton.setPressedIcon(removeArmedIcon);
-            removeButton.setMargin(new Insets(0, 0, 0, 0));
             removeButton.addMouseListener(highlightListener);
             gbc.anchor = GridBagConstraints.EAST;
             gbc.weightx = 0;
@@ -89,12 +82,43 @@ public class FancyTab extends JXPanel {
         
         addMouseListener(highlightListener);
         mainButton.addMouseListener(highlightListener);
+        
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
+    }
+    
+    private JButton createRemoveButton() {
+        JButton button = new JButton();
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setRolloverEnabled(true);
+        button.setIcon(removeBackgroundIcon);
+        button.setRolloverIcon(removeRolloverIcon);
+        button.setPressedIcon(removeArmedIcon);
+        button.setMargin(new Insets(0, 0, 0, 0));
+        button.setAction(tabActions.getRemoveAction());
+        button.setActionCommand(TabActionMap.REMOVE_COMMAND);
+        button.setHideActionText(true);
+        return button;
+    }
+    
+    void addRemoveActionListener(ActionListener listener) {
+        removeButton.addActionListener(new RemoveListener(listener));
+    }
+    
+    void removeRemoveActionListener(ActionListener listener) {
+        for (ActionListener wrappedListener : removeButton.getActionListeners()) {
+            if (wrappedListener instanceof RemoveListener
+                    && ((RemoveListener) wrappedListener).delegate.equals(listener)) {
+                removeButton.removeActionListener(wrappedListener);
+                break;
+            }
+        }
     }
 
     /** Gets the action underlying this tab. */
-    Action getAction() {
-        return selectedAction;
+    TabActionMap getAction() {
+        return tabActions;
     }
     
     /** Selects this tab. */
@@ -149,6 +173,7 @@ public class FancyTab extends JXPanel {
         public TextButton(Action action, ButtonGroup group) {
             super(action);
             group.add(this);
+            setActionCommand(TabActionMap.SELECT_COMMAND);
             setFocusPainted(false);
             setContentAreaFilled(false);
             setMargin(new Insets(2, 5, 2, 5));
@@ -203,7 +228,22 @@ public class FancyTab extends JXPanel {
     }
 
     public String getTitle() {
-        return (String)selectedAction.getValue(Action.NAME);
+        return (String)tabActions.getSelectAction().getValue(Action.NAME);
+    }
+    
+    /** A wrapper listener for removal, needed so the source is correct. */
+    private class RemoveListener implements ActionListener {
+        private ActionListener delegate;
+
+        RemoveListener(ActionListener delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            delegate.actionPerformed(new ActionEvent(FancyTab.this,
+                    e.getID(), e.getActionCommand(), e.getWhen(), e.getModifiers()));
+        }
     }
 
 }

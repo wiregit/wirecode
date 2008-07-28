@@ -16,6 +16,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.TabActionMap;
 
 class SearchTabItems extends JXPanel {
     
@@ -45,7 +46,7 @@ class SearchTabItems extends JXPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         
-        FancyTabList ttp = new FancyTabList(searchTabs);
+        FancyTabList ttp = new FancyTabList(TabActionMap.createMapForSelectActions(searchTabs));
         ttp.setFlowedLayout(new Insets(2, 2, 0, 5));
         ttp.setHighlightPainter(new RectanglePainter<JXPanel>(2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
         add(ttp, gbc);

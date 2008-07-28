@@ -45,7 +45,7 @@ class SearchHandlerImpl implements SearchHandler {
         String panelTitle = info.getTitle();
         final BasicSearchResultsModel model = new BasicSearchResultsModel();
         SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(info, model.getVisualSearchResults(), search);
-        NavItem item = searchNavigator.addSearch(panelTitle, searchPanel);
+        NavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search);
         item.select();
         
         search.start(new SearchListener() {
