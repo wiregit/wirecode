@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Group;
@@ -265,10 +266,22 @@ public class FancyTabList extends JXPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             FancyTab tab = (FancyTab)e.getSource();
-            actions.remove(tab.getAction());
+            boolean selected = tab.isSelected();
+            int idx = actions.indexOf(tab.getAction());
+            assert idx != -1;
+            actions.remove(idx);
             tabs.remove(tab);
             tab.removeFromGroup(tabGroup);
             layoutTabs();
+            
+            // Shift the selection to the tab to the left (or right, if idx==0)
+            if(selected) {
+                if(idx == 0 && actions.size() > 0) {
+                    actions.get(0).getSelectAction().putValue(Action.SELECTED_KEY, true);
+                } else  if(idx > 0 && actions.size() > 0) {
+                    actions.get(idx - 1).getSelectAction().putValue(Action.SELECTED_KEY, true);
+                }
+            }
         }
     }
 }

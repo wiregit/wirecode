@@ -8,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -137,7 +139,7 @@ class TopPanel extends JPanel implements SearchNavigator {
             
             @Override
             public void select() {
-                action.select();
+                action.putValue(Action.SELECTED_KEY, true);
             }
         };
     }
@@ -150,6 +152,17 @@ class TopPanel extends JPanel implements SearchNavigator {
             super(item.getName());
             this.item = item;
             this.search = search;
+            // Make sure this syncs up with any changes in selection.
+            addPropertyChangeListener(new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                        if(evt.getNewValue().equals(Boolean.TRUE)) {
+                            select();
+                        }
+                    }
+                }
+            });
         }
         
         @Override
@@ -163,7 +176,6 @@ class TopPanel extends JPanel implements SearchNavigator {
         
         public void select() {
             item.select();
-            putValue(Action.SELECTED_KEY, true);
             searchBar.setText(item.getName());
             navigator.addNavListener(new NavSelectionListener() {
                 @Override

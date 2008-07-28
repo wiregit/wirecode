@@ -86,6 +86,11 @@ public class FancyTab extends JXPanel {
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
     }
     
+    @Override
+    public String toString() {
+        return "FancyTab for: " + getTitle() + ", " + super.toString();
+    }
+    
     private JButton createRemoveButton() {
         JButton button = new JButton();
         button.setBorderPainted(false);
@@ -147,24 +152,26 @@ public class FancyTab extends JXPanel {
     }
     
     private void changeState(TabState tabState) {
-        this.currentState = tabState;
-        switch(tabState) {
-        case SELECTED:
-            FontUtils.removeUnderline(mainButton);
-            mainButton.setForeground(props.getSelectionColor());
-            this.setBackgroundPainter(props.getSelectedPainter());
-            removeButton.setIcon(removeSelectedIcon);
-            break;
-        case BACKGROUND:
-            FontUtils.underline(mainButton);
-            mainButton.setForeground(props.getNormalColor());
-            this.setBackgroundPainter(props.getNormalPainter());
-            removeButton.setIcon(removeBackgroundIcon);
-            break;
-        case ROLLOVER:
-            setBackgroundPainter(props.getHighlightPainter());
-            removeButton.setIcon(removeSelectedIcon);
-            break;
+        if(currentState != tabState) {
+            this.currentState = tabState;
+            switch(tabState) {
+            case SELECTED:
+                FontUtils.removeUnderline(mainButton);
+                mainButton.setForeground(props.getSelectionColor());
+                this.setBackgroundPainter(props.getSelectedPainter());
+                removeButton.setIcon(removeSelectedIcon);
+                break;
+            case BACKGROUND:
+                FontUtils.underline(mainButton);
+                mainButton.setForeground(props.getNormalColor());
+                this.setBackgroundPainter(props.getNormalPainter());
+                removeButton.setIcon(removeBackgroundIcon);
+                break;
+            case ROLLOVER:
+                setBackgroundPainter(props.getHighlightPainter());
+                removeButton.setIcon(removeSelectedIcon);
+                break;
+            }
         }
     }
 
