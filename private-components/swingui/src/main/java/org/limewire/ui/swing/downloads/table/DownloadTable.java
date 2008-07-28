@@ -8,16 +8,18 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.download.DownloadItem;
 
+import ca.odell.glazedlists.EventList;
+
 public class DownloadTable extends JXTable {
 
-	public DownloadTable(TableModel model) {
-		super(model);
+	public DownloadTable(EventList<DownloadItem> downloadItems) {
+	    //TODO: EventList, not model, as parameter.  Listener on editor
+		super(new DownloadTableModel(downloadItems));
 		setRolloverEnabled(false);
 		setFocusable(false);
 		setEditable(true);
@@ -27,10 +29,13 @@ public class DownloadTable extends JXTable {
 		//This doesn't work with editing on rollover
 		//addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, Color.CYAN, Color.BLACK));		
 
-		DownloadRendererEditor editor = new DownloadRendererEditor();
+		final DownloadRendererEditor editor = new DownloadRendererEditor();
+        editor.initializeEditor(downloadItems);
 		DownloadRendererEditor renderer = new DownloadRendererEditor();
+		
 		setDefaultEditor(DownloadItem.class, editor);
 		setDefaultRenderer(DownloadItem.class, renderer);
+		
 		setRowHeight(renderer.getPreferredSize().height);
 
 		//so that mouseovers will work within table

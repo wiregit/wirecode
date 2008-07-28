@@ -30,7 +30,6 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
-import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -107,7 +106,7 @@ public class CategoryDownloadPanel extends JPanel {
 		//TODO: kill cast and fix this
 		FilterList<DownloadItem> filterList = 
 			new FilterList<DownloadItem>(list, new DownloadStateMatcher(states));
-		final JXTable table = new DownloadTable(new DownloadTableModel(filterList));
+		final JXTable table = new DownloadTable(filterList);
 		tables.add(table);
 		//TODO - list selection from glazed lists
 		table.getSelectionModel().addListSelectionListener(new MultiTableSelectionListener());

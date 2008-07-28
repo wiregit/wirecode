@@ -29,10 +29,19 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import org.limewire.ui.swing.util.I18n;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
+/**
+ * Renderer and editor for DownloadTables. To force editor to update along with
+ * renderers, call 
+ * <code>editor.initializeEditor(downloadItems)</code>
+ */
 public class DownloadRendererEditor extends JPanel implements
 		TableCellRenderer, TableCellEditor {
 
@@ -40,6 +49,9 @@ public class DownloadRendererEditor extends JPanel implements
 	private Color rolloverBackground=Color.CYAN;
 	
 	private Color rolloverForeground= Color.BLACK;
+	
+	//The item being edited by the editor
+	private DownloadItem editItem = null;
 	
 	//used to maintain proper color of renderer
 	private DefaultTableCellRenderer delegateRenderer = new DefaultTableCellRenderer();
@@ -197,58 +209,86 @@ public class DownloadRendererEditor extends JPanel implements
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value,
 			boolean isSel, int row, int col) {
-		EDITOR_LISTENER.setDownloadItem((DownloadItem) value);
-		Component renderer = getCellComponent(table, value, isSel, true, row, col);
-		renderer.setBackground(rolloverBackground);
-		renderer.setForeground(rolloverForeground);
-		return renderer;
+	    editItem = (DownloadItem) value;
+		//EDITOR_LISTENER.setDownloadItem(item);
+		final DownloadRendererEditor editor = getCellComponent(table, value, isSel, true, row, col);
+		editor.setBackground(rolloverBackground);
+		editor.setForeground(rolloverForeground);
+		return editor;
 	}
 
-	private Component getCellComponent(JTable table, Object value,
+	private DownloadRendererEditor getCellComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 		DownloadItem item = (DownloadItem) value;
-		titleLabel.setText(item.getTitle());
-		if(item.getState() == DownloadState.ERROR || item.getState() == DownloadState.STALLED ){
-		    iconLabel.setIcon(warningIcon);
-		} else {
+		updateComponent(this, item);
+		return this;
+	}
+	
+	/**
+     * Binds editor to downloadItems so that the editor automatically updates
+     * when downloadItems changes
+     */
+	public void initializeEditor(EventList<DownloadItem> downloadItems) {
+        downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateEditor();
+                    }
+                });
+            }
+        });
+    }
+	
+	private void updateEditor(){
+	    if (editItem != null) {
+            updateComponent(this, editItem);
+        }
+	}
+	
+	private void updateComponent(DownloadRendererEditor editor, DownloadItem item){
+	    editor.titleLabel.setText(item.getTitle());
+        if(item.getState() == DownloadState.ERROR || item.getState() == DownloadState.STALLED ){
+            editor.iconLabel.setIcon(warningIcon);
+        } else {
             switch (item.getCategory()) {
             case AUDIO:
-                iconLabel.setIcon(audioIcon);
+                editor.iconLabel.setIcon(audioIcon);
                 break;
             case DOCUMENT:
-                iconLabel.setIcon(documentIcon);
+                editor.iconLabel.setIcon(documentIcon);
                 break;
             case IMAGE:
-                iconLabel.setIcon(imageIcon);
+                editor.iconLabel.setIcon(imageIcon);
                 break;
             case VIDEO:
-                iconLabel.setIcon(videoIcon);
+                editor.iconLabel.setIcon(videoIcon);
                 break;
             default:
-                iconLabel.setIcon(otherIcon);
+                editor.iconLabel.setIcon(otherIcon);
             }
         }
-		//TODO time remaining
-		//TODO : doubles in progress bar
-		double totalSize = item.getTotalSize();
-		double curSize = item.getCurrentSize();
-		if (curSize < totalSize) {
-			progressBar.setHidden(false);
-			progressBar.setMaximum((int) item.getTotalSize());
-			progressBar.setValue((int) item.getCurrentSize());
-		} else {
-			progressBar.setHidden(true);
-		}
-		statusLabel.setText(getMessage(item));
-		if(item.getState() == DownloadState.DOWNLOADING){
-		    timeLabel.setText(item.getRemainingDownloadTime());
-		    timeLabel.setVisible(true);
-		} else {
-		    timeLabel.setVisible(false);
-		}
-		setButtonVisibility(item.getState());
-
-		return this;
+        
+        //TODO : doubles in progress bar
+        double totalSize = item.getTotalSize();
+        double curSize = item.getCurrentSize();
+        if (curSize < totalSize) {
+            editor.progressBar.setHidden(false);
+            editor.progressBar.setMaximum((int) item.getTotalSize());
+            editor.progressBar.setValue((int) item.getCurrentSize());
+        } else {
+            progressBar.setHidden(true);
+        }
+        editor.statusLabel.setText(getMessage(item));
+        if(item.getState() == DownloadState.DOWNLOADING){
+            editor.timeLabel.setText(item.getRemainingDownloadTime());
+            editor.timeLabel.setVisible(true);
+        } else {
+            editor.timeLabel.setVisible(false);
+        }
+        setButtonVisibility(item.getState());
 	}
 
 	@Override
@@ -318,21 +358,21 @@ public class DownloadRendererEditor extends JPanel implements
 	}
 
 	private class DownloadEditorListener implements ActionListener {
-		private DownloadItem downloadItem;
+		//private DownloadItem downloadItem;
 
-		public void setDownloadItem(DownloadItem item) {
-			downloadItem = item;
-		}
+//		public void setDownloadItem(DownloadItem item) {
+//			downloadItem = item;
+//		}
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == cancelButton) {
-				downloadItem.cancel();
+				editItem.cancel();
 			} else if (e.getSource() == pauseButton) {
-				downloadItem.pause();
+				editItem.pause();
 			} else if (e.getSource() == resumeButton) {
-				downloadItem.resume();
+				editItem.resume();
 			} else if (e.getSource() == searchAgainButton) {
-				downloadItem.resume();
+				editItem.resume();
 			}
 			cancelCellEditing();
 		}
