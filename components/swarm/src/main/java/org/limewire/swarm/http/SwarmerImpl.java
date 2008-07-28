@@ -269,6 +269,14 @@ public class SwarmerImpl implements Swarmer {
         }
 
         public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
+            //We can't try submitting a request again too soon after getting the response.
+            //kinda hacky for now, will find a better place for this
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     };
 
