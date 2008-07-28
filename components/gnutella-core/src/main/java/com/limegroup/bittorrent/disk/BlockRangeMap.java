@@ -71,6 +71,7 @@ public class BlockRangeMap {
 
     public void clear() {
         blocks.clear();
+        bitSet.clear();
     }
 
     public int size() {
