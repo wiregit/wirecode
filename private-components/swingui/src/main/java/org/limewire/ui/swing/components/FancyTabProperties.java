@@ -15,6 +15,7 @@ public class FancyTabProperties implements Cloneable {
     private Color selectionColor;
     private Color normalColor;
     private Font textFont;
+    private boolean removable;
     
     public FancyTabProperties() {
         highlightPainter = new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY);
@@ -22,6 +23,7 @@ public class FancyTabProperties implements Cloneable {
         normalPainter = null;
         selectionColor = new Color(0, 100, 0);
         normalColor = Color.BLUE;
+        removable = false;
     }
     
     public FancyTabProperties clone() {
@@ -30,6 +32,14 @@ public class FancyTabProperties implements Cloneable {
         } catch(CloneNotSupportedException cnse) {
             throw new Error(cnse);
         }
+    }
+
+    public boolean isRemovable() {
+        return removable;
+    }
+
+    public void setRemovable(boolean removable) {
+        this.removable = removable;
     }
 
     public Painter<?> getHighlightPainter() {

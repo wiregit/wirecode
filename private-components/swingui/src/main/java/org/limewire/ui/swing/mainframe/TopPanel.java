@@ -103,9 +103,10 @@ class TopPanel extends JPanel implements SearchNavigator {
         gbc.weightx = 1;
         gbc.insets = new Insets(5, 0, 0, 0);
         searchList = new FancyTabList();
+        searchList.setRemovable(true);
         searchList.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         searchList.setSelectionPainter(new RectanglePainter<JXPanel>(2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
-        searchList.setMaxActionsToList(3);
+        searchList.setMaxTabs(3);
         add(searchList, gbc);
     }
     
@@ -149,6 +150,7 @@ class TopPanel extends JPanel implements SearchNavigator {
         public void actionPerformed(ActionEvent e) {
             item.select();
             putValue(Action.SELECTED_KEY, true);
+            searchBar.setText(item.getName());
             navigator.addNavListener(new NavSelectionListener() {
                 @Override
                 public void navItemSelected(NavCategory category, NavItem navItem) {

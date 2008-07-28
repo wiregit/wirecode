@@ -26,7 +26,7 @@ public class FancyTabList extends JXPanel {
     private final ButtonGroup tabGroup = new ButtonGroup();
     
     private FancyTabProperties props;
-    private int maxActionsToList;
+    private int maxTabs;
     
     private LayoutStyle layoutStyle;
 
@@ -49,7 +49,7 @@ public class FancyTabList extends JXPanel {
         layoutStyle = LayoutStyle.FIXED;
         
         props = new FancyTabProperties();
-        maxActionsToList = Integer.MAX_VALUE;
+        maxTabs = Integer.MAX_VALUE;
         setActions(actions);
     }
     
@@ -57,9 +57,14 @@ public class FancyTabList extends JXPanel {
         this(Arrays.asList(actions));
     }
     
-    public void setMaxActionsToList(int max) {
-        this.maxActionsToList = max;
+    public void setMaxTabs(int max) {
+        this.maxTabs = max;
         layoutTabs();
+    }
+    
+    public void setRemovable(boolean removable) {
+        props.setRemovable(removable);
+        setActions(actions);
     }
 
     public void addActionAt(Action action, int i) {
@@ -139,7 +144,7 @@ public class FancyTabList extends JXPanel {
         gbc.insets = tabInsets;
         int i = 0;
         for(FancyTab tab : tabs) {
-            if(i < maxActionsToList) {
+            if(i < maxTabs) {
                 add(tab, gbc);
             }
             i++;
@@ -162,7 +167,7 @@ public class FancyTabList extends JXPanel {
         
         int i = 0;
         for(FancyTab tab : tabs) {
-            if(i < maxActionsToList) {
+            if(i < maxTabs) {
                 seqGroup.addComponent(tab, minimumWidth, preferredWidth, maximumWidth);
                 verGroup.addComponent(tab);
             }
