@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.handshaking.piecestrategy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.collection.AndView;
 import org.limewire.collection.BitField;
 
 import com.limegroup.bittorrent.BTInterval;
@@ -15,30 +16,28 @@ public class LargestGapStartPieceStrategy extends AbstractPieceStrategy {
     private final int maxNumPieces;
 
     public LargestGapStartPieceStrategy(BTMetaInfo btMetaInfo, BitField interestingPieces) {
-        this(btMetaInfo, interestingPieces, DEFAULT_MAX_NUM_PIECES);
+        this(btMetaInfo, DEFAULT_MAX_NUM_PIECES);
     }
 
-    public LargestGapStartPieceStrategy(BTMetaInfo btMetaInfo, BitField interestingPieces,
+    public LargestGapStartPieceStrategy(BTMetaInfo btMetaInfo,
             int maxNumPieces) {
-        super(btMetaInfo, interestingPieces);
+        super(btMetaInfo);
         this.maxNumPieces = maxNumPieces;
 
     }
 
-    public List<BTInterval> getNextPieces() {
+    public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
 
+        BitField interestingBlocks = new AndView(availableBlocks,neededBlocks);
         List<BTInterval> nextPieces = new ArrayList<BTInterval>();
-
-        BitField available = getInterestingPieces();
-
-        int currentGapStartIndex = available.nextSetBit(0);
+        int currentGapStartIndex = interestingBlocks.nextSetBit(0);
         int lastPieceIndex = -1;
         int currentGapSize = 0;
 
         int selectedGapStartIndex = 0;
         int selectedGapSize = 0;
 
-        for (int currentPieceIndex = available.nextSetBit(0); currentPieceIndex >= 0; currentPieceIndex = available
+        for (int currentPieceIndex = interestingBlocks.nextSetBit(0); currentPieceIndex >= 0; currentPieceIndex = interestingBlocks
                 .nextSetBit(currentPieceIndex + 1)) {
             if ((lastPieceIndex + 1) != currentPieceIndex) {
                 currentGapStartIndex = currentPieceIndex;

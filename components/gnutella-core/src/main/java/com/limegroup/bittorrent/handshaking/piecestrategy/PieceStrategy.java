@@ -2,6 +2,8 @@ package com.limegroup.bittorrent.handshaking.piecestrategy;
 
 import java.util.List;
 
+import org.limewire.collection.BitField;
+
 import com.limegroup.bittorrent.BTInterval;
 
 public interface PieceStrategy {
@@ -12,5 +14,5 @@ public interface PieceStrategy {
      * 
      * @return the next pieces to download
      */
-    public List<BTInterval> getNextPieces();
+    public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks);
 }

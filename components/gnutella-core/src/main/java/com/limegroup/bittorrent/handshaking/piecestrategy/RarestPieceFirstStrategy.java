@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.handshaking.piecestrategy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.collection.AndView;
 import org.limewire.collection.BitField;
 
 import com.limegroup.bittorrent.BTConnection;
@@ -14,15 +15,15 @@ public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
 
     private final BTLinkManager btLinkManager;
 
-    public RarestPieceFirstStrategy(BTMetaInfo btMetaInfo, BTLinkManager btLinkManager,
-            BitField interestingPieces) {
-        super(btMetaInfo, interestingPieces);
+    public RarestPieceFirstStrategy(BTMetaInfo btMetaInfo, BTLinkManager btLinkManager) {
+        super(btMetaInfo);
         this.btLinkManager = btLinkManager;
     }
 
-    public List<BTInterval> getNextPieces() {
+    public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
         List<BTInterval> nextPieces = new ArrayList<BTInterval>();
-        int rarestPiece = getCurrentRarestPiece(1);
+        BitField interestingBlocks = new AndView(availableBlocks, neededBlocks);
+        int rarestPiece = getCurrentRarestPiece(interestingBlocks, 1);
 
         if (rarestPiece > -1) {
             BTInterval nextPiece = getBtMetaInfo().getPiece(rarestPiece);
@@ -62,18 +63,17 @@ public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
      * for returning. Otherwise it will iterate through all pieces and rareness
      * combinations until the rarest is found. Pieces with a rareness of zero(no
      * peers having the piece) are excluded from the results.
+     * @param interestingBlocks 
      * 
      * @param numBlocks
      * @return
      */
-    private int getCurrentRarestPiece(int min) {
+    private int getCurrentRarestPiece(BitField interestingBlocks, int min) {
         int currentRarestPiece = -1;
 
         int mostRare = Integer.MAX_VALUE;
 
-        BitField available = getInterestingPieces();
-
-        for (int pieceIndex = available.nextSetBit(0); pieceIndex >= 0; pieceIndex = available
+        for (int pieceIndex = interestingBlocks.nextSetBit(0); pieceIndex >= 0; pieceIndex = interestingBlocks
                 .nextSetBit(pieceIndex + 1)) {
             int currentPieceRareness = getPieceRareness(pieceIndex, mostRare);
             if (currentPieceRareness < mostRare) {

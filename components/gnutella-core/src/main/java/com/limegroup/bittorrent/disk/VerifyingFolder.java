@@ -19,7 +19,9 @@ import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.NECallable;
+import org.limewire.collection.NandView;
 import org.limewire.collection.NotView;
+import org.limewire.collection.OrView;
 import org.limewire.collection.RRProcessingQueue;
 import org.limewire.io.DiskException;
 import org.limewire.service.ErrorService;
@@ -33,6 +35,8 @@ import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.handshaking.piecestrategy.EndGamePieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
@@ -150,9 +154,10 @@ class VerifyingFolder implements TorrentDiskManager {
 		_files = complete? system.getFiles() : system.getIncompleteFiles();
 		this.context = context;
 		_corruptedBytes = 0;
-		partialBlocks = new BlockRangeMap();
-		requestedRanges = new BlockRangeMap();
-		pendingRanges = new BlockRangeMap();
+		int numBlocks = context.getMetaInfo().getNumBlocks();
+        partialBlocks = new BlockRangeMap(numBlocks);
+        requestedRanges = new BlockRangeMap(numBlocks);
+        pendingRanges = new BlockRangeMap(numBlocks);
 		this.diskController = diskController;
 				
 		if (complete) {
@@ -565,11 +570,27 @@ class VerifyingFolder implements TorrentDiskManager {
 		return leased;
 	}
 	
-	private BTInterval findRandom(BitField bs, Set<BTInterval> exclude) {
-		EndGamePieceStrategy endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),bs,exclude,false,partialBlocks,pendingRanges,requestedRanges);
+//	private BTInterval findPiece(BitField availableRanges, PieceStrategy pieceStrategy) {
+//        BTInterval nextPiece = null;
+//        List<BTInterval> nextPieces = pieceStrategy.getNextPieces(availableRanges, getNeededBlocks());
+//
+//        if (nextPieces != null && nextPieces.size() > 0) {
+//            nextPiece = nextPieces.get(0);
+//        }
+//
+//        return nextPiece;
+//    }
+    
+	private BitField getNeededBlocks() {
+        BitField neededBlocks = new AndView(missing, new OrView(partialBlocks.getBitField(), pendingRanges.getBitField(), requestedRanges.getBitField()));
+        return neededBlocks;
+    }
+
+    private BTInterval findRandom(BitField availableRanges, Set<BTInterval> exclude) {
+		EndGamePieceStrategy endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),exclude,false,partialBlocks,pendingRanges,requestedRanges);
 		
 		//first try to complete any partial pieces that are not requested
-		List<BTInterval> nextPieces = endGamePieceStrategy.getNextPieces();
+		List<BTInterval> nextPieces = endGamePieceStrategy.getNextPieces(availableRanges, getNeededBlocks());
 		BTInterval ret = null;
 		if(nextPieces.size() > 0) {
     		ret = nextPieces.get(0);
@@ -581,14 +602,14 @@ class VerifyingFolder implements TorrentDiskManager {
 		
 		// then see if the remote has any pieces that are neither 
 		// partial nor already requested
-		ret = findUnassigned(bs);
+		ret = findUnassigned(availableRanges);
 		if (ret != null) {
 			return ret;
 		}
 		LOG.debug("couldn't find unassigned, looking for already requested");
 		
-		endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),bs,exclude,true,partialBlocks,pendingRanges,requestedRanges);
-		nextPieces = endGamePieceStrategy.getNextPieces();
+		endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),exclude,true,partialBlocks,pendingRanges,requestedRanges);
+		nextPieces = endGamePieceStrategy.getNextPieces(availableRanges, getNeededBlocks());
 		
 		if(nextPieces.size() > 0) {
             ret = nextPieces.get(0);

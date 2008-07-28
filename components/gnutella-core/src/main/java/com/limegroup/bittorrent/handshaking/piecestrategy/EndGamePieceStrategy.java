@@ -22,11 +22,10 @@ import com.limegroup.bittorrent.disk.BlockRangeMap;
 public class EndGamePieceStrategy implements PieceStrategy {
     private static final Log LOG = LogFactory.getLog(EndGamePieceStrategy.class);
     
-    private final BitField bs;
 
     private final Set<BTInterval> exclude;
 
-    //TODO refactor out logic drive nby this variable into two seperate Piece Strategies
+    //TODO refactor out logic driven by this variable into two seperate Piece Strategies
     private final boolean endgame;
 
     private final BTMetaInfo btMetaInfo;
@@ -38,11 +37,10 @@ public class EndGamePieceStrategy implements PieceStrategy {
     private final BlockRangeMap requestedRanges;
 
 
-    public EndGamePieceStrategy(BTMetaInfo btMetaInfo, BitField bs, Set<BTInterval> exclude,
+    public EndGamePieceStrategy(BTMetaInfo btMetaInfo, Set<BTInterval> exclude,
             boolean endgame, BlockRangeMap partialBlocks, BlockRangeMap pendingRanges,
             BlockRangeMap requestedRanges) {
         this.btMetaInfo = btMetaInfo;
-        this.bs = bs;
         this.exclude = exclude;
         this.endgame = endgame;
         this.partialBlocks = partialBlocks;
@@ -50,9 +48,9 @@ public class EndGamePieceStrategy implements PieceStrategy {
         this.requestedRanges = requestedRanges;
     }
 
-    public List<BTInterval> getNextPieces() {
+    public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
         List<BTInterval> nextPieces = new ArrayList<BTInterval>();
-        BTInterval nextPiece = assignEndgame(bs, exclude, endgame);
+        BTInterval nextPiece = assignEndgame(availableBlocks, exclude, endgame);
         if (nextPiece != null) {
             nextPieces.add(nextPiece);
         }

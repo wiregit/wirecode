@@ -13,21 +13,21 @@ public class PrettyRareWithBiggestDistanceFromCompletedPieceStrategy extends
         RarestPieceFirstStrategy {
 
     public PrettyRareWithBiggestDistanceFromCompletedPieceStrategy(BTMetaInfo btMetaInfo,
-            BTLinkManager btLinkManager, BitField interestingPieces) {
-        super(btMetaInfo, btLinkManager, interestingPieces);
+            BTLinkManager btLinkManager) {
+        super(btMetaInfo, btLinkManager);
     }
 
     @Override
-    public List<BTInterval> getNextPieces() {
+    public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
         List<BTInterval> nextPieces = new ArrayList<BTInterval>();
-        int nextPiece = getPrettyRarePiece();
+        int nextPiece = getPrettyRarePiece(neededBlocks);
         if (nextPiece > -1) {
             nextPieces.add(getBtMetaInfo().getPiece(nextPiece));
         }
         return nextPieces;
     }
 
-    public int getPrettyRarePiece() {
+    public int getPrettyRarePiece(BitField neededBlocks) {
         int numPeers = getBTLinkManager().getNumConnections();
         int numPieces = getBtMetaInfo().getNumBlocks();
 
@@ -42,7 +42,8 @@ public class PrettyRareWithBiggestDistanceFromCompletedPieceStrategy extends
             gap++;
             int pieceRareness = getPieceRareness(pieceIndex, Integer.MAX_VALUE);
             boolean peerHasPiece = pieceRareness != 0;
-            if (peerHasPiece) {
+            boolean neededPiece = neededBlocks.get(pieceIndex);
+            if (peerHasPiece && neededPiece) {
                 if (pieceRareness < (currentRareness - X) || pieceRareness <= (currentRareness + X)
                         && gap > currGap) {
                     currentRareness = pieceRareness;
