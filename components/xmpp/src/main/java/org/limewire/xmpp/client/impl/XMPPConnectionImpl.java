@@ -33,7 +33,6 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     
     private final XMPPConnectionConfiguration configuration;
     private final FileOfferHandler fileOfferHandler;
-    //private final NetworkManager networkManager;
     private final AddressFactory addressFactory;
     private org.jivesoftware.smack.XMPPConnection connection;
     
@@ -189,19 +188,23 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                             LOG.debug("user " + user + " presence changed to " + presence.getType());
                         }
                         if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
-                            try {
-                                if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
-                                    if(LOG.isDebugEnabled()) {
-                                        LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
+                            if(!user.getPresences().containsKey(presence.getFrom())) {
+                                try {
+                                    if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
+                                        if(LOG.isDebugEnabled()) {
+                                            LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
+                                        }
+                                        LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
+                                        limePresense.sendGetAddress();
+                                        user.addPresense(limePresense);
+                                    } else {
+                                        user.addPresense(new PresenceImpl(presence, connection));
                                     }
-                                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
-                                    limePresense.sendGetAddress();
-                                    user.addPresense(limePresense);
-                                } else {
-                                    user.addPresense(new PresenceImpl(presence, connection));
+                                } catch (org.jivesoftware.smack.XMPPException exception) {
+                                    LOG.error(exception.getMessage(), exception);
                                 }
-                            } catch (org.jivesoftware.smack.XMPPException exception) {
-                                LOG.error(exception.getMessage(), exception);
+                            } else {
+                                // TODO update presence
                             }
                         } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
                             user.removePresense(new PresenceImpl(presence, connection));

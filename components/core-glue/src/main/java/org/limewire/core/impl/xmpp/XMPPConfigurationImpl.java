@@ -3,7 +3,6 @@ package org.limewire.core.impl.xmpp;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.RosterListener;
 import org.limewire.xmpp.client.service.XMPPErrorListener;
-import com.limegroup.gnutella.settings.XMPPSettings;
 
 public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
 

@@ -3,8 +3,6 @@ package org.limewire.core.impl.xmpp;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.limewire.core.impl.xmpp.XMPPConfigurationImpl;
-import com.limegroup.gnutella.settings.XMPPSettings;
 import org.limewire.xmpp.client.service.RosterListener;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.XMPPErrorListener;

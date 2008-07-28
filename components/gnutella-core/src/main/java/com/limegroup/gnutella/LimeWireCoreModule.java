@@ -137,7 +137,6 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryDispatcherImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
-import com.limegroup.gnutella.settings.LimeWireSettingsModule;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
 import com.limegroup.gnutella.simpp.LimeWireSimppModule;
@@ -190,7 +189,6 @@ import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
 import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
-import org.limewire.xmpp.client.LimeWireXMPPModule;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -235,8 +233,6 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGeocodeGlueModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
-        binder().install(new LimeWireXMPPModule());
-        binder().install(new LimeWireSettingsModule());
         
         binder().install(ProviderMethods.from(new FileEventListenerProvider()));
         

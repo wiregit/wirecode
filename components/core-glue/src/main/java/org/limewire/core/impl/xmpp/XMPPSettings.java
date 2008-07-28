@@ -1,7 +1,8 @@
-package com.limegroup.gnutella.settings;
+package org.limewire.core.impl.xmpp;
 
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.settings.LimeProps;
 import org.limewire.setting.StringSetSetting;
 
 import java.util.ArrayList;
