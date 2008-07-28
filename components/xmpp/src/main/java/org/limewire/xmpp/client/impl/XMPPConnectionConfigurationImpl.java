@@ -3,7 +3,10 @@ package org.limewire.xmpp.client.impl;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.RosterListener;
 import org.limewire.xmpp.client.service.XMPPErrorListener;
+import org.limewire.xmpp.client.service.XMPPService;
 import org.limewire.xmpp.client.impl.XMPPException;
+
+import com.google.inject.Inject;
 
 public class XMPPConnectionConfigurationImpl implements XMPPConnectionConfiguration {
     String userName;
@@ -56,6 +59,10 @@ public class XMPPConnectionConfigurationImpl implements XMPPConnectionConfigurat
 
     public XMPPErrorListener getErrorListener() {
         return new XMPPErrorListener() {
+            public void register(XMPPService xmppService) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
             public void error(XMPPException exception) {
                 exception.printStackTrace();
             }

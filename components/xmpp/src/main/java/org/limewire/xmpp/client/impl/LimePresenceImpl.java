@@ -1,6 +1,7 @@
 package org.limewire.xmpp.client.impl;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,11 +10,10 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.limewire.net.address.Address;
-import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.service.FileMetaData;
 import org.limewire.xmpp.client.service.LimePresence;
-import org.xmlpull.v1.XmlPullParserException;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
@@ -55,6 +55,4 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         transferIQ.setPacketID(IQ.nextID());
         connection.sendPacket(transferIQ);
     }
-    
-    
 }

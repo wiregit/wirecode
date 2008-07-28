@@ -1,33 +1,42 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.ui.swing.xmpp;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.core.api.browse.BrowseFactory;
+import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.net.address.Address;
 import org.limewire.xmpp.client.service.LimePresence;
 import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.PresenceListener;
 import org.limewire.xmpp.client.service.RosterListener;
 import org.limewire.xmpp.client.service.User;
+import org.limewire.xmpp.client.service.XMPPService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 class RosterListenerImpl implements RosterListener {
 
-    private final BrowseHost browseHost;
-
+    private final BrowseFactory browseFactory;
+    
     private HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     private final IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
 
     @Inject
-    public RosterListenerImpl(BrowseHost browseHost) {
-        this.browseHost = browseHost;
+    public RosterListenerImpl(BrowseFactory browseFactory) {
+        this.browseFactory = browseFactory;
+    }
+    
+    @Inject
+    public void register(XMPPService xmppService) {
+        xmppService.register(this);
     }
 
     public void userAdded(User user) {
-        System.out.println("user added: " + user.getId());
         if(roster.get(user.getId()) == null) {
             roster.put(user.getId(), new ArrayList<Presence>());
         }
@@ -42,11 +51,15 @@ class RosterListenerImpl implements RosterListener {
                     roster.get(id).add(presence);
                     presence.setIncomingChatListener(listener);
                     if(presence instanceof LimePresence) {
-                        System.out.println("lime presence " + presence.getJID() + " (" + name + ") available");
+                        // TODO update UI
                         Address address = ((LimePresence)presence).getAddress();
-                        browseHost.browseHost(address);
+                        browseFactory.createBrowse(address).start(new BrowseListener() {
+                            public void handleBrowseResult(SearchResult searchResult) {
+                                // TODO update UI
+                            }
+                        });
                     } else {
-                        System.out.println("presence " + presence.getJID() + " (" + name + ") available");
+                        // TODO update UI
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     if(roster.get(id) == null) {
@@ -54,13 +67,12 @@ class RosterListenerImpl implements RosterListener {
                     }
                     remove(id, presence);
                     if(presence instanceof LimePresence) {
-                        System.out.println("lime presence " + presence.getJID() + " (" + name + ") unavailable");
+                        // TODO update UI
                     } else {
-
-                        System.out.println("presence " + presence.getJID() + " (" + name + ") unavailable");
+                        // TODO update UI
                     }
                 } else {
-                    System.out.println("user presence changed: " + presence.getType());
+                    // TODO update UI
                 }
             }
         });
@@ -75,11 +87,11 @@ class RosterListenerImpl implements RosterListener {
     }
 
     public void userUpdated(User user) {
-        System.out.println("user updated: " + user.getId());
+        
     }
 
     public void userDeleted(String id) {
-        System.out.println("user deleted: " +id);
+        
     }
 }
 

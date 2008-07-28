@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.xmpp;
+package org.limewire.core.impl.xmpp;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -52,6 +52,7 @@ import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class XMPPIntegrationTest extends LimeTestCase {
@@ -115,7 +116,7 @@ public class XMPPIntegrationTest extends LimeTestCase {
         
         fileManager = injector.getInstance(FileManager.class);
 
-        fileManager.loadSettingsAndWait(100000);
+        FileManagerTestUtils.waitForLoad(fileManager, 100000);
 
         assertGreaterThan(0, fileManager.getSharedFileList().getNumFiles());
         

@@ -1,5 +1,9 @@
 package org.limewire.xmpp.client.impl;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -11,8 +15,8 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.listener.EventListener;
-import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
@@ -20,10 +24,11 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListene
 import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.User;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
+import org.limewire.xmpp.client.service.RosterListener;
+import org.limewire.xmpp.client.service.XMPPErrorListener;
+import org.limewire.xmpp.client.service.XMPPService;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.google.inject.Inject;
 
 //import com.limegroup.gnutella.BrowseHostReplyHandler;
 
@@ -42,14 +47,20 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     protected FileTransferIQListener fileTransferIQListener;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
-                       FileOfferHandler fileOfferHandler,
+                       RosterListener rosterListener, FileOfferHandler fileOfferHandler,
                        AddressFactory addressFactory) {
         this.configuration = configuration;
         this.fileOfferHandler = fileOfferHandler;
         this.addressFactory = addressFactory;
         this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener>();
-        this.rosterListeners.add(configuration.getRosterListener());
+        if(rosterListener != null) {
+            this.rosterListeners.add(rosterListener);
+        }
         this.users = new HashMap<String, UserImpl>();
+    }
+    
+    void addRosterListener(RosterListener rosterListener) {
+        rosterListeners.add(rosterListener);
     }
 
     public XMPPConnectionConfiguration getConfiguration() {
@@ -89,13 +100,17 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     }
     
     public void initialize() {
-        this.rosterListeners.add(new org.limewire.xmpp.client.service.RosterListener() {
-            public void userAdded(User user) {
-                //user.addPresenceListener(new LibraryGetter());
-            }
-            public void userUpdated(User user) {}
-            public void userDeleted(String id) {}
-        });
+//        this.rosterListeners.add(new org.limewire.xmpp.client.service.RosterListener() {
+//            public void register(XMPPService xmppService) {
+//                //To change body of implemented methods use File | Settings | File Templates.
+//            }
+//
+//            public void userAdded(User user) {
+//                //user.addPresenceListener(new LibraryGetter());
+//            }
+//            public void userUpdated(User user) {}
+//            public void userDeleted(String id) {}
+//        });
         org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
             public void connectionCreated(final org.jivesoftware.smack.XMPPConnection connection) {
                 if(XMPPConnectionImpl.this.connection == connection) {

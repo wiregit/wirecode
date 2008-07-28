@@ -1,5 +1,7 @@
 package org.limewire.xmpp.client.service;
 
+import com.google.inject.Inject;
+
 /**
  * Allows users of the xmpp service to listen for chages to their roster.
  * Note that user additions / deletions do not correpsond to those users
@@ -9,6 +11,8 @@ package org.limewire.xmpp.client.service;
  * during <code>XMPPService.start()</code>
  */
 public interface RosterListener {
+    @Inject 
+    public void register(XMPPService xmppService);
     public void userAdded(User user);
     
     public void userUpdated(User user);

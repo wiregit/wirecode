@@ -14,12 +14,12 @@ import java.util.List;
 class XMPPConfigurationListProvider extends ArrayList<XMPPConnectionConfiguration> {
 
     @Inject
-    XMPPConfigurationListProvider(Provider<List<XMPPSettings.XMPPServerConfiguration>> serverConfigs,
+    XMPPConfigurationListProvider(Provider<List<XMPPSettings.XMPPServerConfiguration>> serverConfigs/*,
                                   RosterListener rosterListener,
-                                  XMPPErrorListener errorListener) {
+                                  XMPPErrorListener errorListener*/) {
         for(XMPPSettings.XMPPServerConfiguration serverConfiguration : serverConfigs.get()) {
             // TODO per-configuration RosterListeners, XMPPErrorListeners
-            add(new XMPPConfigurationImpl(serverConfiguration, rosterListener, errorListener));
+            add(new XMPPConfigurationImpl(serverConfiguration, null, null));
         }
     }
 }

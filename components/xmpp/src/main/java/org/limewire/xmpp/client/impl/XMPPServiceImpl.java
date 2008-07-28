@@ -15,6 +15,8 @@ import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.XMPPConnection;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.xmpp.client.service.RosterListener;
+import org.limewire.xmpp.client.service.XMPPErrorListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,15 +32,15 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     
     private CopyOnWriteArrayList<XMPPConnectionImpl> connections;
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
-    private final FileOfferHandler fileOfferHandler;
+    private FileOfferHandler fileOfferHandler;
     private final AddressFactory addressFactory;
+    private RosterListener rosterListener;
+    private XMPPErrorListener errorListener;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
-                    FileOfferHandler fileOfferHandler,
                     AddressFactory addressFactory) {
         this.configurations = configurations;
-        this.fileOfferHandler = fileOfferHandler;
         this.addressFactory = addressFactory;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
     }
@@ -51,6 +53,21 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     @Inject
     void register(ListenerSupport<AddressEvent> registry) {
         registry.addListener(this);
+    }
+
+    public void register(RosterListener rosterListener) {
+        this.rosterListener = rosterListener;
+        for(XMPPConnectionImpl connection : connections) {
+            connection.addRosterListener(rosterListener);
+        }
+    }
+
+    public void register(XMPPErrorListener errorListener) {
+        this.errorListener = errorListener;
+    }
+
+    public void register(FileOfferHandler offerHandler) {
+        this.fileOfferHandler = offerHandler;
     }
 
     public void initialize() {
@@ -77,7 +94,8 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             connection.login();
         } catch (XMPPException e) {
             LOG.error(e.getMessage(), e);
-            connection.getConfiguration().getErrorListener().error(e);
+            // TODO connection.getConfiguration().getErrorListener()
+            errorListener.error(e);
         }
     }
 
@@ -103,7 +121,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, fileOfferHandler, addressFactory);
+        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener, fileOfferHandler, addressFactory);
         connection.initialize();
         connections.add(connection);
     }

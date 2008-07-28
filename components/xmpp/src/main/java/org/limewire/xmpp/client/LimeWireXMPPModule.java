@@ -11,7 +11,7 @@ import org.limewire.xmpp.client.service.XMPPService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
+import com.google.inject.Scopes;
 
 public class LimeWireXMPPModule extends AbstractModule {
     private final Provider<FileOfferHandler> fileAcceptor;
@@ -29,7 +29,8 @@ public class LimeWireXMPPModule extends AbstractModule {
     }
     
     protected void configure() {
-        bind(XMPPService.class).to(XMPPServiceImpl.class);
+        bind(XMPPServiceImpl.class).in(Scopes.SINGLETON);
+        bind(XMPPService.class).to(XMPPServiceImpl.class).in(Scopes.SINGLETON);
         //bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(configurations);
         //bind(FileOfferHandler.class).toProvider(fileAcceptor);
     }
@@ -38,6 +39,10 @@ public class LimeWireXMPPModule extends AbstractModule {
         return new Provider<FileOfferHandler>() {
             public FileOfferHandler get() {
                 return new FileOfferHandler() {
+                    public void register(XMPPService xmppService) {
+                        //To change body of implemented methods use File | Settings | File Templates.
+                    }
+
                     public boolean fileOfferred(FileMetaData f) {
                         return false;  //To change body of implemented methods use File | Settings | File Templates.
                     }

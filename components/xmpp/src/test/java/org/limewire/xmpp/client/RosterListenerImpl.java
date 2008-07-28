@@ -9,13 +9,21 @@ import org.limewire.xmpp.client.service.FileMetaData;
 import org.limewire.xmpp.client.service.User;
 import org.limewire.xmpp.client.service.PresenceListener;
 import org.limewire.xmpp.client.service.LimePresence;
+import org.limewire.xmpp.client.service.XMPPService;
 import org.jivesoftware.smack.util.StringUtils;
+
+import com.google.inject.Inject;
 
 public class RosterListenerImpl implements RosterListener {
     public HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
     IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
-    
+
+    @Inject
+    public void register(XMPPService xmppService) {
+        xmppService.register(this);
+    }
+
     public void userAdded(User user) {
         System.out.println("user added: " + user.getId());            
         if(roster.get(user.getId()) == null) {

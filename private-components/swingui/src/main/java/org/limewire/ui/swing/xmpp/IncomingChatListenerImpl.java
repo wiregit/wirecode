@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.ui.swing.xmpp;
 
 import org.limewire.xmpp.client.service.IncomingChatListener;
 import org.limewire.xmpp.client.service.MessageWriter;
@@ -9,7 +9,7 @@ class IncomingChatListenerImpl implements IncomingChatListener {
     MessageReaderImpl reader;
 
     public MessageReader incomingChat(MessageWriter writer) {
-        System.out.println("new chat");
+        // TODO update UI
         this.writer = writer;
         this.reader = new MessageReaderImpl();
         return reader;
