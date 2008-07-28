@@ -20,6 +20,7 @@ import org.limewire.collection.BitSet;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.NECallable;
 import org.limewire.collection.NotView;
+import org.limewire.collection.OrView;
 import org.limewire.collection.RRProcessingQueue;
 import org.limewire.io.DiskException;
 import org.limewire.service.ErrorService;
@@ -33,6 +34,7 @@ import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.handshaking.piecestrategy.EndGamePieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
@@ -598,25 +600,19 @@ class VerifyingFolder implements TorrentDiskManager {
         return ret;
     }
     
-    private BTInterval findUnassigned(BitField available) {
-        int selected = -1;
-        int current = 1;
+    private BTInterval findUnassigned(BitField availableBlocks) {
         
-        for (int i = available.nextSetBit(0); i >= 0; i = available.nextSetBit(i+1)) {
-            if (pendingRanges.containsKey(i) || 
-                    partialBlocks.containsKey(i) ||
-                    requestedRanges.containsKey(i))
-                continue;
-            if (Math.random() < 1f/current++)
-                selected = i;
+        BitField uninteresting = new OrView(pendingRanges.getBitField(), requestedRanges.getBitField(), partialBlocks.getBitField());
+        BitField neededBlocks = new AndView(missing, new NotView(uninteresting));
+        RandomPieceStrategy randomPieceStrategy = new RandomPieceStrategy(context.getMetaInfo());
+        
+        List<BTInterval> nextPieces = randomPieceStrategy.getNextPieces(availableBlocks, neededBlocks);
+        BTInterval unassigned = null;
+        if(nextPieces != null && nextPieces.size() > 0) {
+            unassigned = nextPieces.get(0);
         }
         
-        if (selected == -1)
-            return null;
-        if (LOG.isDebugEnabled())
-            LOG.debug("selecting unassigned piece "+selected);
-
-        return context.getMetaInfo().getPiece(selected);
+        return unassigned;
     }
     
     
