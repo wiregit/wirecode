@@ -35,12 +35,9 @@ public class BlockRangeMapTest extends BaseTestCase {
         assertBitField(bitField, false, false, false, false, false);
     }
 
-    private void assertBitField(BitField bitField, boolean field0, boolean field1, boolean field2,
-            boolean field3, boolean field4) {
-        Assert.assertEquals(field0, bitField.get(0));
-        Assert.assertEquals(field1, bitField.get(1));
-        Assert.assertEquals(field2, bitField.get(2));
-        Assert.assertEquals(field3, bitField.get(3));
-        Assert.assertEquals(field4, bitField.get(4));
+    private void assertBitField(BitField bitField, boolean... fields) {
+        for (int i = 0; i < fields.length; i++) {
+            Assert.assertEquals(fields[i], bitField.get(i));
+        }
     }
 }

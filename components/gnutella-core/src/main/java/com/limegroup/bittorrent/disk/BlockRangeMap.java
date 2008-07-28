@@ -22,8 +22,11 @@ public class BlockRangeMap {
     private final HashMap<Integer, IntervalSet> blocks;
 
     private final BitSet bitSet;
+    
+    private final int numBlocks;
 
     public BlockRangeMap(int numBlocks) {
+        this.numBlocks = numBlocks;
         blocks = new HashMap<Integer, IntervalSet>(numBlocks);
         bitSet = new BitSet(numBlocks);
     }
@@ -115,7 +118,7 @@ public class BlockRangeMap {
     }
 
     public BitField getBitField() {
-        return new BitFieldSet(bitSet, bitSet.size());
+        return new BitFieldSet(bitSet, numBlocks);
     }
 
 }
