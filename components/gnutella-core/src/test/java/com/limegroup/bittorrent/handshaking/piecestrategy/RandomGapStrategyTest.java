@@ -14,13 +14,12 @@ import org.limewire.util.BaseTestCase;
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
 
-public class RandomPieceStrategyTest extends BaseTestCase {
+public class RandomGapStrategyTest extends BaseTestCase {
 
-    public RandomPieceStrategyTest(String name) {
+    public RandomGapStrategyTest(String name) {
         super(name);
-
     }
-
+    
     public void testGetNextPieces() {
         Mockery context = new Mockery();
 
@@ -39,28 +38,39 @@ public class RandomPieceStrategyTest extends BaseTestCase {
 
         final int numBlocks = 10;
 
-        final int pieceIndex1 = 5;
-        final int pieceIndex2 = 6;
-        final int pieceIndex3 = 5;
 
         context.checking(new Expectations() {
             {
-                allowing(btMetaInfo).getPiece(pieceIndex1);
-                will(returnValue(new BTInterval(1, 100, pieceIndex1)));
+                allowing(btMetaInfo).getNumBlocks();
+                will(returnValue(numBlocks));
+                allowing(btMetaInfo).getPiece(5);
+                will(returnValue(new BTInterval(1, 100, 5)));
+                allowing(btMetaInfo).getPiece(6);
+                will(returnValue(new BTInterval(101, 200, 6)));
+                allowing(btMetaInfo).getPiece(7);
+                will(returnValue(new BTInterval(201, 300, 7)));
             }
         });
 
-        RandomPieceStrategy randomPieceStrategy = new RandomPieceStrategy(btMetaInfo, derandomizer);
+        RandomGapStrategy randomGapStrategy = new RandomGapStrategy(btMetaInfo, derandomizer);
         BitSet availableBlocks = new BitSet(numBlocks);
         availableBlocks.flip(1, 8);
         BitSet neededBlocks = new BitSet(numBlocks);
         neededBlocks.flip(4, 9);
-        List<BTInterval> nextPieces = randomPieceStrategy.getNextPieces(new BitFieldSet(
+        List<BTInterval> nextPieces = randomGapStrategy.getNextPieces(new BitFieldSet(
                 availableBlocks, numBlocks), new BitFieldSet(neededBlocks, numBlocks));
-        Assert.assertEquals(1, nextPieces.size());
+        Assert.assertEquals(3, nextPieces.size());
         BTInterval btInterval1 = nextPieces.get(0);
         Assert.assertNotNull(btInterval1);
         Assert.assertEquals(new BTInterval(1, 100, 5), btInterval1);
+        
+        BTInterval btInterval2 = nextPieces.get(1);
+        Assert.assertNotNull(btInterval2);
+        Assert.assertEquals(new BTInterval(101, 200, 6), btInterval2);
+        
+        BTInterval btInterval3 = nextPieces.get(2);
+        Assert.assertNotNull(btInterval3);
+        Assert.assertEquals(new BTInterval(201, 300, 7), btInterval3);
     }
 
 }
