@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent.disk;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.BitField;
@@ -9,6 +10,7 @@ import org.limewire.collection.NECallable;
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.PieceReadListener;
+import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 
 /**
@@ -64,6 +66,8 @@ public interface TorrentDiskManager {
 	 */
 	public boolean isComplete();
 
+	List<BTInterval> lease(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy);
+	
 	/**
 	 * returns a random available range that has preferably not yet been
 	 * requested
@@ -73,7 +77,7 @@ public interface TorrentDiskManager {
 	 * request
 	 * @return a BTInterval that should be requested next.
 	 */
-	public BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude);
+	public BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy);
 
 	/**
 	 * Removes an interval from the internal list of already requested intervals.

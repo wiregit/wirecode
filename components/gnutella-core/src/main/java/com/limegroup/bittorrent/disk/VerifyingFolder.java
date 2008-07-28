@@ -34,6 +34,7 @@ import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.handshaking.piecestrategy.EndGamePieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
@@ -544,7 +545,41 @@ class VerifyingFolder implements TorrentDiskManager {
      * request
      * @return a BTInterval that should be requested next.
      */
-    public synchronized BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude) {
+    public synchronized BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy) {
+        if (isComplete())
+            return null;
+        
+        if(pieceStrategy == null) {
+            pieceStrategy = new RandomPieceStrategy(context.getMetaInfo());
+        }
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
+        
+        BitField interesting = new AndView(bs, missing);
+        List<BTInterval> toLease = findPieceWithEndGame(interesting, exclude, pieceStrategy);
+        BTInterval lease = null;
+        
+        if (toLease != null && toLease.size() > 0) {
+            lease = resize(toLease.get(0));
+            requestedRanges.addInterval(lease);
+            
+            if (LOG.isDebugEnabled())
+                LOG.debug("assigning "+lease);
+        }
+        else if (LOG.isDebugEnabled())
+            LOG.debug("couldn't find anything to assign "+exclude);
+        
+        return lease;
+    }
+
+    private BTInterval resize(BTInterval lease) {
+        if (lease.getHigh() - lease.getLow() + 1 > BLOCK_SIZE)
+            lease = new BTInterval(lease.getLow(), lease.getLow() + BLOCK_SIZE - 1, lease.getId());
+        return lease;
+    }
+    
+    public synchronized List<BTInterval> lease(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy) {
         if (isComplete())
             return null;
         
@@ -552,91 +587,60 @@ class VerifyingFolder implements TorrentDiskManager {
             LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
         
         BitField interesting = new AndView(bs, missing);
-        BTInterval leased = findPiece(interesting, exclude);
+        List<BTInterval> toLease = findPiecesWithEndGame(interesting, exclude);
         
-        if (leased != null) {
-            if (leased.getHigh() - leased.getLow() + 1 > BLOCK_SIZE)
-                leased = new BTInterval(leased.getLow(), leased.getLow() + BLOCK_SIZE - 1, leased.getId());
-            requestedRanges.addInterval(leased);
-            
-            if (LOG.isDebugEnabled())
-                LOG.debug("assigning "+leased);
+        if (toLease != null && toLease.size() > 0) {
+           for(BTInterval lease : toLease)
+           {
+               requestedRanges.addInterval(lease);
+               if (LOG.isDebugEnabled()) {
+                   LOG.debug("assigning "+lease);
+               }
+           }
         }
-        else if (LOG.isDebugEnabled())
+        else if (LOG.isDebugEnabled()) {
             LOG.debug("couldn't find anything to assign "+exclude);
+        }
         
-        return leased;
+        return toLease;
     }
     
-//    public synchronized BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude) {
-//        if (isComplete())
-//            return null;
-//        
-//        if (LOG.isDebugEnabled())
-//            LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
-//        
-//        BitField interesting = new AndView(bs, missing);
-//        BTInterval leased = findRandom(interesting, exclude);
-//        
-//        if (leased != null) {
-//            if (leased.getHigh() - leased.getLow() + 1 > BLOCK_SIZE)
-//                leased = new BTInterval(leased.getLow(), leased.getLow() + BLOCK_SIZE - 1, leased.getId());
-//            requestedRanges.addInterval(leased);
-//            
-//            if (LOG.isDebugEnabled())
-//                LOG.debug("assigning "+leased);
-//        }
-//        else if (LOG.isDebugEnabled())
-//            LOG.debug("couldn't find anything to assign "+exclude);
-//        
-//        return leased;
-//    }
-    
-    private BTInterval findPiece(BitField bs, Set<BTInterval> exclude) {
+    private List<BTInterval> findPiecesWithEndGame(BitField interesting, Set<BTInterval> exclude) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private List<BTInterval> findPieceWithEndGame(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy) {
         EndGamePieceStrategy endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),exclude,false,partialBlocks,pendingRanges,requestedRanges);
         
         //first try to complete any partial pieces that are not requested
         List<BTInterval> nextPieces = endGamePieceStrategy.getNextPieces(bs, missing);
-        BTInterval ret = null;
-        if(nextPieces.size() > 0) {
-            ret = nextPieces.get(0);
-            if (ret != null) {
-                return ret;
-            }
+        if(nextPieces != null && nextPieces.size() > 0) {
+            return nextPieces;
         }
         LOG.debug("couldn't find partial, looking for unnassigned");
         
         // then see if the remote has any pieces that are neither 
         // partial nor already requested
-        ret = findUnassigned(bs);
-        if (ret != null) {
-            return ret;
+        nextPieces = findUnassigned(bs, pieceStrategy);
+        if(nextPieces != null && nextPieces.size() > 0) {
+            return nextPieces;
         }
         LOG.debug("couldn't find unassigned, looking for already requested");
         
         endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),exclude,true,partialBlocks,pendingRanges,requestedRanges);
         nextPieces = endGamePieceStrategy.getNextPieces(bs,missing);
         
-        if(nextPieces.size() > 0) {
-            ret = nextPieces.get(0);
-        }
-        
-        return ret;
+        return nextPieces;
     }
     
-    private BTInterval findUnassigned(BitField availableBlocks) {
+    private List<BTInterval> findUnassigned(BitField availableBlocks, PieceStrategy pieceStrategy) {
         
         BitField uninteresting = new OrView(pendingRanges.getBitField(), requestedRanges.getBitField(), partialBlocks.getBitField());
         BitField neededBlocks = new AndView(missing, new NotView(uninteresting));
-        RandomPieceStrategy randomPieceStrategy = new RandomPieceStrategy(context.getMetaInfo());
-        
-        List<BTInterval> nextPieces = randomPieceStrategy.getNextPieces(availableBlocks, neededBlocks);
-        BTInterval unassigned = null;
-        if(nextPieces != null && nextPieces.size() > 0) {
-            unassigned = nextPieces.get(0);
-        }
-        
-        return unassigned;
+         
+        List<BTInterval> nextPieces = pieceStrategy.getNextPieces(availableBlocks, neededBlocks);
+       return nextPieces;
     }
     
     
