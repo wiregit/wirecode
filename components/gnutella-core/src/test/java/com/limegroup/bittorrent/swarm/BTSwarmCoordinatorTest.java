@@ -80,8 +80,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.addSource(new BTSwarmSource(metaInfo));
 
-        Thread.sleep(300000000);
-
+        Thread.sleep(3000);
+        
         SwarmerImplTest.assertSwarmer("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertSwarmer("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 

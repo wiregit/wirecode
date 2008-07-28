@@ -89,13 +89,20 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         int numPieces = btMetaInfo.getNumBlocks();
 
         BitSet avalableBitSet = new BitSet(numPieces);
-        
-        avalableBitSet.flip(0, numPieces );
+
+        avalableBitSet.flip(0, numPieces);
 
         BitField availableRangesBitField = new BitFieldSet(avalableBitSet, numPieces);
         BTInterval leased = torrentDiskManager.leaseRandom(availableRangesBitField, null);
 
-        return leased;
+        Range lease = null;
+        if (leased != null) {
+            long startByte = leased.getBlockId() * btMetaInfo.getPieceLength() + leased.getLow();
+            long endByte = startByte + leased.getLength() -1;
+            lease = Range.createRange(startByte, endByte);
+        }
+
+        return lease;
     }
 
     public Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector) {
@@ -121,7 +128,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     public void unlease(Range range) {
-        
+
         // TODO really need to iterate through the range.
         // there will might be multiple peices in reality.
         // change the torrent disk manager to accept either a list of
@@ -131,11 +138,21 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         torrentDiskManager.releaseInterval(piece);
     }
 
+    /**
+     * TODO the ranges in BTIntervals are always from 0-<piece size>. All pieces
+     * are the same size, except for the last piece.
+     * 
+     * @param range
+     * @return
+     */
     private BTInterval createBTInterval(Range range) {
-        long lowByte = range.getLow();
-        int pieceSize = btMetaInfo.getPieceLength();
-        int pieceNum = (int) Math.floor(lowByte / pieceSize);
-        BTInterval piece = new BTInterval(range, pieceNum);
+        int pieceLength = btMetaInfo.getPieceLength();
+        int pieceNum = (int) Math.floor(range.getLow() / pieceLength);
+
+        long lowByte = range.getLow() - (pieceLength * pieceNum);
+        long highByte = lowByte + range.getLength() -1;
+        Range btRange = Range.createRange(lowByte, highByte);
+        BTInterval piece = new BTInterval(btRange, pieceNum);
         return piece;
     }
 
