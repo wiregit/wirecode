@@ -544,7 +544,7 @@ class VerifyingFolder implements TorrentDiskManager {
      * request
      * @return a BTInterval that should be requested next.
      */
-    public synchronized BTInterval leaseRandom(BitField bs, Set<BTInterval> exclude) {
+    public synchronized BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude) {
         if (isComplete())
             return null;
         
@@ -552,7 +552,7 @@ class VerifyingFolder implements TorrentDiskManager {
             LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
         
         BitField interesting = new AndView(bs, missing);
-        BTInterval leased = findRandom(interesting, exclude);
+        BTInterval leased = findPiece(interesting, exclude);
         
         if (leased != null) {
             if (leased.getHigh() - leased.getLow() + 1 > BLOCK_SIZE)
@@ -568,7 +568,31 @@ class VerifyingFolder implements TorrentDiskManager {
         return leased;
     }
     
-    private BTInterval findRandom(BitField bs, Set<BTInterval> exclude) {
+//    public synchronized BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude) {
+//        if (isComplete())
+//            return null;
+//        
+//        if (LOG.isDebugEnabled())
+//            LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
+//        
+//        BitField interesting = new AndView(bs, missing);
+//        BTInterval leased = findRandom(interesting, exclude);
+//        
+//        if (leased != null) {
+//            if (leased.getHigh() - leased.getLow() + 1 > BLOCK_SIZE)
+//                leased = new BTInterval(leased.getLow(), leased.getLow() + BLOCK_SIZE - 1, leased.getId());
+//            requestedRanges.addInterval(leased);
+//            
+//            if (LOG.isDebugEnabled())
+//                LOG.debug("assigning "+leased);
+//        }
+//        else if (LOG.isDebugEnabled())
+//            LOG.debug("couldn't find anything to assign "+exclude);
+//        
+//        return leased;
+//    }
+    
+    private BTInterval findPiece(BitField bs, Set<BTInterval> exclude) {
         EndGamePieceStrategy endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),exclude,false,partialBlocks,pendingRanges,requestedRanges);
         
         //first try to complete any partial pieces that are not requested

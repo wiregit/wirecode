@@ -73,7 +73,7 @@ public interface TorrentDiskManager {
 	 * request
 	 * @return a BTInterval that should be requested next.
 	 */
-	public BTInterval leaseRandom(BitField bs, Set<BTInterval> exclude);
+	public BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude);
 
 	/**
 	 * Removes an interval from the internal list of already requested intervals.

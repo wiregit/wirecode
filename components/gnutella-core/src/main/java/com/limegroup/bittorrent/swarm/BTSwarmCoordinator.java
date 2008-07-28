@@ -90,7 +90,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         avalableBitSet.flip(0, numPieces);
 
         BitField availableRangesBitField = new BitFieldSet(avalableBitSet, numPieces);
-        BTInterval leased = torrentDiskManager.leaseRandom(availableRangesBitField, null);
+        BTInterval leased = torrentDiskManager.leaseBTInterval(availableRangesBitField, null);
 
         Range lease = null;
         if (leased != null) {
