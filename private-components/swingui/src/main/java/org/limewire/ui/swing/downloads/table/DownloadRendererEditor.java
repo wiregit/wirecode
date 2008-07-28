@@ -9,6 +9,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -16,7 +19,9 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -52,6 +57,8 @@ public class DownloadRendererEditor extends JPanel implements
 	
 	//The item being edited by the editor
 	private DownloadItem editItem = null;
+
+    private DownloadItem menuEditItem = null;
 	
 	//used to maintain proper color of renderer
 	private DefaultTableCellRenderer delegateRenderer = new DefaultTableCellRenderer();
@@ -61,12 +68,18 @@ public class DownloadRendererEditor extends JPanel implements
 	private JLabel titleLabel;
 	private JLabel statusLabel;
 	private LimeProgressBar progressBar;
-	private JButton pauseButton;
-	private JButton cancelButton;
-	private JButton resumeButton;
-	private JButton searchAgainButton;
+    private JButton pauseButton;
+    private JButton cancelButton;
+    private JButton resumeButton;
+    private JButton tryAgainButton;
+    private JMenuItem pauseMenuItem;
+    private JMenuItem cancelMenuItem;
+    private JMenuItem resumeMenuItem;
+    private JMenuItem tryAgainMenuItem;
 	private JLabel timeLabel;
-	private final DownloadEditorListener EDITOR_LISTENER;
+	private DownloadEditorListener editorLister;
+	private MenuListener menuListener;
+    private JPopupMenu popupMenu;
 
 	@Resource
 	private Icon audioIcon;
@@ -103,38 +116,52 @@ public class DownloadRendererEditor extends JPanel implements
 		progressBar.setMinimumSize(size);
 		progressBar.setPreferredSize(size);
 
-		EDITOR_LISTENER = new DownloadEditorListener();
+		editorLister = new DownloadEditorListener();
+		menuListener = new MenuListener();
 
 		pauseButton = new JButton();
-		pauseButton.addActionListener(EDITOR_LISTENER);
+		pauseButton.addActionListener(editorLister);
 		pauseButton.setOpaque(false);
 		pauseButton.setText("||");
+		
+		pauseMenuItem = new JMenuItem(I18n.tr("Pause"));
+		pauseMenuItem.addActionListener(menuListener);
+		
 
 		cancelButton = new JButton();
-		cancelButton.addActionListener(EDITOR_LISTENER);
+		cancelButton.addActionListener(editorLister);
 		cancelButton.setOpaque(false);
 		cancelButton.setText("X");
+		
+		cancelMenuItem = new JMenuItem(I18n.tr("Cancel"));
+		cancelMenuItem.addActionListener(menuListener);
 
 		timeLabel = new JLabel();
 		timeLabel.setFont(new Font("", Font.PLAIN, 9));
 		timeLabel.setText("13 years remaining");
 
 		resumeButton = new JButton();
-		resumeButton.addActionListener(EDITOR_LISTENER);
+		resumeButton.addActionListener(editorLister);
 		resumeButton.setVisible(false);
 		resumeButton.setText("O");
+		
+		resumeMenuItem = new JMenuItem(I18n.tr("Resume"));
+		resumeMenuItem.addActionListener(menuListener);
 
-		searchAgainButton = new JButton();
-		searchAgainButton.addActionListener(EDITOR_LISTENER);
-		searchAgainButton.setToolTipText(I18n.tr("Try Again"));
-		searchAgainButton.setText("S");
+		tryAgainButton = new JButton();
+		tryAgainButton.addActionListener(editorLister);
+		tryAgainButton.setToolTipText(I18n.tr("Try Again"));
+		tryAgainButton.setText("S");
+		
+		tryAgainMenuItem = new JMenuItem(I18n.tr("Try Again"));
+		tryAgainMenuItem.addActionListener(menuListener);
 		
 		buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		//show color of underlying panel
 		buttonPanel.setOpaque(false);
 		buttonPanel.add(resumeButton);
 		buttonPanel.add(pauseButton);
-		buttonPanel.add(searchAgainButton);
+		buttonPanel.add(tryAgainButton);
 		buttonPanel.add(cancelButton);
 
 		setLayout(new GridBagLayout());
@@ -191,9 +218,51 @@ public class DownloadRendererEditor extends JPanel implements
 		gbc.weighty = 0;
 		gbc.gridwidth = 1;
 		add(buttonPanel, gbc);		
+		
+		popupMenu = new JPopupMenu();
+        popupMenu.add(pauseMenuItem);
+        popupMenu.add(resumeMenuItem);
+        popupMenu.add(cancelMenuItem);
+        popupMenu.add(tryAgainMenuItem);
+
+        //TODO: why does this mess up mouse over highlighting on CategoryDownloadPane?
+        addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    showPopup(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+
+        });
 
 	}
 	
+	@Override
+	public void addMouseListener(MouseListener listener){
+	    super.addMouseListener(listener);
+	    for(Component component : getComponents()){
+	        component.addMouseListener(listener);
+	    }	     
+	}
+	
+	@Override
+    public void removeMouseListener(MouseListener listener){
+        super.removeMouseListener(listener);
+        for(Component component : getComponents()){
+            component.removeMouseListener(listener);
+        } 
+    }
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
@@ -222,6 +291,16 @@ public class DownloadRendererEditor extends JPanel implements
 		DownloadItem item = (DownloadItem) value;
 		updateComponent(this, item);
 		return this;
+	}
+	
+	private void showPopup(Component c, int x, int y){	    
+	    menuEditItem = editItem;
+	    DownloadState state = menuEditItem.getState();
+	    pauseMenuItem.setVisible(state.isPausable());
+        resumeMenuItem.setVisible(state.isResumable());
+        cancelMenuItem.setVisible(state.isCancellable());
+        tryAgainMenuItem.setVisible(state.isSearchAgainable());
+        popupMenu.show(c, x, y);
 	}
 	
 	/**
@@ -345,7 +424,7 @@ public class DownloadRendererEditor extends JPanel implements
 		pauseButton.setVisible(state.isPausable());
 		resumeButton.setVisible(state.isResumable());
 		cancelButton.setVisible(state.isCancellable());
-		searchAgainButton.setVisible(state.isSearchAgainable());
+		tryAgainButton.setVisible(state.isSearchAgainable());
 		if (state == DownloadState.DOWNLOADING) {
 			progressBar.setEnabled(true);
 			progressBar.setHidden(false);
@@ -357,12 +436,8 @@ public class DownloadRendererEditor extends JPanel implements
 		}
 	}
 
+	//TODO: combine these listeners
 	private class DownloadEditorListener implements ActionListener {
-		//private DownloadItem downloadItem;
-
-//		public void setDownloadItem(DownloadItem item) {
-//			downloadItem = item;
-//		}
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == cancelButton) {
@@ -371,13 +446,30 @@ public class DownloadRendererEditor extends JPanel implements
 				editItem.pause();
 			} else if (e.getSource() == resumeButton) {
 				editItem.resume();
-			} else if (e.getSource() == searchAgainButton) {
+			} else if (e.getSource() == tryAgainButton) {
 				editItem.resume();
 			}
 			cancelCellEditing();
 		}
 
 	}
+	
+	private class MenuListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == cancelMenuItem) {
+                menuEditItem.cancel();
+            } else if (e.getSource() == pauseMenuItem) {
+                menuEditItem.pause();
+            } else if (e.getSource() == resumeMenuItem) {
+                menuEditItem.resume();
+            } else if (e.getSource() == tryAgainMenuItem) {
+                menuEditItem.resume();
+            }
+            cancelCellEditing();
+        }
+
+    }
 
 	private String getMessage(DownloadItem item) {
 		switch (item.getState()) {
