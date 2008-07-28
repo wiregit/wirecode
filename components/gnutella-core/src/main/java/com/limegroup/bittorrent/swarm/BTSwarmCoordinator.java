@@ -40,15 +40,12 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobControl callback) {
-        // TODO Auto-generated method stub
-        // create a buffered write job, that will only write a full block at a
-        // time to the
         BTInterval btInterval = createBTInterval(range);
         return new BTSwarmWriteJob(btInterval, torrentDiskManager, callback);
     }
 
     public void finish() throws IOException {
-        // TODO Auto-generated method stub
+        // do nothing let the managed_torrent manage closing things
 
     }
 
@@ -98,7 +95,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         Range lease = null;
         if (leased != null) {
             long startByte = leased.getBlockId() * btMetaInfo.getPieceLength() + leased.getLow();
-            long endByte = startByte + leased.getLength() -1;
+            long endByte = startByte + leased.getLength() - 1;
             lease = Range.createRange(startByte, endByte);
         }
 
@@ -139,25 +136,27 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     /**
-     * TODO the ranges in BTIntervals are always from 0-<piece size>. All pieces
-     * are the same size, except for the last piece.
+     * 
      * 
      * @param range
      * @return
      */
     private BTInterval createBTInterval(Range range) {
+        //TODO this range might really be multiple BTIntervals
+        //we need to handle the case when it is
         int pieceLength = btMetaInfo.getPieceLength();
         int pieceNum = (int) Math.floor(range.getLow() / pieceLength);
 
         long lowByte = range.getLow() - (pieceLength * pieceNum);
-        long highByte = lowByte + range.getLength() -1;
+        long highByte = lowByte + range.getLength() - 1;
         Range btRange = Range.createRange(lowByte, highByte);
         BTInterval piece = new BTInterval(btRange, pieceNum);
         return piece;
     }
 
     public void unpending(Range range) {
-        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException(
+                "BTSwarmCoordinator.unpending(Range) is not implemented.");
 
     }
 
@@ -167,13 +166,14 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     public long write(Range range, ByteBuffer content) throws IOException {
-        // TODO Auto-generated method stub
-        return 0;
+        throw new UnsupportedOperationException(
+                "BTSwarmCoordinator.write(Range, ByteBuffer) is not implemented.");
+
     }
 
     public void wrote(Range range) {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException(
+                "BTSwarmCoordinator.wrote(Range) is not implemented.");
     }
 
 }

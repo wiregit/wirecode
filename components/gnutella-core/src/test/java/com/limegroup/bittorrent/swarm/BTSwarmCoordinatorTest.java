@@ -74,6 +74,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
         File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
         downloadedFile1.delete();
+        downloadedFile2.delete();
         final Swarmer swarmer = createSwarmer(torrentContext);
 
         swarmer.start();
