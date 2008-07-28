@@ -2,6 +2,7 @@ package com.limegroup.bittorrent.handshaking.piecestrategy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.limewire.collection.AndView;
 import org.limewire.collection.BitField;
@@ -10,8 +11,16 @@ import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
 
 public class RandomPieceStrategy extends AbstractPieceStrategy {
+
+    private final Random randomizer;
+
     public RandomPieceStrategy(BTMetaInfo btMetaInfo) {
+        this(btMetaInfo, new Random());
+    }
+
+    public RandomPieceStrategy(BTMetaInfo btMetaInfo, Random randomizer) {
         super(btMetaInfo);
+        this.randomizer = randomizer;
     }
 
     public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
@@ -33,7 +42,9 @@ public class RandomPieceStrategy extends AbstractPieceStrategy {
         int current = 1;
         for (int pieceIndex = available.nextSetBit(0); pieceIndex >= 0; pieceIndex = available
                 .nextSetBit(pieceIndex + 1)) {
-            if (Math.random() < 1f / current++) {
+            float random = randomizer.nextFloat();
+            float percent = 1f / current++;
+            if ( random < percent) {
                 selectedPiece = pieceIndex;
             }
         }
