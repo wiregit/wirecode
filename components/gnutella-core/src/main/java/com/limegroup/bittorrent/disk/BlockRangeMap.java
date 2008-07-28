@@ -22,7 +22,7 @@ public class BlockRangeMap {
     private final HashMap<Integer, IntervalSet> blocks;
 
     private final BitSet bitSet;
-    
+
     private final int numBlocks;
 
     public BlockRangeMap(int numBlocks) {
@@ -46,9 +46,11 @@ public class BlockRangeMap {
         if (s == null)
             return;
         s.delete(in);
-        if (s.isEmpty())
+        if (s.isEmpty()) {
             blocks.remove(in.getBlockId());
-        bitSet.set(in.getId(), false);
+            bitSet.set(in.getBlockId(), false);
+        }
+
     }
 
     public long byteSize() {
