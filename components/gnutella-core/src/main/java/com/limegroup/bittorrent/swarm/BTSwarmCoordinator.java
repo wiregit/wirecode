@@ -3,7 +3,6 @@ package com.limegroup.bittorrent.swarm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.limewire.collection.BitField;
@@ -48,18 +47,12 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     public void finish() throws IOException {
         // do nothing let the managed_torrent manage closing things
-
     }
 
     public long getAmountLost() {
         return torrentDiskManager.getNumCorruptedBytes();
     }
-
-    public long getAmountVerified() {
-        throw new UnsupportedOperationException(
-                "BTSwarmCoordinator.getAmountVerified() is not implemented.");
-    }
-
+    
     public SwarmFile getSwarmFile(Range range) {
         long position = range.getLow();
         List<TorrentFile> torrentFiles = torrentFileSystem.getFiles();
@@ -77,14 +70,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         return torrentDiskManager.isComplete();
     }
 
-    public Range lease() {
-        throw new UnsupportedOperationException("BTSwarmCoordinator.lease() is not implemented.");
-    }
-
     public Range leasePortion(IntervalSet availableRanges) {
-        // TODO do not lease random, use a gap strategy to find a good gap.
-        // This will be multiple ranges in the long run
-
         int numPieces = btMetaInfo.getNumBlocks();
 
         BitSet avalableBitSet = new BitSet(numPieces);
@@ -97,35 +83,20 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         Range lease = null;
         if (leased != null && leased.size() > 0) {
             BTInterval firstBlock = leased.get(0);
-            long startByte = getLow(firstBlock);
-            long endByte = getHigh(leased.get(leased.size() - 1));
+            long startByte = btMetaInfo.getLowByte(firstBlock);
+            long endByte = btMetaInfo.getHighByte(leased.get(leased.size() - 1));
             lease = Range.createRange(startByte, endByte);
         }
 
         return lease;
     }
 
-    public Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector) {
-        throw new UnsupportedOperationException(
-                "BTSwarmCoordinator.leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector) is not implemented.");
-    }
-
-    public void pending(Range range) {
-        throw new UnsupportedOperationException(
-                "BTSwarmCoordinator.pending(Range range) is not implemented.");
-    }
 
     public Range renewLease(Range oldLease, Range newLease) {
-
         List<BTInterval> oldInterval = createBTInterval(oldLease);
         List<BTInterval> newInterval = createBTInterval(newLease);
         torrentDiskManager.renewLease(oldInterval, newInterval);
         return newLease;
-    }
-
-    public void reverify() {
-        throw new UnsupportedOperationException("BTSwarmCoordinator.reverify() is not implemented.");
-
     }
 
     public void unlease(Range range) {
@@ -136,8 +107,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     /**
-     * 
-     * 
+     * Takes a range and converts it into a List of BTInterval objects.
      * @param range
      * @return
      */
@@ -146,62 +116,79 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         long index = range.getLow();
         while (index <= range.getHigh()) {
             BTInterval piece = btMetaInfo.getPieceAt(index);
-            
-            long byteLow = getLow(piece);
+
+            long byteLow = btMetaInfo.getLowByte(piece);
             long offsetLow = 0;
-            
             if (byteLow < range.getLow()) {
                 offsetLow = byteLow - range.getLow();
                 byteLow = range.getLow();
             }
-           long byteHigh = getHigh(piece);
-           long offsetHigh = 0;
+            
+            long byteHigh = btMetaInfo.getHighByte(piece);
+            long offsetHigh = 0;
             if (byteHigh > range.getHigh()) {
                 offsetHigh = byteHigh - range.getHigh();
                 byteHigh = range.getHigh();
             }
-            
-            
+
+            //rebuild piece using offsets
             long pieceLow = piece.getLow() - offsetLow;
             long pieceHigh = piece.getHigh() - offsetHigh;
-            
             piece = new BTInterval(pieceLow, pieceHigh, piece.getBlockId());
+            
             btIntervals.add(piece);
             index = byteHigh + 1;
         }
         return btIntervals;
     }
-
-    private long getHigh(BTInterval piece) {
-        long pieceNum = piece.getBlockId();
-        long high = piece.getHigh() + pieceNum * btMetaInfo.getPieceLength();
-        return high;
+    
+    public long getAmountVerified() {
+        throw new UnsupportedOperationException(
+                "BTSwarmCoordinator.getAmountVerified() is not implemented.");
     }
-
-    private long getLow(BTInterval piece) {
-        long pieceNum = piece.getBlockId();
-        long low = piece.getLow() + pieceNum * btMetaInfo.getPieceLength();
-        return low;
+    
+    public Range lease() {
+        // not the job of the BTSwarmCoordinator
+        throw new UnsupportedOperationException("BTSwarmCoordinator.lease() is not implemented.");
     }
 
     public void unpending(Range range) {
+        // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.unpending(Range) is not implemented.");
-
+    }
+    
+    public Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector) {
+        // not the job of the BTSwarmCoordinator
+        throw new UnsupportedOperationException(
+                "BTSwarmCoordinator.leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector) is not implemented.");
     }
 
+    public void pending(Range range) {
+        // not the job of the BTSwarmCoordinator
+        throw new UnsupportedOperationException(
+                "BTSwarmCoordinator.pending(Range range) is not implemented.");
+    }
+    
     public void verify() {
+        // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException("BTSwarmCoordinator.verify() is not implemented.");
+    }
+    
+    public void reverify() {
+        // not the job of the BTSwarmCoordinator
+        throw new UnsupportedOperationException("BTSwarmCoordinator.reverify() is not implemented.");
 
     }
 
     public long write(Range range, ByteBuffer content) throws IOException {
+        // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.write(Range, ByteBuffer) is not implemented.");
-
     }
 
     public void wrote(Range range) {
+        // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.wrote(Range) is not implemented.");
     }

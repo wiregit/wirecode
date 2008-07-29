@@ -101,5 +101,20 @@ public interface BTMetaInfo {
     public abstract boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck);
 
     public abstract BTInterval getPieceAt(long i);
+    
+    
+    /**
+     * Gets the highByte of the given BTInterval
+     * @param piece
+     * @return
+     */
+    public long getHighByte(BTInterval btInterval);
+    
+    /**
+     * Gets the lowByte of the given BTInterval
+     * @param piece
+     * @return
+     */
+    public long getLowByte(BTInterval btInterval);
 
 }

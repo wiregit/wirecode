@@ -428,6 +428,28 @@ public class BTMetaInfoImpl implements BTMetaInfo {
        int pieceIndex = (int) (torrentbyte /_pieceLength);
        return getPiece(pieceIndex);
     }
+
+    /**
+     * Gets the highByte of the given BTInterval
+     * @param piece
+     * @return
+     */
+    public long getHighByte(BTInterval piece) {
+        long pieceNum = piece.getBlockId();
+        long high = piece.getHigh() + pieceNum * getPieceLength();
+        return high;
+    }
+
+    /**
+     * Gets the lowByte of the given BTInterval
+     * @param piece
+     * @return
+     */
+    public long getLowByte(BTInterval piece) {
+        long pieceNum = piece.getBlockId();
+        long low = piece.getLow() + pieceNum * getPieceLength();
+        return low;
+    }
     
     
 }
