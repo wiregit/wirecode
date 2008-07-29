@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.limewire.inspection.Inspectable;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 
@@ -21,7 +20,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A List of FileDescs that are grouped together 
  */
-public class FileListImpl implements FileList, FileEventListener, Inspectable {
+public class FileListImpl implements FileListPackage, FileEventListener {
 
     /**
      * A list of listeners for this list
@@ -63,7 +62,7 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
         this.fileManager = fileManager;
         this.individualFiles = individualFiles;
         this.fileDescs = new ArrayList<FileDesc>();
-        this.pendingFiles = new ArrayList<File>(); 
+        pendingFiles = new ArrayList<File>();
 
         fileManager.addFileEventListener(this);
         
@@ -75,34 +74,26 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
     public String getName() {
         return name;
     }
-
-    public void addFileAlways(File file) {
-        addFile(file, LimeXMLDocument.EMPTY_LIST);
+    
+    public void addPendingFileAlways(File file) {
+        addPendingFile(file);
     }
     
-    public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
-        addFile(file, list);
-    }
-
-    public void addFileForSession(File file) {
-        addFile(file);
+    public void addPendingFileForSession(File file) {
+        addPendingFile(file);
     }
     
-    public void addFile(File file) {
-        addFile(file, LimeXMLDocument.EMPTY_LIST);
-    }
-    
-    public void addFile(File file, List<? extends LimeXMLDocument> list) {
-        synchronized(this) {
-            if(!pendingFiles.contains(file))
-                pendingFiles.add(file);
-        }
-        fileManager.addFile(file, list);
+    public void addPendingFile(File file) {
+        if(!pendingFiles.contains(file))
+            pendingFiles.add(file);
     }
 
-    public void add(FileDesc fileDesc) {
-        if(addFileDesc(fileDesc))
+    public boolean add(FileDesc fileDesc) {
+        if(addFileDesc(fileDesc)) {
             fireAddEvent(fileDesc);
+            return true;
+        } else
+            return false;
     }
    
     /**
@@ -115,7 +106,7 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
     }
 
     /**
-     * Performs the actual add. No notication is sent when this returns.
+     * Performs the actual add. No notification is sent when this returns.
      * @return true if the fileDesc was added, false otherwise
      */
     protected boolean addFileDesc(FileDesc fileDesc) {
@@ -123,8 +114,7 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
             throw new IllegalArgumentException("FileDesc cannot be null");
         
         // always remove pending file, whether it is allowed to get added or not
-        if(pendingFiles.contains(fileDesc.getFile()))
-            pendingFiles.remove(fileDesc.getFile());
+        pendingFiles.remove(fileDesc.getFile());
         
         if(!fileDescs.contains(fileDesc) && isFileAddable(fileDesc)) {
             fileDescs.add(fileDesc);
@@ -154,9 +144,8 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
         
         // if we were waiting on this FileDesc but still hadn't recieved it for
         // some reason, remove it from pending files anyways
-        if(pendingFiles.contains(fileDesc.getFile())) {
-            pendingFiles.remove(fileDesc.getFile());
-        }
+        pendingFiles.remove(fileDesc.getFile());
+
         if(fileDescs.contains(fileDesc)) {
             fileDescs.remove(fileDesc);
             numBytes -= fileDesc.getFileSize();
@@ -251,18 +240,31 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
         listeners.remove(listener);
     }
     
+    /**
+     * Fires an addFileDesc event to all the listeners
+     * @param fileDesc that was added
+     */
     protected void fireAddEvent(FileDesc fileDesc) {
         for(FileListListener listener : listeners) {
             listener.addEvent(fileDesc);
         }
     }
     
+    /**
+     * Fires a removeFileDesc event to all the listeners
+     * @param fileDesc that was removed
+     */
     protected void fireRemoveEvent(FileDesc fileDesc) {
         for(FileListListener listener : listeners) {
             listener.removeEvent(fileDesc);
         }
     }
     
+    /**
+     * Fires a changeEvent to all the listeners
+     * @param oldFileDesc FileDesc that was modified
+     * @param newFileDesc current state of that FileDesc
+     */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
         for(FileListListener listener : listeners) {
             listener.changeEvent(oldFileDesc, newFileDesc);

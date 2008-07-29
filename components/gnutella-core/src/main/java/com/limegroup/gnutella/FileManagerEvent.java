@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.EventObject;
 import java.util.List;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -422,30 +424,6 @@ public class FileManagerEvent extends EventObject {
        
     @Override
     public String toString() {
-        StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=").append(type);
-
-        if(oldFileDesc != null || newFileDesc != null){
-            if(oldFileDesc != null) {
-                buffer.append("fdsOld=" + oldFileDesc + "\n");
-            }
-            if(newFileDesc != null) {
-                buffer.append("fdsNew=" + newFileDesc + "\n");
-            }
-        } else {
-            buffer.append(", fds=null");
-        }
-
-        if(oldFile != null || newFile != null) {
-            if(oldFile != null) {
-                buffer.append(", oldFile=").append(oldFile).append("\n");
-            }
-            if(newFile != null) {
-                buffer.append(", newFile=").append(newFile).append("\n");
-            }
-        } else {
-            buffer.append(", files=null");
-        }
-        
-        return buffer.append("]").toString();
+        return StringUtils.toString(this, oldFile, newFile, oldFileDesc, newFileDesc);
     }
 }

@@ -2109,9 +2109,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected void shareSavedFile(File saveFile){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
-			fileManager.getSharedFileList().addFileAlways(saveFile, getXMLDocuments());
+		    fileManager.addSharedFileAlways(saveFile, getXMLDocuments());
 		else
-		    fileManager.getSharedFileList().addFile(saveFile, getXMLDocuments());
+		    fileManager.addSharedFile(saveFile, getXMLDocuments());
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 

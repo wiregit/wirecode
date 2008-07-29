@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +14,6 @@ import org.limewire.collection.MultiCollection;
 import org.limewire.inspection.InspectableForSize;
 
 import com.limegroup.gnutella.library.SharingUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class SharedFileListImpl extends FileListImpl {
     
@@ -53,36 +51,24 @@ public class SharedFileListImpl extends FileListImpl {
     }
     
     @Override
-    public void addFileAlways(File file) {
-        addFileAlways(file, LimeXMLDocument.EMPTY_LIST);
-    }
-    
-    /**
-     * Always adds this file, regardless if it has a failing properties to make
-     * it shareable
-     */
-    @Override
-    public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
-        synchronized (this) {
-            filesNotToShare.remove(file); 
-            if (!isFileAddable(file))
-                individualFiles.add(file);
-                   
-        }
-        addFile(file, list);
+    public void addPendingFileAlways(File file) {
+        filesNotToShare.remove(file); 
+        if (!isFileAddable(file))
+            individualFiles.add(file);
+        addPendingFile(file);
     }
     
     /**
      * Adds this file for the session only
      */
     @Override
-    public void addFileForSession(File file) {
+    public void addPendingFileForSession(File file) {
         synchronized (this) {
             filesNotToShare.remove(file);
             if (!isFileAddable(file))
                 transientSharedFiles.add(file);    
         }
-        addFile(file);
+        addPendingFile(file);
     }
     
     @Override
@@ -105,7 +91,7 @@ public class SharedFileListImpl extends FileListImpl {
         if(!individualSharedFiles.contains(fd.getFile()) && fileManager.isFileInCompletelySharedDirectory(fd.getFile()))
             filesNotToShare.add(fd.getFile());
         
-        boolean value = super.remove(fd);
+        boolean value = super.removeFileDesc(fd);
 
         if(value) {
             File parent = fd.getFile().getParentFile();
@@ -144,7 +130,7 @@ public class SharedFileListImpl extends FileListImpl {
     public void clear() {
         super.clear();
         if(transientSharedFiles != null)
-        transientSharedFiles.clear();
+            transientSharedFiles.clear();
         numForcedFiles = 0;
     }
     

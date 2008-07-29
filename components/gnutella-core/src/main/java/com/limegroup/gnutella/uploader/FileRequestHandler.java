@@ -446,6 +446,9 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         FileDesc fd = null;
 
         int index = request.index;
+        
+        if(!fileManager.isValidIndex(index))
+       	    return null;
 
         // first verify the file index
         fd = fileManager.get(index);
@@ -489,7 +492,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         }
 
         // special handling for incomplete files
-        if(fd instanceof IncompleteFileDesc) {
+        if (fd instanceof IncompleteFileDesc) {
             // Check to see if we're allowing PFSP.
             if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue()) {
                 if (LOG.isDebugEnabled()) {
@@ -510,7 +513,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
                 fileManager.removeFile(file);
-                fileManager.getSharedFileList().addFile(file);
+                fileManager.addSharedFile(file);
                 return false;
             }
         }

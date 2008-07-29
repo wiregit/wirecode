@@ -4,14 +4,12 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+public class SynchronizedFileList implements FileListPackage {
 
-public class SynchronizedFileList implements FileList {
-
-    final FileList fileList;
+    final FileListPackage fileList;
     final Object mutex;     // Object on which to synchronize
     
-    public SynchronizedFileList(FileList fileList) { 
+    public SynchronizedFileList(FileListPackage fileList) { 
         if(fileList == null)
             throw new NullPointerException();
         this.fileList = fileList;
@@ -28,9 +26,9 @@ public class SynchronizedFileList implements FileList {
         }
     }
     
-    public void add(FileDesc fileDesc) {
+    public boolean add(FileDesc fileDesc) {
         synchronized (mutex) {
-            fileList.add(fileDesc);
+            return fileList.add(fileDesc);
         }
     }
 
@@ -56,24 +54,22 @@ public class SynchronizedFileList implements FileList {
         }
     }
     
-    public void addFileAlways(File file) {
-        fileList.addFileAlways(file);
+    public void addPendingFileAlways(File file) {
+        synchronized (mutex) {
+            fileList.addPendingFileAlways(file);            
+        }
     }
 
-    public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
-        fileList.addFileAlways(file,list);
-    }
-
-    public void addFileForSession(File file) {
-        fileList.addFileForSession(file);
+    public void addPendingFileForSession(File file) {
+        synchronized (mutex) {
+            fileList.addPendingFileForSession(file);            
+        }
     }
     
-    public void addFile(File file) {
-        fileList.addFile(file);
-    }
-
-    public void addFile(File file, List<? extends LimeXMLDocument> list) {
-        fileList.addFile(file, list);
+    public void addPendingFile(File file) {
+        synchronized (mutex) {
+            fileList.addPendingFile(file);            
+        }
     }
 
     public boolean remove(FileDesc fileDesc) {

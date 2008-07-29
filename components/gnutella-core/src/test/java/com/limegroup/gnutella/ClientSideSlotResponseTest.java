@@ -70,11 +70,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
         FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
         fileManager.addFileEventListener(waiter);
-        fileManager.getSharedFileList().addFileAlways(textFile);
-        fileManager.getSharedFileList().addFileAlways(torrentFile);
-        fileManager.getSharedFileList().addFileAlways(userTorrentFile);
-        fileManager.getSharedFileList().addFileAlways(appTextFile);
-        fileManager.getSharedFileList().addFileAlways(appTorrentFile);
+        fileManager.addSharedFileAlways(textFile);
+        fileManager.addSharedFileAlways(torrentFile);
+        fileManager.addSharedFileAlways(userTorrentFile);
+        fileManager.addSharedFileAlways(appTextFile);
+        fileManager.addSharedFileAlways(appTorrentFile);
         waiter.waitForLoad();
         fileManager.removeFileEventListener(waiter);
                 

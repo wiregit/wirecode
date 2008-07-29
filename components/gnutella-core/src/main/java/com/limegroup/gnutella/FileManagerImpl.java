@@ -62,7 +62,9 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * The list of all known files. This creates and maintains a list of 
  * directories and FileDescs. It also creates a set of FileLists which 
- * may contain subsets of all FileDescs.  <p>
+ * may contain subsets of all FileDescs. Files can be added to just the 
+ * FileManager or loaded into both the FileManager and a specified FileList
+ * once the FileDesc has been created. <p>
  *
  * This class is thread-safe.
  */
@@ -85,11 +87,11 @@ public class FileManagerImpl implements FileManager, Service {
      */
     protected final LibraryData _data = new LibraryData();
     
-    private final FileList sharedFileList;
-    private final FileList storeFileList; 
-    private final FileList buddyFileList;
-    private final FileList incompleteFileList;
-    private final Map<String, FileList> buddyFileLists = new HashMap<String,FileList>();
+    private final FileListPackage sharedFileList;
+    private final FileListPackage storeFileList; 
+    private final FileListPackage buddyFileList;
+    private final FileListPackage incompleteFileList;
+    private final Map<String, FileListPackage> buddyFileLists = new HashMap<String,FileListPackage>();
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -249,7 +251,7 @@ public class FileManagerImpl implements FileManager, Service {
         this.activityCallback = activityCallback;
         this.backgroundExecutor = backgroundExecutor;
         this.eventListeners = eventListeners;
-        
+                
         sharedFileList = new SynchronizedFileList(new SharedFileListImpl("Shared", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl("Store", this, _data.SPECIAL_STORE_FILES));
         buddyFileList = new SynchronizedFileList(new BuddyFileListImpl("All Buddys", this, _data.getBuddyList("All")));
@@ -371,7 +373,10 @@ public class FileManagerImpl implements FileManager, Service {
     }
     
     public Map<String, FileList> getAllBuddyLists(){
-        return buddyFileLists;
+        Map<String, FileList> map = new HashMap<String, FileList>();
+        for(String name : buddyFileLists.keySet())
+            map.put(name, buddyFileLists.get(name));
+        return map;
     }
     
     ///////////////////////////////////////////////////////////////////////////
@@ -425,12 +430,14 @@ public class FileManagerImpl implements FileManager, Service {
         return urnMap.get(urn);
     }
     
-    /**
-     * Returns the FileDesc at index if the list or returns null if the 
-     * list no longer contains that file.
-     */
     public synchronized FileDesc get(int index) {
         return files.get(index);
+    }
+    
+    public synchronized boolean isValidIndex(int index) {
+        if( index >= 0 && index < files.size() )
+            return true;
+        return false;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -620,10 +627,10 @@ public class FileManagerImpl implements FileManager, Service {
             updateDirectories(directory[i], null, revision, displayDirectories);
         
         // Add specially shared files
-        loadIndividualFiles(getSharedFileList(), revision);
+        loadIndividualFiles(sharedFileList, revision);
 
         // Add individual store files
-        loadIndividualFiles(getStoreFileList(), revision);
+        loadIndividualFiles(storeFileList, revision);
         
         //Buddy files
         for(String key : buddyFileLists.keySet())
@@ -635,11 +642,12 @@ public class FileManagerImpl implements FileManager, Service {
     /**
      * Takes a collection of files and adds them to the supplied FileList
      */
-    private void loadIndividualFiles(FileList list, int revision) {
-        for(File file: list.getIndividualFiles()) {
+    private void loadIndividualFiles(FileListPackage fileList, int revision) {
+        for(File file: fileList.getIndividualFiles()) {
             if(_revision != revision)
                 break;
-            list.addFile(file);
+            fileList.addPendingFile(file);
+            addFile(file);
         }
     }   
 
@@ -808,6 +816,66 @@ public class FileManagerImpl implements FileManager, Service {
     //////////////////////////////////////////////////////////////////////////////
     //  File Accessors
     //////////////////////////////////////////////////////////////////////////////
+    
+    public void addBuddyFile(String name, File file) {
+        FileListPackage fileList = buddyFileLists.get(name);
+        
+        if(fileList != null) {
+            fileList.addPendingFile(file);
+            
+            FileDesc fileDesc = getFileDesc(file);
+            if(fileDesc != null) {
+                fileList.add(fileDesc);
+                dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+            } else {
+                addFile(file);
+            }
+        }
+    }
+
+    public void addSharedFile(File file) {
+        addSharedFile(file, LimeXMLDocument.EMPTY_LIST);
+    }
+
+    public void addSharedFile(File file, List<? extends LimeXMLDocument> list) {
+        FileDesc fileDesc = getFileDesc(file);
+        sharedFileList.addPendingFile(file);
+ 
+        if(fileDesc != null) {
+            sharedFileList.add(fileDesc);
+            dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+        } else {
+            addFile(file, list);
+        }
+    }
+
+    public void addSharedFileAlways(File file) {
+        addSharedFileAlways(file, LimeXMLDocument.EMPTY_LIST);
+    }
+
+    public void addSharedFileAlways(File file, List<? extends LimeXMLDocument> list) {
+        FileDesc fileDesc = getFileDesc(file);
+        sharedFileList.addPendingFileAlways(file);
+        
+        if(fileDesc != null) {
+            sharedFileList.add(fileDesc);
+            dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+        } else {
+            addFile(file, list);
+        }
+    }
+
+    public void addSharedFileForFession(File file) {
+        FileDesc fileDesc = getFileDesc(file);
+        sharedFileList.addPendingFileForSession(file);
+        
+        if(fileDesc != null) {
+            sharedFileList.add(fileDesc);
+            dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+        } else {
+            addFile(file);
+        }
+    }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File)
@@ -1800,7 +1868,7 @@ public class FileManagerImpl implements FileManager, Service {
          if (file_list == null)
              return;
          for(int i = 0; i < file_list.length && _revision == revision; i++)
-             getSharedFileList().addFile(file_list[i]);
+             addSharedFile(file_list[i]);
              
          // Exit quickly (without doing the dir lookup) if revisions changed.
          if(_revision != revision)

@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-
 /**
  * A collection of FileDescs.
  */
@@ -17,39 +15,17 @@ public interface FileList {
     public String getName();
     
     /**
-     * These add a file to this list for special edge cases. These should only be
-     * called on SharedFileListImpl
-     */
-    public void addFileAlways(File file);
-    public void addFileAlways(File file, List<? extends LimeXMLDocument> list);
-    public void addFileForSession(File file);
-    
-    /**
-     * Adds this file to FileManager and later adds this File's FileDesc to
-     * this list once its calculated.
-     * @param file - the file to be added to this list
-     */
-    public void addFile(File file);
-    
-    /**
-     * Adds this file to FileManager and later adds this File's FileDesc to
-     * this list once its calculated.
-     * @param file - the file to be added to this list
-     * @param list - the Xml data to associate with the FileDesc
-     */
-    public void addFile(File file, List<? extends LimeXMLDocument> list);
-    
-    /**
      * Given a non-null FileDesc, adds this FileDesc to this list. If FileDesc
      * is null, throws an IllegalArguementException. 
      * @param fileDesc - FileDesc to be added to this list
      */
-    public void add(FileDesc fileDesc);
+    public boolean add(FileDesc fileDesc);
        
     /**
      * Removes the FileDesc from the list if it exists. If the value existed 
-     * returns true, false if it did not exist and nothing was removed. This method
-     * simply removes this FileDesc from this list.
+     * returns true, false if it did not exist and nothing was removed. This 
+     * method simply removes this FileDesc from this list. If FileDesc is 
+     * null, throws an IllegalArguementException. 
      */
     public boolean remove(FileDesc fileDesc);
     
@@ -60,7 +36,8 @@ public interface FileList {
     
     /**
      * Returns an iterator over this list of FileDescs.
-     * NOTE: This must be synchronized upon by the caller.
+     * NOTE: This must be synchronized upon by the caller if accessed
+     * in a multi-threaded way.
      */
     public Iterator<FileDesc> iterator();
     
@@ -104,7 +81,7 @@ public interface FileList {
      */  
     public List<FileDesc> getFilesInDirectory(File directory);
     
-    int getNumForcedFiles();
+    public int getNumForcedFiles();
     
     /**
      * Adds a listener to this list

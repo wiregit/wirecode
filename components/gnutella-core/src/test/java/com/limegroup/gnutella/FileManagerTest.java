@@ -957,8 +957,8 @@ public class FileManagerTest extends LimeTestCase {
         File shared    = createNewNamedTestFile(10, "shared", _sharedDir.getParentFile());
         File notShared = createNewNamedTestFile(10, "notShared", _sharedDir.getParentFile());
         File sessionShared = createNewNamedTestFile(10, "sessionShared", _sharedDir.getParentFile());
-//        getLibraryData().SPECIAL_FILES_TO_SHARE.add(shared);
-//        fman.getSharedFileList().addFile(shared);
+        getLibraryData().SPECIAL_FILES_TO_SHARE.add(shared);
+        fman.addSharedFile(shared);
         waitForLoad();
 
         addAlways(shared);
@@ -1027,7 +1027,7 @@ public class FileManagerTest extends LimeTestCase {
     }
     
     /**
-     * Tests {@link FileManager#addFileAlways(File)}.
+     * Tests {@link FileManager#addPendingFileAlways(File)}.
      * @throws Exception
      */
     public void testAddFileAlways() throws Exception {
@@ -1552,7 +1552,7 @@ public class FileManagerTest extends LimeTestCase {
                    fman.removeFile(store2));
 
         // try sharing the store file
-        fman.getSharedFileList().addFile(store1);
+        fman.addSharedFile(store1);
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
 
@@ -1635,25 +1635,26 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("Unexpected number of responses", 0, responses.length);
                 
         // try sharing the store file
-        fman.getSharedFileList().addFile(store1);
-        fman.getSharedFileList().addFile(store2);
+        fman.addSharedFile(store1);
+        fman.addSharedFile(store2);
         assertEquals("Unexpected number of shared files", 2, fman.getSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try forcing the sharing
-        fman.getSharedFileList().addFileAlways(store1, LimeXMLDocument.EMPTY_LIST);
-        fman.getSharedFileList().addFileAlways(store2, LimeXMLDocument.EMPTY_LIST);
+        fman.addSharedFileAlways(store1);
+        fman.addSharedFileAlways(store2);
         assertEquals("Unexpected number of shared files", 2, fman.getSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
-        fman.getSharedFileList().addFileForSession(store1);
-        fman.getSharedFileList().addFileForSession(store2);
+        fman.addSharedFileForFession(store1);
+        fman.addSharedFileForFession(store2);
+
         assertEquals("Unexpected number of shared files", 2, fman.getSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
 
-        fman.getSharedFileList().addFileAlways(f1, LimeXMLDocument.EMPTY_LIST);
-        fman.getSharedFileList().addFileAlways(f2, LimeXMLDocument.EMPTY_LIST);
+        fman.addSharedFileAlways(f1);
+        fman.addSharedFileAlways(f2);
         
 
         // no store files should be shareable in the file descriptors
@@ -1840,20 +1841,21 @@ public class FileManagerTest extends LimeTestCase {
         waitForLoad();
 
         // try sharing the store file
-        fman.getSharedFileList().addFile(store1);
-        fman.getSharedFileList().addFile(store2);
+        fman.addSharedFile(store1);
+        fman.addSharedFile(store2);
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try forcing the sharing
-        fman.getSharedFileList().addFileAlways(store1, LimeXMLDocument.EMPTY_LIST);
-        fman.getSharedFileList().addFileAlways(store2, LimeXMLDocument.EMPTY_LIST);
+        fman.addSharedFileAlways(store1);
+        fman.addSharedFileAlways(store2);
+
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
-        fman.getSharedFileList().addFileForSession(store1);
-        fman.getSharedFileList().addFileForSession(store2);
+        fman.addSharedFileForFession(store1);
+        fman.addSharedFileForFession(store2);
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
@@ -2352,7 +2354,7 @@ public class FileManagerTest extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.getSharedFileList().addFile(f, LimeXMLDocument.EMPTY_LIST);
+            fman.addSharedFile(f);
             fel.wait(5000);
         }
         return fel.evt;
@@ -2362,7 +2364,7 @@ public class FileManagerTest extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.getSharedFileList().addFile(f, l);
+            fman.addSharedFile(f, l);
             fel.wait(5000);
         }
         return fel.evt;
@@ -2372,7 +2374,7 @@ public class FileManagerTest extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.getSharedFileList().addFileAlways(f, LimeXMLDocument.EMPTY_LIST);
+            fman.addSharedFileAlways(f);
             fel.wait(8000);
         }
         return fel.evt;
@@ -2392,7 +2394,7 @@ public class FileManagerTest extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.getSharedFileList().addFileForSession(f1);
+            fman.addSharedFileForFession(f1);
             fel.wait(5000);
         }
         return fel.evt;

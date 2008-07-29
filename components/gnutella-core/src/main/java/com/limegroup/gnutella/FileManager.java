@@ -160,6 +160,45 @@ public interface FileManager {
     public void removeFolder(File folder);
 
     /**
+     * Creates a FileDesc for the file if one doesn't yet exist, then
+     * adds the FileDesc to the sharedFileList
+     */
+    public void addSharedFile(File file);
+    
+    /**
+     * Creates a FileDesc for the file if one doesn't yet exist using the supplied
+     * xml document, then adds the FileDesc to the sharedFileList
+     */
+    public void addSharedFile(File file, List<? extends LimeXMLDocument> list);
+    
+    /**
+     * Creates a FileDesc for the file if one doesn't yet exist, then 
+     * adds the FileDesc to the sharedFileList even if the file is not
+     * shareable by default.
+     */
+    public void addSharedFileAlways(File file);
+    
+    /**
+     * Creates a FileDesc for the file if one doesn't yet exist, then 
+     * adds the FileDesc to the sharedFileList even if the file is not
+     * shareable by default.
+     */
+    public void addSharedFileAlways(File file, List<? extends LimeXMLDocument> list);
+    
+    /**
+     * Creates a FileDesc for the file if one doesn't yet exist, then 
+     * adds the FileDesc to the sharedFileList only for the session.
+     */
+    public void addSharedFileForFession(File file);
+    
+    /**
+     * Creates a FileDesc for the file if one doesn't yet exist, then adds the
+     * FileDesc to the buddy list with the given name. If no buddy list by that
+     * name exists no action is performed.
+     */
+    public void addBuddyFile(String name, File file);
+    
+    /**
      * Adds the file to the master file list. 
      */
     public void addFile(File file);
@@ -175,6 +214,11 @@ public interface FileManager {
      *          exists in this list.
      */
     public FileDesc get(int index);
+    
+    /**
+     * Returns true if 
+     */
+    public boolean isValidIndex(int index);
 
     /**
      * @modifies this
