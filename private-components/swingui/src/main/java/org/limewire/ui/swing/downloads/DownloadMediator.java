@@ -43,7 +43,7 @@ class DownloadMediator {
 
 	public void pauseAll() {
         // lock list to ensure it is not modified elsewhere
-        commonBaseList.getReadWriteLock().readLock().lock();
+        commonBaseList.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : commonBaseList) {
                 if (item.getState().isPausable()) {
@@ -51,14 +51,14 @@ class DownloadMediator {
                 }
             }
         } finally {
-            commonBaseList.getReadWriteLock().readLock().unlock();
+            commonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 
 
 	public void resumeAll() {
         // lock list to ensure it is not modified elsewhere
-        commonBaseList.getReadWriteLock().readLock().lock();
+        commonBaseList.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : commonBaseList) {
                 if (item.getState().isResumable()) {
@@ -66,7 +66,7 @@ class DownloadMediator {
                 }
             }
         } finally {
-            commonBaseList.getReadWriteLock().readLock().unlock();
+            commonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 	
