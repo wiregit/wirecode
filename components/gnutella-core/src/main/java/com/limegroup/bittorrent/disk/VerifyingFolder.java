@@ -397,6 +397,7 @@ class VerifyingFolder implements TorrentDiskManager {
      * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
      */
     public void open(final DiskManagerListener torrent) throws IOException {
+        //TODO refactor to be able to add multipl listeners
         this.listener = torrent;
         storedException = null;
         
