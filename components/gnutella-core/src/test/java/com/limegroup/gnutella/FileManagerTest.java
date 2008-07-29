@@ -4,8 +4,6 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,15 +20,12 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.Range;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
-import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.LimeWireCoreModule.FileEventListenerProvider;
@@ -56,44 +51,15 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 
-public class FileManagerTest extends LimeTestCase {
+public class FileManagerTest extends FileManagerTestCase {
 
-    protected static final String SHARE_EXTENSION = "XYZ";
-    protected static final String EXTENSION = SHARE_EXTENSION + ";mp3";
     private static final int MAX_LOCATIONS = 10;
-    
-    protected File f1 = null;
-    protected File f2 = null;
-    protected File f3 = null;
-    protected File f4 = null;
-    protected File f5 = null;
-    protected File f6 = null;
-    
-    protected File store1 = null;
-    protected File store2 = null;
-    protected File store3 = null;
-   
-    //changed to protected so that MetaFileManagerTest can
-    //use these variables as well.
-    protected volatile FileManagerImpl fman = null;
-    protected QRPUpdater qrpUpdater = null;
-    protected Object loaded = new Object();
-    protected Response[] responses;
-    protected List<FileDesc> sharedFiles;
-    protected Injector injector;
-    protected SharedFilesKeywordIndex keywordIndex;
-    private LimeXMLDocumentFactory limeXMLDocumentFactory;
-    
-    private QueryRequestFactory queryRequestFactory;
-    
-    private SchemaReplyCollectionMapper schemaMapper;
 
     public FileManagerTest(String name) {
         super(name);
@@ -103,50 +69,6 @@ public class FileManagerTest extends LimeTestCase {
         return buildTestSuite(FileManagerTest.class);
     }
     
-    @Override
-    protected void setUp() throws Exception {
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        
-        cleanFiles(_incompleteDir, false);
-        cleanFiles(_sharedDir, false);
-        cleanFiles(_storeDir, false);
-
-
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
-            }
-        });
-        
-        fman = (FileManagerImpl)injector.getInstance(FileManager.class);
-        keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
-        qrpUpdater = injector.getInstance(QRPUpdater.class);
-        schemaMapper = injector.getInstance(SchemaReplyCollectionMapper.class);
-        
-        fman.addFileEventListener(keywordIndex);
-        fman.addFileEventListener(qrpUpdater);
-        fman.addFileEventListener(schemaMapper);
-              
-        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
-        
-        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-    }
-    
-    @Override
-    protected void tearDown() {
-        if (f1!=null) f1.delete();
-        if (f2!=null) f2.delete();
-        if (f3!=null) f3.delete();
-        if (f4!=null) f4.delete();
-        if (f5!=null) f5.delete();
-        if (f6!=null) f6.delete();      
-        
-        if(store1!=null) store1.delete();
-        if(store2!=null) store2.delete();
-        if(store3!=null) store3.delete();
-    }
         
     public void testGetParentFile() throws Exception {
         f1 = createNewTestFile(1);
@@ -404,7 +326,7 @@ public class FileManagerTest extends LimeTestCase {
         cache.addTime(fd.getSHA1Urn(), 1234);
         long time = cache.getCreationTimeAsLong(fd.getSHA1Urn()); 
 
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString("title=\"Alive\""));
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString("title=\"Alive\""));
         fd.addLimeXMLDocument(d1);
         
         FileManagerEvent result = fileChanged(f1);
@@ -424,7 +346,7 @@ public class FileManagerTest extends LimeTestCase {
         
         FileDesc fd = fman.getFileDescForFile(f1);
 
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString("title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\""));
+        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString("title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\""));
         fd.addLimeXMLDocument(d2);
         
         FileManagerEvent result = fileChanged(f1);
@@ -1586,8 +1508,8 @@ public class FileManagerTest extends LimeTestCase {
     public void testNonSharedStoreFolder() throws Exception { 
         assertEquals("Unexpected number of store files", 0, fman.getSharedFileList().getNumFiles());
 
-        store1 = createNewNameStoreTestFile("FileManager_unit_test_Store", _storeDir);
-        store2 = createNewNameStoreTestFile2("FileManager_unit_test_Store", _storeDir);
+        store1 = FileManagerTestUtils.createNewNameStoreTestFile("FileManager_unit_test_Store", _storeDir);
+        store2 = FileManagerTestUtils.createNewNameStoreTestFile2("FileManager_unit_test_Store", _storeDir);
         f1 = createNewNamedTestFile(4, "FileManager_unit_test1", _storeDir);
 
         // load the files into the manager
@@ -1617,8 +1539,8 @@ public class FileManagerTest extends LimeTestCase {
         f1 = createNewTestFile(4);
         f2 = createNewTestFile(5);
         
-        store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _sharedDir);
-        store2 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+        store1 = FileManagerTestUtils.createNewNameStoreTestFile("FileManager_unit_store_test", _sharedDir);
+        store2 = FileManagerTestUtils.createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
         
         // load the files into the manager
         waitForLoad();       
@@ -1709,9 +1631,9 @@ public class FileManagerTest extends LimeTestCase {
         f3 = createNewTestFile(5);
         
         // create files in the store folder
-        store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
+        store1 = FileManagerTestUtils.createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
         // create a file from LWS in shared directory
-        store2 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+        store2 = FileManagerTestUtils.createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
 
         // load the files into the manager
         waitForLoad();
@@ -1751,9 +1673,9 @@ public class FileManagerTest extends LimeTestCase {
         f1 = createNewTestFile(4);
         
         // create a file from the LWS in the store directory
-        store2 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
+        store2 = FileManagerTestUtils.createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
         
-        store1 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+        store1 = FileManagerTestUtils.createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
         
         // load the files into the manager
         waitForLoad();
@@ -1796,7 +1718,7 @@ public class FileManagerTest extends LimeTestCase {
         store1 = createNewTestStoreFile();
         
         //create a file after the load
-        store3 = createNewNameStoreTestFile2("FileManager_unit_store_test", newStoreFolder);
+        store3 = FileManagerTestUtils.createNewNameStoreTestFile2("FileManager_unit_store_test", newStoreFolder);
         // load the files into the manager
         waitForLoad();
 
@@ -1930,7 +1852,7 @@ public class FileManagerTest extends LimeTestCase {
         
         // test a query where the filename is meaningless but XML matches.
         File f1 = createNewNamedTestFile(10, "meaningless");
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString(
             "artist=\"Sammy B\" album=\"Jazz in G\""));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>(); 
         l1.add(d1);
@@ -1939,14 +1861,14 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         Response[] r1 = keywordIndex.query(queryRequestFactory.createQuery("sam",
-                                    buildAudioXMLString("artist=\"sam\"")));
+                                    FileManagerTestUtils.buildAudioXMLString("artist=\"sam\"")));
         assertNotNull(r1);
         assertEquals(1, r1.length);
         assertEquals(d1.getXMLString(), r1[0].getDocument().getXMLString());
         
         // test a match where 50% matches -- should get no matches.
         Response[] r2 = keywordIndex.query(queryRequestFactory.createQuery("sam jazz in c",
-                                   buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
+                                   FileManagerTestUtils.buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
         assertNotNull(r2);
         assertEquals(0, r2.length);
             
@@ -1959,7 +1881,7 @@ public class FileManagerTest extends LimeTestCase {
                                   
         // test where keyword matches, but xml doesn't.
         Response[] r4 = keywordIndex.query(queryRequestFactory.createQuery("meaningles",
-                                   buildAudioXMLString("artist=\"bob\"")));
+                                   FileManagerTestUtils.buildAudioXMLString("artist=\"bob\"")));
         assertNotNull(r4);
         assertEquals(0, r4.length);
             
@@ -1967,7 +1889,7 @@ public class FileManagerTest extends LimeTestCase {
         // will work, but a keyword search that included XML will fail for
         // the same.
         File f2 = createNewNamedTestFile(10, "jazz in d");
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(
+        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString(
             "album=\"jazz in e\""));
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>(); l2.add(d2);
         result = addIfShared(f2, l2);
@@ -1982,7 +1904,7 @@ public class FileManagerTest extends LimeTestCase {
         
         // keyword, but has XML to check more efficiently.
         Response[] r6 = keywordIndex.query(queryRequestFactory.createQuery("jazz in d",
-                                   buildAudioXMLString("album=\"jazz in d\"")));
+                                   FileManagerTestUtils.buildAudioXMLString("album=\"jazz in d\"")));
         assertNotNull(r6);
         assertEquals(0, r6.length);
                             
@@ -1998,7 +1920,7 @@ public class FileManagerTest extends LimeTestCase {
         
         // create a store audio file with limexmldocument preventing sharing
         File f1 = createNewNamedTestFile(12, "small town hero");
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString(storeAudio));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(f1, l1);
@@ -2013,33 +1935,33 @@ public class FileManagerTest extends LimeTestCase {
         // create a query where keyword matches and partial xml matches, should get no
         // responses
         Response[] r1 = keywordIndex.query(queryRequestFactory.createQuery("small town hero",
-                                    buildAudioXMLString("title=\"Alive\"")));    
+                                    FileManagerTestUtils.buildAudioXMLString("title=\"Alive\"")));
         assertNotNull(r1);
         assertEquals(0, r1.length);
         
         // test 100% matches, should get no results
         Response[] r2 = keywordIndex.query(queryRequestFactory.createQuery("small town hero",
-                                   buildAudioXMLString(storeAudio)));
+                                   FileManagerTestUtils.buildAudioXMLString(storeAudio)));
         assertNotNull(r2);
         assertEquals(0, r2.length);
         
         // test xml matches 100% but keyword doesn't, should get no matches
         Response[] r3 = keywordIndex.query(queryRequestFactory.createQuery("meaningless",
-                                   buildAudioXMLString(storeAudio)));
+                                   FileManagerTestUtils.buildAudioXMLString(storeAudio)));
         assertNotNull(r3);
         assertEquals(0, r3.length);
         
         //test where nothing matches, should get no results
         Response[] r4 = keywordIndex.query(queryRequestFactory.createQuery("meaningless",
-                                   buildAudioXMLString("title=\"some title\" artist=\"unknown artist\" album=\"this album name\" genre=\"Classical\"")));
+                                   FileManagerTestUtils.buildAudioXMLString("title=\"some title\" artist=\"unknown artist\" album=\"this album name\" genre=\"Classical\"")));
         assertNotNull(r4);
         assertEquals(0, r4.length);
         
         
         // create a store audio file with xmldocument preventing sharing with video xml attached also
         File f2 = createNewNamedTestFile(12, "small town hero 2");
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-        LimeXMLDocument d3 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString("director=\"francis loopola\" title=\"Alive\""));
+        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString(storeAudio));
+        LimeXMLDocument d3 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildVideoXMLString("director=\"francis loopola\" title=\"Alive\""));
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(d3);
         l2.add(d2);
@@ -2054,7 +1976,7 @@ public class FileManagerTest extends LimeTestCase {
         // query with videoxml matching. This SHOULDNT return results. The new Meta-data parsing
         //  is fixed to disallow adding new XML docs to files
         Response[] r6 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
-                                    buildVideoXMLString("director=\"francis loopola\" title=\"Alive\"")));
+                                    FileManagerTestUtils.buildVideoXMLString("director=\"francis loopola\" title=\"Alive\"")));
         assertNotNull(r6);
         assertEquals(0, r6.length);
         
@@ -2062,13 +1984,13 @@ public class FileManagerTest extends LimeTestCase {
         //  is fixed to disallow adding new XML docs to files, this in theory shouldn't be 
         //  possible
         Response[] r7 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
-                                    buildVideoXMLString("title=\"Alive\"")));
+                                    FileManagerTestUtils.buildVideoXMLString("title=\"Alive\"")));
         assertNotNull(r7);
         assertEquals(0, r7.length);
         
         // test 100% matches minus VideoXxml, should get no results
         Response[] r8 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
-                                    buildAudioXMLString(storeAudio)));
+                                    FileManagerTestUtils.buildAudioXMLString(storeAudio)));
         assertNotNull(r8);
         assertEquals(0, r8.length);
         
@@ -2089,7 +2011,7 @@ public class FileManagerTest extends LimeTestCase {
 
         //now test xml metadata in the QRT
         File f2 = createNewNamedTestFile(11, "metadatafile2");
-        LimeXMLDocument newDoc2 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir2));
+        LimeXMLDocument newDoc2 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildVideoXMLString(dir2));
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(newDoc2);
         
@@ -2098,14 +2020,14 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(newDoc2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         qrt = qrpUpdater.getQRT();
         
-        assertTrue("expected in QRT", qrt.contains (get_qr(buildVideoXMLString(dir2))));
-        assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString("director=\"sasami juzo\""))));
+        assertTrue("expected in QRT", qrt.contains (get_qr(FileManagerTestUtils.buildVideoXMLString(dir2))));
+        assertFalse("should not be in QRT", qrt.contains(get_qr(FileManagerTestUtils.buildVideoXMLString("director=\"sasami juzo\""))));
         
         //now remove the file and make sure the xml gets deleted.
         fman.removeFileIfSharedOrStore(f2);
         qrt = qrpUpdater.getQRT();
        
-        assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString(dir2))));
+        assertFalse("should not be in QRT", qrt.contains(get_qr(FileManagerTestUtils.buildVideoXMLString(dir2))));
     }
     
     public void testMetaQRTStoreFiles() throws Exception {
@@ -2124,7 +2046,7 @@ public class FileManagerTest extends LimeTestCase {
         
         // create a store audio file with xml preventing sharing
         File f2 = createNewNamedTestFile(12, "small town hero");
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString(storeAudio));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         
@@ -2133,13 +2055,13 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         qrt = qrpUpdater.getQRT();
         
-        assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
+        assertFalse("should not be in QRT", qrt.contains (get_qr(FileManagerTestUtils.buildAudioXMLString(storeAudio))));
    
         waitForLoad();
    
         //store file should not be in QRT table
         qrt = qrpUpdater.getQRT();
-        assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
+        assertFalse("should not be in QRT", qrt.contains (get_qr(FileManagerTestUtils.buildAudioXMLString(storeAudio))));
         assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
     }
 
@@ -2148,13 +2070,13 @@ public class FileManagerTest extends LimeTestCase {
         String dir1 = "director=\"loopola\"";
 
         //make sure there's nothing with this xml query
-        Response[] res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        Response[] res = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildVideoXMLString(dir1)));
         
         assertEquals("there should be no matches", 0, res.length);
         
         File f1 = createNewNamedTestFile(10, "test_this");
         
-        LimeXMLDocument newDoc1 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir1));
+        LimeXMLDocument newDoc1 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildVideoXMLString(dir1));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(newDoc1);
 
@@ -2162,7 +2084,7 @@ public class FileManagerTest extends LimeTestCase {
         String dir2 = "director=\"\u5bae\u672c\u6b66\u8535\u69d8\"";
         File f2 = createNewNamedTestFile(11, "hmm");
 
-        LimeXMLDocument newDoc2 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir2));
+        LimeXMLDocument newDoc2 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildVideoXMLString(dir2));
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(newDoc2);
 
@@ -2171,7 +2093,7 @@ public class FileManagerTest extends LimeTestCase {
         File f3 = createNewNamedTestFile(12, "testtesttest");
         
         LimeXMLDocument newDoc3 = 
-            limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir3));
+            limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildVideoXMLString(dir3));
         List<LimeXMLDocument> l3 = new ArrayList<LimeXMLDocument>();
         l3.add(newDoc3);
         
@@ -2188,30 +2110,30 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(newDoc3, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         Thread.sleep(100);
-        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildVideoXMLString(dir1)));
         assertEquals("there should be one match", 1, res.length);
 
-        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
         
         //remove a file
         fman.removeFileIfSharedOrStore(f1);
 
-        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildVideoXMLString(dir1)));
         assertEquals("there should be no matches", 0, res.length);
         
         //make sure the two other files are there
-        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
 
         //remove another and check we still have on left
         fman.removeFileIfSharedOrStore(f2);
-        res = keywordIndex.query(queryRequestFactory.createQuery("",buildVideoXMLString(dir3)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildVideoXMLString(dir3)));
         assertEquals("there should be one match", 1, res.length);
 
         //remove the last file and make sure we get no replies
         fman.removeFileIfSharedOrStore(f3);
-        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir3)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildVideoXMLString(dir3)));
         assertEquals("there should be no matches", 0, res.length);
     }
     
@@ -2223,87 +2145,8 @@ public class FileManagerTest extends LimeTestCase {
         System.setProperty("os.name", name);
         PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems");
     }
-    
-    //helper function to create queryrequest with I18N
-    private QueryRequest get_qr(File f) {
-        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        String norm = I18NConvert.instance().getNorm(f.getName());
-        norm = StringUtils.replace(norm, "_", " ");
-        return queryRequestFactory.createQuery(norm);
-    }
-    
-    protected void addFilesToLibrary() throws Exception {
-        String dirString = "com/limegroup/gnutella";
-        File testDir = TestUtils.getResourceFile(dirString);
-        testDir = testDir.getCanonicalFile();
-        assertTrue("could not find the gnutella directory",
-            testDir.isDirectory());
-        
-        File[] testFiles = testDir.listFiles(new FileFilter() { 
-            public boolean accept(File file) {
-                // use files with a $ because they'll generally
-                // trigger a single-response return, which is
-                // easier to check
-                return !file.isDirectory() && file.getName().indexOf("$")!=-1;
-            }
-        });
-        assertNotNull("no files to test against", testFiles);
-        assertNotEquals("no files to test against", 0, testFiles.length);
-
-        for(int i=0; i<testFiles.length; i++) {
-            if(!testFiles[i].isFile()) continue;
-            File shared = new File(
-                _sharedDir, testFiles[i].getName() + "." + SHARE_EXTENSION);
-            assertTrue("unable to get file", FileUtils.copy( testFiles[i], shared));
-        }
-
-        waitForLoad();
-
-        
-        // the below test depends on the filemanager loading shared files in 
-        // alphabetical order, and listFiles returning them in alphabetical
-        // order since neither of these must be true, a length check can
-        // suffice instead.
-        //for(int i=0; i<files.length; i++)
-        //    assertEquals(files[i].getName()+".tmp", 
-        //                 fman.get(i).getFile().getName());
-            
-        assertEquals("unexpected number of shared files",
-            testFiles.length, fman.getSharedFileList().getNumFiles() );
-    }
-    
 
 
-    /**
-     * Helper function to create a new temporary file of the given size,
-     * with the given name, in the default shared directory.
-     */
-    protected File createNewNamedTestFile(int size, String name) throws Exception {
-        return createNewNamedTestFile(size, name, _sharedDir);
-    }
-
-    protected File createNewTestFile(int size) throws Exception {
-        return createNewNamedTestFile(size, "FileManager_unit_test", _sharedDir);
-    }
-    
-    protected URN getURN(File f) throws Exception {
-        return URN.createSHA1Urn(f);
-    }
-
-    /**
-     * Helper function to create a new temporary file of the given size,
-     * with the given name, in the given directory.
-     */
-    protected File createNewNamedTestFile(int size, String name, File directory) throws Exception {
-        File file = File.createTempFile(name, "." + SHARE_EXTENSION, directory);
-        file.deleteOnExit();
-        OutputStream out = new FileOutputStream(file);
-        out.write(new byte[size]);
-        out.flush();
-        out.close();
-        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
-        return FileUtils.getCanonicalFile(file);
-    }
 
     /** Same a createNewTestFile but doesn't actually allocate the requested
      *  number of bytes on disk.  Instead returns a subclass of File. */
@@ -2335,26 +2178,6 @@ public class FileManagerTest extends LimeTestCase {
         }
     }
 
-    protected void waitForLoad() throws Exception {
-        FileManagerTestUtils.waitForLoad(fman, 10000);
-    }    
-    
-    public static class Listener implements FileEventListener {
-        public FileManagerEvent evt;
-        public synchronized void handleFileEvent(FileManagerEvent fme) {
-            switch(fme.getType()) {
-                case LOAD_FILE:
-                case REMOVE_URN:
-                case REMOVE_FD:
-                    return;
-            }
-
-            evt = fme;
-            notify();
-            fme.getFileManager().removeFileEventListener(this);
-        }
-    }
-    
     private static class MultiListener implements FileEventListener {
         private List<FileManagerEvent> evtList = new ArrayList<FileManagerEvent>();
         public synchronized void handleFileEvent(FileManagerEvent fme) {
@@ -2364,134 +2187,5 @@ public class FileManagerTest extends LimeTestCase {
         public synchronized List<FileManagerEvent> getFileManagerEventList() {
             return evtList;
         }
-    }
-    
-    protected FileManagerEvent addIfShared(File f) throws Exception {
-        Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addFileIfShared(f, LimeXMLDocument.EMPTY_LIST);
-            fel.wait(5000);
-        }
-        return fel.evt;
-    }
-    
-    protected FileManagerEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
-        Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addFileIfShared(f, l);
-            fel.wait(5000);
-        }
-        return fel.evt;
-    }
-    
-    protected FileManagerEvent addAlways(File f) throws Exception {
-        Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addFileAlways(f);
-            fel.wait(5000);
-        }
-        return fel.evt;
-    }
-    
-    protected FileManagerEvent renameFile(File f1, File f2) throws Exception {
-        Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.renameFileIfSharedOrStore(f1, f2);
-            fel.wait(5000);
-        }
-        return fel.evt;
-    }
-    
-    protected FileManagerEvent addFileForSession(File f1) throws Exception {
-        Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addFileForSession(f1);
-            fel.wait(5000);
-        }
-        return fel.evt;
-    }
-    
-    protected FileManagerEvent fileChanged(File f1) throws Exception {
-        Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        synchronized (fel) {
-            fman.fileChanged(f1);
-            fel.wait(5000);
-        }
-        return fel.evt;
-    }
-    
-    protected void assertSharedFiles(List<FileDesc> shared, File... expected) {
-        List<File> files = new ArrayList<File>(shared.size());
-        synchronized(shared) {
-            for(FileDesc fd: shared) {
-                files.add(fd.getFile());
-            }
-        }
-        assertEquals(files.size(), expected.length);
-        for(File file : expected) {
-            assertTrue(files.contains(file));
-            files.remove(file);
-        }
-        assertTrue(files.toString(), files.isEmpty());
-    }
-    
-    private QueryRequest get_qr(String xml) {
-        return queryRequestFactory.createQuery("", xml);
-    }
-
-    // build xml string for video
-    private String buildVideoXMLString(String keyname) {
-        return "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video " 
-            + keyname 
-            + "></video></videos>";
-    }
-    
-    private String buildAudioXMLString(String keyname) {
-        return "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio " 
-            + keyname 
-            + "></audio></audios>";
-    }    
-    
-    protected File createNewTestStoreFile() throws Exception{
-        return createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
-    }
-    
-    private File createNewTestStoreFile2() throws Exception {
-        return createNewNameStoreTestFile2("FileManager_unit_store_test", _storeDir);
-    }
-    
-    protected File createNewNameStoreTestFile(String name, File directory) throws Exception { 
-        
-        String dir = "com/limegroup/gnutella/";
-        
-        File f = TestUtils.getResourceFile(dir + "StoreTestFile.mp3");
-        assertTrue(f.exists());
-        File file = File.createTempFile(name, ".mp3", directory);
-        
-        FileUtils.copy(f, file);
-        assertTrue(file.exists());
-        file.deleteOnExit();
-
-        return FileUtils.getCanonicalFile(file);
-    }
-    
-    protected File createNewNameStoreTestFile2(String name, File directory) throws Exception {
-        String dir = "com/limegroup/gnutella/";
-        
-        File f = TestUtils.getResourceFile(dir + "StoreTestFile2.mp3");
-        assertTrue(f.exists());
-        File file = File.createTempFile(name, ".mp3", directory);
-        
-        FileUtils.copy(f, file);
-        assertTrue(file.exists());
-        file.deleteOnExit();
-
-        return FileUtils.getCanonicalFile(file);
     }
 }

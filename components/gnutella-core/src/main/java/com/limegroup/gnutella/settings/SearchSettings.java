@@ -414,4 +414,11 @@ public final class SearchSettings extends LimeProps {
     public static final boolean isPromotionalResultsDisabled() {
         return LimeWireUtils.isPro() && DISABLE_PROMOTIONAL_RESULTS.getValue();
     }
+
+    /**
+     * Whether or not to include metadata in plaintext searches
+     */
+    public static final BooleanSetting INCLUDE_METADATA_IN_PLAINTEXT_SEARCH =
+        FACTORY.createRemoteBooleanSetting("INCLUDE_METADATA_IN_PLAINTEXT_SEARCH",
+                true, "SearchSettings.includeMetadataInPlaintextSearch");
 }

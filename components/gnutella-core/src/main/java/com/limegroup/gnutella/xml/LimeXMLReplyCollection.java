@@ -116,9 +116,12 @@ public class LimeXMLReplyCollection {
      * Creates a new LimeXMLReplyCollection.  The reply collection
      * will retain only those XMLDocs that match the given schema URI.
      *
-     * @param fds The list of shared FileDescs.
      * @param URI This collection's schema URI
-     * @param fileManager 
+     * @param path directory where the xml documents are stored
+     * @param fileManager guice provider used for {@link FileManager}
+     * @param limeXMLDocumentFactory factory object for {@link LimeXMLDocument}
+     * @param metaDataReader also used to construct {@link LimeXMLDocument}
+     * @param metaDataFactory the MetaDataFactory used in this class
      */
     LimeXMLReplyCollection(String URI, File path, Provider<FileManager> fileManager,
             LimeXMLDocumentFactory limeXMLDocumentFactory, MetaDataReader metaDataReader,
@@ -504,6 +507,28 @@ public class LimeXMLReplyCollection {
             return Collections.emptyList();
 
         return actualMatches;
+    }
+
+    public List<LimeXMLDocument> getMatchingReplies(String query) {
+    	 List<LimeXMLDocument> matching = null;
+         synchronized(mainMap) {
+        	 for (StringTrie<List<LimeXMLDocument>> trie: trieMap.values()) {
+                 Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(query);
+
+                 if(iter.hasNext()) {
+                     if (matching == null)
+                         matching = new ArrayList<LimeXMLDocument>();
+
+                     while(iter.hasNext())
+                         matching.addAll(iter.next());
+                 }
+             }
+         }
+         if (matching != null) {
+        	 return matching;
+         } else {
+        	 return Collections.emptyList();
+         }
     }
     
     /**

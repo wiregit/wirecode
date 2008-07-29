@@ -188,8 +188,8 @@ public class LimeXMLUtils {
                     // if this is a parse-able numeric value, doing a prefix
                     // matching doesn't make sense.  cast it to a double and do
                     // a straight equals comparison
-                    double rDVD = (new Double(replyDocValue)).doubleValue();
-                    double qVD  = (new Double(queryValue)).doubleValue();
+                    double rDVD = Double.parseDouble(replyDocValue);
+                    double qVD  = Double.parseDouble(queryValue);
                     if (rDVD == qVD) {
                         matchCount++;
                         if (currFieldName.equals(LimeXMLNames.AUDIO_BITRATE))

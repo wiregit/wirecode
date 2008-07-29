@@ -184,7 +184,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
             throw new IllegalArgumentException("Bad Meta Flag = " +
                                                metaFlagMask);
         if (metaFlagMask > 0)
-            _metaMask = new Integer(metaFlagMask);
+            _metaMask = metaFlagMask;
 
         // only set the minspeed if none was input...x
         if (minSpeed == 0) {
@@ -359,7 +359,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 		PAYLOAD=payload;
 		
         QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload, manager);
-        
+
 		QUERY = parser.query;
 
 	    LimeXMLDocument tempDoc = null;
@@ -689,7 +689,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     public boolean desiresAudio() {
         if (_metaMask != null) 
-            return ((_metaMask.intValue() & AUDIO_MASK) > 0);
+            return ((_metaMask & AUDIO_MASK) > 0);
         return true;
     }
     
@@ -697,7 +697,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     public boolean desiresVideo() {
         if (_metaMask != null) 
-            return ((_metaMask.intValue() & VIDEO_MASK) > 0);
+            return ((_metaMask & VIDEO_MASK) > 0);
         return true;
     }
     
@@ -705,7 +705,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     public boolean desiresDocuments() {
         if (_metaMask != null) 
-            return ((_metaMask.intValue() & DOC_MASK) > 0);
+            return ((_metaMask & DOC_MASK) > 0);
         return true;
     }
     
@@ -713,7 +713,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     public boolean desiresImages() {
         if (_metaMask != null) 
-            return ((_metaMask.intValue() & IMAGE_MASK) > 0);
+            return ((_metaMask & IMAGE_MASK) > 0);
         return true;
     }
     
@@ -722,7 +722,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     public boolean desiresWindowsPrograms() {
         if (_metaMask != null) 
-            return ((_metaMask.intValue() & WIN_PROG_MASK) > 0);
+            return ((_metaMask & WIN_PROG_MASK) > 0);
         return true;
     }
     
@@ -731,7 +731,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     public boolean desiresLinuxOSXPrograms() {
         if (_metaMask != null) 
-            return ((_metaMask.intValue() & LIN_PROG_MASK) > 0);
+            return ((_metaMask & LIN_PROG_MASK) > 0);
         return true;
     }
     
@@ -740,7 +740,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      */
     public int getMetaMask() {
         if (_metaMask != null)
-            return _metaMask.intValue();
+            return _metaMask;
         return 0;
     }
     
@@ -1001,9 +1001,9 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                             doNotProxy = true;
                         }
                         if (ggep.hasKey(GGEPKeys.GGEP_HEADER_META)) {
-                            metaMask = new Integer(ggep.getInt(GGEPKeys.GGEP_HEADER_META));
+                            metaMask = ggep.getInt(GGEPKeys.GGEP_HEADER_META);
                             // if the value is something we can't handle, don't even set it
-                            if ((metaMask.intValue() < 4) || (metaMask.intValue() > 248))
+                            if ((metaMask < 4) || (metaMask > 248))
                                 metaMask = null;
                         }
                         if (ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_OOB)) {

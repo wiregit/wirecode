@@ -1,11 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 
 import org.limewire.collection.Function;
 import org.limewire.collection.IntSet;
@@ -20,23 +22,20 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import com.limegroup.gnutella.xml.LimeXMLSchema;
 
 // TODO split this up further and remove query and response from here,
 // or introduce a generic indexing class that can be used
 @Singleton
 public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
-    /**
-     * Constant for an empty <tt>Response</tt> array to return when there are
-     * no matches.
-     */
-    private static final Response[] EMPTY_RESPONSES = new Response[0];
-    
     /**
      * A trie mapping keywords in complete filenames to the indices in _files.
      * Keywords are the tokens when the filename is tokenized with the
@@ -73,48 +72,45 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
     private final ActivityCallback activityCallback;
 
+    private final LimeXMLSchemaRepository schemaRepository;
+
     @Inject
     public SharedFilesKeywordIndexImpl(FileManager fileManager, Provider<CreationTimeCache> creationTimeCache,
             Provider<ResponseFactory> responseFactory, Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
-            ActivityCallback activityCallback) {
+            ActivityCallback activityCallback, LimeXMLSchemaRepository schemaRepository) {
         this.fileManager = fileManager;
         this.creationTimeCache = creationTimeCache;
         this.responseFactory = responseFactory;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
         this.activityCallback = activityCallback;
+        this.schemaRepository = schemaRepository;
     }
     
     public Response[] query(QueryRequest request) {
-        Response[] result = queryInternal(request);
-        if (request.shouldIncludeXMLInResponse()) {
-            LimeXMLDocument doc = request.getRichQuery();
-            if (doc != null) {
-                Response[] metas = query(doc);
-                if (metas != null) // valid query & responses.
-                    result = union(result, metas);
-            }
-        }
-        return result;
+        Set<Response> responses = QueryProcessor.processQuery(request, this);
+        return responses.toArray(new Response[responses.size()]);
     }
-    
+
+
+    private Set<Response> queryMetaData(QueryRequest request) {
+        List<LimeXMLDocument> documents = Collections.emptyList();
+        LimeXMLDocument doc = request.getRichQuery();
+        if (doc != null) {
+            documents = queryMetaDataWithRequestXml(doc);
+        } else if (SearchSettings.INCLUDE_METADATA_IN_PLAINTEXT_SEARCH.getValue()) {
+            // no xml query, look if any xml field of the matching mediatype
+            // starts with the keywords of the request
+            documents = queryMetaDataWithPlaintext(request);
+        }
+        return createResponses(documents);
+    }
+
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#query(com.limegroup.gnutella.messages.QueryRequest)
-     */
-    public Response[] queryInternal(QueryRequest request) {
+    * @see com.limegroup.gnutella.FileManager#query(com.limegroup.gnutella.messages.QueryRequest)
+    */
+    private Set<Response> queryFileNames(QueryRequest request) {
         String str = request.getQuery();
         boolean includeXML = request.shouldIncludeXMLInResponse();
-
-        //Special case: return up to 3 of your 'youngest' files.
-        if (request.isWhatIsNewRequest()) 
-            return respondToWhatIsNewRequest(request, includeXML);
-
-        //Special case: return everything for Clip2 indexing query ("    ") and
-        //browse queries ("*.*").  If these messages had initial TTLs too high,
-        //StandardMessageRouter will clip the number of results sent on the
-        //network.  Note that some initial TTLs are filterd by GreedyQuery
-        //before they ever reach this point.
-        if (str.equals(QueryRequest.INDEXING_QUERY) || str.equals(QueryRequest.BROWSE_QUERY))
-            return EMPTY_RESPONSES;
 
         //Normal case: query the index to find all matches.  TODO: this
         //sometimes returns more results (>255) than we actually send out.
@@ -130,9 +126,9 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             matches = urnSearch(request.getQueryUrns(),matches);
         
         if (matches==null)
-            return EMPTY_RESPONSES;
+            return Collections.emptySet();
 
-        List<Response> responses = new LinkedList<Response>();
+        Set<Response> responses = new HashSet<Response>();
         final MediaType.Aggregator filter = MediaType.getAggregator(request);
         LimeXMLDocument doc = request.getRichQuery();
 
@@ -158,10 +154,11 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             responses.add(resp);
         }
         if (responses.size() == 0)
-            return EMPTY_RESPONSES;
-        return responses.toArray(new Response[responses.size()]);
+            return Collections.emptySet();
+
+        return responses;
     }
-    
+
     private static boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
         return LimeXMLUtils.match(r.getDocument(), doc, true);
     }
@@ -196,8 +193,9 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     /**
      * Responds to a what is new request.
      */
-    private Response[] respondToWhatIsNewRequest(QueryRequest request, 
-                                                 boolean includeXML) {
+    private Set<Response> queryWhatsNew(QueryRequest request) {
+        boolean includeXML = request.shouldIncludeXMLInResponse();
+
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
@@ -205,10 +203,10 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         //       returns the top 3 shared files
         List<URN> urnList = creationTimeCache.get().getFiles(request, 3);
         if (urnList.size() == 0)
-            return EMPTY_RESPONSES;
+            return Collections.emptySet();
         
         // get the appropriate responses
-        Response[] resps = new Response[urnList.size()];
+        Set<Response> resps = new HashSet<Response>(urnList.size());
         for (int i = 0; i < urnList.size(); i++) {
             URN currURN = urnList.get(i);
             FileDesc desc = fileManager.getFileDescForUrn(currURN);
@@ -224,7 +222,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 addXMLToResponse(r, desc);
             
             // Cache it
-            resps[i] = r;
+            resps.add(r);
         }
         return resps;
     }
@@ -299,9 +297,8 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private void loadKeywords(StringTrie<IntSet> trie, FileDesc fd) {
         // Index the filename.  For each keyword...
         String[] keywords = extractKeywords(fd);
-        
-        for (int i = 0; i < keywords.length; i++) {
-            String keyword = keywords[i];
+
+        for (String keyword : keywords) {
             synchronized (trie) {
                 //Ensure the _keywordTrie has a set of indices associated with keyword.
                 IntSet indices = trie.get(keyword);
@@ -319,8 +316,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private void removeKeywords(StringTrie<IntSet> trie, FileDesc fd) {
         //Remove references to this from index.
         String[] keywords = extractKeywords(fd);
-        for (int j = 0; j < keywords.length; j++) {
-            String keyword = keywords[j];
+        for (String keyword : keywords) {
             synchronized (trie) {
                 IntSet indices = trie.get(keyword);
                 if (indices != null) {
@@ -333,9 +329,9 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     }
     
     /**
-     * Returns a set of indices of files matching q, or null if there are no
-     * matches.  Subclasses may override to provide different notions of
-     * matching.  The caller of this method must not mutate the returned
+     * Returns a set of indices of files matching <code>query</code>, or null
+     * if there are no matches.  Subclasses may override to provide different
+     * notions of matching.  The caller of this method must not mutate the returned
      * value.
      */
     protected IntSet search(String query, IntSet priors, boolean partial) {
@@ -465,55 +461,77 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         }
     }
 
-    /**
-     * Creates a new array, the size of which is less than or equal to
-     * normals.length + metas.length.
-     */
-    private static Response[] union(Response[] normals, Response[] metas) {
-        if (normals == null || normals.length == 0)
-            return metas;
-        if (metas == null || metas.length == 0)
-            return normals;
-
-        // It is important to use a HashSet here so that duplicate
-        // responses are not sent.
-        // Unfortunately, it is still possible that one Response
-        // did not have metadata but the other did, causing two
-        // responses for the same file.
-
-        Set<Response> unionSet = new HashSet<Response>();
-        for (Response meta : metas)
-            unionSet.add(meta);
-        for (Response normal : normals)
-            unionSet.add(normal);
-
-        // The set contains all the elements that are the union of the 2 arrays
-        Response[] retArray = new Response[unionSet.size()];
-        retArray = unionSet.toArray(retArray);
-        return retArray;
-    }
-
-    
 
     /**
      * Returns an array of Responses that correspond to documents that have a
      * match given query document.
      */
-    private Response[] query(LimeXMLDocument queryDoc) {
+    private List<LimeXMLDocument> queryMetaDataWithRequestXml(LimeXMLDocument queryDoc) {
         String schema = queryDoc.getSchemaURI();
         LimeXMLReplyCollection replyCol = schemaReplyCollectionMapper.get().getReplyCollection(schema);
         if (replyCol == null)// no matching reply collection for schema
-            return null;
+            return Collections.emptyList();
 
-        List<LimeXMLDocument> matchingReplies = replyCol.getMatchingReplies(queryDoc);
-        // matchingReplies = a List of LimeXMLDocuments that match the query
-        int s = matchingReplies.size();
-        if (s == 0) // no matching replies.
-            return null;
+        return replyCol.getMatchingReplies(queryDoc);
+    }
 
-        Response[] retResponses = new Response[s];
-        int z = 0;
-        for (LimeXMLDocument currDoc : matchingReplies) {
+    /**
+     * Queries metadata of shared files.  This will query certain
+     * media types, depending on what is specified in the request.
+     *
+     * If not specified in request, query all metadata.
+     *
+     * @param request determines what to search, and
+     * which metadata is searched.
+     * @return
+     */
+    private List<LimeXMLDocument> queryMetaDataWithPlaintext(QueryRequest request) {
+        
+        Collection<LimeXMLReplyCollection> schemas = getReplyCollections(request);
+        
+        List<LimeXMLDocument> documents = new ArrayList<LimeXMLDocument>();
+    	for (LimeXMLReplyCollection schemaCol : schemas) {
+    		documents.addAll(schemaCol.getMatchingReplies(request.getQuery()));
+    	}
+    	return documents;
+    }
+
+
+    private Collection<LimeXMLReplyCollection> getReplyCollections(QueryRequest request) {
+    	MediaType.Aggregator filter = MediaType.getAggregator(request);
+    	SchemaReplyCollectionMapper mapper = schemaReplyCollectionMapper.get();
+        if (filter == null) {
+    		return mapper.getCollections();
+        }
+    	Collection<MediaType> mediaTypes = filter.getMediaTypes();
+    	List<LimeXMLReplyCollection> collections = new ArrayList<LimeXMLReplyCollection>(mediaTypes.size());
+    	for (MediaType mt : mediaTypes) {
+
+            // get schema uri from media type
+            LimeXMLReplyCollection col = mapper.getReplyCollection(
+                    getSchemaUriFromMimeType(mt.getMimeType()));
+
+            if (col != null) {
+    		    collections.add(col);
+            }
+        }
+    	return collections;
+    }
+
+    private String getSchemaUriFromMimeType(String mimeType) {
+        Collection<LimeXMLSchema> schemas = schemaRepository.getAvailableSchemas();
+        for (LimeXMLSchema schema : schemas) {
+            if (schema.getDescription().equals(mimeType)) {
+                return schema.getSchemaURI();
+            }
+        }
+        return "";
+    }
+
+    private Set<Response> createResponses(List<LimeXMLDocument> documents) {
+    	Set<Response> responses = new HashSet<Response>(documents.size());
+
+    	for (LimeXMLDocument currDoc : documents) {
             File file = currDoc.getIdentifier();// returns null if none
             Response res = null;
             if (file == null) { // pure metadata (no file)
@@ -532,27 +550,156 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 }
             }
 
-            // Note that if any response was invalid,
-            // the array will be too small, and we'll
-            // have to resize it.
             res.setDocument(currDoc);
-            retResponses[z] = res;
-            z++;
-        }
-
-        if (z == 0)
-            return null; // no responses
-
-        // need to ensure that no nulls are returned in my response[]
-        // z is a count of responses constructed, see just above...
-        // s == retResponses.length
-        if (z < s) {
-            Response[] temp = new Response[z];
-            System.arraycopy(retResponses, 0, temp, 0, z);
-            retResponses = temp;
-        }
-
-        return retResponses;
+            responses.add(res);
+    	}
+        return responses;
     }
 
+    /**
+     * Enum type and context object to better organize the
+     * various steps that go into processing a query
+     * <p>
+     * Each QueryProcessor enum represents 1 step in
+     * processing a query.
+     * <p>
+     * Purposes of the context object are:
+     * <p>
+     * 1. Keep track of whether query processing is done<br>
+     * 2. Keep track of Responses found during searches so far.<br>
+     * <p>
+     * What query processing does:
+     * <p>
+     * For each QueryProcessor Enum type,
+     * <p>
+     * 1. Check context object to see if query processing is done.  If so, stop processing
+     * 2. Should this particular query type be done?
+     * 3. If it should, perform the query, and add the Response objects in context object
+     * 4. If query processing done, set status in context object
+     *
+     */
+    private enum QueryProcessor {
+
+        /**
+         * "What is new" search. Get up to 3 of your "youngest" files.
+         */
+        WHATS_NEW {
+            void processQueryStage(QueryRequest request,
+                                          QueryProcessingContext context,
+                                          SharedFilesKeywordIndexImpl keywordIndex) {
+                Set<Response> responses = keywordIndex.queryWhatsNew(request);
+                context.addQueryResponses(responses);
+                context.setFinishedProcessing();
+            }
+
+            boolean shouldProcess(QueryRequest request) {
+                return request.isWhatIsNewRequest();
+            }
+        },
+
+
+        /**
+         * Special case: return everything for Clip2 indexing query ("    ") and
+         * browse queries ("*.*").  If these messages had initial TTLs too high,
+         * StandardMessageRouter will clip the number of results sent on the
+         * network.  Note that some initial TTLs are filterd by GreedyQuery
+         * before they ever reach this point.
+         */
+        SPECIAL_CASE_EMPTY_RESPONSE {
+            void processQueryStage(QueryRequest request,
+                                   QueryProcessingContext context,
+                                   SharedFilesKeywordIndexImpl keywordIndex) {
+                context.setFinishedProcessing();
+            }
+            
+            boolean shouldProcess(QueryRequest request) {
+                String str = request.getQuery();
+                return str.equals(QueryRequest.INDEXING_QUERY) || str.equals(QueryRequest.BROWSE_QUERY);
+            }
+        },
+
+        /**
+         * Search file name
+         */
+        FILE_SEARCH {
+            void processQueryStage(QueryRequest request,
+                                   QueryProcessingContext context,
+                                   SharedFilesKeywordIndexImpl keywordIndex) {
+                Set<Response> responses = keywordIndex.queryFileNames(request);
+                context.addQueryResponses(responses);
+            }
+
+            boolean shouldProcess(QueryRequest request) {
+                return true;
+            }
+
+        },
+
+        /**
+         * Search meta data
+         */
+        METADATA_SEARCH {
+            void processQueryStage(QueryRequest request,
+                                   QueryProcessingContext context,
+                                   SharedFilesKeywordIndexImpl keywordIndex) {
+                Set<Response> responses = keywordIndex.queryMetaData(request);
+                context.addQueryResponses(responses);
+                context.setFinishedProcessing();
+            }
+
+            boolean shouldProcess(QueryRequest request) {
+                return request.shouldIncludeXMLInResponse();
+            }
+        };
+
+        abstract void processQueryStage(QueryRequest request,
+                                        QueryProcessingContext context,
+                                        SharedFilesKeywordIndexImpl keywordIndex);
+
+        abstract boolean shouldProcess(QueryRequest request);
+
+
+        public static Set<Response> processQuery(QueryRequest request,
+                                                        SharedFilesKeywordIndexImpl keywordIndex) {
+
+            QueryProcessingContext contextObj = new QueryProcessingContext();
+            for (QueryProcessor queryProcessor : QueryProcessor.values()) {
+                if (queryProcessor.shouldProcess(request)) {
+                    queryProcessor.processQueryStage(request, contextObj, keywordIndex);
+
+                    if (contextObj.isFinishedProcessing()) {
+                        break;
+                    }
+                }
+            }
+            return contextObj.getResponses();
+        }
+    }
+
+    private static class QueryProcessingContext {
+
+        private boolean isTerminal;
+        private final Set<Response> responses;
+
+        QueryProcessingContext() {
+            this.responses = new HashSet<Response>();
+            this.isTerminal = false;
+        }
+
+        boolean isFinishedProcessing() {
+            return isTerminal;
+        }
+
+        Set<Response> getResponses() {
+            return responses;
+        }
+
+        void addQueryResponses(Set<Response> responses) {
+            this.responses.addAll(responses);
+        }
+
+        void setFinishedProcessing() {
+            isTerminal = true;
+        }
+    }
 }

@@ -26,7 +26,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         context = new Mockery();
         fileManager = context.mock(FileManager.class);
         sharedFileList = context.mock(FileList.class);
-        keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null);
+        keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null);
     }
     
     public void testRenamedFilesEvent() throws Exception {

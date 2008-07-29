@@ -71,7 +71,7 @@ public class QueryUtils {
 
     /**
      * Convenience wrapper for 
-     * {@link keywords keywords(String, false)}.
+     * {@link #keywords(String, boolean) keywords(String, false)}.
      * @param fileName
      * @return
      */
@@ -170,7 +170,7 @@ public class QueryUtils {
 
     /**
      * Convenience wrapper for 
-     * {@link createQueryString createQueryString(String, false)}.
+     * {@link #createQueryString(String, boolean) createQueryString(String, false)}.
      * @param name
      * @return
      */

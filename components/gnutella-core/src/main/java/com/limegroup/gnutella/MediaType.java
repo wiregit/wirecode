@@ -30,7 +30,7 @@ public class MediaType implements Serializable {
     private static final long serialVersionUID = 3999062781289258389L;
     
     // These values should match standard MIME content-type
-    // categories and/or XSD schema names.
+    // categories and/or XSD Mime Type names.
     public static final String SCHEMA_ANY_TYPE = "*";
     public static final String SCHEMA_CUSTOM = "custom";
     public static final String SCHEMA_DOCUMENTS = "document";
@@ -48,7 +48,7 @@ public class MediaType implements Serializable {
     public static final String AUDIO = I18nMarker.marktr("Audio");
     public static final String VIDEO = I18nMarker.marktr("Video");
     public static final String IMAGES = I18nMarker.marktr("Images");
-    
+
     /**
      * Type for 'any file'
      */
@@ -76,7 +76,7 @@ public class MediaType implements Serializable {
                 "pdf", "ps", "eps", "epsf", "dvi", 
                 "rtf", "wri", "doc", "mcw", "wps",
                 "xls", "wk1", "dif", "csv", "ppt", "tsv",
-                "hlp", "chm", "lit", 
+                "hlp", "chm", "lit",
                 "tex", "texi", "latex", "info", "man",
                 "wp", "wpd", "wp5", "wk3", "wk4", "shw", 
                 "sdd", "sdw", "sdp", "sdc",
@@ -194,7 +194,7 @@ public class MediaType implements Serializable {
      * Whether or not this is one of the default media types.
      */
     private final boolean isDefault;
-    
+
     /**
      * Constructs a MediaType with only a MIME-Type.
      */
@@ -234,7 +234,7 @@ public class MediaType implements Serializable {
             this.exts = set;
         }
     }
-        
+
     /** 
      * Returns true if a file with the given name is of this
      * media type, i.e., the suffix of the filename matches
@@ -290,7 +290,7 @@ public class MediaType implements Serializable {
     public Set<String> getExtensions() {
         return exts;
     }
-    
+
     /**
      * Returns all default media types.
      */
@@ -332,7 +332,7 @@ public class MediaType implements Serializable {
     public boolean equals(Object obj) {
         if (obj instanceof MediaType) {
             MediaType type = (MediaType)obj;
-            return schema.equals(type.schema) 
+            return schema.equals(type.schema)
             && exts.equals(type.exts)
             && isDefault == type.isDefault;
         }
@@ -429,6 +429,13 @@ public class MediaType implements Serializable {
         private void addFilter(MediaType filter) {
             _filters.add(filter);
         }
+
+        /**
+         * @return an immutable list of mediatypes of aggregator.
+         */
+        public List<MediaType> getMediaTypes() {
+        	return Collections.unmodifiableList(_filters);
+        }        
 
         /** @return true if the Response falls within one of the MediaTypes
          *  this aggregates.

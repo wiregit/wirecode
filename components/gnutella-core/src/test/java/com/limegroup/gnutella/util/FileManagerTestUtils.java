@@ -3,11 +3,20 @@ package com.limegroup.gnutella.util;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.File;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
 
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.FileManagerEvent.Type;
+import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
+import junit.framework.Assert;
 
 public class FileManagerTestUtils {
 
@@ -35,4 +44,69 @@ public class FileManagerTestUtils {
             fileManager.removeFileEventListener(listener);
         }
     }
+
+    // build xml string for video
+    public static String buildVideoXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video "
+            + keyname
+            + "></video></videos>";
+    }
+
+    public static String buildAudioXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio "
+            + keyname
+            + "></audio></audios>";
+    }
+
+
+    /**
+     * Helper function to create a new temporary file of the given size,
+     * with the given name, in the given directory.
+     */
+    public static File createNewNamedTestFile(int size, String name,
+                                              String extension, File directory) throws Exception {
+        File file = File.createTempFile(name, "." + extension, directory);
+        file.deleteOnExit();
+        OutputStream out = new FileOutputStream(file);
+
+        for (int i=0; i<size; i++) {
+            out.write(name.charAt(i % name.length()));
+        }
+        out.flush();
+        out.close();
+            
+        //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".
+        return FileUtils.getCanonicalFile(file);
+    }
+
+
+    public static File createNewNameStoreTestFile(String name, File directory) throws Exception {
+
+        String dir = "com/limegroup/gnutella/";
+
+        File f = TestUtils.getResourceFile(dir + "StoreTestFile.mp3");
+        Assert.assertTrue(f.exists());
+        File file = File.createTempFile(name, ".mp3", directory);
+
+        FileUtils.copy(f, file);
+        Assert.assertTrue(file.exists());
+        file.deleteOnExit();
+
+        return FileUtils.getCanonicalFile(file);
+    }
+
+    public static File createNewNameStoreTestFile2(String name, File directory) throws Exception {
+        String dir = "com/limegroup/gnutella/";
+
+        File f = TestUtils.getResourceFile(dir + "StoreTestFile2.mp3");
+        Assert.assertTrue(f.exists());
+        File file = File.createTempFile(name, ".mp3", directory);
+
+        FileUtils.copy(f, file);
+        Assert.assertTrue(file.exists());
+        file.deleteOnExit();
+
+        return FileUtils.getCanonicalFile(file);
+    }
+
 }
