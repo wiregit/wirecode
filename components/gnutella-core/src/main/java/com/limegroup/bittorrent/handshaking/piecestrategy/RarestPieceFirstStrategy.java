@@ -45,7 +45,6 @@ public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
     }
 
     /**
-     * 
      * Gets the rareness of an individual piece. A smaller number means it is
      * more rare. The number indicates how many of your peers has the piece. The
      * algorithm stops after the specified max rareness is reached, and the max
@@ -73,8 +72,7 @@ public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
      * This algorithm attempts to find the rarest piece among your peers. It
      * will return the first piece that matches the minimum indicated rareness
      * for returning. Otherwise it will iterate through all pieces and rareness
-     * combinations until the rarest is found. Pieces with a rareness of zero(no
-     * peers having the piece) are excluded from the results.
+     * combinations until the rarest is found. 
      * 
      * @param interestingBlocks
      * 
