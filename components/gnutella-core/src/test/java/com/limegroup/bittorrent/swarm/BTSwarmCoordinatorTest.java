@@ -134,7 +134,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
     }
 
-    private BTMetaInfo createMetaInfo(File torrentFile) throws IOException {
+    public static BTMetaInfo createMetaInfo(File torrentFile) throws IOException {
         byte[] torrentBytes = FileUtils.readFileFully(torrentFile);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         final BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(torrentBytes);
