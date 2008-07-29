@@ -25,6 +25,10 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
+/**
+ * This class is a panel that displays search results.
+ * @see org.limewire.ui.swing.search.SearchResultsPanel.
+ */
 public class ResultsContainer extends JXPanel {
 
     private final CardLayout cardLayout;
@@ -88,5 +92,4 @@ public class ResultsContainer extends JXPanel {
             }
         }
     }
-
 }

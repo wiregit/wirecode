@@ -25,46 +25,47 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
+/**
+ * This class is a panel that contains components for
+ * filtering and sorting search results.
+ * @see org.limewire.ui.swing.search.SearchResultsPanel.
+ */
 class SortAndFilterPanel extends JXPanel {
     
-    private final JComboBox sortBox;
-    private final JTextField filterBox;
+    private static final int FILTER_WIDTH = 15;
+    
+    private final JComboBox sortBox = new JComboBox(new String[] {
+        "Sources", "Relevance", "Size", "File Extension" });
+    
+    private final JTextField filterBox = new JTextField(FILTER_WIDTH);
     
     SortAndFilterPanel() {
-        this.sortBox = new JComboBox(new String[] { "Sources", "Relevance", "Size", "File Extension" } );
-        this.filterBox = new JTextField();
         setBackground(new Color(100, 100, 100));
         
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         
+        gbc.insets = new Insets(5, 5, 5, 10);
+        //gbc.ipadx = 150;
+        add(filterBox, gbc);
+        
         JLabel sortLabel = new JLabel("Sort by");
         FontUtils.changeSize(sortLabel, 1);
         FontUtils.changeStyle(sortLabel, Font.BOLD);
         sortLabel.setForeground(Color.WHITE);
-        gbc.insets = new Insets(5, 10, 5, 5);
+        //gbc.insets = new Insets(5, 10, 5, 5);
+        gbc.insets.right = 5;
         add(sortLabel, gbc);
-        gbc.insets = new Insets(5, 0, 5, 15);
+        
+        //gbc.insets = new Insets(5, 0, 5, 15);
         add(sortBox, gbc);
-        
-        JLabel filterLabel = new JLabel("Filter by");
-        FontUtils.changeSize(filterLabel, 1);
-        FontUtils.changeStyle(filterLabel, Font.BOLD);
-        filterLabel.setForeground(Color.WHITE);
-        gbc.insets = new Insets(5, 0, 5, 5);
-        add(filterLabel, gbc);
-        gbc.insets = new Insets(5, 0, 5, 0);
-        gbc.ipadx = 150;
-        add(filterBox, gbc);
-        
-        gbc.weightx = 1;
-        gbc.ipady = 42;
-        gbc.ipadx = 0;
-        add(Box.createGlue(), gbc);
     }
 
-    public EventList<VisualSearchResult> getSortedAndFilteredList(EventList<VisualSearchResult> visualSearchResults) {
-        EventList<VisualSearchResult> filteredList = new FilterList<VisualSearchResult>(visualSearchResults, new TextComponentMatcherEditor<VisualSearchResult>(filterBox, new VisualSearchResultTextFilterator(), true));
+    public EventList<VisualSearchResult> getSortedAndFilteredList(
+        EventList<VisualSearchResult> visualSearchResults) {
+        
+        EventList<VisualSearchResult> filteredList =
+            new FilterList<VisualSearchResult>(visualSearchResults, new TextComponentMatcherEditor<VisualSearchResult>(filterBox, new VisualSearchResultTextFilterator(), true));
         final SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(filteredList, null);
         ItemListener listener = new ItemListener() {
             @Override
