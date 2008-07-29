@@ -51,6 +51,10 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
         synchronized (writeLock) {
             if (byteBuffer == null) {
                 piece = pieces.get(index++);
+                //TODO instead of writing all of the data for the piece to a buffer.
+                //use a real buffer and keep track of which pieces have finished.
+                //just resize the piece that is being written to disk so that 
+                //the verifying folder can figure things out.
                 byteBuffer = ByteBuffer.allocate(piece.get32BitLength());
             }
 
