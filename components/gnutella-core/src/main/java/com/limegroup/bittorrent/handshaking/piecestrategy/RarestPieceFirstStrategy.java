@@ -13,17 +13,29 @@ import com.limegroup.bittorrent.BTMetaInfo;
 
 public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
 
+    private static final int DEFAULT_MIN_RARENESS = 1;
+
     private final BTLinkManager btLinkManager;
 
-    public RarestPieceFirstStrategy(BTMetaInfo btMetaInfo, BTLinkManager btLinkManager) {
+    private final int minRareness;
+
+    public RarestPieceFirstStrategy(BTMetaInfo btMetaInfo, BTLinkManager btLinkManager,
+            int minRareness) {
         super(btMetaInfo);
+        assert btLinkManager != null;
+        assert minRareness >= 0;
         this.btLinkManager = btLinkManager;
+        this.minRareness = minRareness;
+    }
+
+    public RarestPieceFirstStrategy(BTMetaInfo btMetaInfo, BTLinkManager btLinkManager) {
+        this(btMetaInfo, btLinkManager, DEFAULT_MIN_RARENESS);
     }
 
     public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
         List<BTInterval> nextPieces = new ArrayList<BTInterval>();
         BitField interestingBlocks = new AndView(availableBlocks, neededBlocks);
-        int rarestPiece = getCurrentRarestPiece(interestingBlocks, 1);
+        int rarestPiece = getCurrentRarestPiece(interestingBlocks, minRareness);
 
         if (rarestPiece > -1) {
             BTInterval nextPiece = getBtMetaInfo().getPiece(rarestPiece);
@@ -63,7 +75,8 @@ public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
      * for returning. Otherwise it will iterate through all pieces and rareness
      * combinations until the rarest is found. Pieces with a rareness of zero(no
      * peers having the piece) are excluded from the results.
-     * @param interestingBlocks 
+     * 
+     * @param interestingBlocks
      * 
      * @param numBlocks
      * @return
