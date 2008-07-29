@@ -19,8 +19,8 @@ import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.disk.BlockRangeMap;
 
-public class EndGamePieceStrategy implements PieceStrategy {
-    private static final Log LOG = LogFactory.getLog(EndGamePieceStrategy.class);
+public class PartialPieceStrategy implements PieceStrategy {
+    private static final Log LOG = LogFactory.getLog(PartialPieceStrategy.class);
 
     private final Set<BTInterval> exclude;
 
@@ -32,7 +32,7 @@ public class EndGamePieceStrategy implements PieceStrategy {
 
     private final BlockRangeMap requestedRanges;
 
-    public EndGamePieceStrategy(BTMetaInfo btMetaInfo, Set<BTInterval> exclude, boolean endgame,
+    public PartialPieceStrategy(BTMetaInfo btMetaInfo, Set<BTInterval> exclude, boolean endgame,
             BlockRangeMap partialBlocks, BlockRangeMap pendingRanges, BlockRangeMap requestedRanges) {
         this.btMetaInfo = btMetaInfo;
         this.exclude = exclude;
@@ -43,7 +43,7 @@ public class EndGamePieceStrategy implements PieceStrategy {
 
     public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
         List<BTInterval> nextPieces = new ArrayList<BTInterval>();
-        BTInterval nextPiece = assignEndgame(availableBlocks, exclude);
+        BTInterval nextPiece = assignPartialPieces(availableBlocks, exclude);
         if (nextPiece != null) {
             nextPieces.add(nextPiece);
         }
@@ -51,11 +51,14 @@ public class EndGamePieceStrategy implements PieceStrategy {
     }
 
     /**
-     * Picks an interval that is already requested by another connection. This
-     * is referred to as "Endgame mode" and is done when there are no other
-     * pieces to request.
+     * This method will try to assign any partially completed pieces that are
+     * not currently requested.
+     * 
+     * @param bs
+     * @param exclude
+     * @return
      */
-    private BTInterval assignEndgame(BitField bs, Set<BTInterval> exclude) {
+    private BTInterval assignPartialPieces(BitField bs, Set<BTInterval> exclude) {
 
         BTInterval ret = null;
 
@@ -68,13 +71,15 @@ public class EndGamePieceStrategy implements PieceStrategy {
         // prepare a list of partial or requested blocks the remote host has
         Collection<Integer> available = null;
         for (int requested : requestedAndPartial) {
-            if (!bs.get(requested) || btMetaInfo.isCompleteBlock(requested, partialBlocks)) {
+            if (!bs.get(requested) || (btMetaInfo.isCompleteBlock(requested, requestedRanges))
+                    || btMetaInfo.isCompleteBlock(requested, partialBlocks)) {
                 continue;
             }
 
             if (available == null) {
                 available = new HashSet<Integer>(requestedRanges.size() + partialBlocks.size());
             }
+
             available.add(requested);
         }
 
@@ -85,7 +90,7 @@ public class EndGamePieceStrategy implements PieceStrategy {
         if (LOG.isDebugEnabled()) {
             LOG.debug("available partial and requested blocks to attempt: " + available);
         }
-
+        
         available = new ArrayList<Integer>(available);
         Collections.shuffle((List<Integer>) available);
 
@@ -102,14 +107,12 @@ public class EndGamePieceStrategy implements PieceStrategy {
             IntervalSet requested = requestedRanges.get(block);
 
             // get the parts of the block we're missing
-            if (partial != null) {
+            if (partial != null)
                 needed.delete(partial);
-            }
 
             // don't request any parts pending write
-            if (pending != null) {
+            if (pending != null)
                 needed.delete(pending);
-            }
 
             // exclude any specified intervals
             if (exclude != null) {
@@ -120,26 +123,11 @@ public class EndGamePieceStrategy implements PieceStrategy {
             // try not to request any parts that are already requested
             if (requested != null) {
                 needed.delete(requested);
-
-                // now, if we still have some parts of the chunk, get one of
-                // them
-                // if not and this is the last partial chunk, doubly-assign some
-                // part of it (a.k.a. endgame?)
-                if (needed.isEmpty() && !iterator.hasNext()) {
-                    LOG.debug("endgame");
-                    needed = requested.clone();
-
-                    // exclude the specified intervals again
-                    if (exclude != null) {
-                        for (Range excluded : exclude) {
-                            needed.delete(excluded);
-                        }
-                    }
-                }
             }
 
-            if (needed.isEmpty())
+            if (needed.isEmpty()) {
                 continue;
+            }
 
             ret = new BTInterval(needed.getFirst(), block);
             if (LOG.isDebugEnabled()) {
@@ -150,7 +138,6 @@ public class EndGamePieceStrategy implements PieceStrategy {
             }
         }
 
-        // couldn't find anything to assign.
         return ret;
     }
 

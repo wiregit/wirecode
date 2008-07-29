@@ -34,6 +34,7 @@ import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.handshaking.piecestrategy.EndGamePieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.PartialPieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
@@ -603,11 +604,11 @@ class VerifyingFolder implements TorrentDiskManager {
     private List<BTInterval> findPiecesWithEndGame(BitField bs, Set<BTInterval> exclude,
             PieceStrategy pieceStrategy) {
 
-        EndGamePieceStrategy endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(),
+        PartialPieceStrategy partialPieceStrategy = new PartialPieceStrategy(context.getMetaInfo(),
                 exclude, false, partialBlocks, pendingRanges, requestedRanges);
 
         // first try to complete any partial pieces that are not requested
-        List<BTInterval> nextPieces = endGamePieceStrategy.getNextPieces(bs, missing);
+        List<BTInterval> nextPieces = partialPieceStrategy.getNextPieces(bs, missing);
         if (nextPieces != null && nextPieces.size() > 0) {
             return nextPieces;
         }
@@ -621,9 +622,9 @@ class VerifyingFolder implements TorrentDiskManager {
         }
         LOG.debug("couldn't find unassigned, looking for already requested");
 
-        endGamePieceStrategy = new EndGamePieceStrategy(context.getMetaInfo(), exclude, true,
+        EndGamePieceStrategy endGameStrategy = new EndGamePieceStrategy(context.getMetaInfo(), exclude, true,
                 partialBlocks, pendingRanges, requestedRanges);
-        nextPieces = endGamePieceStrategy.getNextPieces(bs, missing);
+        nextPieces = endGameStrategy.getNextPieces(bs, missing);
 
         return nextPieces;
     }
