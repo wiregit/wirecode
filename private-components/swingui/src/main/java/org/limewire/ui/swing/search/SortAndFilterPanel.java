@@ -38,7 +38,7 @@ class SortAndFilterPanel extends JXPanel {
     private final JComboBox sortBox = new JComboBox(new String[] { "Sources", "Relevance", "Size",
             "File Extension" });
 
-    private final JTextField filterBox = new JTextField(FILTER_WIDTH);
+    private final JTextField filterBox = new FilteredTextField(FILTER_WIDTH);
 
     SortAndFilterPanel() {
         setBackground(Color.LIGHT_GRAY);
