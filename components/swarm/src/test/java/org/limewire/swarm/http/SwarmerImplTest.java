@@ -297,4 +297,7 @@ public class SwarmerImplTest extends BaseTestCase {
                 selectionStrategy);
         return swarmCoordinator;
     }
+    
+    //TODO test larger files
+    //TODO test better variety of files.
 }

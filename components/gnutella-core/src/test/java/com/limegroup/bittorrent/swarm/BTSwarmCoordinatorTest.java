@@ -210,4 +210,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                 });
         return swarmer;
     }
+    
+    //TODO test better variety of torrent files.
+    //TODO test larger torrent files.
 }

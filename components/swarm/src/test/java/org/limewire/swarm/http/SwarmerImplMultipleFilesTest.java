@@ -118,4 +118,7 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
         return swarmer;
     }
+    
+    //TODO test larger files
+    //TODO test better variety of files.
 }
