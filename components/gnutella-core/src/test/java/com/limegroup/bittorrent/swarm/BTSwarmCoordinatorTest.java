@@ -30,6 +30,10 @@ import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
+import com.limegroup.bittorrent.handshaking.piecestrategy.LargestGapStartPieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.RandomGapStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 
 public class BTSwarmCoordinatorTest extends BaseTestCase {
 
@@ -51,7 +55,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         File downloadedFile = torrentFileSystem.getIncompleteFiles().get(0);
         downloadedFile.delete();
-        final Swarmer swarmer = createSwarmer(torrentContext);
+        final Swarmer swarmer = createSwarmer(torrentContext, null);
 
         swarmer.start();
 
@@ -73,7 +77,53 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
         downloadedFile1.delete();
         downloadedFile2.delete();
-        final Swarmer swarmer = createSwarmer(torrentContext);
+        final Swarmer swarmer = createSwarmer(torrentContext, null);
+
+        swarmer.start();
+
+        swarmer.addSource(new BTSwarmSource(metaInfo));
+
+        SwarmerImplTest.assertSwarmer("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        SwarmerImplTest.assertSwarmer("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+
+    }
+
+    public void testMultiFileTorret2() throws Exception {
+
+        File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
+                + "/test-single-webseed-multiple-file.torrent");
+
+        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+        File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
+        downloadedFile1.delete();
+        downloadedFile2.delete();
+        final Swarmer swarmer = createSwarmer(torrentContext, new RandomGapStrategy(metaInfo));
+
+        swarmer.start();
+
+        swarmer.addSource(new BTSwarmSource(metaInfo));
+
+        SwarmerImplTest.assertSwarmer("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        SwarmerImplTest.assertSwarmer("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+
+    }
+    
+    public void testMultiFileTorret3() throws Exception {
+
+        File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
+                + "/test-single-webseed-multiple-file.torrent");
+
+        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+        File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
+        downloadedFile1.delete();
+        downloadedFile2.delete();
+        final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(metaInfo));
 
         swarmer.start();
 
@@ -91,8 +141,13 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         return metaInfo;
     }
 
-    private Swarmer createSwarmer(TorrentContext torrentContext) throws IOException {
+    private Swarmer createSwarmer(TorrentContext torrentContext, PieceStrategy pieceStrategy)
+            throws IOException {
 
+        if (pieceStrategy == null) {
+            pieceStrategy = new RandomPieceStrategy(torrentContext.getMetaInfo());
+        }
+        
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         TorrentDiskManager torrentDiskManager = torrentContext.getDiskManager();
         torrentDiskManager.open(new DiskManagerListener() {
@@ -118,7 +173,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         ConnectingIOReactor ioReactor = SwarmerImplTest.createIOReactor(params);
         final BTMetaInfo btMetaInfo = torrentContext.getMetaInfo();
         final BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(torrentContext
-                .getMetaInfo(), torrentFileSystem, torrentDiskManager);
+                .getMetaInfo(), torrentFileSystem, torrentDiskManager, pieceStrategy);
         btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(btCoordinator);

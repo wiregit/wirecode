@@ -15,7 +15,7 @@ public class LargestGapStartPieceStrategy extends AbstractPieceStrategy {
 
     private final int maxNumPieces;
 
-    public LargestGapStartPieceStrategy(BTMetaInfo btMetaInfo, BitField interestingPieces) {
+    public LargestGapStartPieceStrategy(BTMetaInfo btMetaInfo) {
         this(btMetaInfo, DEFAULT_MAX_NUM_PIECES);
     }
 
