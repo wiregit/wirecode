@@ -116,4 +116,6 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      *         but all are choked.
      */
     boolean isSuspended();    
+    
+    BTLinkManager getLinkManager();
 }

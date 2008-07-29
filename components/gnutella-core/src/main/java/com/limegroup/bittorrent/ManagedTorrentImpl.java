@@ -1209,4 +1209,10 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     public boolean isSuspended() {
         return isComplete() && linkManager.hasInterested() && !linkManager.hasUnchoked();
     }
+
+    public BTLinkManager getLinkManager() {
+        return linkManager;
+    }
+    
+    
 }
