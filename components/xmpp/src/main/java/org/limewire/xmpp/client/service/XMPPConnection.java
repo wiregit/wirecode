@@ -7,4 +7,5 @@ public interface XMPPConnection {
     public void login() throws XMPPException;
     public void logout();
     public boolean isLoggedIn();
+    public void addRosterListener(RosterListener rosterListener);
 }

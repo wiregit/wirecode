@@ -15,7 +15,7 @@ class FileOfferHandlerImpl implements FileOfferHandler {
         xmppService.register(this);
     }
 
-    public boolean fileOfferred(FileMetaData f) {
-        return true; // TODO update UI
+    public void fileOfferred(FileMetaData f) {
+        // TODO update UI
     }
 }

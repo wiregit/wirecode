@@ -1,9 +1,9 @@
 package org.limewire.core.api.browse;
 
 public interface Browse {
-    /** Starts the search. */
+    /** Starts the browse. */
     void start(BrowseListener searchListener);
     
-    /** Stops the search. */
+    /** Stops the browse. */
     void stop();
 }

@@ -8,5 +8,11 @@ import com.google.inject.Inject;
 public interface FileOfferHandler {
     @Inject 
     public void register(XMPPService xmppService);
-    public boolean fileOfferred(FileMetaData f);
+
+    /**
+     * Notifies the user that a contact has offered a file to them
+     * @param f the file being offered
+     * @return whether the user wants the file
+     */
+    public void fileOfferred(FileMetaData f);
 }

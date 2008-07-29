@@ -28,6 +28,7 @@ import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.LimePresence;
 import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
+import org.limewire.xmpp.client.service.XMPPService;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -35,6 +36,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.limegroup.gnutella.BrowseHostHandler;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -76,9 +78,9 @@ public class XMPPIntegrationTest extends LimeTestCase {
         started = new CountDownLatch(1);
         rosterListener = new RosterListenerImpl();
         rosterListener2 = new RosterListenerImpl();
-        XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
+        final XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
                 "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener);
-        XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
+        final XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
                 "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2);
         Module xmppModule = new LimeWireXMPPModule(new XMPPConnectionConfigurationListProvider(configuration, configuration2),
                 new FileOfferHandlerImpl());
@@ -107,6 +109,9 @@ public class XMPPIntegrationTest extends LimeTestCase {
         injector = LimeTestUtils.createInjectorAndStart(xmppModule, new AbstractModule() {
             @Override
             protected void configure() {
+                // TODO use real limewire.props file with XMPP_CONNECTIONS property
+                bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(new XMPPConnectionConfigurationListProvider(configuration, configuration2));
+                bind(FileOfferHandler.class).to(FileOfferHandlerImpl.class);
                 //bind(ReplyHandler.class).annotatedWith(Names.named("forMeReplyHandler")).to(QueryReplyHandler.class);
                 //bind(StartedWatcher.class);
                 //bind(NetworkManager.class).toInstance(new NetworkManagerStub());
@@ -221,9 +226,14 @@ public class XMPPIntegrationTest extends LimeTestCase {
 
     }
     
+    @Singleton
     class FileOfferHandlerImpl implements FileOfferHandler, Provider<FileOfferHandler> {
-        public boolean fileOfferred(FileMetaData f) {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
+        @Inject
+        public void register(XMPPService xmppService) {
+            xmppService.register(this);
+        }
+
+        public void fileOfferred(FileMetaData f) {
         }
 
         public FileOfferHandler get() {

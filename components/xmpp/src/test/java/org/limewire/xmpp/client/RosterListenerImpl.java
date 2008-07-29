@@ -21,7 +21,7 @@ public class RosterListenerImpl implements RosterListener {
 
     @Inject
     public void register(XMPPService xmppService) {
-        xmppService.register(this);
+        //xmppService.register(this);
     }
 
     public void userAdded(User user) {

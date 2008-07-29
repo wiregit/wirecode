@@ -23,16 +23,31 @@ public class FileMetaDataImpl implements FileMetaData {
     private Map<Element, String> data = new HashMap<Element, String>();
 
     public FileMetaDataImpl(XmlPullParser parser) throws XmlPullParserException, IOException {
-        do {
+        parser.nextTag();
+        do {            
             int eventType = parser.getEventType();
             if(eventType == XmlPullParser.START_TAG) {
-                data.put(Element.valueOf(parser.getName()), parser.getText());
+                data.put(Element.valueOf(parser.getName()), parser.nextText());
             } else if(eventType == XmlPullParser.END_TAG) {
                 if(parser.getName().equals("file")) {
                     return;
                 }
             }
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
+    }
+    
+    public FileMetaDataImpl(FileMetaData metaData) throws URISyntaxException {
+        setCreateTime(metaData.getCreateTime());
+        setDescription(metaData.getDescription());
+        setId(metaData.getId());
+        setIndex(metaData.getIndex());
+        setName(metaData.getName());
+        setSize(metaData.getSize());
+        setURIs(metaData.getURIs());
+    }
+    
+    public FileMetaDataImpl() {
+        
     }
 
     public String getId() {
@@ -71,8 +86,8 @@ public class FileMetaDataImpl implements FileMetaData {
         return Long.valueOf(data.get(Element.index));
     }
     
-    public void setIndex(int index) {
-        data.put(Element.index, Integer.toString(index));
+    public void setIndex(long index) {
+        data.put(Element.index, Long.toString(index));
     }
 
     public Map<String, String> getMetaData() {

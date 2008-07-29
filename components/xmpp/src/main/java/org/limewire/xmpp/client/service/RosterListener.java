@@ -13,6 +13,7 @@ import com.google.inject.Inject;
 public interface RosterListener {
     @Inject 
     public void register(XMPPService xmppService);
+    
     public void userAdded(User user);
     
     public void userUpdated(User user);

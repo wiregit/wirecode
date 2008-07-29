@@ -47,19 +47,19 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     protected FileTransferIQListener fileTransferIQListener;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
-                       RosterListener rosterListener, FileOfferHandler fileOfferHandler,
+                       FileOfferHandler fileOfferHandler,
                        AddressFactory addressFactory) {
         this.configuration = configuration;
         this.fileOfferHandler = fileOfferHandler;
         this.addressFactory = addressFactory;
         this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener>();
-        if(rosterListener != null) {
-            this.rosterListeners.add(rosterListener);
+        if(configuration.getRosterListener() != null) {
+            this.rosterListeners.add(configuration.getRosterListener());
         }
         this.users = new HashMap<String, UserImpl>();
     }
     
-    void addRosterListener(RosterListener rosterListener) {
+    public void addRosterListener(RosterListener rosterListener) {
         rosterListeners.add(rosterListener);
     }
 

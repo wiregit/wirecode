@@ -43,8 +43,7 @@ public class LimeWireXMPPModule extends AbstractModule {
                         //To change body of implemented methods use File | Settings | File Templates.
                     }
 
-                    public boolean fileOfferred(FileMetaData f) {
-                        return false;  //To change body of implemented methods use File | Settings | File Templates.
+                    public void fileOfferred(FileMetaData f) {
                     }
                 };
             }

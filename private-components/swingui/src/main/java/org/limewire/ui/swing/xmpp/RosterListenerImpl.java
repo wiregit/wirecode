@@ -13,6 +13,7 @@ import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.PresenceListener;
 import org.limewire.xmpp.client.service.RosterListener;
 import org.limewire.xmpp.client.service.User;
+import org.limewire.xmpp.client.service.XMPPConnection;
 import org.limewire.xmpp.client.service.XMPPService;
 
 import com.google.inject.Inject;
@@ -33,7 +34,9 @@ class RosterListenerImpl implements RosterListener {
     
     @Inject
     public void register(XMPPService xmppService) {
-        xmppService.register(this);
+        for(XMPPConnection connection : xmppService.getConnections()) {
+            connection.addRosterListener(this);
+        }
     }
 
     public void userAdded(User user) {

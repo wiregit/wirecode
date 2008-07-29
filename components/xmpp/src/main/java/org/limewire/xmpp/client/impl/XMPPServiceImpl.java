@@ -34,7 +34,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
     private FileOfferHandler fileOfferHandler;
     private final AddressFactory addressFactory;
-    private RosterListener rosterListener;
     private XMPPErrorListener errorListener;
 
     @Inject
@@ -55,12 +54,12 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         registry.addListener(this);
     }
 
-    public void register(RosterListener rosterListener) {
-        this.rosterListener = rosterListener;
-        for(XMPPConnectionImpl connection : connections) {
-            connection.addRosterListener(rosterListener);
-        }
-    }
+//    public void register(RosterListener rosterListener) {
+//        this.rosterListener = rosterListener;
+//        for(XMPPConnectionImpl connection : connections) {
+//            connection.addRosterListener(rosterListener);
+//        }
+//    }
 
     public void register(XMPPErrorListener errorListener) {
         this.errorListener = errorListener;
@@ -121,7 +120,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener, fileOfferHandler, addressFactory);
+        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, fileOfferHandler, addressFactory);
         connection.initialize();
         connections.add(connection);
     }

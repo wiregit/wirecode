@@ -1,7 +1,14 @@
 package org.limewire.xmpp.client;
 
-import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.log4j.BasicConfigurator;
 import org.limewire.inject.AbstractModule;
 import org.limewire.lifecycle.ServiceTestCase;
@@ -11,24 +18,21 @@ import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.DirectConnectionAddress;
 import org.limewire.net.address.DirectConnectionAddressImpl;
-import org.limewire.xmpp.client.impl.XMPPException;
 import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
+import org.limewire.xmpp.client.impl.XMPPException;
+import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
+import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.LimePresence;
 import org.limewire.xmpp.client.service.MessageWriter;
 import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.XMPPConnection;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.XMPPService;
+import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
 
 public class XMPPServiceTest extends ServiceTestCase {
     protected RosterListenerImpl rosterListener;
@@ -55,16 +59,17 @@ public class XMPPServiceTest extends ServiceTestCase {
     protected List<Module> getServiceModules() {
         rosterListener = new RosterListenerImpl();
         rosterListener2 = new RosterListenerImpl();
-        XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
+        final XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
                 "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener);
-        XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com",
+        final XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com",
                 "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2);
-        Module xmppModule = new LimeWireXMPPModule(new XMPPConnectionConfigurationListProvider(configuration, configuration2),
-                new FileOfferHandlerImpl());
+        Module xmppModule = new LimeWireXMPPModule();
         addressEventBroadcaster = new AddressEventTestBroadcaster();
         Module m = new AbstractModule() {
             protected void configure() {
                 bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(addressEventBroadcaster);
+                bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(new XMPPConnectionConfigurationListProvider(configuration, configuration2));
+                bind(FileOfferHandler.class).to(FileOfferHandlerImpl.class);
             }
         };
         return Arrays.asList(xmppModule, m, new LimeWireNetTestModule());
@@ -105,7 +110,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertEquals(true, address.isTLSCapable());
         
         assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
-        assertTrue(rosterListener2.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
+        assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
         LimePresence buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
         address = (DirectConnectionAddress)buddy1.getAddress();
@@ -149,30 +154,29 @@ public class XMPPServiceTest extends ServiceTestCase {
         
     }
     
-    public void testSendFile() throws InterruptedException, IOException {
+    public void testSendFile() throws InterruptedException, IOException, XmlPullParserException {
         
-//        HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
-//        
-//        LimePresence limebuddy2 = ((LimePresence)roster1.get("limebuddy2@gmail.com").get(0));
-//        FileMetaDataImpl metaData = new FileMetaDataImpl(new Random().nextInt() + "", "a_cool_file.txt");
-//        metaData.setSize(1000);
-//        metaData.setDate(new Date());
-//        metaData.setDescription("cool file");
-//        limebuddy2.sendFile(metaData);        
-//        
-//        Thread.sleep(6 * 1000);
-//        
-//        File receivedFile = null;
-//        File [] savedFiles2 = libraryProvider.saveDir.listFiles();
-//        for(File saved : savedFiles2) {
-//            if(saved.getName().equals(toSend.getName())) {
-//                receivedFile = saved;
-//                break;
-//            }
-//        }
-//        
-//        assertNotNull(receivedFile);
-        // TODO compare contents
+        HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
+        
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+                Address.EventType.ADDRESS_CHANGED));
+        
+        Thread.sleep(1000);
+        
+        LimePresence limebuddy2 = ((LimePresence)roster1.get("limebuddy2@gmail.com").get(0));
+        FileMetaDataImpl metaData = new FileMetaDataImpl();
+        metaData.setId(new Random().nextInt() + "");
+        metaData.setName("a_cool_file.txt");
+        metaData.setSize(1000);
+        metaData.setCreateTime(new Date());
+        metaData.setDescription("cool file");
+        limebuddy2.sendFile(metaData);
+        
+        Thread.sleep(1000);
+        
+        List<FileMetaData> offers = ((FileOfferHandlerImpl) injector.getInstance(FileOfferHandler.class)).offers;
+        assertEquals(1, offers.size());
+        assertEquals("a_cool_file.txt", offers.get(0).getName());
     }
 
 }

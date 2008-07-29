@@ -1,16 +1,26 @@
 package org.limewire.xmpp.client;
 
-import org.limewire.xmpp.client.service.FileOfferHandler;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.FileOfferHandler;
+import org.limewire.xmpp.client.service.XMPPService;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-public class FileOfferHandlerImpl implements FileOfferHandler, Provider<FileOfferHandler> {
-    public boolean fileOfferred(FileMetaData f) {
-        return true;
+@Singleton
+public class FileOfferHandlerImpl implements FileOfferHandler {
+
+    List<FileMetaData> offers = new ArrayList<FileMetaData>();
+    
+    @Inject
+    public void register(XMPPService xmppService) {
+        xmppService.register(this);
     }
 
-    public FileOfferHandler get() {
-        return this;
+    public void fileOfferred(FileMetaData f) {
+        offers.add(f);
     }
 }
