@@ -144,6 +144,6 @@ public interface TorrentDiskManager {
      * @param newInterval
      * @return
      */
-    public BTInterval renewLease(BTInterval oldInterval, BTInterval newInterval);
+    public void renewLease(List<BTInterval> oldInterval, List<BTInterval> newInterval);
 
 }

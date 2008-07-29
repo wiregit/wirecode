@@ -2,6 +2,7 @@ package com.limegroup.bittorrent.swarm;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.limewire.collection.NECallable;
 import org.limewire.swarm.SwarmContent;
@@ -14,28 +15,29 @@ import com.limegroup.bittorrent.disk.TorrentDiskManager;
 
 public class BTSwarmWriteJob implements SwarmWriteJob {
 
-    private final BTInterval bInterval;
+    private final List<BTInterval> pieces;
 
     private final TorrentDiskManager torrentDiskManager;
 
     private final SwarmWriteJobControl callback;
 
-    private final ByteBuffer byteBuffer;
+    private ByteBuffer byteBuffer;
 
     private final Object writeLock = new Object();
 
-    public BTSwarmWriteJob(BTInterval bInterval, TorrentDiskManager torrentDiskManager,
+    private int index = 0;
+
+    private BTInterval piece = null;
+
+    public BTSwarmWriteJob(List<BTInterval> pieces, TorrentDiskManager torrentDiskManager,
             SwarmWriteJobControl callback) {
-        // TODO support multiple btintervals
-        assert bInterval != null;
+        assert pieces != null;
         assert torrentDiskManager != null;
         assert callback != null;
-        /** Range cannot be longer than an integer */
-        assert !bInterval.isLong();
-        this.bInterval = bInterval;
+        this.pieces = pieces;
         this.torrentDiskManager = torrentDiskManager;
         this.callback = callback;
-        this.byteBuffer = ByteBuffer.allocate((int) bInterval.getLength());
+        this.byteBuffer = null;
     }
 
     public void cancel() {
@@ -46,24 +48,30 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
     }
 
     public long write(SwarmContent content) throws IOException {
-        long read = 0;
         synchronized (writeLock) {
+            if (byteBuffer == null) {
+                piece = pieces.get(index++);
+                byteBuffer = ByteBuffer.allocate(piece.get32BitLength());
+            }
 
+            long read = 0;
             read = content.read(byteBuffer);
             callback.resume();
             if (byteBuffer.remaining() == 0) {
                 // piece is done reading
+                final byte[] data = byteBuffer.array();
+                byteBuffer = null;
                 torrentDiskManager.writeBlock(new NECallable<BTPiece>() {
 
                     public BTPiece call() {
                         return new BTPiece() {
 
                             public byte[] getData() {
-                                return byteBuffer.array();
+                                return data;
                             }
 
                             public BTInterval getInterval() {
-                                return bInterval;
+                                return piece;
                             }
                         };
                     }
@@ -71,8 +79,8 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
                 });
 
             }
+            return read;
         }
-        return read;
     }
 
 }

@@ -2,6 +2,8 @@ package com.limegroup.bittorrent.swarm;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.limewire.collection.BitField;
@@ -40,8 +42,8 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobControl callback) {
-        BTInterval btInterval = createBTInterval(range);
-        return new BTSwarmWriteJob(btInterval, torrentDiskManager, callback);
+        List<BTInterval> pieces = createBTInterval(range);
+        return new BTSwarmWriteJob(pieces, torrentDiskManager, callback);
     }
 
     public void finish() throws IOException {
@@ -90,12 +92,13 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         avalableBitSet.flip(0, numPieces);
 
         BitField availableRangesBitField = new BitFieldSet(avalableBitSet, numPieces);
-        BTInterval leased = torrentDiskManager.leaseBTInterval(availableRangesBitField, null, null);
+        List<BTInterval> leased = torrentDiskManager.lease(availableRangesBitField, null, null);
 
         Range lease = null;
-        if (leased != null) {
-            long startByte = leased.getBlockId() * btMetaInfo.getPieceLength() + leased.getLow();
-            long endByte = startByte + leased.getLength() - 1;
+        if (leased != null && leased.size() > 0) {
+            BTInterval firstBlock = leased.get(0);
+            long startByte = getLow(firstBlock);
+            long endByte = getHigh(leased.get(leased.size() - 1));
             lease = Range.createRange(startByte, endByte);
         }
 
@@ -113,8 +116,9 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     public Range renewLease(Range oldLease, Range newLease) {
-        BTInterval oldInterval = createBTInterval(oldLease);
-        BTInterval newInterval = createBTInterval(newLease);
+
+        List<BTInterval> oldInterval = createBTInterval(oldLease);
+        List<BTInterval> newInterval = createBTInterval(newLease);
         torrentDiskManager.renewLease(oldInterval, newInterval);
         return newLease;
     }
@@ -125,14 +129,10 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     public void unlease(Range range) {
-
-        // TODO really need to iterate through the range.
-        // there will might be multiple peices in reality.
-        // change the torrent disk manager to accept either a list of
-        // btintervals
-        // or a range that will be converted into the BTInterval list.
-        BTInterval piece = createBTInterval(range);
-        torrentDiskManager.releaseInterval(piece);
+        List<BTInterval> pieces = createBTInterval(range);
+        for (BTInterval btInterval : pieces) {
+            torrentDiskManager.releaseInterval(btInterval);
+        }
     }
 
     /**
@@ -141,17 +141,47 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
      * @param range
      * @return
      */
-    private BTInterval createBTInterval(Range range) {
-        //TODO this range might really be multiple BTIntervals
-        //we need to handle the case when it is
-        int pieceLength = btMetaInfo.getPieceLength();
-        int pieceNum = (int) Math.floor(range.getLow() / pieceLength);
+    private List<BTInterval> createBTInterval(Range range) {
+        List<BTInterval> btIntervals = new ArrayList<BTInterval>();
+        long index = range.getLow();
+        while (index <= range.getHigh()) {
+            BTInterval piece = btMetaInfo.getPieceAt(index);
+            
+            long byteLow = getLow(piece);
+            long offsetLow = 0;
+            
+            if (byteLow < range.getLow()) {
+                offsetLow = byteLow - range.getLow();
+                byteLow = range.getLow();
+            }
+           long byteHigh = getHigh(piece);
+           long offsetHigh = 0;
+            if (byteHigh > range.getHigh()) {
+                offsetHigh = byteHigh - range.getHigh();
+                byteHigh = range.getHigh();
+            }
+            
+            
+            long pieceLow = piece.getLow() - offsetLow;
+            long pieceHigh = piece.getHigh() - offsetHigh;
+            
+            piece = new BTInterval(pieceLow, pieceHigh, piece.getBlockId());
+            btIntervals.add(piece);
+            index = byteHigh + 1;
+        }
+        return btIntervals;
+    }
 
-        long lowByte = range.getLow() - (pieceLength * pieceNum);
-        long highByte = lowByte + range.getLength() - 1;
-        Range btRange = Range.createRange(lowByte, highByte);
-        BTInterval piece = new BTInterval(btRange, pieceNum);
-        return piece;
+    private long getHigh(BTInterval piece) {
+        long pieceNum = piece.getBlockId();
+        long high = piece.getHigh() + pieceNum * btMetaInfo.getPieceLength();
+        return high;
+    }
+
+    private long getLow(BTInterval piece) {
+        long pieceNum = piece.getBlockId();
+        long low = piece.getLow() + pieceNum * btMetaInfo.getPieceLength();
+        return low;
     }
 
     public void unpending(Range range) {

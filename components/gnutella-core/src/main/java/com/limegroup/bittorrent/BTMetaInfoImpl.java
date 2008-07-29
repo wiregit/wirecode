@@ -423,6 +423,11 @@ public class BTMetaInfoImpl implements BTMetaInfo {
         Range i = set.getFirst();
         return isCompleteBlock(i, pieceNum);
     }
+
+    public BTInterval getPieceAt(long torrentbyte) {
+       int pieceIndex = (int) (torrentbyte /_pieceLength);
+       return getPiece(pieceIndex);
+    }
     
     
 }

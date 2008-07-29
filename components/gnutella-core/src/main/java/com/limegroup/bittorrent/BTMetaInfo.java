@@ -100,4 +100,6 @@ public interface BTMetaInfo {
     
     public abstract boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck);
 
+    public abstract BTInterval getPieceAt(long i);
+
 }
