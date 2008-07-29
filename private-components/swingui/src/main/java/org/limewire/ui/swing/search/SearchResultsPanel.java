@@ -60,19 +60,21 @@ public class SearchResultsPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 0;
         add(searchTab, gbc);
         
         gbc.anchor = GridBagConstraints.EAST;
-        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx = 0;
         add(sortAndFilterPanel, gbc);
         
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.gridy++;
         gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridy++;
         gbc.weightx = 1;
         gbc.weighty = 1;
         add(resultsContainer, gbc);

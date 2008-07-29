@@ -26,82 +26,91 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 /**
- * This class is a panel that contains components for
- * filtering and sorting search results.
+ * This class is a panel that contains components for filtering and sorting
+ * search results.
+ * 
  * @see org.limewire.ui.swing.search.SearchResultsPanel.
  */
 class SortAndFilterPanel extends JXPanel {
-    
+
     private static final int FILTER_WIDTH = 15;
-    
-    private final JComboBox sortBox = new JComboBox(new String[] {
-        "Sources", "Relevance", "Size", "File Extension" });
-    
+
+    private final JComboBox sortBox = new JComboBox(new String[] { "Sources", "Relevance", "Size",
+            "File Extension" });
+
     private final JTextField filterBox = new JTextField(FILTER_WIDTH);
-    
+
     SortAndFilterPanel() {
-        setBackground(new Color(100, 100, 100));
-        
+        setBackground(Color.LIGHT_GRAY);
+
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        
-        gbc.insets = new Insets(5, 5, 5, 10);
-        //gbc.ipadx = 150;
+
+        gbc.insets = new Insets(3, 2, 2, 10);
         add(filterBox, gbc);
-        
-        JLabel sortLabel = new JLabel("Sort by");
-        FontUtils.changeSize(sortLabel, 1);
-        FontUtils.changeStyle(sortLabel, Font.BOLD);
+
+        JLabel sortLabel = new JLabel("Sort by:");
+        // FontUtils.changeSize(sortLabel, 1);
+        // FontUtils.changeStyle(sortLabel, Font.BOLD);
         sortLabel.setForeground(Color.WHITE);
-        //gbc.insets = new Insets(5, 10, 5, 5);
         gbc.insets.right = 5;
         add(sortLabel, gbc);
-        
-        //gbc.insets = new Insets(5, 0, 5, 15);
+
         add(sortBox, gbc);
     }
 
     public EventList<VisualSearchResult> getSortedAndFilteredList(
-        EventList<VisualSearchResult> visualSearchResults) {
-        
+            EventList<VisualSearchResult> visualSearchResults) {
+
+        VisualSearchResultTextFilterator filterator =
+            new VisualSearchResultTextFilterator();
+        TextComponentMatcherEditor<VisualSearchResult> editor =
+            new TextComponentMatcherEditor<VisualSearchResult>(
+                filterBox, filterator, true);
         EventList<VisualSearchResult> filteredList =
-            new FilterList<VisualSearchResult>(visualSearchResults, new TextComponentMatcherEditor<VisualSearchResult>(filterBox, new VisualSearchResultTextFilterator(), true));
-        final SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(filteredList, null);
+            new FilterList<VisualSearchResult>(visualSearchResults, editor);
+        final SortedList<VisualSearchResult> sortedList =
+            new SortedList<VisualSearchResult>(filteredList, null);
+
         ItemListener listener = new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    if(e.getItem().equals("Relevance")) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    if (e.getItem().equals("Relevance")) {
                         sortedList.setComparator(null);
-                    } else if(e.getItem().equals("Size")) {
+                    } else if (e.getItem().equals("Size")) {
                         sortedList.setComparator(new Comparator<VisualSearchResult>() {
                             public int compare(VisualSearchResult o1, VisualSearchResult o2) {
-                                return ((Long)o2.getSize()).compareTo(o1.getSize());
+                                return ((Long) o2.getSize()).compareTo(o1.getSize());
                             }
                         });
-                    } else if(e.getItem().equals("File Extension")) {
+                    } else if (e.getItem().equals("File Extension")) {
                         sortedList.setComparator(new Comparator<VisualSearchResult>() {
                             public int compare(VisualSearchResult o1, VisualSearchResult o2) {
                                 // TODO: Support locales better.
-                                return o2.getFileExtension().compareToIgnoreCase(o1.getFileExtension());
+                                return o2.getFileExtension().compareToIgnoreCase(
+                                        o1.getFileExtension());
                             }
                         });
-                    } else if(e.getItem().equals("Sources")) {
+                    } else if (e.getItem().equals("Sources")) {
                         sortedList.setComparator(new Comparator<VisualSearchResult>() {
                             public int compare(VisualSearchResult o1, VisualSearchResult o2) {
-                                return ((Integer)o2.getSources().size()).compareTo(o1.getSources().size());
+                                return ((Integer) o2.getSources().size()).compareTo(o1.getSources()
+                                        .size());
                             }
                         });
                     }
                 }
             }
         };
-        listener.itemStateChanged(new ItemEvent(sortBox, ItemEvent.ITEM_STATE_CHANGED, sortBox.getSelectedItem(), ItemEvent.SELECTED));
+        listener.itemStateChanged(new ItemEvent(sortBox, ItemEvent.ITEM_STATE_CHANGED, sortBox
+                .getSelectedItem(), ItemEvent.SELECTED));
         sortBox.addItemListener(listener);
         return sortedList;
     }
-    
-    private static class VisualSearchResultTextFilterator implements TextFilterator<VisualSearchResult> {
+
+    private static class VisualSearchResultTextFilterator implements
+            TextFilterator<VisualSearchResult> {
         @Override
         public void getFilterStrings(List<String> baseList, VisualSearchResult element) {
             baseList.add(element.getDescription());
