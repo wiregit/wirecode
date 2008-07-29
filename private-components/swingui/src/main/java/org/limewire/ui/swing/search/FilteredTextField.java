@@ -61,7 +61,9 @@ class FilteredTextField extends JTextField implements FocusListener {
     @Override
     public Dimension getSize() {
         Dimension size = super.getSize();
-        size.width += icon.getIconWidth();
+        if(icon != null) {
+            size.width += icon.getIconWidth();
+        }
         return size;
     }
 
@@ -76,9 +78,9 @@ class FilteredTextField extends JTextField implements FocusListener {
         } else {
             Image image = ((ImageIcon) icon).getImage();
             g2d.drawImage(image, 0, 0, Color.WHITE, null);
+            g2d.translate(icon.getIconWidth(), 0);
         }
         
-        g2d.translate(icon.getIconWidth(), 0);
         super.paintComponent(g2d);
         
         g2d.dispose();

@@ -1,22 +1,21 @@
 package com.limegroup.gnutella.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.File;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
+
+import junit.framework.Assert;
+
+import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.FileManagerEvent.Type;
-import org.limewire.util.FileUtils;
-import org.limewire.util.TestUtils;
-import junit.framework.Assert;
 
 public class FileManagerTestUtils {
 

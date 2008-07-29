@@ -45,7 +45,7 @@ class TopPanel extends JPanel implements SearchNavigator {
     private final SearchBar searchBar;
     private final FancyTabList searchList;
     private final Navigator navigator;
-
+    
     @Inject
     public TopPanel(final SearchHandler searchHandler, Navigator navigator) {
         this.navigator = navigator;
@@ -107,10 +107,12 @@ class TopPanel extends JPanel implements SearchNavigator {
         gbc.weightx = 1;
         gbc.insets = new Insets(5, 0, 0, 0);
         searchList = new FancyTabList();
+        searchList.setFixedLayout(50, 120, 120);
         searchList.setRemovable(true);
         searchList.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         searchList.setSelectionPainter(new RectanglePainter<JXPanel>(2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
         searchList.setMaxTabs(3);
+        searchList.setName("TopPanel.SearchList");
         add(searchList, gbc);
     }
     
