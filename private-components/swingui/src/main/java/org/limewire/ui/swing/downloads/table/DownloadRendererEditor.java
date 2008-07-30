@@ -447,7 +447,7 @@ public class DownloadRendererEditor extends JPanel implements
 		tryAgainButton.setVisible(state.isSearchAgainable());
 		if(state == DownloadState.ERROR){
 		    linkButton.setVisible(true);
-		    linkButton.setText(getErrorMessage(item.getErrorState()));
+		    linkButton.setText("<html><u>" + getErrorMessage(item.getErrorState()) + "</u></html>");
 		} else {
 		    linkButton.setVisible(false);
 		}
