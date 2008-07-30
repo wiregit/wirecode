@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -58,6 +59,8 @@ public class DownloadRendererEditor extends JPanel implements
 	
 	private Color rolloverForeground= Color.BLACK;
 	
+	private Color menuShowingBackground = Color.BLUE.brighter();
+	
 	//The item being edited by the editor
 	private DownloadItem editItem = null;
 
@@ -76,14 +79,30 @@ public class DownloadRendererEditor extends JPanel implements
     private JButton resumeButton;
     private JButton tryAgainButton;
     private JButton linkButton;
+    private JMenuItem launchMenuItem;
+    private JMenuItem previewMenuItem;
+    private JMenuItem removeMenuItem;
     private JMenuItem pauseMenuItem;
+    private JMenuItem locateMenuItem;
     private JMenuItem cancelMenuItem;
     private JMenuItem resumeMenuItem;
     private JMenuItem tryAgainMenuItem;
+    private JMenuItem propertiesMenuItem;
 	private JLabel timeLabel;
 	private DownloadEditorListener editorListener;
 	private MenuListener menuListener;
     private JPopupMenu popupMenu;
+
+    private final static String PAUSE_COMMAND = "pause";
+    private final static String CANCEL_COMMAND = "cancel";
+    private final static String RESUME_COMMAND = "resume";
+    private final static String TRY_AGAIN_COMMAND = "try again";
+    private final static String LAUNCH_COMMAND = "launch";
+    private final static String PREVIEW_COMMAND = "preview";
+    private final static String REMOVE_COMMAND = "remove";
+    private final static String LOCATE_COMMAND = "locate";
+    private final static String PROPERTIES_COMMAND = "properties";
+    private final static String LINK_COMMAND = "link";
 
 	@Resource
 	private Icon audioIcon;
@@ -150,43 +169,72 @@ public class DownloadRendererEditor extends JPanel implements
 		menuListener = new MenuListener();
 		
 		linkButton = new JXHyperlink();
+		linkButton.setActionCommand(LINK_COMMAND);
         linkButton.setText("link button");
         linkButton.addActionListener(editorListener);
 
 
-		pauseButton = createButton(pauseIcon, pauseIconRollover, pauseIconPressed);
+		pauseButton = createIconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
+		pauseButton.setActionCommand(PAUSE_COMMAND);
 		pauseButton.addActionListener(editorListener);
 		pauseButton.setToolTipText(I18n.tr("Pause"));
 		
 		pauseMenuItem = new JMenuItem(I18n.tr("Pause"));
+        pauseMenuItem.setActionCommand(PAUSE_COMMAND);
 		pauseMenuItem.addActionListener(menuListener);
 		
 
-		cancelButton = createButton(cancelIcon, cancelIconRollover, cancelIconPressed);
+		cancelButton = createIconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
+		cancelButton.setActionCommand(CANCEL_COMMAND);
 		cancelButton.addActionListener(editorListener);
-        cancelButton.setToolTipText(I18n.tr("Cancel"));
+        cancelButton.setToolTipText(I18n.tr("Cancel Download"));
 		
-		cancelMenuItem = new JMenuItem(I18n.tr("Cancel"));
+		cancelMenuItem = new JMenuItem(I18n.tr("Cancel Download"));
+        cancelMenuItem.setActionCommand(CANCEL_COMMAND);
 		cancelMenuItem.addActionListener(menuListener);
 
 		timeLabel = new JLabel();
 		timeLabel.setFont(new Font("", Font.PLAIN, 9));
 		timeLabel.setText("13 years remaining");
 
-		resumeButton = createButton(resumeIcon, resumeIconRollover, resumeIconPressed);
+		resumeButton = createIconButton(resumeIcon, resumeIconRollover, resumeIconPressed);
+		resumeButton.setActionCommand(RESUME_COMMAND);
 		resumeButton.addActionListener(editorListener);
 		resumeButton.setVisible(false);
         resumeButton.setToolTipText(I18n.tr("Resume"));
 		
 		resumeMenuItem = new JMenuItem(I18n.tr("Resume"));
+		resumeMenuItem.setActionCommand(RESUME_COMMAND);
 		resumeMenuItem.addActionListener(menuListener);
 
-		tryAgainButton = createButton(tryAgainIcon, tryAgainIconRollover, tryAgainIconPressed);
+		tryAgainButton = createIconButton(tryAgainIcon, tryAgainIconRollover, tryAgainIconPressed);
+		tryAgainButton.setActionCommand(TRY_AGAIN_COMMAND);
 		tryAgainButton.addActionListener(editorListener);
 		tryAgainButton.setToolTipText(I18n.tr("Try Again"));
 		
 		tryAgainMenuItem = new JMenuItem(I18n.tr("Try Again"));
+		tryAgainMenuItem.setActionCommand(TRY_AGAIN_COMMAND);
 		tryAgainMenuItem.addActionListener(menuListener);
+
+        launchMenuItem = new JMenuItem(I18n.tr("Launch file"));
+        launchMenuItem.setActionCommand(LAUNCH_COMMAND);
+        launchMenuItem.addActionListener(menuListener);
+        
+        removeMenuItem = new JMenuItem(I18n.tr("Remove from list"));
+        removeMenuItem.setActionCommand(REMOVE_COMMAND);
+        removeMenuItem.addActionListener(menuListener);
+        
+        locateMenuItem = new JMenuItem(I18n.tr("Locate file"));
+        locateMenuItem.setActionCommand(LOCATE_COMMAND);
+        locateMenuItem.addActionListener(menuListener);
+        
+        propertiesMenuItem = new JMenuItem(I18n.tr("Properties"));
+        propertiesMenuItem.setActionCommand(PROPERTIES_COMMAND);
+        propertiesMenuItem.addActionListener(menuListener);
+        
+        previewMenuItem =  new JMenuItem(I18n.tr("Preview File"));
+        previewMenuItem.setActionCommand(PREVIEW_COMMAND);
+        previewMenuItem.addActionListener(menuListener);
 		
 		buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		//show color of underlying panel
@@ -252,17 +300,9 @@ public class DownloadRendererEditor extends JPanel implements
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.gridwidth = 1;
-		add(timeLabel, gbc);
+		add(timeLabel, gbc);			
 		
-			
-		
-		popupMenu = new JPopupMenu();
-        popupMenu.add(pauseMenuItem);
-        popupMenu.add(resumeMenuItem);
-        popupMenu.add(cancelMenuItem);
-        popupMenu.add(tryAgainMenuItem);
-
-     
+		popupMenu = new JPopupMenu();	
 
 	}
 	
@@ -287,7 +327,8 @@ public class DownloadRendererEditor extends JPanel implements
 			boolean isSelected, boolean hasFocus, int row, int column) {
 		Component delegate = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		Component renderer = getCellComponent(table, value, isSelected, hasFocus, row, column);
-		renderer.setBackground(delegate.getBackground());
+		Color bgColor = value == menuEditItem ? menuShowingBackground : delegate.getBackground();
+		renderer.setBackground(bgColor);
 		return renderer;
 	}
 
@@ -313,11 +354,63 @@ public class DownloadRendererEditor extends JPanel implements
 	
 	public void showPopup(Component c, int x, int y){	    
 	    menuEditItem = editItem;
+	    popupMenu.removeAll();
 	    DownloadState state = menuEditItem.getState();
-	    pauseMenuItem.setVisible(state.isPausable());
-        resumeMenuItem.setVisible(state.isResumable());
-        cancelMenuItem.setVisible(state.isCancellable());
-        tryAgainMenuItem.setVisible(state.isSearchAgainable());
+	   
+	    switch(state){
+	    
+	    case DONE:
+	        popupMenu.add(launchMenuItem);
+	        popupMenu.add(locateMenuItem);
+	        popupMenu.add(removeMenuItem);
+	        break;
+	        
+	    case CONNECTING:
+        case ERROR:
+        case FINISHING:
+        case LOCAL_QUEUED:
+        case REMOTE_QUEUED:
+	        if (menuEditItem.getCurrentSize() > 0){
+	            popupMenu.add(previewMenuItem);
+	            popupMenu.add(locateMenuItem);
+	            popupMenu.add(new JSeparator());
+	        } 
+                popupMenu.add(cancelMenuItem);
+            break;
+            
+	    case DOWNLOADING:
+            popupMenu.add(pauseMenuItem);
+            popupMenu.add(previewMenuItem);
+            popupMenu.add(locateMenuItem);
+            popupMenu.add(new JSeparator());
+            popupMenu.add(cancelMenuItem);
+            break;
+            
+            
+	    case PAUSED:
+            popupMenu.add(resumeMenuItem);
+            if (menuEditItem.getCurrentSize() > 0){
+                popupMenu.add(previewMenuItem);
+                popupMenu.add(locateMenuItem);
+                popupMenu.add(new JSeparator());
+            } 
+                popupMenu.add(cancelMenuItem);
+            break;
+            
+	    case STALLED:
+	        popupMenu.add(tryAgainMenuItem);
+	        if (menuEditItem.getCurrentSize() > 0){
+                popupMenu.add(previewMenuItem);
+                popupMenu.add(locateMenuItem);
+                popupMenu.add(new JSeparator());
+            } 
+                popupMenu.add(cancelMenuItem);
+            break;
+	    }
+	    
+	    popupMenu.add(new JSeparator());
+	    popupMenu.add(propertiesMenuItem);
+	    
         popupMenu.show(c, x, y);
 	}
 	
@@ -466,17 +559,7 @@ public class DownloadRendererEditor extends JPanel implements
 	private class DownloadEditorListener implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == cancelButton) {
-				editItem.cancel();
-			} else if (e.getSource() == pauseButton) {
-				editItem.pause();
-			} else if (e.getSource() == resumeButton) {
-				editItem.resume();
-			} else if (e.getSource() == tryAgainButton) {
-				editItem.resume();
-			} else if (e.getSource() == linkButton){
-			    GuiUtils.openURL(ERROR_URL);
-			}
+			performAction(e.getActionCommand(), editItem);
 			cancelCellEditing();
 		}
 
@@ -485,19 +568,40 @@ public class DownloadRendererEditor extends JPanel implements
 	private class MenuListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == cancelMenuItem) {
-                menuEditItem.cancel();
-            } else if (e.getSource() == pauseMenuItem) {
-                menuEditItem.pause();
-            } else if (e.getSource() == resumeMenuItem) {
-                menuEditItem.resume();
-            } else if (e.getSource() == tryAgainMenuItem) {
-                menuEditItem.resume();
-            }
+            performAction(e.getActionCommand(), menuEditItem);
             cancelCellEditing();
         }
 
     }
+	
+	private void performAction(String actionCommmand, DownloadItem item){
+	    if (actionCommmand == CANCEL_COMMAND) {
+            editItem.cancel();
+        } else if (actionCommmand == PAUSE_COMMAND) {
+            editItem.pause();
+        } else if (actionCommmand == RESUME_COMMAND) {
+            editItem.resume();
+        } else if (actionCommmand == TRY_AGAIN_COMMAND) {
+            editItem.resume();
+        } else if (actionCommmand == LINK_COMMAND){
+            GuiUtils.openURL(ERROR_URL);
+        } else if (actionCommmand == PREVIEW_COMMAND){
+            //TODO preview
+            System.out.println("preview " + item.getTitle());
+        } else if (actionCommmand == LOCATE_COMMAND){
+            //TODO locate
+            System.out.println("locate " + item.getTitle());
+        } else if (actionCommmand == LAUNCH_COMMAND){
+            //TODO launch
+            System.out.println("launch " + item.getTitle());
+        } else if (actionCommmand == PROPERTIES_COMMAND){
+            //TODO properties
+            System.out.println("properties " + item.getTitle());
+        } else if (actionCommmand == REMOVE_COMMAND){
+            //TODO remove
+            System.out.println("remove " + item.getTitle());
+        }
+	}
 
 	private String getMessage(DownloadItem item) {
 		switch (item.getState()) {
@@ -553,7 +657,8 @@ public class DownloadRendererEditor extends JPanel implements
         }
 	}
 	
-	private JButton createButton(Icon icon, Icon rolloverIcon, Icon pressedIcon) {
+	//TODO: move this out of renderer
+	private JButton createIconButton(Icon icon, Icon rolloverIcon, Icon pressedIcon) {
         JButton button = new JButton();
         button.setMargin(new Insets(0, 0, 0, 0));
         button.setBorderPainted(false);
