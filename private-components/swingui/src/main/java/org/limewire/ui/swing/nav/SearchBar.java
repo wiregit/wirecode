@@ -9,8 +9,6 @@ import javax.swing.JTextField;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
 
-
-
 public class SearchBar extends JTextField {
 
 	private String defaultText = "Search...";
@@ -22,7 +20,6 @@ public class SearchBar extends JTextField {
 	private Color defaultTextColor;
 	
 	public SearchBar() {
-	    super();
 	    GuiUtils.assignResources(this);
 	    setText(defaultText);
 		setForeground(defaultTextColor);
@@ -39,7 +36,7 @@ public class SearchBar extends JTextField {
 		@Override
 		public void focusGained(FocusEvent e) {
 		    String text = getText();
-		    if(text == null || text.equals(defaultText)) {
+		    if (text == null || text.equals(defaultText)) {
 		        setText("");
 		        setForeground(null);
 		    }

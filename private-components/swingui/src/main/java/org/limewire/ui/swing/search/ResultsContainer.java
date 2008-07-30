@@ -34,6 +34,9 @@ public class ResultsContainer extends JXPanel {
     private final CardLayout cardLayout;
     private final FilterMatcherEditor matcherEditor;
 
+    /**
+     * See LimeWireUISearchModule for binding information.
+     */
     @AssistedInject ResultsContainer(
         @Assisted EventList<VisualSearchResult> visualSearchResults, 
         @Assisted Search search,
@@ -70,13 +73,13 @@ public class ResultsContainer extends JXPanel {
         
         add(new SearchScrollPane(
             imagesFactory.create(eventListModel, eventSelectionModel, search)),
-            SearchCategory.IMAGES .name());
+            SearchCategory.IMAGES.name());
         
         add(new SearchScrollPane(
            documentsFactory.create(eventListModel, eventSelectionModel, search)),
            SearchCategory.DOCUMENTS.name());
     }
-
+    
     void showCategory(SearchCategory category) {
         cardLayout.show(this, category.name());
         matcherEditor.categoryChanged(category);

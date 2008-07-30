@@ -12,7 +12,9 @@ public class FontUtils {
     private FontUtils() {}
     
     public static void changeSize(JComponent component, float increment) {
-        component.setFont(component.getFont().deriveFont(component.getFont().getSize() + increment));
+        Font font = component.getFont();
+        float newSize = font.getSize() + increment;
+        component.setFont(font.deriveFont(newSize));
     }
     
     public static void changeStyle(JComponent component, int style) {

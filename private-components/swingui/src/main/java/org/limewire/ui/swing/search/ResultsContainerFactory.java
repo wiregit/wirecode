@@ -7,6 +7,7 @@ import ca.odell.glazedlists.EventList;
 
 public interface ResultsContainerFactory {
 
-    public ResultsContainer create(EventList<VisualSearchResult> visualSearchResults, Search search);
-    
+    public ResultsContainer create(
+        EventList<VisualSearchResult> visualSearchResults,
+        Search search);
 }

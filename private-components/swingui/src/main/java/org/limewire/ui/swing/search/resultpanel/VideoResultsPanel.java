@@ -12,11 +12,12 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public class VideoResultsPanel extends BaseResultPanel {
     
-    
-    @AssistedInject public VideoResultsPanel(@Assisted EventListModel<VisualSearchResult> listModel,
-            @Assisted EventSelectionModel<VisualSearchResult> selectionModel,
-            SearchResultDownloader searchResultDownloader,
-            @Assisted Search search) {
-        super("Video from Everyone", listModel, selectionModel, searchResultDownloader, search);
+    @AssistedInject public VideoResultsPanel(
+        @Assisted EventListModel<VisualSearchResult> listModel,
+        @Assisted EventSelectionModel<VisualSearchResult> selectionModel,
+        SearchResultDownloader searchResultDownloader,
+        @Assisted Search search) {
+        super("Video from Everyone", listModel, selectionModel,
+            searchResultDownloader, search);
     }
 }

@@ -20,13 +20,34 @@ public class LimeWireUiSearchModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
-        bind(SearchResultsPanelFactory.class).toProvider(FactoryProvider.newFactory(SearchResultsPanelFactory.class, SearchResultsPanel.class));
-        bind(ResultsContainerFactory.class).toProvider(FactoryProvider.newFactory(ResultsContainerFactory.class, ResultsContainer.class));
-        bind(AllResultsPanelFactory.class).toProvider(FactoryProvider.newFactory(AllResultsPanelFactory.class, AllResultsPanel.class));
-        bind(AudioResultsPanelFactory.class).toProvider(FactoryProvider.newFactory(AudioResultsPanelFactory.class, AudioResultsPanel.class));
-        bind(ImagesResultsPanelFactory.class).toProvider(FactoryProvider.newFactory(ImagesResultsPanelFactory.class, ImagesResultsPanel.class));
-        bind(DocumentsResultsPanelFactory.class).toProvider(FactoryProvider.newFactory(DocumentsResultsPanelFactory.class, DocumentsResultsPanel.class));
-        bind(VideoResultsPanelFactory.class).toProvider(FactoryProvider.newFactory(VideoResultsPanelFactory.class, VideoResultsPanel.class));
+        
+        bind(SearchResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                SearchResultsPanelFactory.class, SearchResultsPanel.class));
+        
+        bind(ResultsContainerFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                ResultsContainerFactory.class, ResultsContainer.class));
+        
+        bind(AllResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                AllResultsPanelFactory.class, AllResultsPanel.class));
+        
+        bind(AudioResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                AudioResultsPanelFactory.class, AudioResultsPanel.class));
+        
+        bind(ImagesResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                ImagesResultsPanelFactory.class, ImagesResultsPanel.class));
+        
+        bind(DocumentsResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                DocumentsResultsPanelFactory.class, DocumentsResultsPanel.class));
+        
+        bind(VideoResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                VideoResultsPanelFactory.class, VideoResultsPanel.class));
     }
 
 }

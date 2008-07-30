@@ -1,10 +1,10 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import ca.odell.glazedlists.swing.EventListModel;
+import ca.odell.glazedlists.swing.EventSelectionModel;
+
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -18,17 +18,14 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
+import org.limewire.ui.swing.search.SponsoredResultsPanel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.util.FontUtils;
-
-import ca.odell.glazedlists.swing.EventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 
 class BaseResultPanel extends JXPanel implements Scrollable {
     
     private final JList resultsList;
-    private final SearchResultDownloader searchResultDownloader;
     private final Search search;
+    private final SearchResultDownloader searchResultDownloader;
     
     BaseResultPanel(String title,
             EventListModel<VisualSearchResult> listModel,
@@ -37,32 +34,40 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
         
-        setLayout(new GridBagLayout());
+        //setLayout(new GridBagLayout());
+        //GridBagConstraints gbc = new GridBagConstraints();
+        setLayout(new BorderLayout());
         
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 0);
+        // TODO: RMV The latest screen mockups do not include this title!
+        /*
         JLabel titleLabel = new JLabel(title);
         FontUtils.changeSize(titleLabel, 5);
         FontUtils.changeStyle(titleLabel, Font.BOLD);
-        add(titleLabel, gbc);
+        add(titleLabel, BorderLayout.NORTH);
+        */
                 
-        gbc.gridwidth = GridBagConstraints.RELATIVE;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(0, 5, 5, 0);
+        //gbc.gridwidth = GridBagConstraints.RELATIVE;
+        //gbc.weightx = 1;
+        //gbc.weighty = 1;
+        //gbc.anchor = GridBagConstraints.NORTHWEST;
+        //gbc.insets = new Insets(0, 5, 5, 0);
         resultsList = new JList(listModel);
         resultsList.setSelectionModel(selectionModel);
         resultsList.addMouseListener(new ResultDownloader());
-        add(resultsList, gbc);
+        add(resultsList, BorderLayout.CENTER);
         
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.NORTH;
-        gbc.insets = new Insets(0, 5, 0, 5);
-        add(new JLabel("sponsored results"), gbc);
+        SponsoredResultsPanel srp = createSponsoredResultsPanel();
+        add(srp, BorderLayout.EAST);
+    }
+
+    private SponsoredResultsPanel createSponsoredResultsPanel() {
+        SponsoredResultsPanel srp = new SponsoredResultsPanel();
+        srp.addEntry("Advantage Consulting, Inc.\n" +
+            "When you really can't afford to fail...\n" +
+            "IT Staffing Solutions with an ADVANTAGE");
+        srp.addEntry("Object Computing, Inc.\n" +
+            "An OO Software Engineering Company");
+        return srp;
     }
 
     @Override
@@ -71,9 +76,10 @@ class BaseResultPanel extends JXPanel implements Scrollable {
     }
 
     @Override
-    public int getScrollableBlockIncrement(Rectangle visibleRect,
-            int orientation, int direction) {
-        return resultsList.getScrollableBlockIncrement(visibleRect, orientation, direction);
+    public int getScrollableBlockIncrement(
+        Rectangle visibleRect, int orientation, int direction) {
+        return resultsList.getScrollableBlockIncrement(
+            visibleRect, orientation, direction);
     }
 
     @Override
@@ -98,19 +104,21 @@ class BaseResultPanel extends JXPanel implements Scrollable {
             if (e.getClickCount() == 2) {
                 int index = resultsList.locationToIndex(e.getPoint());
                 ListModel dlm = resultsList.getModel();
-                VisualSearchResult item = (VisualSearchResult) dlm.getElementAt(index);
+                VisualSearchResult item =
+                    (VisualSearchResult) dlm.getElementAt(index);
                 resultsList.ensureIndexIsVisible(index);
+                
                 try {
                     // TODO: Need to go through some of the rigor that 
                     // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
                     // went through.. checking for conflicts, etc.
-                    searchResultDownloader.addDownload(search, item.getCoreSearchResults());
-                } catch(SaveLocationException sle) {
+                    searchResultDownloader.addDownload(
+                        search, item.getCoreSearchResults());
+                } catch (SaveLocationException sle) {
                     // TODO: Do something!
                     sle.printStackTrace();
                 }
             }
         }
     }
-    
 }

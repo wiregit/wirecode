@@ -12,11 +12,12 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public class AudioResultsPanel extends BaseResultPanel {
     
-    
-    @AssistedInject public AudioResultsPanel(@Assisted EventListModel<VisualSearchResult> listModel,
-            @Assisted EventSelectionModel<VisualSearchResult> selectionModel,
-            SearchResultDownloader searchResultDownloader,
-            @Assisted Search search) {
-        super("Audio from Everyone", listModel, selectionModel, searchResultDownloader, search);
+    @AssistedInject public AudioResultsPanel(
+        @Assisted EventListModel<VisualSearchResult> listModel,
+        @Assisted EventSelectionModel<VisualSearchResult> selectionModel,
+        SearchResultDownloader searchResultDownloader,
+        @Assisted Search search) {
+        super("Audio from Everyone", listModel, selectionModel,
+            searchResultDownloader, search);
     }
 }

@@ -12,10 +12,12 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public class AllResultsPanel extends BaseResultPanel {
         
-    @AssistedInject public AllResultsPanel(@Assisted EventListModel<VisualSearchResult> listModel,
-            @Assisted EventSelectionModel<VisualSearchResult> selectionModel,
-            SearchResultDownloader searchResultDownloader,
-            @Assisted Search search) {
-        super("All Results from Everyone", listModel, selectionModel, searchResultDownloader, search);
+    @AssistedInject public AllResultsPanel(
+        @Assisted EventListModel<VisualSearchResult> listModel,
+        @Assisted EventSelectionModel<VisualSearchResult> selectionModel,
+        SearchResultDownloader searchResultDownloader,
+        @Assisted Search search) {
+        super("All Results from Everyone", listModel, selectionModel,
+            searchResultDownloader, search);
     }
 }
