@@ -6,6 +6,7 @@ import java.awt.Image;
 import java.util.Enumeration;
 
 import javax.swing.JPopupMenu;
+import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
@@ -49,6 +50,7 @@ public class AppFrame extends SingleFrameApplication {
         // Because we use a browser heavily, which is heavyweight,
         // we must disable all lightweight popups.
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 
         Injector injector = createInjector();
 
