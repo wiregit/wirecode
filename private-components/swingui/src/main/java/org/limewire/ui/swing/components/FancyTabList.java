@@ -146,7 +146,6 @@ public class FancyTabList extends JXPanel {
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                     if(evt.getNewValue().equals(Boolean.TRUE)) {
-                        System.out.println("new true on: " + tab);
                         layoutTabs();
                     }
                 }
