@@ -9,7 +9,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.Scrollable;
@@ -31,11 +30,10 @@ class BaseResultPanel extends JXPanel implements Scrollable {
             EventListModel<VisualSearchResult> listModel,
             EventSelectionModel<VisualSearchResult> selectionModel,
             SearchResultDownloader searchResultDownloader, Search search) {
+        
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
         
-        //setLayout(new GridBagLayout());
-        //GridBagConstraints gbc = new GridBagConstraints();
         setLayout(new BorderLayout());
         
         // TODO: RMV The latest screen mockups do not include this title!
@@ -46,11 +44,6 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         add(titleLabel, BorderLayout.NORTH);
         */
                 
-        //gbc.gridwidth = GridBagConstraints.RELATIVE;
-        //gbc.weightx = 1;
-        //gbc.weighty = 1;
-        //gbc.anchor = GridBagConstraints.NORTHWEST;
-        //gbc.insets = new Insets(0, 5, 5, 0);
         resultsList = new JList(listModel);
         resultsList.setSelectionModel(selectionModel);
         resultsList.addMouseListener(new ResultDownloader());
