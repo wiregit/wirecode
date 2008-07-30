@@ -122,7 +122,7 @@ public class FancyTab extends JXPanel {
     }
 
     /** Gets the action underlying this tab. */
-    TabActionMap getAction() {
+    TabActionMap getTabActionMap() {
         return tabActions;
     }
     

@@ -126,7 +126,7 @@ class TopPanel extends JPanel implements SearchNavigator {
         final NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, title, searchPanel, false);
         final SearchAction action = new SearchAction(item, search);
         final TabActionMap actionMap = new TabActionMap(action, action);
-        searchList.addActionAt(actionMap, 0);
+        searchList.addTabActionMapAt(actionMap, 0);
         return new NavItem() {
             @Override
             public String getName() {
@@ -135,7 +135,7 @@ class TopPanel extends JPanel implements SearchNavigator {
             
             @Override
             public void remove() {
-                searchList.removeAction(actionMap);
+                searchList.removeTabActionMap(actionMap);
                 action.remove();
             }
             

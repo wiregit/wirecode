@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,7 +18,6 @@ import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.GroupLayout.Group;
 
@@ -30,11 +28,10 @@ import org.jdesktop.swingx.painter.Painter;
 /** A horizontal list of {@link FancyTab FancyTabs}. */
 public class FancyTabList extends JXPanel {
     
-    private final List<TabActionMap> actionMaps = new ArrayList<TabActionMap>();
-    private final List<FancyTab> visibleTabs = new ArrayList<FancyTab>();
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
     private final ActionListener tabRemoveListener = new RemoveListener();
+    private int vizStartIdx = -1;
     
     private final JPanel view;
     private final AbstractButton moreOption;
@@ -54,7 +51,7 @@ public class FancyTabList extends JXPanel {
         FIXED, FLOWED;
     }
     
-    public FancyTabList(Iterable<? extends TabActionMap> actions) {
+    public FancyTabList(Iterable<? extends TabActionMap> actionMaps) {
         setOpaque(false);
         
         view = new JXPanel();
@@ -77,19 +74,19 @@ public class FancyTabList extends JXPanel {
             public void actionPerformed(ActionEvent e) {
                 boolean found = false;
                 boolean moved = false;
-                for(TabActionMap actions : actionMaps) {
+                for(FancyTab tab : tabs) {
                     if(found) {
                         moved = true;
-                        actions.getSelectAction().putValue(Action.SELECTED_KEY, true);
+                        tab.getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
                         break;
                     }
                     
-                    if(actions.getSelectAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
+                    if(tab.getTabActionMap().getSelectAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
                         found = true;
                     }
                 }
-                if(!moved && !actionMaps.isEmpty()) {
-                    actionMaps.get(0).getSelectAction().putValue(Action.SELECTED_KEY, true);
+                if(!moved && !tabs.isEmpty()) {
+                    tabs.get(0).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
                 }
                 
             }
@@ -104,11 +101,11 @@ public class FancyTabList extends JXPanel {
         maxTabs = Integer.MAX_VALUE;
         
         props = new FancyTabProperties();
-        setActions(actions);
+        setTabActionMaps(actionMaps);
     }
     
-    public FancyTabList(TabActionMap... actions) {
-        this(Arrays.asList(actions));
+    public FancyTabList(TabActionMap... actionMaps) {
+        this(Arrays.asList(actionMaps));
     }
 
     /** Sets the maximum number of tabs to render at once. */
@@ -120,13 +117,12 @@ public class FancyTabList extends JXPanel {
     /** Sets whether or not the tabs should render a 'remove' icon. */
     public void setRemovable(boolean removable) {
         props.setRemovable(removable);
-        setActions(actionMaps);
+        recreateTabs();
     }
 
     /** Adds a new tab based on the given action at the specified index. */
-    public void addActionAt(TabActionMap action, int i) {
-        this.actionMaps.add(i, action);
-        FancyTab tab = createAndPrepareTab(action);
+    public void addTabActionMapAt(TabActionMap actionMap, int i) {
+        FancyTab tab = createAndPrepareTab(actionMap);
         this.tabs.add(i, tab);
         layoutTabs();
     }
@@ -135,11 +131,10 @@ public class FancyTabList extends JXPanel {
      * Removes the tab based on the given action. This will not trigger an
      * action from the {@link TabActionMap#getRemoveAction()} action.
      */
-    public void removeAction(TabActionMap action) {
-        actionMaps.remove(action);
+    public void removeTabActionMap(TabActionMap actionMap) {
         for(Iterator<FancyTab> iter = tabs.iterator(); iter.hasNext(); ) {
             FancyTab tab = iter.next();
-            if(tab.getAction().equals(action)) {
+            if(tab.getTabActionMap().equals(actionMap)) {
                 tab.removeFromGroup(tabGroup);
                 iter.remove();
                 break;
@@ -151,16 +146,13 @@ public class FancyTabList extends JXPanel {
     /**
      * Sets a new list of tabs based on the given actions.
      */
-    public void setActions(Iterable<? extends TabActionMap> newActions) {
-        actionMaps.clear();
-        
+    public void setTabActionMaps(Iterable<? extends TabActionMap> newActionMaps) {
         for(FancyTab tab : tabs) {
             tab.removeFromGroup(tabGroup);
         }
         tabs.clear();
 
-        for(TabActionMap actions : newActions) {
-            this.actionMaps.add(actions);
+        for(TabActionMap actions : newActionMaps) {
             FancyTab tab = createAndPrepareTab(actions);
             tabs.add(tab);
         }
@@ -168,10 +160,18 @@ public class FancyTabList extends JXPanel {
         layoutTabs();
     }
     
-    private FancyTab createAndPrepareTab(TabActionMap actions) {
-        final FancyTab tab = new FancyTab(actions, tabGroup, props);
+    private void recreateTabs() {
+        List<TabActionMap> actionMaps = new ArrayList<TabActionMap>(tabs.size());
+        for(FancyTab tab : tabs) {
+            actionMaps.add(tab.getTabActionMap());
+        }
+        setTabActionMaps(actionMaps);
+    }
+    
+    private FancyTab createAndPrepareTab(TabActionMap actionMaps) {
+        final FancyTab tab = new FancyTab(actionMaps, tabGroup, props);
         tab.addRemoveActionListener(tabRemoveListener);
-        actions.getSelectAction().addPropertyChangeListener(new PropertyChangeListener() {
+        actionMaps.getSelectAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
@@ -187,8 +187,8 @@ public class FancyTabList extends JXPanel {
     /**
      * Sets a new list of tabs based on the given actions.
      */
-    public void setActions(TabActionMap... actions) {
-        setActions(Arrays.asList(actions));
+    public void setTabActionMaps(TabActionMap... actionMaps) {
+        setTabActionMaps(Arrays.asList(actionMaps));
     }
     
     /**
@@ -230,11 +230,6 @@ public class FancyTabList extends JXPanel {
             break;
         }
         
-        visibleTabs.clear();
-        for(int i = 0; i < view.getComponentCount(); i++) {
-            visibleTabs.add((FancyTab)view.getComponent(i));
-        }
-        
         if(tabs.size() >= maxTabs) {
             moreOption.setVisible(true);
         }
@@ -254,28 +249,33 @@ public class FancyTabList extends JXPanel {
     
     /**
      * Returns the tabs that *should* be visible, based on the currently visible
-     * tabs, and the currently selected tab.
+     * tabs, and the currently selected tab.  This keeps state and assumes the
+     * tabs it returns will become visible.
      * 
      * @return
      */
     private List<FancyTab> getPendingVisibleTabs() {
+        List<FancyTab> vizTabs;
         if(maxTabs >= tabs.size()) {
-            return tabs;
+            vizStartIdx = 0;
+            vizTabs = tabs;
         } else {        
             FancyTab selectedTab = getSelectedTab();
-            if(visibleTabs.contains(selectedTab)) {
-                return visibleTabs;
-            } else {
-                int vizIdx = tabs.indexOf(visibleTabs.get(0));
+            if(tabs.size() - vizStartIdx < maxTabs) {
+                vizStartIdx = tabs.size() - maxTabs;
+            }
+            vizTabs = tabs.subList(vizStartIdx, vizStartIdx + maxTabs);
+            if(!vizTabs.contains(selectedTab)) {
                 int selIdx = tabs.indexOf(selectedTab);
-                if (vizIdx > selIdx) { // We have to shift left
-                    return tabs.subList(selIdx, selIdx+maxTabs);
+                if (vizStartIdx > selIdx) { // We have to shift left
+                    vizStartIdx = selIdx;
                 } else { // We have to shift right
-                    return tabs.subList(selIdx-maxTabs+1, selIdx+1);
+                    vizStartIdx = selIdx-maxTabs+1;
                 }
-                
+                vizTabs = tabs.subList(vizStartIdx, vizStartIdx+maxTabs);
             }
         }
+        return vizTabs;
     }
     
     /**
@@ -372,20 +372,20 @@ public class FancyTabList extends JXPanel {
         public void actionPerformed(ActionEvent e) {
             FancyTab tab = (FancyTab)e.getSource();
             boolean selected = tab.isSelected();
-            int idx = actionMaps.indexOf(tab.getAction());
+            int idx = tabs.indexOf(tab);
             assert idx != -1;
-            actionMaps.remove(idx);
             tabs.remove(tab);
             tab.removeFromGroup(tabGroup);
-            layoutTabs();
             
             // Shift the selection to the tab to the left (or right, if idx==0)
-            if(selected) {
-                if(idx == 0 && actionMaps.size() > 0) {
-                    actionMaps.get(0).getSelectAction().putValue(Action.SELECTED_KEY, true);
-                } else  if(idx > 0 && actionMaps.size() > 0) {
-                    actionMaps.get(idx - 1).getSelectAction().putValue(Action.SELECTED_KEY, true);
+            if(selected && !tabs.isEmpty()) {
+                if(idx == 0 && tabs.size() > 0) {
+                    tabs.get(0).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
+                } else if(idx > 0 && tabs.size() > 0) {
+                    tabs.get(idx - 1).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
                 }
+            } else {            
+                layoutTabs();
             }
         }
     }
