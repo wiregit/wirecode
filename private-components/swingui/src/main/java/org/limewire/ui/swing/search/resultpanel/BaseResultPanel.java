@@ -4,12 +4,14 @@ import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JList;
+import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.Scrollable;
 
@@ -22,7 +24,10 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 class BaseResultPanel extends JXPanel implements Scrollable {
     
+    public enum Mode { LIST, TABLE };
+    
     private final JList resultsList;
+    private final JTable resultsTable;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -47,7 +52,17 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         resultsList = new JList(listModel);
         resultsList.setSelectionModel(selectionModel);
         resultsList.addMouseListener(new ResultDownloader());
-        add(resultsList, BorderLayout.CENTER);
+        
+        /*
+        SortedList sortedResults =
+            new SortedList(listModel, new ResultComparator());
+        EventTableModel tableModel =
+            new EventTableModel(sortedResults, new ResultTableFormat());
+        resultsTable = new JTable(tableModel);
+        */
+        resultsTable = null;
+        
+        setMode(Mode.LIST);
         
         SponsoredResultsPanel srp = createSponsoredResultsPanel();
         add(srp, BorderLayout.EAST);
@@ -89,6 +104,14 @@ class BaseResultPanel extends JXPanel implements Scrollable {
     public int getScrollableUnitIncrement(Rectangle visibleRect,
             int orientation, int direction) {
         return resultsList.getScrollableUnitIncrement(visibleRect, orientation, direction);
+    }
+    
+    public void setMode(Mode mode) {
+        Component component =
+            mode == Mode.LIST ? resultsList :
+            mode == Mode.TABLE ? resultsTable :
+            null;
+        add(component, BorderLayout.CENTER);
     }
     
     private class ResultDownloader extends MouseAdapter {
