@@ -230,9 +230,7 @@ public class FancyTabList extends JXPanel {
             break;
         }
         
-        if(tabs.size() >= maxTabs) {
-            moreOption.setVisible(true);
-        }
+        moreOption.setVisible(tabs.size() >= maxTabs);
     }
     
     /**
@@ -251,6 +249,7 @@ public class FancyTabList extends JXPanel {
      * Returns the tabs that *should* be visible, based on the currently visible
      * tabs, and the currently selected tab.  This keeps state and assumes the
      * tabs it returns will become visible.
+     * a
      * 
      * @return
      */
