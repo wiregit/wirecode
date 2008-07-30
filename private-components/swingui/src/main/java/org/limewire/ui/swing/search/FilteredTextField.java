@@ -16,14 +16,15 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 class FilteredTextField extends JTextField implements FocusListener {
     
-    private static final String DEFAULT_TEXT = "Filter results...";
-    
     // The icon displayed on the left side of the text field,
     // supplied by the call to GuiUtils.assignResources().
+    // TODO: RMV We need to change this so the icon to be displayed
+    // TODO: RMV is specified by the class that creates this component
+    // TODO: RMV so that different icons can be used.
     @Resource private Icon icon;
     
-    private boolean valueEntered;
-
+    private String defaultText = "Filter results...";
+    
     /**
      * Creates a FilteredTextField that displays a given number of columns.
      * @param columns
@@ -41,23 +42,36 @@ class FilteredTextField extends JTextField implements FocusListener {
         addFocusListener(this);
     }
     
+    /**
+     * Repaints this component when focus is gained
+     * so default text can be removed.
+     */
     @Override
     public void focusGained(FocusEvent e) {
-        if (!valueEntered) {
-            setText("");
-            setForeground(Color.BLACK);
-        }
+        repaint();
     }
     
+    /**
+     * Repaints this component when focus is lost
+     * so default text can be displayed if no text has been entered.
+     */
     @Override
     public void focusLost(FocusEvent e) {
-        valueEntered = getText().length() > 0;
-        if (!valueEntered) {
-            setForeground(Color.LIGHT_GRAY);
-            setText(DEFAULT_TEXT);
-        }
+        repaint();
     }
     
+    /**
+     * Gets the default text that is displayed when this component
+     * doesn't have focus and doesn't contain any text.
+     * @return the default text
+     */
+    public String getDefaultText() {
+        return defaultText;
+    }
+
+    /**
+     * @return the size of this component
+     */
     @Override
     public Dimension getSize() {
         Dimension size = super.getSize();
@@ -67,12 +81,16 @@ class FilteredTextField extends JTextField implements FocusListener {
         return size;
     }
 
+    /**
+     * Paints this component, including an icon and
+     * the default text when this component has focus and has no text value.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
         
         if (icon == null) {
-            // TODO: How should not finding the icon be handled?
+            // TODO: RMV How should not finding the icon be handled?
             g2d.drawLine(0, 0, getWidth(), getHeight());
             g2d.drawLine(0, getHeight(), getWidth(), 0);
         } else {
@@ -81,8 +99,28 @@ class FilteredTextField extends JTextField implements FocusListener {
             g2d.translate(icon.getIconWidth(), 0);
         }
         
+        int iconWidth = icon.getIconWidth();
+        g2d.translate(iconWidth, 0);
         super.paintComponent(g2d);
         
+        boolean valueEntered = getText().length() > 0;
+        if (!hasFocus() && !valueEntered) {
+            g2d.setColor(Color.LIGHT_GRAY);
+            FontMetrics fm = g2d.getFontMetrics();
+            int x = 2; // using previous translate
+            int y = fm.getAscent() + 2;
+            g2d.drawString(defaultText, x, y);
+        }
+        
         g2d.dispose();
+    }
+
+    /**
+     * Sets the default text that is displayed when this component
+     * doesn't have focus and doesn't contain any text.
+     * @param defaultText the default text
+     */
+    public void setDefaultText(String defaultText) {
+        this.defaultText = defaultText;
     }
 }

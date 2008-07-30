@@ -1,5 +1,11 @@
 package org.limewire.ui.swing.search;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -9,18 +15,17 @@ import java.awt.event.ItemListener;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * This class is a panel that contains components for filtering and sorting
@@ -30,30 +35,68 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
  */
 class SortAndFilterPanel extends JXPanel {
 
-    private static final int FILTER_WIDTH = 15;
+    private static final int FILTER_WIDTH = 10;
+    
+    @Resource private Icon listViewPressedIcon;
+    @Resource private Icon listViewUnpressedIcon;
+    @Resource private Icon tableViewPressedIcon;
+    @Resource private Icon tableViewUnpressedIcon;
 
-    private final JComboBox sortBox = new JComboBox(new String[] { "Sources", "Relevance", "Size",
-            "File Extension" });
-
+    private final JComboBox sortBox = new JComboBox(new String[] {
+        "Sources", "Relevance", "Size", "File Extension" });
+    
+    private final JLabel sortLabel = new JLabel("Sort by:");
     private final JTextField filterBox = new FilteredTextField(FILTER_WIDTH);
+    private final JToggleButton listViewToggleButton = new JToggleButton();
+    private final JToggleButton tableViewToggleButton = new JToggleButton();
 
     SortAndFilterPanel() {
+        GuiUtils.assignResources(this);
+        
         setBackground(Color.LIGHT_GRAY);
 
+        sortLabel.setForeground(Color.WHITE);
+        // TODO: RMV Are the following lines needed?
+        // FontUtils.changeSize(sortLabel, 1);
+        // FontUtils.changeStyle(sortLabel, Font.BOLD);
+        
+        configureViewButtons();
+        
+        layoutComponents();
+    }
+
+    private void layoutComponents() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
-        gbc.insets = new Insets(3, 2, 2, 10);
+        gbc.insets = new Insets(2, 2, 2, 10); // top, left, bottom, right
         add(filterBox, gbc);
 
-        JLabel sortLabel = new JLabel("Sort by:");
-        // FontUtils.changeSize(sortLabel, 1);
-        // FontUtils.changeStyle(sortLabel, Font.BOLD);
-        sortLabel.setForeground(Color.WHITE);
         gbc.insets.right = 5;
         add(sortLabel, gbc);
 
         add(sortBox, gbc);
+        
+        gbc.insets.left = gbc.insets.right = 0;
+        add(listViewToggleButton, gbc);
+        add(tableViewToggleButton, gbc);
+    }
+
+    private void configureViewButtons() {
+        Insets insets = new Insets(0, 0, 0, 0);
+        
+        listViewToggleButton.setIcon(listViewUnpressedIcon);
+        listViewToggleButton.setPressedIcon(listViewPressedIcon);
+        listViewToggleButton.setSelected(true);
+        listViewToggleButton.setMargin(insets);
+        
+        tableViewToggleButton.setIcon(tableViewUnpressedIcon);
+        tableViewToggleButton.setPressedIcon(tableViewPressedIcon);
+        tableViewToggleButton.setMargin(insets);
+        
+        ButtonGroup viewGroup = new ButtonGroup();
+        viewGroup.add(listViewToggleButton);
+        viewGroup.add(tableViewToggleButton);
     }
 
     public EventList<VisualSearchResult> getSortedAndFilteredList(
@@ -100,14 +143,18 @@ class SortAndFilterPanel extends JXPanel {
                 }
             }
         };
-        listener.itemStateChanged(new ItemEvent(sortBox, ItemEvent.ITEM_STATE_CHANGED, sortBox
-                .getSelectedItem(), ItemEvent.SELECTED));
+        
+        ItemEvent itemEvent = new ItemEvent(
+            sortBox, ItemEvent.ITEM_STATE_CHANGED,
+            sortBox.getSelectedItem(), ItemEvent.SELECTED);
+        listener.itemStateChanged(itemEvent);
         sortBox.addItemListener(listener);
+        
         return sortedList;
     }
 
-    private static class VisualSearchResultTextFilterator implements
-            TextFilterator<VisualSearchResult> {
+    private static class VisualSearchResultTextFilterator
+    implements TextFilterator<VisualSearchResult> {
         @Override
         public void getFilterStrings(List<String> baseList, VisualSearchResult element) {
             baseList.add(element.getDescription());
@@ -116,5 +163,4 @@ class SortAndFilterPanel extends JXPanel {
             baseList.add(String.valueOf(element.getSize()));
         }
     }
-
 }
