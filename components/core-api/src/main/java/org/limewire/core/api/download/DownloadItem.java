@@ -32,12 +32,12 @@ public interface DownloadItem  {
 	/**
 	 * @return size in bytes
 	 */
-	public double getCurrentSize();
+	public long getCurrentSize();
 	
 	/**
      * @return size in bytes
      */
-	public double getTotalSize();
+	public long getTotalSize();
 
 	public String getRemainingDownloadTime();
 

@@ -63,7 +63,7 @@ public class MainDownloadPanel extends JPanel {
 		cardPanel.add(categoryPanel, categoryPanel.getName());
 
 		final DownloadSettingsPanel settingsPanel = new DownloadSettingsPanel();
-		settingsPanel.setBorder(new LineBorder(Color.black, 1, false));
+		settingsPanel.setBorder(new LineBorder(Color.BLACK, 1, false));
 		add(settingsPanel, BorderLayout.NORTH);
 	}
 	

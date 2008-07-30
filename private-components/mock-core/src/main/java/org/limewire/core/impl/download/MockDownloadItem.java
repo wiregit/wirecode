@@ -13,18 +13,20 @@ import org.limewire.core.api.download.DownloadState;
 public class MockDownloadItem implements DownloadItem {
 
 	private String title;
-	private volatile double currentSize = 0;
-	private final double totalSize;
+	private volatile long currentSize = 0;
+	private final long totalSize;
 	//guarded by this
 	private boolean running = true;
 	private DownloadState state = DownloadState.DOWNLOADING;
 	private List<DownloadSource> downloadSources;
 	private Category category;
 	
+	private ErrorState errorState = ErrorState.NONE;
+	
 	private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
 	//TODO: change constructor
-	public MockDownloadItem(String title, double totalSize, DownloadState state, Category category) {
+	public MockDownloadItem(String title, long totalSize, DownloadState state, Category category) {
 		this.title = title;
 		this.category = category;
 		this.totalSize = totalSize;
@@ -52,11 +54,11 @@ public class MockDownloadItem implements DownloadItem {
 		return (int) (100 * getCurrentSize() / getTotalSize());
 	}
 
-	public double getCurrentSize() {
+	public long getCurrentSize() {
 		return currentSize;
 	}
 
-	private synchronized void setCurrentSize(double newSize) {
+	private synchronized void setCurrentSize(long newSize) {
 		double oldSize = this.currentSize;
 		this.currentSize = newSize > getTotalSize() ? getTotalSize() : newSize;
 		if (currentSize == getTotalSize()) {
@@ -68,7 +70,7 @@ public class MockDownloadItem implements DownloadItem {
 //		notifyObservers();
 	}
 
-	public double getTotalSize() {
+	public long getTotalSize() {
 		return totalSize;
 	}
 
@@ -104,7 +106,7 @@ public class MockDownloadItem implements DownloadItem {
 		new Thread() {
 			public void run() {
 				while (isRunning() && getCurrentSize() < getTotalSize()) {
-					setCurrentSize(getCurrentSize() + .5);
+					setCurrentSize(getCurrentSize() + 5);
 					try {
 						sleep(500);
 					} catch (InterruptedException e) {
@@ -170,8 +172,11 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public ErrorState getErrorState() {
-        // TODO Auto-generated method stub
-        return ErrorState.NONE;
+        return errorState;
+    }
+    
+    public void setErrorState(ErrorState errorState){
+        this.errorState = errorState;
     }
 
 

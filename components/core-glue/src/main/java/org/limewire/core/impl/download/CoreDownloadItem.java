@@ -25,9 +25,8 @@ public class CoreDownloadItem implements DownloadItem {
     /**
      * size in bytes.  FINISHING state is only shown for files greater than this size.
      */
-    //TODO: actual size for finishing threshold
-    private final int finishingThreshold = 999999999;
-  //  private DownloadState state;
+    //set to 0 to show FINISHING state regardless of size
+    private final long finishingThreshold = 0;
 
     public CoreDownloadItem(Downloader downloader) {
         this.downloader = downloader;
@@ -71,7 +70,7 @@ public class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public double getCurrentSize() {
+    public long getCurrentSize() {
         if(getState() == DownloadState.DONE){
             return getTotalSize();
         } else {
@@ -129,11 +128,11 @@ public class CoreDownloadItem implements DownloadItem {
     @Override
     public String getTitle() {
         // TODO return title, not file name
-        return downloader.getFile().getName();
+        return downloader.getSaveFile().getName();
     }
 
     @Override
-    public double getTotalSize() {
+    public long getTotalSize() {
         return downloader.getContentLength();
     }
 

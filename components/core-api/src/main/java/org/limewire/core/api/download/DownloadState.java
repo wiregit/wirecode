@@ -11,7 +11,7 @@ public enum DownloadState {
     REMOTE_QUEUED(true, false, false, false), 
 	CANCELLED(false, false, false, false), 
 	STALLED(true, false, false, true), 
-	ERROR(false, false, false, false);
+	ERROR(true, false, false, false);
 
 	private boolean cancellable;
 	private boolean pausable;

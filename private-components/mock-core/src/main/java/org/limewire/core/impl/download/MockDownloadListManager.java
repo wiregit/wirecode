@@ -7,6 +7,7 @@ import java.util.List;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 
@@ -47,47 +48,77 @@ public class MockDownloadListManager implements DownloadListManager {
 	
 
 	private void initializeMockData(){
-	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 44.6,
+	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 446,
 				DownloadState.DOWNLOADING, DownloadItem.Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("Frank"));
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		item.addDownloadSource(new MockDownloadSource("Joey"));
 		addDownload(item);
 		
-		item = new MockDownloadItem("FINISHING", 44.6,
+		item = new MockDownloadItem("FINISHING", 446,
 				DownloadState.FINISHING, DownloadItem.Category.AUDIO);
 		item.addDownloadSource(new MockDownloadSource("Henry"));
 		addDownload(item);
 		
-		item = new MockDownloadItem("done on Skateboard", 44.6,
+		item = new MockDownloadItem("done on Skateboard", 446,
 				DownloadState.DONE, DownloadItem.Category.IMAGE);
 		item.addDownloadSource(new MockDownloadSource("Jolene"));
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		addDownload(item);
 		
-		item = new MockDownloadItem("queued file", 5.5,
+		item = new MockDownloadItem("queued file", 55,
 				DownloadState.LOCAL_QUEUED, DownloadItem.Category.DOCUMENT);
 		item.addDownloadSource(new MockDownloadSource("Barack"));
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		addDownload(item);
 		
-		item = new MockDownloadItem("other queued file", 5.5,
+		item = new MockDownloadItem("other queued file", 55,
                 DownloadState.REMOTE_QUEUED, DownloadItem.Category.DOCUMENT);
         item.addDownloadSource(new MockDownloadSource("Barack"));
         item.addDownloadSource(new MockDownloadSource("Bob"));
         addDownload(item);
 		
-		item = new MockDownloadItem("Paused file", 5.5,
+		item = new MockDownloadItem("Paused file", 55,
 				DownloadState.PAUSED, DownloadItem.Category.AUDIO);
 		item.addDownloadSource(new MockDownloadSource("John"));
 		item.addDownloadSource(new MockDownloadSource("George"));
 		addDownload(item);
-		
-		item = new MockDownloadItem("Stalled file", 5.5,
-				DownloadState.STALLED, DownloadItem.Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("Al"));
-		item.addDownloadSource(new MockDownloadSource("Bob"));
-		addDownload(item);
+        
+        item = new MockDownloadItem("Stalled file", 55,
+                DownloadState.STALLED, DownloadItem.Category.VIDEO);
+        item.addDownloadSource(new MockDownloadSource("Al"));
+        item.addDownloadSource(new MockDownloadSource("Bob"));
+        addDownload(item);
+        
+
+        
+        item = new MockDownloadItem("Corrupt file", 55,
+                DownloadState.ERROR, DownloadItem.Category.VIDEO);
+        item.addDownloadSource(new MockDownloadSource("Al"));
+        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.setErrorState(ErrorState.CORRUPT_FILE);
+        addDownload(item);
+        
+        item = new MockDownloadItem("disk problem file", 55,
+                DownloadState.ERROR, DownloadItem.Category.VIDEO);
+        item.addDownloadSource(new MockDownloadSource("Al"));
+        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.setErrorState(ErrorState.DISK_PROBLEM);
+        addDownload(item);
+        
+        item = new MockDownloadItem("not sharable file", 55,
+                DownloadState.ERROR, DownloadItem.Category.VIDEO);
+        item.addDownloadSource(new MockDownloadSource("Al"));
+        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.setErrorState(ErrorState.FILE_NOT_SHARABLE);
+        addDownload(item);
+        
+        item = new MockDownloadItem("UNABLE_TO_CONNECT file", 55,
+                DownloadState.ERROR, DownloadItem.Category.VIDEO);
+        item.addDownloadSource(new MockDownloadSource("Al"));
+        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.setErrorState(ErrorState.UNABLE_TO_CONNECT);
+        addDownload(item);
 	}
 	
 	private class RemoveCancelledListener implements PropertyChangeListener {

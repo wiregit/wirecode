@@ -29,8 +29,10 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -49,6 +51,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 public class DownloadRendererEditor extends JPanel implements
 		TableCellRenderer, TableCellEditor {
 
+    private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
+    
 	//TODO: inject colors
 	private Color rolloverBackground=Color.CYAN;
 	
@@ -71,12 +75,13 @@ public class DownloadRendererEditor extends JPanel implements
     private JButton cancelButton;
     private JButton resumeButton;
     private JButton tryAgainButton;
+    private JButton linkButton;
     private JMenuItem pauseMenuItem;
     private JMenuItem cancelMenuItem;
     private JMenuItem resumeMenuItem;
     private JMenuItem tryAgainMenuItem;
 	private JLabel timeLabel;
-	private DownloadEditorListener editorLister;
+	private DownloadEditorListener editorListener;
 	private MenuListener menuListener;
     private JPopupMenu popupMenu;
 
@@ -124,7 +129,7 @@ public class DownloadRendererEditor extends JPanel implements
 	 */
 	public DownloadRendererEditor() {
 		GuiUtils.assignResources(this);
-
+		
 		iconLabel = new JLabel();
 
 		titleLabel = new JLabel();
@@ -141,11 +146,16 @@ public class DownloadRendererEditor extends JPanel implements
 		progressBar.setMinimumSize(size);
 		progressBar.setPreferredSize(size);
 
-		editorLister = new DownloadEditorListener();
+		editorListener = new DownloadEditorListener();
 		menuListener = new MenuListener();
+		
+		linkButton = new JXHyperlink();
+        linkButton.setText("link button");
+        linkButton.addActionListener(editorListener);
+
 
 		pauseButton = createButton(pauseIcon, pauseIconRollover, pauseIconPressed);
-		pauseButton.addActionListener(editorLister);
+		pauseButton.addActionListener(editorListener);
 		pauseButton.setToolTipText(I18n.tr("Pause"));
 		
 		pauseMenuItem = new JMenuItem(I18n.tr("Pause"));
@@ -153,7 +163,7 @@ public class DownloadRendererEditor extends JPanel implements
 		
 
 		cancelButton = createButton(cancelIcon, cancelIconRollover, cancelIconPressed);
-		cancelButton.addActionListener(editorLister);
+		cancelButton.addActionListener(editorListener);
         cancelButton.setToolTipText(I18n.tr("Cancel"));
 		
 		cancelMenuItem = new JMenuItem(I18n.tr("Cancel"));
@@ -164,7 +174,7 @@ public class DownloadRendererEditor extends JPanel implements
 		timeLabel.setText("13 years remaining");
 
 		resumeButton = createButton(resumeIcon, resumeIconRollover, resumeIconPressed);
-		resumeButton.addActionListener(editorLister);
+		resumeButton.addActionListener(editorListener);
 		resumeButton.setVisible(false);
         resumeButton.setToolTipText(I18n.tr("Resume"));
 		
@@ -172,7 +182,7 @@ public class DownloadRendererEditor extends JPanel implements
 		resumeMenuItem.addActionListener(menuListener);
 
 		tryAgainButton = createButton(tryAgainIcon, tryAgainIconRollover, tryAgainIconPressed);
-		tryAgainButton.addActionListener(editorLister);
+		tryAgainButton.addActionListener(editorListener);
 		tryAgainButton.setToolTipText(I18n.tr("Try Again"));
 		
 		tryAgainMenuItem = new JMenuItem(I18n.tr("Try Again"));
@@ -211,8 +221,17 @@ public class DownloadRendererEditor extends JPanel implements
 		gbc.gridy = 1;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
-		gbc.gridwidth = 2;
+		gbc.gridwidth = 3;
 		add(progressBar, gbc);
+		
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.gridx += gbc.gridwidth;
+        gbc.gridy = 1;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.gridwidth = 1;
+        add(buttonPanel, gbc);  
 		
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.WEST;
@@ -223,23 +242,19 @@ public class DownloadRendererEditor extends JPanel implements
 		gbc.gridwidth = 1;
 		add(statusLabel, gbc);
 		
+		gbc.gridx++;
+		add(linkButton, gbc);
+		
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.EAST;
-		gbc.gridx = 2;
+		gbc.gridx++;
 		gbc.gridy = 2;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.gridwidth = 1;
 		add(timeLabel, gbc);
 		
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.anchor = GridBagConstraints.NORTHWEST;
-		gbc.gridx = 3;
-		gbc.gridy = 1;
-		gbc.weightx = 1;
-		gbc.weighty = 0;
-		gbc.gridwidth = 1;
-		add(buttonPanel, gbc);		
+			
 		
 		popupMenu = new JPopupMenu();
         popupMenu.add(pauseMenuItem);
@@ -355,9 +370,8 @@ public class DownloadRendererEditor extends JPanel implements
             }
         }
         
-        //TODO : doubles in progress bar
-        double totalSize = item.getTotalSize();
-        double curSize = item.getCurrentSize();
+        long totalSize = item.getTotalSize();
+        long curSize = item.getCurrentSize();
         if (curSize < totalSize) {
             editor.progressBar.setHidden(false);
             editor.progressBar.setMaximum((int) item.getTotalSize());
@@ -372,7 +386,7 @@ public class DownloadRendererEditor extends JPanel implements
         } else {
             editor.timeLabel.setVisible(false);
         }
-        setButtonVisibility(item.getState());
+        updateButtons(item);
 	}
 
 	@Override
@@ -425,11 +439,18 @@ public class DownloadRendererEditor extends JPanel implements
 		return true;
 	}
 
-	private void setButtonVisibility(DownloadState state) {
+	private void updateButtons(DownloadItem item) {
+	    DownloadState state = item.getState();
 		pauseButton.setVisible(state.isPausable());
 		resumeButton.setVisible(state.isResumable());
 		cancelButton.setVisible(state.isCancellable());
 		tryAgainButton.setVisible(state.isSearchAgainable());
+		if(state == DownloadState.ERROR){
+		    linkButton.setVisible(true);
+		    linkButton.setText(getErrorMessage(item.getErrorState()));
+		} else {
+		    linkButton.setVisible(false);
+		}
 		if (state == DownloadState.DOWNLOADING) {
 			progressBar.setEnabled(true);
 			progressBar.setHidden(false);
@@ -453,6 +474,8 @@ public class DownloadRendererEditor extends JPanel implements
 				editItem.resume();
 			} else if (e.getSource() == tryAgainButton) {
 				editItem.resume();
+			} else if (e.getSource() == linkButton){
+			    GuiUtils.openURL(ERROR_URL);
 			}
 			cancelCellEditing();
 		}
@@ -491,28 +514,18 @@ public class DownloadRendererEditor extends JPanel implements
 		case DOWNLOADING:
 			//TODO : uploaders in DownloadItem & plural
 			return I18n.tr("Downloading {0} of {1} ({2}) from {3} people", 
-							GuiUtils.toUnitbytes((long)item.getCurrentSize()), GuiUtils.toUnitbytes((long)item.getTotalSize()),
+							GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
 							GuiUtils.rate2speed(item.getDownloadSpeed()), item.getDownloadSourceCount() );
 		case STALLED:
 			return I18n
 					.tr("Stalled - {0} of {1} ({2}%) from 0 people",
-							new Object[] { GuiUtils.toUnitbytes((long)item.getCurrentSize()),
-					        GuiUtils.toUnitbytes((long)item.getTotalSize() ), item.getPercentComplete()});
-		case ERROR:
-			switch (item.getErrorState()) {
-			//TODO: all error messages should link to: http://wiki.limewire.org/index.php?title=User_Guide_Download
-            case CORRUPT_FILE:
-                return I18n.tr("Unable to download: the file is corrupted");
-            case DISK_PROBLEM:
-                return I18n.tr("Unable to download: there is a disk problem");
-            case FILE_NOT_SHARABLE:
-                return I18n.tr("Unable to download: the file is not sharable ");
-            case UNABLE_TO_CONNECT:
-                return I18n.tr("Unable to download: trouble connecting to people");
-            }
+							new Object[] { GuiUtils.toUnitbytes(item.getCurrentSize()),
+					        GuiUtils.toUnitbytes(item.getTotalSize() ), item.getPercentComplete()});
+		case ERROR:			
+            return I18n.tr("Unable to download: ");
 		case PAUSED:
 			return I18n.tr("Paused - {0} of {1} ({2}%)", new Object[] {
-			        GuiUtils.toUnitbytes((long)item.getCurrentSize()), GuiUtils.toUnitbytes((long)item.getTotalSize()),
+			        GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
 			        item.getPercentComplete()});
         case LOCAL_QUEUED:
             //TODO: queue time
@@ -520,9 +533,24 @@ public class DownloadRendererEditor extends JPanel implements
         case REMOTE_QUEUED:
             return I18n.tr("Queued - {0} people ahead of you for this file", item.getQueuePosition());
 		default:
-            return item.getState().toString();
+		    throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
 		}
 		
+	}
+	
+	private String getErrorMessage(ErrorState errorState){
+	    switch (errorState) {
+        case CORRUPT_FILE:
+            return I18n.tr("the file is corrupted");
+        case DISK_PROBLEM:
+            return I18n.tr("there is a disk problem");
+        case FILE_NOT_SHARABLE:
+            return I18n.tr("the file is not sharable ");
+        case UNABLE_TO_CONNECT:
+            return I18n.tr("trouble connecting to people");
+        default:
+            throw new IllegalArgumentException("Unknown ErrorState: " + errorState);
+        }
 	}
 	
 	private JButton createButton(Icon icon, Icon rolloverIcon, Icon pressedIcon) {
