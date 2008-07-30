@@ -994,7 +994,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return;
         
         FileDesc fd = fileManager.getFileDesc(incompleteFile);
-        if( fd != null && fd instanceof IncompleteFileDesc ) {
+        if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
             // Assert that the SHA1 of the IFD and our sha1 match.
             if(getSha1Urn() != null && !getSha1Urn().equals(ifd.getSHA1Urn())) {

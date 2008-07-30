@@ -36,6 +36,7 @@ public interface FileList {
     
     /**
      * Returns an iterator over this list of FileDescs.
+     * <p>
      * NOTE: This must be synchronized upon by the caller if accessed
      * in a multi-threaded way.
      */
@@ -48,9 +49,10 @@ public interface FileList {
     public List<FileDesc> getAllFileDescs();
        
     /**
-     * Returns the size of all files within this list, in <b>bytes</b>.  NOTE: 
-     * the largest value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.
-     * If more bytes are being shared, returns this value.
+     * Returns the size of all files within this list, in <b>bytes</b>.  
+     * <p>
+     * NOTE: the largest value that can be returned is Integer.MAX_VALUE, 
+     * i.e., ~2GB. If more bytes are being shared, returns this value.
      */
     public int getNumBytes();
      

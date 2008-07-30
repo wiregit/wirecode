@@ -492,7 +492,6 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         URN tempFile1URN = fm.getFileDesc(tempFile1).getSHA1Urn();
-//        URN tempFile2URN = fm.getURNForFile(tempFile2);
         // we are changing tempFile1 to become tempFile2 - but since we
         // call fileChanged(), then the common URN should get tempFile1's
         // cTime
@@ -792,7 +791,6 @@ public class ServerSideWhatIsNewTest
             for (; (i < 15) && (fileManager.getSharedFileList().size()+ fileManager.getSharedFileList().getNumForcedFiles() < 5); i++)
                 Thread.sleep(1000);
             
-            System.out.println(fileManager.getSharedFileList().size() + " " + fileManager.getSharedFileList().getNumForcedFiles());
             if (i == 15)
                 fail("num shared files? " + fileManager.getSharedFileList().size());
     

@@ -108,7 +108,9 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
 
         private final HTTPUploader uploader;
 
-        private Iterator<FileDesc> iterable;
+        private Iterator<FileDesc> iterator;
+        
+        private List<FileDesc> sharedFiles;
 
         private MessageWriter sender;
         
@@ -142,7 +144,9 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
             sender.setWriteChannel(new NoInterestWritableByteChannel(new ContentEncoderChannel(
                     contentEncoder)));
-            iterable = fileManager.getSharedFileList().iterator();
+            
+            sharedFiles = fileManager.getSharedFileList().getAllFileDescs();
+            iterator = sharedFiles.iterator();
         }
         
         @Override
@@ -153,7 +157,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             assert more || pendingMessageCount == 0;
             
             activateTimeout();
-            return more || iterable.hasNext();
+            return more || iterator.hasNext();
         }
         
         /**
@@ -166,10 +170,8 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             }
             
             List<Response> responses = new ArrayList<Response>(RESPONSES_PER_REPLY); 
-            synchronized(fileManager.getSharedFileList().getLock()) {
-                for (int i = 0; iterable.hasNext() && i < RESPONSES_PER_REPLY; i++) {
-                    responses.add(responseFactory.get().createResponse(iterable.next()));
-                }
+            for (int i = 0; iterator.hasNext() && i < RESPONSES_PER_REPLY; i++) {
+                responses.add(responseFactory.get().createResponse(iterator.next()));
             }
             
             Iterable<QueryReply> it = outgoingQueryReplyFactory.createReplies(responses.toArray(new Response[0]),

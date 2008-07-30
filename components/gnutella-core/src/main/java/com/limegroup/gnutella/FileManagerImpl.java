@@ -431,6 +431,8 @@ public class FileManagerImpl implements FileManager, Service {
     }
     
     public synchronized FileDesc get(int index) {
+        if(index < 0 || index >= files.size())
+            return null;
         return files.get(index);
     }
     
@@ -1179,8 +1181,6 @@ public class FileManagerImpl implements FileManager, Service {
     
     /**
      * Removes stored indices for a URN associated with a given FileDesc
-     * @param fileDesc
-     * @param purgeState
      */
     private void removeUrnIndex(FileDesc fileDesc, boolean purgeState) {
         for(URN urn : fileDesc.getUrns()) {

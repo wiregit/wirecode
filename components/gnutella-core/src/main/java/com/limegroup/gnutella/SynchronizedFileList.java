@@ -113,11 +113,15 @@ public class SynchronizedFileList implements FileListPackage {
     }
     
     public void addFileListListener(FileListListener listener) {
-        fileList.addFileListListener(listener);
+        synchronized (mutex) {
+            fileList.addFileListListener(listener);            
+        }
     }
 
     public void removeFileListListener(FileListListener listener) {
-        fileList.removeFileListListener(listener);
+        synchronized (mutex) {
+            fileList.removeFileListListener(listener);
+        }
     }
     
     /////////// backwards compatibility /////////////////////////

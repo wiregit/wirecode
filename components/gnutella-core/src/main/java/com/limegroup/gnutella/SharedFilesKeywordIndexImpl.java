@@ -159,7 +159,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                    !isValidXMLMatch(resp, doc))
                     continue;
             }
-            responses.add(resp); 
+            responses.add(resp);
         }
         if (responses.size() == 0)
             return EMPTY_RESPONSES;

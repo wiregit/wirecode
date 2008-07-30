@@ -20,7 +20,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A List of FileDescs that are grouped together 
  */
-public class FileListImpl implements FileListPackage, FileEventListener {
+abstract class FileListImpl implements FileListPackage, FileEventListener {
 
     /**
      * A list of listeners for this list
@@ -262,8 +262,8 @@ public class FileListImpl implements FileListPackage, FileEventListener {
     
     /**
      * Fires a changeEvent to all the listeners
-     * @param oldFileDesc FileDesc that was modified
-     * @param newFileDesc current state of that FileDesc
+     * @param oldFileDesc FileDesc that was there previously
+     * @param newFileDesc FileDesc that replaced oldFileDesc
      */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
         for(FileListListener listener : listeners) {

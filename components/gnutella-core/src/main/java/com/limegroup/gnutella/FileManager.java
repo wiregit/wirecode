@@ -53,7 +53,6 @@ public interface FileManager {
     
     /**
      * Removes the shared Buddy list containing this name.
-     * @param name
      */
     public void removeBuddyFileList(String name);
     
@@ -216,7 +215,7 @@ public interface FileManager {
     public FileDesc get(int index);
     
     /**
-     * Returns true if 
+     * Returns true if this index exists, false otherwise.
      */
     public boolean isValidIndex(int index);
 
