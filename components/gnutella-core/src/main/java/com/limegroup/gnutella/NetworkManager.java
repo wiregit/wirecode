@@ -82,12 +82,28 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent> {
     // TODO: Convert to listener pattern
     public boolean addressChanged();
     
+    /**
+     * used to notify the <code>NetworkManager</code> of a change in
+     * the external IP.
+     */
     public void externalAddressChanged();
-    
+
+    /**
+     * used to notify the <code>NetworkManager</code> of a change in
+     * the port.
+     */
     public void portChanged();
-    
+
+    /**
+     * used to notify the <code>NetworkManager</code> that
+     * an incoming connection has been accepted
+     */
     public void acceptedIncomingConnectionChanged();
-    
+
+    /**
+     * used to notify the <code>NetworkManager</code> of a new
+     * <code>MediatorAddress</code> (i.e., push proxy)
+     */
     public void newMediatedConnectionAddress(MediatorAddress address);
 
     /** 

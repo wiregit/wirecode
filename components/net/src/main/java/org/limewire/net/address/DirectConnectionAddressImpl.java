@@ -1,9 +1,10 @@
 package org.limewire.net.address;
 
-import java.net.UnknownHostException;
-
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.util.Objects;
+
+import java.net.UnknownHostException;
 
 public class DirectConnectionAddressImpl extends ConnectableImpl implements DirectConnectionAddress {
 
@@ -25,17 +26,7 @@ public class DirectConnectionAddressImpl extends ConnectableImpl implements Dire
         DirectConnectionAddress address2 = (DirectConnectionAddress)obj;
         // TODO push up - but what are the side affects,
         // TODO especially for existing callers.
-        return isEqualOrNull(getAddress(), address2.getAddress()) && getPort() == address2.getPort() && isTLSCapable() == address2.isTLSCapable();
-    }
-
-    private boolean isEqualOrNull(String s, String s2) {
-        if(s == null && s2 == null) {
-            return true;
-        }
-        if(s == null || s2 == null) {
-            return false;
-        }
-        return s.equals(s2);
+        return Objects.equalOrNull(getAddress(), address2.getAddress()) && getPort() == address2.getPort() && isTLSCapable() == address2.isTLSCapable();
     }
 
     public int hashCode() {
