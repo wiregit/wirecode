@@ -89,17 +89,17 @@ class FilteredTextField extends JTextField implements FocusListener {
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
         
+        int iconWidth = icon == null ? getHeight() : icon.getIconWidth();
         if (icon == null) {
             // TODO: RMV How should not finding the icon be handled?
-            g2d.drawLine(0, 0, getWidth(), getHeight());
-            g2d.drawLine(0, getHeight(), getWidth(), 0);
+            // Draw an X since we don't have an icon.
+            g2d.drawLine(0, 0, iconWidth, iconWidth);
+            g2d.drawLine(0, iconWidth, iconWidth, 0);
         } else {
             Image image = ((ImageIcon) icon).getImage();
             g2d.drawImage(image, 0, 0, Color.WHITE, null);
-            g2d.translate(icon.getIconWidth(), 0);
         }
         
-        int iconWidth = icon.getIconWidth();
         g2d.translate(iconWidth, 0);
         super.paintComponent(g2d);
         

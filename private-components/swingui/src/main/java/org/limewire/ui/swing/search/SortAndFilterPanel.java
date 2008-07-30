@@ -69,7 +69,7 @@ class SortAndFilterPanel extends JXPanel {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
-        gbc.insets = new Insets(2, 2, 2, 10); // top, left, bottom, right
+        gbc.insets = new Insets(3, 2, 2, 10); // top, left, bottom, right
         add(filterBox, gbc);
 
         gbc.insets.right = 5;
