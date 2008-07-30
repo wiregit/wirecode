@@ -8,7 +8,8 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public interface DocumentsResultsPanelFactory {
     
-    DocumentsResultsPanel create(EventListModel<VisualSearchResult> listModel,
-            EventSelectionModel<VisualSearchResult> selectionModel, Search search);
-
+    DocumentsResultsPanel create(
+        EventListModel<VisualSearchResult> listModel,
+        EventSelectionModel<VisualSearchResult> selectionModel,
+        Search search);
 }

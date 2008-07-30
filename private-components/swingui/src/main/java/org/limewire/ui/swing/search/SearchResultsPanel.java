@@ -47,14 +47,24 @@ public class SearchResultsPanel extends JPanel {
             ResultsContainerFactory containerFactory) {
         
         this.sortAndFilterPanel = new SortAndFilterPanel();
-        this.resultsContainer = containerFactory.create(sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults),search);
-        this.searchTab = new SearchTabItems(searchInfo.getSearchCategory(), new SearchTabItems.SearchTabListener() {
+        
+        EventList<VisualSearchResult> list =
+            sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults);
+        this.resultsContainer = containerFactory.create(list, search);
+        SearchTabItems.SearchTabListener listener =
+            new SearchTabItems.SearchTabListener() {
             @Override
             public void categorySelected(SearchCategory searchCategory) {
                 resultsContainer.showCategory(searchCategory);
             }
-        });
+        };
+        this.searchTab =
+            new SearchTabItems(searchInfo.getSearchCategory(), listener);
         
+        layoutComponents();
+    }
+
+    private void layoutComponents() {
         setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();

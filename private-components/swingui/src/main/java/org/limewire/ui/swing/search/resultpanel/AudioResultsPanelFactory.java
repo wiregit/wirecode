@@ -8,7 +8,8 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public interface AudioResultsPanelFactory {
     
-    AudioResultsPanel create(EventListModel<VisualSearchResult> listModel,
-            EventSelectionModel<VisualSearchResult> selectionModel, Search search);
-
+    AudioResultsPanel create(
+        EventListModel<VisualSearchResult> listModel,
+        EventSelectionModel<VisualSearchResult> selectionModel,
+        Search search);
 }
