@@ -42,6 +42,7 @@ class DownloadMediator {
 	
 
 	public void pauseAll() {
+	    //TODO use TransactionList for these for performance
         // lock list to ensure it is not modified elsewhere
         commonBaseList.getReadWriteLock().writeLock().lock();
         try {

@@ -103,8 +103,7 @@ public class CategoryDownloadPanel extends JPanel {
 			DownloadState... states) {
 		final JXCollapsiblePane collapsePane = new JXCollapsiblePane();
 		collapsePane.setLayout(new BorderLayout());
-		//TODO: kill cast and fix this
-		FilterList<DownloadItem> filterList = 
+		EventList<DownloadItem> filterList = 
 			new FilterList<DownloadItem>(list, new DownloadStateMatcher(states));
 		final JXTable table = new DownloadTable(filterList);
 		tables.add(table);

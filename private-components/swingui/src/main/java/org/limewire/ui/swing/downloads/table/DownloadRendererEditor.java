@@ -7,10 +7,9 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -93,6 +92,32 @@ public class DownloadRendererEditor extends JPanel implements
     private Icon otherIcon;
     @Resource
     private Icon warningIcon;
+    
+
+    @Resource
+    private Icon pauseIcon;    
+    @Resource
+    private Icon pauseIconPressed;    
+    @Resource
+    private Icon pauseIconRollover;
+    @Resource
+    private Icon cancelIcon;
+    @Resource
+    private Icon cancelIconPressed;
+    @Resource
+    private Icon cancelIconRollover;
+    @Resource
+    private Icon resumeIcon;
+    @Resource
+    private Icon resumeIconPressed;
+    @Resource
+    private Icon resumeIconRollover;
+    @Resource
+    private Icon tryAgainIcon;
+    @Resource
+    private Icon tryAgainIconPressed;
+    @Resource
+    private Icon tryAgainIconRollover;
 
 	/**
 	 * Create the panel
@@ -119,19 +144,17 @@ public class DownloadRendererEditor extends JPanel implements
 		editorLister = new DownloadEditorListener();
 		menuListener = new MenuListener();
 
-		pauseButton = new JButton();
+		pauseButton = createButton(pauseIcon, pauseIconRollover, pauseIconPressed);
 		pauseButton.addActionListener(editorLister);
-		pauseButton.setOpaque(false);
-		pauseButton.setText("||");
+		pauseButton.setToolTipText(I18n.tr("Pause"));
 		
 		pauseMenuItem = new JMenuItem(I18n.tr("Pause"));
 		pauseMenuItem.addActionListener(menuListener);
 		
 
-		cancelButton = new JButton();
+		cancelButton = createButton(cancelIcon, cancelIconRollover, cancelIconPressed);
 		cancelButton.addActionListener(editorLister);
-		cancelButton.setOpaque(false);
-		cancelButton.setText("X");
+        cancelButton.setToolTipText(I18n.tr("Cancel"));
 		
 		cancelMenuItem = new JMenuItem(I18n.tr("Cancel"));
 		cancelMenuItem.addActionListener(menuListener);
@@ -140,18 +163,17 @@ public class DownloadRendererEditor extends JPanel implements
 		timeLabel.setFont(new Font("", Font.PLAIN, 9));
 		timeLabel.setText("13 years remaining");
 
-		resumeButton = new JButton();
+		resumeButton = createButton(resumeIcon, resumeIconRollover, resumeIconPressed);
 		resumeButton.addActionListener(editorLister);
 		resumeButton.setVisible(false);
-		resumeButton.setText("O");
+        resumeButton.setToolTipText(I18n.tr("Resume"));
 		
 		resumeMenuItem = new JMenuItem(I18n.tr("Resume"));
 		resumeMenuItem.addActionListener(menuListener);
 
-		tryAgainButton = new JButton();
+		tryAgainButton = createButton(tryAgainIcon, tryAgainIconRollover, tryAgainIconPressed);
 		tryAgainButton.addActionListener(editorLister);
 		tryAgainButton.setToolTipText(I18n.tr("Try Again"));
-		tryAgainButton.setText("S");
 		
 		tryAgainMenuItem = new JMenuItem(I18n.tr("Try Again"));
 		tryAgainMenuItem.addActionListener(menuListener);
@@ -225,26 +247,7 @@ public class DownloadRendererEditor extends JPanel implements
         popupMenu.add(cancelMenuItem);
         popupMenu.add(tryAgainMenuItem);
 
-        //TODO: why does this mess up mouse over highlighting on CategoryDownloadPane?
-        addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-
-            private void maybeShowPopup(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    showPopup(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-
-        });
+     
 
 	}
 	
@@ -293,7 +296,7 @@ public class DownloadRendererEditor extends JPanel implements
 		return this;
 	}
 	
-	private void showPopup(Component c, int x, int y){	    
+	public void showPopup(Component c, int x, int y){	    
 	    menuEditItem = editItem;
 	    DownloadState state = menuEditItem.getState();
 	    pauseMenuItem.setVisible(state.isPausable());
@@ -319,6 +322,8 @@ public class DownloadRendererEditor extends JPanel implements
                 });
             }
         });
+        
+      
     }
 	
 	private void updateEditor(){
@@ -519,5 +524,19 @@ public class DownloadRendererEditor extends JPanel implements
 		}
 		
 	}
+	
+	private JButton createButton(Icon icon, Icon rolloverIcon, Icon pressedIcon) {
+        JButton button = new JButton();
+        button.setMargin(new Insets(0, 0, 0, 0));
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setRolloverEnabled(true);
+        button.setIcon(icon);
+        button.setRolloverIcon(rolloverIcon);
+        button.setPressedIcon(pressedIcon);
+        button.setHideActionText(true);
+        return button;
+    }
 
 }

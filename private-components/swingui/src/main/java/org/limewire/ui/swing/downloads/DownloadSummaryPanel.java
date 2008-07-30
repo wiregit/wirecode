@@ -53,7 +53,7 @@ public class DownloadSummaryPanel extends JPanel {
 	    GuiUtils.assignResources(this);
 
         setLayout(new BorderLayout());
-	    
+	    //TODO ThresholdList > SortedList 
 	    this.allList = itemList;
 	    unfinishedList = new FilterList<DownloadItem>(itemList, new DownloadStateExcluder(DownloadState.DONE));
         warningList = new FilterList<DownloadItem>(itemList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 

@@ -18,7 +18,6 @@ import ca.odell.glazedlists.EventList;
 public class DownloadTable extends JXTable {
 
 	public DownloadTable(EventList<DownloadItem> downloadItems) {
-	    //TODO: EventList, not model, as parameter.  Listener on editor
 		super(new DownloadTableModel(downloadItems));
 		setRolloverEnabled(false);
 		setFocusable(false);
@@ -70,8 +69,25 @@ public class DownloadTable extends JXTable {
 
 				}
 			}
+			
+			  @Override
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    editor.showPopup(e.getComponent(), e.getX(), e.getY());
+                }
+            }
 
 		});
+		
 	}
 	
 	//TODO: get rid of this hack.  GlazedLists isn't playing nicely with the editor
