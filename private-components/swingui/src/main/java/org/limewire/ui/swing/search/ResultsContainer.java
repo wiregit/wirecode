@@ -50,7 +50,9 @@ public class ResultsContainer extends JXPanel {
         setLayout(cardLayout);
         
         this.matcherEditor = new FilterMatcherEditor();
-        FilterList<VisualSearchResult> filterList = new FilterList<VisualSearchResult>(visualSearchResults, matcherEditor);
+        FilterList<VisualSearchResult> filterList =
+            new FilterList<VisualSearchResult>(
+                visualSearchResults, matcherEditor);
         
         EventListModel<VisualSearchResult> eventListModel =
             new EventListModel<VisualSearchResult>(filterList);

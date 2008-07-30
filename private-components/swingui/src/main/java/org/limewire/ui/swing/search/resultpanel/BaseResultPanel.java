@@ -53,9 +53,14 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         resultsList.setSelectionModel(selectionModel);
         resultsList.addMouseListener(new ResultDownloader());
         
+        // TODO: RMV Find a way to access filterList in ResultsContainer!
+        // TODO: RMV You may need to add an EventList parameter to this
+        // TODO: RMV using the factory create methods starting on line 65.
+        // TODO: RMV After this is fixed, listen for JToggleButton presses
+        // TODO: RMV and call the setMode method in this class.
         /*
         SortedList sortedResults =
-            new SortedList(listModel, new ResultComparator());
+            new SortedList(filterList, new ResultComparator());
         EventTableModel tableModel =
             new EventTableModel(sortedResults, new ResultTableFormat());
         resultsTable = new JTable(tableModel);
