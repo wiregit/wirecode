@@ -3,23 +3,23 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Font;
 
-import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 
 public class FancyTabProperties implements Cloneable {
     
-    private Painter<?> highlightPainter;
-    private Painter<?> normalPainter;
-    private Painter<?> selectedPainter;
+    private Painter<JXButton> highlightPainter;
+    private Painter<JXButton> normalPainter;
+    private Painter<JXButton> selectedPainter;
     private Color selectionColor;
     private Color normalColor;
     private Font textFont;
     private boolean removable;
     
     public FancyTabProperties() {
-        highlightPainter = new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY);
-        selectedPainter = new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY);
+        highlightPainter = new RectanglePainter<JXButton>(2, 2, 2, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY);
+        selectedPainter = new RectanglePainter<JXButton>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY);
         normalPainter = null;
         selectionColor = new Color(0, 100, 0);
         normalColor = Color.BLUE;
@@ -42,27 +42,27 @@ public class FancyTabProperties implements Cloneable {
         this.removable = removable;
     }
 
-    public Painter<?> getHighlightPainter() {
+    public Painter<JXButton> getHighlightPainter() {
         return highlightPainter;
     }
 
-    public void setHighlightPainter(Painter<?> highlightPainter) {
+    public void setHighlightPainter(Painter<JXButton> highlightPainter) {
         this.highlightPainter = highlightPainter;
     }
 
-    public Painter<?> getNormalPainter() {
+    public Painter<JXButton> getNormalPainter() {
         return normalPainter;
     }
 
-    public void setNormalPainter(Painter<?> normalPainter) {
+    public void setNormalPainter(Painter<JXButton> normalPainter) {
         this.normalPainter = normalPainter;
     }
 
-    public Painter<?> getSelectedPainter() {
+    public Painter<JXButton> getSelectedPainter() {
         return selectedPainter;
     }
 
-    public void setSelectedPainter(Painter<?> selectedPainter) {
+    public void setSelectedPainter(Painter<JXButton> selectedPainter) {
         this.selectedPainter = selectedPainter;
     }
 

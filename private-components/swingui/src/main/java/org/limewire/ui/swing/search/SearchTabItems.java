@@ -12,6 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
@@ -55,7 +56,7 @@ class SearchTabItems extends JXPanel {
 
         FancyTabList ttp = new FancyTabList(TabActionMap.createMapForSelectActions(searchTabs));
         ttp.setFlowedLayout(new Insets(2, 2, 0, 5));
-        ttp.setHighlightPainter(new RectanglePainter<JXPanel>(2, 2, 0, 2, 5, 5, true, Color.WHITE,
+        ttp.setHighlightPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.WHITE,
                 0f, Color.WHITE));
         add(ttp, gbc);
 

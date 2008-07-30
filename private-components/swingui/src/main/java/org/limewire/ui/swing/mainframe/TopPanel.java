@@ -20,7 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -110,7 +110,8 @@ class TopPanel extends JPanel implements SearchNavigator {
         searchList.setFixedLayout(50, 120, 120);
         searchList.setRemovable(true);
         searchList.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        searchList.setSelectionPainter(new RectanglePainter<JXPanel>(2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
+        searchList.setSelectionPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
+        searchList.setHighlightPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY));
         searchList.setMaxTabs(3);
         searchList.setName("TopPanel.SearchList");
         add(searchList, gbc);

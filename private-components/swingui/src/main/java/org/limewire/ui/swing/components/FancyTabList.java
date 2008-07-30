@@ -1,12 +1,16 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -14,28 +18,30 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
-import javax.swing.JPanel;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
 import javax.swing.GroupLayout.Group;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
+import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 /** A horizontal list of {@link FancyTab FancyTabs}. */
 public class FancyTabList extends JXPanel {
     
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
-    private final ActionListener tabRemoveListener = new RemoveListener();
     private int vizStartIdx = -1;
-    
-    private final JPanel view;
-    private final AbstractButton moreOption;
-    
+        
     private FancyTabProperties props;
     private int maxTabs;
     
@@ -46,54 +52,18 @@ public class FancyTabList extends JXPanel {
     private int preferredWidth;
     
     private Insets tabInsets;
+        
+    @Resource
+    private Icon moreTriangle;
     
     public static enum LayoutStyle {
         FIXED, FLOWED;
     }
     
     public FancyTabList(Iterable<? extends TabActionMap> actionMaps) {
+        GuiUtils.assignResources(this);
         setOpaque(false);
-        
-        view = new JXPanel();
-        view.setOpaque(false);
-        
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        add(view, gbc);
-        
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
-        moreOption = new JXButton("more>>");
-        moreOption.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean found = false;
-                boolean moved = false;
-                for(FancyTab tab : tabs) {
-                    if(found) {
-                        moved = true;
-                        tab.getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
-                        break;
-                    }
-                    
-                    if(tab.getTabActionMap().getSelectAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
-                        found = true;
-                    }
-                }
-                if(!moved && !tabs.isEmpty()) {
-                    tabs.get(0).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
-                }
                 
-            }
-        });
-        add(moreOption, gbc);
-        moreOption.setVisible(false);
-        
         minimumWidth = 30;
         maximumWidth = 150;
         preferredWidth = 150;
@@ -170,12 +140,13 @@ public class FancyTabList extends JXPanel {
     
     private FancyTab createAndPrepareTab(TabActionMap actionMaps) {
         final FancyTab tab = new FancyTab(actionMaps, tabGroup, props);
-        tab.addRemoveActionListener(tabRemoveListener);
+        tab.addRemoveActionListener(new RemoveListener(tab));
         actionMaps.getSelectAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                     if(evt.getNewValue().equals(Boolean.TRUE)) {
+                        System.out.println("new true on: " + tab);
                         layoutTabs();
                     }
                 }
@@ -219,7 +190,7 @@ public class FancyTabList extends JXPanel {
     
     /** Removes all visible tabs and lays them out again. */
     private void layoutTabs() {
-        view.removeAll();
+        removeAll();
         
         switch(layoutStyle) {
         case FIXED:
@@ -229,8 +200,6 @@ public class FancyTabList extends JXPanel {
             layoutFlowed();
             break;
         }
-        
-        moreOption.setVisible(tabs.size() >= maxTabs);
     }
     
     /**
@@ -282,13 +251,17 @@ public class FancyTabList extends JXPanel {
      * using the given insets around each tab.
      */
     private void layoutFlowed() {
-        view.setLayout(new GridBagLayout());
+        setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = tabInsets;
         for(FancyTab tab : getPendingVisibleTabs()) {
-            view.add(tab, gbc);
+            add(tab, gbc);
+        }
+
+        if(tabs.size() > maxTabs) {
+            add(createMoreButton(), gbc);
         }
     }
 
@@ -297,8 +270,8 @@ public class FancyTabList extends JXPanel {
      * and maximum width.
      */
     private void layoutFixed() {
-        GroupLayout layout = new GroupLayout(view);
-        view.setLayout(layout);
+        GroupLayout layout = new GroupLayout(this);
+        setLayout(layout);
 
         layout.setAutoCreateGaps(false);
         layout.setAutoCreateContainerGaps(false);
@@ -306,7 +279,7 @@ public class FancyTabList extends JXPanel {
         Group horGroup = layout.createSequentialGroup();
         layout.setHorizontalGroup(horGroup);
         
-        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
+        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
         layout.setVerticalGroup(layout.createSequentialGroup()
                 .addGroup(verGroup));
         
@@ -314,12 +287,18 @@ public class FancyTabList extends JXPanel {
             horGroup.addComponent(tab, minimumWidth, preferredWidth, maximumWidth);
             verGroup.addComponent(tab);
         }
+        
+        if(tabs.size() > maxTabs) {
+            JComponent more = createMoreButton();
+            horGroup.addComponent(more);
+            verGroup.addComponent(more);
+        }
     }
     
     /**
      * Sets the painter to be used when the tab is rolled over.
      */
-    public void setHighlightPainter(Painter<?> highlightPainter) {
+    public void setHighlightPainter(Painter<JXButton> highlightPainter) {
         for (FancyTab tab : tabs) {
             if (tab.isHighlighted()) {
                 tab.setBackgroundPainter(highlightPainter);
@@ -329,7 +308,7 @@ public class FancyTabList extends JXPanel {
     }
     
     /** Sets the painter to be used when the tab is selected. */
-    public void setSelectionPainter(Painter<?> selectedPainter) {
+    public void setSelectionPainter(Painter<JXButton> selectedPainter) {
         for(FancyTab tab : tabs) {
             if(tab.isHighlighted()) {
                 tab.setBackgroundPainter(selectedPainter);
@@ -367,9 +346,14 @@ public class FancyTabList extends JXPanel {
     }
     
     private class RemoveListener implements ActionListener {
+        private final FancyTab tab;
+        
+        public RemoveListener(FancyTab tab) {
+            this.tab = tab;
+        }
+        
         @Override
         public void actionPerformed(ActionEvent e) {
-            FancyTab tab = (FancyTab)e.getSource();
             boolean selected = tab.isSelected();
             int idx = tabs.indexOf(tab);
             assert idx != -1;
@@ -387,5 +371,134 @@ public class FancyTabList extends JXPanel {
                 layoutTabs();
             }
         }
+    }
+    
+    ////   Stuff after here is for the 'more' button.
+    ////   TODO: try moving it to another class.
+    
+    private JComponent createMenuItemFor(final JPopupMenu menu, final FancyTab tab) {
+        JXPanel jp = new JXPanel();
+        jp.setOpaque(false);
+        jp.setBackgroundPainter(props.getNormalPainter());
+        
+        JXButton selectButton = new JXButton(tab.getTabActionMap().getSelectAction());
+        selectButton.setOpaque(false);
+        removeButtonProperties(selectButton);
+        selectButton.setActionCommand(TabActionMap.SELECT_COMMAND);
+        selectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                menu.setVisible(false);
+                tab.getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
+            }
+        });
+        selectButton.setToolTipText(tab.getTitle());
+        selectButton.setHorizontalAlignment(SwingConstants.LEFT);
+        
+        JButton removeButton = tab.createRemoveButton();
+        removeButton.setOpaque(false);
+        removeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                menu.setVisible(false);
+            }
+        });
+        removeButton.addActionListener(new RemoveListener(tab));
+        
+        GroupLayout layout = new GroupLayout(jp);
+        jp.setLayout(layout);
+        
+        Group horGroup = layout.createSequentialGroup();
+        layout.setHorizontalGroup(horGroup);
+        
+        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
+        layout.setVerticalGroup(layout.createSequentialGroup().addGroup(verGroup));
+        
+        horGroup.addComponent(selectButton, 120, 120, 120);
+        horGroup.addComponent(removeButton, 20, 20, 20);
+        
+        verGroup.addComponent(selectButton);        
+        verGroup.addComponent(removeButton);        
+        
+        Highlighter highlighter = new Highlighter(jp, removeButton);
+        jp.addMouseListener(highlighter);
+        selectButton.addMouseListener(highlighter);
+        removeButton.addMouseListener(highlighter);
+        
+        return jp;
+    }
+    
+    private class Highlighter extends MouseAdapter {
+        private final JXPanel panel;
+        private final JButton button;
+        
+        public Highlighter(JXPanel panel, JButton button) {
+            this.panel = panel;
+            this.button = button;
+        }
+        
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            panel.setBackgroundPainter(props.getHighlightPainter());
+            button.setIcon(button.getSelectedIcon());
+        }
+        
+        @Override
+        public void mouseExited(MouseEvent e) {
+            panel.setBackgroundPainter(props.getNormalPainter());
+            button.setIcon(null);
+        }
+    }
+    
+    private void removeButtonProperties(JButton button) {
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+    }
+    
+    private JComponent createMoreButton() {        
+        final JXButton button = new JXButton(I18n.tr("more"), moreTriangle);
+        button.setHorizontalTextPosition(SwingConstants.LEFT);
+        button.setVerticalTextPosition(SwingConstants.CENTER);
+        removeButtonProperties(button);
+        button.setBackgroundPainter(props.getNormalPainter());
+        MoreListener listener = new MoreListener(button);
+        button.addMouseListener(listener);
+        button.addActionListener(listener);
+        return button;
+    }
+    
+    private class MoreListener implements MouseListener, ActionListener {
+        private final JXButton button;
+        
+        public MoreListener(JXButton button) {
+            this.button = button;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JPopupMenu menu = new JPopupMenu("more");
+            for(FancyTab tab : tabs) {
+                menu.add(createMenuItemFor(menu, tab));
+            }
+            JComponent source = (JComponent)e.getSource();
+            menu.show(source, 3, source.getBounds().height);
+        }
+        
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            button.setBackgroundPainter(props.getHighlightPainter());
+        }
+        
+        @Override
+        public void mouseExited(MouseEvent e) {
+            getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+            button.setBackgroundPainter(props.getNormalPainter());
+        }
+        
+        @Override public void mouseClicked(MouseEvent e) {}
+        @Override public void mousePressed(MouseEvent e) {}
+        @Override public void mouseReleased(MouseEvent e) {}
     }
 }

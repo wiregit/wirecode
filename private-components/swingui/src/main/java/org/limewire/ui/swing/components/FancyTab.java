@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -59,7 +58,10 @@ public class FancyTab extends JXPanel {
         
         this.tabActions = actionMap;
         this.props = fancyTabProperties;
-        this.mainButton = new TextButton(actionMap.getSelectAction(), group);
+        this.mainButton = new TextButton(actionMap.getSelectAction());
+        if(group != null) {
+            group.add(mainButton);
+        }
             
         setOpaque(false);
         setLayout(new GridBagLayout());
@@ -91,13 +93,14 @@ public class FancyTab extends JXPanel {
         return "FancyTab for: " + getTitle() + ", " + super.toString();
     }
     
-    private JButton createRemoveButton() {
+    JButton createRemoveButton() {
         JButton button = new JButton();
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setRolloverEnabled(true);
         button.setIcon(removeBackgroundIcon);
+        button.setSelectedIcon(removeSelectedIcon);
         button.setRolloverIcon(removeRolloverIcon);
         button.setPressedIcon(removeArmedIcon);
         button.setMargin(new Insets(0, 0, 0, 0));
@@ -108,17 +111,11 @@ public class FancyTab extends JXPanel {
     }
     
     void addRemoveActionListener(ActionListener listener) {
-        removeButton.addActionListener(new RemoveListener(listener));
+        removeButton.addActionListener(listener);
     }
     
     void removeRemoveActionListener(ActionListener listener) {
-        for (ActionListener wrappedListener : removeButton.getActionListeners()) {
-            if (wrappedListener instanceof RemoveListener
-                    && ((RemoveListener) wrappedListener).delegate.equals(listener)) {
-                removeButton.removeActionListener(wrappedListener);
-                break;
-            }
-        }
+        removeButton.removeActionListener(listener);
     }
 
     /** Gets the action underlying this tab. */
@@ -177,9 +174,8 @@ public class FancyTab extends JXPanel {
 
     /** The actual button. */
     private class TextButton extends JToggleButton {
-        public TextButton(Action action, ButtonGroup group) {
+        public TextButton(Action action) {
             super(action);
-            group.add(this);
             setActionCommand(TabActionMap.SELECT_COMMAND);
             setFocusPainted(false);
             setContentAreaFilled(false);
@@ -237,20 +233,4 @@ public class FancyTab extends JXPanel {
     public String getTitle() {
         return (String)tabActions.getSelectAction().getValue(Action.NAME);
     }
-    
-    /** A wrapper listener for removal, needed so the source is correct. */
-    private class RemoveListener implements ActionListener {
-        private ActionListener delegate;
-
-        RemoveListener(ActionListener delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            delegate.actionPerformed(new ActionEvent(FancyTab.this,
-                    e.getID(), e.getActionCommand(), e.getWhen(), e.getModifiers()));
-        }
-    }
-
 }
