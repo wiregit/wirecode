@@ -35,6 +35,7 @@ import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.bittorrent.BTMetaInfoTest;
 import com.limegroup.gnutella.util.FileServer;
 
 /**
@@ -56,7 +57,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        fileServer = new FileServer(TEST_PORT, new File("/home/pvertenten/public_html"));
+        fileServer = new FileServer(TEST_PORT, new File(BTMetaInfoTest.TEST_DATA_DIR+"/public_html"));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -93,7 +94,8 @@ public class SwarmerImplTest extends BaseTestCase {
     }
 
     private File createTestFile(String fileName) {
-        File file = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
+        File file = new File(System.getProperty("java.io.tmpdir") + "/limetests/" + fileName);
+        file.mkdirs();
         return file;
     }
 
