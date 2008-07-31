@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -82,7 +83,7 @@ public class BTDownloaderImplTest extends BaseTestCase {
     }
 
     public void testMultipleFile() throws Exception {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/gnutella_protocol_0.4.pdf.torrent";
+        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test.torrent";
         try {
             File torrentFile = new File(torrentfilePath);
             BTDownloader downloader = createBTDownloader(torrentFile);
@@ -90,14 +91,24 @@ public class BTDownloaderImplTest extends BaseTestCase {
             TorrentContext torrentContext = downloader.getTorrentContext();
             TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
-            File incompleteFile = torrentFileSystem.getIncompleteFiles().get(0);
-            incompleteFile.delete();
-            File completeFile = torrentFileSystem.getCompleteFile();
-            completeFile.delete();
+            File rootFile = torrentFileSystem.getCompleteFile();
+            FileUtils.deleteRecursive(rootFile);
+            File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+            incompleteFile1.delete();
+            File completeFile1 = torrentFileSystem.getFiles().get(0);
+            completeFile1.delete();
+
+            File incompleteFile2 = torrentFileSystem.getIncompleteFiles().get(1);
+            incompleteFile2.delete();
+            File completeFile2 = torrentFileSystem.getFiles().get(1);
+            completeFile2.delete();
             downloader.startDownload();
             Thread.sleep(5000);
-            SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
-
+            torrentFileSystem.moveToCompleteFolder();
+            SwarmerImplTest
+                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+            SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
+                    411090);
         } finally {
         }
     }
