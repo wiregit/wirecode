@@ -30,7 +30,7 @@ public class UDPConnectionProcessor {
 
     /** Define the maximum chunk size read for data bytes
         before we will blow out the connection */
-    private static final int   MAX_DATA_SIZE           = 4096;
+    public  static final int   MAX_DATA_SIZE           = 4096;
     
     /** Define the size of the data window */
     private static final int  DATA_WINDOW_SIZE        = 20;
