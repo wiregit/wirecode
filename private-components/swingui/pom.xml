@@ -58,6 +58,11 @@
 			<version>1.0.3</version>
 		</dependency>
 		<dependency>
+			<groupId>org.bushe.swing.event</groupId>
+			<artifactId>EventBus</artifactId>
+			<version>1.2b</version>
+		</dependency>
+		<dependency>
 			<groupId>org.limewire</groupId>
 			<artifactId>lw-mock-core</artifactId>
 			<version>${limewire.version}</version>
