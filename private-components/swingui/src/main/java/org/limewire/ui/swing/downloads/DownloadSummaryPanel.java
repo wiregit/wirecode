@@ -41,7 +41,7 @@ public class DownloadSummaryPanel extends JPanel {
     /**
      * Number of download items displayed in the table
      */
-	private static final int NUMBER_DISPLAYED = 34;
+	private static final int NUMBER_DISPLAYED = 4;
 
 
     private JTable table;
@@ -63,8 +63,8 @@ public class DownloadSummaryPanel extends JPanel {
 
         setLayout(new BorderLayout());
 	    this.allList = itemList;
-	    unfinishedList = new FilterList<DownloadItem>(itemList, new DownloadStateExcluder(DownloadState.DONE));
-        warningList = new FilterList<DownloadItem>(itemList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
+	    unfinishedList = new FilterList<DownloadItem>(allList, new DownloadStateExcluder(DownloadState.DONE));
+        warningList = new FilterList<DownloadItem>(allList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		
 		titleLabel = new JLabel();
 		titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -82,10 +82,8 @@ public class DownloadSummaryPanel extends JPanel {
 		    
 		};
 		
-		SortedList<DownloadItem> sortedList = new SortedList<DownloadItem>(allList, comparator);
+		SortedList<DownloadItem> sortedList = new SortedList<DownloadItem>(allList, comparator);		
 		
-		//active downloads (downloading, connecting, paused), done (100%), inactive (0%),
-		//stalled (percent), error (0%).
 		RangeList<DownloadItem> chokeList = new RangeList<DownloadItem>(sortedList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
 		table = new JTable(new DownloadTableModel(chokeList));
@@ -178,15 +176,11 @@ public class DownloadSummaryPanel extends JPanel {
 		public Component getTableCellRendererComponent(JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
-			DownloadItem item = (DownloadItem) value;
-			if (item.getPercentComplete() >= 100) {
-				return null;
-			} else {
-				nameLabel.setText(item.getTitle());
-				percentLabel.setText(item.getPercentComplete() + "%");
-				return this;
-			}
-		}
+            DownloadItem item = (DownloadItem) value;
+            nameLabel.setText(item.getTitle());
+            percentLabel.setText(item.getPercentComplete() + "%");
+            return this;
+        }
 	}
 	
 	private int getSortPriority(DownloadState state){
