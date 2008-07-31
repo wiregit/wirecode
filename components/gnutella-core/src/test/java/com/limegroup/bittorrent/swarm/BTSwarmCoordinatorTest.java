@@ -61,7 +61,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.addSource(new BTSwarmSource(metaInfo));
 
-        SwarmerImplTest.assertSwarmer("8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
 
     }
 
@@ -83,8 +83,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.addSource(new BTSwarmSource(metaInfo));
 
-        SwarmerImplTest.assertSwarmer("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        SwarmerImplTest.assertSwarmer("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
@@ -106,8 +106,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.addSource(new BTSwarmSource(metaInfo));
 
-        SwarmerImplTest.assertSwarmer("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        SwarmerImplTest.assertSwarmer("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
     
@@ -129,8 +129,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.addSource(new BTSwarmSource(metaInfo));
 
-        SwarmerImplTest.assertSwarmer("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        SwarmerImplTest.assertSwarmer("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
