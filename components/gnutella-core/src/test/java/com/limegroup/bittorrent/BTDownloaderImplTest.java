@@ -57,7 +57,6 @@ public class BTDownloaderImplTest extends BaseTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(localIsPrivateBackup);
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(forceIPAddressBackup);
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(forceIPAddressStringBackup);
-        // shutDownTracker();
         super.tearDown();
     }
 
