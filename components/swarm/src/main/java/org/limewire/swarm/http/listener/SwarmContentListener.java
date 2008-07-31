@@ -120,11 +120,13 @@ public class SwarmContentListener implements ResponseContentListener {
 
         if (actualRange.getLow() < expectedRange.getLow()
                 || actualRange.getHigh() > expectedRange.getHigh()) {
+            //TODO handle off ranges
             throw new IOException("Invalid actual range.  Expected: " + expectedRange
                     + ", Actual: " + actualRange);
         }
 
         if (!actualRange.equals(expectedRange)) {
+            //TODO double check this logic
             expectedRange = fileCoordinator.renewLease(expectedRange, actualRange);
         }
     }
