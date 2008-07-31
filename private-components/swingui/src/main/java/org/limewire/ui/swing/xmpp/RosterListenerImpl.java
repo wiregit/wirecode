@@ -8,6 +8,7 @@ import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.net.address.Address;
+import org.limewire.ui.swing.mainframe.StatusPanel;
 import org.limewire.xmpp.client.service.LimePresence;
 import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.PresenceListener;
@@ -20,16 +21,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class RosterListenerImpl implements RosterListener {
+public class RosterListenerImpl implements RosterListener {
 
     private final BrowseFactory browseFactory;
-    
+    private final StatusPanel.BrowseAction browseAction;
+
     private HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     private final IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
 
     @Inject
-    public RosterListenerImpl(BrowseFactory browseFactory) {
+    public RosterListenerImpl(BrowseFactory browseFactory, StatusPanel.BrowseAction browseAction) {
         this.browseFactory = browseFactory;
+        this.browseAction = browseAction;
     }
     
     @Inject
@@ -56,11 +59,13 @@ class RosterListenerImpl implements RosterListener {
                     if(presence instanceof LimePresence) {
                         // TODO update UI
                         Address address = ((LimePresence)presence).getAddress();
-                        browseFactory.createBrowse(address).start(new BrowseListener() {
-                            public void handleBrowseResult(SearchResult searchResult) {
-                                // TODO update UI
-                            }
-                        });
+                        browseAction.setAddress(address);
+//                        browseFactory.createBrowse(address).start(new BrowseListener() {
+//                            public void handleBrowseResult(SearchResult searchResult) {
+//                                System.out.println(searchResult.getDescription() + ": " + searchResult.getUrn());
+//                                // TODO update UI
+//                            }
+//                        });
                     } else {
                         // TODO update UI
                     }
