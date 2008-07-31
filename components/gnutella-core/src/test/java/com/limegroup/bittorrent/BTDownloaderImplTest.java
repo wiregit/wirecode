@@ -49,25 +49,8 @@ public class BTDownloaderImplTest extends BaseTestCase {
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
-
-        // tracker = new Tracker(3456);
-        // tracker.start();
-        // Runtime.getRuntime().addShutdownHook(new Thread() {
-        // @Override
-        // public void run() {
-        // shutDownTracker();
-        // }
-        // });
         super.setUp();
     }
-
-    // private void shutDownTracker() {
-    // if (tracker != null) {
-    // System.out.println("shutting down tracker.");
-    // tracker.shutdown();
-    // tracker = null;
-    // }
-    // }
 
     @Override
     protected void tearDown() throws Exception {
@@ -80,13 +63,9 @@ public class BTDownloaderImplTest extends BaseTestCase {
 
     public void testBasic() throws Exception {
         String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/gnutella_protocol_0.4.pdf.torrent";
-        // Seeder seeder = new Seeder(torrentfilePath);
         try {
-            // seeder.start();
-
             File torrentFile = new File(torrentfilePath);
             BTDownloader downloader = createBTDownloader(torrentFile);
-            TorrentManager torrentManager = downloader.getTorrentManager();
 
             TorrentContext torrentContext = downloader.getTorrentContext();
             TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
@@ -100,17 +79,12 @@ public class BTDownloaderImplTest extends BaseTestCase {
             SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
 
         } finally {
-            // seeder.shutdown();
         }
     }
 
     public void testMultipleFile() throws Exception {
-        // TODO
         String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/gnutella_protocol_0.4.pdf.torrent";
-        // Seeder seeder = new Seeder(torrentfilePath);
         try {
-            // seeder.start();
-
             File torrentFile = new File(torrentfilePath);
             BTDownloader downloader = createBTDownloader(torrentFile);
             TorrentManager torrentManager = downloader.getTorrentManager();
@@ -127,7 +101,6 @@ public class BTDownloaderImplTest extends BaseTestCase {
             SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
 
         } finally {
-            // seeder.shutdown();
         }
     }
 
@@ -142,98 +115,4 @@ public class BTDownloaderImplTest extends BaseTestCase {
         downloader.initBtMetaInfo(metaInfo);
         return downloader;
     }
-
-    // private static class Tracker extends Thread {
-    // private static final String tempDir =
-    // System.getProperty("java.io.tmpdir");
-    //
-    // private static final String trackerCommand = "/usr/bin/bttrack";
-    //
-    // private final int port;
-    //
-    // private final File trackerFile;
-    //
-    // private Process process = null;
-    //
-    // public Tracker(int port) {
-    // this(port, tempDir + "/limetest/dfile.txt");
-    // }
-    //
-    // public Tracker(int port, String trackerFilePath) {
-    // this.port = port;
-    // this.trackerFile = new File(trackerFilePath);
-    // }
-    //
-    // public void run() {
-    // Runtime runtime = Runtime.getRuntime();
-    // trackerFile.mkdirs();
-    // String trackerFilePath = trackerFile.getAbsolutePath();
-    // String[] command = new String[] { trackerCommand, "--port", port + "",
-    // "--dfile",
-    // trackerFilePath };
-    // try {
-    // process = runtime.exec(command);
-    // InputStream inputStream = process.getInputStream();
-    // BufferedReader reader = new BufferedReader(new
-    // InputStreamReader(inputStream));
-    //
-    // while (true) {
-    // System.out.println("tracker: " + reader.readLine());
-    // }
-    // } catch (IOException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-    //
-    // public void shutdown() {
-    // try {
-    // process.getOutputStream().write(CTRL_C);
-    // Thread.sleep(1000);
-    // process.destroy();
-    // process.waitFor();
-    // } catch (Exception e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-    // }
-    //
-    // private static class Seeder extends Thread {
-    // private static final String seederCommand = "/usr/bin/btdownloadcurses";
-    //
-    // private Process process = null;
-    //
-    // private final String torrentFilePath;
-    //
-    // public Seeder(String torrentFilePath) {
-    // this.torrentFilePath = torrentFilePath;
-    // }
-    //
-    // public void run() {
-    // Runtime runtime = Runtime.getRuntime();
-    // String[] command = new String[] { seederCommand, torrentFilePath,
-    // "--spew", "1", "&>&1" };
-    // try {
-    // process = runtime.exec(command);
-    // process.getErrorStream();
-    // InputStream inputStream = process.getErrorStream();
-    // BufferedReader reader = new BufferedReader(new
-    // InputStreamReader(inputStream));
-    //
-    // while (true) {
-    // System.out.println("seeder: " + reader.readLine());
-    // }
-    // } catch (IOException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-    //
-    // public void shutdown() {
-    // process.destroy();
-    // }
-    //
-    // }
-
 }
