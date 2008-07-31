@@ -179,7 +179,7 @@ class UDPConnection extends AbstractNBSocket implements RUDPSocket {
 
     @Override
     public synchronized int getSendBufferSize() throws SocketException {
-        return UDPConnectionProcessor.DATA_CHUNK_SIZE;
+        return UDPConnectionProcessor.DATA_CHUNK_SIZE * UDPConnectionProcessor.DATA_WINDOW_SIZE;
     }
 
     @Override
@@ -189,7 +189,7 @@ class UDPConnection extends AbstractNBSocket implements RUDPSocket {
 
     @Override
     public synchronized int getReceiveBufferSize() throws SocketException {
-        return UDPConnectionProcessor.MAX_DATA_SIZE;
+        return UDPConnectionProcessor.MAX_DATA_SIZE * UDPConnectionProcessor.DATA_WINDOW_SIZE;
     }
 
     @Override
