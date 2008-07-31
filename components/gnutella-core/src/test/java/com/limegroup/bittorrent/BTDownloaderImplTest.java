@@ -87,7 +87,6 @@ public class BTDownloaderImplTest extends BaseTestCase {
         try {
             File torrentFile = new File(torrentfilePath);
             BTDownloader downloader = createBTDownloader(torrentFile);
-            TorrentManager torrentManager = downloader.getTorrentManager();
 
             TorrentContext torrentContext = downloader.getTorrentContext();
             TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
