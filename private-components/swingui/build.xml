@@ -10,9 +10,10 @@
     <import file="../build-macros.xml"/>
     <import file="../../components/core-api/build.xml"/>
     <import file="../../components/xmpp/build.xml"/>
+    <import file="../../core/build.xml"/>
     <import file="../mock-core/build.xml"/>
     
-    <target name="initialize" depends="lw-core-api.initialize, lw-mock-core.initialize, lw-common.initialize, lw-xmpp.initialize" unless="initialized.swingui">
+    <target name="initialize" depends="lw-core-api.initialize, lw-mock-core.initialize, lw-common.initialize, lw-core.initialize" unless="initialized.swingui">
         <do.setup-private-properties component="swingui">
 			<add-src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
@@ -30,6 +31,7 @@
 			    <path refid="build.limewire.components.core-api.buildpath"/>
 			    <path refid="build.limewire.components.mock-core.buildpath"/>
                 <path refid="build.limewire.components.xmpp.buildpath"/>
+                <pathelement location="../../core"/>
             </add-src-classpath>
         </do.setup-private-properties>
     </target>
@@ -38,14 +40,14 @@
 	    <do.clean component="swingui"/>
 	</target>
     
-    <target name="compile" depends="initialize, lw-core-api.compile, lw-mock-core.compile, lw-common.compile, lw-xmpp.compile">
+    <target name="compile" depends="initialize, lw-core-api.compile, lw-mock-core.compile, lw-common.compile, lw-xmpp.compile, lw-core.compile">
         <!-- Currently no tests - using compile-src in the meantime -->
     	<!--<do.compile component="core-api"/>-->
     	<do.compile-src component="swingui"/>
         <mkdir dir="${build.limewire.components.swingui.tests}"/>
     </target>
 	
-	<target name="compile-src" depends="initialize, lw-core-api.compile-src, lw-mock-core.compile-src, lw-common.compile-src, lw-xmpp.compile-src">
+	<target name="compile-src" depends="initialize, lw-core-api.compile-src, lw-mock-core.compile-src, lw-common.compile-src, lw-xmpp.compile-src, lw-core.compile-src">
 	    <do.compile-src component="swingui"/>
 	</target>
     
