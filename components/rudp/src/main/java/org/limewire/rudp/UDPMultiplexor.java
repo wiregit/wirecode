@@ -15,8 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 
@@ -93,7 +93,10 @@ public class UDPMultiplexor extends AbstractSelector {
                 if(channel == null)
                     continue;
                 
+                LOG.debugf("index: {0}", i);
+                
 				if ( channel.isConnectionPending() && channel.getRemoteSocketAddress().equals(addr)) {
+				    LOG.debugf("found index: {0}, sender id: {1}", i, ((SynMessage)msg).getSenderConnectionID());
                     channel.getProcessor().handleMessage(msg);
 					break;
 				} 

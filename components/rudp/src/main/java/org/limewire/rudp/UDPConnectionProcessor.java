@@ -8,8 +8,8 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ConnectionPendingException;
 import java.nio.channels.SelectionKey;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.rudp.messages.AckMessage;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.FinMessage;
@@ -968,7 +968,8 @@ public class UDPConnectionProcessor {
 
         // First Message from other host - get his connectionID.
         byte       theirConnID = smsg.getSenderConnectionID();
-        if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) { 
+        LOG.debugf("our id: {0}, their id: {1}, their sender id: {2}", _theirConnectionID, theirConnID, smsg.getSenderConnectionID());
+        if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) {
             // Keep track of their connectionID
             _theirConnectionID = theirConnID;
         } else if ( _theirConnectionID == theirConnID ) {
