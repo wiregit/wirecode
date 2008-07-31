@@ -234,7 +234,8 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void promptAboutCorruptDownload(Downloader dloader) {
-        // TODO Auto-generated method stub
+        //just kill the download if it is corrupt
+        dloader.discardCorruptDownload(true);
 
     }
 

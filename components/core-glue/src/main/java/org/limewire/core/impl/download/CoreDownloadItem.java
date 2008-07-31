@@ -91,6 +91,11 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public int getPercentComplete() {
+        DownloadState state = getState();
+        if(state == DownloadState.FINISHING || state == DownloadState.DONE){
+            return 100;
+        }
+
         // TODO - check for div by zero?
         return (int) (100 * getCurrentSize() / getTotalSize());
     }

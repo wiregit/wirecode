@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseListener;
+import java.util.Comparator;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -26,6 +27,8 @@ import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.RangeList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -35,7 +38,13 @@ import org.limewire.ui.swing.util.I18n;
 
 public class DownloadSummaryPanel extends JPanel {
 
-	private JTable table;
+    /**
+     * Number of download items displayed in the table
+     */
+	private static final int NUMBER_DISPLAYED = 34;
+
+
+    private JTable table;
 
 	
 	private JLabel titleLabel;
@@ -53,7 +62,6 @@ public class DownloadSummaryPanel extends JPanel {
 	    GuiUtils.assignResources(this);
 
         setLayout(new BorderLayout());
-	    //TODO ThresholdList > SortedList 
 	    this.allList = itemList;
 	    unfinishedList = new FilterList<DownloadItem>(itemList, new DownloadStateExcluder(DownloadState.DONE));
         warningList = new FilterList<DownloadItem>(itemList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
@@ -64,7 +72,23 @@ public class DownloadSummaryPanel extends JPanel {
 		add(titleLabel, BorderLayout.NORTH);
 			
 
-		table = new JTable(new DownloadTableModel(unfinishedList));
+		
+		Comparator<DownloadItem> comparator = new Comparator<DownloadItem>(){
+
+            @Override
+            public int compare(DownloadItem o1, DownloadItem o2) {
+                return getSortPriority(o2.getState()) - getSortPriority(o1.getState());
+            }
+		    
+		};
+		
+		SortedList<DownloadItem> sortedList = new SortedList<DownloadItem>(allList, comparator);
+		
+		//active downloads (downloading, connecting, paused), done (100%), inactive (0%),
+		//stalled (percent), error (0%).
+		RangeList<DownloadItem> chokeList = new RangeList<DownloadItem>(sortedList);
+		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
+		table = new JTable(new DownloadTableModel(chokeList));
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);
 		
@@ -109,7 +133,11 @@ public class DownloadSummaryPanel extends JPanel {
     }
 
 	private void updateTitle(){
-		titleLabel.setText(I18n.tr("Downloads ({0})", unfinishedList.size()));
+	    if (unfinishedList.size() > 0) {
+            titleLabel.setText(I18n.tr("Downloads ({0})", unfinishedList.size()));
+        } else {
+            titleLabel.setText(I18n.tr("Downloads"));
+        }
         if(warningList.size()>0){
             titleLabel.setIcon(warningIcon);
         } else {
@@ -161,6 +189,30 @@ public class DownloadSummaryPanel extends JPanel {
 		}
 	}
 	
-	
+	private int getSortPriority(DownloadState state){
+	    switch(state){
+        case DOWNLOADING:
+            return 8;
+        case PAUSED:
+            return 7;
+        case CONNECTING:
+            return 6;
+        case LOCAL_QUEUED:
+        case REMOTE_QUEUED:
+            return 5;
+        case FINISHING:
+            return 4;
+	    case DONE:
+            return 3;
+        case STALLED:
+            return 2;
+	    case ERROR:
+            return 1;
+        case CANCELLED:
+            return 0;
+	    
+	    }
+	    return 0;
+	}
 
 }

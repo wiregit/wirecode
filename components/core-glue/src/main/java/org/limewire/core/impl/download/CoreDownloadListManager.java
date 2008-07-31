@@ -172,8 +172,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadRemoved(DownloadItem downloadItem) {
-            //don't automatically remove finished downloads
-            if (downloadItem.getState() != DownloadState.DONE) {
+            //don't automatically remove finished downloads or downloads in error states
+            if (downloadItem.getState() != DownloadState.DONE && downloadItem.getState() != DownloadState.ERROR) {
                 list.remove(downloadItem);
             }
         }
