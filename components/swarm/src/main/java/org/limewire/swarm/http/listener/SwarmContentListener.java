@@ -1,8 +1,6 @@
 package org.limewire.swarm.http.listener;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,13 +31,10 @@ public class SwarmContentListener implements ResponseContentListener {
     
     private final SwarmFile swarmFile;
     
-    private static final List<SwarmContentListener> activeListeners = new ArrayList<SwarmContentListener>();
-
     public SwarmContentListener(SwarmCoordinator fileCoordinator, SwarmFile swarmFile, Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
         this.expectedRange = Objects.nonNull(range, "range");
         this.swarmFile = swarmFile;
-        activeListeners.add(this);
     }
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
@@ -83,7 +78,6 @@ public class SwarmContentListener implements ResponseContentListener {
                 expectedRange = null;
             }
         }
-        activeListeners.remove(this);
     }
 
     public void initialize(HttpResponse response) throws IOException {
