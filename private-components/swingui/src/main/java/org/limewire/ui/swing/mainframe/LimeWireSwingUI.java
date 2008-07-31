@@ -3,7 +3,11 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
@@ -27,7 +31,8 @@ public class LimeWireSwingUI extends JPanel {
     
 	@Inject
     public LimeWireSwingUI(TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
-            StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler) {
+            StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler,
+            FriendsPanel friendsPanel) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
@@ -80,7 +85,12 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        add(mainPanel, gbc);
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.addComponentListener(new MainPanelResizer(mainPanel));
+        layeredPane.addComponentListener(new FriendsPanelResizer(friendsPanel));
+        layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
+        add(layeredPane, gbc);
         
         // Line below the left & main panel
         gbc.fill = GridBagConstraints.BOTH;
@@ -106,6 +116,30 @@ public class LimeWireSwingUI extends JPanel {
         topPanel.requestFocusInWindow();
     }
     
-    
+    private class MainPanelResizer extends ComponentAdapter {
+        private final MainPanel target;
 
+        public MainPanelResizer(MainPanel target) {
+            this.target = target;
+        }
+        
+        @Override
+        public void componentResized(ComponentEvent e) {
+            Rectangle parentBounds = e.getComponent().getBounds();
+            target.setBounds(0, 0, (int)parentBounds.getWidth(), (int)parentBounds.getHeight());
+        }
+    }
+    
+    private class FriendsPanelResizer extends ComponentAdapter {
+        private final FriendsPanel target;
+        
+        public FriendsPanelResizer(FriendsPanel target) {
+            this.target = target;
+        }
+        
+        @Override
+        public void componentResized(ComponentEvent e) {
+            target.resize();
+        }
+    }
 }

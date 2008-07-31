@@ -130,5 +130,6 @@
 	<classpathentry kind="lib" path="lib/jars/jspeex-0.9.7-jfcom.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jstun.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmf.jar"/>
+	<classpathentry kind="lib" path="lib/jars/EventBus-1.2b.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
