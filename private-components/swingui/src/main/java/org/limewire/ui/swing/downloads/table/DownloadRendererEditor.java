@@ -45,8 +45,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 /**
- * Renderer and editor for DownloadTables. To force editor to update along with
- * renderers, call 
+ * Renderer and editor for DownloadTables. Editors must be initialized with 
  * <code>editor.initializeEditor(downloadItems)</code>
  */
 public class DownloadRendererEditor extends JPanel implements
@@ -92,6 +91,10 @@ public class DownloadRendererEditor extends JPanel implements
 	private DownloadEditorListener editorListener;
 	private MenuListener menuListener;
     private JPopupMenu popupMenu;
+    
+    private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
+
+    private EventList<DownloadItem> downloadItems;
 
     private final static String PAUSE_COMMAND = "pause";
     private final static String CANCEL_COMMAND = "cancel";
@@ -332,13 +335,12 @@ public class DownloadRendererEditor extends JPanel implements
 		return renderer;
 	}
 
-	private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
+
 
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value,
 			boolean isSel, int row, int col) {
 	    editItem = (DownloadItem) value;
-		//EDITOR_LISTENER.setDownloadItem(item);
 		final DownloadRendererEditor editor = getCellComponent(table, value, isSel, true, row, col);
 		editor.setBackground(rolloverBackground);
 		editor.setForeground(rolloverForeground);
@@ -416,9 +418,10 @@ public class DownloadRendererEditor extends JPanel implements
 	
 	/**
      * Binds editor to downloadItems so that the editor automatically updates
-     * when downloadItems changes
+     * when downloadItems changes and popup menus work.  This is required for Editors
      */
 	public void initializeEditor(EventList<DownloadItem> downloadItems) {
+	    this.downloadItems = downloadItems;
         downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
@@ -587,19 +590,18 @@ public class DownloadRendererEditor extends JPanel implements
             GuiUtils.openURL(ERROR_URL);
         } else if (actionCommmand == PREVIEW_COMMAND){
             //TODO preview
-            System.out.println("preview " + item.getTitle());
+            throw new RuntimeException("Implement "+ actionCommmand + "!");
         } else if (actionCommmand == LOCATE_COMMAND){
             //TODO locate
-            System.out.println("locate " + item.getTitle());
+            throw new RuntimeException("Implement "+ actionCommmand + "!");
         } else if (actionCommmand == LAUNCH_COMMAND){
             //TODO launch
-            System.out.println("launch " + item.getTitle());
+            throw new RuntimeException("Implement "+ actionCommmand + "!");
         } else if (actionCommmand == PROPERTIES_COMMAND){
             //TODO properties
-            System.out.println("properties " + item.getTitle());
+            throw new RuntimeException("Implement "+ actionCommmand + "!");
         } else if (actionCommmand == REMOVE_COMMAND){
-            //TODO remove
-            System.out.println("remove " + item.getTitle());
+            downloadItems.remove(menuEditItem);
         }
 	}
 
