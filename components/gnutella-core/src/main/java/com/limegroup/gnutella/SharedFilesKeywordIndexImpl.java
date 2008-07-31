@@ -135,9 +135,13 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // Iterate through our hit indices to create a list of results.
         for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
             int i = iter.next();
-            FileDesc desc = fileManager.getSharedFileList().get(i);
+            FileDesc desc = fileManager.get(i);
+
             assert desc != null : "unexpected null in FileManager for query:\n"+ request;
 
+            if(!(fileManager.getSharedFileList().contains(desc) || fileManager.getIncompleteFileList().contains(desc)))
+                continue;
+            
             if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;
 
@@ -169,21 +173,25 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
         IntSet ret = priors;
         for(URN urn : urnsIter) {
-            IntSet hits = fileManager.getSharedFileList().getIndicesForUrn(urn);
-            if(hits!=null) {
-                // double-check hits to be defensive (not strictly needed)
-                IntSet.IntSetIterator iter = hits.iterator();
-                while(iter.hasNext()) {
-                    FileDesc fd = fileManager.getSharedFileList().get(iter.next());
-                    // If the file is unshared or an incomplete file
-                    // DO NOT SEND IT.
-                    if(fd == null || fd instanceof IncompleteFileDesc)
-                        continue;
-                    if(fd.containsUrn(urn)) {
-                        // still valid
-                        if(ret==null) ret = new IntSet();
-                        ret.add(fd.getIndex());
-                    } 
+            if( fileManager.getSharedFileList().contains(fileManager.getFileDesc(urn))) {
+                IntSet hits = fileManager.getIndices(urn);
+     
+                if(hits!=null) {
+                    // double-check hits to be defensive (not strictly needed)
+                    IntSet.IntSetIterator iter = hits.iterator();
+                    while(iter.hasNext()) {
+                            FileDesc fd = fileManager.get(iter.next());
+        
+                        // If the file is unshared or an incomplete file
+                        // DO NOT SEND IT.
+                        if(fd == null || (fd instanceof IncompleteFileDesc))
+                            continue;
+                        if(fd.containsUrn(urn)) {
+                            // still valid
+                            if(ret==null) ret = new IntSet();
+                            ret.add(fd.getIndex());
+                        } 
+                    }
                 }
             }
         }
@@ -209,7 +217,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         Set<Response> resps = new HashSet<Response>(urnList.size());
         for (int i = 0; i < urnList.size(); i++) {
             URN currURN = urnList.get(i);
-            FileDesc desc = fileManager.getFileDescForUrn(currURN);
+            FileDesc desc = fileManager.getFileDesc(currURN);
             
             // should never happen since we don't add times for IFDs and
             // we clear removed files...
@@ -235,26 +243,23 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     public void handleFileEvent(FileManagerEvent evt) {
         // building tries should be fast and non-blocking so can be done in
         // dispatch thread
-        FileDesc[] fileDescs = evt.getFileDescs();
         switch (evt.getType()) {
         case ADD_FILE:
-            if(evt.getFileManager().getSharedFileList().contains(evt.getFiles()[0])) 
-                addFileDescs(fileDescs);
+            addFileDescs(evt.getNewFileDesc());
             break;
         case REMOVE_FILE:
-            removeFileDescs(fileDescs);
+            removeFileDescs(evt.getNewFileDesc());
             break;
         case RENAME_FILE:
-            removeFileDescs(fileDescs[0]);
-            addFileDescs(fileDescs[1]);
+            removeFileDescs(evt.getOldFileDesc());
+            addFileDescs(evt.getNewFileDesc());
             break;
         case CHANGE_FILE:
-            if(fileDescs[0] instanceof IncompleteFileDesc) {
-                addFileDescs(fileDescs[0]);
-                return;
-            }
-            removeFileDescs(fileDescs[0]);
-            addFileDescs(fileDescs[1]);
+            removeFileDescs(evt.getOldFileDesc());
+            addFileDescs(evt.getNewFileDesc());
+            break;
+        case INCOMPLETE_URN_CHANGE:
+            addFileDescs(evt.getNewFileDesc());
             break;
         case FILEMANAGER_LOAD_DIRECTORIES:
             clear();
@@ -267,7 +272,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     
     private void removeFileDescs(FileDesc...fileDescs) {
         for (FileDesc fileDesc : fileDescs) {
-            if (fileDesc instanceof IncompleteFileDesc) {
+            if(fileDesc instanceof IncompleteFileDesc) {
                 removeKeywords(incompleteKeywordTrie, fileDesc);
             } else {
                 removeKeywords(keywordTrie, fileDesc);
@@ -279,12 +284,12 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         boolean indexIncompleteFiles = SharingSettings.ALLOW_PARTIAL_SHARING.getValue()
         && SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue();
         for (FileDesc fileDesc : fileDescs) {
-            if (fileDesc instanceof IncompleteFileDesc) {
+            if(fileManager.getIncompleteFileList().contains(fileDesc)) { 
                 IncompleteFileDesc ifd = (IncompleteFileDesc)fileDesc;
                 if (indexIncompleteFiles && ifd.hasUrnsAndPartialData()) {
                     loadKeywords(incompleteKeywordTrie, fileDesc);
                 }
-            } else if(fileManager.getSharedFileList().contains(fileDesc.getFile())){
+            } else if(fileManager.getSharedFileList().contains(fileDesc)){
                 loadKeywords(keywordTrie, fileDesc);
             }
         }
@@ -537,8 +542,8 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             if (file == null) { // pure metadata (no file)
                 res = responseFactory.get().createPureMetadataResponse();
             } else { // meta-data about a specific file
-                FileDesc fd = fileManager.getSharedFileList().getFileDesc(file);
-                if (fd == null || fd instanceof IncompleteFileDesc) {
+                FileDesc fd = fileManager.getFileDesc(file);
+                if (fd == null || !fileManager.getSharedFileList().contains(fd)) {
                     // fd == null is bad -- would mean MetaFileManager is out of sync.
                     // fd incomplete should never happen, but apparently is somehow...
                     // fd is store file, shouldn't be returning query hits for it then..

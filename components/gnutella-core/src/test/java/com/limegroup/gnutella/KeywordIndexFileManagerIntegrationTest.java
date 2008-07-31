@@ -40,7 +40,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         l1.add(d1);
         FileManagerEvent result = addIfShared(f1, l1);
         assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        assertEquals(d1, result.getNewFileDesc().getLimeXMLDocuments().get(0));
 
         // test exact match of keywords in metadata
         Response[] responses = keywordIndex.query(queryRequestFactory.createRequery("Sammy B"));
@@ -103,7 +103,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertEquals(0, responses.length);
 
         // remove file
-        fman.removeFileIfSharedOrStore(f1);
+        fman.removeFile(f1);
 
         // no more matches
         responses = keywordIndex.query(queryRequestFactory.createQuery("Sammy B"));

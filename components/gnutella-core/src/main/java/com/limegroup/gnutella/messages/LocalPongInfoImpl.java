@@ -35,7 +35,7 @@ public class LocalPongInfoImpl implements LocalPongInfo {
     }
 
     public long getNumSharedFiles() {
-        return fileManager.get().getSharedFileList().getNumFiles();
+        return fileManager.get().getSharedFileList().size();
     }
 
     public int getSharedFileSize() {

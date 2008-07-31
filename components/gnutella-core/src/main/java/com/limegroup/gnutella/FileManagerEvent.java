@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.EventObject;
 import java.util.List;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -25,6 +27,11 @@ public class FileManagerEvent extends EventObject {
          * Called when a ADD_FILE fails to load a file into FileManager 
          */
         ADD_FAILED_FILE,
+        
+        /**
+         * Called when ADD_FILE attempts to load a file that already exists in FileManager
+         */
+        FILE_ALREADY_ADDED,
         
         /**
          * Called when a file is removed from a list, Note that this
@@ -76,29 +83,19 @@ public class FileManagerEvent extends EventObject {
         REMOVE_FD,
                 
         /**
-         * Called when ADD_FILE attempts to load a file that already exists in FileManager
+         * Called when an IncompleteFileDesc has had its URNs modified.
          */
-        ALREADY_SHARED_FILE,
+        INCOMPLETE_URN_CHANGE,
         
         /**
-         * Called when a shared folder and all of its contents has been added to FileManager
+         * Called when a folder and all of its contents has been added to FileManager
          */
         ADD_FOLDER,
         
         /**
-         * Called when a store folder and all of its contents has been added to FileManager
-         */
-        ADD_STORE_FOLDER,
-        
-        /**
-         * Called when a shared folder and all of its contents has been removed from FileManager
+         * Called when a folder and all of its contents has been removed from FileManager
          */
         REMOVE_FOLDER,
-        
-        /**
-         * Called when a store folder and all of its contents has been removed from FileManager
-         */
-        REMOVE_STORE_FOLDER,
         
         /**
          * Called once FileManager has begun a new load process of loading all files in all shared
@@ -136,8 +133,10 @@ public class FileManagerEvent extends EventObject {
     }
     
     private final Type type;
-    private final FileDesc[] fds;
-    private final File[] files;
+    private final FileDesc oldFileDesc;
+    private final FileDesc newFileDesc;
+    private final File oldFile;
+    private final File newFile;
     private final URN urn;
     
     private final int relativeDepth;
@@ -150,72 +149,124 @@ public class FileManagerEvent extends EventObject {
     public FileManagerEvent(FileManager manager, Type type) {
         super(manager);
         this.type = type;
-        this.fds = null;
-        this.files = null;
+        oldFileDesc = null;
+        newFileDesc = null;
+        oldFile = null;
+        newFile = null;
         this.urn = null;
         this.relativeDepth = -1;
         this.rootShare = null;
         this.metaData = null;
+    }
+    
+    public FileManagerEvent(FileManager manager, Type type, FileDesc newFileDesc) {
+        super(manager);
+        this.type = type;
+        this.oldFileDesc = null;
+        this.newFileDesc = newFileDesc;
+        this.relativeDepth = -1;
+        this.rootShare = null;
+        this.metaData = null;
+        this.urn = null;
+
+        oldFile = null;
+        
+        if(newFileDesc != null)
+            newFile = newFileDesc.getFile();
+        else
+            newFile = null;
     }
     
     /**
      * Constructs a FileManagerEvent
      */
-    public FileManagerEvent(FileManager manager, Type type, FileDesc... fds) {
+    public FileManagerEvent(FileManager manager, Type type, FileDesc oldFileDesc, FileDesc newFileDesc) {
         super(manager);
         this.type = type;
-        this.fds = fds;
+        this.oldFileDesc = oldFileDesc;
+        this.newFileDesc = newFileDesc;
         this.relativeDepth = -1;
         this.rootShare = null;
         this.metaData = null;
         this.urn = null;
         
-        this.files = new File[fds != null ? fds.length : 0];
-        for (int i = 0; fds != null && i < fds.length; i++) {
-            files[i] = fds[i].getFile();
-        }
+        if(oldFileDesc != null)
+            oldFile = oldFileDesc.getFile();
+        else
+            oldFile = null;
+        
+        if(newFileDesc != null)
+            newFile = newFileDesc.getFile();
+        else
+            newFile = null;
     }
     
     /**
      * Constructs a FileManagerEvent with a bunch of files.
      */
-    public FileManagerEvent(FileManager manager, Type type, File... files) {
+    public FileManagerEvent(FileManager manager, Type type, File newFile) {
+        this(manager, type, null, newFile);
+    }
+    
+    public FileManagerEvent(FileManager manager, Type type, File oldFile, File newFile) {
         super(manager);
         this.type = type;
-        this.files = files;
-        this.fds = null;
         this.urn = null;
+        
+        this.newFileDesc = null;
+        this.oldFileDesc = null;
+        this.newFile = newFile;
+        this.oldFile = oldFile;
+        
         this.relativeDepth = 0;
         this.rootShare = null;
         this.metaData = null;
     }
 
-    public FileManagerEvent(FileManager manager, Type type, File rootShare, int relativeDepth, File... files) {
+    public FileManagerEvent(FileManager manager, Type type, int relativeDepth) {
         super(manager);
         this.type = type;
-        this.files = files;
-        this.fds = null;
         this.urn = null;
+        
+        this.newFileDesc = null;
+        this.oldFileDesc = null;
+        this.newFile = null;
+        this.oldFile = null;
+        
+        this.relativeDepth = relativeDepth;
+        this.rootShare = null;
+        this.metaData = null;
+    }
+    
+    public FileManagerEvent(FileManager manager, Type type, File rootShare, int relativeDepth, File oldFile, File newFile) {
+        super(manager);
+        this.type = type;
+        this.urn = null;
+
+        this.newFileDesc = null;
+        this.oldFileDesc = null;
+        this.newFile = newFile;
+        this.oldFile = oldFile;
         
         this.relativeDepth = relativeDepth;
         this.rootShare = rootShare;
         this.metaData = null;
     }
     
-    public FileManagerEvent(FileManager manager, Type type, List<? extends LimeXMLDocument> md, FileDesc... fds) {
+    public FileManagerEvent(FileManager manager, Type type, List<? extends LimeXMLDocument> md, FileDesc newFileDesc) {
         super(manager);
         this.type = type;
-        this.fds = fds;
+        this.urn = null;
+        
+        this.newFileDesc = newFileDesc;
+        this.oldFileDesc = null;
+        this.newFile = newFileDesc.getFile();
+        this.oldFile = null;
+        
         this.metaData = md;
         
         this.relativeDepth = -1;
         this.rootShare = null;
-        this.urn = null;
-        
-        this.files = new File[fds != null ? fds.length : 0];
-        for (int i = 0; fds != null && i < fds.length; i++) {
-            files[i] = fds[i].getFile();
-        }
     }
     
     public FileManagerEvent(FileManager manager, Type type, URN urn) {
@@ -223,8 +274,10 @@ public class FileManagerEvent extends EventObject {
         this.type = type;
         this.urn = urn;
         
-        this.fds = null;
-        this.files = null;
+        oldFileDesc = null;
+        newFileDesc = null;
+        oldFile = null;
+        newFile = null;
         this.relativeDepth = -1;
         this.rootShare = null;
         this.metaData = null;
@@ -245,19 +298,39 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Note: RENAME and CHANGE events return an array with
-     * two elements. The first element is the previous
-     * FileDesc and the second is the new FileDesc.
+     * Returns the previous instance of this File that has been replaced with 
+     * an instance of a new File. If no old File was being modified this 
+     * method returns null.
      */
-    public FileDesc[] getFileDescs() {
-        return fds;
+    public File getOldFile() {
+        return oldFile;
     }
     
     /**
-     * Gets the effected file.
+     * Returns the File that FileManager was acting upon. NOTE: if only
+     * one File was being acted upon, it will be returned with this method.
      */
-    public File[] getFiles() {
-        return files;
+    public File getNewFile() {
+        return newFile;
+    }
+    
+    /**
+     * Returns the previous instance of the FileDesc if the FileManager has 
+     * modified an existing FileDesc such as a in CHANGE_EVENT or RENAME_EVENT
+     * @return
+     */
+    public FileDesc getOldFileDesc() {
+        return oldFileDesc;
+    }
+    
+    /**
+     * Returns the newly created FileDesc or null if no FileDesc exists
+     * for this event. NOTE: if a FileDesc has been created or only one
+     * FileDesc exists, it will be returned with this method
+     * @return
+     */
+    public FileDesc getNewFileDesc() {
+        return newFileDesc;
     }
     
     /**
@@ -314,18 +387,11 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Returns true if this is a FAILED add event (ie, addFile failed).
-     */
-    public boolean isFailedAddEvent() {
-        return (type.equals(Type.ADD_FAILED_FILE));
-    }
-
-    /**
      * Returns true if this is an event for a file that was ALREADY_SHARED
      * (ie, an addFile event was ignored because the file was already shared)
      */
     public boolean isAlreadySharedEvent() {
-        return (type.equals(Type.ALREADY_SHARED_FILE));
+        return (type.equals(Type.FILE_ALREADY_ADDED));
     }
     
     /**
@@ -358,30 +424,6 @@ public class FileManagerEvent extends EventObject {
        
     @Override
     public String toString() {
-        StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=").append(type);
-        
-        if (fds != null) {
-            buffer.append(", fds=").append(fds.length).append("\n");
-            for(int i = 0; i < fds.length; i++) {
-                buffer.append(fds[i]);
-                if(i != fds.length -1)
-                    buffer.append(", ");
-            }
-        } else {
-            buffer.append(", fds=null");
-        }
-        
-        if (files != null) {
-            buffer.append(", files=").append(files.length).append("\n");
-            for(int i = 0; i < files.length; i++) {
-                buffer.append(files[i]);
-                if(i != files.length -1)
-                    buffer.append(", ");
-            }
-        } else {
-            buffer.append(", files=null");
-        }
-        
-        return buffer.append("]").toString();
+        return StringUtils.toString(this, oldFile, newFile, oldFileDesc, newFileDesc);
     }
 }

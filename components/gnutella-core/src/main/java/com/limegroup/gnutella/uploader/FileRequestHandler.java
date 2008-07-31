@@ -447,14 +447,12 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
         int index = request.index;
 
-        // first verify the file index
-        synchronized (fileManager.getSharedFileList()) {
-            if (fileManager.getSharedFileList().isValidSharedIndex(index)) {
-                fd = fileManager.getSharedFileList().get(index);
-            }
-        }
+        if(!fileManager.isValidIndex(index))
+       	    return null;
 
-        if (fd == null) {
+        // first verify the file index
+        fd = fileManager.get(index);
+        if(fd == null || !fileManager.getSharedFileList().contains(fd)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid index in request does not map to file descriptor: " + request);
             }
@@ -514,8 +512,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.removeFileIfSharedOrStore(file);
-                fileManager.addFileIfShared(file);
+                fileManager.removeFile(file);
+                fileManager.addSharedFile(file);
                 return false;
             }
         }

@@ -1,9 +1,10 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.limewire.collection.IntSet;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -23,14 +24,48 @@ public interface FileManager {
     public abstract void stop();
 
     /**
-     * Returns the FileList containing Shared files
+     * Returns the FileList containing Shared files.
      */
     public FileList getSharedFileList();
     
     /**
-     * Returns the FileList containing Store files
+     * Returns the FileList containing Store files.
      */
     public FileList getStoreFileList();
+
+    /**
+     * Returns the FileList containing files shared with
+     * all buddys.
+     */
+    public FileList getBuddyFileList();
+    
+    /**
+     * Returns the FileList containing Shared Buddy files of this name. If
+     * this buddy list does not exist, a new Buddylist with this name will 
+     * be created.
+     */
+    public FileList getBuddyFileList(String name);
+    
+    /**
+     * Creates a new FileList with the given name.
+     */
+    public void addBuddyFileList(String name);
+    
+    /**
+     * Removes the shared Buddy list containing this name.
+     */
+    public void removeBuddyFileList(String name);
+    
+    /**
+     * Returns true if a shared buddy list of this name exists, false
+     * otherwise.
+     */
+    public boolean containsBuddyFileList(String name);
+    
+    /**
+     * Returns the FileList containing Incomplete files.
+     */
+    public FileList getIncompleteFileList();
 
     /**
      * Returns the number of pending files.
@@ -41,7 +76,7 @@ public interface FileManager {
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
      * or null if the file is not shared or not a store file.
      */
-    public abstract FileDesc getFileDescForFile(File f);
+    public FileDesc getFileDesc(File f);
 
     /**
      * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
@@ -52,7 +87,7 @@ public interface FileManager {
      * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
      *  <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
      */
-    public abstract FileDesc getFileDescForUrn(final URN urn);
+    public FileDesc getFileDesc(final URN urn);
 
     /**
      * Starts a new revision of the library, ensuring that only items present
@@ -80,13 +115,24 @@ public interface FileManager {
     public abstract boolean isUpdating();
 
     /**
-     * Removes a given directory from being completely shared.
+     * Adds a given folder to be shared.
+     * NOTE: this remains for backwards compatibility. This should not be
+     * used as of 5.0. Instead a generic folder should be added using addFolder().
      */
-    public abstract void removeFolderIfShared(File folder);
+    public abstract boolean addSharedFolder(File folder);
+    
+    /**
+     * Removes a given directory from being completely shared.
+     * NOTE: this remains for backwards compatibility. This should not be
+     * used as of 5.0. Instead a generic folder should be added using removeFolder().
+     */
+    public abstract void removeSharedFolder(File folder);
 
     /**
      * Adds a set of folders to be shared and a black list of subfolders that should
      * not be shared.
+     * NOTE: this remains for backwards compatibility. This should not be
+     * used as of 5.0. Instead a generic folder should be added using addFolders
      * 
      * @param folders set of folders to  be shared
      * @param blackListedSet the subfolders or subsubfolders that are not to be
@@ -97,43 +143,81 @@ public interface FileManager {
     public abstract Set<File> getFolderNotToShare();
 
     /**
-     * Adds a given folder to be shared.
+     * Adds a folder to be managed. This folder will be checked everytime a refresh occurs
      */
-    public abstract boolean addSharedFolder(File folder);
+    public void addFolder(File folder);
+    
+    /**
+     * Adds a set of folders to be managed.
+     */
+    public void addFolders(Set<File> folders);
+    
+    /**
+     * Removes a managed folder.
+     * @param folder - folder to remove
+     */
+    public void removeFolder(File folder);
 
     /**
-     * Always shares the given file.
+     * Creates a FileDesc for the file if one doesn't yet exist, then
+     * adds the FileDesc to the sharedFileList
      */
-    public abstract void addFileAlways(File file);
+    public void addSharedFile(File file);
+    
+    /**
+     * Creates a FileDesc for the file if one doesn't yet exist using the supplied
+     * xml document, then adds the FileDesc to the sharedFileList
+     */
+    public void addSharedFile(File file, List<? extends LimeXMLDocument> list);
 
     /**
-     * Always shares the given file, using the given list of metadata.
+     * Creates a FileDesc for the file if one doesn't yet exist, then 
+     * adds the FileDesc to the sharedFileList even if the file is not
+     * shareable by default.
      */
-    public abstract void addFileAlways(File file, List<? extends LimeXMLDocument> list);
+    public void addSharedFileAlways(File file);
 
     /**
-     * adds a file that will be shared during this session of limewire
-     * only.
+     * Creates a FileDesc for the file if one doesn't yet exist, then 
+     * adds the FileDesc to the sharedFileList even if the file is not
+     * shareable by default.
      */
-    public abstract void addFileForSession(File file);
+    public void addSharedFileAlways(File file, List<? extends LimeXMLDocument> list);
 
     /**
-     * Adds the given file if it's shared.
+     * Creates a FileDesc for the file if one doesn't yet exist, then 
+     * adds the FileDesc to the sharedFileList only for the session.
      */
-    public abstract void addFileIfShared(File file);
+    public void addSharedFileForFession(File file);
 
     /**
-     * Adds the file if it's shared, using the given list of metadata.
+     * Creates a FileDesc for the file if one doesn't yet exist, then adds the
+     * FileDesc to the buddy list with the given name. If no buddy list by that
+     * name exists no action is performed.
      */
-    public abstract void addFileIfShared(File file, List<? extends LimeXMLDocument> list);
+    public void addBuddyFile(String name, File file);
 
     /**
-     * Removes the file if it is being shared, and then removes the file from
-     * the special lists as necessary.
-     * @return The FileDesc associated with this file, or null if the file was
-     * not shared. 
+     * Adds the file to the master file list. 
      */
-    public abstract FileDesc stopSharingFile(File file);
+    public void addFile(File file);
+
+    /**
+     * Adds the file to the master file list, using the given list of metadata.
+     */
+    public void addFile(File file, List<? extends LimeXMLDocument> list);
+
+    /**
+     * Returns the FileDesc located at the index in the list
+     * @return the FileDesc if it exists, or null if the file no longer
+     *          exists in this list.
+     */
+    public FileDesc get(int index);
+    
+    /**
+     * Returns true if this index exists, false otherwise.
+     */
+    public boolean isValidIndex(int index);
 
     /**
      * @modifies this
@@ -143,7 +227,7 @@ public interface FileManager {
      *  other files.  Note that the file is not actually removed from
      *  disk.
      */
-    public abstract FileDesc removeFileIfSharedOrStore(File f);
+    public FileDesc removeFile(File f);
 
     /**
      * Adds an incomplete file to be used for partial file sharing.
@@ -162,7 +246,7 @@ public interface FileManager {
      * Notification that a file has changed and new hashes should be
      * calculated.
      */
-    public abstract void fileChanged(File f);
+    public void fileChanged(File f, List<LimeXMLDocument> xmlDocs);
 
     /** Attempts to validate the given FileDesc. */
     public abstract void validate(final FileDesc fd);
@@ -172,7 +256,7 @@ public interface FileManager {
      * adds "newName", and returns true iff newName is actually shared.  The new
      * file may or may not have the same index as the original.
      */
-    public abstract void renameFileIfSharedOrStore(File oldName, File newName);
+    public void renameFile(File oldName, File newName);
 
     /**
      * Validates a file, moving it from 'SENSITIVE_DIRECTORIES_NOT_TO_SHARE'
@@ -188,44 +272,11 @@ public interface FileManager {
     public abstract void invalidateSensitiveFile(File dir);
 
     /**
-     * Determines if there are any files shared that are not in completely shared directories.
-     */
-    public abstract boolean hasIndividualFiles();
-
-    /**
-     * Determines if there are any LWS files that are located in a shared
-     * directory
-     */
-    public abstract boolean hasIndividualStoreFiles();
-
-    /**
      * @return true if currently we have any files that are 
      * shared by the application.
      */
     public abstract boolean hasApplicationSharedFiles();
 
-    /**
-     * Returns all files that are shared while not in shared directories.
-     */
-    public abstract File[] getIndividualFiles();
-
-    /**
-     * Returns all files that are LWS files that are located in a shared
-     *	directory
-     */
-    public abstract File[] getIndividualStoreFiles();
-
-    /**
-     * Returns true if the file is a store file and is located in a shared directory,
-     * false otherwise
-     */
-    public abstract boolean isIndividualStore(File f);
-
-    /**
-     * Returns true if the file is not a store file and is shared but the entire folder 
-     * is not shared, false otherwise
-     */
-    public abstract boolean isIndividualShare(File f);
 
     public abstract boolean isRareFile(FileDesc fd);
 
@@ -276,23 +327,24 @@ public interface FileManager {
     public abstract boolean isFileApplicationShared(String name);
 
     /**
-     * registers a listener for FileManagerEvents
-     */
-    public abstract void addFileEventListener(FileEventListener listener);
-
-    /**
-     * unregisters a listener for FileManagerEvents
-     */
-    public abstract void removeFileEventListener(FileEventListener listener);
-
-    /** 
-     * Returns an iterator for all shared files. 
-     */
-    public abstract Iterator<FileDesc> getIndexingIterator();
-    
-    /**
      * Notification that an IncompleteFileDesc has been updated.
      */
     public void fileURNSUpdated(FileDesc ifd);
 
+    public IntSet getIndices(URN urn);
+
+    /**
+     * Returns the number of files
+     */
+    public int size();
+
+    /** 
+     * registers a listener for FileManagerEvents
+     */
+    public abstract void addFileEventListener(FileEventListener listener);
+    
+    /**
+     * unregisters a listener for FileManagerEvents
+     */
+    public abstract void removeFileEventListener(FileEventListener listener);
 }

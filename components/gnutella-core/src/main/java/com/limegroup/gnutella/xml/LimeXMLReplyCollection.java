@@ -656,16 +656,84 @@ public class LimeXMLReplyCollection {
             retVal == MetaDataState.INCORRECT_FILETYPE)
             return retVal;
             
-        // We do not remove the hash from the hashMap because
-        // MetaFileManager needs to look it up to get the doc.
+        File file = new File(fileName);
+        FileDesc fd = fileManager.get().getFileDesc(file);
         
-        //Since the hash of the file has changed, the metadata pertaining 
-        //to other schemas will be lost unless we update those tables
-        //with the new hashValue. 
-        //NOTE:This is the only time the hash will change-(mp3 and audio)
-        fileManager.get().fileChanged(new File(fileName));
+        // if a FileDesc for this file exists, write out the changes to disk
+        // and update the FileDesc in the FileManager
+        if(fd != null) {
+            List<LimeXMLDocument> currentXmlDocs = fd.getLimeXMLDocuments();
+            if (LimeXMLUtils.isEditableFormat(file)) {
+                try {
+                      //TODO: Disk IO being performed here!!
+                      LimeXMLDocument newAudioXmlDoc = metaDataReader.readDocument(file);
+                      LimeXMLDocument oldAudioXmlDoc = getAudioDoc(currentXmlDocs);
+                      
+                      if(!oldAudioXmlDoc.equals(newAudioXmlDoc)) {
+                          currentXmlDocs = mergeAudioDocs(currentXmlDocs, oldAudioXmlDoc, newAudioXmlDoc);
+                      }
+                  } catch (IOException e) {
+                      // if we were unable to read this document,
+                      // then simply add the file without metadata.
+                      currentXmlDocs = Collections.emptyList();
+                  }
+            }
+            //Since the hash of the file has changed, the metadata pertaining 
+            //to other schemas will be lost unless we update those tables
+            //with the new hashValue. 
+            //NOTE:This is the only time the hash will change-(mp3 and audio)
+            fileManager.get().fileChanged(file, currentXmlDocs);
+        }
         return retVal;
     }
+    
+    /**
+     * Returns the audio LimeXMLDocument from this list if one exists, null otherwise.
+     */
+    private LimeXMLDocument getAudioDoc(List<LimeXMLDocument> allDocs) {
+        LimeXMLDocument audioDoc = null;
+        
+        for (LimeXMLDocument doc : allDocs) {
+            if (doc.getSchema().getSchemaURI().equals(LimeXMLNames.AUDIO_SCHEMA)) {
+                audioDoc = doc;
+                break;
+            }
+        }
+        return audioDoc;
+    }
+    
+    /**
+     * Merges the a new Audio LimeXMLDocument with a list of LimeXMLDocuments. 
+     * If the list didn't already contain and audio LimeXMLDocument, the new 
+     * one is added, else the new Audio LimeXMLDocument replaces the old one 
+     * in the list.
+     */
+    private List<LimeXMLDocument> mergeAudioDocs(List<LimeXMLDocument> allDocs, LimeXMLDocument oldAudioDoc, 
+            LimeXMLDocument newAudioDoc) {
+        List<LimeXMLDocument> retList = new ArrayList<LimeXMLDocument>();
+        retList.addAll(allDocs);
+
+        if (oldAudioDoc == null) {// nothing to resolve
+            retList.add(newAudioDoc);
+        } else {
+            // OK. audioDoc exists, remove it
+            retList.remove(oldAudioDoc);
+    
+            // now add the non-id3 tags from audioDoc to id3doc
+            List<NameValue<String>> oldAudioList = oldAudioDoc.getOrderedNameValueList();
+            List<NameValue<String>> newAudioList = newAudioDoc.getOrderedNameValueList();
+            
+            for (int i = 0; i < oldAudioList.size(); i++) {
+                NameValue<String> nameVal = oldAudioList.get(i);
+                if (AudioMetaData.isNonLimeAudioField(nameVal.getName()))
+                    newAudioList.add(nameVal);
+            }
+            oldAudioDoc = limeXMLDocumentFactory.createLimeXMLDocument(newAudioList, LimeXMLNames.AUDIO_SCHEMA);
+            retList.add(oldAudioDoc);
+        }
+        return retList;
+    }
+    
     
     /** Serializes the current map to disk. */
     public boolean writeMapToDisk() {

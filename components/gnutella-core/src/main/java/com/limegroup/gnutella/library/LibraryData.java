@@ -49,7 +49,7 @@ public class LibraryData extends AbstractSettingsGroup {
     
     /**
      * Files in a shared folder that are not the location of the LWS downloads but 
-     * were purchased from the LWS
+     * were purchased from the LWS.
      */
     public final Set<File> SPECIAL_STORE_FILES = DATA.getSet("SPECIAL_STORE_FILES");
     
@@ -58,6 +58,37 @@ public class LibraryData extends AbstractSettingsGroup {
      */
     public LibraryData() {
         SettingsGroupManager.instance().addSettingsGroup(this);
+    }
+    
+    /**
+     * Returns a Set of Files with the key name. If a Set does not
+     * exist with this name it creates one and returns it.
+     */
+    public Set<File> getBuddyList(String name) {
+        return DATA.getSet(name);
+    }
+    
+    /**
+     * Returns true if a BuddyList exists by this name, false
+     * otherwise
+     */
+    public boolean containsBuddyList(String name) {
+        return DATA.contains(name);
+    }
+    
+    /**
+     * Creates a new BuddyList by this name is one does not
+     * exist.
+     */
+    public void addBuddyList(String name) {
+        DATA.getSet(name);
+    }
+    
+    /**
+     * Removes the BuddyList associated with this name
+     */
+    public void removeBuddyList(String name) {
+        DATA.remove(name);
     }
     
     /**

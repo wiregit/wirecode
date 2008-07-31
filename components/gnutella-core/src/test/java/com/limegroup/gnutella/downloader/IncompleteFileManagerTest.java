@@ -176,7 +176,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
      * added / removed incomplete file.
      */
     public void testFileManagerIsNotified() throws Exception {
-        assertEquals(0, fm.getSharedFileList().getNumIncompleteFiles()); // begin with 0 shared.
+        assertEquals(0, fm.getIncompleteFileList().size()); // begin with 0 shared.
         
         //Populate IFM with a hash.
         rfd1=newRFD("some file name", 1839, 
@@ -185,18 +185,18 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1839);
         incompleteFileManager.addEntry(tmp1, vf, true);
         
-        assertEquals(1, fm.getSharedFileList().getNumIncompleteFiles()); // 1 added.
+        assertEquals(1, fm.getIncompleteFileList().size()); // 1 added.
         
         // make sure it's associated with a URN.
         URN urn = URN.createSHA1Urn(    
             "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        FileDesc fd = fm.getFileDescForUrn(urn);
+        FileDesc fd = fm.getFileDesc(urn);
         assertNotNull(urn);
         assertInstanceof(IncompleteFileDesc.class, fd);
         
         incompleteFileManager.removeEntry(tmp1);
         
-        assertEquals(0, fm.getSharedFileList().getNumIncompleteFiles()); // back to 0 shared.
+        assertEquals(0, fm.getIncompleteFileList().size()); // back to 0 shared.
     }   
 
     public void testCompletedHash_NotFound() throws Throwable{

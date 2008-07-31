@@ -63,7 +63,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         addEvent = new FileManagerEvent(fileManager, FileManagerEvent.Type.ADD_FILE);
         removeEvent = new FileManagerEvent(fileManager, FileManagerEvent.Type.REMOVE_FILE);
         loadedEvent =  new FileManagerEvent(fileManager, FileManagerEvent.Type.ADD_FILE);
-        randomEvent =  new FileManagerEvent(fileManager, FileManagerEvent.Type.REMOVE_STORE_FOLDER);
+        randomEvent =  new FileManagerEvent(fileManager, FileManagerEvent.Type.REMOVE_FOLDER);
     }
     
     
@@ -76,7 +76,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             never(notifier);
             exactly(4).of(fileManager).getSharedFileList();
             will(returnValue(fileList));
-            exactly(4).of(fileList).getNumFiles();
+            exactly(4).of(fileList).size();
             will(returnValue(5));
         }});
             
@@ -117,7 +117,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             one(fileManager).getSharedFileList();
             will(returnValue(fileList));
-            one(fileList).getNumFiles();
+            one(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             one(notifier).showMessage(with(matcher));
         }});
@@ -139,11 +139,11 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             one(fileManager).getSharedFileList();
             will(returnValue(fileList));
-            one(fileList).getNumFiles();
+            one(fileList).size();
             will(returnValue(5));
             one(fileManager).getSharedFileList();
             will(returnValue(fileList));
-            one(fileList).getNumFiles();
+            one(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(1).of(notifier).showMessage(with(matcher));
         }});
@@ -167,7 +167,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             exactly(2).of(fileManager).getSharedFileList();
             will(returnValue(fileList));
-            exactly(2).of(fileList).getNumFiles();
+            exactly(2).of(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
         }});
@@ -188,7 +188,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             exactly(2).of(fileManager).getSharedFileList();
             will(returnValue(fileList));
-            exactly(2).of(fileList).getNumFiles();
+            exactly(2).of(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             never(notifier);
         }});
@@ -204,7 +204,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     
     
     private FileManagerEvent createAddFolderEvent(int depth) {
-        return new FileManagerEvent(fileManager,FileManagerEvent.Type.ADD_FOLDER,null,depth);
+        return new FileManagerEvent(fileManager,FileManagerEvent.Type.ADD_FOLDER,depth);
     }
     
     
@@ -310,7 +310,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             one(fileManager).getSharedFileList();
             will(returnValue(fileList));
-            one(fileList).getNumFiles();
+            one(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
         }});

@@ -167,17 +167,19 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	Map<File, FileDesc> fileMap = new HashMap<File, FileDesc>();
     	fileMap.put(f,partialDesc);
     	
+    	fileManager.setFileDesc(descList);
+    	fileManager.setUrns(urnMap);
+    	fileManager.setFiles(fileMap);
+    	
     	FileListStub sharedList = (FileListStub) fileManager.getSharedFileList();
-    	sharedList.setUrns(urnMap);
     	sharedList.setDescs(descList);
-    	sharedList.setFiles(fileMap);
     	
     	// then create an rfd from a firewalled host
     	RemoteFileDesc rfd = newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());
     	
     	//test that currently we have no altlocs for the incomplete file
     	
-    	FileDesc test = fileManager.getFileDescForUrn(partialURN);
+    	FileDesc test = fileManager.getFileDesc(partialURN);
     	assertNotNull(test);
     	AltLocManager altLocManager = injector.getInstance(AltLocManager.class);    	
     	assertEquals(0, altLocManager.getNumLocs(test.getSHA1Urn()));
@@ -209,7 +211,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
     	//the altloc should have been added to the file descriptor
-    	test = fileManager.getFileDescForUrn(partialURN);
+    	test = fileManager.getFileDesc(partialURN);
     	assertEquals(1, altLocManager.getNumLocs(test.getSHA1Urn()));
     	
     	//now repeat the test, pretending the uploader wants push altlocs
@@ -223,7 +225,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	assertTrue(fakeDownloader._addedSuccessfull);
     	
     	//make sure the file was added to the file descriptor
-    	test = fileManager.getFileDescForUrn(partialURN);
+    	test = fileManager.getFileDesc(partialURN);
     	assertEquals(1, altLocManager.getNumLocs(test.getSHA1Urn()));
     	
     	//rince and repeat, saying this was a bad altloc. 

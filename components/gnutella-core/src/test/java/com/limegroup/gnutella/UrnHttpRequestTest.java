@@ -87,7 +87,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         fileManager = injector.getInstance(FileManager.class);
         FileManagerTestUtils.waitForLoad(fileManager,2000);
         
-        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getSharedFileList().getNumFiles());
+        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getSharedFileList().size());
     }
 
     @Override

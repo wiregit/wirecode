@@ -993,7 +993,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if( incompleteFile == null ) // no incomplete, no big deal.
             return;
         
-        FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
+        FileDesc fd = fileManager.getFileDesc(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
             // Assert that the SHA1 of the IFD and our sha1 match.
@@ -1006,7 +1006,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                            "\nour hash    : " + getSha1Urn() +
                            "\ntheir hashes: " + ifd.getUrns()+
                            "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
-                fileManager.removeFileIfSharedOrStore(incompleteFile);
+                fileManager.removeFile(incompleteFile);
             }
         }
         
@@ -1968,7 +1968,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
         if (commonOutFile.getHashTree() == null) 
-            fileManager.removeFileIfSharedOrStore(incompleteFile);
+            fileManager.removeFile(incompleteFile);
         
         // purge the tree
         tigerTreeCache.get().purgeTree(getSha1Urn());
@@ -2039,7 +2039,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
-            fileManager.removeFileIfSharedOrStore(saveFile);
+            fileManager.removeFile(saveFile);
 
         // add file hash to manager for fast lookup
         addFileHash(fileHash, saveFile);
@@ -2109,9 +2109,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected void shareSavedFile(File saveFile){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
-			fileManager.addFileAlways(saveFile, getXMLDocuments());
+		    fileManager.addSharedFileAlways(saveFile, getXMLDocuments());
 		else
-		    fileManager.addFileIfShared(saveFile, getXMLDocuments());
+		    fileManager.addSharedFile(saveFile, getXMLDocuments());
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 
@@ -2856,7 +2856,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             URN ttroot = tree.getTreeRootUrn();
             tigerTreeCache.get().addRoot(sha1, ttroot);
             synchronized(fileManager) {
-                FileDesc fd = fileManager.getFileDescForUrn(sha1);
+                FileDesc fd = fileManager.getFileDesc(sha1);
                 if (fd == null) // possible for in-network downloads
                     return;
                 if (fd.setTTRoot(ttroot))

@@ -101,7 +101,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         FileManagerTestUtils.waitForLoad(fileManager,100000);
 
-        assertGreaterThan(0, fileManager.getSharedFileList().getNumFiles());
+        assertGreaterThan(0, fileManager.getSharedFileList().size());
 
         browseHostHandler = injector.getInstance(BrowseHostHandlerManager.class).createBrowseHostHandler(new GUID(), new GUID());
         socketsManager = injector.getInstance(SocketsManager.class);
@@ -166,13 +166,15 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             }
         }
 
-        assertEquals(fileManager.getSharedFileList().getNumFiles(), files.size());
+        assertEquals(fileManager.getSharedFileList().size(), files.size());
 
-        for (Iterator<FileDesc> it = fileManager.getIndexingIterator(); it.hasNext();) {
-            FileDesc result = it.next();
-            boolean contained = files.remove(result.getFileName());
-            assertTrue("File is missing in browse response: "
+        synchronized (fileManager.getSharedFileList().getLock()) {
+            for (Iterator<FileDesc> it = fileManager.getSharedFileList().iterator(); it.hasNext();) {
+                FileDesc result = it.next();
+                boolean contained = files.remove(result.getFileName());
+                assertTrue("File is missing in browse response: "
                     + result.getFileName(), contained);
+            }
         }
         assertTrue("Browse returned more results than shared: " + files,
                 files.isEmpty());

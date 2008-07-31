@@ -102,6 +102,25 @@ class Container {
     }
     
     /**
+     * Returns true if a Set by this name exists, false otherwise
+     */
+    synchronized boolean contains(String name) {
+        Collection<File> data = STORED.get(name);
+        if(data == null)
+            return false;
+        else
+            return true;
+    }
+    
+    /**
+     * Removes the set from the container.
+     * @param name - name of Set to remove
+     */
+    synchronized void remove(String name) {
+        STORED.remove(name);
+    }
+    
+    /**
      * Clears all entries.
      */
     synchronized void clear() {

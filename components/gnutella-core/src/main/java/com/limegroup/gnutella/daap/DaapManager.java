@@ -388,19 +388,17 @@ public final class DaapManager implements FileEventListener {
      * Handles a change event.
      */
     private synchronized void handleChangeEvent(FileManagerEvent evt) {
-        FileDesc oldDesc = evt.getFileDescs()[0];
-        Song song = urnToSong.remove(oldDesc.getSHA1Urn());
+        Song song = urnToSong.remove(evt.getOldFileDesc().getSHA1Urn());
 
         if (song != null) {
-            FileDesc newDesc = evt.getFileDescs()[1];
-            urnToSong.put(newDesc.getSHA1Urn(), song);
+            urnToSong.put(evt.getNewFileDesc().getSHA1Urn(), song);
             
-            String name = newDesc.getFileName().toLowerCase(Locale.US);
+            String name = evt.getNewFileDesc().getFileName().toLowerCase(Locale.US);
             
             if (isSupportedAudioFormat(name)) {
-                updateSongAudioMeta(autoCommitTxn, song, newDesc);
+                updateSongAudioMeta(autoCommitTxn, song, evt.getNewFileDesc());
             } else if (isSupportedVideoFormat(name)) {
-                updateSongVideoMeta(autoCommitTxn, song, newDesc);
+                updateSongVideoMeta(autoCommitTxn, song, evt.getNewFileDesc());
             } else {
                 database.removeSong(autoCommitTxn, song);
             }
@@ -423,26 +421,26 @@ public final class DaapManager implements FileEventListener {
             }
         }
         
-        FileDesc file = evt.getFileDescs()[0];
-        if (!(file instanceof IncompleteFileDesc)) {
+        FileDesc fileDesc = evt.getNewFileDesc();
+        if (!(fileDesc instanceof IncompleteFileDesc)) {
 
-            String name = file.getFileName().toLowerCase(Locale.US);
+            String name = fileDesc.getFileName().toLowerCase(Locale.US);
 
             Song song = null;
             
             if (isSupportedAudioFormat(name)) {
-                song = createSong(file, true);
+                song = createSong(fileDesc, true);
             } else if (isSupportedVideoFormat(name)) {
-                song = createSong(file, false);
+                song = createSong(fileDesc, false);
             }
             
             if (song != null) {
-                urnToSong.put(file.getSHA1Urn(), song);
+                urnToSong.put(fileDesc.getSHA1Urn(), song);
                 
                 database.getMasterPlaylist().addSong(autoCommitTxn, song);
                 whatsNew.addSong(autoCommitTxn, song);
                 
-                if (file.isLicensed()) {
+                if (fileDesc.isLicensed()) {
                     creativecommons.addSong(autoCommitTxn, song);
                 }
 
@@ -459,13 +457,11 @@ public final class DaapManager implements FileEventListener {
      * Handles a rename event.
      */
     private synchronized void handleRenameEvent(FileManagerEvent evt) {
-        FileDesc oldDesc = evt.getFileDescs()[0];
-        Song song = urnToSong.remove(oldDesc.getSHA1Urn());
+        Song song = urnToSong.remove(evt.getOldFileDesc().getSHA1Urn());
 
         if (song != null) {
-            FileDesc newDesc = evt.getFileDescs()[1];
-            urnToSong.put(newDesc.getSHA1Urn(), song);
-            song.setAttachment(newDesc);
+            urnToSong.put(evt.getNewFileDesc().getSHA1Urn(), song);
+            song.setAttachment(evt.getNewFileDesc());
         }
     }
 
@@ -473,8 +469,7 @@ public final class DaapManager implements FileEventListener {
      * Handles a remove event.
      */
     private synchronized void handleRemoveEvent(FileManagerEvent evt) {
-        FileDesc file = evt.getFileDescs()[0];
-        Song song = urnToSong.remove(file.getSHA1Urn());
+        Song song = urnToSong.remove(evt.getNewFileDesc().getSHA1Urn());
 
         if (song != null) {
             database.removeSong(autoCommitTxn, song);
@@ -505,10 +500,6 @@ public final class DaapManager implements FileEventListener {
         List<FileDesc> files = sharedFileList.getAllFileDescs();
     
         for(FileDesc fd: files){
-            if(fd instanceof IncompleteFileDesc) {
-                continue;
-            }
-            
             String name = fd.getFileName().toLowerCase(Locale.US);
             boolean audio = isSupportedAudioFormat(name);
             

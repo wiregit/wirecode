@@ -1,31 +1,34 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 
-import org.limewire.collection.IntSet;
+public class SynchronizedFileList implements FileListPackage {
 
-public class SynchronizedFileList implements FileList {
-
-    final FileList fileList;
+    final FileListPackage fileList;
     final Object mutex;     // Object on which to synchronize
     
-    public SynchronizedFileList(FileList fileList) { 
+    public SynchronizedFileList(FileListPackage fileList) { 
         if(fileList == null)
             throw new NullPointerException();
         this.fileList = fileList;
-        mutex = this;
+        mutex = fileList;
     }
     
-    public void addFile(File file, FileDesc fileDesc) {
+    public String getName() {
+        return fileList.getName();
+    }
+    
+    public void clear() {
         synchronized (mutex) {
-            fileList.addFile(file, fileDesc);
+            fileList.clear();
         }
     }
 
-    public boolean contains(File file) {
+    public boolean add(FileDesc fileDesc) {
         synchronized (mutex) {
-            return fileList.contains(file);
+            return fileList.add(fileDesc);
         }
     }
 
@@ -35,39 +38,13 @@ public class SynchronizedFileList implements FileList {
         }
     }
 
-    public boolean contains(URN urn) {
-        synchronized (mutex) {
-            return fileList.contains(urn);
-        }
-    }
-
-    public FileDesc get(int i) {
-        synchronized (mutex) {
-            return fileList.get(i);
-        }
+    public Iterator<FileDesc> iterator() {
+        return fileList.iterator();
     }
 
     public List<FileDesc> getAllFileDescs() {
         synchronized (mutex) {
             return fileList.getAllFileDescs();
-        }
-    }
-
-    public FileDesc getFileDesc(URN urn) {
-        synchronized (mutex) {
-            return fileList.getFileDesc(urn);
-        }
-    }
-
-    public FileDesc getFileDesc(File file) {
-        synchronized (mutex) {
-            return fileList.getFileDesc(file);
-        }
-    }
-
-    public IntSet getIndicesForUrn(URN urn) {
-        synchronized (mutex) {
-            return fileList.getIndicesForUrn(urn);
         }
     }
 
@@ -77,57 +54,45 @@ public class SynchronizedFileList implements FileList {
         }
     }
 
-    public int getNumFiles() {
+    public void addPendingFileAlways(File file) {
         synchronized (mutex) {
-            return fileList.getNumFiles();
+            fileList.addPendingFileAlways(file);            
         }
     }
 
-    public boolean isValidSharedIndex(int i) {
+    public void addPendingFileForSession(File file) {
         synchronized (mutex) {
-            return fileList.isValidSharedIndex(i);
+            fileList.addPendingFileForSession(file);            
         }
     }
 
-    public void remove(FileDesc fileDesc) {
+    public void addPendingFile(File file) {
         synchronized (mutex) {
-            fileList.remove(fileDesc);
+            fileList.addPendingFile(file);            
+        }
+    }
+
+    public boolean remove(FileDesc fileDesc) {
+        synchronized (mutex) {
+            return fileList.remove(fileDesc);
+        }
+    }
+
+    public int size() {
+        synchronized (mutex) {
+            return fileList.size();
+        }
+    }
+
+    public boolean isFileAddable(File file) {
+        synchronized (mutex) {
+            return fileList.isFileAddable(file);
         }
     }
     
-    public void removeIncomplete(IncompleteFileDesc fileDesc) {
-        synchronized(mutex) {
-            fileList.removeIncomplete(fileDesc);
-        }
-    }
-
-    public void remove(URN urn) {
+    public List<FileDesc> getFilesInDirectory(File directory) {
         synchronized (mutex) {
-            fileList.remove(urn);
-        }
-    }
-
-    public void resetVariables() {
-        synchronized (mutex) {
-            fileList.resetVariables();
-        }
-    }
-
-    public int getListLength() {
-        synchronized (mutex) {
-            return fileList.getListLength();
-        }
-    }
-
-    public void updateUrnIndex(FileDesc fileDesc) {
-        synchronized (mutex) {
-            fileList.updateUrnIndex(fileDesc);
-        }
-    }
-    
-    public void addIncompleteFile(File incompleteFile, IncompleteFileDesc incompleteFileDesc) {
-        synchronized (mutex) {
-            fileList.addIncompleteFile(incompleteFile, incompleteFileDesc);
+            return fileList.getFilesInDirectory(directory);
         }
     }
 
@@ -136,17 +101,52 @@ public class SynchronizedFileList implements FileList {
             return fileList.getNumForcedFiles();
         }
     }
+    
+    public Object getLock() {
+        return mutex;
+    }
 
-    public int getNumIncompleteFiles() {
+    public void cleanupListeners() {
         synchronized (mutex) {
-            return fileList.getNumIncompleteFiles();
+            fileList.cleanupListeners();
         }
     }
 
-    public List<FileDesc> getFilesInDirectory(File directory) {
+    public void addFileListListener(FileListListener listener) {
         synchronized (mutex) {
-            return fileList.getFilesInDirectory(directory);
+            fileList.addFileListListener(listener);            
         }
     }
 
+    public void removeFileListListener(FileListListener listener) {
+        synchronized (mutex) {
+            fileList.removeFileListListener(listener);
+        }
+    }
+    
+    /////////// backwards compatibility /////////////////////////
+
+    public File[] getIndividualFiles() {
+        synchronized (mutex) {
+            return fileList.getIndividualFiles();
+        }
+    }
+
+    public int getNumIndividualFiles() {
+        synchronized (mutex) {
+            return fileList.getNumIndividualFiles();
+        }
+    }
+
+    public boolean hasIndividualFiles() {
+        synchronized (mutex) {
+            return fileList.hasIndividualFiles();
+        }
+    }
+
+    public boolean isIndividualFile(File file) {
+        synchronized (mutex) {
+            return fileList.isIndividualFile(file);
+        }
+    }
 }

@@ -13,7 +13,7 @@ public class FileListAdapter implements FileList {
     @Override
     public long size() {
         if(fileList != null) {
-            return fileList.getNumFiles();
+            return fileList.size();
         } else {
             return 0;
         }

@@ -5,7 +5,6 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.IntSet;
-import org.limewire.collection.MultiCollection;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -39,7 +36,6 @@ import org.limewire.lifecycle.Service;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.NameValue;
 import org.limewire.util.RPNParser;
 
 import com.google.inject.Inject;
@@ -54,9 +50,6 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.library.SharingUtils;
-import com.limegroup.gnutella.licenses.LicenseType;
-import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -65,14 +58,13 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLNames;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- * The list of all shared files.  Provides operations to add and remove
- * individual files, directory, or sets of directories.  Provides a method to
- * efficiently query for files whose names contain certain keywords.<p>
+ * The list of all known files. This creates and maintains a list of 
+ * directories and FileDescs. It also creates a set of FileLists which 
+ * may contain subsets of all FileDescs. Files can be added to just the 
+ * FileManager or loaded into both the FileManager and a specified FileList
+ * once the FileDesc has been created. <p>
  *
  * This class is thread-safe.
  */
@@ -93,10 +85,45 @@ public class FileManagerImpl implements FileManager, Service {
     /**
      * All of the data for FileManager.
      */
-    private final LibraryData _data = new LibraryData();
+    protected final LibraryData _data = new LibraryData();
     
-    protected FileList sharedFileList = new SynchronizedFileList(new SharedFileListImpl());
-    private FileList storeFileList = new SynchronizedFileList(new FileListImpl());
+    private final FileListPackage sharedFileList;
+    private final FileListPackage storeFileList; 
+    private final FileListPackage buddyFileList;
+    private final FileListPackage incompleteFileList;
+    private final Map<String, FileListPackage> buddyFileLists = new HashMap<String,FileListPackage>();
+    
+    /** 
+     * The list of complete and incomplete files.  An entry is null if it
+     *  is no longer shared.
+     * INVARIANT: for all i, files[i]==null, or files[i].index==i and either
+     *  files[i]._path is in a shared directory with a shareable extension or
+     *  files[i]._path is the incomplete directory if files[i] is an IncompleteFileDesc.
+     */
+    protected List<FileDesc> files;
+    
+    private int numFiles;
+    
+    /**
+     * An index that maps a <tt>File</tt> on disk to the 
+     *  <tt>FileDesc</tt> holding it.
+     *
+     * INVARIANT: For all keys k in _fileToFileDescMap, 
+     *  files[_fileToFileDescMap.get(k).getIndex()].getFile().equals(k)
+     *
+     * Keys must be canonical <tt>File</tt> instances.
+     */
+    protected Map<File, FileDesc> fileToFileDescMap;
+ 
+    /**
+     * A map of appropriately case-normalized URN strings to the
+     * indices in files.  Used to make query-by-hash faster.
+     * 
+     * INVARIANT: for all keys k in urnMap, for all i in urnMap.get(k),
+     * files[i].containsUrn(k).  Likewise for all i, for all k in
+     *files[i].getUrns(), rnMap.get(k) contains i.
+     */
+    private Map<URN, IntSet> urnMap;
     
     /** 
      * The total number of files that are pending sharing.
@@ -127,32 +154,24 @@ public class FileManagerImpl implements FileManager, Service {
     private Set<URN> _requestingValidation = Collections.synchronizedSet(new HashSet<URN>());
     
     /**
-     * Files that are shared only for this LW session.
-     * INVARIANT: no file can be in this and _data.SPECIAL_FILES_TO_SHARE
-     * at the same time
-     */
-    @InspectableForSize("number of transiently shared files")
-    private Set<File> _transientSharedFiles = new HashSet<File>();
-
-    /**
      *  The directory for downloading LWS songs to and any subdirectories
      *  that may recursively exist
      */    
     @InspectableForSize("number of directories for the store")
-    private Set<File> _storeDirectories;
+    private Set<File> storeDirectories;
     
     /**
-     * Individual files that are not in a shared folder.
+     * Generic directories that are loaded. Subsets of these folders can be
+     * shared files/ store files/ shared with buddys or none of the above. 
      */
-    @InspectableForSize("number of individually shared files")
-    private Collection<File> _individualSharedFiles; 
+    private Set<File> displayDirectories;
     
     /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
     @InspectablePrimitive("filemanager revision")
-    protected volatile int _revision = 0;
+    private volatile int _revision = 0;
     
     /**
      * The revision that finished loading all pending files.
@@ -179,7 +198,7 @@ public class FileManagerImpl implements FileManager, Service {
     /**
      * Whether the FileManager has been shutdown.
      */
-    protected volatile boolean shutdown;
+    private volatile boolean shutdown;
     
     private Saver saver;
     
@@ -188,7 +207,7 @@ public class FileManagerImpl implements FileManager, Service {
      */
     private final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
         public boolean accept(File f) {
-            return isFileShareable(f);
+            return getSharedFileList().isFileAddable(f);
         }
     };    
     
@@ -211,8 +230,6 @@ public class FileManagerImpl implements FileManager, Service {
     private final Provider<AltLocManager> altLocManager;
     private final Provider<ActivityCallback> activityCallback;
     private final ScheduledExecutorService backgroundExecutor;
-    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
-    private final MetaDataReader metaDataReader;
     
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
@@ -225,8 +242,6 @@ public class FileManagerImpl implements FileManager, Service {
             Provider<AltLocManager> altLocManager,
             Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            LimeXMLDocumentFactory limeXMLDocumentFactory,
-            MetaDataReader metaDataReader,
             CopyOnWriteArrayList<FileEventListener> eventListeners) {
         this.simppManager = simppManager;
         this.urnCache = urnCache;
@@ -235,9 +250,14 @@ public class FileManagerImpl implements FileManager, Service {
         this.altLocManager = altLocManager;
         this.activityCallback = activityCallback;
         this.backgroundExecutor = backgroundExecutor;
-        this.limeXMLDocumentFactory = limeXMLDocumentFactory;
-        this.metaDataReader = metaDataReader;
         this.eventListeners = eventListeners;
+        
+        sharedFileList = new SynchronizedFileList(new SharedFileListImpl("Shared", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
+        storeFileList = new SynchronizedFileList(new StoreFileListImpl("Store", this, _data.SPECIAL_STORE_FILES));
+        buddyFileList = new SynchronizedFileList(new BuddyFileListImpl("All Buddys", this, _data.getBuddyList("All")));
+        incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl("Incomplete", this, new HashSet<File>()));
+        for(String name : SharingSettings.SHARED_BUDDY_LIST_NAMES.getValue())
+            buddyFileLists.put(name, new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
         
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -253,16 +273,22 @@ public class FileManagerImpl implements FileManager, Service {
      * all invariants.  This is necessary, for example, when the shared
      * files are reloaded.
      */
-    private void resetVariables()  {
-        sharedFileList.resetVariables();
-        storeFileList.resetVariables();
+    protected void resetVariables()  {
+        files = new ArrayList<FileDesc>();
+        urnMap = new HashMap<URN, IntSet>();
+        fileToFileDescMap = new HashMap<File, FileDesc>();
+        
+        getSharedFileList().clear();
+        getStoreFileList().clear();
+        getIncompleteFileList().clear();
+        for(String key : buddyFileLists.keySet() )
+            buddyFileLists.get(key).clear();
+
+        numFiles = 0;
         _numPendingFiles = 0;
         _extensions = new HashSet<String>();
 		_completelySharedDirectories = new HashSet<File>();
-        // the transient files and the special files.
-        _individualSharedFiles = Collections.synchronizedCollection(
-        		new MultiCollection<File>(_transientSharedFiles, _data.SPECIAL_FILES_TO_SHARE));
-        _storeDirectories = new HashSet<File>();
+        storeDirectories = new HashSet<File>();
     }
 
     public String getServiceName() {
@@ -299,6 +325,10 @@ public class FileManagerImpl implements FileManager, Service {
         _data.save();
     }
     
+    /////////////////////////////////////////////////////////////////////////
+    //  FileList Accessors
+    ////////////////////////////////////////////////////////////////////////
+    
     public FileList getSharedFileList() {
         return sharedFileList;
     }
@@ -307,46 +337,109 @@ public class FileManagerImpl implements FileManager, Service {
         return storeFileList;
     }
 	
+    public FileList getBuddyFileList() {
+        return buddyFileList;
+    }
+    
+    public FileList getBuddyFileList(String name) {
+        return buddyFileLists.get(name);
+    }
+    
+    public void addBuddyFileList(String name) {
+        if(!containsBuddyFileList(name)) {
+            SharingSettings.addBuddyListName(name);
+            _data.addBuddyList(name);
+            buddyFileLists.put(name, new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
+        }
+    }
+    
+    public boolean containsBuddyFileList(String name) {
+        return buddyFileLists.containsKey(name);
+    }
+    
+    public void removeBuddyFileList(String name) {
+        // if it was a valid key, remove saved references to it
+        FileList removeFileList = buddyFileLists.get(name);
+        if(removeFileList != null) {
+            removeFileList.cleanupListeners();
+            buddyFileLists.remove(name);
+            _data.removeBuddyList(name);
+            SharingSettings.removeBuddyListName(name);
+        }
+    }
+
+    public FileList getIncompleteFileList() {
+        return incompleteFileList;
+    }
+    
+    public Map<String, FileList> getAllBuddyLists(){
+        Map<String, FileList> map = new HashMap<String, FileList>();
+        for(String name : buddyFileLists.keySet())
+            map.put(name, buddyFileLists.get(name));
+        return map;
+    }
+    
     ///////////////////////////////////////////////////////////////////////////
-    //  Accessors
+    //  FileDesc Accessors
     ///////////////////////////////////////////////////////////////////////////
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getNumPendingFiles()
      */
-    public int getNumPendingFiles() {
+    public synchronized int getNumPendingFiles() {
         return _numPendingFiles;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getFileDescForFile(java.io.File)
      */
-    public synchronized FileDesc getFileDescForFile(File f) {
+    public synchronized FileDesc getFileDesc(File f) {
         try {
             f = FileUtils.getCanonicalFile(f);
         } catch(IOException ioe) {
             return null;
         }
-        if(sharedFileList.contains(f))
-            return sharedFileList.getFileDesc(f);
-        else
-            return storeFileList.getFileDesc(f);
+        return fileToFileDescMap.get(f);
     }
 
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getFileDescForUrn(com.limegroup.gnutella.URN)
      */
-	public synchronized FileDesc getFileDescForUrn(final URN urn) {
+    public synchronized FileDesc getFileDesc(final URN urn) {
         if (!urn.isSHA1())
             throw new IllegalArgumentException();
         
-        if( sharedFileList.contains(urn)){
-            return sharedFileList.getFileDesc(urn);
-        } else if ( storeFileList.contains(urn)) { 
-            return storeFileList.getFileDesc(urn);
-        } else {
-            return null;
+        IntSet indices = urnMap.get(urn);
+        if(indices == null) return null;
+        IntSet.IntSetIterator iter = indices.iterator();
+      
+        //Pick the first non-null non-Incomplete FileDesc.
+        FileDesc ret = null;
+        while ( iter.hasNext() 
+                   && ( ret == null || ret instanceof IncompleteFileDesc) ) {
+            int index = iter.next();
+            ret = files.get(index);
         }
+        return ret;
+    }
+    
+    /**
+     * Returns the indices into this list for a given URN
+     */
+    public synchronized IntSet getIndices(URN urn) {
+        return urnMap.get(urn);
+    }
+    
+    public synchronized FileDesc get(int index) {
+        if(index < 0 || index >= files.size())
+            return null;
+        return files.get(index);
+        }
+    
+    public synchronized boolean isValidIndex(int index) {
+        if( index >= 0 && index < files.size() )
+            return true;
+        return false;
 	}
 
     ///////////////////////////////////////////////////////////////////////////
@@ -377,8 +470,10 @@ public class FileManagerImpl implements FileManager, Service {
         synchronized(_data.DIRECTORIES_NOT_TO_SHARE) {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
             _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListSet));
-            _storeDirectories.clear();
-            _storeDirectories.add(SharingSettings.getSaveLWSDirectory());
+        }
+        synchronized(storeDirectories) {
+            storeDirectories.clear();
+            storeDirectories.add(SharingSettings.getSaveLWSDirectory());
         }
 	    loadSettings();
     }
@@ -403,7 +498,7 @@ public class FileManagerImpl implements FileManager, Service {
     /**
      * Kicks off necessary stuff for loading being done.
      */
-    protected void loadFinished(int revision) {
+    private void loadFinished(int revision) {
         // save ourselves to disk every minute
         synchronized(this) {
             if (saver == null) {
@@ -444,11 +539,30 @@ public class FileManagerImpl implements FileManager, Service {
         if(LOG.isDebugEnabled())
             LOG.debug("Loading Library Revision: " + revision);
         
-        final File[] directories;
         synchronized (this) {
-            // Reset the file list info
             resetVariables();
 
+            loadExtensions();
+        }
+        loadDirectories(revision);
+
+        if(LOG.isDebugEnabled())
+            LOG.debug("Finished queueing files for revision: " + revision);
+            
+        synchronized (this) {
+            _updatingFinished = revision;
+            if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
+                _pendingFinished = revision;
+        }
+        tryToFinish();
+    }
+    
+    /**
+     * Loads the extensions that can be shared and cannot be shared.
+     * NOTE: this does not limit files that can be loaded into the library, just files
+     * that can and cannot be added to the shared list
+     */
+    private void loadExtensions() {
             // Load the extensions. 
             String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase(Locale.US));
                         
@@ -478,16 +592,22 @@ public class FileManagerImpl implements FileManager, Service {
                     _extensions.remove(ext);
                 }
             }
+    }
 
+    private void loadDirectories(int revision) {
+        //clear this, list of directories retrieved
+        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOAD_DIRECTORIES));
 
-            //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
-            //C:\dir\subdir.  Although this isn't needed for correctness, it may
-            //help the GUI show "subdir" as a subdirectory of "dir".  One way of
-            //doing this is to do a full topological sort, but that's a lot of 
-            //work. So we just approximate this by sorting by filename length, 
-            //from smallest to largest.  Unless directories are specified as
-            //"C:\dir\..\dir\..\dir", this will do the right thing.
+        _isUpdating = true;
+        // Update the FORCED_SHARE directory.
+        updateSharedDirectories(SharingUtils.PROGRAM_SHARE, null, revision);
+        updateSharedDirectories(SharingUtils.PREFERENCE_SHARE, null, revision);
             
+        // Shared folders are still treated as they were previously. In clean 5.0 installs
+        // there should be no directories to add here. In upgrades from 4.x installs, 
+        // there should be no noticable difference to files that are shared. 
+        final File[] directories;
+        synchronized (this) {
             directories = SharingSettings.DIRECTORIES_TO_SHARE.getValueAsArray();
             Arrays.sort(directories, new Comparator<File>() {
                 public int compare(File a, File b) {
@@ -495,86 +615,45 @@ public class FileManagerImpl implements FileManager, Service {
                 }
             });
         }
-
-        //clear this, list of directories retrieved
-        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOAD_DIRECTORIES));
-        
-        // Update the FORCED_SHARE directory.
-        updateSharedDirectories(SharingUtils.PROGRAM_SHARE, null, revision);
-        updateSharedDirectories(SharingUtils.PREFERENCE_SHARE, null, revision);
-        
-        //Load the shared directories and add their files.
-        _isUpdating = true;
         for(int i = 0; i < directories.length && _revision == revision; i++)
             updateSharedDirectories(directories[i], null, revision);
             
 
-        // Add specially shared files
-        Collection<File> specialFiles = _individualSharedFiles;
-        ArrayList<File> list;
-        synchronized(specialFiles) {
-        	// iterate over a copied list, since addFileIfShared might call
-        	// _data.SPECIAL_FILES_TO_SHARE.remove() which can cause a concurrent
-        	// modification exception
-        	list = new ArrayList<File>(specialFiles);
-        }
-        for(File file : list) {
-            if(_revision != revision)
-                break;
-            addFile(file, LimeXMLDocument.EMPTY_LIST, _revision);
-        }
-        
         // Update the store directory and add only files from the LWS
         File storeDir = SharingSettings.getSaveLWSDirectory();
-        updateStoreDirectories(storeDir.getAbsoluteFile(), null, revision);
+        updateDirectories(storeDir.getAbsoluteFile(), null, revision, storeDirectories);
         
-        // Optain the list of lws files found in shared directories
-        Collection<File> specialStoreFiles = _data.SPECIAL_STORE_FILES;
-        ArrayList<File> storeList;
-        synchronized (specialStoreFiles) {
-            storeList = new ArrayList<File>(specialStoreFiles);
-        }
+        // Load all other directories that aren't necesarily shared or store folders
+        File[] directory = SharingSettings.DIRECTORIES_TO_DISPLAY.getValueAsArray();
+        for(int i = 0; i < directory.length && _revision == revision; i++)
+            updateDirectories(directory[i], null, revision, displayDirectories);
         
-        // list lws files found in shared directories in the special
-        //	store files node
-        for(File file: storeList) {
-            if(_revision != revision)
-                break;
-            addFile(file, LimeXMLDocument.EMPTY_LIST, _revision);
-        }
-        
+        // Add specially shared files
+        loadIndividualFiles(sharedFileList, revision);
+            
+        // Add individual store files
+        loadIndividualFiles(storeFileList, revision);
+    
+        //Buddy files
+        for(String key : buddyFileLists.keySet())
+            loadIndividualFiles(buddyFileLists.get(key), revision);
+    
         _isUpdating = false;
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("Finished queueing shared files for revision: " + revision);
-            
-        synchronized (this) {
-            _updatingFinished = revision;
-            if(_numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
-                _pendingFinished = revision;
-        }
-        tryToFinish();
-    }
-    
-    
-    private void updateSharedDirectories(File directory, File parent, int revision) {
-        updateSharedDirectories(directory, directory, parent, revision, 1);
     }
     
     /**
-     * Recursively adds this directory and all subdirectories to the shared
-     * directories as well as queueing their files for sharing.  Does nothing
-     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
-     * been added.  This method is thread-safe.  It acquires locks on a
-     * per-directory basis.  If the current revision ever changes from the
-     * expected revision, this returns immediately.
-     * 
-     * @requires directory is part of DIRECTORIES_TO_SHARE or one of its
-     *           children, and parent is directory's shared parent or null if
-     *           directory's parent is not shared.
-     * @modifies this
+     * Takes a collection of files and adds them to the supplied FileList
      */
-    private void updateSharedDirectories(File rootShare, File directory, File parent, int revision, int depth) {     
+    private void loadIndividualFiles(FileListPackage fileList, int revision) {
+        for(File file: fileList.getIndividualFiles()) {
+        if(_revision != revision)
+                break;
+            fileList.addPendingFile(file);
+            addFile(file);
+        }
+    }
+
+    private void updateDirectories(File directory, File parent, int revision, Set<File> savedDirectories) {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
@@ -585,121 +664,25 @@ public class FileManagerImpl implements FileManager, Service {
         if(!directory.exists())
             return;
         
-        // STEP 0:
-		// Do not share unsharable directories.
-        if(!isFolderShareable(directory, true))
-            return;
-        
-        // Do not share sensitive directories
-        if (SharingUtils.isSensitiveDirectory(directory)) {
-            //  go through directories that explicitly should not be shared
-            if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory)) {
-                return;
-            }
-            
-            // if we haven't already validated the sensitive directory, ask about it.
-            if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
-                //  ask the user whether the sensitive directory should be shared
-                // THIS CALL CAN BLOCK.
-                if (!activityCallback.get().warnAboutSharingSensitiveDirectory(directory))
-                    return;
-            }
-        }
-		
-        // Exit quickly (without doing the dir lookup) if revisions changed.
-        if(_revision != revision)
-            return;
-
-        // STEP 1:
-        // Add directory
-        boolean isForcedShare = SharingUtils.isForcedShareDirectory(directory);
-        
-        synchronized (this) {
+        synchronized (savedDirectories) {
             // if it was already added, ignore.
-            if (_completelySharedDirectories.contains(directory))
-                return;
-
-            if (!_storeDirectories.contains(directory))
-				_completelySharedDirectories.add(directory);
-            if (!isForcedShare) {
-                dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, rootShare, depth, directory, parent));
-            }
-        }
-        
-        // STEP 2:
-        // Scan subdirectory for the amount of shared files.
-        File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
-        if (file_list == null)
-            return;
-        for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFile(file_list[i], LimeXMLDocument.EMPTY_LIST, _revision);
-            
-        // Exit quickly (without doing the dir lookup) if revisions changed.
-        if(_revision != revision)
-            return;
-
-        // STEP 3:
-        // Recursively add subdirectories.
-        // This has the effect of ensuring that the number of pending files
-        // is closer to correct number.
-        // TODO: when we add non-recursive support, add it here.
-        if (isForcedShare) 
-            return;
-        
-        // Do not share subdirectories of the forcibly shared dir.
-        File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
-        if(dir_list != null) {
-            for(int i = 0; i < dir_list.length && _revision == revision; i++)
-                updateSharedDirectories(rootShare, dir_list[i], directory, revision, depth+1);
-        }
-    }
-
-    /**
-     * Recursively add files from the LWS download directory.  Does nothing
-     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
-     * been added.  This method is thread-safe.  It acquires locks on a
-     * per-directory basis.  If the current revision ever changes from the
-     * expected revision, this returns immediately.
-     * 
-     * @requires directory is part of _storeDirectories or one of its
-     *           children, and parent is directory's store directory parent 
-     * @modifies this
-     */
-    private void updateStoreDirectories(File directory, File parent, int revision) {
-        //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
-        //are the same on Windows but different on Unix.
-        try {
-            directory = FileUtils.getCanonicalFile(directory);
-        } catch (IOException e) {
-            return;
-        }
-        
-        if(!directory.exists())
-            return;
-        
-        
-        // Exit quickly (without doing the dir lookup) if revisions changed.
-        if(_revision != revision)
-            return;
-
-        
-        synchronized (this) {
-            // if it was already added, ignore.
-            if (_storeDirectories.contains(directory))
+            if (savedDirectories.contains(directory))
                 return;
             
             //otherwise add this directory to list to avoid rescanning it
-            _storeDirectories.add(directory);
-            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_STORE_FOLDER, directory, parent));
+            savedDirectories.add(directory);
+            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, directory, parent));
         }
         
         // STEP 2:
         // Scan subdirectory for the amount of shared files.
-        File[] file_list = directory.listFiles();
-        if (file_list == null)
+        File[] files = directory.listFiles();
+        if (files == null)
             return;
-        for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFile(file_list[i], LimeXMLDocument.EMPTY_LIST, _revision);
+        
+        for(int i = 0; i < files.length && _revision == revision; i++) {
+            addFile(files[i]);
+        }
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -709,122 +692,23 @@ public class FileManagerImpl implements FileManager, Service {
         // Recursively add subdirectories.
         // This has the effect of ensuring that the number of pending files
         // is closer to correct number.     
-        File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
-        if(dir_list != null) {
-            for(int i = 0; i < dir_list.length && _revision == revision; i++)
-                updateStoreDirectories(dir_list[i], directory, revision);
+        File[] directories = directory.listFiles(DIRECTORY_FILTER);
+        if(directories != null) {
+            for(int i = 0; i < directories.length && _revision == revision; i++)
+                updateDirectories(directories[i], directory, revision, savedDirectories);
         }
-            
     }
 
 	///////////////////////////////////////////////////////////////////////////
-	//  Adding and removing shared files and directories
+    //  Adding and removing directories
 	///////////////////////////////////////////////////////////////////////////
 
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#removeFolderIfShared(java.io.File)
+    /**
+     * Returns set of canonicalized files or the same set if there
+     * was an IOException for one of the files while canconicalizing. 
      */
-	public void removeFolderIfShared(File folder) {
-        _isUpdating = true;
-        removeFolderIfShared(folder, null);
-        _isUpdating = false;
-
-	}
-	
-	/**
-	 * Removes a given directory from being completed shared.
-	 * If 'parent' is null, this will remove it from the root-level of
-	 * shared folders if it existed there.  (If it is non-null & it was
-	 * a root-level shared folder, the folder remains shared.)
-	 *
-	 * The first time this is called, parent must be non-null in order to ensure
-	 * it works correctly.  Otherwise, we'll end up adding tons of stuff
-	 * to the DIRECTORIES_NOT_TO_SHARE.
-	 */
-	private void removeFolderIfShared(File folder, File parent) {
-		if (!folder.isDirectory() && folder.exists())
-			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
-		
-	    try {
-	        folder = FileUtils.getCanonicalFile(folder);
-	    } catch(IOException ignored) {}
-
-        // grab the value quickly.  release the lock
-        // so that we don't hold it during a long recursive function.
-        // it's no big deal if it changes, we'll just do some extra work for a short
-        // bit of time.
-        boolean contained;
-        synchronized(this) {
-            contained = _completelySharedDirectories.contains(folder);
-        }
-        
-        if(contained) {
-            if(parent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
-                // we don't wanna remove it, since it's a root-share, nor do we want
-                // to remove any of its children, so we return immediately.
-                return;
-            } else if(parent == null) {
-                // Add the directory in the exclude list if it wasn't in the DIRECTORIES_NOT_TO_SHARE,
-                // or if it was *and* a parent folder of it is fully shared.
-                boolean explicitlyShared = SharingSettings.DIRECTORIES_TO_SHARE.remove(folder);
-                if(!explicitlyShared || isFolderShared(folder.getParentFile()))
-                    _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
-                
-            }
-            
-            // note that if(parent != null && not a root share)
-            // we DO NOT ADD to DIRECTORIES_NOT_TO_SHARE.
-            // this is by design, because the parent has already been removed
-            // from sharing, which inherently will remove the child directories.
-            // there's no need to clutter up DIRECTORIES_NOT_TO_SHARE with useless
-            // entries.
-           
-            synchronized(this) {
-                _completelySharedDirectories.remove(folder);
-            }
-            
-            File[] subs = folder.listFiles();
-            if(subs != null) {
-                for(int i = 0; i < subs.length; i++) {
-                    File f = subs[i];
-                    if(f.isDirectory())
-                        removeFolderIfShared(f, folder);
-                    else if(f.isFile() && !_individualSharedFiles.contains(f)) {
-                        if(removeFileIfSharedOrStore(f) == null)
-                            urnCache.get().clearPendingHashesFor(f, this);
-                        if(storeFileList.contains(f)) 
-                            _data.SPECIAL_STORE_FILES.remove(f);	
-                    }
-                }
-            }
-            
-            // send the event last.  this is a hack so that the GUI can properly
-            // receive events with the children first, moving any leftover children up to
-            // potential parent directories.
-            dispatchFileEvent(
-                new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
-        }
-    }
-    
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#addSharedFolders(java.util.Set, java.util.Set)
-     */
-	public void addSharedFolders(Set<File> folders, Set<File> blackListedSet) {
-		if (folders.isEmpty()) {
-			throw new IllegalArgumentException("Only blacklisting without sharing, not allowed");
-		}
-	    _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListedSet));
-	    for (File folder : folders) {
-	    	addSharedFolder(folder);
-	    }
-	}
-	
-	/**
-	 * Returns set of canonicalized files or the same set if there
-	 * was an IOException for one of the files while canconicalizing. 
-	 */
-	private static Set<File> canonicalize(Set<File> files) {
-	    // canonicalize blacklist
+    private static Set<File> canonicalize(Set<File> files) {
+        // canonicalize blacklist
         Set<File> canonical = new HashSet<File>(files.size());
         try {
             for (File excluded : files) {
@@ -835,88 +719,178 @@ public class FileManagerImpl implements FileManager, Service {
             canonical = files;
         }
         return canonical;
-	}
-	
+    }
+    
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getFolderNotToShare()
      */
-	public Set<File> getFolderNotToShare() {
-	    synchronized (_data.DIRECTORIES_NOT_TO_SHARE) {
-	        return new HashSet<File>(_data.DIRECTORIES_NOT_TO_SHARE);
-	    }
-	}
-	
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#addSharedFolder(java.io.File)
-     */
-    public boolean addSharedFolder(File folder) {
-		if (!folder.isDirectory())
-			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
-	
-        try {
-            folder = FileUtils.getCanonicalFile(folder);
-        } catch(IOException ignored) {}
-        
-        if(!isFolderShareable(folder, false))
-            return false;
-        
-        _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
-		if (!isFolderShared(folder.getParentFile()))
-			SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
-        _isUpdating = true;
-        updateSharedDirectories(folder, null, _revision);
-        _isUpdating = false;
-        
-        return true;
-    }
-    
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#addFileAlways(java.io.File)
-     */
-    public void addFileAlways(File file) {
-        addFileAlways(file, LimeXMLDocument.EMPTY_LIST);
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#addFileAlways(java.io.File, java.util.List, com.limegroup.gnutella.FileEventListener)
-     */
-     public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
-        _data.FILES_NOT_TO_SHARE.remove(file);
-        if (!isFileShareable(file))
-            _data.SPECIAL_FILES_TO_SHARE.add(file);
-            
-        addFile(file,list,_revision);
+    public Set<File> getFolderNotToShare() {
+        synchronized (_data.DIRECTORIES_NOT_TO_SHARE) {
+            return new HashSet<File>(_data.DIRECTORIES_NOT_TO_SHARE);
+        }
     }
 
-     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#addFileForSession(java.io.File, com.limegroup.gnutella.FileEventListener)
-     */
-     public void addFileForSession(File file) {
-         _data.FILES_NOT_TO_SHARE.remove(file);
-         if (!isFileShareable(file))
-             _transientSharedFiles.add(file);
-         addFile(file, LimeXMLDocument.EMPTY_LIST, _revision);
+    public void addFolders(Set<File> folders) {
+        for (File folder : folders) {
+            addFolder(folder);
+        }
+	}
+	
+    public void addFolder(File folder) {
+        if (!folder.isDirectory())
+			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
+		
+	    try {
+	        folder = FileUtils.getCanonicalFile(folder);
+	    } catch(IOException ignored) {}
+
+        synchronized (displayDirectories) {
+            // if folder already exists, just return
+            if(displayDirectories.contains(folder))
+                return;
+        }
+        
+        _isUpdating = true;
+        // add folder, then load files from within the folder
+        synchronized (SharingSettings.DIRECTORIES_TO_DISPLAY) {
+            SharingSettings.DIRECTORIES_TO_DISPLAY.add(folder);
+        }
+        updateDirectories(folder, null, _revision, displayDirectories);
+        _isUpdating = false;
+    }
+    
+    public void removeFolder(File folder) {
+        _isUpdating = true;
+        boolean contained;
+
+        // if this was in an old shared folder, remove it the old way
+        synchronized (_completelySharedDirectories) {
+            contained = _completelySharedDirectories.contains(folder);
+        }
+        if(contained) {
+            removeSharedFolder(folder);
+        }
+                
+        // if this was in a new folder, remove it the proper way
+        synchronized (displayDirectories) {
+           contained = displayDirectories.contains(folder);
+            }
+        if( contained )
+            removeFolder(folder, null);
+            
+        _isUpdating = false;
+           
+    }
+    
+    private void removeFolder(File folder, File parent) {
+        if(!folder.isDirectory() && folder.exists()) 
+            throw new IllegalArgumentException("Expected a directory, but given: " + folder);
+          
+        try {
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch (IOException ignored) {}
+
+        synchronized (displayDirectories) {
+            // if the folder isn't loaded already, just return
+            if(!displayDirectories.remove(folder))
+                return;
+        }
+
+        // remove folder from disk
+        synchronized (SharingSettings.DIRECTORIES_TO_DISPLAY) {
+            SharingSettings.DIRECTORIES_TO_DISPLAY.remove(folder);
+            }
+            
+            File[] subs = folder.listFiles();
+            if(subs != null) {
+            for(File f : subs) {
+                    if(f.isDirectory())
+                    removeFolder(f, folder);
+                else if(f.isFile()){
+                    if(removeFile(f) == null)
+                            urnCache.get().clearPendingHashesFor(f, this);
+                    }
+                }
+            }
+        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
+    }
+    
+    //////////////////////////////////////////////////////////////////////////////
+    //  File Accessors
+    //////////////////////////////////////////////////////////////////////////////
+	
+    public void addBuddyFile(String name, File file) {
+        FileListPackage fileList = buddyFileLists.get(name);
+        
+        if(fileList != null) {
+            fileList.addPendingFile(file);
+            
+            FileDesc fileDesc = getFileDesc(file);
+            if(fileDesc != null) {
+                fileList.add(fileDesc);
+                dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+            } else {
+                addFile(file);
+            }
+        }
+	}
+	
+    public void addSharedFile(File file) {
+        addSharedFile(file, LimeXMLDocument.EMPTY_LIST);
+	}
+	
+    public void addSharedFile(File file, List<? extends LimeXMLDocument> list) {
+        FileDesc fileDesc = getFileDesc(file);
+        sharedFileList.addPendingFile(file);
+	
+        if(fileDesc != null) {
+            sharedFileList.add(fileDesc);
+            dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+        } else {
+            addFile(file, list);
+        }
+    }
+        
+    public void addSharedFileAlways(File file) {
+        addSharedFileAlways(file, LimeXMLDocument.EMPTY_LIST);
+    }
+        
+    public void addSharedFileAlways(File file, List<? extends LimeXMLDocument> list) {
+        FileDesc fileDesc = getFileDesc(file);
+        sharedFileList.addPendingFileAlways(file);
+        
+        if(fileDesc != null) {
+            sharedFileList.add(fileDesc);
+            dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+        } else {
+            addFile(file, list);
+    }
+    }
+    
+    public void addSharedFileForFession(File file) {
+        FileDesc fileDesc = getFileDesc(file);
+        sharedFileList.addPendingFileForSession(file);
+            
+        if(fileDesc != null) {
+            sharedFileList.add(fileDesc);
+            dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+        } else {
+            addFile(file);
+    }
      }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File)
      */
-    public void addFileIfShared(File file) {
-        addFile(file, LimeXMLDocument.EMPTY_LIST, _revision);
+    public void addFile(File file) {
+        addFile(file, LimeXMLDocument.EMPTY_LIST);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File, java.util.List)
      */
-    public void addFileIfShared(File file, List<? extends LimeXMLDocument> list) {
-        addFile(file, list, _revision);
-    }
-    
-    /**
-     * Adds a shared file
-     */
-    private void addFile(File file, List<? extends LimeXMLDocument> list, int revision) {
-        addFileIfSharedOrStore(file, list, revision, Type.ADD_FILE, Type.ADD_FAILED_FILE, null);
+    public void addFile(File file, List<? extends LimeXMLDocument> list) {
+        addFile(file, list, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE, null);
     }
     
     /**
@@ -930,8 +904,8 @@ public class FileManagerImpl implements FileManager, Service {
      * @param successType - event type to return if add succeeds
      * @param failureType - event type to return if add fails
      */
-    private void addFileIfSharedOrStore(File file, List<? extends LimeXMLDocument> metadata, int revision, 
-            Type successType, Type failureType, FileDesc oldFileDesc) {
+    private void addFile(File file, List<? extends LimeXMLDocument> metadata, int revision, Type successType, 
+            Type failureType, FileDesc oldFileDesc) {
         if(LOG.isDebugEnabled())
             LOG.debug("Attempting to load store or shared file: " + file);
 
@@ -943,20 +917,17 @@ public class FileManagerImpl implements FileManager, Service {
             return;
         }
         
-            // if file is not shareable, also remove it from special files
-            // to share since in that case it's not physically shareable then
-        if (!isFileShareable(file) && !isFileLocatedStoreDirectory(file)) { 
-                _individualSharedFiles.remove(file);
+        // if the file is already added
+        synchronized (this) {
+            if(fileToFileDescMap.containsKey(file)) {
+                dispatchFileEvent( new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, getFileDesc(file)));
+            return;
+        }
+        }
+        
+        //make sure a FileDesc can be created from this file
+        if (!SharingUtils.isFilePhysicallyShareable(file)) {
             resolveAndDispatchFileEvent(failureType, oldFileDesc, file);
-            return;
-        }
-        
-        if(storeFileList.contains(file)) {
-            return;
-        }
-        
-        if(sharedFileList.contains(file)) {
-            dispatchFileEvent( new FileManagerEvent(this, Type.ALREADY_SHARED_FILE, file));
             return;
         }
 
@@ -993,8 +964,7 @@ public class FileManagerImpl implements FileManager, Service {
                     // Only load the file if we were able to calculate URNs 
                     // assume the fd is being shared
                     if(!urns.isEmpty()) {
-                        int fileIndex = sharedFileList.getListLength();
-                        fd = createFileDesc(file, urns, fileIndex);
+                        fd = createFileDesc(file, urns, files.size());
                     }
                 }
 		        
@@ -1004,20 +974,22 @@ public class FileManagerImpl implements FileManager, Service {
                     return;
 		        }
                     
-                // try loading the fd so we can check the LimeXML info
+                // try loading the XML for this fileDesc
                 dispatchFileEvent(new FileManagerEvent(FileManagerImpl.this, Type.LOAD_FILE, metadata, fd));
 
-                // check LimeXML to determine if is a store file or the sha1 is mapped to a store file 
-                //  (the sha1 check is needed if duplicate store files are loaded since the second file 
-                //  will not have a unique LimeXMLDoc associated with it)
-                if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn())){
-                    addStoreFile(fd, file, urns, successType, oldFileDesc); 
-                } else if (isFileLocatedStoreDirectory(file) && !isFileInCompletelySharedDirectory(file)
-                        && !isFileShareable(file)) {
-                    resolveAndDispatchFileEvent(failureType, oldFileDesc, file);
-                }else {
-                    addSharedFile(file, fd, urns, successType, oldFileDesc); 
-                }
+                numFiles += 1;
+                files.add(fd);
+                fileToFileDescMap.put(file, fd);
+
+                updateUrnIndex(fd);
+
+                //If the event is a addStoreFile event, just pass along the newly added FileDesc
+                //else it was an UpdateEvent so pass along the oldFileDesc and newly added one
+                if(successType == Type.ADD_FILE)
+                    dispatchFileEvent(new FileManagerEvent(FileManagerImpl.this, successType, fd));
+                else if( successType == Type.CHANGE_FILE ||
+                         successType == Type.RENAME_FILE)
+                    dispatchFileEvent(new FileManagerEvent(FileManagerImpl.this,successType, oldFileDesc, fd));
                 
                 boolean finished = false;
                 synchronized (this) {
@@ -1029,6 +1001,7 @@ public class FileManagerImpl implements FileManager, Service {
                 
                 if (finished) {
                     tryToFinish();
+                    _data.save();
                 }
             }
             
@@ -1038,71 +1011,6 @@ public class FileManagerImpl implements FileManager, Service {
         };
     }
   
-    /**
-     * Creates a file descriptor for the given file and places the fd into the set
-     * of LWS file descriptors
-     */
-    private synchronized void addStoreFile(FileDesc fd, File file, Set<? extends URN> urns, Type successType, FileDesc oldFileDesc) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Adding Store file: " + file);
-
-        if( fd.getLimeXMLDocuments().size() == 0 || !isStoreXML(fd.getLimeXMLDocuments().get(0))) {
-            return;
-        }
-        
-        // if this file isn't in the store folder, add to individual store files 
-        if(!FileUtils.isAncestor(SharingSettings.getSaveLWSDirectory(), file)) { 
-            _data.SPECIAL_STORE_FILES.add(file);
-        } 
-
-        //store files are not part of the _files list so recreate fd with an index into store file list
-        FileDesc fileDesc = createFileDesc(file, urns, storeFileList.getListLength());
-        //add the xml doc to the new FileDesc
-        if( fd.getXMLDocument() != null )
-            fileDesc.addLimeXMLDocument(fd.getXMLDocument());
-        
-        storeFileList.addFile(file, fileDesc);
-
-        //If the event is a addStoreFile event, just pass along the newly added FileDesc
-        //else it was an UpdateEvent so pass along the oldFileDesc and newly added one
-        if(successType == Type.ADD_FILE)
-            dispatchFileEvent(new FileManagerEvent(this, successType, fileDesc));
-        else if( successType == Type.CHANGE_FILE ||
-                 successType == Type.RENAME_FILE)
-            dispatchFileEvent(new FileManagerEvent(this,successType, oldFileDesc, fileDesc));
-//        else
-            //TODO: handle exception here
-    }
-    
-    /**
-     * Handles the actual sharing of a file by placing the file descriptor into the set of shared files
-     */
-    private synchronized void addSharedFile(File file, FileDesc fileDesc, Set<? extends URN> urns, Type successType, FileDesc oldFileDesc) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Adding Shared file: " + file);
-               
-        // since we created the FD to test the XML for being an instance of LWS, check to make sure
-        //  the FD is still valid before continuing
-        if( fileDesc.getIndex() != sharedFileList.getListLength()){
-            LimeXMLDocument doc = fileDesc.getXMLDocument();
-            fileDesc = createFileDesc(file, urns, sharedFileList.getListLength());
-            if( doc != null )
-                fileDesc.addLimeXMLDocument(doc);
-        }
-
-        sharedFileList.addFile(file, fileDesc);
-
-        //If the event is a addFile event, just pass along the newly added FileDesc
-        //else it was an UpdateEvent so pass along the oldFileDesc and newly added one
-        if(successType == Type.ADD_FILE)
-            dispatchFileEvent(new FileManagerEvent(this, successType, fileDesc));
-        else if( successType == Type.CHANGE_FILE ||
-                 successType == Type.RENAME_FILE)
-            dispatchFileEvent(new FileManagerEvent(this,successType, oldFileDesc, fileDesc));
-//        else
-            //TODO: handle exception here
-    }
-    
     /**
      * Creates a file descriptor for a given file and a set of urns
      * @param file - file to create descriptor for
@@ -1121,39 +1029,9 @@ public class FileManagerImpl implements FileManager, Service {
     }
 
 	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#stopSharingFile(java.io.File)
-     */
-	public synchronized FileDesc stopSharingFile(File file) {
-		try {
-			file = FileUtils.getCanonicalFile(file);
-		} catch (IOException e) {
-			return null;
-		}
-		
-		// if its a store file it can't be shared thus it can't be unshared,
-		//    just return null
-		if( storeFileList.contains(file))
-		    return null;
-		
-		// remove file already here to heed against race conditions
-		// wrt to filemanager events being handled on other threads
-		boolean removed = _individualSharedFiles.remove(file); 
-		FileDesc fd = removeFileIfSharedOrStore(file);
-		if (fd == null) {
-		    urnCache.get().clearPendingHashesFor(file, this);
-        } else {
-			file = fd.getFile();
-			// if file was not specially shared, add it to files_not_to_share
-			if (!removed)
-				_data.FILES_NOT_TO_SHARE.add(file);
-		}
-        return fd;
-	}
-	
-	/* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#removeFileIfShared(java.io.File)
      */
-    public synchronized FileDesc removeFileIfSharedOrStore(File f) {
+    public synchronized FileDesc removeFile(File f) {
         if(LOG.isDebugEnabled())
             LOG.debug("Removing file " + f);                
                 
@@ -1163,56 +1041,32 @@ public class FileManagerImpl implements FileManager, Service {
             return null;
         }   
         
-        FileDesc fd = null;
-        if( sharedFileList.contains(f))
-            fd = removeSharedFileDesc(f);
-        else if( storeFileList.contains(f))
-            fd = removeStoreFileDesc(f);
-        else
-            return null;
-        
-        // if the FileDesc is not null and the file is not forceably shared
-        if( fd != null && !SharingUtils.isForcedShareDirectory(f.getParentFile()))
-            dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FILE, fd));
+        FileDesc fd = getFileDesc(f);
+        if(fd == null)
         return fd;
-    }
     
-    /**
-     * Removes the shared FileDesc reference
-     */
-    protected synchronized FileDesc removeSharedFileDesc(File f) {           
-        FileDesc fd = sharedFileList.getFileDesc(f);
+        removeFileDesc(fd);
+        
+        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FILE, fd));
 
-        // If it's an incomplete file, the only reference we 
-        // have is the URN, so remove that and be done.
-        // We also return false, because the file was never really
-        // "shared" to begin with.
-        if (fd instanceof IncompleteFileDesc) {
-            sharedFileList.removeIncomplete((IncompleteFileDesc)fd);
-            removeSharedUrnIndex(fd, false);
-        } else {
-            sharedFileList.remove(fd);
-            //Remove hash information.
-            removeSharedUrnIndex(fd, true);
-        }
-        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FD, fd));
         return fd;   
     }
     
     /**
-     * Removes the store FileDesc reference
+     * Actually removes references to this FileDesc
+     * @param fileDesc
      */
-    private synchronized FileDesc removeStoreFileDesc(File f){
-        FileDesc fd = storeFileList.getFileDesc(f);
-        storeFileList.remove(fd);
+    private void removeFileDesc(FileDesc fileDesc) {
+        if(fileDesc instanceof IncompleteFileDesc)
+            removeUrnIndex(fileDesc, false);
+        else 
+            removeUrnIndex(fileDesc, true);
 
-        _data.SPECIAL_STORE_FILES.remove(f);
+        numFiles -= 1;
+        files.set(fileDesc.getIndex(), null);
+        fileToFileDescMap.remove(fileDesc.getFile());
 
-        //Remove hash information.
-        removeStoreUrnIndex(fd);
-        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FD, fd));
-
-        return fd;
+        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FD, fileDesc));
     }
     
     /* (non-Javadoc)
@@ -1239,17 +1093,18 @@ public class FileManagerImpl implements FileManager, Service {
         for(URN urn : urns) {
             if (!urn.isSHA1())
                 continue;
-            // if there were indices for this URN, exit.
+
             // nothing was shared for this URN, look at another
-            if (!sharedFileList.contains(urn))
+            if(!getIncompleteFileList().contains(getFileDesc(urn)))
                 continue;
             
-            IntSet shared = sharedFileList.getIndicesForUrn(urn);
+            // if there were indices for this URN, exit.
+            IntSet shared = getIndices(urn);
             for (IntSet.IntSetIterator isIter = shared.iterator(); isIter.hasNext(); ) {
                 int i = isIter.next();
-                FileDesc desc = sharedFileList.get(i);
+                FileDesc desc = get(i);
                 // unshared, keep looking.
-                if (desc == null)
+                if (desc == null || !getIncompleteFileList().contains(desc))
                     continue;
                 String incPath = incompleteFile.getAbsolutePath();
                 String path  = desc.getFile().getAbsolutePath();
@@ -1261,14 +1116,14 @@ public class FileManagerImpl implements FileManager, Service {
         
         // no indices were found for any URN associated with this
         // IncompleteFileDesc... add it.
-        int fileIndex = sharedFileList.getListLength();
+        IncompleteFileDesc incompleteFileDesc = new IncompleteFileDesc(incompleteFile, urns, files.size(), name, size, vf);
         
-        IncompleteFileDesc ifd = new IncompleteFileDesc(
-        incompleteFile, urns, fileIndex, name, size, vf);
-        sharedFileList.addIncompleteFile(incompleteFile, ifd);
-        fileURNSUpdated(ifd);
-        
-        dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
+        numFiles += 1;
+        files.add(incompleteFileDesc);
+        fileToFileDescMap.put(incompleteFile, incompleteFileDesc);
+        fileURNSUpdated(incompleteFileDesc);
+        //TODO: check incomplete file
+        dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, incompleteFileDesc));
     }
     
     /* (non-Javadoc)
@@ -1280,7 +1135,7 @@ public class FileManagerImpl implements FileManager, Service {
                public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
                    if(r != null && !r.isOK())
-                       removeFileIfSharedOrStore(fd.getFile());
+                       removeFile(fd.getFile());
                }
             }, 5000);
         }
@@ -1293,13 +1148,13 @@ public class FileManagerImpl implements FileManager, Service {
     public synchronized void fileURNSUpdated(FileDesc fd) {
         FileManagerEvent event = null; 
         synchronized (this) {
-            sharedFileList.updateUrnIndex(fd);
-            if (fd instanceof IncompleteFileDesc) {
+            updateUrnIndex(fd);
+            if(fd instanceof IncompleteFileDesc) {
                 IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
                 if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
                         SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
                         ifd.hasUrnsAndPartialData()) {
-                    event = new FileManagerEvent(this, Type.CHANGE_FILE, fd);
+                    event = new FileManagerEvent(this, Type.INCOMPLETE_URN_CHANGE, fd);
                 }
             }
         }
@@ -1310,28 +1165,31 @@ public class FileManagerImpl implements FileManager, Service {
     }
 
     /** 
-     * Removes any URN index information for desc from shared files
-     * @param purgeState true if any state should also be removed (creation time, altlocs) 
+     * Generic method for adding a fileDesc's URNS to a map
      */
-    private synchronized void removeSharedUrnIndex(FileDesc fileDesc, boolean purgeState) {
-        removeUrnIndex(fileDesc, sharedFileList, purgeState);
+    private void updateUrnIndex(FileDesc fileDesc) {
+        for(URN urn : fileDesc.getUrns()) {
+            if (!urn.isSHA1())
+                continue;
+            IntSet indices= urnMap.get(urn);
+            if (indices==null) {
+                indices=new IntSet();
+                urnMap.put(urn, indices);
+            }
+            indices.add(fileDesc.getIndex());
+        }
     }
     
     /** 
-     * Removes any URN index information for desc from store files
-     * @param purgeState true if any state should also be removed (creation time, altlocs) 
+     * Removes stored indices for a URN associated with a given FileDesc
      */
-    private synchronized void removeStoreUrnIndex(FileDesc fileDesc) {
-        removeUrnIndex(fileDesc, storeFileList, true);
-    }
-    
-    private synchronized void removeUrnIndex(FileDesc fileDesc, FileList fileList, boolean purgeState) {
+    private void removeUrnIndex(FileDesc fileDesc, boolean purgeState) {
         for(URN urn : fileDesc.getUrns()) {
             if (!urn.isSHA1())
                 continue;
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
-            IntSet indices= fileList.getIndicesForUrn(urn);
+            IntSet indices = getIndices(urn);
             if (indices == null) {
                 assert fileDesc instanceof IncompleteFileDesc;
                 return;
@@ -1341,113 +1199,56 @@ public class FileManagerImpl implements FileManager, Service {
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0 && purgeState) {
                 dispatchFileEvent(new FileManagerEvent(this,Type.REMOVE_URN, urn));
-                fileList.remove(urn);
             }
         }
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#renameFileIfSharedOrStore(java.io.File, java.io.File)
+     * @see com.limegroup.gnutella.FileManager#renameFileIfSharedOrStore(java.io.File, java.io.File, com.limegroup.gnutella.FileEventListener)
      */
-    public synchronized void renameFileIfSharedOrStore(File oldName, final File newName) {
+    public synchronized void renameFile(File oldName, final File newName) {
         if(LOG.isDebugEnabled())
             LOG.debug("Attempting to rename: " + oldName + " to: "  + newName);      
         
         try {
             oldName = FileUtils.getCanonicalFile(oldName);
         } catch (IOException e) {
+            dispatchFileEvent(new FileManagerEvent(this, Type.RENAME_FILE_FAILED, oldName, null));
             return;
         }      
         
-        // if its a shared file
-        if( sharedFileList.contains(oldName)) {
-            renameSharedFile(oldName, newName);
-        } else if(storeFileList.contains(oldName)) {
-            renameStoreFile(oldName, newName);
-        } else {
+        FileDesc fileDesc = getFileDesc(oldName);
+        if( fileDesc == null) {
             // couldn't find a FileDesc for this file
-            dispatchFileEvent(new FileManagerEvent(this, Type.RENAME_FILE_FAILED, oldName));
-        }
+            dispatchFileEvent(new FileManagerEvent(this, Type.RENAME_FILE_FAILED, oldName, null));
+            return;
     }
     
-    /**
-     * Renames a shared file
-     * @param oldName - old file name
-     * @param newName - new name of the file
-     */
-    private void renameSharedFile(final File oldName, final File newName) {       
-        final FileDesc removed = removeSharedFileDesc(oldName);
-
-        if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
-            _data.SPECIAL_FILES_TO_SHARE.add(newName);
-        
+        removeFileDesc(fileDesc);
         // Prepopulate the cache with new URNs.
-        urnCache.get().addUrns(newName, removed.getUrns());
+        urnCache.get().addUrns(newName, fileDesc.getUrns());
 
-        List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(removed.getLimeXMLDocuments());
+        List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(fileDesc.getLimeXMLDocuments());
         
-        addFileIfSharedOrStore(newName, xmlDocs, _revision, Type.RENAME_FILE, Type.REMOVE_FILE, removed);
-    }
-    
-    /**
-     * Renames a store file
-     * @param oldName - old file name
-     * @param newName - new name of the file
-     */
-    private void renameStoreFile(final File oldName, final File newName) {       
-        final FileDesc removed = removeStoreFileDesc(oldName);
-
-        if (_data.SPECIAL_STORE_FILES.remove(oldName)) 
-            _data.SPECIAL_STORE_FILES.add(newName);
-        // Prepopulate the cache with new URNs.
-        urnCache.get().addUrns(newName, removed.getUrns());
-
-        List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(removed.getLimeXMLDocuments());
-        
-        addFileIfSharedOrStore(newName, xmlDocs, _revision, Type.RENAME_FILE, Type.REMOVE_FILE, removed);
+        addFile(newName, xmlDocs, _revision, Type.RENAME_FILE, Type.REMOVE_FILE, fileDesc);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#fileChanged(java.io.File)
      */
-    public void fileChanged(File f) {
+    public synchronized void fileChanged(File f, List<LimeXMLDocument> xmlDocs) {
         if (LOG.isDebugEnabled())
             LOG.debug("File Changed: " + f);
 
-        FileDesc fd = getFileDescForFile(f);
+        FileDesc fd = getFileDesc(f);
         if (fd == null) {
             dispatchFileEvent(new FileManagerEvent(this, Type.CHANGE_FILE_FAILED, f));
             return;            
         }
 
-        List<LimeXMLDocument> xmlDocs = fd.getLimeXMLDocuments();
-        if (LimeXMLUtils.isEditableFormat(f)) {
-            try {
-                //TODO: Disk IO being performed here
-                LimeXMLDocument diskDoc = metaDataReader.readDocument(f);
-                xmlDocs = resolveWriteableDocs(xmlDocs, diskDoc);
-            } catch (IOException e) {
-                // if we were unable to read this document,
-                // then simply add the file without metadata.
-                xmlDocs = Collections.emptyList();
-            }
-        }
-
         fd.setCreationTime(creationTimeCache.get().getCreationTimeAsLong(fd.getSHA1Urn()));
-        if( sharedFileList.contains(fd)) {
-            final FileDesc removed = removeSharedFileDesc(f);
-            assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
-
-            addFileIfSharedOrStore(f, xmlDocs, _revision, Type.CHANGE_FILE, Type.REMOVE_FILE, fd);
-        } else if( storeFileList.contains(fd)){
-            final FileDesc removed = removeStoreFileDesc(f);
-            assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
-
-            addFileIfSharedOrStore(f, xmlDocs, _revision, Type.CHANGE_FILE, Type.REMOVE_FILE, fd);
-        } else {
-            // couldn't find a FileDesc for this file
-            dispatchFileEvent(new FileManagerEvent(this, Type.CHANGE_FILE_FAILED, f));
-        }
+        removeFileDesc(fd);
+        addFile(f, xmlDocs, _revision, Type.CHANGE_FILE, Type.REMOVE_FILE, fd);
     }
     
     /* (non-Javadoc)
@@ -1468,20 +1269,6 @@ public class FileManagerImpl implements FileManager, Service {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#hasIndividualFiles()
-     */
-    public boolean hasIndividualFiles() {
-        return !_data.SPECIAL_FILES_TO_SHARE.isEmpty();
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#hasIndividualStoreFiles()
-     */
-    public boolean hasIndividualStoreFiles() {
-        return !_data.SPECIAL_STORE_FILES.isEmpty();
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#hasApplicationSharedFiles()
      */
     public boolean hasApplicationSharedFiles() {
@@ -1492,70 +1279,17 @@ public class FileManagerImpl implements FileManager, Service {
     	// if at least one of the files in the application special
     	// share are currently shared, return true.
     	for (File f: files) {
-    		if (sharedFileList.contains(f))
+            if (getSharedFileList().contains(getFileDesc(f)))
     			return true;
     	}
     	
     	return false;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getIndividualFiles()
-     */
-    public File[] getIndividualFiles() {
-        Set<File> candidates = _data.SPECIAL_FILES_TO_SHARE;
-        synchronized(candidates) {
-    		ArrayList<File> files = new ArrayList<File>(candidates.size());
-            for(File f : candidates) {
-    			if (f.exists())
-    				files.add(f);
-    		}
-    		
-    		if (files.isEmpty())
-    			return new File[0];
-            else
-    		    return files.toArray(new File[files.size()]);
-        }
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getIndividualStoreFiles()
-     */
-    public File[] getIndividualStoreFiles() {
-        Set<File> candidates = _data.SPECIAL_STORE_FILES;
-        synchronized (candidates) {
-            ArrayList<File> files = new ArrayList<File>(candidates.size());
-            for(File f : candidates) {
-                if (f.exists())
-                    files.add(f);
-            }
-            
-            if (files.isEmpty())
-                return new File[0];
-            else
-                return files.toArray(new File[files.size()]);
-        }
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isIndividualStore(java.io.File)
-     */
-    public boolean isIndividualStore(File f) {
-        return _data.SPECIAL_STORE_FILES.contains(f);
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isIndividualShare(java.io.File)
-     */
-    public boolean isIndividualShare(File f) {
-    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) 
-            && SharingUtils.isFilePhysicallyShareable(f)
-            && !SharingUtils.isApplicationSpecialShare(f);
-    }
-       
     /**
      * Cleans all stale entries from the Set of individual files.
      */
+    //TODO: this needs to clean all files
     private void cleanIndividualFiles() {
         Set<File> files = _data.SPECIAL_FILES_TO_SHARE;
         synchronized(files) {
@@ -1575,7 +1309,7 @@ public class FileManagerImpl implements FileManager, Service {
     }
 	
     /** Returns true if file has a shareable extension.  Case is ignored. */
-    private static boolean hasShareableExtension(File file) {
+    static boolean hasShareableExtension(File file) {
         if(file == null)
             return false;
         
@@ -1595,7 +1329,7 @@ public class FileManagerImpl implements FileManager, Service {
         if (dir == null) 
             return false;
 
-		synchronized (this) {
+        synchronized (_completelySharedDirectories) {
 			return _completelySharedDirectories.contains(dir);
 		}
 	}
@@ -1607,52 +1341,21 @@ public class FileManagerImpl implements FileManager, Service {
 		if (dir == null)
 			return false;
 		
-		synchronized (this) {
+        synchronized (_completelySharedDirectories) {
 			return _completelySharedDirectories.contains(dir);
 		}
 	}
-    
-	/**
-	 * Returns true if the given file is in a completely shared directory
-	 * or if it is specially shared.
-     * NOTE: this does not determine if a file is unshareable as a result of
-     * being a LWS file
-	 */
-	private boolean isFileShareable(File file) {
-		if (!SharingUtils.isFilePhysicallyShareable(file))
-			return false;
-		if (_individualSharedFiles.contains(file))
-			return true;
-		if (_data.FILES_NOT_TO_SHARE.contains(file))
-			return false;
-		if (isFileInCompletelySharedDirectory(file)) {
-	        if (file.getName().toUpperCase(Locale.US).startsWith("LIMEWIRE"))
-				return true;
-			if (!hasShareableExtension(file))
-	        	return false;
-			return true;
-		}
-			
-		return false;
-	}
-    
-    private boolean isFileLocatedStoreDirectory(File file) {
-        return ( _storeDirectories.contains(file.getParentFile()));
-    }
-    
-    /**
-     * Returns true if the XML doc contains information regarding the LWS
-     */
-    private boolean isStoreXML(LimeXMLDocument doc) {
-       return doc != null && doc.getLicenseString() != null &&
-               doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
-    }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isStoreDirectory(java.io.File)
      */
     public boolean isStoreDirectory(File file) {
-        return _storeDirectories.contains(file);
+        if(file == null)
+            return false;
+        
+        synchronized(storeDirectories) {
+            return storeDirectories.contains(file);
+        }
     }
        
  
@@ -1690,9 +1393,12 @@ public class FileManagerImpl implements FileManager, Service {
     	} catch (IOException bad) {
     		return false;
     	}
-    	return sharedFileList.contains(file);
+        return getSharedFileList().contains(getFileDesc(file));
     }
     
+    public int size() {
+        return numFiles;
+    }
   
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileEventListener(com.limegroup.gnutella.FileEventListener)
@@ -1738,110 +1444,6 @@ public class FileManagerImpl implements FileManager, Service {
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getIndexingIterator(boolean)
-     */
-    public Iterator<FileDesc> getIndexingIterator() {
-        return new Iterator<FileDesc>() {
-            int startRevision = _revision;
-            /** Points to the index that is to be examined next. */
-            int index = 0;
-            FileDesc preview;
-
-            private boolean preview() {
-                assert preview == null;
-
-                if (_revision != startRevision) {
-                    return false;
-                }
-
-                synchronized (sharedFileList) {
-                    while (index < sharedFileList.getListLength()) {
-                        FileDesc desc = sharedFileList.get(index);
-                        index++;
-
-                        // skip, if the file was unshared or is an incomplete file,
-                        if (desc == null || desc instanceof IncompleteFileDesc || SharingUtils.isForcedShare(desc)) 
-                            continue;
-
-                        preview = desc;
-                        return true;
-                    }
-                    return false;
-                }
-            }
-
-            public boolean hasNext() {
-                if (_revision != startRevision) {
-                    return false;
-                }
-
-                if (preview != null) {
-                    if (sharedFileList.get(index-1) == null) {
-                        // file was removed in the meantime
-                        preview = null;
-                    }
-                }
-                return preview != null || preview();
-            }
-
-            public FileDesc next() {
-                if (hasNext()) {
-                    FileDesc item = preview;
-                    preview = null;
-                    return item;
-                }
-                throw new NoSuchElementException();               
-            }
-
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-
-        };
-    }
-    
-    /**
-     * Finds the audio metadata document in allDocs, and makes it's id3 fields
-     * identical with the fields of id3doc (which are only id3).
-     */
-    private List<LimeXMLDocument> resolveWriteableDocs(List<LimeXMLDocument> allDocs,
-            LimeXMLDocument id3Doc) {
-        LimeXMLDocument audioDoc = null;
-        
-        for (LimeXMLDocument doc : allDocs) {
-            if (doc.getSchema().getSchemaURI().equals(LimeXMLNames.AUDIO_SCHEMA)) {
-                audioDoc = doc;
-                break;
-            }
-        }
-
-        if (id3Doc.equals(audioDoc)) // No issue -- both documents are the same
-            return allDocs; // did not modify list, keep using it
-
-        List<LimeXMLDocument> retList = new ArrayList<LimeXMLDocument>();
-        retList.addAll(allDocs);
-
-        if (audioDoc == null) {// nothing to resolve
-            retList.add(id3Doc);
-        } else {
-            // OK. audioDoc exists, remove it
-            retList.remove(audioDoc);
-    
-            // now add the non-id3 tags from audioDoc to id3doc
-            List<NameValue<String>> audioList = audioDoc.getOrderedNameValueList();
-            List<NameValue<String>> id3List = id3Doc.getOrderedNameValueList();
-            for (int i = 0; i < audioList.size(); i++) {
-                NameValue<String> nameVal = audioList.get(i);
-                if (AudioMetaData.isNonLimeAudioField(nameVal.getName()))
-                    id3List.add(nameVal);
-            }
-            audioDoc = limeXMLDocumentFactory.createLimeXMLDocument(id3List, LimeXMLNames.AUDIO_SCHEMA);
-            retList.add(audioDoc);
-        }
-        return retList;
-    }
-
     /** A bunch of inspectables for FileManager */
     @InspectableContainer
     private class FMInspectables {
@@ -1869,7 +1471,7 @@ public class FileManagerImpl implements FileManager, Service {
                 int matched = 0;
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.getValue());
-                    for (FileDesc fd : sharedFileList.getAllFileDescs()){
+                    for (FileDesc fd : getSharedFileList().getAllFileDescs()){
                         total++;
                         if (parser.evaluate(fd))
                             matched++;
@@ -1917,7 +1519,7 @@ public class FileManagerImpl implements FileManager, Service {
             Map<Integer, FileDesc> topAltsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
 
-            List<FileDesc> fds = sharedFileList.getAllFileDescs();
+            List<FileDesc> fds = getSharedFileList().getAllFileDescs();
             hits.ensureCapacity(fds.size());
             uploads.ensureCapacity(fds.size());
             int rare = 0;
@@ -2012,7 +1614,6 @@ public class FileManagerImpl implements FileManager, Service {
             
             return ret;
         }
-        
     }
     
     private class RareFileDefinition implements SimppListener {
@@ -2048,6 +1649,10 @@ public class FileManagerImpl implements FileManager, Service {
             }
         }
 
+        public void setDirty() {
+            isDirty.getAndSet(true);
+        }
+
         /**
          * If a change occurs, write changes to disk
          */
@@ -2055,14 +1660,234 @@ public class FileManagerImpl implements FileManager, Service {
             switch(evt.getType()) {
                 case ADD_FILE:
                 case ADD_FOLDER:
-                case ADD_STORE_FOLDER:
                 case CHANGE_FILE:
                 case REMOVE_FILE:
                 case REMOVE_FOLDER:
-                case REMOVE_STORE_FOLDER:
                 case RENAME_FILE:
-                    isDirty.getAndSet(true);
+                    setDirty();
             }
+        }
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //  DO NOTE ADD ANYTHING BELOW THIS. The following are here for backwards compatibility 
+    //  with pre 5.0 versions. 
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+  /* (non-Javadoc)
+   * @see com.limegroup.gnutella.FileManager#removeFolderIfShared(java.io.File)
+   */
+    public void removeSharedFolder(File folder) {
+        _isUpdating = true;
+        removeSharedFolder(folder, null);
+        _isUpdating = false;
+    }
+  
+  /**
+   * REMOVES A GIVEN DIRECTORY FROM BEING COMPLETED SHARED.
+   * IF 'PARENT' IS NULL, THIS WILL REMOVE IT FROM THE ROOT-LEVEL OF
+   * SHARED FOLDERS IF IT EXISTED THERE.  (IF IT IS NON-NULL & IT WAS
+   * A ROOT-LEVEL SHARED FOLDER, THE FOLDER REMAINS SHARED.)
+   *
+   * THE FIRST TIME THIS IS CALLED, PARENT MUST BE NON-NULL IN ORDER TO ENSURE
+   * IT WORKS CORRECTLY.  OTHERWISE, WE'LL END UP ADDING TONS OF STUFF
+   * TO THE DIRECTORIES_NOT_TO_SHARE.
+   */
+    private void removeSharedFolder(File folder, File parent) {
+        if(!folder.isDirectory() && folder.exists()) 
+            throw new IllegalArgumentException("Expected a directory, but given: " + folder);
+          
+        try {
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch (IOException ignored) {}
+
+
+        // GRAB THE VALUE QUICKLY.  RELEASE THE LOCK
+        // SO THAT WE DON'T HOLD IT DURING A LONG RECURSIVE FUNCTION.
+        // IT'S NO BIG DEAL IF IT CHANGES, WE'LL JUST DO SOME EXTRA WORK FOR A SHORT
+        // BIT OF TIME
+        boolean contained;
+        synchronized (_completelySharedDirectories) {
+            contained = _completelySharedDirectories.contains(folder);
+        }
+
+        if(contained) {
+            if(parent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
+                // we don't want to remove it since its a root share and we do not want
+                // to remove any of its children
+                return;
+            } else if(parent == null) {
+                // add the directory in the excluded list if it wasn't in the directories_not_to_share
+                // or if it was and parent folder of it is fully shared
+                boolean explicityShared = SharingSettings.DIRECTORIES_TO_SHARE.remove(folder);
+                if(!explicityShared || isFolderShared(folder.getParentFile()))
+                    _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
+            }
+          
+            // NOTE: that if parent != null && not a root share)
+            // we do not add to directories not to share.
+            // This is by design, because the parent has already been removed
+            // from sharing, which inherently will remove the child directories.
+            // there's no need to clutter up directories no to share with useless
+            // entries
+            synchronized (_completelySharedDirectories) {
+                _completelySharedDirectories.remove(folder);
+            }
+            
+            File[] subs = folder.listFiles();
+            if(subs != null) {
+                for(File f : subs) {
+                    if(f.isDirectory())
+                        removeSharedFolder(f, folder);
+                    else if(f.isFile() && !getSharedFileList().isIndividualFile(f)){
+                        if(removeFile(f) == null)
+                            urnCache.get().clearPendingHashesFor(f, this);
+                    }
+                }
+            }
+            
+            dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
+        }
+    }
+
+  
+   /* (non-Javadoc)
+    * @see com.limegroup.gnutella.FileManager#addSharedFolders(java.util.Set, java.util.Set)
+    */
+    public void addSharedFolders(Set<File> folders, Set<File> blackListedSet) {
+        if (folders.isEmpty()) {
+            throw new IllegalArgumentException("Only blacklisting without sharing, not allowed");
+        }
+        _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListedSet));
+        for (File folder : folders) {
+            addSharedFolder(folder);
+        }
+    }
+  
+   /* (non-Javadoc)
+    * @see com.limegroup.gnutella.FileManager#addSharedFolder(java.io.File)
+    */
+    public boolean addSharedFolder(File folder) {
+        if (!folder.isDirectory())
+            throw new IllegalArgumentException("Expected a directory, but given: "+folder);
+    
+        try {
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch(IOException ignored) {}
+       
+        if(!isFolderShareable(folder, false))
+            return false;
+       
+        _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
+        if (!isFolderShared(folder.getParentFile()))
+            SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
+        _isUpdating = true;
+        updateSharedDirectories(folder, folder, null, _revision, 1);
+        _isUpdating = false;
+       
+        return true;
+    }
+    
+    private void updateSharedDirectories(File directory, File parent, int revision) {
+        updateSharedDirectories(directory, directory, parent, revision, 1);
+    }
+    
+    /**
+     * Recursively adds this directory and all subdirectories to the shared
+     * directories as well as queueing their files for sharing.  Does nothing
+     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
+     * been added.  This method is thread-safe.  It acquires locks on a
+     * per-directory basis.  If the current revision ever changes from the
+     * expected revision, this returns immediately.
+     * 
+     * @requires directory is part of DIRECTORIES_TO_SHARE or one of its
+     *           children, and parent is directory's shared parent or null if
+     *           directory's parent is not shared.
+     * @modifies this
+     */
+     private void updateSharedDirectories(File rootShare, File directory, File parent, int revision, int depth) {     
+         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
+         //are the same on Windows but different on Unix.
+         try {
+             directory = FileUtils.getCanonicalFile(directory);
+         } catch (IOException e) {
+             return;
+         }
+         if(!directory.exists())
+             return;
+         
+         // STEP 0:
+         // Do not share unsharable directories.
+         if(!isFolderShareable(directory, true))
+             return;
+         
+         // Do not share sensitive directories
+         if (SharingUtils.isSensitiveDirectory(directory)) {
+             //  go through directories that explicitly should not be shared
+             if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory)) {
+                 return;
+             }
+             
+             // if we haven't already validated the sensitive directory, ask about it.
+             if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
+                 //  ask the user whether the sensitive directory should be shared
+                 // THIS CALL CAN BLOCK.
+                 if (!activityCallback.get().warnAboutSharingSensitiveDirectory(directory))
+                     return;
+             }
+         }
+     
+         // Exit quickly (without doing the dir lookup) if revisions changed.
+         if(_revision != revision)
+             return;
+    
+         // STEP 1:
+         // Add directory
+         boolean isForcedShare = SharingUtils.isForcedShareDirectory(directory);
+         
+         boolean isStoreDirectory;
+         synchronized (storeDirectories) {
+             isStoreDirectory = !storeDirectories.contains(directory);
+         }
+         
+         synchronized (_completelySharedDirectories) {
+             // if it was already added, ignore.
+             if (_completelySharedDirectories.contains(directory))
+                 return;
+    
+             if (isStoreDirectory)
+                 _completelySharedDirectories.add(directory);
+             if (!isForcedShare) {
+                 dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, rootShare, depth, directory, parent));
+             }
+         }
+     
+         // STEP 2:
+         // Scan subdirectory for the amount of shared files.
+         File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
+         if (file_list == null)
+             return;
+         for(int i = 0; i < file_list.length && _revision == revision; i++)
+             addSharedFile(file_list[i]);
+             
+         // Exit quickly (without doing the dir lookup) if revisions changed.
+         if(_revision != revision)
+             return;
+    
+         // STEP 3:
+         // Recursively add subdirectories.
+         // This has the effect of ensuring that the number of pending files
+         // is closer to correct number.
+         // TODO: when we add non-recursive support, add it here.
+         if (isForcedShare) 
+             return;
+         
+         // Do not share subdirectories of the forcibly shared dir.
+         File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
+         if(dir_list != null) {
+             for(int i = 0; i < dir_list.length && _revision == revision; i++)
+                 updateSharedDirectories(rootShare, dir_list[i], directory, revision, depth+1);
         }
     }
 }

@@ -623,7 +623,7 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
             
             if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().isLoadFinished()) {
                 
-                FileDesc shared = fileManager.get().getFileDescForUrn(next.getUpdateURN());
+                FileDesc shared = fileManager.get().getFileDesc(next.getUpdateURN());
                 //TODO: remove the cast
                 ManagedDownloader md = (ManagedDownloader)downloadManager.get().getDownloaderForURN(next.getUpdateURN());
                 if(LOG.isDebugEnabled())
@@ -678,7 +678,7 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
             List<FileDesc> shared = fileManager.get().getSharedFileList().getFilesInDirectory(SharingUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
-                    fileManager.get().removeFileIfSharedOrStore(fd.getFile());
+                    fileManager.get().removeFile(fd.getFile());
                     fd.getFile().delete();
                 }
             }
@@ -844,7 +844,7 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
         if (myUrn == null)
             return true;
         
-        FileDesc desc = fileManager.get().getFileDescForUrn(myUrn);
+        FileDesc desc = fileManager.get().getFileDesc(myUrn);
         
         if (desc == null)
             return false;

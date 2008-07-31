@@ -28,10 +28,8 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 public class CreationTimeCacheTest extends LimeTestCase {
     
@@ -409,10 +407,8 @@ public class CreationTimeCacheTest extends LimeTestCase {
                 Provider<AltLocManager> altLocManager,
                 Provider<ActivityCallback> activityCallback,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                LimeXMLDocumentFactory limeXMLDocumentFactory,
-                MetaDataReader metaDataReader,
                 CopyOnWriteArrayList<FileEventListener> eventListeners) {
-            super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, eventListeners);
+            super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, eventListeners);
         }
         
         public void setDefaultUrn(URN urn) {
@@ -431,7 +427,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         }
 
         @Override
-        public FileDesc getFileDescForUrn(URN urn) {
+        public FileDesc getFileDesc(URN urn) {
             if (fd == null) {
                 Set<URN> urnSet = new HashSet<URN>();
                 urnSet.add(defaultURN);
@@ -442,7 +438,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
             } else if (validUrns.contains(urn)) {
                 return fd;
             } else {
-                return super.getFileDescForUrn(urn);
+                return super.getFileDesc(urn);
             }
         }
     }

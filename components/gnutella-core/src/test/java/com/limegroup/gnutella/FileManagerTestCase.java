@@ -193,7 +193,7 @@ public class FileManagerTestCase extends LimeTestCase {
         //                 fman.get(i).getFile().getName());
 
         assertEquals("unexpected number of shared files",
-            testFiles.length, fman.getSharedFileList().getNumFiles() );
+            testFiles.length, fman.getSharedFileList().size() );
     }
 
 
@@ -226,7 +226,7 @@ public class FileManagerTestCase extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileIfShared(f, LimeXMLDocument.EMPTY_LIST);
+            fman.addSharedFile(f, LimeXMLDocument.EMPTY_LIST);
             fel.wait(5000);
         }
         return fel.evt;
@@ -236,7 +236,7 @@ public class FileManagerTestCase extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileIfShared(f, l);
+            fman.addSharedFile(f, l);
             fel.wait(5000);
         }
         return fel.evt;
@@ -246,7 +246,7 @@ public class FileManagerTestCase extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileAlways(f);
+            fman.addSharedFileAlways(f);
             fel.wait(5000);
         }
         return fel.evt;
@@ -256,7 +256,7 @@ public class FileManagerTestCase extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.renameFileIfSharedOrStore(f1, f2);
+            fman.renameFile(f1, f2);
             fel.wait(5000);
         }
         return fel.evt;
@@ -266,7 +266,7 @@ public class FileManagerTestCase extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileForSession(f1);
+            fman.addSharedFileForFession(f1);
             fel.wait(5000);
         }
         return fel.evt;
@@ -276,7 +276,7 @@ public class FileManagerTestCase extends LimeTestCase {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
         synchronized (fel) {
-            fman.fileChanged(f1);
+            fman.fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
             fel.wait(5000);
         }
         return fel.evt;
