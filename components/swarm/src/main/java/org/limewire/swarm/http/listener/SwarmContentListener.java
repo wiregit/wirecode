@@ -121,6 +121,7 @@ public class SwarmContentListener implements ResponseContentListener {
         if (actualRange.getLow() < expectedRange.getLow()
                 || actualRange.getHigh() > expectedRange.getHigh()) {
             //TODO handle off ranges
+            //this exception gets eaten inside the httpnio code, so we need better logging/handling on our end
             throw new IOException("Invalid actual range.  Expected: " + expectedRange
                     + ", Actual: " + actualRange);
         }
