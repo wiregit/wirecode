@@ -13,8 +13,9 @@
     <import file="swingui/build.xml" />
     <import file="mock-core/build.xml" />
     <import file="integrated-ui/build.xml"/>
+    <import file="../components/net/build.xml"/>
     
-    <target name="initialize" depends="lw-swingui.initialize, lw-mock-core.initialize, lw-integrated-ui.initialize" unless="initialized.private-all">
+    <target name="initialize" depends="lw-swingui.initialize, lw-mock-core.initialize, lw-integrated-ui.initialize, lw-net.initialize" unless="initialized.private-all">
         <do.setup-private-properties component="private-all">
 			<add-tests-classpath>
             	<path refid="tests.limewire.components.swingui.classpath"/>
@@ -43,7 +44,7 @@
 	
 	<target name="clean"
 	        description="Cleans all generated data in every component."
-          depends="lw-swingui.clean, lw-mock-core.clean, lw-integrated-ui.clean"
+          depends="lw-swingui.clean, lw-mock-core.clean, lw-integrated-ui.clean, lw-net.clean"
           >
 	    <do.clean component="private-all"/>
     </target>
@@ -51,32 +52,32 @@
     
     <target name="compile"
         	description="Compiles the source and tests of every component."
-            depends="lw-swingui.compile, lw-mock-core.compile, lw-integrated-ui.compile">
+            depends="lw-swingui.compile, lw-mock-core.compile, lw-integrated-ui.compile, lw-net.compile">
         <mkdir dir="${build.limewire.components.private-all.classes}"/>
         <mkdir dir="${build.limewire.components.private-all.tests}"/>
 	</target>
     
     <target name="compile-src"
     		description="Compiles only the source code of every component."
-	        depends="lw-swingui.compile-src, lw-mock-core.compile-src, lw-integrated-ui.compile-src">
+	        depends="lw-swingui.compile-src, lw-mock-core.compile-src, lw-integrated-ui.compile-src, lw-net.compile-src">
         <mkdir dir="${build.limewire.components.private-all.classes}"/>
 	</target>
 	    
 	<target name="clean-src"
 	        description="Cleans files generated from compiling the source code of every component."
-	        depends="lw-swingui.clean-src, lw-mock-core.clean-src, lw-integrated-ui.clean-src">
+	        depends="lw-swingui.clean-src, lw-mock-core.clean-src, lw-integrated-ui.clean-src, lw-net.clean-src">
 		<do.clean-src component="private-all"/>
 	</target>
 	
 	<target name="compile-tests"
 	        description="Compiles the tests of every component (and the source if necessary)"
-	        depends="compile-src, lw-test-util.compile-src, lw-swingui.compile-tests, lw-mock-core.compile-tests, lw-integrated-ui.compile-tests">
+	        depends="compile-src, lw-test-util.compile-src, lw-swingui.compile-tests, lw-mock-core.compile-tests, lw-integrated-ui.compile-tests, lw-net.compile-tests">
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
     
 	<target name="clean-tests"
 	        description="Cleans data generated from compiling and running the tests of every component."
-	        depends="initialize, lw-swingui.clean-tests, lw-mock-core.clean-tests, lw-integrated-ui.clean-tests">
+	        depends="initialize, lw-swingui.clean-tests, lw-mock-core.clean-tests, lw-integrated-ui.clean-tests, lw-net.clean-tests">
 	    <do.clean-tests component="private-all"/>
 	</target>
 	

@@ -17,6 +17,7 @@ import org.limewire.net.address.Address;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddress;
 
 @Singleton
 public class StatusPanel extends JPanel {
@@ -52,8 +53,12 @@ public class StatusPanel extends JPanel {
         }
         
         public void setAddress(Address address) {
-            this.address = address;
-            putValue(Action.NAME, "browse: " + address);
+            if(address instanceof PushProxyHolePunchAddress) {
+                if(!((PushProxyHolePunchAddress)address).getDirectConnectionAddress().getAddress().contains("66.108.19.102")) {
+                    this.address = address;
+                    putValue(Action.NAME, "browse: " + address);    
+                }
+            }            
         }
     }
 
