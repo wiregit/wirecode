@@ -3,6 +3,8 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.IOException;
 
+import junit.framework.Assert;
+
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -63,35 +65,50 @@ public class BTDownloaderImplTest extends BaseTestCase {
 
     public void testBasic() throws Exception {
         String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/gnutella_protocol_0.4.pdf.torrent";
-        try {
-            File torrentFile = new File(torrentfilePath);
-            BTDownloader downloader = createBTDownloader(torrentFile);
+        File torrentFile = new File(torrentfilePath);
+        BTDownloader downloader = createBTDownloader(torrentFile);
 
-            TorrentContext torrentContext = downloader.getTorrentContext();
-            TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        TorrentContext torrentContext = downloader.getTorrentContext();
+        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File completeFile = torrentFileSystem.getCompleteFile();
+        try {
 
             File incompleteFile = torrentFileSystem.getIncompleteFiles().get(0);
             incompleteFile.delete();
-            File completeFile = torrentFileSystem.getCompleteFile();
+
             completeFile.delete();
             downloader.startDownload();
-            Thread.sleep(5000);
+            finishDownload(downloader);
             SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
 
         } finally {
+            if (completeFile != null) {
+                completeFile.delete();
+            }
+        }
+    }
+
+    private void finishDownload(BTDownloader downloader) throws InterruptedException {
+        int maxIterations = 30;
+        int index = 0;
+        while (!downloader.isCompleted()) {
+            if (index++ > maxIterations) {
+                Assert.fail("Failure downloading the file. Taking too long.");
+            }
+            Thread.sleep(1000);
         }
     }
 
     public void testMultipleFile() throws Exception {
         String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test.torrent";
+        File torrentFile = new File(torrentfilePath);
+        BTDownloader downloader = createBTDownloader(torrentFile);
+
+        TorrentContext torrentContext = downloader.getTorrentContext();
+        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File rootFile = torrentFileSystem.getCompleteFile();
         try {
-            File torrentFile = new File(torrentfilePath);
-            BTDownloader downloader = createBTDownloader(torrentFile);
 
-            TorrentContext torrentContext = downloader.getTorrentContext();
-            TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
-
-            File rootFile = torrentFileSystem.getCompleteFile();
             FileUtils.deleteRecursive(rootFile);
             File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
             incompleteFile1.delete();
@@ -103,13 +120,15 @@ public class BTDownloaderImplTest extends BaseTestCase {
             File completeFile2 = torrentFileSystem.getFiles().get(1);
             completeFile2.delete();
             downloader.startDownload();
-            Thread.sleep(5000);
-            torrentFileSystem.moveToCompleteFolder();
+            finishDownload(downloader);
             SwarmerImplTest
                     .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
             SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
                     411090);
         } finally {
+            if (rootFile != null) {
+                rootFile.delete();
+            }
         }
     }
 
