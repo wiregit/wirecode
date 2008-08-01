@@ -1,6 +1,7 @@
 package org.limewire.core.impl.search;
 
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.search.Search;
@@ -22,8 +23,10 @@ public class CoreSearch implements Search {
     private final SearchServices searchServices;
     private final QueryReplyListenerList listenerList;
     private final AtomicBoolean started = new AtomicBoolean(false);
+    private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
+    private final QrListener qrListener = new QrListener();
+    
     private volatile byte[] searchGuid;
-    private volatile QrListener listener;
 
     @AssistedInject
     public CoreSearch(@Assisted
@@ -38,20 +41,33 @@ public class CoreSearch implements Search {
     public SearchCategory getCategory() {
         return searchDetails.getSearchCategory();
     }
+    
+    @Override
+    public void addSearchListener(SearchListener searchListener) {
+        searchListeners.add(searchListener);
+    }
+    
+    @Override
+    public void removeSearchListener(SearchListener searchListener) {
+        searchListeners.remove(searchListener);
+    }
 
     @Override
-    public void start(SearchListener searchListener) {
+    public void start() {
         if (started.getAndSet(true)) {
             throw new IllegalStateException("already started!");
         }
+        
+        for(SearchListener listener : searchListeners) {
+            listener.searchStarted();
+        }
 
-        doSearch(searchListener);
+        doSearch();
     }
     
-    private void doSearch(SearchListener searchListener) {
+    private void doSearch() {
         searchGuid = searchServices.newQueryGUID();
-        listener = new QrListener(searchListener);
-        listenerList.addQueryReplyListener(searchGuid, listener);
+        listenerList.addQueryReplyListener(searchGuid, qrListener);
 
         searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
                 MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
@@ -64,7 +80,12 @@ public class CoreSearch implements Search {
         }
         
         stop();
-        doSearch(listener.searchListener);
+        
+        for(SearchListener listener : searchListeners) {
+            listener.searchStarted();
+        }
+        
+        doSearch();
     }
 
     @Override
@@ -73,27 +94,27 @@ public class CoreSearch implements Search {
             throw new IllegalStateException("must start!");
         }
         
-        listenerList.removeQueryReplyListener(searchGuid, listener);
+        listenerList.removeQueryReplyListener(searchGuid, qrListener);
         searchServices.stopQuery(new GUID(searchGuid));
-    }
-
-    private static class QrListener implements QueryReplyListener {
-        private final SearchListener searchListener;
-
-        public QrListener(SearchListener searchListener) {
-            this.searchListener = searchListener;
-        }
-
-        @Override
-        public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
-                Set<? extends IpPort> locs) {
-            searchListener.handleSearchResult(new RemoteFileDescAdapter(rfd,
-                    queryReply, locs));
+        
+        for(SearchListener listener : searchListeners) {
+            listener.searchStopped();
         }
     }
+
 
     public GUID getQueryGuid() {
         return new GUID(searchGuid);
+    }
+
+    private class QrListener implements QueryReplyListener {
+        @Override
+        public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
+                Set<? extends IpPort> locs) {
+            for (SearchListener listener : searchListeners) {
+                listener.handleSearchResult(new RemoteFileDescAdapter(rfd, queryReply, locs));
+            }
+        }
     }
 
 }

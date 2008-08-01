@@ -152,7 +152,7 @@ public class FancyTabList extends JXPanel {
         });
         actionMap.setRemoveAll(closeAllAction);
         actionMap.setRemoveOthers(closeOtherAction);
-        actionMap.getSelectAction().addPropertyChangeListener(new PropertyChangeListener() {
+        actionMap.getMainAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
@@ -180,9 +180,9 @@ public class FancyTabList extends JXPanel {
         if(selected && !tabs.isEmpty()) {
             // Selecting a tab will trigger a layout.
             if(idx == 0 && tabs.size() > 0) {
-                tabs.get(0).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
+                tabs.get(0).getTabActionMap().getMainAction().putValue(Action.SELECTED_KEY, true);
             } else if(idx > 0 && tabs.size() > 0) {
-                tabs.get(idx - 1).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
+                tabs.get(idx - 1).getTabActionMap().getMainAction().putValue(Action.SELECTED_KEY, true);
             } // else empty, no need to layout.
         } else {            
             layoutTabs();

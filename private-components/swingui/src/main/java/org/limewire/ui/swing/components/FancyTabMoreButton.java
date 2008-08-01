@@ -20,6 +20,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.GroupLayout.Group;
 import javax.swing.GroupLayout.SequentialGroup;
 
+import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.util.I18n;
@@ -57,7 +58,6 @@ public class FancyTabMoreButton extends JXButton {
             }
         });
         
-        JLabel moreText = tab.createAdditionalText();
         
         JButton removeButton = tab.createRemoveButton();
         removeButton.setVisible(true);
@@ -66,7 +66,10 @@ public class FancyTabMoreButton extends JXButton {
             public void actionPerformed(ActionEvent e) {
                 menu.setVisible(false);
             }
-        });        
+        });
+        
+        JLabel moreText = tab.createAdditionalText();
+        JXBusyLabel busyLabel = tab.createBusyLabel();
         
         GroupLayout layout = new GroupLayout(jp);
         jp.setLayout(layout);
@@ -79,20 +82,24 @@ public class FancyTabMoreButton extends JXButton {
         
         layout.setAutoCreateGaps(true);
         
-        horGroup.addComponent(selectButton, 0, 120, 120)
+        horGroup.addGap(5)
+                .addComponent(busyLabel)
+                .addComponent(selectButton, 0, 120, 120)
                 .addComponent(moreText)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(removeButton, 20, 20, 20);
         
-        verGroup.addComponent(selectButton)
+        verGroup.addComponent(busyLabel)
+                .addComponent(selectButton)
                 .addComponent(moreText)
-                .addComponent(removeButton);        
+                .addComponent(removeButton, 20, 20, 20);
+        
+        layout.setHonorsVisibility(busyLabel, false);
         
         Highlighter highlighter = new Highlighter(jp, selectButton, removeButton);
         jp.addMouseListener(highlighter);
         selectButton.addMouseListener(highlighter);
         removeButton.addMouseListener(highlighter);
-        moreText.addMouseListener(highlighter);
         
         return jp;
     }
@@ -140,7 +147,7 @@ public class FancyTabMoreButton extends JXButton {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            JPopupMenu menu = new JPopupMenu("more");
+            JPopupMenu menu = new JPopupMenu(I18n.tr("more"));
             for(FancyTab tab : tabs) {
                 menu.add(createMenuItemFor(menu, tab));
             }

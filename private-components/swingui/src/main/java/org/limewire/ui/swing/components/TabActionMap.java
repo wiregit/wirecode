@@ -18,7 +18,10 @@ public class TabActionMap {
     /** An action command to be used for the remove action. */
     public static final String REMOVE_COMMAND = "tab.remove";
     
-    private final Action select;
+    /** A property in the main action that can indicate business. */
+    public static final String BUSY_KEY = "busy.indicator";
+    
+    private final Action main;
     private final Action remove;
     private final Action moreText;
     private final List<Action> rightClick;
@@ -26,9 +29,9 @@ public class TabActionMap {
     private Action removeOthers;
     private Action removeAll;
         
-    public TabActionMap(Action selectAction, Action removeAction, Action moreTextAction,
+    public TabActionMap(Action mainAction, Action removeAction, Action moreTextAction,
             List<Action> rightClickActions) {
-        this.select = selectAction;
+        this.main = mainAction;
         this.remove = removeAction;
         this.moreText = moreTextAction;
         if(rightClickActions == null) {
@@ -54,8 +57,8 @@ public class TabActionMap {
         this.removeAll = removeAll;
     }
 
-    public Action getSelectAction() {
-        return select;
+    public Action getMainAction() {
+        return main;
     }
 
     public Action getRemoveAction() {
@@ -71,20 +74,20 @@ public class TabActionMap {
     }
     
     /**
-     * Wraps the given {@link Action} for select within a list {@link TabActionMap},
+     * Wraps the given {@link Action} for use within a list {@link TabActionMap},
      * suitable for constructing a {@link FancyTabList}.
      */
-    public static List<TabActionMap> createMapForSelectActions(Action... selectActions) {
-        return createMapForSelectActions(Arrays.asList(selectActions));
+    public static List<TabActionMap> createMapForMainActions(Action... selectActions) {
+        return createMapForMainActions(Arrays.asList(selectActions));
     }
     
     /**
-     * Wraps the given {@link Action} for select within a list {@link TabActionMap},
+     * Wraps the given {@link Action} for use within a list {@link TabActionMap},
      * suitable for constructing a {@link FancyTabList}.
      */
-    public static List<TabActionMap> createMapForSelectActions(Collection<? extends Action> selectActions) {
+    public static List<TabActionMap> createMapForMainActions(Collection<? extends Action> mainActions) {
         List<TabActionMap> maps = new ArrayList<TabActionMap>();
-        for(Action action : selectActions) {
+        for(Action action : mainActions) {
             maps.add(new TabActionMap(action, null, null, null));
         }
         return maps;

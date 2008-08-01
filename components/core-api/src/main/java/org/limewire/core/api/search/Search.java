@@ -8,8 +8,14 @@ public interface Search {
     /** Returns the category this search is for. */
     SearchCategory getCategory();
     
+    /** Adds a new SearchListener. */
+    void addSearchListener(SearchListener searchListener);
+    
+    /** Removes a SearchListener. */
+    void removeSearchListener(SearchListener searchListener);
+    
     /** Starts the search. */
-    void start(SearchListener searchListener);
+    void start();
     
     /** Repeats the search. */
     void repeat();

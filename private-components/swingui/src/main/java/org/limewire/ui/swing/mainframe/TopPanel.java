@@ -20,11 +20,15 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
@@ -132,6 +136,7 @@ class TopPanel extends JPanel implements SearchNavigator {
     public SearchNavItem addSearch(String title, JComponent searchPanel, final Search search) {
         final NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, title, searchPanel, false);
         final SearchAction action = new SearchAction(item, search);
+        search.addSearchListener(action);
         final Action moreTextAction = new NoOpAction();
         final Action repeat = new AbstractAction(I18n.tr("Repeat search")) {
             @Override
@@ -161,13 +166,17 @@ class TopPanel extends JPanel implements SearchNavigator {
             @Override
             public void sourceCountUpdated(int newSourceCount) {
                 moreTextAction.putValue(Action.NAME, String.valueOf(newSourceCount));
+                if(newSourceCount >= 100) {
+                    action.killBusy();
+                }
             }
         };
     }
     
-    private class SearchAction extends AbstractAction {
+    private class SearchAction extends AbstractAction implements SearchListener {
         private final NavItem item;
         private final Search search;
+        private Timer busyTimer;
         
         public SearchAction(NavItem item, Search search) {
             super(item.getName());
@@ -213,6 +222,44 @@ class TopPanel extends JPanel implements SearchNavigator {
             item.remove();
             search.stop();
         }
+        
+        @Override
+        public void handleSearchResult(SearchResult searchResult) {}
+        
+        @Override
+        public void searchStarted() {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    busyTimer = new Timer(30000, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);
+                        }
+                    });
+                    busyTimer.setRepeats(false);
+                    busyTimer.start();
+                    putValue(TabActionMap.BUSY_KEY, Boolean.TRUE);
+                }
+            });
+        }
+        
+        void killBusy() {
+            busyTimer.stop();
+            putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);
+        }
+        
+        
+        @Override
+        public void searchStopped() {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    killBusy();
+                }
+            });
+        }
+        
     }
     
     

@@ -47,7 +47,7 @@ class SearchHandlerImpl implements SearchHandler {
         final SearchNavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search);
         item.select();
         
-        search.start(new SearchListener() {
+        search.addSearchListener(new SearchListener() {
             @Override
             public void handleSearchResult(final SearchResult searchResult) {
                 SwingUtilities.invokeLater(new Runnable() {
@@ -58,13 +58,23 @@ class SearchHandlerImpl implements SearchHandler {
                         // we never expect things to remove -- changes
                         // only happen on insertion.
                         // If removes ever happen, we'll need to switch
-                        // to adding a listEventListener to 
+                        // to adding a listEventListener to
                         // mode.getVisualSearchResults.
                         item.sourceCountUpdated(model.getResultCount());
                     }
                 });
             }
+
+            @Override
+            public void searchStarted() {
+            }
+
+            @Override
+            public void searchStopped() {
+            }
         });
+        
+        search.start();
         
     }
 

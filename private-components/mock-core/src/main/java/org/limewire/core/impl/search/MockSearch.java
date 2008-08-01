@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.endpoint.RemoteHostAction;
@@ -17,7 +18,7 @@ import org.limewire.core.api.search.SearchResult;
 
 public class MockSearch implements Search {
     
-    private SearchListener listener;
+    private CopyOnWriteArrayList<SearchListener> listeners = new CopyOnWriteArrayList<SearchListener>();
 
     public MockSearch(SearchDetails searchDetails) {
         // TODO Auto-generated constructor stub
@@ -25,7 +26,9 @@ public class MockSearch implements Search {
 
     @Override
     public void stop() {
-        // TODO Auto-generated method stub
+        for(SearchListener listener : listeners) {
+            listener.searchStopped();
+        }
     }
     
     @Override
@@ -33,10 +36,23 @@ public class MockSearch implements Search {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public void addSearchListener(SearchListener searchListener) {
+        listeners.add(searchListener);
+    }
+    
+    @Override
+    public void removeSearchListener(SearchListener searchListener) {
+        listeners.remove(searchListener);
+    }
+    
 
     @Override
-    public void start(final SearchListener searchListener) {
-        listener = searchListener;
+    public void start() {
+        for(SearchListener listener : listeners) {
+            listener.searchStarted();
+        }
         addResults("");
     }
     
@@ -44,16 +60,22 @@ public class MockSearch implements Search {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                listener.handleSearchResult(
+                handleSearchResult(
                         new MockSearchResult("5.0. Blues" + suffix, "ogg", ResultType.AUDIO, 123456789L, Arrays.asList(new MockRemoteHost("bob")), "test" + suffix));
-                listener.handleSearchResult(
+                handleSearchResult(
                         new MockSearchResult("5.0 Blues Source 2" + suffix, "ogg", ResultType.AUDIO, 1234789L, Arrays.asList(new MockRemoteHost("tom"), new MockRemoteHost("bob")), "test" + suffix));
-                listener.handleSearchResult(
+                handleSearchResult(
                         new MockSearchResult("Standdown Situps" + suffix, "ogv", ResultType.VIDEO, 123456L, Arrays.asList(new MockRemoteHost("dick")), "test1" + suffix));
-                listener.handleSearchResult(
+                handleSearchResult(
                         new MockSearchResult("Craziness" + suffix, "tmp", ResultType.UNKNOWN, 1L, Arrays.asList(new MockRemoteHost("harry"), new MockRemoteHost("larry")), "test2" + suffix));
             }
         }).start();
+    }
+    
+    private void handleSearchResult(MockSearchResult mock) {
+        for(SearchListener listener : listeners) {
+            listener.handleSearchResult(mock);
+        }
     }
     
     @Override

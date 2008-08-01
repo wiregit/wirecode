@@ -4,6 +4,7 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Insets;
@@ -32,6 +33,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.JToggleButton.ToggleButtonModel;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -44,6 +46,7 @@ public class FancyTab extends JXPanel {
     private final TabActionMap tabActions;
     private final AbstractButton mainButton;
     private final AbstractButton removeButton;
+    private final JXBusyLabel busyLabel;
     private final JLabel additionalText;
     private final FancyTabProperties props;
     
@@ -73,6 +76,7 @@ public class FancyTab extends JXPanel {
         this.mainButton = createMainButton();
         this.additionalText = createAdditionalText();
         this.removeButton = createRemoveButton();
+        this.busyLabel = createBusyLabel();
 
         if(group != null) {
             group.add(mainButton);
@@ -96,7 +100,6 @@ public class FancyTab extends JXPanel {
         
         addMouseListener(highlightListener);
         mainButton.addMouseListener(highlightListener);
-        additionalText.addMouseListener(highlightListener);
         
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
         
@@ -110,6 +113,8 @@ public class FancyTab extends JXPanel {
         layout.setAutoCreateGaps(true);
         
         layout.setHorizontalGroup(layout.createSequentialGroup()
+                .addGap(5)
+                .addComponent(busyLabel)
                 .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 .addComponent(additionalText)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -119,6 +124,7 @@ public class FancyTab extends JXPanel {
         
         layout.setVerticalGroup(
                     layout.createParallelGroup(GroupLayout.Alignment.CENTER, true)
+                    .addComponent(busyLabel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(additionalText, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(removeButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -128,6 +134,25 @@ public class FancyTab extends JXPanel {
     @Override
     public String toString() {
         return "FancyTab for: " + getTitle() + ", " + super.toString();
+    }
+    
+    JXBusyLabel createBusyLabel() {
+        final JXBusyLabel busy = new JXBusyLabel(new Dimension(16, 16));
+        if(tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) == Boolean.TRUE) {
+            busy.setBusy(true);
+            busy.setVisible(true);
+        }
+        tabActions.getMainAction().addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
+                    boolean on = evt.getNewValue() == Boolean.TRUE;
+                    busy.setBusy(on);
+                    busy.setVisible(on);
+                }
+            }
+        });
+        return busy;
     }
     
     JLabel createAdditionalText() {
@@ -188,11 +213,11 @@ public class FancyTab extends JXPanel {
     AbstractButton createMainButton() {
         AbstractButton button = new JToggleButton();
         button.setModel(new NoToggleModel());
-        button.setAction(tabActions.getSelectAction());
+        button.setAction(tabActions.getMainAction());
         button.setActionCommand(TabActionMap.SELECT_COMMAND);
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
-        button.setMargin(new Insets(2, 5, 2, 5));
+        button.setMargin(new Insets(0, 0, 0, 0));
         button.setToolTipText(getTitle());
 
         if (props.getTextFont() != null) {
@@ -276,7 +301,7 @@ public class FancyTab extends JXPanel {
     }
 
     public String getTitle() {
-        return (String)tabActions.getSelectAction().getValue(Action.NAME);
+        return (String)tabActions.getMainAction().getValue(Action.NAME);
     }
     
     private void showPopup(MouseEvent event) {
