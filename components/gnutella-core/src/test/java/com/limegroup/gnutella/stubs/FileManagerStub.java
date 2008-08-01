@@ -3,7 +3,6 @@ package com.limegroup.gnutella.stubs;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +67,7 @@ public class FileManagerStub extends FileManagerImpl {
         super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, listeners);
         
         fileListStub = new FileListStub("Shared Stub", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE);
-    
+        
         super.resetVariables();
     }
 
@@ -80,12 +79,6 @@ public class FileManagerStub extends FileManagerImpl {
     @Override
     public FileList getSharedFileList() {
         return fileListStub;
-    }
-    
-    private List removeRequests = new LinkedList();
-    
-    public List getRemoveRequests() {
-        return removeRequests;
     }
     
     public FileDesc get(int i) {
@@ -135,13 +128,10 @@ public class FileManagerStub extends FileManagerImpl {
         getIncompleteFileList().add(ifd);
         fileURNSUpdated(ifd);
         
+        files.add(ifd);
+        fileToFileDescMap.put(incompleteFile, ifd);
+        
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
-    }
-    
-    @Override
-    public synchronized FileDesc removeFile(File f) {
-        removeRequests.add(f);
-        return super.removeFile(f);
     }
         
     public void dispatchEvent(FileManagerEvent.Type type, FileDesc fileDesc) {

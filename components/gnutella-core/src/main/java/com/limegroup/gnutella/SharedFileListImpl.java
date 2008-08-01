@@ -73,6 +73,7 @@ public class SharedFileListImpl extends FileListImpl {
     
     @Override
     public boolean addFileDesc(FileDesc fileDesc) {
+      	filesNotToShare.remove(fileDesc.getFile());
         boolean value = super.addFileDesc(fileDesc);
         
         //Register this file with its parent directory.

@@ -109,7 +109,8 @@ class FileRequestParser {
         }
     
         FileDesc desc = fileManager.getFileDesc(urn);
-        if(desc == null || !fileManager.getSharedFileList().contains(desc)) {
+        if(desc == null || (!fileManager.getSharedFileList().contains(desc) 
+        			&& !fileManager.getIncompleteFileList().contains(desc))) {
             return null;
         }
     

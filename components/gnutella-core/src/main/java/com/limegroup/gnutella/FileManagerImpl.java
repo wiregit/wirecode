@@ -1042,9 +1042,9 @@ public class FileManagerImpl implements FileManager, Service {
         }   
         
         FileDesc fd = getFileDesc(f);
-        if(fd == null)
-        return fd;
-    
+        if(fd == null || !fileToFileDescMap.containsKey(f))
+            return fd;
+
         removeFileDesc(fd);
         
         dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FILE, fd));
