@@ -11,6 +11,9 @@ public interface Search {
     /** Starts the search. */
     void start(SearchListener searchListener);
     
+    /** Repeats the search. */
+    void repeat();
+    
     /** Stops the search. */
     void stop();
 

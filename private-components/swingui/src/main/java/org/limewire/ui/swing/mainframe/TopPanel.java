@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collections;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -109,6 +110,9 @@ class TopPanel extends JPanel implements SearchNavigator {
         gbc.weightx = 1;
         gbc.insets = new Insets(5, 0, 0, 0);
         searchList = new FancyTabList();
+        searchList.setCloseAllText(I18n.tr("Close all searches"));
+        searchList.setCloseOneText(I18n.tr("Close search"));
+        searchList.setCloseOtherText(I18n.tr("Close other searches"));
         searchList.setFixedLayout(50, 120, 120);
         searchList.setRemovable(true);
         searchList.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -125,11 +129,17 @@ class TopPanel extends JPanel implements SearchNavigator {
     }
     
     @Override
-    public SearchNavItem addSearch(String title, JComponent searchPanel, Search search) {
+    public SearchNavItem addSearch(String title, JComponent searchPanel, final Search search) {
         final NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, title, searchPanel, false);
         final SearchAction action = new SearchAction(item, search);
         final Action moreTextAction = new NoOpAction();
-        final TabActionMap actionMap = new TabActionMap(action, action, moreTextAction);
+        final Action repeat = new AbstractAction(I18n.tr("Repeat search")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                search.repeat();
+            }
+        };
+        final TabActionMap actionMap = new TabActionMap(action, action, moreTextAction, Collections.singletonList(repeat));
         searchList.addTabActionMapAt(actionMap, 0);
         return new SearchNavItem() {
             @Override

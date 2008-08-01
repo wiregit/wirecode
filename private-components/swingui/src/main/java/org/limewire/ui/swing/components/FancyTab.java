@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -16,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -23,8 +25,10 @@ import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
+import javax.swing.SwingUtilities;
 import javax.swing.JToggleButton.ToggleButtonModel;
 
 import org.jdesktop.application.Resource;
@@ -201,6 +205,14 @@ public class FancyTab extends JXPanel {
         return button;
     }
     
+    void remove() {
+        removeButton.doClick(0);
+    }
+    
+    void select() {
+        mainButton.doClick(0);
+    }
+    
     void addRemoveActionListener(ActionListener listener) {
         removeButton.addActionListener(listener);
     }
@@ -262,6 +274,37 @@ public class FancyTab extends JXPanel {
             }
         }
     }
+
+    public String getTitle() {
+        return (String)tabActions.getSelectAction().getValue(Action.NAME);
+    }
+    
+    private void showPopup(MouseEvent event) {
+        if(props.isRemovable() || !tabActions.getRightClickActions().isEmpty()) {
+            JPopupMenu menu = new JPopupMenu();
+            for(Action action : tabActions.getRightClickActions()) {
+                menu.add(action);
+            }
+            
+            if(menu.getComponentCount() != 0 && props.isRemovable()) {
+                menu.addSeparator();
+            }
+            
+            if(props.isRemovable()) {
+                menu.add(new AbstractAction(props.getCloseOneText()) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        remove();
+                    }
+                });
+                menu.add(tabActions.getRemoveOthers());
+                menu.addSeparator();
+                menu.add(tabActions.getRemoveAll());
+            }
+            
+            menu.show((Component)event.getSource(), event.getX()+3, event.getY()+3);
+        }
+    }
     
     private class HighlightListener extends MouseAdapter {
         @Override
@@ -282,18 +325,29 @@ public class FancyTab extends JXPanel {
         
         @Override
         public void mouseClicked(MouseEvent e) {
-            // If middle-click, delete.
-            if(e.getButton() == MouseEvent.BUTTON2 && props.isRemovable()) {
-                removeButton.doClick(0);
-            } else if(!(e.getSource() instanceof AbstractButton)) {
-                mainButton.doClick(0);
+            if(props.isRemovable() && SwingUtilities.isMiddleMouseButton(e)) {
+                remove();
+            } else if(!(e.getSource() instanceof AbstractButton) && SwingUtilities.isLeftMouseButton(e)) {
+                select();
+            } else if(e.isPopupTrigger()) {
+                showPopup(e);
             }
         }
-    }
-
-    public String getTitle() {
-        return (String)tabActions.getSelectAction().getValue(Action.NAME);
-    }
+        
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if(e.isPopupTrigger()) {
+                showPopup(e);
+            }
+        }
+        
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if(e.isPopupTrigger()) {
+                showPopup(e);
+            }
+        }
+    }    
     
     private static class NoToggleModel extends ToggleButtonModel {
         @Override

@@ -6,8 +6,9 @@ import java.awt.Font;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.ui.swing.util.I18n;
 
-public class FancyTabProperties implements Cloneable {
+class FancyTabProperties implements Cloneable {
     
     private Painter<JXButton> highlightPainter;
     private Painter<JXButton> normalPainter;
@@ -16,14 +17,20 @@ public class FancyTabProperties implements Cloneable {
     private Color normalColor;
     private Font textFont;
     private boolean removable;
-    
-    public FancyTabProperties() {
+    private String closeOneText;
+    private String closeAllText;
+    private String closeOtherText;
+
+    FancyTabProperties() {
         highlightPainter = new RectanglePainter<JXButton>(2, 2, 2, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY);
         selectedPainter = new RectanglePainter<JXButton>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY);
         normalPainter = null;
         selectionColor = new Color(0, 100, 0);
         normalColor = Color.BLUE;
         removable = false;
+        closeOneText = I18n.tr("Close Tab");
+        closeAllText = I18n.tr("Close All Tabs");
+        closeOtherText = I18n.tr("Close Other Tabs");
     }
     
     public FancyTabProperties clone() {
@@ -88,6 +95,30 @@ public class FancyTabProperties implements Cloneable {
 
     public void setTextFont(Font textFont) {
         this.textFont = textFont;
+    }
+
+    public String getCloseOneText() {
+        return closeOneText;
+    }
+
+    public String getCloseAllText() {
+        return closeAllText;
+    }
+
+    public String getCloseOtherText() {
+        return closeOtherText;
+    }
+    
+    public void setCloseOneText(String closeOneText) {
+        this.closeOneText = closeOneText;
+    }
+
+    public void setCloseAllText(String closeAllText) {
+        this.closeAllText = closeAllText;
+    }
+
+    public void setCloseOtherText(String closeOtherText) {
+        this.closeOtherText = closeOtherText;
     }
 
 

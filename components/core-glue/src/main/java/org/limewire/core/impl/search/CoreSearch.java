@@ -23,7 +23,7 @@ public class CoreSearch implements Search {
     private final QueryReplyListenerList listenerList;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private volatile byte[] searchGuid;
-    private volatile QueryReplyListener listener;
+    private volatile QrListener listener;
 
     @AssistedInject
     public CoreSearch(@Assisted
@@ -40,11 +40,15 @@ public class CoreSearch implements Search {
     }
 
     @Override
-    public void start(final SearchListener searchListener) {
+    public void start(SearchListener searchListener) {
         if (started.getAndSet(true)) {
             throw new IllegalStateException("already started!");
         }
 
+        doSearch(searchListener);
+    }
+    
+    private void doSearch(SearchListener searchListener) {
         searchGuid = searchServices.newQueryGUID();
         listener = new QrListener(searchListener);
         listenerList.addQueryReplyListener(searchGuid, listener);
@@ -52,9 +56,23 @@ public class CoreSearch implements Search {
         searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
                 MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
     }
+    
+    @Override
+    public void repeat() {
+        if(!started.get()) {
+            throw new IllegalStateException("must start!");
+        }
+        
+        stop();
+        doSearch(listener.searchListener);
+    }
 
     @Override
     public void stop() {
+        if(!started.get()) {
+            throw new IllegalStateException("must start!");
+        }
+        
         listenerList.removeQueryReplyListener(searchGuid, listener);
         searchServices.stopQuery(new GUID(searchGuid));
     }

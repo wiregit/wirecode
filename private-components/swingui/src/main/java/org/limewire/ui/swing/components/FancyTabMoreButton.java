@@ -16,6 +16,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.GroupLayout.Group;
 import javax.swing.GroupLayout.SequentialGroup;
 
@@ -122,7 +123,7 @@ public class FancyTabMoreButton extends JXButton {
         @Override
         public void mouseClicked(MouseEvent e) {
             // Forward the click to selection if it wasn't already a button
-            if(!(e.getSource() instanceof AbstractButton)) {
+            if(!(e.getSource() instanceof AbstractButton) && SwingUtilities.isLeftMouseButton(e)) {
                 selectButton.doClick(0);
             }
         }

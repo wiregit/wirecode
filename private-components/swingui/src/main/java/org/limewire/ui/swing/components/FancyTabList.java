@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,11 +15,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.GroupLayout.Group;
 
 import org.jdesktop.application.Resource;
@@ -27,12 +30,18 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.util.GuiUtils;
 
-/** A horizontal list of {@link FancyTab FancyTabs}. */
+/** 
+ * A horizontal list of {@link FancyTab FancyTabs}.
+ * TODO: Support vertical too, if we need it.
+ */
 public class FancyTabList extends JXPanel {
     
     private final List<FancyTab> tabs = new ArrayList<FancyTab>();
     private final ButtonGroup tabGroup = new ButtonGroup();
     private int vizStartIdx = -1;
+    
+    private final Action closeOtherAction;
+    private final Action closeAllAction;
         
     private FancyTabProperties props;
     private int maxTabs;
@@ -63,6 +72,9 @@ public class FancyTabList extends JXPanel {
         maxTabs = Integer.MAX_VALUE;
         
         props = new FancyTabProperties();
+        closeOtherAction = new CloseOther();
+        closeAllAction = new CloseAll();
+        
         setTabActionMaps(actionMaps);
     }
     
@@ -130,10 +142,17 @@ public class FancyTabList extends JXPanel {
         setTabActionMaps(actionMaps);
     }
     
-    private FancyTab createAndPrepareTab(TabActionMap actionMaps) {
-        final FancyTab tab = new FancyTab(actionMaps, tabGroup, props);
-        tab.addRemoveActionListener(new RemoveListener(tab));
-        actionMaps.getSelectAction().addPropertyChangeListener(new PropertyChangeListener() {
+    private FancyTab createAndPrepareTab(TabActionMap actionMap) {
+        final FancyTab tab = new FancyTab(actionMap, tabGroup, props);
+        tab.addRemoveActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeTab(tab);
+            }
+        });
+        actionMap.setRemoveAll(closeAllAction);
+        actionMap.setRemoveOthers(closeOtherAction);
+        actionMap.getSelectAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
@@ -144,6 +163,30 @@ public class FancyTabList extends JXPanel {
             }
         });
         return tab;
+    }
+    
+    /**
+     * Removes the tab from the layout.
+     * This does not trigger any listeners on the tab's removal.
+     */
+    private void removeTab(FancyTab tab) {
+        boolean selected = tab.isSelected();
+        int idx = tabs.indexOf(tab);
+        assert idx != -1;
+        tabs.remove(tab);
+        tab.removeFromGroup(tabGroup);
+        
+        // Shift the selection to the tab to the left (or right, if idx==0)
+        if(selected && !tabs.isEmpty()) {
+            // Selecting a tab will trigger a layout.
+            if(idx == 0 && tabs.size() > 0) {
+                tabs.get(0).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
+            } else if(idx > 0 && tabs.size() > 0) {
+                tabs.get(idx - 1).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
+            } // else empty, no need to layout.
+        } else {            
+            layoutTabs();
+        }
     }
 
     /**
@@ -333,31 +376,61 @@ public class FancyTabList extends JXPanel {
         props.setTextFont(font);
     }
     
-    private class RemoveListener implements ActionListener {
-        private final FancyTab tab;
-        
-        public RemoveListener(FancyTab tab) {
-            this.tab = tab;
+    public void setCloseOneText(String closeOneText) {
+        props.setCloseOneText(closeOneText);
+    }
+
+    public void setCloseAllText(String closeAllText) {
+        props.setCloseAllText(closeAllText);
+        closeAllAction.putValue(Action.NAME, closeAllText);
+    }
+
+    public void setCloseOtherText(String closeOtherText) {
+        props.setCloseOtherText(closeOtherText);
+        closeOtherAction.putValue(Action.NAME, closeOtherText);
+    }
+    
+    private class CloseAll extends AbstractAction {
+        public CloseAll() {
+            super(props.getCloseAllText());
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            boolean selected = tab.isSelected();
-            int idx = tabs.indexOf(tab);
-            assert idx != -1;
-            tabs.remove(tab);
-            tab.removeFromGroup(tabGroup);
-            
-            // Shift the selection to the tab to the left (or right, if idx==0)
-            if(selected && !tabs.isEmpty()) {
-                if(idx == 0 && tabs.size() > 0) {
-                    tabs.get(0).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
-                } else if(idx > 0 && tabs.size() > 0) {
-                    tabs.get(idx - 1).getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
-                }
-            } else {            
-                layoutTabs();
+            while(!tabs.isEmpty()) {
+                tabs.get(0).remove();
             }
+        }
+    }
+    
+    private class CloseOther extends AbstractAction {
+        public CloseOther() {
+            super(props.getCloseOtherText());
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            while(tabs.size() > 1) {
+                FancyTab tab = tabs.get(0);
+                if(isFrom(tab, (Component)e.getSource())) {
+                    tab = tabs.get(1);
+                }
+                tab.remove();
+            }
+        }
+        
+        private boolean isFrom(JComponent parent, Component child) {
+            while(child.getParent() != null) {
+                child = child.getParent();
+                if(child instanceof JPopupMenu) {
+                    child = ((JPopupMenu)child).getInvoker();
+                }
+                
+                if(child == parent) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
