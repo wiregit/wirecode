@@ -107,8 +107,13 @@ public class UDPMultiplexor extends AbstractSelector {
 
 		} else if(array[connID] != null) {  // If valid connID then send on to connection
             channel = array[connID];
+            if (msg instanceof SynMessage) {
+                LOG.debugf("already assigned syn: {0}", msg);
+            }
 			if (channel.getRemoteSocketAddress().equals(addr) )
                 channel.getProcessor().handleMessage(msg);
+		} else {
+		    LOG.debugf("message for non-existing connection: {0}", msg);
 		}
 		
 		if (channel != null && channel.getProcessor().readyOps() != 0)
