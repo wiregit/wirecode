@@ -16,10 +16,12 @@ public class TabActionMap extends ActionMap {
     
     public static final String SELECT_COMMAND = "tab.select";
     public static final String REMOVE_COMMAND = "tab.remove";
+    private static final String MORE_TEXT_COMMAND = "tab.moreText";
         
-    public TabActionMap(Action selectAction, Action removeAction) {
+    public TabActionMap(Action selectAction, Action removeAction, Action moreTextAction) {
         put(SELECT_COMMAND, selectAction);
         put(REMOVE_COMMAND, removeAction);
+        put(MORE_TEXT_COMMAND, moreTextAction);
     }
 
     public Action getSelectAction() {
@@ -28,6 +30,10 @@ public class TabActionMap extends ActionMap {
 
     public Action getRemoveAction() {
         return get(REMOVE_COMMAND);
+    }
+    
+    public Action getMoreTextAction() {
+        return get(MORE_TEXT_COMMAND);
     }
     
     /**
@@ -45,7 +51,7 @@ public class TabActionMap extends ActionMap {
     public static List<TabActionMap> createMapForSelectActions(Collection<? extends Action> selectActions) {
         List<TabActionMap> maps = new ArrayList<TabActionMap>();
         for(Action action : selectActions) {
-            maps.add(new TabActionMap(action, null));
+            maps.add(new TabActionMap(action, null, null));
         }
         return maps;
     }

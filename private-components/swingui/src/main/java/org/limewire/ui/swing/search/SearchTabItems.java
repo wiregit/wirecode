@@ -55,7 +55,7 @@ class SearchTabItems extends JXPanel {
         gbc.gridwidth = GridBagConstraints.RELATIVE;
 
         FancyTabList ttp = new FancyTabList(TabActionMap.createMapForSelectActions(searchTabs));
-        ttp.setFlowedLayout(new Insets(2, 2, 0, 5));
+        ttp.setFlowedLayout(new Insets(0, 2, 0, 5));
         ttp.setHighlightPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.WHITE,
                 0f, Color.WHITE));
         add(ttp, gbc);

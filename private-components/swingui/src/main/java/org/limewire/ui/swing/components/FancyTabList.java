@@ -284,7 +284,7 @@ public class FancyTabList extends JXPanel {
         
         for(FancyTab tab : getPendingVisibleTabs()) {
             horGroup.addComponent(tab, minimumWidth, preferredWidth, maximumWidth);
-            verGroup.addComponent(tab);
+            verGroup.addComponent(tab, this.getHeight(), this.getHeight(), this.getHeight());
         }
         
         if(tabs.size() > maxTabs) {

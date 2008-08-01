@@ -70,7 +70,7 @@ public class SearchResultsPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 0;

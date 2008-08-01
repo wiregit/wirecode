@@ -3,8 +3,6 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -16,9 +14,13 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
+import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JToggleButton;
+import javax.swing.LayoutStyle;
+import javax.swing.SwingConstants;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
@@ -33,6 +35,7 @@ public class FancyTab extends JXPanel {
     private final TabActionMap tabActions;
     private final TextButton mainButton;
     private final JButton removeButton;
+    private final JLabel additionalText;
     private FancyTabProperties props;
     
     private static enum TabState {
@@ -64,28 +67,78 @@ public class FancyTab extends JXPanel {
         }
             
         setOpaque(false);
-        setLayout(new GridBagLayout());
         setToolTipText(getTitle());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.weightx = 1;
-        add(mainButton, gbc);
-        
         HighlightListener highlightListener = new HighlightListener();
         
+        additionalText = new JLabel();
+        additionalText.setVisible(false);
+        
+        if(actionMap.getMoreTextAction() != null) {
+            additionalText.setOpaque(false);
+            additionalText.setHorizontalAlignment(SwingConstants.LEADING);
+            additionalText.setFont(props.getTextFont());
+            
+            String name = (String)actionMap.getMoreTextAction().getValue(Action.NAME);
+            if(name != null) {
+                additionalText.setText(name);
+                additionalText.setVisible(true);
+            }
+            actionMap.getMoreTextAction().addPropertyChangeListener(new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if(evt.getPropertyName().equals(Action.NAME)) {
+                        additionalText.setText("(" + (String)evt.getNewValue() + ")");
+                        additionalText.setVisible(true);
+                    }
+                }
+            });
+            additionalText.addMouseListener(highlightListener);
+        }
+        
+        
         removeButton = createRemoveButton();
+        removeButton.setVisible(false);
         if(props.isRemovable()) {
             removeButton.addMouseListener(highlightListener);
-            gbc.anchor = GridBagConstraints.EAST;
-            gbc.weightx = 0;
-            gbc.insets = new Insets(0, 0, 0, 3);
-            add(removeButton, gbc);
+            removeButton.setVisible(true);
         }
         
         addMouseListener(highlightListener);
         mainButton.addMouseListener(highlightListener);
         
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
+        
+        layoutComponents();
+    }
+    
+    private void layoutComponents() {
+        GroupLayout layout = new GroupLayout(this);
+        setLayout(layout);
+        
+        mainButton.setHorizontalAlignment(SwingConstants.LEADING);
+        additionalText.setHorizontalAlignment(SwingConstants.LEADING);
+        removeButton.setHorizontalAlignment(SwingConstants.TRAILING);
+        
+        mainButton.setVerticalAlignment(SwingConstants.CENTER);
+        additionalText.setVerticalAlignment(SwingConstants.CENTER);
+        removeButton.setVerticalAlignment(SwingConstants.CENTER);
+        
+        layout.setAutoCreateGaps(true);
+        
+        layout.setHorizontalGroup(layout.createSequentialGroup()
+                .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+                .addComponent(additionalText)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(removeButton)
+                .addGap(5)
+                );
+        
+        layout.setVerticalGroup(
+                    layout.createParallelGroup(GroupLayout.Alignment.CENTER, true)
+                    .addComponent(mainButton)
+                    .addComponent(additionalText)
+                    .addComponent(removeButton)
+                );
     }
     
     @Override

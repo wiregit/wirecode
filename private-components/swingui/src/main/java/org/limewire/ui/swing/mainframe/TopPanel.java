@@ -25,6 +25,7 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectionListener;
@@ -33,6 +34,7 @@ import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.util.I18n;
 
@@ -123,12 +125,13 @@ class TopPanel extends JPanel implements SearchNavigator {
     }
     
     @Override
-    public NavItem addSearch(String title, JComponent searchPanel, Search search) {
+    public SearchNavItem addSearch(String title, JComponent searchPanel, Search search) {
         final NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, title, searchPanel, false);
         final SearchAction action = new SearchAction(item, search);
-        final TabActionMap actionMap = new TabActionMap(action, action);
+        final Action moreTextAction = new NoOpAction();
+        final TabActionMap actionMap = new TabActionMap(action, action, moreTextAction);
         searchList.addTabActionMapAt(actionMap, 0);
-        return new NavItem() {
+        return new SearchNavItem() {
             @Override
             public String getName() {
                 return item.getName();
@@ -143,6 +146,11 @@ class TopPanel extends JPanel implements SearchNavigator {
             @Override
             public void select() {
                 action.putValue(Action.SELECTED_KEY, true);
+            }
+            
+            @Override
+            public void sourceCountUpdated(int newSourceCount) {
+                moreTextAction.putValue(Action.NAME, String.valueOf(newSourceCount));
             }
         };
     }
