@@ -18,15 +18,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.GroupLayout.Group;
+import javax.swing.GroupLayout.SequentialGroup;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -394,6 +397,7 @@ public class FancyTabList extends JXPanel {
         selectButton.setToolTipText(tab.getTitle());
         selectButton.setHorizontalAlignment(SwingConstants.LEFT);
         
+        
         JButton removeButton = tab.createRemoveButton();
         removeButton.setOpaque(false);
         removeButton.addActionListener(new ActionListener() {
@@ -403,23 +407,32 @@ public class FancyTabList extends JXPanel {
             }
         });
         removeButton.addActionListener(new RemoveListener(tab));
+
+        Highlighter highlighter = new Highlighter(jp, selectButton, removeButton);
+        
+        JLabel moreText = tab.createAdditionalText(highlighter);
+        
         
         GroupLayout layout = new GroupLayout(jp);
         jp.setLayout(layout);
         
-        Group horGroup = layout.createSequentialGroup();
+        SequentialGroup horGroup = layout.createSequentialGroup();
         layout.setHorizontalGroup(horGroup);
         
         Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
-        layout.setVerticalGroup(layout.createSequentialGroup().addGroup(verGroup));
+        layout.setVerticalGroup(verGroup);
         
-        horGroup.addComponent(selectButton, 120, 120, 120);
-        horGroup.addComponent(removeButton, 20, 20, 20);
+        layout.setAutoCreateGaps(true);
         
-        verGroup.addComponent(selectButton);        
-        verGroup.addComponent(removeButton);        
+        horGroup.addComponent(selectButton, 0, 120, 120)
+                .addComponent(moreText)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(removeButton, 20, 20, 20);
         
-        Highlighter highlighter = new Highlighter(jp, removeButton);
+        verGroup.addComponent(selectButton)
+                .addComponent(moreText)
+                .addComponent(removeButton);        
+        
         jp.addMouseListener(highlighter);
         selectButton.addMouseListener(highlighter);
         removeButton.addMouseListener(highlighter);
@@ -429,23 +442,33 @@ public class FancyTabList extends JXPanel {
     
     private class Highlighter extends MouseAdapter {
         private final JXPanel panel;
-        private final JButton button;
+        private final JButton selectButton;
+        private final JButton removeButton;
         
-        public Highlighter(JXPanel panel, JButton button) {
+        public Highlighter(JXPanel panel, JButton selectButton, JButton removeButton) {
             this.panel = panel;
-            this.button = button;
+            this.selectButton = selectButton;
+            this.removeButton = removeButton;
         }
         
         @Override
         public void mouseEntered(MouseEvent e) {
             panel.setBackgroundPainter(props.getHighlightPainter());
-            button.setIcon(button.getSelectedIcon());
+            removeButton.setIcon(removeButton.getSelectedIcon());
         }
         
         @Override
         public void mouseExited(MouseEvent e) {
             panel.setBackgroundPainter(props.getNormalPainter());
-            button.setIcon(null);
+            removeButton.setIcon(null);
+        }
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            // Forward the click to selection if it wasn't already a button
+            if(!(e.getSource() instanceof AbstractButton)) {
+                selectButton.doClick();
+            }
         }
     }
     

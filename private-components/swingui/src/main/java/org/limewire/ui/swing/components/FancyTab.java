@@ -9,6 +9,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -20,7 +21,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
-import javax.swing.SwingConstants;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
@@ -70,32 +70,7 @@ public class FancyTab extends JXPanel {
         setToolTipText(getTitle());
         HighlightListener highlightListener = new HighlightListener();
         
-        additionalText = new JLabel();
-        additionalText.setVisible(false);
-        
-        if(actionMap.getMoreTextAction() != null) {
-            additionalText.setOpaque(false);
-            additionalText.setHorizontalAlignment(SwingConstants.LEADING);
-            additionalText.setFont(props.getTextFont());
-            
-            String name = (String)actionMap.getMoreTextAction().getValue(Action.NAME);
-            if(name != null) {
-                additionalText.setText(name);
-                additionalText.setVisible(true);
-            }
-            actionMap.getMoreTextAction().addPropertyChangeListener(new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if(evt.getPropertyName().equals(Action.NAME)) {
-                        additionalText.setText("(" + (String)evt.getNewValue() + ")");
-                        additionalText.setVisible(true);
-                    }
-                }
-            });
-            additionalText.addMouseListener(highlightListener);
-        }
-        
-        
+        additionalText = createAdditionalText(highlightListener);
         removeButton = createRemoveButton();
         removeButton.setVisible(false);
         if(props.isRemovable()) {
@@ -114,14 +89,6 @@ public class FancyTab extends JXPanel {
     private void layoutComponents() {
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
-        
-        mainButton.setHorizontalAlignment(SwingConstants.LEADING);
-        additionalText.setHorizontalAlignment(SwingConstants.LEADING);
-        removeButton.setHorizontalAlignment(SwingConstants.TRAILING);
-        
-        mainButton.setVerticalAlignment(SwingConstants.CENTER);
-        additionalText.setVerticalAlignment(SwingConstants.CENTER);
-        removeButton.setVerticalAlignment(SwingConstants.CENTER);
         
         layout.setAutoCreateGaps(true);
         
@@ -144,6 +111,35 @@ public class FancyTab extends JXPanel {
     @Override
     public String toString() {
         return "FancyTab for: " + getTitle() + ", " + super.toString();
+    }
+    
+    JLabel createAdditionalText(MouseListener highlighter) {
+        final JLabel label = new JLabel();
+        label.setVisible(false);
+        
+        if(tabActions.getMoreTextAction() != null) {
+            label.setOpaque(false);
+            label.setFont(props.getTextFont());
+            
+            String name = (String)tabActions.getMoreTextAction().getValue(Action.NAME);
+            if(name != null) {
+                label.setText("(" + name + ")");
+                label.setVisible(true);
+            }
+            
+            tabActions.getMoreTextAction().addPropertyChangeListener(new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if(evt.getPropertyName().equals(Action.NAME)) {
+                        label.setText("(" + (String)evt.getNewValue() + ")");
+                        label.setVisible(true);
+                    }
+                }
+            });
+            label.addMouseListener(highlighter);
+        }
+        
+        return label;
     }
     
     JButton createRemoveButton() {
