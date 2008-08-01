@@ -1,6 +1,8 @@
-package org.limewire.core.api.download.util;
+package org.limewire.core.impl.download;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
@@ -8,6 +10,7 @@ import org.limewire.core.api.download.DownloadState;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * calculates
@@ -55,6 +58,31 @@ public class QueueTimeCalculator {
         } finally {
             downloadingList.getReadWriteLock().readLock().unlock();
         }
+    }
+    
+    private static class DownloadStateMatcher implements Matcher<DownloadItem> {
+
+        
+        private Set<DownloadState> downloadStates = new HashSet<DownloadState>();
+
+        
+        public DownloadStateMatcher(DownloadState... states) {
+            for (DownloadState state : states) {
+                downloadStates.add(state);
+            }
+        }
+
+        
+        @Override
+        public boolean matches(DownloadItem item) {
+            if (item == null)
+                return false;
+
+            return downloadStates.contains(item.getState());
+        }
+
+        
+
     }
 
 }

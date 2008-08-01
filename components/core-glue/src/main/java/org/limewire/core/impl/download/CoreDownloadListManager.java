@@ -12,7 +12,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.util.QueueTimeCalculator;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.CoreSearch;

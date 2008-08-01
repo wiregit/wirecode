@@ -8,7 +8,6 @@ import java.util.List;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.util.QueueTimeCalculator;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.Downloader;
@@ -269,7 +268,7 @@ public class CoreDownloadItem implements DownloadItem {
         return downloader.getInactivePriority();
     }
 
-    @Override
+  
     public void setQueueTimeCalculator(QueueTimeCalculator queueTimeCalculator) {
         this.queueTimeCalculator = queueTimeCalculator;
     }

@@ -1,4 +1,4 @@
-package org.limewire.core.api.download.util;
+package org.limewire.ui.swing.downloads.table;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,8 +25,6 @@ public class DownloadStateMatcher implements Matcher<DownloadItem> {
 	public boolean matches(DownloadItem item) {
 		if (item == null)
 			return false;
-		if (downloadStates.isEmpty())
-			return true;
 
 		return downloadStates.contains(item.getState());
 	}
