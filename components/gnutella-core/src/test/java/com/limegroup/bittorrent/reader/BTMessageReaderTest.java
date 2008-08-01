@@ -36,6 +36,13 @@ public class BTMessageReaderTest extends BaseTestCase {
     public BTMessageReaderTest(String name) {
         super(name);
     }
+    
+    @Override
+    protected void setUp() throws Exception {
+        assertionsPassed = false;
+        parsedMessage = null;
+        super.setUp();
+    }
 
     public void testBTCancel() throws Exception {
 
@@ -203,8 +210,9 @@ public class BTMessageReaderTest extends BaseTestCase {
             }
 
             public void execute(Runnable arg0) {
-                arg0.run();
                 System.out.println("execute");
+                arg0.run();
+                
 
             }
         }, new ByteBufferCache());
