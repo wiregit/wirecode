@@ -8,7 +8,7 @@ import javax.swing.JTextField;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
+import org.limewire.core.api.download.util.DownloadStateExcluder;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;

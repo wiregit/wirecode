@@ -12,6 +12,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.util.QueueTimeCalculator;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.CoreSearch;
@@ -43,6 +44,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private final EventList<DownloadItem> downloadItems;
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
+	private final QueueTimeCalculator queueTimeCalculator;
     
     private static final int PERIOD = 1000;
 	
@@ -56,7 +58,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedLists.threadSafeList(
 	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));
-	    listenerList.addDownloadListener(new CoreDownloadListener(downloadItems));
+	    this.queueTimeCalculator = new QueueTimeCalculator(downloadItems);
+	    listenerList.addDownloadListener(new CoreDownloadListener(downloadItems, queueTimeCalculator));
 	    
 	  //TODO: change backgroundExecutor to listener - currently no listener for download progress
       //hack to force tables to update
@@ -84,7 +87,6 @@ public class CoreDownloadListManager implements DownloadListManager {
 	
 	@Override
 	public EventList<DownloadItem> getDownloads() {
-	    System.out.println(this);
 		return downloadItems;
 	}
 
@@ -116,7 +118,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         
         Downloader downloader = downloadManager.download(files, alts, queryGUID, overwrite, saveDir, fileName);
         
-        return new CoreDownloadItem(downloader);
+        return new CoreDownloadItem(downloader, queueTimeCalculator);
 	}
 
 	
@@ -160,18 +162,22 @@ public class CoreDownloadListManager implements DownloadListManager {
     private static class CoreDownloadListener implements DownloadListener {
 	    
 	    private List<DownloadItem> list;
+	    private QueueTimeCalculator queueTimeCalculator;
 
-        public CoreDownloadListener(List<DownloadItem> list){
+        public CoreDownloadListener(List<DownloadItem> list, QueueTimeCalculator queueTimeCalculator){
 	        this.list = list;
+	        this.queueTimeCalculator = queueTimeCalculator;
 	    }
 
         @Override
-        public void downloadAdded(DownloadItem downloadItem) {
+        public void downloadAdded(Downloader downloader) {
+            CoreDownloadItem downloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
             list.add(downloadItem);
         }
 
         @Override
-        public void downloadRemoved(DownloadItem downloadItem) {
+        public void downloadRemoved(Downloader downloader) {
+            CoreDownloadItem downloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
             //don't automatically remove finished downloads or downloads in error states
             if (downloadItem.getState() != DownloadState.DONE && downloadItem.getState() != DownloadState.ERROR) {
                 list.remove(downloadItem);

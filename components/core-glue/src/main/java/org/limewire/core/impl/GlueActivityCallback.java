@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.download.DownloadListener;
-import org.limewire.core.impl.download.CoreDownloadItem;
 import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
@@ -217,9 +216,8 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void addDownload(Downloader d) {
-        CoreDownloadItem downloadItem = new CoreDownloadItem(d);
         for (DownloadListener listener : downloadListeners) {
-            listener.downloadAdded(downloadItem);
+            listener.downloadAdded(d);
         }
     }
 
@@ -240,9 +238,8 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void removeDownload(Downloader d) {
-        CoreDownloadItem downloadItem = new CoreDownloadItem(d);
         for (DownloadListener listener : downloadListeners) {
-            listener.downloadRemoved(downloadItem);
+            listener.downloadRemoved(d);
         }
     }
 

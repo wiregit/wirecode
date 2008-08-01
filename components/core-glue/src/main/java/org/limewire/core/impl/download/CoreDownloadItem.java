@@ -8,8 +8,8 @@ import java.util.List;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.util.QueueTimeCalculator;
 import org.limewire.listener.EventListener;
-import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -27,9 +27,11 @@ public class CoreDownloadItem implements DownloadItem {
      */
     //set to 0 to show FINISHING state regardless of size
     private final long finishingThreshold = 0;
+    private QueueTimeCalculator queueTimeCalculator;
 
-    public CoreDownloadItem(Downloader downloader) {
+    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator) {
         this.downloader = downloader;
+        this.queueTimeCalculator = queueTimeCalculator;
         
         downloader.addListener(new EventListener<DownloadStatusEvent>(){
 
@@ -101,14 +103,13 @@ public class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public String getRemainingDownloadTime() {
+    public long getRemainingDownloadTime() {
         double remaining = (getTotalSize() - getCurrentSize()) / 1024.0;
         float speed = getDownloadSpeed();
         if (speed > 0) {
-            return CommonUtils.seconds2time((long) (remaining / speed));
+            return (long) (remaining / speed);
         } else {
-            // TODO: remaining time when speed is unknown
-            return "unknown";
+            return UNKNOWN_TIME;
         }
 
     }
@@ -159,7 +160,7 @@ public class CoreDownloadItem implements DownloadItem {
     }
     
     private DownloadState convertState(DownloadStatus status) {
-        // TODO: double check states
+        // TODO: double check states - some are not right
         switch (status) {
 
         case SAVING:
@@ -236,11 +237,6 @@ public class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public String getRemainingStateTime() {
-        return CommonUtils.seconds2time(downloader.getRemainingStateTime());
-    }
-
-    @Override
     public ErrorState getErrorState() {
         switch (downloader.getState()) {
         case CORRUPT_FILE:
@@ -255,6 +251,17 @@ public class CoreDownloadItem implements DownloadItem {
         default:
             return ErrorState.NONE;
         }
+    }
+
+    @Override
+    public long getRemainingQueueTime() {
+        return queueTimeCalculator.getRemainingQueueTime(this);
+    }
+
+ 
+    @Override
+    public int getLocalQueuePriority() {
+        return downloader.getInactivePriority();
     }
     
    

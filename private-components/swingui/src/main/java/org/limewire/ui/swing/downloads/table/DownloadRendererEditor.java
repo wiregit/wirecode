@@ -39,6 +39,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.CommonUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -477,7 +478,7 @@ public class DownloadRendererEditor extends JPanel implements
         }
         editor.statusLabel.setText(getMessage(item));
         if(item.getState() == DownloadState.DOWNLOADING){
-            editor.timeLabel.setText(item.getRemainingDownloadTime());
+            editor.timeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
             editor.timeLabel.setVisible(true);
         } else {
             editor.timeLabel.setVisible(false);
@@ -634,8 +635,12 @@ public class DownloadRendererEditor extends JPanel implements
 			        GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
 			        item.getPercentComplete()});
         case LOCAL_QUEUED:
-            //TODO: queue time
-            return I18n.tr("Queued - About x seconds before download can begin");
+            long queueTime = item.getRemainingQueueTime();
+            if(queueTime == DownloadItem.UNKNOWN_TIME){
+                return I18n.tr("Queued - remaining time unknown");                
+            } else {
+                return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
+            }
         case REMOTE_QUEUED:
             return I18n.tr("Queued - {0} people ahead of you for this file", item.getQueuePosition());
 		default:

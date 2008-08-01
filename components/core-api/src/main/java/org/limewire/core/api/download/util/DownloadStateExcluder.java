@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.downloads.table;
+package org.limewire.core.api.download.util;
 
 import java.util.HashSet;
 import java.util.Set;

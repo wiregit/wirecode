@@ -74,8 +74,8 @@ public class MockDownloadItem implements DownloadItem {
 		return totalSize;
 	}
 
-	public String getRemainingDownloadTime() {
-		return "1:42 minutes";
+	public long getRemainingDownloadTime() {
+		return 4123;
 	}
 
 	public synchronized void cancel() {
@@ -164,11 +164,6 @@ public class MockDownloadItem implements DownloadItem {
         return 2;
     }
 
-    @Override
-    public String getRemainingStateTime() {
-        // TODO Auto-generated method stub
-        return "1:20";
-    }
 
     @Override
     public ErrorState getErrorState() {
@@ -177,6 +172,19 @@ public class MockDownloadItem implements DownloadItem {
     
     public void setErrorState(ErrorState errorState){
         this.errorState = errorState;
+    }
+
+    @Override
+    public long getRemainingQueueTime() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+ 
+    @Override
+    public int getLocalQueuePriority() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 
