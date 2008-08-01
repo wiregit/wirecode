@@ -25,21 +25,25 @@ import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMessageHandler;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.messages.BTCancel;
+import com.limegroup.bittorrent.messages.BTChoke;
+import com.limegroup.bittorrent.messages.BTHave;
+import com.limegroup.bittorrent.messages.BTInterested;
 import com.limegroup.bittorrent.messages.BTMessage;
+import com.limegroup.bittorrent.messages.BTNotInterested;
+import com.limegroup.bittorrent.messages.BTPieceMessage;
+import com.limegroup.bittorrent.messages.BTRequest;
+import com.limegroup.bittorrent.messages.BTUnchoke;
 
 public class BTMessageReaderTest extends BaseTestCase {
-
-    private boolean assertionsPassed = false;
 
     private BTMessage parsedMessage = null;
 
     public BTMessageReaderTest(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
-        assertionsPassed = false;
         parsedMessage = null;
         super.setUp();
     }
@@ -51,18 +55,10 @@ public class BTMessageReaderTest extends BaseTestCase {
         int pieceIndex = 0;
         int length = endIndex - startIndex + 1;
 
-        final ByteBuffer payload = ByteBuffer.allocate(12);
-        payload.order(ByteOrder.BIG_ENDIAN);
-        payload.putInt(pieceIndex);
-        payload.putInt(startIndex);
-        payload.putInt(length);
+        final ByteBuffer payload = buildPayload(startIndex, pieceIndex, length);
         payload.clear();
 
-        final ByteBuffer message = ByteBuffer.allocate(8 + payload.limit());
-        message.order(ByteOrder.BIG_ENDIAN);
-        message.putInt(13);
-        message.put(BTMessage.CANCEL);
-        message.put(payload);
+        final ByteBuffer message = buildMessage(13, BTMessage.CANCEL, payload);
         message.clear();
         payload.clear();
 
@@ -71,18 +67,183 @@ public class BTMessageReaderTest extends BaseTestCase {
         messageReader.dataConsumed(true);
 
         Assert.assertTrue(parsedMessage instanceof BTCancel);
-        BTCancel cancel = (BTCancel) parsedMessage;
+        BTCancel btMessage = (BTCancel) parsedMessage;
+        assertMessage(BTMessage.CANCEL, btMessage, payload);
+
+    }
+
+    public void testBTRequest() throws Exception {
+
+        int startIndex = 0;
+        int endIndex = 16;
+        int pieceIndex = 0;
+        int length = endIndex - startIndex + 1;
+
+        final ByteBuffer payload = buildPayload(startIndex, pieceIndex, length);
+        payload.clear();
+
+        final ByteBuffer message = buildMessage(13, BTMessage.REQUEST, payload);
+        message.clear();
+        payload.clear();
+
+        BTMessageReader messageReader = runTest(message);
+        messageReader.handleRead();
+        messageReader.dataConsumed(true);
+
+        Assert.assertTrue(parsedMessage instanceof BTRequest);
+        BTRequest btMessage = (BTRequest) parsedMessage;
+        assertMessage(BTMessage.REQUEST, btMessage, payload);
+
+    }
+
+    public void testBTChoke() throws Exception {
+
+        final ByteBuffer payload = ByteBuffer.allocate(0);
+        payload.clear();
+
+        final ByteBuffer message = buildMessage(1, BTMessage.CHOKE, payload);
+        message.clear();
+        payload.clear();
+
+        BTMessageReader messageReader = runTest(message);
+        messageReader.handleRead();
+        messageReader.dataConsumed(true);
+
+        Assert.assertTrue(parsedMessage instanceof BTChoke);
+        BTChoke btMessage = (BTChoke) parsedMessage;
+        assertMessage(BTMessage.CHOKE, btMessage, payload);
+
+    }
+
+    public void testBTUnChoke() throws Exception {
+
+        final ByteBuffer payload = ByteBuffer.allocate(0);
+        payload.clear();
+
+        final ByteBuffer message = buildMessage(1, BTMessage.UNCHOKE, payload);
+        message.clear();
+        payload.clear();
+
+        BTMessageReader messageReader = runTest(message);
+        messageReader.handleRead();
+        messageReader.dataConsumed(true);
+
+        Assert.assertTrue(parsedMessage instanceof BTUnchoke);
+        BTUnchoke btMessage = (BTUnchoke) parsedMessage;
+        assertMessage(BTMessage.UNCHOKE, btMessage, payload);
+
+    }
+
+    public void testBTInterested() throws Exception {
+
+        final ByteBuffer payload = ByteBuffer.allocate(0);
+        payload.clear();
+
+        final ByteBuffer message = buildMessage(1, BTMessage.INTERESTED, payload);
+        message.clear();
+        payload.clear();
+
+        BTMessageReader messageReader = runTest(message);
+        messageReader.handleRead();
+        messageReader.dataConsumed(true);
+
+        Assert.assertTrue(parsedMessage instanceof BTInterested);
+        BTInterested btMessage = (BTInterested) parsedMessage;
+        assertMessage(BTMessage.INTERESTED, btMessage, payload);
+
+    }
+
+    public void testBTNotInterested() throws Exception {
+
+        final ByteBuffer payload = ByteBuffer.allocate(0);
+        payload.clear();
+
+        final ByteBuffer message = buildMessage(1, BTMessage.NOT_INTERESTED, payload);
+        message.clear();
+        payload.clear();
+
+        BTMessageReader messageReader = runTest(message);
+        messageReader.handleRead();
+        messageReader.dataConsumed(true);
+
+        Assert.assertTrue(parsedMessage instanceof BTNotInterested);
+        BTNotInterested btMessage = (BTNotInterested) parsedMessage;
+        assertMessage(BTMessage.NOT_INTERESTED, btMessage, payload);
+
+    }
+
+    public void testBTHave() throws Exception {
+
+        int pieceIndex = 0;
+        final ByteBuffer payload = ByteBuffer.allocate(4);
+        payload.putInt(pieceIndex);
+        payload.clear();
+
+        final ByteBuffer message = buildMessage(5, BTMessage.HAVE, payload);
+        message.clear();
+        payload.clear();
+
+        BTMessageReader messageReader = runTest(message);
+        messageReader.handleRead();
+        messageReader.dataConsumed(true);
+
+        Assert.assertTrue(parsedMessage instanceof BTHave);
+        BTHave btMessage = (BTHave) parsedMessage;
+        assertMessage(BTMessage.HAVE, btMessage, payload);
+        Assert.assertEquals(pieceIndex, btMessage.getPieceNum());
+
+    }
+
+    public void testBTPieceMessage() throws Exception {
+        byte[] data = { 1, 2, 3, 4, 5, 6 };
+        int pieceIndex = 0;
+        int offset = 0;
+        final ByteBuffer payload = ByteBuffer.allocate(8 + data.length);
+        payload.putInt(pieceIndex);
+        payload.putInt(offset);
+        payload.put(data);
+        payload.clear();
+
+        final ByteBuffer message = buildMessage(9 + data.length, BTMessage.PIECE, payload);
+        message.clear();
+        payload.clear();
+
+        BTMessageReader messageReader = runTest(message);
+        messageReader.handleRead();
+        messageReader.dataConsumed(true);
+
         
-        assertMessage(BTMessage.CANCEL, cancel, payload);
+        //TODO does this jsut call finish receiving peice instead?
+        Assert.assertTrue(parsedMessage instanceof BTPieceMessage);
+        BTPieceMessage btMessage = (BTPieceMessage) parsedMessage;
+        assertMessage(BTMessage.PIECE, btMessage, payload);
+        BTInterval btInterval = btMessage.getInterval();
+        Assert.assertEquals(new BTInterval(0, data.length - 1, pieceIndex), btInterval);
+        Assert.assertEquals(data, btMessage.getData());
 
-        Assert.assertTrue(assertionsPassed);
+    }
 
+    private ByteBuffer buildMessage(int length, byte messageType, final ByteBuffer payload) {
+        final ByteBuffer message = ByteBuffer.allocate(5 + payload.limit());
+        message.order(ByteOrder.BIG_ENDIAN);
+        message.putInt(length);
+        message.put(messageType);
+        message.put(payload);
+        return message;
+    }
+
+    private ByteBuffer buildPayload(int startIndex, int pieceIndex, int length) {
+        final ByteBuffer payload = ByteBuffer.allocate(12);
+        payload.order(ByteOrder.BIG_ENDIAN);
+        payload.putInt(pieceIndex);
+        payload.putInt(startIndex);
+        payload.putInt(length);
+        return payload;
     }
 
     private void assertMessage(byte messageType, BTMessage message, final ByteBuffer testPayload) {
         Assert.assertEquals(messageType, message.getType());
         Assert.assertEquals(testPayload, message.getPayload());
-        assertionsPassed = true;
     }
 
     private BTMessageReader runTest(final ByteBuffer testBuffer) {
@@ -212,7 +373,6 @@ public class BTMessageReaderTest extends BaseTestCase {
             public void execute(Runnable arg0) {
                 System.out.println("execute");
                 arg0.run();
-                
 
             }
         }, new ByteBufferCache());
