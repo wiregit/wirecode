@@ -3,6 +3,8 @@ package org.limewire.core.api.download;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 
+import org.limewire.core.api.download.util.QueueTimeCalculator;
+
 
 
 /**
@@ -78,4 +80,6 @@ public interface DownloadItem  {
     public ErrorState getErrorState();
     
     public int getLocalQueuePriority();
+    
+    public void setQueueTimeCalculator(QueueTimeCalculator queueTimeCalculator);
 }

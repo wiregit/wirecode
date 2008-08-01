@@ -8,6 +8,7 @@ import java.util.List;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.util.QueueTimeCalculator;
 
 
 public class MockDownloadItem implements DownloadItem {
@@ -185,6 +186,12 @@ public class MockDownloadItem implements DownloadItem {
     public int getLocalQueuePriority() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public void setQueueTimeCalculator(QueueTimeCalculator queueTimeCalculator) {
+        // TODO Auto-generated method stub
+        
     }
 
 

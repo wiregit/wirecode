@@ -170,14 +170,14 @@ public class CoreDownloadListManager implements DownloadListManager {
 	    }
 
         @Override
-        public void downloadAdded(Downloader downloader) {
-            CoreDownloadItem downloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
+        public void downloadAdded(DownloadItem downloadItem) {
+            //TODO better way of doing this
+            ((CoreDownloadItem) downloadItem).setQueueTimeCalculator(queueTimeCalculator);
             list.add(downloadItem);
         }
 
         @Override
-        public void downloadRemoved(Downloader downloader) {
-            CoreDownloadItem downloadItem = new CoreDownloadItem(downloader, queueTimeCalculator);
+        public void downloadRemoved(DownloadItem downloadItem) {
             //don't automatically remove finished downloads or downloads in error states
             if (downloadItem.getState() != DownloadState.DONE && downloadItem.getState() != DownloadState.ERROR) {
                 list.remove(downloadItem);

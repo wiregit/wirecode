@@ -29,18 +29,20 @@ public class CoreDownloadItem implements DownloadItem {
     private final long finishingThreshold = 0;
     private QueueTimeCalculator queueTimeCalculator;
 
+    public CoreDownloadItem(Downloader downloader) {
+        this(downloader, null);
+    }
+
     public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
-        
-        downloader.addListener(new EventListener<DownloadStatusEvent>(){
 
+        downloader.addListener(new EventListener<DownloadStatusEvent>() {
             @Override
             public void handleEvent(DownloadStatusEvent event) {
-                //broadcast the status has changed
+                // broadcast the status has changed
                 support.firePropertyChange("state", null, getState());
             }
-            
         });
     }
 
@@ -255,6 +257,9 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public long getRemainingQueueTime() {
+        if(queueTimeCalculator == null){
+            return DownloadItem.UNKNOWN_TIME;
+        }
         return queueTimeCalculator.getRemainingQueueTime(this);
     }
 
@@ -262,6 +267,11 @@ public class CoreDownloadItem implements DownloadItem {
     @Override
     public int getLocalQueuePriority() {
         return downloader.getInactivePriority();
+    }
+
+    @Override
+    public void setQueueTimeCalculator(QueueTimeCalculator queueTimeCalculator) {
+        this.queueTimeCalculator = queueTimeCalculator;
     }
     
    
