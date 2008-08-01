@@ -6,12 +6,12 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
+import org.limewire.ui.swing.friends.LoginPanel;
 
 import com.google.inject.Singleton;
 
@@ -23,14 +23,14 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class FriendsPanel extends JXCollapsiblePane {
+    private final LoginPanel loginPanel;
     public FriendsPanel() {
         super(Direction.UP);
         AnnotationProcessor.process(this);
         setLayout(new GridLayout(10, 1));
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        for (int i = 0; i < 10; i++) {
-            add(new JLabel("This is a stand-in for the content of the friends panel"));
-        }
+        loginPanel = new LoginPanel();
+        add(loginPanel);
         setCollapsed(true);
     }
 
@@ -45,11 +45,10 @@ public class FriendsPanel extends JXCollapsiblePane {
     
     private void resetBounds() {
         Rectangle parentBounds = getParent().getBounds();
-        Dimension ps = getPreferredSize();
-        int w = (int) ps.getWidth();
-        int h = (int) ps.getHeight();
-        //FIXME: Hard coded Y subtraction component
-        setBounds(parentBounds.width - w, parentBounds.y + parentBounds.height - 204, w, h);
+        Dimension childPreferredSize = loginPanel.getPreferredSize();
+        int w = (int) childPreferredSize.getWidth();
+        int h = (int) childPreferredSize.getHeight();
+        setBounds(parentBounds.width - w, parentBounds.height - h, w, h);
     }
 
     public void resize() {
