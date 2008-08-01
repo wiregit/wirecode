@@ -33,6 +33,7 @@ public class RosterListenerImpl implements RosterListener {
     public RosterListenerImpl(BrowseFactory browseFactory, StatusPanel.BrowseAction browseAction) {
         this.browseFactory = browseFactory;
         this.browseAction = browseAction;
+        Thread.dumpStack();
     }
     
     @Inject

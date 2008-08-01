@@ -29,6 +29,10 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         return address;
     }
     
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+    
     void sendGetAddress() {
         if(LOG.isInfoEnabled()) {
             LOG.info("getting address from " + getJID() + "...");

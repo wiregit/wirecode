@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.log4j.BasicConfigurator;
 import org.limewire.inject.AbstractModule;
@@ -33,6 +35,11 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyAddress;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressImpl;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 
 public class XMPPServiceTest extends ServiceTestCase {
     protected RosterListenerImpl rosterListener;
@@ -177,6 +184,64 @@ public class XMPPServiceTest extends ServiceTestCase {
         List<FileMetaData> offers = ((FileOfferHandlerImpl) injector.getInstance(FileOfferHandler.class)).offers;
         assertEquals(1, offers.size());
         assertEquals("a_cool_file.txt", offers.get(0).getName());
+    }
+    
+    public void testDetectAddressChanges() throws InterruptedException, UnknownHostException {
+        assertEquals(1, rosterListener.roster.size());
+        assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
+        assertEquals(0, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        
+        assertEquals(1, rosterListener2.roster.size());
+        assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
+        assertEquals(0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+                Address.EventType.ADDRESS_CHANGED));
+        
+        Thread.sleep(1000);
+        
+        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
+        LimePresence buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        assertEquals(Presence.Type.available, buddy2.getType());
+        DirectConnectionAddress address = (DirectConnectionAddress)buddy2.getAddress();
+        assertEquals("199.199.199.199", address.getAddress());
+        assertEquals(2048, address.getPort());
+        assertEquals(true, address.isTLSCapable());
+        
+        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
+        LimePresence buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
+        assertEquals(Presence.Type.available, buddy1.getType());
+        address = (DirectConnectionAddress)buddy1.getAddress();
+        assertEquals("199.199.199.199", address.getAddress());
+        assertEquals(2048, address.getPort());
+        assertEquals(true, address.isTLSCapable());
+
+        GUID clientGuid = new GUID();
+        PushProxyAddress pushProxy = new PushProxyAddressImpl("200.200.200.200", 3000, false);
+        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
+        proxies.add(pushProxy);
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new PushProxyMediatorAddressImpl(clientGuid, proxies),
+                Address.EventType.ADDRESS_CHANGED));
+        
+        Thread.sleep(1000);
+        
+        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
+        buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        assertEquals(Presence.Type.available, buddy2.getType());
+        PushProxyMediatorAddress mediatorAddress = (PushProxyMediatorAddress)buddy2.getAddress();
+        assertEquals(clientGuid, mediatorAddress.getClientID());
+        assertEquals(proxies, mediatorAddress.getPushProxies());
+        
+        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
+        buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
+        assertEquals(Presence.Type.available, buddy1.getType());
+        mediatorAddress = (PushProxyMediatorAddress)buddy2.getAddress();
+        assertEquals(clientGuid, mediatorAddress.getClientID());
+        assertEquals(proxies, mediatorAddress.getPushProxies());
     }
 
 }

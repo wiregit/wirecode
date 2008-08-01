@@ -8,7 +8,7 @@ import org.limewire.xmpp.client.service.User;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-class UserImpl implements User {
+public class UserImpl implements User {
     private final String id;
     private final String name;
     private final ConcurrentHashMap<String, Presence> presences;
@@ -29,7 +29,7 @@ class UserImpl implements User {
         return name;
     }
 
-    ConcurrentHashMap<String, Presence> getPresences() {
+    public ConcurrentHashMap<String, Presence> getPresences() {
         return presences;
     }
     

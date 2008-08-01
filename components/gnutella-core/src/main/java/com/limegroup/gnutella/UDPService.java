@@ -656,7 +656,7 @@ public class UDPService implements ReadWriteObserver {
 	    if (!canReceiveSolicited()) 
 	        return false;
 
-	    boolean canDoFWTSetting = ConnectionSettings.CAN_DO_FWT.getValue();
+	    boolean canDoFWTSetting = !ConnectionSettings.CANNOT_DO_FWT.getValue();
 	    if (!connectionServices.isConnected())
 	        return canDoFWTSetting;
 	    
@@ -666,7 +666,7 @@ public class UDPService implements ReadWriteObserver {
 	    }
 	    
 	    updateFWTState();
-	    return ConnectionSettings.CAN_DO_FWT.getValue();
+	    return !ConnectionSettings.CANNOT_DO_FWT.getValue();
 	}
 	
 	private void updateFWTState() {
@@ -692,7 +692,7 @@ public class UDPService implements ReadWriteObserver {
 	                    _lastReportedPort == networkManager.getPort());
 	        }
 	    }
-	    ConnectionSettings.CAN_DO_FWT.setValue(newFWTSetting);
+	    ConnectionSettings.CANNOT_DO_FWT.setValue(!newFWTSetting);
 	}
 	
 	// Some getters for bug reporting 

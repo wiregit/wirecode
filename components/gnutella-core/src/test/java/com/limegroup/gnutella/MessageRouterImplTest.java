@@ -209,7 +209,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
      */
     // TODO refactor to unit test case and move to different class
     public void testResponsesToQueryReplies() throws Exception {
-        ConnectionSettings.CAN_DO_FWT.setValue(false);
+        ConnectionSettings.CANNOT_DO_FWT.setValue(false);
         
         // needs valid address && port
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();

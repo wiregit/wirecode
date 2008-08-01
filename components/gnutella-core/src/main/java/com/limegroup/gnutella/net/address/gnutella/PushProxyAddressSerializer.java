@@ -21,11 +21,6 @@ public class PushProxyAddressSerializer extends DirectConnectionAddressSerialize
         return PushProxyAddress.class;
     }
 
-    @Inject
-    public void register(AddressFactory factory) {
-        super.register(factory);
-    }
-
     public Address deserialize(byte[] serializedAddress) throws IOException {
         DirectConnectionAddress address = (DirectConnectionAddress)super.deserialize(serializedAddress);
         return new PushProxyAddressImpl(address.getAddress(), address.getPort(), address.isTLSCapable());

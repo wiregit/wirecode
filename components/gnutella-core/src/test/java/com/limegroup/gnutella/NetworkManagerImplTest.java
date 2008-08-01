@@ -243,7 +243,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         UDPService udpService = injector.getInstance(UDPService.class);
         udpService.setReceiveSolicited(true);
-        ConnectionSettings.CAN_DO_FWT.setValue(true);
+        ConnectionSettings.CANNOT_DO_FWT.setValue(true);
         
         networkManager.incomingStatusChanged();
         assertEquals(1, addressChangedListener.events.size());
@@ -268,7 +268,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         UDPService udpService = injector.getInstance(UDPService.class);
         udpService.setReceiveSolicited(true);
-        ConnectionSettings.CAN_DO_FWT.setValue(true);
+        ConnectionSettings.CANNOT_DO_FWT.setValue(true);
         networkManager.incomingStatusChanged();
         assertEquals(0, addressChangedListener.events.size());
         
@@ -298,7 +298,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         UDPService udpService = injector.getInstance(UDPService.class);
         udpService.setReceiveSolicited(true);
-        ConnectionSettings.CAN_DO_FWT.setValue(true);
+        ConnectionSettings.CANNOT_DO_FWT.setValue(true);
         
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
@@ -342,7 +342,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         UDPService udpService = injector.getInstance(UDPService.class);
         udpService.setReceiveSolicited(true);
-        ConnectionSettings.CAN_DO_FWT.setValue(true);
+        ConnectionSettings.CANNOT_DO_FWT.setValue(true);
         
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
@@ -363,7 +363,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         addressChangedListener.events.clear();
         
         udpService.setReceiveSolicited(false);
-        ConnectionSettings.CAN_DO_FWT.setValue(false);
+        ConnectionSettings.CANNOT_DO_FWT.setValue(false);
         networkManager.incomingStatusChanged();
         
         holePunch = new PushProxyHolePunchAddressImpl(networkManager.supportsFWTVersion(), 
@@ -381,7 +381,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         UDPService udpService = injector.getInstance(UDPService.class);
         udpService.setReceiveSolicited(true);
-        ConnectionSettings.CAN_DO_FWT.setValue(true);
+        ConnectionSettings.CANNOT_DO_FWT.setValue(true);
         
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   

@@ -55,9 +55,10 @@ public class NetworkManagerImpl implements NetworkManager {
     private final SettingListener fwtListener = new FWTChangeListener();
     private final Provider<ByteBufferCache> bbCache;
     
-    private DirectConnectionAddress directAddress;
-    private MediatorAddress mediatedAddress;
-    private HolePunchAddress holePunchAddress;
+    private final Object addressLock = new Object();
+    private volatile DirectConnectionAddress directAddress;
+    private volatile MediatorAddress mediatedAddress;
+    private volatile HolePunchAddress holePunchAddress;
     
     
     /** True if TLS is disabled for this session. */
@@ -99,7 +100,7 @@ public class NetworkManagerImpl implements NetworkManager {
     
 
     public void start() {
-        ConnectionSettings.CAN_DO_FWT.addSettingListener(fwtListener);
+        ConnectionSettings.CANNOT_DO_FWT.addSettingListener(fwtListener);
         if(isIncomingTLSEnabled() || isOutgoingTLSEnabled()) {
             SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), bbCache.get());
             if(!sslTester.go()) {
@@ -114,7 +115,7 @@ public class NetworkManagerImpl implements NetworkManager {
 
     public void stop() {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
-        ConnectionSettings.CAN_DO_FWT.removeSettingListener(fwtListener);
+        ConnectionSettings.CANNOT_DO_FWT.removeSettingListener(fwtListener);
     }
     
     public void initialize() {
@@ -215,7 +216,9 @@ public class NetworkManagerImpl implements NetworkManager {
         capabilitiesVMFactory.get().updateCapabilities();
         if (connectionManager.get().isShieldedLeaf()) 
             connectionManager.get().sendUpdatedCapabilities();
-        maybeFireNewHolePunchAddress();
+        synchronized (addressLock) {
+            maybeFireNewHolePunchAddress();
+        }
     }
 
     private boolean maybeFireNewHolePunchAddress() {
@@ -292,7 +295,9 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     public void externalAddressChanged() {
-        maybeFireNewDirectConnectionAddress();
+        synchronized (addressLock) {
+            maybeFireNewDirectConnectionAddress();
+        }
     }
 
     private void maybeFireNewDirectConnectionAddress() {
@@ -313,11 +318,15 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     public void portChanged() {
-        maybeFireNewDirectConnectionAddress();
+        synchronized (addressLock) {
+            maybeFireNewDirectConnectionAddress();
+        }
     }
 
     public void acceptedIncomingConnectionChanged() {
-        maybeFireNewDirectConnectionAddress();
+        synchronized (addressLock) {
+            maybeFireNewDirectConnectionAddress();
+        }
     }
 
     private DirectConnectionAddress getDirectConnectionAddress() {
@@ -336,16 +345,18 @@ public class NetworkManagerImpl implements NetworkManager {
         fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
     }
 
-    public void newMediatedConnectionAddress(MediatorAddress newMediatorAddress) {        
-        if(supportsFWTVersion() > 0) {
-            mediatedAddress = newMediatorAddress;
-            PushProxyHolePunchAddress newHolePunchAddress = getPushProxyHolePunchAddress();
-            if(holePunchAddress == null || !holePunchAddress.equals(newHolePunchAddress)) {
-                fireHolePunchAddressEvent(newHolePunchAddress);
-            }
-        } else if(mediatedAddress == null || !mediatedAddress.equals(newMediatorAddress)) {
-            fireMediatedConenctionAddressEvent(newMediatorAddress);
-        }           
+    public void newMediatedConnectionAddress(MediatorAddress newMediatorAddress) { 
+        synchronized (addressLock) {
+            if(supportsFWTVersion() > 0) {
+                mediatedAddress = newMediatorAddress;
+                PushProxyHolePunchAddress newHolePunchAddress = getPushProxyHolePunchAddress();
+                if(holePunchAddress == null || !holePunchAddress.equals(newHolePunchAddress)) {
+                    fireHolePunchAddressEvent(newHolePunchAddress);
+                }
+            } else if(mediatedAddress == null || !mediatedAddress.equals(newMediatorAddress)) {
+                fireMediatedConenctionAddressEvent(newMediatorAddress);
+            }           
+        }
     }
     
     private void fireMediatedConenctionAddressEvent(MediatorAddress address) {

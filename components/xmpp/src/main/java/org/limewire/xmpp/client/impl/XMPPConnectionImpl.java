@@ -121,7 +121,8 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                         // TODO conncurrency control
                         ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     }
-                    addressIQListener = new AddressIQListener(connection, addressFactory);
+                    addressIQListener = new AddressIQListener(connection, addressFactory, users);
+                    XMPPConnectionImpl.this.rosterListeners.add(addressIQListener);
                     connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
                     ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
 
@@ -202,27 +203,29 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                         if(LOG.isDebugEnabled()) {
                             LOG.debug("user " + user + " presence changed to " + presence.getType());
                         }
-                        if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
-                            if(!user.getPresences().containsKey(presence.getFrom())) {
-                                try {
-                                    if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
-                                        if(LOG.isDebugEnabled()) {
-                                            LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
+                        synchronized (user) {
+                            if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
+                                if(!user.getPresences().containsKey(presence.getFrom())) {
+                                    try {
+                                        if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
+                                            if(LOG.isDebugEnabled()) {
+                                                LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
+                                            }
+                                            LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
+                                            limePresense.sendGetAddress();
+                                            user.addPresense(limePresense);
+                                        } else {
+                                            user.addPresense(new PresenceImpl(presence, connection));
                                         }
-                                        LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
-                                        limePresense.sendGetAddress();
-                                        user.addPresense(limePresense);
-                                    } else {
-                                        user.addPresense(new PresenceImpl(presence, connection));
+                                    } catch (org.jivesoftware.smack.XMPPException exception) {
+                                        LOG.error(exception.getMessage(), exception);
                                     }
-                                } catch (org.jivesoftware.smack.XMPPException exception) {
-                                    LOG.error(exception.getMessage(), exception);
+                                } else {
+                                    // TODO update presence
                                 }
-                            } else {
-                                // TODO update presence
+                            } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
+                                user.removePresense(new PresenceImpl(presence, connection));
                             }
-                        } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
-                            user.removePresense(new PresenceImpl(presence, connection));
                         }
                     }
                 }, "presence-handler-" + presence.getFrom());
