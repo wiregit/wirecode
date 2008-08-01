@@ -96,7 +96,7 @@ public class UDPMultiplexor extends AbstractSelector {
                 
                 LOG.debugf("non-empty index: {0}, addr: {1}", i, channel.getRemoteSocketAddress());
                 
-				if ( channel.isConnectionPending() && channel.getRemoteSocketAddress().equals(addr)) {
+				if ( channel.isConnectionPending() && channel.isForMe(addr, (SynMessage)msg)) {
 				    LOG.debugf("found index: {0}, sender id: {1}", i, ((SynMessage)msg).getSenderConnectionID());
                     channel.getProcessor().handleMessage(msg);
 					break;

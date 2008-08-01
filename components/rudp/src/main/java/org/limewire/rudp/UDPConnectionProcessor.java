@@ -325,7 +325,11 @@ public class UDPConnectionProcessor {
         // which means each side can send/receive a SYN and ACK
 		tryToConnect();
     }
-    
+
+    public byte getTheirConnectionID() {
+        return _theirConnectionID;
+    }
+
     /** Sets the connection id this is using. */
     protected void setConnectionId(byte id) {
         this._myConnectionID = id;
