@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 
 import javax.swing.BorderFactory;
@@ -7,23 +9,24 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
- * TODO: Add il8n
- * TODO: Swap labels on network button press
- * TODO: Error state
+ * TODO: Swap labels on network button press?
  * TODO: Use xmpp API
  */
 public class LoginPanel extends JPanel {
@@ -36,6 +39,7 @@ public class LoginPanel extends JPanel {
     private JCheckBox rememberMeCheckbox;
     private JButton signInButton;
     private JTextField userNameField;
+    private JPanel topPanel;
 
     public LoginPanel() {
         GuiUtils.assignResources(this);
@@ -46,14 +50,16 @@ public class LoginPanel extends JPanel {
     private void initComponents() {
         userNameField = new JTextField(18);
         passwordField = new JPasswordField(18);
-        rememberMeCheckbox = new JCheckBox("Remember me");
-        signInButton = new JButton("Sign in");
+        rememberMeCheckbox = new JCheckBox(tr("Remember me"));
+        signInButton = new JButton(tr("Sign in"));
 
-        FormLayout layout = new FormLayout("7dlu, l:p, 7dlu", "7dlu, p, 5dlu, p, 7dlu");
+        FormLayout layout = new FormLayout("7dlu, p, 7dlu", "7dlu, p, 10dlu, p, 7dlu");
         PanelBuilder builder = new PanelBuilder(layout);
         CellConstraints cc = new CellConstraints();
         
-        builder.add(topPanel(), cc.xy(2, 2));
+        topPanel = new JPanel();
+        topPanel.add(topPanel());
+        builder.add(topPanel, cc.xy(2, 2));
         builder.add(getDetailsPanel(), cc.xy(2, 4));
         add(builder.getPanel());
     }
@@ -62,19 +68,32 @@ public class LoginPanel extends JPanel {
         FormLayout layout = new FormLayout("p, 4dlu, p:g", "p, 3dlu, p, p, p");
         PanelBuilder builder = new PanelBuilder(layout);
         CellConstraints cc = new CellConstraints();
-        builder.addLabel("Have a Gmail or Facebook account?", cc.xyw(1, 1, 3));
-        builder.addLabel("- Access your friends' libraries", cc.xy(3, 3));
-        builder.addLabel("- See what new files they have", cc.xy(3, 4));
-        builder.addLabel("- Chat with your friends", cc.xy(3, 5));
+        builder.addLabel(tr("Have a Gmail or Facebook account?"), cc.xyw(1, 1, 3));
+        builder.addLabel(tr("- Access your friends' libraries"), cc.xy(3, 3));
+        builder.addLabel(tr("- See what new files they have"), cc.xy(3, 4));
+        builder.addLabel(tr("- Chat with your friends"), cc.xy(3, 5));
+        return builder.getPanel();
+    }
+    
+    private JPanel noConnectionAvailablePanel() {
+        FormLayout layout = new FormLayout("c:p:g", "7dlu,p, p, 7dlu");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.nextLine();
+        JLabel label = builder.addLabel(tr("Could not log you in"));
+        //A pretty crimson
+        label.setForeground(new Color(112, 13, 37));
+        FontUtils.changeSize(label, 2.0f);
+        builder.nextLine();
+        builder.addLabel(tr("Please try again."));
         return builder.getPanel();
     }
     
     private JPanel getDetailsPanel() {
         
         ButtonGroup networkGroup = new ButtonGroup();
-        googleTalkButton = new JToggleButton("Gmail", gmail);
+        googleTalkButton = new JToggleButton(tr("Gmail"), gmail);
         networkGroup.add(googleTalkButton);
-        facebookButton = new JToggleButton("Facebook", facebook);
+        facebookButton = new JToggleButton(tr("Facebook"), facebook);
         networkGroup.add(facebookButton);
         
         FormLayout layout = new FormLayout("l:p, 2dlu, p", "p");
@@ -90,9 +109,9 @@ public class LoginPanel extends JPanel {
         
         layout = new FormLayout("7dlu, l:p, 7dlu", "7dlu, p, p, 2dlu, p, p, 2dlu, p, 3dlu, p, 7dlu");
         PanelBuilder inputBuilder = new PanelBuilder(layout);
-        inputBuilder.addLabel("Gmail address", cc.xy(2, 2));
+        inputBuilder.addLabel(tr("Gmail address"), cc.xy(2, 2));
         inputBuilder.add(userNameField, cc.xy(2, 3));
-        inputBuilder.addLabel("Password", cc.xy(2, 5));
+        inputBuilder.addLabel(tr("Password"), cc.xy(2, 5));
         inputBuilder.add(passwordField, cc.xy(2, 6));
         inputBuilder.add(rememberMeCheckbox, cc.xy(2, 8));
         inputBuilder.add(signInButton, cc.xy(2, 10));
