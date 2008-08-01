@@ -88,12 +88,13 @@ public class UDPMultiplexor extends AbstractSelector {
 		// If connID equals 0 and SynMessage then associate with a connection
         // that appears to want it (connecting and with knowledge of it).
 		if ( connID == 0 && msg instanceof SynMessage ) {
+		    LOG.debugf("route sym: {0}", msg);
 			for (int i = 1; i < array.length; i++) {
                 channel = array[i];
                 if(channel == null)
                     continue;
                 
-                LOG.debugf("index: {0}", i);
+                LOG.debugf("non-empty index: {0}, addr: {1}", i, channel.getRemoteSocketAddress());
                 
 				if ( channel.isConnectionPending() && channel.getRemoteSocketAddress().equals(addr)) {
 				    LOG.debugf("found index: {0}, sender id: {1}", i, ((SynMessage)msg).getSenderConnectionID());
