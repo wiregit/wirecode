@@ -1,16 +1,12 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -18,25 +14,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingConstants;
 import javax.swing.GroupLayout.Group;
-import javax.swing.GroupLayout.SequentialGroup;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 
 /** A horizontal list of {@link FancyTab FancyTabs}. */
 public class FancyTabList extends JXPanel {
@@ -220,9 +209,6 @@ public class FancyTabList extends JXPanel {
      * Returns the tabs that *should* be visible, based on the currently visible
      * tabs, and the currently selected tab.  This keeps state and assumes the
      * tabs it returns will become visible.
-     * a
-     * 
-     * @return
      */
     private List<FancyTab> getPendingVisibleTabs() {
         List<FancyTab> vizTabs;
@@ -263,7 +249,7 @@ public class FancyTabList extends JXPanel {
         }
 
         if(tabs.size() > maxTabs) {
-            add(createMoreButton(), gbc);
+            add(new FancyTabMoreButton(tabs, moreTriangle, props), gbc);
         }
     }
 
@@ -287,11 +273,11 @@ public class FancyTabList extends JXPanel {
         
         for(FancyTab tab : getPendingVisibleTabs()) {
             horGroup.addComponent(tab, minimumWidth, preferredWidth, maximumWidth);
-            verGroup.addComponent(tab, this.getHeight(), this.getHeight(), this.getHeight());
+            verGroup.addComponent(tab, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
         }
         
         if(tabs.size() > maxTabs) {
-            JComponent more = createMoreButton();
+            JComponent more = new FancyTabMoreButton(tabs, moreTriangle, props);
             horGroup.addComponent(more);
             verGroup.addComponent(more);
         }
@@ -373,154 +359,5 @@ public class FancyTabList extends JXPanel {
                 layoutTabs();
             }
         }
-    }
-    
-    ////   Stuff after here is for the 'more' button.
-    ////   TODO: try moving it to another class.
-    
-    private JComponent createMenuItemFor(final JPopupMenu menu, final FancyTab tab) {
-        JXPanel jp = new JXPanel();
-        jp.setOpaque(false);
-        jp.setBackgroundPainter(props.getNormalPainter());
-        
-        JXButton selectButton = new JXButton(tab.getTabActionMap().getSelectAction());
-        selectButton.setOpaque(false);
-        removeButtonProperties(selectButton);
-        selectButton.setActionCommand(TabActionMap.SELECT_COMMAND);
-        selectButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                menu.setVisible(false);
-                tab.getTabActionMap().getSelectAction().putValue(Action.SELECTED_KEY, true);
-            }
-        });
-        selectButton.setToolTipText(tab.getTitle());
-        selectButton.setHorizontalAlignment(SwingConstants.LEFT);
-        
-        
-        JButton removeButton = tab.createRemoveButton();
-        removeButton.setOpaque(false);
-        removeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                menu.setVisible(false);
-            }
-        });
-        removeButton.addActionListener(new RemoveListener(tab));
-
-        Highlighter highlighter = new Highlighter(jp, selectButton, removeButton);
-        
-        JLabel moreText = tab.createAdditionalText(highlighter);
-        
-        
-        GroupLayout layout = new GroupLayout(jp);
-        jp.setLayout(layout);
-        
-        SequentialGroup horGroup = layout.createSequentialGroup();
-        layout.setHorizontalGroup(horGroup);
-        
-        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
-        layout.setVerticalGroup(verGroup);
-        
-        layout.setAutoCreateGaps(true);
-        
-        horGroup.addComponent(selectButton, 0, 120, 120)
-                .addComponent(moreText)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(removeButton, 20, 20, 20);
-        
-        verGroup.addComponent(selectButton)
-                .addComponent(moreText)
-                .addComponent(removeButton);        
-        
-        jp.addMouseListener(highlighter);
-        selectButton.addMouseListener(highlighter);
-        removeButton.addMouseListener(highlighter);
-        
-        return jp;
-    }
-    
-    private class Highlighter extends MouseAdapter {
-        private final JXPanel panel;
-        private final JButton selectButton;
-        private final JButton removeButton;
-        
-        public Highlighter(JXPanel panel, JButton selectButton, JButton removeButton) {
-            this.panel = panel;
-            this.selectButton = selectButton;
-            this.removeButton = removeButton;
-        }
-        
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            panel.setBackgroundPainter(props.getHighlightPainter());
-            removeButton.setIcon(removeButton.getSelectedIcon());
-        }
-        
-        @Override
-        public void mouseExited(MouseEvent e) {
-            panel.setBackgroundPainter(props.getNormalPainter());
-            removeButton.setIcon(null);
-        }
-        
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            // Forward the click to selection if it wasn't already a button
-            if(!(e.getSource() instanceof AbstractButton)) {
-                selectButton.doClick();
-            }
-        }
-    }
-    
-    private void removeButtonProperties(JButton button) {
-        button.setContentAreaFilled(false);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-    }
-    
-    private JComponent createMoreButton() {        
-        final JXButton button = new JXButton(I18n.tr("more"), moreTriangle);
-        button.setHorizontalTextPosition(SwingConstants.LEFT);
-        button.setVerticalTextPosition(SwingConstants.CENTER);
-        removeButtonProperties(button);
-        button.setBackgroundPainter(props.getNormalPainter());
-        MoreListener listener = new MoreListener(button);
-        button.addMouseListener(listener);
-        button.addActionListener(listener);
-        return button;
-    }
-    
-    private class MoreListener implements MouseListener, ActionListener {
-        private final JXButton button;
-        
-        public MoreListener(JXButton button) {
-            this.button = button;
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            JPopupMenu menu = new JPopupMenu("more");
-            for(FancyTab tab : tabs) {
-                menu.add(createMenuItemFor(menu, tab));
-            }
-            JComponent source = (JComponent)e.getSource();
-            menu.show(source, 3, source.getBounds().height);
-        }
-        
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            button.setBackgroundPainter(props.getHighlightPainter());
-        }
-        
-        @Override
-        public void mouseExited(MouseEvent e) {
-            getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
-            button.setBackgroundPainter(props.getNormalPainter());
-        }
-        
-        @Override public void mouseClicked(MouseEvent e) {}
-        @Override public void mousePressed(MouseEvent e) {}
-        @Override public void mouseReleased(MouseEvent e) {}
     }
 }

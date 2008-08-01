@@ -1,18 +1,22 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
@@ -21,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
+import javax.swing.JToggleButton.ToggleButtonModel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
@@ -33,10 +38,10 @@ import org.limewire.ui.swing.util.GuiUtils;
 public class FancyTab extends JXPanel {
 
     private final TabActionMap tabActions;
-    private final TextButton mainButton;
-    private final JButton removeButton;
+    private final AbstractButton mainButton;
+    private final AbstractButton removeButton;
     private final JLabel additionalText;
-    private FancyTabProperties props;
+    private final FancyTabProperties props;
     
     private static enum TabState {
         BACKGROUND, ROLLOVER, SELECTED;
@@ -61,18 +66,25 @@ public class FancyTab extends JXPanel {
         
         this.tabActions = actionMap;
         this.props = fancyTabProperties;
-        this.mainButton = new TextButton(actionMap.getSelectAction());
+        this.mainButton = createMainButton();
+        this.additionalText = createAdditionalText();
+        this.removeButton = createRemoveButton();
+
         if(group != null) {
             group.add(mainButton);
         }
+
+        mainButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                changeState(e.getStateChange() == ItemEvent.SELECTED ? TabState.SELECTED : TabState.BACKGROUND);
+            }
+        });
             
         setOpaque(false);
         setToolTipText(getTitle());
-        HighlightListener highlightListener = new HighlightListener();
         
-        additionalText = createAdditionalText(highlightListener);
-        removeButton = createRemoveButton();
-        removeButton.setVisible(false);
+        HighlightListener highlightListener = new HighlightListener();
         if(props.isRemovable()) {
             removeButton.addMouseListener(highlightListener);
             removeButton.setVisible(true);
@@ -80,6 +92,7 @@ public class FancyTab extends JXPanel {
         
         addMouseListener(highlightListener);
         mainButton.addMouseListener(highlightListener);
+        additionalText.addMouseListener(highlightListener);
         
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
         
@@ -113,7 +126,7 @@ public class FancyTab extends JXPanel {
         return "FancyTab for: " + getTitle() + ", " + super.toString();
     }
     
-    JLabel createAdditionalText(MouseListener highlighter) {
+    JLabel createAdditionalText() {
         final JLabel label = new JLabel();
         label.setVisible(false);
         
@@ -136,7 +149,6 @@ public class FancyTab extends JXPanel {
                     }
                 }
             });
-            label.addMouseListener(highlighter);
         }
         
         return label;
@@ -156,6 +168,36 @@ public class FancyTab extends JXPanel {
         button.setAction(tabActions.getRemoveAction());
         button.setActionCommand(TabActionMap.REMOVE_COMMAND);
         button.setHideActionText(true);
+        button.setVisible(false);
+        if(removeButton != null) {
+            for(ActionListener listener : removeButton.getActionListeners()) {
+                if(listener == tabActions.getRemoveAction()) {
+                    // Ignore the remove action -- it's added implicitly.
+                    continue;
+                }
+                button.addActionListener(listener);
+            }
+        }
+        return button;
+    }
+    
+    AbstractButton createMainButton() {
+        AbstractButton button = new JToggleButton();
+        button.setModel(new NoToggleModel());
+        button.setAction(tabActions.getSelectAction());
+        button.setActionCommand(TabActionMap.SELECT_COMMAND);
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setMargin(new Insets(2, 5, 2, 5));
+        button.setToolTipText(getTitle());
+
+        if (props.getTextFont() != null) {
+            button.setFont(props.getTextFont());
+        } else {
+            FontUtils.changeStyle(button, Font.BOLD);
+            FontUtils.changeSize(button, 2);
+        }
+        
         return button;
     }
     
@@ -220,39 +262,6 @@ public class FancyTab extends JXPanel {
             }
         }
     }
-
-    /** The actual button. */
-    private class TextButton extends JToggleButton {
-        public TextButton(Action action) {
-            super(action);
-            setActionCommand(TabActionMap.SELECT_COMMAND);
-            setFocusPainted(false);
-            setContentAreaFilled(false);
-            setMargin(new Insets(2, 5, 2, 5));
-            setToolTipText(getTitle());
-
-            if (props.getTextFont() != null) {
-                setFont(props.getTextFont());
-            } else {
-                FontUtils.changeStyle(this, Font.BOLD);
-                FontUtils.changeSize(this, 2);
-            }
-
-            addPropertyChangeListener(Action.NAME, new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
-                }
-            });
-
-            addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    changeState(e.getStateChange() == ItemEvent.SELECTED ? TabState.SELECTED : TabState.BACKGROUND);
-                }
-            });
-        }
-    }
     
     private class HighlightListener extends MouseAdapter {
         @Override
@@ -273,13 +282,54 @@ public class FancyTab extends JXPanel {
         
         @Override
         public void mouseClicked(MouseEvent e) {
-            if(e.getSource() != mainButton) {
-                mainButton.doClick();
+            // If middle-click, delete.
+            if(e.getButton() == MouseEvent.BUTTON2 && props.isRemovable()) {
+                removeButton.doClick(0);
+            } else if(!(e.getSource() instanceof AbstractButton)) {
+                mainButton.doClick(0);
             }
         }
     }
 
     public String getTitle() {
         return (String)tabActions.getSelectAction().getValue(Action.NAME);
+    }
+    
+    private static class NoToggleModel extends ToggleButtonModel {
+        @Override
+        public void setPressed(boolean b) {
+            if ((isPressed() == b) || !isEnabled()) {
+                return;
+            }
+
+            // This is different than the super in that
+            // we only go from false -> true, not true -> false.
+            if (!b && isArmed() && !isSelected()) {
+                setSelected(true);
+            } 
+
+            if (b) {
+                stateMask |= PRESSED;
+            } else {
+                stateMask &= ~PRESSED;
+            }
+
+            fireStateChanged();
+
+            if(!isPressed() && isArmed()) {
+                int modifiers = 0;
+                AWTEvent currentEvent = EventQueue.getCurrentEvent();
+                if (currentEvent instanceof InputEvent) {
+                    modifiers = ((InputEvent)currentEvent).getModifiers();
+                } else if (currentEvent instanceof ActionEvent) {
+                    modifiers = ((ActionEvent)currentEvent).getModifiers();
+                }
+                fireActionPerformed(
+                    new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                                    getActionCommand(),
+                                    EventQueue.getMostRecentEventTime(),
+                                    modifiers));
+            }
+        }
     }
 }
