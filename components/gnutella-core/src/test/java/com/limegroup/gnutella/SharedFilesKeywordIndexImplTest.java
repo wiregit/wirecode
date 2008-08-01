@@ -27,6 +27,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         context = new Mockery();
         fileManager = context.mock(FileManager.class);
         sharedFileList = context.mock(FileList.class);
+        incompleteFileList = context.mock(FileList.class);
         keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null);
     }
     
