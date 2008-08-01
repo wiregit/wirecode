@@ -135,9 +135,9 @@ public class FancyTab extends JXPanel {
         
         layout.setVerticalGroup(
                     layout.createParallelGroup(GroupLayout.Alignment.CENTER, true)
-                    .addComponent(mainButton)
-                    .addComponent(additionalText)
-                    .addComponent(removeButton)
+                    .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(additionalText, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(removeButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 );
     }
     
