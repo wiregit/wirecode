@@ -60,13 +60,15 @@ public class FancyTabMoreButton extends JXButton {
         
         
         JButton removeButton = tab.createRemoveButton();
-        removeButton.setVisible(true);
-        removeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                menu.setVisible(false);
-            }
-        });
+        if(props.isRemovable()) {
+            removeButton.setVisible(true);
+            removeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    menu.setVisible(false);
+                }
+            });
+        }
         
         JLabel moreText = tab.createAdditionalText();
         JXBusyLabel busyLabel = tab.createBusyLabel();

@@ -138,10 +138,13 @@ public class FancyTab extends JXPanel {
     
     JXBusyLabel createBusyLabel() {
         final JXBusyLabel busy = new JXBusyLabel(new Dimension(16, 16));
+        busy.setVisible(false);
+        
         if(tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) == Boolean.TRUE) {
             busy.setBusy(true);
             busy.setVisible(true);
         }
+        
         tabActions.getMainAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {

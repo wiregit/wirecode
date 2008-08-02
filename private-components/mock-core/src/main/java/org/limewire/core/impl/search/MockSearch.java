@@ -80,7 +80,7 @@ public class MockSearch implements Search {
     
     @Override
     public void repeat() {
-        addResults(" (from repeat)");
+        start();
     }
 
     private static class MockSearchResult implements SearchResult {
