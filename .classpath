@@ -49,6 +49,7 @@
 	<classpathentry kind="src" output="private-components/integrated-ui/build/classes" path="private-components/integrated-ui/src/main/java"/>
 	<classpathentry kind="src" output="private-components/mock-core/build/classes" path="private-components/mock-core/src/main/java"/>
 	<classpathentry kind="src" output="private-components/swingui/build/classes" path="private-components/swingui/src/main/java"/>
+	<classpathentry kind="src" output="private-components/swingui/build/tests" path="private-components/swingui/src/test/java"/>
 	<classpathentry kind="src" output="private-components/swingui/src/main/resources" path="private-components/swingui/src/main/resources"/>
 	<classpathentry kind="src" output="components/core-api/build/classes" path="components/core-api/src/main/java"/>
 	<classpathentry kind="src" output="components/core-glue/build/classes" path="components/core-glue/src/main/java"/>
