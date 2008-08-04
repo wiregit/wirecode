@@ -34,18 +34,6 @@ public interface SwarmCoordinator {
     void unlease(Range range);
 
     /**
-     * Writes the given range to disk using the supplied buffer. The buffer might not contain
-     * The full range to be written, the number of bytes written will be returned and a modified
-     * range can be passed in to write additional bytes.
-     * @param range
-     * @param content
-     * @return the number of bytes writen.
-     * @throws IOException
-     */
-    long write(Range range, ByteBuffer content) throws IOException;
-
-    
-    /**
      * Constructs a new WriteJob that will be used to write data. As data
      * becomes available, {@link SwarmWriteJob#write(Content)} can be called,
      * informing the job that data is available. If the job cannot consume data,
@@ -140,5 +128,7 @@ public interface SwarmCoordinator {
      * @return
      */
     SwarmFile getSwarmFile(Range range);
+
+    SwarmFileSystem getSwarmFileSystem();
 
 }

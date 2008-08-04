@@ -271,8 +271,8 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
                     fileSystem.closeSwarmFile(swarmFile);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
-                    //TODO need to figure out what we will do in this case,
-                    //most likely  jsut log the message
+                    // TODO need to figure out what we will do in this case,
+                    // most likely jsut log the message
                     e.printStackTrace();
                 }
             }
@@ -419,6 +419,10 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
     public SwarmFile getSwarmFile(Range range) {
         return fileSystem.getSwarmFile(range.getLow());
+    }
+
+    public SwarmFileSystem getSwarmFileSystem() {
+        return fileSystem;
     }
 
 }
