@@ -282,8 +282,9 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 if (s == TorrentState.SEEDING || s == TorrentState.VERIFYING)
                     return;
 
-                webseed();
+                
                 validateTorrent();
+                webseed();
                 startConnecting();
             }
 
