@@ -12,7 +12,7 @@ public class BTMetaInfoTest extends BaseTestCase {
      * A directory containing the test data for this unit test.
      */
     public static final String TEST_DATA_DIR = System.getProperty("user.dir")
-            + "/tests/test-data";
+            + "/test-data";
 
     public BTMetaInfoTest(String name) {
         super(name);

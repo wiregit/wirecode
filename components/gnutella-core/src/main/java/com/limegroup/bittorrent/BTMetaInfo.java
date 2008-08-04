@@ -117,4 +117,6 @@ public interface BTMetaInfo {
      */
     public long getLowByte(BTInterval btInterval);
 
+    public abstract boolean hasWebSeeds();
+
 }
