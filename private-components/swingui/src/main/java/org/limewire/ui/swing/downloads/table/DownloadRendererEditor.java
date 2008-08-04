@@ -152,7 +152,6 @@ public class DownloadRendererEditor extends JPanel implements
 	 */
 	public DownloadRendererEditor() {
 		GuiUtils.assignResources(this);
-		
 		iconLabel = new JLabel();
 
 		titleLabel = new JLabel();
@@ -429,7 +428,9 @@ public class DownloadRendererEditor extends JPanel implements
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        updateEditor();
+                        if (isVisible()) {
+                            updateEditor();
+                        }
                     }
                 });
             }

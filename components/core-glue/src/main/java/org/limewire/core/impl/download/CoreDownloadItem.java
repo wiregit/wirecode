@@ -40,11 +40,15 @@ public class CoreDownloadItem implements DownloadItem {
             @Override
             public void handleEvent(DownloadStatusEvent event) {
                 // broadcast the status has changed
-                support.firePropertyChange("state", null, getState());
-            }
+                fireDataChanged();
+            }           
         });
     }
 
+    void fireDataChanged() {
+        support.firePropertyChange("state", null, getState());
+    }
+    
     private Downloader getDownloader(){
         return downloader;
     }

@@ -14,6 +14,7 @@ public class MockDownloadItem implements DownloadItem {
 
 	private String title;
 	private volatile long currentSize = 0;
+    private volatile long remainingQueueTime = 9999;
 	private final long totalSize;
 	//guarded by this
 	private boolean running = true;
@@ -75,8 +76,8 @@ public class MockDownloadItem implements DownloadItem {
 	}
 
 	public long getRemainingDownloadTime() {
-		return 4123;
-	}
+        return (long) ((getTotalSize() - getCurrentSize()) / getDownloadSpeed());
+    }
 
 	public synchronized void cancel() {
 		setRunning(false);
@@ -107,6 +108,7 @@ public class MockDownloadItem implements DownloadItem {
 			public void run() {
 				while (isRunning() && getCurrentSize() < getTotalSize()) {
 					setCurrentSize(getCurrentSize() + 5);
+					setRemainingQueueTime(getRemainingQueueTime() - 1);
 					try {
 						sleep(500);
 					} catch (InterruptedException e) {
@@ -114,6 +116,7 @@ public class MockDownloadItem implements DownloadItem {
 					}
 				}
 			}
+          
 		}.start();
 	}
 
@@ -177,9 +180,15 @@ public class MockDownloadItem implements DownloadItem {
     @Override
     public long getRemainingQueueTime() {
         // TODO Auto-generated method stub
-        return 0;
+        System.out.println("remainingTime="+remainingQueueTime);
+        return remainingQueueTime;
     }
 
+    private synchronized void setRemainingQueueTime(long l) {
+        long oldTime = remainingQueueTime;
+        remainingQueueTime = l;
+        support.firePropertyChange("remainingQueueTime", oldTime, remainingQueueTime);
+    }
  
     @Override
     public int getLocalQueuePriority() {

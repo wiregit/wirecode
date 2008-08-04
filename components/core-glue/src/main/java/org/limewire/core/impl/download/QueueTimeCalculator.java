@@ -54,6 +54,7 @@ public class QueueTimeCalculator {
             if (index >= downloadingList.size()) {
                 return DownloadItem.UNKNOWN_TIME;
             }
+            System.out.println(downloadingList.get(index).getRemainingDownloadTime());
             return downloadingList.get(index).getRemainingDownloadTime();
         } finally {
             downloadingList.getReadWriteLock().readLock().unlock();
