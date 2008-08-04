@@ -44,7 +44,7 @@ class DownloadMediator {
 	public void pauseAll() {
 	 // TODO use TransactionList for performance (requires using GlazedLists from head)
         // lock list to ensure it is not modified elsewhere
-        commonBaseList.getReadWriteLock().readLock().lock();
+        commonBaseList.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : commonBaseList) {
                 if (item.getState().isPausable()) {
@@ -52,7 +52,7 @@ class DownloadMediator {
                 }
             }
         } finally {
-            commonBaseList.getReadWriteLock().readLock().unlock();
+            commonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 
@@ -60,7 +60,7 @@ class DownloadMediator {
 	public void resumeAll() {
         // lock list to ensure it is not modified elsewhere
 	 // TODO use TransactionList for these for performance (requires using GlazedLists from head)
-        commonBaseList.getReadWriteLock().readLock().lock();
+        commonBaseList.getReadWriteLock().writeLock().lock();
         try {
             for (DownloadItem item : commonBaseList) {
                 if (item.getState().isResumable()) {
@@ -68,7 +68,7 @@ class DownloadMediator {
                 }
             }
         } finally {
-            commonBaseList.getReadWriteLock().readLock().unlock();
+            commonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 	
