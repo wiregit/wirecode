@@ -262,6 +262,35 @@ public class BTDownloaderImplTest extends BaseTestCase {
             }
         }
     }
+    
+    public void testSingleWebSeedSingleFilePeers() throws Exception {
+        //TODO force peers and webseed to not have all pieces
+        //only when used togetehr have all the pieces
+        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-single-webseed-single-file-peer.torrent";
+        File torrentFile = new File(torrentfilePath);
+        BTDownloader downloader = createBTDownloader(torrentFile);
+
+        TorrentContext torrentContext = downloader.getTorrentContext();
+        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File rootFile = torrentFileSystem.getCompleteFile();
+        try {
+
+            FileUtils.deleteRecursive(rootFile);
+            File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+            incompleteFile1.delete();
+            File completeFile1 = torrentFileSystem.getFiles().get(0);
+            completeFile1.delete();
+
+            downloader.startDownload();
+            finishDownload(downloader);
+            SwarmerImplTest
+                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+        } finally {
+            if (rootFile != null) {
+                rootFile.delete();
+            }
+        }
+    }
 
     private BTDownloader createBTDownloader(File torrentFile) throws IOException {
         Assert.assertTrue(torrentFile.exists());
