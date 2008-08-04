@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.limewire.ui.swing.friends.Friend.State;
 import org.limewire.ui.swing.friends.Message.Type;
 
 /**
@@ -19,7 +20,7 @@ public class ConversationPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
 
-                ConversationPane pane = new ConversationPane("Will Benedict");
+                ConversationPane pane = new ConversationPane(new FriendImpl("Will Benedict", "Just listening to some jams", State.Available));
                 frame.add(pane);
                 
                 for(int i = 0; i < 10; i++) {
@@ -61,5 +62,31 @@ public class ConversationPaneHarness {
             return type;
         }
         
+    }
+    
+    private static class FriendImpl implements Friend {
+        private final String name, status;
+        private final State state;
+        
+        public FriendImpl(String name, String status, State state) {
+            this.name = name;
+            this.state = state;
+            this.status = status;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getStatus() {
+            return status;
+        }
+
+        @Override
+        public State getState() {
+            return state;
+        }
     }
 }
