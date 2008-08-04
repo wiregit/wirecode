@@ -74,17 +74,17 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     // forces refresh
     private void update() {
-        downloadItems.getReadWriteLock().readLock().lock();
-        try {
-            // TODO use TransactionList for these for performance (requires using GlazedLists from head)
-            for (DownloadItem item : downloadItems) {
-                if (item instanceof CoreDownloadItem)
-                    ((CoreDownloadItem) item).fireDataChanged();
-            }
-
-        } finally {
-            downloadItems.getReadWriteLock().readLock().unlock();
-        }
+//        downloadItems.getReadWriteLock().readLock().lock();
+//        try {
+//            // TODO use TransactionList for these for performance (requires using GlazedLists from head)
+//            for (DownloadItem item : downloadItems) {
+//                if (item instanceof CoreDownloadItem)
+//                    ((CoreDownloadItem) item).fireDataChanged();
+//            }
+//
+//        } finally {
+//            downloadItems.getReadWriteLock().readLock().unlock();
+//        }
     }
 	
 	@Override
