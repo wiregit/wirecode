@@ -4,7 +4,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
-public class ResultTableFormat implements TableFormat {
+public class ResultTableFormat implements TableFormat<VisualSearchResult> {
     private static final String[] COLUMN_NAMES = {
         "Icon", "Name", "Type", "Size", "Actions"
     };
@@ -20,16 +20,12 @@ public class ResultTableFormat implements TableFormat {
     }
 
     @Override
-    public Object getColumnValue(Object baseObject, int column) {
-         VisualSearchResult vsr = (VisualSearchResult) baseObject;
-         
+    public Object getColumnValue(VisualSearchResult vsr, int column) {
          if (column == 0) return vsr.getFileExtension();
          if (column == 1) return vsr.getDescription();
          if (column == 2) return vsr.getCategory();
          if (column == 3) return vsr.getSize();
          if (column == 4) return "action buttons go here";
-         
          return null;
     }
-
 }

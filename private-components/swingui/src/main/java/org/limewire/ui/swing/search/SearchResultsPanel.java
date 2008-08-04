@@ -1,5 +1,10 @@
 package org.limewire.ui.swing.search;
 
+import ca.odell.glazedlists.EventList;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -8,11 +13,7 @@ import javax.swing.JPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-
-import ca.odell.glazedlists.EventList;
-
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 
 /**
  * This class displays search results in a panel.
@@ -47,17 +48,24 @@ public class SearchResultsPanel extends JPanel {
             ResultsContainerFactory containerFactory) {
         
         this.sortAndFilterPanel = new SortAndFilterPanel();
-        
         EventList<VisualSearchResult> list =
             sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults);
+        
         this.resultsContainer = containerFactory.create(list, search);
+        sortAndFilterPanel.addModeListener(resultsContainer);
+        
         SearchTabItems.SearchTabListener listener =
             new SearchTabItems.SearchTabListener() {
             @Override
             public void categorySelected(SearchCategory searchCategory) {
                 resultsContainer.showCategory(searchCategory);
+                BaseResultPanel currentPanel =
+                    resultsContainer.getCurrentPanel();
+                ModeListener.Mode mode = currentPanel.getMode();
+                sortAndFilterPanel.setMode(mode);
             }
         };
+        
         this.searchTab =
             new SearchTabItems(searchInfo.getSearchCategory(), listener);
         

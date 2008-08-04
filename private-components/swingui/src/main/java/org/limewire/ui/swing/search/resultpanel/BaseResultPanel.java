@@ -1,7 +1,10 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -19,20 +22,21 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
+import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.SponsoredResultsPanel;
+import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
-class BaseResultPanel extends JXPanel implements Scrollable {
-    
-    public enum Mode { LIST, TABLE };
+public class BaseResultPanel extends JXPanel implements Scrollable {
     
     private final JList resultsList;
     private final JTable resultsTable;
+    private ModeListener.Mode mode;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
     BaseResultPanel(String title,
-            EventListModel<VisualSearchResult> listModel,
+            EventList<VisualSearchResult> eventList,
             EventSelectionModel<VisualSearchResult> selectionModel,
             SearchResultDownloader searchResultDownloader, Search search) {
         
@@ -49,25 +53,22 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         add(titleLabel, BorderLayout.NORTH);
         */
                 
-        resultsList = new JList(listModel);
+        EventListModel<VisualSearchResult> eventListModel =
+            new EventListModel<VisualSearchResult>(eventList);
+        
+        resultsList = new JList(eventListModel);
         resultsList.setSelectionModel(selectionModel);
         resultsList.addMouseListener(new ResultDownloader());
         
-        // TODO: RMV Find a way to access filterList in ResultsContainer!
-        // TODO: RMV You may need to add an EventList parameter to this
-        // TODO: RMV using the factory create methods starting on line 65.
-        // TODO: RMV After this is fixed, listen for JToggleButton presses
-        // TODO: RMV and call the setMode method in this class.
-        /*
-        SortedList sortedResults =
-            new SortedList(filterList, new ResultComparator());
-        EventTableModel tableModel =
-            new EventTableModel(sortedResults, new ResultTableFormat());
+        SortedList<VisualSearchResult> sortedResults =
+            new SortedList<VisualSearchResult>(
+                eventList, new ResultComparator());
+        EventTableModel<VisualSearchResult> tableModel =
+            new EventTableModel<VisualSearchResult>(
+                sortedResults, new ResultTableFormat());
         resultsTable = new JTable(tableModel);
-        */
-        resultsTable = null;
         
-        setMode(Mode.LIST);
+        setMode(ModeListener.Mode.LIST);
         
         SponsoredResultsPanel srp = createSponsoredResultsPanel();
         add(srp, BorderLayout.EAST);
@@ -81,6 +82,14 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         srp.addEntry("Object Computing, Inc.\n" +
             "An OO Software Engineering Company");
         return srp;
+    }
+    
+    /**
+     * Gets the current mode, LIST or TABLE.
+     * @return the current mode
+     */
+    public ModeListener.Mode getMode() {
+        return mode;
     }
 
     @Override
@@ -111,12 +120,19 @@ class BaseResultPanel extends JXPanel implements Scrollable {
         return resultsList.getScrollableUnitIncrement(visibleRect, orientation, direction);
     }
     
+    /**
+     * Changes whether the list view or table view is displayed.
+     * @param mode LIST or TABLE
+     */
     public void setMode(Mode mode) {
+        this.mode = mode;
         Component component =
             mode == Mode.LIST ? resultsList :
             mode == Mode.TABLE ? resultsTable :
             null;
+        removeAll();
         add(component, BorderLayout.CENTER);
+        revalidate();
     }
     
     private class ResultDownloader extends MouseAdapter {

@@ -9,12 +9,10 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ResultComparator implements Comparator {
+public class ResultComparator implements Comparator<VisualSearchResult> {
 
     @Override
-    public int compare(Object obj1, Object obj2) {
-        VisualSearchResult vsr1 = (VisualSearchResult) obj1;
-        VisualSearchResult vsr2 = (VisualSearchResult) obj2;
+    public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
         return vsr1.getDescription().compareTo(vsr2.getDescription());
     }
 }

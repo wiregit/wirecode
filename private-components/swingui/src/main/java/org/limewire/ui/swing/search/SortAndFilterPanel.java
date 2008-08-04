@@ -12,6 +12,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,6 +37,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 class SortAndFilterPanel extends JXPanel {
 
     private static final int FILTER_WIDTH = 10;
+    
+    private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
     
     @Resource private Icon listViewPressedIcon;
     @Resource private Icon listViewUnpressedIcon;
@@ -65,40 +68,45 @@ class SortAndFilterPanel extends JXPanel {
         layoutComponents();
     }
 
-    private void layoutComponents() {
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.insets = new Insets(3, 2, 2, 10); // top, left, bottom, right
-        add(filterBox, gbc);
-
-        gbc.insets.right = 5;
-        add(sortLabel, gbc);
-
-        add(sortBox, gbc);
-        
-        gbc.insets.left = gbc.insets.right = 0;
-        add(listViewToggleButton, gbc);
-        add(tableViewToggleButton, gbc);
+    public synchronized void addModeListener(ModeListener listener) {
+        modeListeners.add(listener);
     }
-
+    
     private void configureViewButtons() {
         Insets insets = new Insets(0, 0, 0, 0);
+        
+        final SortAndFilterPanel outerThis = this;
         
         listViewToggleButton.setIcon(listViewUnpressedIcon);
         listViewToggleButton.setPressedIcon(listViewPressedIcon);
         listViewToggleButton.setSelected(true);
         listViewToggleButton.setMargin(insets);
+        listViewToggleButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+                if (event.getStateChange() == ItemEvent.SELECTED) {
+                    outerThis.notifyModeListeners(ModeListener.Mode.LIST);
+                }
+            }
+        });
         
         tableViewToggleButton.setIcon(tableViewUnpressedIcon);
         tableViewToggleButton.setPressedIcon(tableViewPressedIcon);
         tableViewToggleButton.setMargin(insets);
+        tableViewToggleButton.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+                if (event.getStateChange() == ItemEvent.SELECTED) {
+                    outerThis.notifyModeListeners(ModeListener.Mode.TABLE);
+                }
+            }
+        });
         
         ButtonGroup viewGroup = new ButtonGroup();
         viewGroup.add(listViewToggleButton);
         viewGroup.add(tableViewToggleButton);
     }
-
+    
     public EventList<VisualSearchResult> getSortedAndFilteredList(
             EventList<VisualSearchResult> visualSearchResults) {
 
@@ -153,10 +161,52 @@ class SortAndFilterPanel extends JXPanel {
         return sortedList;
     }
 
+    private void layoutComponents() {
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        gbc.insets = new Insets(3, 2, 2, 10); // top, left, bottom, right
+        add(filterBox, gbc);
+
+        gbc.insets.right = 5;
+        add(sortLabel, gbc);
+
+        add(sortBox, gbc);
+        
+        gbc.insets.left = gbc.insets.right = 0;
+        add(listViewToggleButton, gbc);
+        add(tableViewToggleButton, gbc);
+    }
+
+    private synchronized void notifyModeListeners(ModeListener.Mode mode) {
+        for (ModeListener listener : modeListeners) {
+            listener.setMode(mode);
+        }
+    }
+
+    public synchronized void removeModeListener(ModeListener listener) {
+        modeListeners.remove(listener);
+    }
+    
+    /**
+     * Sets the state of the view toggle buttons.
+     * @param mode the current mode ... LIST or TABLE
+     */
+    public void setMode(ModeListener.Mode mode) {
+        if (mode == ModeListener.Mode.LIST) {
+            listViewToggleButton.setSelected(true);
+            tableViewToggleButton.setSelected(false);
+        } else if (mode == ModeListener.Mode.TABLE) {
+            listViewToggleButton.setSelected(false);
+            tableViewToggleButton.setSelected(true);
+        }
+    }
+    
     private static class VisualSearchResultTextFilterator
     implements TextFilterator<VisualSearchResult> {
         @Override
-        public void getFilterStrings(List<String> baseList, VisualSearchResult element) {
+        public void getFilterStrings(
+                List<String> baseList, VisualSearchResult element) {
             baseList.add(element.getDescription());
             baseList.add(element.getCategory().toString());
             baseList.add(element.getFileExtension());
