@@ -17,7 +17,6 @@ import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
 import org.apache.http.nio.protocol.NHttpRequestExecutionHandler;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
-import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
@@ -27,8 +26,6 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
-import org.limewire.http.reactor.HttpIOSession;
-import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 
 public class SwarmerImpl implements Swarmer {
@@ -51,14 +48,15 @@ public class SwarmerImpl implements Swarmer {
 
     public SwarmerImpl(ExecutionHandler executionHandler,
             ConnectionReuseStrategy connectionReuseStrategy, ConnectingIOReactor ioReactor,
-            HttpParams params, SourceEventListener sourceEventListener) {
+            HttpParams params, SourceEventListener globalSourceEventListener) {
 
         this.executionHandler = executionHandler;
         this.ioReactor = ioReactor;
-        if (sourceEventListener == null)
-            this.globalSourceEventListener = NULL_LISTENER;
-        else
-            this.globalSourceEventListener = sourceEventListener;
+        if (globalSourceEventListener == null) {
+            this.globalSourceEventListener = DEFAULT_SOURCE_EVENT_LISTENER;
+        } else {
+            this.globalSourceEventListener = globalSourceEventListener;
+        }
 
         httpProcessor = new SynchronizedHttpProcessor();
         httpProcessor.addInterceptor(new RequestContent());
@@ -66,26 +64,9 @@ public class SwarmerImpl implements Swarmer {
         httpProcessor.addInterceptor(new RequestConnControl());
         httpProcessor.addInterceptor(new RequestUserAgent());
         httpProcessor.addInterceptor(new RequestExpectContinue());
-//        httpProcessor.addInterceptor(new HttpRequestInterceptor(){
-//
-//            public void process(HttpRequest arg0, HttpContext arg1) throws HttpException,
-//                    IOException {
-//               arg0.
-//                
-//            }
-//            
-//        });
- 
-        final ConnectionReuseStrategy finalConnectionReuseStrategy = connectionReuseStrategy;
-        clientHandler = new AsyncNHttpClientHandler(httpProcessor, new SwarmExecutionHandler(),
-                new ConnectionReuseStrategy() {
 
-                    public boolean keepAlive(HttpResponse arg0, HttpContext arg1) {
-                        
-                        return finalConnectionReuseStrategy.keepAlive(arg0, arg1);
-                    }
-            
-        }, params);
+        clientHandler = new AsyncNHttpClientHandler(httpProcessor, new SwarmExecutionHandler(),
+                connectionReuseStrategy, params);
 
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
@@ -95,13 +76,15 @@ public class SwarmerImpl implements Swarmer {
     }
 
     public void addSource(final SwarmSource source, SourceEventListener sourceEventListener) {
-//        if (!started.get())
-//            throw new IllegalStateException("Cannot add source before starting");
+        if (!started.get()) {
+            throw new IllegalStateException("Cannot add source before starting");
+        }
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Adding source: " + source);
+        }
 
-        final SourceEventListener listener = getListener(sourceEventListener);
+        SourceEventListener listener = buildListener(sourceEventListener);
         SessionRequestCallback sessionRequestCallback = createSessionRequestCallback(source,
                 listener);
 
@@ -111,26 +94,10 @@ public class SwarmerImpl implements Swarmer {
 
     private SessionRequestCallback createSessionRequestCallback(final SwarmSource source,
             final SourceEventListener listener) {
-        return new SessionRequestCallback() {
-            public void cancelled(SessionRequest request) {
-                listener.connectFailed(SwarmerImpl.this, source);
-            };
-
-            public void completed(SessionRequest request) {
-                listener.connected(SwarmerImpl.this, source);
-            };
-
-            public void failed(SessionRequest request) {
-                listener.connectFailed(SwarmerImpl.this, source);
-            };
-
-            public void timeout(SessionRequest request) {
-                listener.connectFailed(SwarmerImpl.this, source);
-            };
-        };
+        return new SwarmHttpSessionRequestCallback(this, source, listener);
     }
 
-    private SourceEventListener getListener(SourceEventListener sourceEventListener) {
+    private SourceEventListener buildListener(SourceEventListener sourceEventListener) {
         final SourceEventListener listener;
         if (sourceEventListener == null) {
             listener = globalSourceEventListener;
@@ -138,14 +105,6 @@ public class SwarmerImpl implements Swarmer {
             listener = new DualSourceEventListener(sourceEventListener, globalSourceEventListener);
         }
         return listener;
-    }
-
-    public void addHeaderInterceptor(HttpRequestInterceptor requestInterceptor) {
-        httpProcessor.addInterceptor(requestInterceptor);
-    }
-
-    public void addHeaderInterceptor(HttpResponseInterceptor responseInterceptor) {
-        httpProcessor.addInterceptor(responseInterceptor);
     }
 
     public void start() {
@@ -222,8 +181,7 @@ public class SwarmerImpl implements Swarmer {
                 SourceEventListener listener = (SourceEventListener) context.getAttribute(LISTENER);
                 SwarmSource source = (SwarmSource) context
                         .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
-                listener.responseProcessed(SwarmerImpl.this, source, response.getStatusLine()
-                        .getStatusCode());
+                listener.responseProcessed(SwarmerImpl.this, source, new SwarmHTTPStatus(response.getStatusLine()));
 
                 executionHandler.handleResponse(response, context);
             } else {
@@ -245,7 +203,6 @@ public class SwarmerImpl implements Swarmer {
 
         public HttpRequest submitRequest(HttpContext context) {
             if (isActive()) {
-                HttpIOSession ioSession = (HttpIOSession) context.getAttribute(LimeConnectingIOReactor.IO_SESSION_KEY);
                 HttpRequest request = executionHandler.submitRequest(context);
 
                 if (LOG.isTraceEnabled() && request != null)
@@ -258,27 +215,7 @@ public class SwarmerImpl implements Swarmer {
         }
     }
 
-    private static final SourceEventListener NULL_LISTENER = new SourceEventListener() {
-        public void connected(Swarmer swarmer, SwarmSource source) {
-        }
-
-        public void connectFailed(Swarmer swarmer, SwarmSource source) {
-        }
-
-        public void connectionClosed(Swarmer swarmer, SwarmSource source) {
-        }
-
-        public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
-            //We can't try submitting a request again too soon after getting the response.
-            //kinda hacky for now, will find a better place for this
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    };
+    private static final SourceEventListener DEFAULT_SOURCE_EVENT_LISTENER = new ReconnectingSourceEventListener();
 
     public boolean finished() {
         // TODO Auto-generated method stub

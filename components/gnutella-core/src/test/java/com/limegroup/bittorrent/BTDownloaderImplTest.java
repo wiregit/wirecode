@@ -265,7 +265,7 @@ public class BTDownloaderImplTest extends BaseTestCase {
     
     public void testSingleWebSeedSingleFilePeers() throws Exception {
         //TODO force peers and webseed to not have all pieces
-        //only when used togetehr have all the pieces
+        //only when used together have all the pieces
         String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-single-webseed-single-file-peer.torrent";
         File torrentFile = new File(torrentfilePath);
         BTDownloader downloader = createBTDownloader(torrentFile);

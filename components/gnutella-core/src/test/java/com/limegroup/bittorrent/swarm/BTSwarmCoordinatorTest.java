@@ -10,6 +10,7 @@ import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.DiskException;
+import org.limewire.swarm.SwarmStatus;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.http.SourceEventListener;
 import org.limewire.swarm.http.SwarmSource;
@@ -48,7 +49,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
     public void testSingleFileTorret() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-single-file.torrent");
+                + "/test-single-webseed-single-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -68,7 +69,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
     public void testMultiFileTorret() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-multiple-file.torrent");
+                + "/test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -91,7 +92,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
     public void testMultiFileTorret2() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-multiple-file.torrent");
+                + "/test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -114,7 +115,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
     public void testMultiFileTorret3() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-multiple-file.torrent");
+                + "/test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -202,7 +203,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                     }
 
                     public void responseProcessed(Swarmer swarmer, SwarmSource source,
-                            int statusCode) {
+                            SwarmStatus status) {
                         System.out.println("responseProcessed");
 
                     }
