@@ -10,7 +10,7 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import java.awt.CardLayout;
+import java.awt.BorderLayout;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +24,6 @@ import org.limewire.ui.swing.search.resultpanel.AudioResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
-import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
 /**
@@ -34,7 +33,6 @@ import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 public class ResultsContainer extends JXPanel implements ModeListener {
 
     private BaseResultPanel currentPanel;
-    private final CardLayout cardLayout = new CardLayout();
     private final FilterMatcherEditor matcherEditor = new FilterMatcherEditor();
     private Map<String, BaseResultPanel> panelMap =
         new HashMap<String, BaseResultPanel>();
@@ -51,7 +49,7 @@ public class ResultsContainer extends JXPanel implements ModeListener {
         ImagesResultsPanelFactory imagesFactory,
         DocumentsResultsPanelFactory documentsFactory) {
         
-        setLayout(cardLayout);
+        setLayout(new BorderLayout());
         
         FilterList<VisualSearchResult> filterList =
             new FilterList<VisualSearchResult>(
@@ -72,13 +70,12 @@ public class ResultsContainer extends JXPanel implements ModeListener {
             imagesFactory.create(filterList, eventSelectionModel, search));
         panelMap.put(SearchCategory.DOCUMENTS.name(),
             documentsFactory.create(filterList, eventSelectionModel, search));
-        
-        for (String name : panelMap.keySet()) {
-            BaseResultPanel panel = panelMap.get(name);
-            add(new SearchScrollPane(panel), name);
-        }
     }
     
+    /**
+     * Gets the currently displayed panel.
+     * @return the panel
+     */
     public BaseResultPanel getCurrentPanel() {
         return currentPanel;
     }
@@ -92,9 +89,10 @@ public class ResultsContainer extends JXPanel implements ModeListener {
     }
     
     void showCategory(SearchCategory category) {
-        String name = category.name();
-        cardLayout.show(this, name);
-        currentPanel = panelMap.get(name);
+        //if (currentPanel != null) remove(currentPanel);
+        removeAll();
+        currentPanel = panelMap.get(category.name());
+        add(currentPanel, BorderLayout.CENTER);
         matcherEditor.categoryChanged(category);
     }
 

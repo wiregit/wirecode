@@ -5,7 +5,7 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 
 import javax.swing.JPanel;
@@ -72,29 +72,27 @@ public class SearchResultsPanel extends JPanel {
         layoutComponents();
     }
 
+    private SponsoredResultsPanel createSponsoredResultsPanel() {
+        SponsoredResultsPanel srp = new SponsoredResultsPanel();
+        srp.addEntry("Advantage Consulting, Inc.\n" +
+            "When you really can't afford to fail...\n" +
+            "IT Staffing Solutions with an ADVANTAGE");
+        srp.addEntry("Object Computing, Inc.\n" +
+            "An OO Software Engineering Company");
+        return srp;
+    }
+    
     private void layoutComponents() {
-        setLayout(new GridBagLayout());
+        JPanel northPanel = new JPanel(new BorderLayout());
+        northPanel.add(searchTab, BorderLayout.CENTER);
+        northPanel.add(sortAndFilterPanel, BorderLayout.EAST);
         
-        GridBagConstraints gbc = new GridBagConstraints();
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(resultsContainer, BorderLayout.CENTER);
+        centerPanel.add(createSponsoredResultsPanel(), BorderLayout.EAST);
         
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridy = 0;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        add(searchTab, gbc);
-        
-        gbc.anchor = GridBagConstraints.EAST;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx = 0;
-        add(sortAndFilterPanel, gbc);
-        
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridy++;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        add(resultsContainer, gbc);
+        setLayout(new BorderLayout());
+        add(northPanel, BorderLayout.NORTH);
+        add(centerPanel, BorderLayout.CENTER);
     }
 }

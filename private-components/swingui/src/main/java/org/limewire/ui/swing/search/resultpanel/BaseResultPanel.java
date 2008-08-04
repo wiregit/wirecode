@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.Scrollable;
@@ -23,7 +24,6 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.search.ModeListener;
-import org.limewire.ui.swing.search.SponsoredResultsPanel;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -32,6 +32,7 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
     private final JList resultsList;
     private final JTable resultsTable;
     private ModeListener.Mode mode;
+    private final JScrollPane scrollPane = new JScrollPane();
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -44,6 +45,7 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         this.search = search;
         
         setLayout(new BorderLayout());
+        add(scrollPane, BorderLayout.CENTER);
         
         // TODO: RMV The latest screen mockups do not include this title!
         /*
@@ -69,21 +71,8 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         resultsTable = new JTable(tableModel);
         
         setMode(ModeListener.Mode.LIST);
-        
-        SponsoredResultsPanel srp = createSponsoredResultsPanel();
-        add(srp, BorderLayout.EAST);
     }
 
-    private SponsoredResultsPanel createSponsoredResultsPanel() {
-        SponsoredResultsPanel srp = new SponsoredResultsPanel();
-        srp.addEntry("Advantage Consulting, Inc.\n" +
-            "When you really can't afford to fail...\n" +
-            "IT Staffing Solutions with an ADVANTAGE");
-        srp.addEntry("Object Computing, Inc.\n" +
-            "An OO Software Engineering Company");
-        return srp;
-    }
-    
     /**
      * Gets the current mode, LIST or TABLE.
      * @return the current mode
@@ -130,9 +119,7 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
             mode == Mode.LIST ? resultsList :
             mode == Mode.TABLE ? resultsTable :
             null;
-        removeAll();
-        add(component, BorderLayout.CENTER);
-        revalidate();
+        scrollPane.setViewportView(component);
     }
     
     private class ResultDownloader extends MouseAdapter {
