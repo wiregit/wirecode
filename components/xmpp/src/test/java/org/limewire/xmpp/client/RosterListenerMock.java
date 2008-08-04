@@ -14,10 +14,10 @@ import org.jivesoftware.smack.util.StringUtils;
 
 import com.google.inject.Inject;
 
-public class RosterListenerImpl implements RosterListener {
+public class RosterListenerMock implements RosterListener {
     public HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
-    IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
+    IncomingChatListenerMock listener = new IncomingChatListenerMock();
 
     @Inject
     public void register(XMPPService xmppService) {

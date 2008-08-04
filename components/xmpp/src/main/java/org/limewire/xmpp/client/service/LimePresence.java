@@ -11,7 +11,7 @@ import org.limewire.net.address.Address;
 public interface LimePresence extends Presence {
 
     /**
-     * offer a file to this user
+     * offer a file to this user; blocking call.
      * @param file
      */
     public void offerFile(FileMetaData file);

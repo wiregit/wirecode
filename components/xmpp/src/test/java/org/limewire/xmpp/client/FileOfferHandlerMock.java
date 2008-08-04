@@ -11,7 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FileOfferHandlerImpl implements FileOfferHandler {
+public class FileOfferHandlerMock implements FileOfferHandler {
 
     List<FileMetaData> offers = new ArrayList<FileMetaData>();
     

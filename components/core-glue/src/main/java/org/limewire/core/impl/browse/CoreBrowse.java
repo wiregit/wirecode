@@ -56,40 +56,41 @@ public class CoreBrowse implements Browse {
         }
 
         browseGuid = searchServices.newQueryGUID();
-        listener = new BrListener(browseListener);
+        listener = new BrowseResultAdapter(browseListener);
         listenerList.addQueryReplyListener(browseGuid, listener);
         
-        byte [] guidBytes = null;
+        Connectable host = null;
+        byte [] clientGuid = null;
         Set<? extends IpPort> proxies = null;
-        byte features = ~PushEndpoint.PPTLS_BINARY;
-        int version = 0;
-        IpPort directAddrss = null;
+        boolean canDoFWT = false;
 
         if(addr instanceof DirectConnectionAddress) {
             DirectConnectionAddress address = (DirectConnectionAddress)addr;
-            directAddrss = address;
+            host = address;
         }
         else if(addr instanceof PushProxyMediatorAddress) {
             PushProxyMediatorAddress address = (PushProxyMediatorAddress)addr;
-            guidBytes = address.getClientID().bytes();
+            clientGuid = address.getClientID().bytes();
             proxies = address.getPushProxies();
         } else if(addr instanceof PushProxyHolePunchAddress) {
             PushProxyHolePunchAddress address = (PushProxyHolePunchAddress) addr;
-            guidBytes = ((PushProxyMediatorAddress)address.getMediatorAddress()).getClientID().bytes();
+            clientGuid = ((PushProxyMediatorAddress)address.getMediatorAddress()).getClientID().bytes();
             proxies = ((PushProxyMediatorAddress)address.getMediatorAddress()).getPushProxies();
-            version = address.getVersion();
+            int version = address.getVersion();
             BitNumbers bn = HTTPHeaderUtils.getTLSIndices(proxies, (Math.min(proxies.size(), PushEndpoint.MAX_PROXIES)));
-            features = bn.toByteArray()[0] |= PushEndpoint.PPTLS_BINARY;
-            directAddrss = address.getDirectConnectionAddress();
+            // TODO fix case with empty byte []
+            byte features = bn.toByteArray()[0] |= PushEndpoint.PPTLS_BINARY;
+            IpPort directAddrss = address.getDirectConnectionAddress();
+            PushEndpoint pushEndpoint = pushEndpointFactory.createPushEndpoint(clientGuid, proxies, features, version, directAddrss);
+            proxies = pushEndpoint.getProxies();
+            canDoFWT = pushEndpoint.getFWTVersion() >= RUDPUtils.VERSION;
+            InetSocketAddress inetSocketAddress = pushEndpoint.getInetSocketAddress();
+            host = inetSocketAddress != null ? new ConnectableImpl(inetSocketAddress, false) : null;
         }
 
-        PushEndpoint pushEndpoint = pushEndpointFactory.createPushEndpoint(guidBytes, proxies, features, version, directAddrss);
-        InetSocketAddress inetSocketAddress = pushEndpoint.getInetSocketAddress();
-        Connectable host = inetSocketAddress != null ? new ConnectableImpl(inetSocketAddress, false) : null;
-
         searchServices.doAsynchronousBrowseHost(
-                                    host, new GUID(browseGuid), new GUID(pushEndpoint.getClientGUID()), pushEndpoint.getProxies(),
-                                    pushEndpoint.getFWTVersion() >= RUDPUtils.VERSION);
+                                    host, new GUID(browseGuid), new GUID(clientGuid), proxies,
+                                    canDoFWT);
     }
 
     @Override
@@ -98,10 +99,10 @@ public class CoreBrowse implements Browse {
         searchServices.stopQuery(new GUID(browseGuid));
     }
 
-    private static class BrListener implements QueryReplyListener {
+    private static class BrowseResultAdapter implements QueryReplyListener {
         private final BrowseListener browseListener;
 
-        public BrListener(BrowseListener browseListener) {
+        public BrowseResultAdapter(BrowseListener browseListener) {
             this.browseListener = browseListener;
         }
 

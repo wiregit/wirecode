@@ -27,7 +27,7 @@ public abstract class ServiceTestCase extends BaseTestCase {
         registry.start();
     }
 
-    protected Injector createInjector(Module [] modules) {
+    protected Injector createInjector(Module... modules) {
         return Guice.createInjector(Stage.PRODUCTION, modules);
     }
 

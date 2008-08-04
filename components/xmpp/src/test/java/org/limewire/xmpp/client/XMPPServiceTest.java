@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Random;
 
 public class XMPPServiceTest extends ServiceTestCase {
-    protected RosterListenerImpl rosterListener;
-    protected RosterListenerImpl rosterListener2;
+    protected RosterListenerMock rosterListener;
+    protected RosterListenerMock rosterListener2;
     protected AddressEventTestBroadcaster addressEventBroadcaster;
 
     public XMPPServiceTest(String name) {
@@ -56,8 +56,8 @@ public class XMPPServiceTest extends ServiceTestCase {
     }
 
     protected List<Module> getServiceModules() {
-        rosterListener = new RosterListenerImpl();
-        rosterListener2 = new RosterListenerImpl();
+        rosterListener = new RosterListenerMock();
+        rosterListener2 = new RosterListenerMock();
         final XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
                 "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener);
         final XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com",
@@ -68,7 +68,7 @@ public class XMPPServiceTest extends ServiceTestCase {
             protected void configure() {
                 bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(addressEventBroadcaster);
                 bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(new XMPPConnectionConfigurationListProvider(configuration, configuration2));
-                bind(FileOfferHandler.class).to(FileOfferHandlerImpl.class);
+                bind(FileOfferHandler.class).to(FileOfferHandlerMock.class);
             }
         };
         return Arrays.asList(xmppModule, m, new LimeWireNetTestModule());
@@ -132,14 +132,14 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         Thread.sleep(1000);
         
-        MessageReaderImpl reader = new MessageReaderImpl();
+        MessageReaderMock reader = new MessageReaderMock();
         Presence limeBuddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         MessageWriter writer = limeBuddy2.createChat(reader);
         writer.writeMessage("hello world");
        
         Thread.sleep(2 * 1000);
         
-        IncomingChatListenerImpl incomingChatListener2 = rosterListener2.listener;
+        IncomingChatListenerMock incomingChatListener2 = rosterListener2.listener;
         MessageWriter writer2 = incomingChatListener2.writer;
         writer2.writeMessage("goodbye world");
         
@@ -173,7 +173,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         Thread.sleep(1000);
         
-        List<FileMetaData> offers = ((FileOfferHandlerImpl) injector.getInstance(FileOfferHandler.class)).offers;
+        List<FileMetaData> offers = ((FileOfferHandlerMock) injector.getInstance(FileOfferHandler.class)).offers;
         assertEquals(1, offers.size());
         assertEquals("a_cool_file.txt", offers.get(0).getName());
     }

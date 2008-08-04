@@ -75,9 +75,11 @@ public class AppFrame extends SingleFrameApplication {
             List<Module> modules = new ArrayList<Module>();
             modules.add(new LimeWireSwingUiModule());
             Injector newInjector = Guice.createInjector(injector, Stage.PRODUCTION, modules);
-//            newInjector.getInstance(FileOfferHandler.class);
-//            newInjector.getInstance(RosterListener.class);
-//            newInjector.getInstance(XMPPErrorListener.class);
+            
+            // TODO HACK
+            newInjector.getInstance(FileOfferHandler.class);
+            newInjector.getInstance(RosterListener.class);
+            newInjector.getInstance(XMPPErrorListener.class);
             return newInjector;
         }
     }

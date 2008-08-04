@@ -33,9 +33,9 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         this.address = address;
     }
     
-    void sendGetAddress() {
+    void subscribeAndWaitForAddress() {
         if(LOG.isInfoEnabled()) {
-            LOG.info("getting address from " + getJID() + "...");
+            LOG.info("getting address from " + getJID() + " ...");
         }
         final AddressIQ addressIQ = new AddressIQ();
         addressIQ.setType(IQ.Type.GET);

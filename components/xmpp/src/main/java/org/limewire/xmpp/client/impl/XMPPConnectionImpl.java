@@ -25,10 +25,6 @@ import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.User;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
-import org.limewire.xmpp.client.service.XMPPService;
-
-import com.google.inject.Inject;
 
 //import com.limegroup.gnutella.BrowseHostReplyHandler;
 
@@ -39,9 +35,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     private final XMPPConnectionConfiguration configuration;
     private final FileOfferHandler fileOfferHandler;
     private final AddressFactory addressFactory;
-    private org.jivesoftware.smack.XMPPConnection connection;
+    private volatile org.jivesoftware.smack.XMPPConnection connection;
     
-    private final CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener> rosterListeners;
+    private final CopyOnWriteArrayList<RosterListener> rosterListeners;
     private final HashMap<String, UserImpl> users;
     protected AddressIQListener addressIQListener;
     protected FileTransferIQListener fileTransferIQListener;
@@ -84,9 +80,11 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     }
 
     public void logout() {
-        LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
-        connection.disconnect();
-        LOG.info("disconnected.");
+        if(isLoggedIn()) {
+            LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
+            connection.disconnect();
+            LOG.info("disconnected.");
+        }
     }
 
     public boolean isLoggedIn() {
@@ -121,7 +119,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                         // TODO conncurrency control
                         ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     }
-                    addressIQListener = new AddressIQListener(connection, addressFactory, users);
+                    addressIQListener = new AddressIQListener(connection, addressFactory);
                     XMPPConnectionImpl.this.rosterListeners.add(addressIQListener);
                     connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
                     ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
@@ -149,13 +147,15 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("user " + user + " added");
                 }
-                users.put(id, user);
+                synchronized (users) {
+                    users.put(id, user);
+                }
                 fireUserAdded(user);
             }
         }
 
         private void fireUserAdded(User user) {
-            for(org.limewire.xmpp.client.service.RosterListener rosterListener : rosterListeners) {
+            for(RosterListener rosterListener : rosterListeners) {
                 rosterListener.userAdded(user);
             }
         }
@@ -168,20 +168,25 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("user " + user + " updated");
                 }
-                users.put(id, user);
+                synchronized (users) {
+                    users.put(id, user);
+                }
                 fireUserUpdated(user);
             }
         }
 
         private void fireUserUpdated(UserImpl user) {
-            for(org.limewire.xmpp.client.service.RosterListener rosterListener : rosterListeners) {
+            for(RosterListener rosterListener : rosterListeners) {
                 rosterListener.userUpdated(user);
             }
         }
 
         public void entriesDeleted(Collection<String> removedIds) {
             for(String id : removedIds) {
-                User user = users.remove(id);
+                User user;
+                synchronized (users) {                    
+                    user = users.remove(id);
+                }
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("user " + user + " removed");
                 }
@@ -190,7 +195,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
         }
         
         private void fireUserDeleted(String id) {
-            for(org.limewire.xmpp.client.service.RosterListener rosterListener : rosterListeners) {
+            for(RosterListener rosterListener : rosterListeners) {
                 rosterListener.userDeleted(id);
             }
         }
@@ -199,7 +204,10 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
             if(!presence.getFrom().equals(connection.getUser())) {
                 Thread t = ThreadExecutor.newManagedThread(new Runnable() {
                     public void run() {
-                        UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                        UserImpl user;
+                        synchronized (users) {
+                            user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                        }
                         if(LOG.isDebugEnabled()) {
                             LOG.debug("user " + user + " presence changed to " + presence.getType());
                         }
@@ -212,7 +220,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                                                 LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
                                             }
                                             LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
-                                            limePresense.sendGetAddress();
+                                            limePresense.subscribeAndWaitForAddress();
                                             user.addPresense(limePresense);
                                         } else {
                                             user.addPresense(new PresenceImpl(presence, connection));

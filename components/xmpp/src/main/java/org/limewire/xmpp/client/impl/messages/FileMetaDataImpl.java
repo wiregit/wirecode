@@ -20,7 +20,7 @@ public class FileMetaDataImpl implements FileMetaData {
         id, name, size, description, index, metadata, uris, createTime
     }
 
-    private Map<Element, String> data = new HashMap<Element, String>();
+    private final Map<Element, String> data = new HashMap<Element, String>();
 
     public FileMetaDataImpl(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.nextTag();
@@ -121,6 +121,7 @@ public class FileMetaDataImpl implements FileMetaData {
     }
 
     public String toXML() {
+        // TODO StringBuilder instead of concats
         String fileMetadata = "<file>";
         for(Element element : data.keySet()) {
             fileMetadata += "<" + element.toString() + ">";

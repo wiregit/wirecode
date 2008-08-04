@@ -2,6 +2,7 @@ package org.limewire.ui.swing.xmpp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.browse.BrowseFactory;
@@ -26,14 +27,13 @@ public class RosterListenerImpl implements RosterListener {
     private final BrowseFactory browseFactory;
     private final StatusPanel.BrowseAction browseAction;
 
-    private HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
+    private Map<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     private final IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
 
     @Inject
     public RosterListenerImpl(BrowseFactory browseFactory, StatusPanel.BrowseAction browseAction) {
         this.browseFactory = browseFactory;
         this.browseAction = browseAction;
-        Thread.dumpStack();
     }
     
     @Inject
@@ -61,12 +61,12 @@ public class RosterListenerImpl implements RosterListener {
                         // TODO update UI
                         Address address = ((LimePresence)presence).getAddress();
                         browseAction.setAddress(address);
-//                        browseFactory.createBrowse(address).start(new BrowseListener() {
-//                            public void handleBrowseResult(SearchResult searchResult) {
-//                                System.out.println(searchResult.getDescription() + ": " + searchResult.getUrn());
-//                                // TODO update UI
-//                            }
-//                        });
+                        browseFactory.createBrowse(address).start(new BrowseListener() {
+                            public void handleBrowseResult(SearchResult searchResult) {
+                                //System.out.println(searchResult.getDescription() + ": " + searchResult.getUrn());
+                                // TODO update UI
+                            }
+                        });
                     } else {
                         // TODO update UI
                     }

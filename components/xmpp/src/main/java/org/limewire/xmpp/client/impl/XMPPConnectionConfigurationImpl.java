@@ -9,11 +9,11 @@ import org.limewire.xmpp.client.impl.XMPPException;
 import com.google.inject.Inject;
 
 public class XMPPConnectionConfigurationImpl implements XMPPConnectionConfiguration {
-    String userName;
-    String pw;
-    String host;
-    int port;
-    String serviceName;
+    private final String userName;
+    private final String pw;
+    private final String host;
+    private final int port;
+    private final String serviceName;
     private final RosterListener rosterListener;
 
     public XMPPConnectionConfigurationImpl(String userName, String pw, String host, int port, String serviceName, RosterListener rosterListener) {

@@ -20,7 +20,7 @@ import org.limewire.io.IpPort;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.TestUtils;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
-import org.limewire.xmpp.client.RosterListenerImpl;
+import org.limewire.xmpp.client.RosterListenerMock;
 import org.limewire.xmpp.client.XMPPConnectionConfigurationListProvider;
 import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
 import org.limewire.xmpp.client.service.FileMetaData;
@@ -58,8 +58,8 @@ import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class XMPPIntegrationTest extends LimeTestCase {
-    protected RosterListenerImpl rosterListener;
-    protected RosterListenerImpl rosterListener2;
+    protected RosterListenerMock rosterListener;
+    protected RosterListenerMock rosterListener2;
     protected PushEndpointFactory pushEndpointFactory;
     
     private Injector injector;
@@ -76,8 +76,8 @@ public class XMPPIntegrationTest extends LimeTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         started = new CountDownLatch(1);
-        rosterListener = new RosterListenerImpl();
-        rosterListener2 = new RosterListenerImpl();
+        rosterListener = new RosterListenerMock();
+        rosterListener2 = new RosterListenerMock();
         final XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
                 "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener);
         final XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 

@@ -1,14 +1,15 @@
 package org.limewire.xmpp.client.impl;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
 import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.PresenceListener;
 import org.limewire.xmpp.client.service.User;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
@@ -33,7 +34,7 @@ public class UserImpl implements User {
         return name;
     }
 
-    public ConcurrentHashMap<String, Presence> getPresences() {
+    public ConcurrentMap<String, Presence> getPresences() {
         return presences;
     }
     
@@ -41,10 +42,8 @@ public class UserImpl implements User {
         if(LOG.isDebugEnabled()) {
             LOG.debugf("adding presence {0}", presence.getJID());
         }
-        synchronized (presences) {
-            presences.put(presence.getJID(), presence);
-            firePresenceListeners(presence);        
-        }
+        presences.put(presence.getJID(), presence);
+        firePresenceListeners(presence);      
     }
 
     private void firePresenceListeners(Presence presence) {
@@ -54,18 +53,15 @@ public class UserImpl implements User {
     }
 
     void removePresense(Presence presence) {
-        synchronized (presences) {
-            presences.remove(presence.getJID());
-            firePresenceListeners(presence);
-        }
+        presences.remove(presence.getJID());
+        firePresenceListeners(presence);
+
     }
     
     public void addPresenceListener(PresenceListener presenceListener) {
-        synchronized (presences) {
-            presenceListeners.add(presenceListener);
-            for(Presence presence : presences.values()) {
-                presenceListener.presenceChanged(presence);    
-            }
+        presenceListeners.add(presenceListener);
+        for(Presence presence : presences.values()) {
+            presenceListener.presenceChanged(presence);    
         }
     }
 

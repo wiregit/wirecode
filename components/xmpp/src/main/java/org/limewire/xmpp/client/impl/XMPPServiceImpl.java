@@ -30,7 +30,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     
     public static final String LW_SERVICE_NS = "http://www.limewire.org/";
     
-    private CopyOnWriteArrayList<XMPPConnectionImpl> connections;
+    private final CopyOnWriteArrayList<XMPPConnectionImpl> connections;
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
     private FileOfferHandler fileOfferHandler;
     private final AddressFactory addressFactory;

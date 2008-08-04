@@ -12,7 +12,6 @@ import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.client.impl.LimePresenceImpl;
-import org.limewire.xmpp.client.impl.UserImpl;
 import org.limewire.xmpp.client.service.LimePresence;
 import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.PresenceListener;
@@ -22,29 +21,27 @@ import org.limewire.xmpp.client.service.XMPPService;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class AddressIQListener implements PacketListener, EventListener<AddressEvent>, RosterListener {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 
-    private XMPPConnection connection;
-    private final Map<String, AddressIQ> getRequests = new HashMap<String, AddressIQ>();
+    private final XMPPConnection connection;
     private volatile Address address;
     private final AddressFactory factory;
-    private final HashMap<String, UserImpl> users;
+    
+    private final Map<String, AddressIQ> getRequests = new HashMap<String, AddressIQ>(); 
+    // TODO get rid of subscribedJids, and just use limePresences
     private final Set<String> subscribedJids = new HashSet<String>();
     private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
 
     public AddressIQListener(XMPPConnection connection,
-                             AddressFactory factory, HashMap<String, UserImpl> users) {
+                             AddressFactory factory) {
         this.connection = connection;
         this.factory = factory;
-        this.users = users;
     }
 
     public void processPacket(Packet packet) {
@@ -78,6 +75,17 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
         if(LOG.isDebugEnabled()) {
             LOG.debug("handling set");
         }
+        handleAddressUpdate(iq);
+    }
+    
+    private void handleResult(AddressIQ addressIQ) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("handling result");
+        }
+        handleAddressUpdate(addressIQ);
+    }
+
+    private void handleAddressUpdate(AddressIQ iq) {
         synchronized (this) {
             LimePresenceImpl presence = limePresences.get(iq.getFrom());
             if(presence != null) {
@@ -88,39 +96,10 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
             }
         }
     }
-
-    private void handleResult(AddressIQ addressIQ) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("handling result");
-        }
-        synchronized (this) {
-            LimePresenceImpl presence = limePresences.get(addressIQ.getFrom());
-            if(presence != null) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("updating address on presence " + presence.getJID() + " to " + address);
-                }
-                presence.setAddress(addressIQ.getAddress());
-            }
-        }
-    }
-
-    private void _handleGet(AddressIQ packet) throws IOException, XmlPullParserException {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("handling address get " + packet.getPacketID());
-        }
-        synchronized (this) {
-            if(address == null) {
-                // we do not yet know our external address
-                getRequests.put(packet.getFrom(), packet);
-            } else {
-                sendResult(packet);
-            }
-        }
-    }
     
     private void handleGet(AddressIQ packet) throws IOException, XmlPullParserException {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("handling address subscription froml " + packet.getFrom());
+            LOG.debug("handling address subscription from " + packet.getFrom());
         }
         synchronized (this) {
             if(subscribedJids.add(packet.getFrom())) {
@@ -150,37 +129,6 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
             }
         };
     }
-
-    public void __handleEvent(AddressEvent event) {
-        if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
-            // TODO async?
-            synchronized (this) {
-                address = event.getSource();
-                for(AddressIQ getRequest : getRequests.values()) {
-                    sendResult(getRequest);
-                }
-                getRequests.clear();
-            }
-            // TODO notify all buddies?
-        }
-    }
-    
-    public void _handleEvent(AddressEvent event) {
-        if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
-            // TODO async?
-            synchronized (this) { // TODO synch on users?
-                address = event.getSource();
-                for(UserImpl user : users.values()) {
-                    for(Presence presence : user.getPresences().values()) {
-                        if(presence instanceof LimePresence) {
-                            sendAddress(address, (LimePresence)presence);            
-                        }
-                    }
-                }
-                getRequests.clear();
-            }
-        }
-    }
     
     public void handleEvent(AddressEvent event) {
         if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
@@ -197,14 +145,6 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
                 }
             }
         }
-    }
-    
-    private void sendAddress(Address address, LimePresence presence) {
-        AddressIQ queryResult = new AddressIQ(address, factory);
-        queryResult.setTo(presence.getJID());
-        queryResult.setFrom(connection.getUser());
-        queryResult.setType(IQ.Type.SET);
-        connection.sendPacket(queryResult);
     }
     
     private void sendAddress(Address address, String jid) {
