@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -54,12 +55,24 @@ public class DownloadSummaryPanel extends JPanel {
     private EventList<DownloadItem> warningList;
     private EventList<DownloadItem> unfinishedList;
     private RangeList<DownloadItem> chokeList;
+    
+    private JPanel completePanel;
+    private JPanel cardPanel;
+
+    private static final String TABLE = "TABLE";
+    private static final String COMPLETE = "COMPLETE";
+    
+    private CardLayout cardLayout;
 
     @Resource
     private Icon warningIcon;
-    
+
     @Resource
     private Color moreColor;
+    @Resource
+    private Color allCompleteColor;
+
+
 
 	/**
 	 * Create the panel
@@ -68,8 +81,14 @@ public class DownloadSummaryPanel extends JPanel {
 	    GuiUtils.assignResources(this);
 
         setLayout(new BorderLayout());
+                
+        completePanel = new JPanel(new BorderLayout());
+        JLabel completeLabel = new JLabel("<html><u>" + I18n.tr("Downloads Complete") + "</u></html>", JLabel.CENTER);
+        completeLabel.setForeground(allCompleteColor);
+        completePanel.add(completeLabel);
+        
 	    this.allList = itemList;
-	    unfinishedList = new FilterList<DownloadItem>(allList, new DownloadStateExcluder(DownloadState.DONE));
+        unfinishedList = new FilterList<DownloadItem>(allList, new DownloadStateExcluder(DownloadState.DONE));
         warningList = new FilterList<DownloadItem>(allList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		
 		titleLabel = new JLabel();
@@ -118,8 +137,17 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		
 		//TODO: sorting
-		table.setDefaultRenderer(DownloadItem.class, new DownloadStatusPanelRenderer());		
-		add(table, BorderLayout.CENTER);
+		table.setDefaultRenderer(DownloadItem.class, new DownloadStatusPanelRenderer());
+
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);
+
+        add(cardPanel, BorderLayout.CENTER);
+
+        cardPanel.add(completePanel, COMPLETE);
+        cardPanel.add(table, TABLE);
+
+        cardLayout.show(cardPanel, TABLE);
 		
 		updateTitle();
 		adjustVisibility();  
@@ -128,17 +156,31 @@ public class DownloadSummaryPanel extends JPanel {
 	//hide panel if there are no downloads.  show it if there are
     private void adjustVisibility() {
         if (allList.size() > 0) {
+            
             setVisible(true);
-            if (allList.size() > NUMBER_DISPLAYED) {
-                chokeList.setHeadRange(0, NUMBER_DISPLAYED - 1);
-                moreLabel.setVisible(true);
-            } else {
-                chokeList.setHeadRange(0, NUMBER_DISPLAYED);
+
+            if (unfinishedList.size() > 0) {//downloads in progress
+                
+                cardLayout.show(cardPanel, TABLE);
+
+                if (allList.size() > NUMBER_DISPLAYED) {
+                    chokeList.setHeadRange(0, NUMBER_DISPLAYED - 1);
+                    moreLabel.setVisible(true);
+                } else {
+                    chokeList.setHeadRange(0, NUMBER_DISPLAYED);
+                    moreLabel.setVisible(false);
+                }
+                
+            } else {//all downloads complete
+                cardLayout.show(cardPanel, COMPLETE);
                 moreLabel.setVisible(false);
             }
+            
         } else {
+            //Nothing to show
             setVisible(false);
         }
+        revalidate();
     }
 
     //Overridden to add listener to all components in this container so that mouse clicks will work anywhere
@@ -146,6 +188,10 @@ public class DownloadSummaryPanel extends JPanel {
     public void addMouseListener(MouseListener listener){
         super.addMouseListener(listener);
         for(Component comp : getComponents()){
+            comp.addMouseListener(listener);
+        }
+        
+        for(Component comp : cardPanel.getComponents()){
             comp.addMouseListener(listener);
         }
     }
