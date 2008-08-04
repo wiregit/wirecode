@@ -5,8 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -44,11 +44,12 @@ class LeftPanel extends JPanel implements NavigableTree {
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));
         
-        downloadPanel.addMouseListener(new MouseAdapter(){
-            public void mouseClicked(MouseEvent arg0) {
+        downloadPanel.addMouseListener(GuiUtils.getActionHandListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 showDownloads();
             }            
-        });
+        }));
              
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
