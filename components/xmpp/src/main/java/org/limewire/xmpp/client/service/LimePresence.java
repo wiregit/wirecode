@@ -14,7 +14,7 @@ public interface LimePresence extends Presence {
      * offer a file to this user
      * @param file
      */
-    public void sendFile(FileMetaData file);
+    public void offerFile(FileMetaData file);
 
     /**
      * 

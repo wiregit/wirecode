@@ -59,9 +59,9 @@ public class AddressIQ extends IQ {
     public String getChildElementXML() {        
         String pushEndpoint = "<address xmlns=\"jabber:iq:lw-address\">";        
         if(address != null) {
-            AddressSerializer addressSerializer = factory.getSerializer(address.getClass());
-            pushEndpoint += "<" + addressSerializer.getAddressType();
             try {
+                AddressSerializer addressSerializer = factory.getSerializer(address.getClass());
+                pushEndpoint += "<" + addressSerializer.getAddressType();
                 pushEndpoint += " value=\"" + new String(Base64.encodeBase64(addressSerializer.serialize(address)), "UTF-8") + "\"/>";
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);

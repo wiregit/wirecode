@@ -49,9 +49,9 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         collector.cancel();
     }
 
-    public void sendFile(FileMetaData file) {
+    public void offerFile(FileMetaData file) {
         if(LOG.isInfoEnabled()) {
-            LOG.info("sending file " + file.toString() + " to " + getJID());
+            LOG.info("offering file " + file.toString() + " to " + getJID());
         }
         final FileTransferIQ transferIQ = new FileTransferIQ(file, FileTransferIQ.TransferType.OFFER);
         transferIQ.setType(IQ.Type.GET);

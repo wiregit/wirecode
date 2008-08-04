@@ -1,16 +1,7 @@
 package org.limewire.xmpp.client;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
+import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
 import org.apache.log4j.BasicConfigurator;
 import org.limewire.inject.AbstractModule;
 import org.limewire.lifecycle.ServiceTestCase;
@@ -33,13 +24,14 @@ import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.XMPPService;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddress;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressImpl;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
 public class XMPPServiceTest extends ServiceTestCase {
     protected RosterListenerImpl rosterListener;
@@ -161,7 +153,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         
     }
     
-    public void testSendFile() throws InterruptedException, IOException, XmlPullParserException {
+    public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException {
         
         HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
         
@@ -177,7 +169,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         metaData.setSize(1000);
         metaData.setCreateTime(new Date());
         metaData.setDescription("cool file");
-        limebuddy2.sendFile(metaData);
+        limebuddy2.offerFile(metaData);
         
         Thread.sleep(1000);
         
@@ -218,11 +210,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
 
-        GUID clientGuid = new GUID();
-        PushProxyAddress pushProxy = new PushProxyAddressImpl("200.200.200.200", 3000, false);
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        proxies.add(pushProxy);
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new PushProxyMediatorAddressImpl(clientGuid, proxies),
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("200.200.200.200", 5000, false),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
@@ -231,17 +219,19 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
         buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
-        PushProxyMediatorAddress mediatorAddress = (PushProxyMediatorAddress)buddy2.getAddress();
-        assertEquals(clientGuid, mediatorAddress.getClientID());
-        assertEquals(proxies, mediatorAddress.getPushProxies());
-        
+        address = (DirectConnectionAddress)buddy2.getAddress();
+        assertEquals("200.200.200.200", address.getAddress());
+        assertEquals(5000, address.getPort());
+        assertEquals(false, address.isTLSCapable());
+
         assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
         assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
         buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
-        mediatorAddress = (PushProxyMediatorAddress)buddy2.getAddress();
-        assertEquals(clientGuid, mediatorAddress.getClientID());
-        assertEquals(proxies, mediatorAddress.getPushProxies());
+        address = (DirectConnectionAddress)buddy1.getAddress();
+        assertEquals("200.200.200.200", address.getAddress());
+        assertEquals(5000, address.getPort());
+        assertEquals(false, address.isTLSCapable());
     }
 
 }

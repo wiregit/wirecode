@@ -1,21 +1,26 @@
 package org.limewire.net.address;
 
+import com.google.inject.Singleton;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.inject.Singleton;
-
 @Singleton
 public class AddressFactoryImpl implements AddressFactory {
+    private static final Log LOG = LogFactory.getLog(AddressFactoryImpl.class);
+
     private ConcurrentHashMap<String, AddressSerializer> serializerTypeMap = new ConcurrentHashMap<String, AddressSerializer>();
     private ConcurrentHashMap<Class<? extends Address>, AddressSerializer> serializerClassMap = new ConcurrentHashMap<Class<? extends Address>, AddressSerializer>();
 
     public void addSerializer(AddressSerializer serializer) {
+        LOG.debugf("adding serializer type = {0}, class = {1}", serializer.getAddressType(), serializer.getAddressClass());
         serializerTypeMap.put(serializer.getAddressType(), serializer);
         serializerClassMap.put(serializer.getAddressClass(), serializer);
     }
 
-    public AddressSerializer getSerializer(Class<? extends Address> addressClass) {
+    public AddressSerializer getSerializer(Class<? extends Address> addressClass) throws IOException {
         Class [] interfaces = addressClass.getInterfaces();
         AddressSerializer serializer = serializerClassMap.get(addressClass);
         if(serializer != null) {
@@ -29,7 +34,7 @@ public class AddressFactoryImpl implements AddressFactory {
                 }
             }
         }
-        return null;
+        throw new IOException("unknown message type: " + addressClass);
     }
 
     public AddressSerializer getSerializer(String addressType) {
