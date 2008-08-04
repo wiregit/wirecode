@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -48,12 +49,17 @@ public class DownloadSummaryPanel extends JPanel {
 
 	
 	private JLabel titleLabel;
+	private JLabel moreLabel;
 	private EventList<DownloadItem> allList;
     private EventList<DownloadItem> warningList;
     private EventList<DownloadItem> unfinishedList;
+    private RangeList<DownloadItem> chokeList;
 
     @Resource
     private Icon warningIcon;
+    
+    @Resource
+    private Color moreColor;
 
 	/**
 	 * Create the panel
@@ -70,6 +76,9 @@ public class DownloadSummaryPanel extends JPanel {
 		titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
         FontUtils.changeStyle(titleLabel, Font.BOLD);
 		add(titleLabel, BorderLayout.NORTH);
+		moreLabel = new JLabel("<html><u>" + I18n.tr("More...") + "</u></html>", JLabel.RIGHT);
+		moreLabel.setForeground(moreColor);
+		add(moreLabel, BorderLayout.SOUTH);
 			
 
 		
@@ -84,7 +93,7 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		SortedList<DownloadItem> sortedList = new SortedList<DownloadItem>(allList, comparator);		
 		
-		RangeList<DownloadItem> chokeList = new RangeList<DownloadItem>(sortedList);
+		chokeList = new RangeList<DownloadItem>(sortedList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
 		table = new JTable(new DownloadTableModel(chokeList));
 		table.setShowHorizontalLines(false);
@@ -118,7 +127,18 @@ public class DownloadSummaryPanel extends JPanel {
     
 	//hide panel if there are no downloads.  show it if there are
     private void adjustVisibility() {
-        setVisible(allList.size()>0);
+        if (allList.size() > 0) {
+            setVisible(true);
+            if (allList.size() > NUMBER_DISPLAYED) {
+                chokeList.setHeadRange(0, NUMBER_DISPLAYED - 1);
+                moreLabel.setVisible(true);
+            } else {
+                chokeList.setHeadRange(0, NUMBER_DISPLAYED);
+                moreLabel.setVisible(false);
+            }
+        } else {
+            setVisible(false);
+        }
     }
 
     //Overridden to add listener to all components in this container so that mouse clicks will work anywhere
