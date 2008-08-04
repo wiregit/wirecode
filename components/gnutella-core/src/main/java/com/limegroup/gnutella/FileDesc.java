@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.RPNParser.StringLookup;
 
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.routing.HashFunction;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 

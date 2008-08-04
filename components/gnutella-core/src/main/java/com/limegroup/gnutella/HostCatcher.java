@@ -36,6 +36,8 @@ import org.limewire.collection.IntSet;
 import org.limewire.collection.ListPartitioner;
 import org.limewire.collection.RandomAccessMap;
 import org.limewire.collection.RandomOrderHashMap;
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -60,8 +62,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 

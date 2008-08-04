@@ -7,13 +7,13 @@ import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**

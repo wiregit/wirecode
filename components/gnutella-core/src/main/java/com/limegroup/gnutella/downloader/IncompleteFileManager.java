@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 import org.limewire.collection.Comparators;
 import org.limewire.collection.Range;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
@@ -25,7 +26,6 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /** 

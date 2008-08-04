@@ -2,9 +2,10 @@ package com.limegroup.gnutella.gui;
 
 import java.util.Locale;
 
+import org.limewire.core.settings.ApplicationSettings;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
 
 public class ResourceManagerTest extends GUIBaseTestCase {
 

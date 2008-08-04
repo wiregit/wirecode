@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
@@ -19,7 +20,6 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton

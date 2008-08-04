@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
@@ -38,8 +40,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 

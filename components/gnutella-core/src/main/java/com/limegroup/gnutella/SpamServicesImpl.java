@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.limewire.collection.Comparators;
+import org.limewire.core.settings.FilterSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -12,7 +13,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
-import com.limegroup.gnutella.settings.FilterSettings;
 
 @Singleton
 public class SpamServicesImpl implements SpamServices {

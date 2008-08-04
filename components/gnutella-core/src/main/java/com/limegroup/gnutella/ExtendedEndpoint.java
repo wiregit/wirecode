@@ -9,12 +9,12 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import org.limewire.collection.Buffer;
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * An endpoint with additional history information used to prioritize

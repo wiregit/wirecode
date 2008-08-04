@@ -10,12 +10,12 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.limewire.core.settings.GeocodeSettings;
 import org.limewire.geocode.AbstractGeocoder;
 import org.limewire.http.httpclient.LimeHttpClient;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.limegroup.gnutella.settings.GeocodeSettings;
 
 final class GeocoderImpl extends AbstractGeocoder {
     

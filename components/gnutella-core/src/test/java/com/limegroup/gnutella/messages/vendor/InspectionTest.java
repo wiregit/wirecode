@@ -17,6 +17,8 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.GGEP;
@@ -45,8 +47,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage.GGEPSigner;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
 
 @Singleton
 public class InspectionTest extends ServerSideTestCase {

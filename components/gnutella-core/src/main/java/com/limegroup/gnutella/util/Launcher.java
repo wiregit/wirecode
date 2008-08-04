@@ -6,12 +6,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
+import org.limewire.core.settings.URLHandlerSettings;
+import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.SystemUtils;
 
-import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.settings.URLHandlerSettings;
 
 
 /**

@@ -6,13 +6,13 @@ import java.util.HashMap;
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
+import org.limewire.core.settings.LWSSettings;
 import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.StringCallback;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

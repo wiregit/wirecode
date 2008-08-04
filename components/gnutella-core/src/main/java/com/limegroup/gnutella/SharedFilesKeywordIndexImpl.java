@@ -13,16 +13,17 @@ import org.limewire.collection.Function;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
@@ -129,7 +130,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             return Collections.emptySet();
 
         Set<Response> responses = new HashSet<Response>();
-        final MediaType.Aggregator filter = MediaType.getAggregator(request);
+        final MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(request);
         LimeXMLDocument doc = request.getRichQuery();
 
         // Iterate through our hit indices to create a list of results.
@@ -503,7 +504,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
 
     private Collection<LimeXMLReplyCollection> getReplyCollections(QueryRequest request) {
-    	MediaType.Aggregator filter = MediaType.getAggregator(request);
+    	MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(request);
     	SchemaReplyCollectionMapper mapper = schemaReplyCollectionMapper.get();
         if (filter == null) {
     		return mapper.getCollections();

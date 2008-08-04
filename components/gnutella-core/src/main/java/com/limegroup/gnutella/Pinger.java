@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.core.settings.PingPongSettings;
 import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
@@ -10,7 +11,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.settings.PingPongSettings;
 
 /**
  * This class continually sends broadcast pings on behalf of an Ultrapeer

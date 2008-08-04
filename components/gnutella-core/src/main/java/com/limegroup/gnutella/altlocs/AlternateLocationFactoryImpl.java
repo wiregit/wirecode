@@ -2,6 +2,8 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
@@ -19,8 +21,6 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 public class AlternateLocationFactoryImpl implements AlternateLocationFactory {

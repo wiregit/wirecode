@@ -13,6 +13,8 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ContentSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.ByteReader;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
@@ -44,8 +46,6 @@ import com.limegroup.gnutella.downloader.UnknownCodeException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
-import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileListStub;

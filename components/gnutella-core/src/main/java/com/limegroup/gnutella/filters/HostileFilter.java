@@ -3,12 +3,12 @@ package com.limegroup.gnutella.filters;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.IP;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.FilterSettings;
 
 @Singleton
 public class HostileFilter extends  AbstractIPFilter {

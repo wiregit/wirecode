@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -11,7 +12,6 @@ import org.limewire.service.ErrorService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 class TlsTester implements Service {

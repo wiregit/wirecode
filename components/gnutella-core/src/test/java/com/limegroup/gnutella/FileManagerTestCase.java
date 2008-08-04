@@ -7,8 +7,6 @@ import java.util.ArrayList;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
@@ -18,6 +16,9 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;

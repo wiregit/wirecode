@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
 import org.limewire.security.SecurityToken;
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
-import com.limegroup.gnutella.settings.MessageSettings;
 
 import static com.limegroup.gnutella.MessageRouter.CLEAR_TIME;
 

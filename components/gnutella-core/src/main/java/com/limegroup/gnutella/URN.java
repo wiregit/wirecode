@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.SystemUtils;
@@ -28,7 +29,6 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.MerkleTree;
 import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.security.Tiger;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as

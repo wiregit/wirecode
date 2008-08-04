@@ -2,8 +2,9 @@ package com.limegroup.gnutella.handshaking;
 
 import java.io.IOException;
 
+import org.limewire.core.settings.ConnectionSettings;
+
 import com.limegroup.gnutella.http.ReadHeadersIOState;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * Superclass for HandshakeStates that are reading.

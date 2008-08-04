@@ -4,11 +4,11 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.AbstractSettingsGroup;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * A container of LibraryData.

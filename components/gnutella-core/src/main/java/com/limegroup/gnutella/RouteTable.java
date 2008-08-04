@@ -9,13 +9,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.limewire.collection.MultiIterable;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.search.ResultCounter;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 /**

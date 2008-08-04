@@ -8,6 +8,9 @@ import java.nio.channels.SelectableChannel;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.IOErrorObserver;
 import org.limewire.rudp.RUDPContext;
@@ -28,9 +31,6 @@ import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHelper;
 import com.limegroup.gnutella.rudp.messages.RUDPMessageHandlerHelper;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class RUDPIntegrationTest extends LimeTestCase {

@@ -2,9 +2,10 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 
 import java.io.File;
 
+import org.limewire.core.settings.SharingSettings;
+
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 @Singleton
 public class OldDownloadSettings implements DownloadSerializeSettings {

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
@@ -18,7 +19,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /*
  * A "watchdog" that periodically examines connections and

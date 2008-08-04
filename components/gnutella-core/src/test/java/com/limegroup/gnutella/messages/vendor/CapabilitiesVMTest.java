@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
 
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 public class CapabilitiesVMTest extends BaseTestCase {
 

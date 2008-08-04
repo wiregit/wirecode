@@ -5,6 +5,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.IpPortSet;
 
 import com.google.inject.Injector;
@@ -14,7 +15,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

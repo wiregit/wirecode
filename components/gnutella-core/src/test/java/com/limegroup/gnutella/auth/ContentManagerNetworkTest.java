@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import org.limewire.core.settings.ContentSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
-import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 import junit.framework.Test;

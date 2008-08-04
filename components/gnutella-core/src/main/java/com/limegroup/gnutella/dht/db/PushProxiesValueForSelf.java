@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**

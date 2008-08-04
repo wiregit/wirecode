@@ -9,6 +9,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -24,12 +30,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

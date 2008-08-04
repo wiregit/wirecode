@@ -8,6 +8,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -20,7 +21,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 
@@ -114,7 +114,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
             queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)3,
                 "whatever", "", null, null, true, Network.TCP, false, 0, false, 0);
        
-        MediaType.Aggregator filter = MediaType.getAggregator(query);
+        MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(query);
         assertNull(filter);
         }
 
@@ -155,7 +155,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
                 "whatever", "", null, null, true, Network.TCP, false, 0, false,
                 flag);
        
-        MediaType.Aggregator filter = MediaType.getAggregator(query);
+        MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(query);
         assertNotNull(filter);
         List filterList = (List) PrivilegedAccessor.getValue(filter, 
                                                              "_filters");

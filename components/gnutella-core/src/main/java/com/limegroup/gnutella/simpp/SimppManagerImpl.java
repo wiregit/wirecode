@@ -20,6 +20,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.limewire.core.settings.UpdateSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
@@ -37,7 +38,6 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
-import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

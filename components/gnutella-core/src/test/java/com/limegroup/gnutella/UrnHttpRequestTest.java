@@ -15,15 +15,15 @@ import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpRequest;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpTestUtils;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 

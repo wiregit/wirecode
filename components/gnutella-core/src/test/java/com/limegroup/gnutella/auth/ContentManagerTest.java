@@ -3,12 +3,12 @@ package com.limegroup.gnutella.auth;
 import junit.framework.Test;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.ContentSettings;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
-import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
  
 public class ContentManagerTest extends LimeTestCase {

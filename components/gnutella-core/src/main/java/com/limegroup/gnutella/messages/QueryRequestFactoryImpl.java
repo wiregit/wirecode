@@ -2,21 +2,21 @@ package com.limegroup.gnutella.messages;
 
 import java.util.Set;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
 @Singleton

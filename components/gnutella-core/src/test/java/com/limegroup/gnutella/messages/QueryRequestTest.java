@@ -13,22 +13,22 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.QueryRequestImpl.QueryRequestPayloadParser;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

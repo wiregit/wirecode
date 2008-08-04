@@ -2,6 +2,13 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.util.MediaType;
+
 import junit.framework.Test;
 
 import com.google.inject.AbstractModule;
@@ -11,11 +18,6 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 

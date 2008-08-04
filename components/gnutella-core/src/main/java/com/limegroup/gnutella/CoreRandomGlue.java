@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.FileFilter;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -20,8 +22,6 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;

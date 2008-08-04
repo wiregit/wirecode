@@ -15,18 +15,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorService;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Guice;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LogUtils;
 

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.filters.SpamFilter;
@@ -12,7 +13,6 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**

@@ -4,6 +4,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.PingPongSettings;
+import org.limewire.core.settings.UltrapeerSettings;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;
@@ -23,11 +29,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
-import com.limegroup.gnutella.settings.PingPongSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 

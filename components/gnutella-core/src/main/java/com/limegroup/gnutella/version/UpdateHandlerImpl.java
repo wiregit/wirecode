@@ -26,6 +26,8 @@ import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
@@ -70,8 +72,6 @@ import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

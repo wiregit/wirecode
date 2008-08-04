@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.util.CommonUtils;
@@ -13,7 +14,6 @@ import org.limewire.util.VersionUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 
 
 /**
@@ -452,23 +452,6 @@ public final class LimeWireUtils {
     
     public static void resetSettingsLoadSaveFailures() {
         SettingsFactory.resetLoadSaveFailure();
-    }
-    
-    /**
-     * Returns the root folder from which all Saved/Shared/etc..
-     * folders should be placed.
-     */
-    public static File getLimeWireRootFolder() {
-        String root = null;
-        
-        if(OSUtils.isWindows()) {
-            root = SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS);
-        }
-        
-        if(root == null || "".equals(root))
-            root = CommonUtils.getUserHomeDir().getPath();
-        
-        return new File(root, "LimeWire");
     }
 }
 

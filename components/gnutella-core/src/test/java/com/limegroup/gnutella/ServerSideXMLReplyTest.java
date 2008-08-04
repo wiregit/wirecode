@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  *  Tests that a Ultrapeer correctly sends XML Replies.  

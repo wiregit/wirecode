@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.DualIterator;
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
@@ -31,7 +32,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 public class PingRanker extends AbstractSourceRanker implements MessageListener, Cancellable {
 

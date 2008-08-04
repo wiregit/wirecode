@@ -13,8 +13,8 @@ import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
-import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
 

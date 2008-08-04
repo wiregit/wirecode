@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.Connectable;
 import org.limewire.io.GGEP;
@@ -28,7 +29,6 @@ import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way

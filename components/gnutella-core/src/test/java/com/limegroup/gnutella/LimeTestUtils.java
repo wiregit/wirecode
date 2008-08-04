@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.inject.Modules;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
@@ -32,7 +33,6 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 

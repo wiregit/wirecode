@@ -8,6 +8,7 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.util.BaseTestCase;
 
@@ -22,7 +23,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.InspectionResponse;
 import com.limegroup.gnutella.messages.vendor.InspectionResponseFactory;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 
 public class InspectionRequestHandlerTest extends BaseTestCase {

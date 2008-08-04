@@ -6,13 +6,13 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.service.ErrorService;
 import org.limewire.util.NameValue;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**

@@ -4,6 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.util.MediaType;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.BlockingConnection;
@@ -15,7 +18,6 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;

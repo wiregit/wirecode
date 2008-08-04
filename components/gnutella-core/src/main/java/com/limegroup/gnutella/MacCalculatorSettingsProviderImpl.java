@@ -1,8 +1,8 @@
 package com.limegroup.gnutella;
 
+import org.limewire.core.settings.SecuritySettings;
 import org.limewire.security.SettingsProvider;
 
-import com.limegroup.gnutella.settings.SecuritySettings;
 
 public class MacCalculatorSettingsProviderImpl implements SettingsProvider {
     public long getChangePeriod() {

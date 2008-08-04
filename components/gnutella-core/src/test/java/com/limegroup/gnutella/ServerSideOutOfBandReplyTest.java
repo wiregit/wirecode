@@ -15,6 +15,8 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.MessageSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
@@ -43,8 +45,6 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**

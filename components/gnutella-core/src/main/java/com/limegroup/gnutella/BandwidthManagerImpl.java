@@ -2,14 +2,14 @@ package com.limegroup.gnutella;
 
 import java.net.Socket;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.nio.NBThrottle;
 import org.limewire.nio.Throttle;
 import org.limewire.rudp.RUDPSocket;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 @Singleton
 public class BandwidthManagerImpl implements BandwidthManager {

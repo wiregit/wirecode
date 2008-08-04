@@ -14,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -45,7 +46,6 @@ import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;

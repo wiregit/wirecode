@@ -2,10 +2,11 @@ package com.limegroup.gnutella.filters;
 
 import java.util.Vector;
 
+import org.limewire.core.settings.FilterSettings;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.FilterSettings;
 
 @Singleton
 public class SpamFilterFactoryImpl implements SpamFilterFactory {

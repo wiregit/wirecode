@@ -9,6 +9,13 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.SSLSettings;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -22,13 +29,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 

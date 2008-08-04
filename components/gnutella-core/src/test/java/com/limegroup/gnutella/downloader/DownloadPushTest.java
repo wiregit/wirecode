@@ -8,6 +8,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.rudp.RUDPUtils;
@@ -20,9 +23,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class DownloadPushTest extends DownloadTestCase {

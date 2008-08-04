@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
@@ -38,7 +39,6 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;

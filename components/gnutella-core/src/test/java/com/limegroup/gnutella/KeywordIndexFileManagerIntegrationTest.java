@@ -4,11 +4,13 @@ import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.util.MediaType;
+
 import junit.framework.Test;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.SearchSettings;
 
 /**
  * Integration tests for query handling

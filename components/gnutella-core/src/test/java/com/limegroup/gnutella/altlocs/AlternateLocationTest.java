@@ -8,6 +8,7 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -23,7 +24,6 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.helpers.AlternateLocationHelper;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

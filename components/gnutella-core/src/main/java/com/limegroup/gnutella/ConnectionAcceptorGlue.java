@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import org.limewire.core.settings.LWSSettings;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;
 import org.limewire.net.ConnectionDispatcher;
@@ -13,7 +14,6 @@ import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.lws.server.LWSManager;
-import com.limegroup.gnutella.settings.LWSSettings;
 
 @Singleton
 class ConnectionAcceptorGlue {

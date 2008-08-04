@@ -7,6 +7,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.DHTSettings;
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
@@ -27,8 +29,6 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.PushProxiesValue;
 import com.limegroup.gnutella.dht.db.PushProxiesValueImpl;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
-import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**

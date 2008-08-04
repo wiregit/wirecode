@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -53,8 +55,6 @@ import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 

@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.altlocs;
 
 
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.settings.UploadSettings;
 
 /**
  * Abstract super class that encompasses common functionality shared by most implementations

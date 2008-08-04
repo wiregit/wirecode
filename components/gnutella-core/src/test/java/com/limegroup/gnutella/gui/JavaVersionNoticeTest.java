@@ -2,9 +2,9 @@ package com.limegroup.gnutella.gui;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.settings.QuestionsHandler;
 
 public class JavaVersionNoticeTest extends BaseTestCase {
 

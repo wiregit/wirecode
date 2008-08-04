@@ -14,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -80,7 +81,6 @@ import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;

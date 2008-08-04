@@ -58,6 +58,7 @@
     <module>xmpp</module-->
     <module>test-util</module>
     <module>core-api</module>
+    <module>core-settings</module>
   </modules>
 
   <repositories>

@@ -12,13 +12,13 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.NumericBuffer;
 import org.limewire.collection.QueueCounter;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.settings.UploadSettings;
 
 
 /**

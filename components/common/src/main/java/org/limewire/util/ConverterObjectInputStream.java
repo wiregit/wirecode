@@ -86,6 +86,7 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         lookups.put("com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator", "org.limewire.collection.Comparators$CaseInsensitiveStringComparator");
         lookups.put("com.limegroup.gnutella.util.StringComparator", "org.limewire.collection.StringComparator");
         lookups.put("com.sun.java.util.collections", "java.util");
+        lookups.put("com.limegroup.gnutella.MediaType", "org.limewire.util.MediaType");
     }
 
     /**
@@ -127,11 +128,21 @@ public class ConverterObjectInputStream extends ObjectInputStream {
                 LOG.debug("Stripping array form off, resulting in: " + className);
         }
         
+        
         ObjectStreamClass clazzToReturn; 
         String newName = lookups.get(className);
         if (newName != null) {
             clazzToReturn = ObjectStreamClass.lookup(Class.forName(newName));
-        } else {
+        } else if(className.contains("$")) {
+            // If it's an inner class, replace the parent.
+            int index = className.indexOf("$");
+            String newParent = lookups.get(className.substring(0, index));
+            if(newParent != null) {
+                clazzToReturn = ObjectStreamClass.lookup(Class.forName(newParent + className.substring(index)));
+            } else {
+                clazzToReturn = read;
+            }
+        } else {            
             int index = className.lastIndexOf('.');
             // use "" as lookup key for default package
             String oldPackage = index != -1 ? className.substring(0, index) : "";

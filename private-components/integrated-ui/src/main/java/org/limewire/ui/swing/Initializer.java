@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.swingx.JXLabel;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.StartupSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.browser.WinCreatorHook;
@@ -46,11 +48,10 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.StartupSettings;
 import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
+import com.limegroup.gnutella.util.MacOSXUtils;
 
 /** Initializes (creates, starts, & displays) the LimeWire Core & UI. */
 public final class Initializer {
@@ -330,6 +331,7 @@ public final class Initializer {
         stopwatch.resetAndLog("set system properties");
         
         if (OSUtils.isMacOSX()) {
+            System.setProperty("user.fullname", MacOSXUtils.getUserName()); // for DAAP
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             stopwatch.resetAndLog("set OSX properties");
         }

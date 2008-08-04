@@ -12,6 +12,10 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -31,10 +35,6 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

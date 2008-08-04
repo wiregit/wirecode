@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.rudp;
 
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.rudp.RUDPSettings;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 @Singleton
 class LimeRUDPSettings implements RUDPSettings {

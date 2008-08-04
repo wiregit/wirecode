@@ -5,6 +5,10 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.AssertionFailedError;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.DHTSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.PingPongSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
@@ -13,10 +17,6 @@ import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class DHTTestUtils {
@@ -27,8 +27,8 @@ public class DHTTestUtils {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {"127.*.*.*", "18.239.0.*"});
                 
-        com.limegroup.gnutella.settings.NetworkSettings.PORT.setValue(port);
-        BaseTestCase.assertEquals("unexpected port", port, com.limegroup.gnutella.settings.NetworkSettings.PORT.getValue());
+        org.limewire.core.settings.NetworkSettings.PORT.setValue(port);
+        BaseTestCase.assertEquals("unexpected port", port, org.limewire.core.settings.NetworkSettings.PORT.getValue());
                 
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);

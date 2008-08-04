@@ -6,6 +6,7 @@ import java.io.OutputStream;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Injector;
@@ -13,7 +14,6 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 

@@ -3,9 +3,12 @@ package com.limegroup.gnutella;
 import java.util.Set;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.util.DebugRunnable;
+import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -15,8 +18,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.statistics.QueryStats;
 

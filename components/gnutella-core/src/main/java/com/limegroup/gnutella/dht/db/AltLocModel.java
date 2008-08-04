@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.collection.MultiCollection;
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Storable;
@@ -24,7 +25,6 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 

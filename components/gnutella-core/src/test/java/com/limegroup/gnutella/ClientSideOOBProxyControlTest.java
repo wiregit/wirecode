@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 
+import org.limewire.core.settings.SearchSettings;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.BlockingConnection;
@@ -12,7 +14,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessageStubHelper;
-import com.limegroup.gnutella.settings.SearchSettings;
 
 /**
  * First ultrapeer supports new out-of-band proxying control protocol.

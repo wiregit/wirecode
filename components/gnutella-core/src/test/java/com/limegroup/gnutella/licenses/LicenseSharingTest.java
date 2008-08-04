@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -28,7 +29,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

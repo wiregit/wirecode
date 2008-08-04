@@ -6,6 +6,8 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -14,8 +16,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RoutedConnectionStub;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 

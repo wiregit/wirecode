@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.ByteReader;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
@@ -15,7 +16,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.browser.ExternalControl;
-import com.limegroup.gnutella.settings.NetworkSettings;
 
 /**
  * Allows one to check if a LimeWire is already running under this user's name.

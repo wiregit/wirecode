@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.channel.AbstractBufferChannelWriter;
@@ -28,7 +29,6 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

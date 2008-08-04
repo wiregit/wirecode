@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
@@ -27,8 +29,6 @@ import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
 
 /**
  * A basic implementation of {@link Connection}. The only methods that

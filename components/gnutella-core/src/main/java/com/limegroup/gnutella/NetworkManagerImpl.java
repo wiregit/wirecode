@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
@@ -20,8 +22,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton

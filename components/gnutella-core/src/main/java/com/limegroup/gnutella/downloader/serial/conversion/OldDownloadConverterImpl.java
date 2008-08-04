@@ -17,6 +17,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 
@@ -40,7 +41,6 @@ import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMemento;
 import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMementoImpl;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadConverterObjectInputStream.Version;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 public class OldDownloadConverterImpl implements OldDownloadConverter {
     

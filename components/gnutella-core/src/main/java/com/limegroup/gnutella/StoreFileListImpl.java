@@ -3,9 +3,9 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * A collection of FileDescs containing only files purchased from the LWS.

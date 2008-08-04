@@ -3,6 +3,10 @@ package com.limegroup.gnutella.connection;
 import java.net.InetAddress;
 import java.util.List;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
 
 import junit.framework.Test;
@@ -15,10 +19,6 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.StubGnetConnectObserver;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 

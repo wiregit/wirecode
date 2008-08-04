@@ -3,6 +3,7 @@ package com.limegroup.gnutella.altlocs;
 import junit.framework.Test;
 
 import org.limewire.collection.Function;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.BaseTestCase;
@@ -12,7 +13,6 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class AltLocUtilsTest extends BaseTestCase {

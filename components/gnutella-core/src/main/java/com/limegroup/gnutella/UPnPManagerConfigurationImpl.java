@@ -1,8 +1,9 @@
 package com.limegroup.gnutella;
 
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.ConnectionSettings;
+
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 @Singleton
 public class UPnPManagerConfigurationImpl implements UPnPManagerConfiguration {

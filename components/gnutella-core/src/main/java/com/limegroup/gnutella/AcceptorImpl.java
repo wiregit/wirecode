@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IOUtils;
@@ -40,8 +42,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to

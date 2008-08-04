@@ -13,6 +13,8 @@ import java.util.TreeSet;
 import junit.framework.Test;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
@@ -27,8 +29,6 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.stubs.AcceptorStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 

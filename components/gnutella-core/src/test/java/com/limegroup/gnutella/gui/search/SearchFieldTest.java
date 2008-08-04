@@ -4,11 +4,11 @@ import javax.swing.text.BadLocationException;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.util.I18NConvert;
 
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.search.SearchField.SearchFieldDocument;
-import com.limegroup.gnutella.settings.SearchSettings;
 
 public class SearchFieldTest extends GUIBaseTestCase {
 

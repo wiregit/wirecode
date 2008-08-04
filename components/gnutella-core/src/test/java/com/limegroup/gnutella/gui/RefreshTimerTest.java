@@ -2,9 +2,9 @@ package com.limegroup.gnutella.gui;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.StringArraySetting;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
 
 public class RefreshTimerTest extends GUIBaseTestCase {
 

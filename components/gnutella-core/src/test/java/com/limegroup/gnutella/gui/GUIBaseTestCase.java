@@ -3,9 +3,10 @@ package com.limegroup.gnutella.gui;
 import java.io.File;
 import java.util.Locale;
 
+import org.limewire.core.settings.ApplicationSettings;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

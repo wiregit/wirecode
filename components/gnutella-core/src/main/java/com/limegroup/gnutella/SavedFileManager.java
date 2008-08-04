@@ -13,12 +13,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * Singleton that manages saved files.

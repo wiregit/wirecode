@@ -27,6 +27,7 @@ import org.limewire.collection.NECallable;
 import org.limewire.collection.NotView;
 import org.limewire.collection.RRProcessingQueue;
 import org.limewire.collection.Range;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.DiskException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.SystemUtils;
@@ -42,7 +43,6 @@ import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * Verifies the Pieces of the torrent to the .torrent meta information 

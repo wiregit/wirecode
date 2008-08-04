@@ -1,11 +1,11 @@
 package com.limegroup.gnutella;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 public class LocalSocketAddressProviderImpl implements LocalSocketAddressProvider {

@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.gui.search;
 
+import org.limewire.util.MediaType;
+
 import junit.framework.Test;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GuiCoreMediator;
 

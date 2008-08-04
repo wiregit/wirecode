@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.collection.IntervalSet;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.settings.SharingSettings;
 
 
 /**

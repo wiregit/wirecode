@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SyncWrapper;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
@@ -36,7 +37,6 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 

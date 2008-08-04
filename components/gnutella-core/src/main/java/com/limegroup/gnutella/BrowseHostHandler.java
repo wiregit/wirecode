@@ -18,6 +18,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -41,7 +42,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

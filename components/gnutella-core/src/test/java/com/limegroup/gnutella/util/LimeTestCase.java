@@ -4,6 +4,16 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.ContentSettings;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LimeProps;
+import org.limewire.core.settings.SSLSettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.UISettings;
+import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.service.ErrorCallback;
 import org.limewire.setting.SettingsGroupManager;
@@ -15,16 +25,6 @@ import org.limewire.util.TestUtils;
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.LimeProps;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UISettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 /**
  * Should be used when the test case requires to change settings.

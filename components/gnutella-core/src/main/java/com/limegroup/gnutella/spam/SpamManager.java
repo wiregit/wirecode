@@ -2,11 +2,12 @@ package com.limegroup.gnutella.spam;
 
 import java.util.Locale;
 
+import org.limewire.core.settings.SearchSettings;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.Token.Rating;
 
 @Singleton

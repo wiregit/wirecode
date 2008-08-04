@@ -11,13 +11,13 @@ import java.util.List;
 import org.limewire.collection.MultiCollection;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMemento;
 import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMementoImpl;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * Information about the file hierarchy contained in the torrent.

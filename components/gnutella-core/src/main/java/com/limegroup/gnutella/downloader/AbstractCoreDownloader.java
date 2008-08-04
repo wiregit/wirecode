@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -14,7 +15,6 @@ import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * A basic implementation of CoreDownloader.

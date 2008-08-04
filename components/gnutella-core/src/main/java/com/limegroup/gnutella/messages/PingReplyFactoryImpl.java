@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
@@ -30,8 +32,6 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 public class PingReplyFactoryImpl implements PingReplyFactory {

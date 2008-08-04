@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
@@ -35,7 +36,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.templates.StoreFileNameTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreSubDirectoryTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreTemplateProcessor;

@@ -2,8 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.DownloadSettings;
 
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 /** A class to determine which SelectionStrategy should be used for a given file. */
 public class SelectionStrategyFactory {

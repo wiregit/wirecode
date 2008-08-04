@@ -2,9 +2,9 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.Locale;
 
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 public class SelectionStrategyFactoryTest extends BaseTestCase {
 

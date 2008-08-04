@@ -2,7 +2,8 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
+import org.limewire.core.settings.ApplicationSettings;
+
 
 /**
  * A very simple responder to be used by leaf-nodes during the

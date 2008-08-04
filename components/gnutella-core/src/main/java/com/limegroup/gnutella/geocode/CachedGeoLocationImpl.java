@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.GeocodeSettings;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.geocode.Geocoder;
 import org.limewire.geocode.GeocodeInformation.Property;
@@ -15,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.settings.GeocodeSettings;
 
 @Singleton
 public class CachedGeoLocationImpl implements CachedGeoLocation {

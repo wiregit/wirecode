@@ -18,6 +18,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Buffer;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.security.AddressSecurityToken;
@@ -33,8 +35,6 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master

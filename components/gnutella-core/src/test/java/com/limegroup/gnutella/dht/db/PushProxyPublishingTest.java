@@ -5,6 +5,8 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.DHTSettings;
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.MojitoDHT;
@@ -26,8 +28,6 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;

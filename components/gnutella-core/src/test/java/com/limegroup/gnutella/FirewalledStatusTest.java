@@ -2,11 +2,12 @@ package com.limegroup.gnutella;
 
 import java.net.Socket;
 
+import org.limewire.core.settings.ConnectionSettings;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

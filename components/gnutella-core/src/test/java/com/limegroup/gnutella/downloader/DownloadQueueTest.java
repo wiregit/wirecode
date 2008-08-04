@@ -4,11 +4,11 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.DownloadSettings;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 public class DownloadQueueTest extends DownloadTestCase {
     private static final Log LOG = LogFactory.getLog(DownloadQueueTest.class);

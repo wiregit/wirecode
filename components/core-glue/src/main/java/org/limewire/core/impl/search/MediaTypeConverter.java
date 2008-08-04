@@ -1,8 +1,8 @@
 package org.limewire.core.impl.search;
 
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.util.MediaType;
 
-import com.limegroup.gnutella.MediaType;
 
 public class MediaTypeConverter {
 

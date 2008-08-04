@@ -3,8 +3,8 @@ package com.limegroup.gnutella.messages;
 import java.util.Set;
 
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.util.MediaType;
 
-import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message.Network;
 

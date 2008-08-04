@@ -5,6 +5,7 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.UpdateSettings;
 import org.limewire.io.GGEP;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.messages.vendor.UpdateRequest;
 import com.limegroup.gnutella.messages.vendor.UpdateResponse;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
-import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;

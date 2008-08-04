@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.SecureInputStream;
@@ -27,7 +28,6 @@ import org.limewire.util.CommonUtils;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**

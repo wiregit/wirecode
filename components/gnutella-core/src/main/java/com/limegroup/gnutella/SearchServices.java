@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.util.MediaType;
 
 public interface SearchServices {
 

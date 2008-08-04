@@ -11,6 +11,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.BooleanSetting;
 
 import com.limegroup.gnutella.FileList;
@@ -18,7 +19,6 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.gui.notify.Notification;
 import com.limegroup.gnutella.gui.notify.NotifyUser;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     

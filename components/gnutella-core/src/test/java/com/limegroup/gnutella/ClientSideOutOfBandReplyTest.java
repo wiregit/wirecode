@@ -9,6 +9,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SearchSettings;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;
@@ -29,8 +32,6 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**

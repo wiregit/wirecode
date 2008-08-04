@@ -16,6 +16,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.IntervalSet;
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -46,7 +47,6 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongImpl;
-import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;

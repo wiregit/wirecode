@@ -5,6 +5,7 @@ import java.util.concurrent.Future;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -21,7 +22,6 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.settings.DHTSettings;
 
 public class DHTBootstrapperTest extends DHTTestCase {
     

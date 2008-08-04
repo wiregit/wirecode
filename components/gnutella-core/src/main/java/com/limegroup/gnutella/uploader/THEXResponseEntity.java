@@ -8,10 +8,10 @@ import java.io.IOException;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.ContentEncoderChannel;
 import org.apache.http.nio.IOControl;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.nio.NBThrottle;
 
-import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
 import com.limegroup.gnutella.tigertree.ThexWriter;
 

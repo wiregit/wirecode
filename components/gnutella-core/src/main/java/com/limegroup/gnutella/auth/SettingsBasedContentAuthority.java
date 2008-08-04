@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.limewire.core.settings.ContentSettings;
 import org.limewire.io.IpPortImpl;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.settings.ContentSettings;
 
 /** Content Authority that sends requests, randomly, to a host in the settings. */
 public class SettingsBasedContentAuthority implements ContentAuthority {

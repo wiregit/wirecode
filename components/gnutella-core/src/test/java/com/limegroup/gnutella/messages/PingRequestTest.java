@@ -7,6 +7,10 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SSLSettings;
+import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.io.GGEP;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.NameValue;
@@ -18,10 +22,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 @SuppressWarnings("unchecked")

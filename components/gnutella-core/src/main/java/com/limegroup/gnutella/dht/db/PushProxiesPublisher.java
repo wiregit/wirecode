@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPortSet;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -24,7 +25,6 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
-import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
  * The PushProxiesPublisher publishes Push Proxy information for 

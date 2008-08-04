@@ -9,12 +9,12 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 
 

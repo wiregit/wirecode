@@ -283,8 +283,8 @@ public final class CreationTimeCache implements FileEventListener {
             synchronized (this) {
                 if (max < 1)
                     throw new IllegalArgumentException("bad max = " + max);
-                MediaType.Aggregator filter = request == null ?
-                                null : MediaType.getAggregator(request);
+                MediaTypeAggregator.Aggregator filter = request == null ?
+                                null : MediaTypeAggregator.getAggregator(request);
 
                 // may be non-null at loop end
                 List<URN> toRemove = null;

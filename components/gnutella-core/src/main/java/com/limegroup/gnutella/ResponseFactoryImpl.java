@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
@@ -39,7 +40,6 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.messages.IntervalEncoder;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 
 
+import org.limewire.util.MediaType;
+
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**

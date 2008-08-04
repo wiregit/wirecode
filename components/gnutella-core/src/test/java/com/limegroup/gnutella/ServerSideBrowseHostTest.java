@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Iterator;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.ByteReader;
 import org.limewire.util.FileUtils;
 
@@ -21,7 +22,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**

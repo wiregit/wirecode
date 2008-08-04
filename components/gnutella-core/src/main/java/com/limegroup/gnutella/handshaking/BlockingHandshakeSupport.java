@@ -6,10 +6,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Properties;
 
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.ByteReader;
 
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * Contains some convenience methods for handshaking.

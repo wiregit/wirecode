@@ -11,6 +11,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.LocalSocketAddressProvider;
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.helpers.AlternateLocationHelper;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class DownloadAltLocTest extends DownloadTestCase {

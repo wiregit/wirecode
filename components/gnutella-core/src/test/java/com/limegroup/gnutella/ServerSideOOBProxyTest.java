@@ -14,6 +14,8 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -38,8 +40,6 @@ import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage.Contr
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**

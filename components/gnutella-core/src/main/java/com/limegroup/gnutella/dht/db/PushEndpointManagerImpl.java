@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Inject;
@@ -15,7 +16,6 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
-import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
  * Transparently interfaces with {@link PushEndpointService} 

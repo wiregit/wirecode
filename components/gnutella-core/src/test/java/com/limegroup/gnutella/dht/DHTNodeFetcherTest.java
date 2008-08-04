@@ -15,6 +15,8 @@ import junit.framework.Test;
 
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
@@ -36,8 +38,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 
 public class DHTNodeFetcherTest extends DHTTestCase {

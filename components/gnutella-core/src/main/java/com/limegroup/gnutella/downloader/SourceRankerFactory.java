@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.downloader;
 
+import org.limewire.core.settings.DownloadSettings;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.UDPPinger;
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 @Singleton
 public class SourceRankerFactory {

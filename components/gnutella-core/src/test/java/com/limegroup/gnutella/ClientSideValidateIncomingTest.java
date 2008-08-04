@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Random;
 
+import org.limewire.core.settings.ConnectionSettings;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;
@@ -24,7 +26,6 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * Checks whether leaves request redirects properly.  

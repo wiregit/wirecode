@@ -8,11 +8,12 @@ import java.util.Set;
 
 import org.limewire.collection.ForgetfulHashMap;
 import org.limewire.collection.MultiIterable;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**

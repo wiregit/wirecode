@@ -4,6 +4,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 

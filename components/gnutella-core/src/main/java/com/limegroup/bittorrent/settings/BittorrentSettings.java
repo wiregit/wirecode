@@ -1,11 +1,11 @@
 package com.limegroup.bittorrent.settings;
 
 
+import org.limewire.core.settings.LimeProps;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.ProbabilisticBooleanSetting;
 
-import com.limegroup.gnutella.settings.LimeProps;
 
 /**
  * BitTorrent settings.

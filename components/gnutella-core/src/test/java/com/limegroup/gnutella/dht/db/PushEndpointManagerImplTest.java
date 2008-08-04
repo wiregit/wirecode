@@ -10,6 +10,7 @@ import org.jmock.Mockery;
 import org.jmock.Sequence;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -18,7 +19,6 @@ import org.limewire.util.BaseTestCase;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
-import com.limegroup.gnutella.settings.DHTSettings;
 
 public class PushEndpointManagerImplTest extends BaseTestCase {
 

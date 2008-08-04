@@ -6,13 +6,13 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.core.settings.GeocodeSettings;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.geocode.Geocoder;
 import org.limewire.geocode.GeocodeInformation.Property;
 import org.limewire.inject.Providers;
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.settings.GeocodeSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 

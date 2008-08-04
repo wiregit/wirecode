@@ -2,13 +2,13 @@ package com.limegroup.gnutella.chat;
 
 import java.net.Socket;
 
+import org.limewire.core.settings.ChatSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.net.ConnectionAcceptor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.SpamServices;
-import com.limegroup.gnutella.settings.ChatSettings;
 
 /**
  * This class establishes a connection for a chat, either

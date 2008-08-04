@@ -8,6 +8,8 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.DHTSettings;
+import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
@@ -27,8 +29,6 @@ import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.EventDispatcher;
 

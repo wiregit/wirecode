@@ -4,6 +4,7 @@ import java.awt.event.WindowEvent;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.BaseTestCase;
@@ -23,7 +24,6 @@ import com.limegroup.gnutella.gui.I18n;
 import com.limegroup.gnutella.gui.LimeWireGUIModule;
 import com.limegroup.gnutella.gui.ResourceManager;
 import com.limegroup.gnutella.gui.VisualConnectionCallback;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class ChatUIManagerTest extends BaseTestCase {

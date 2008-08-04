@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -12,7 +13,6 @@ import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
 
 import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public abstract class DHTTestCase extends LimeTestCase {
@@ -36,10 +36,10 @@ public abstract class DHTTestCase extends LimeTestCase {
         bootstrapDHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
         bootstrapDHT.start();
         
-        com.limegroup.gnutella.settings.NetworkSettings.PORT.setValue(PORT);
+        org.limewire.core.settings.NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
-        assertEquals("unexpected port", PORT, com.limegroup.gnutella.settings.NetworkSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, org.limewire.core.settings.NetworkSettings.PORT.getValue());
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         lifeCycleManager.start();

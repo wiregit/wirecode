@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.settings.SearchSettings;
 
 public class QueryUtils {
     

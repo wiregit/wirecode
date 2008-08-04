@@ -3,10 +3,11 @@ package com.limegroup.gnutella.http;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.core.settings.ChatSettings;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.settings.ChatSettings;
 
 @Singleton
 public class FeaturesWriter {

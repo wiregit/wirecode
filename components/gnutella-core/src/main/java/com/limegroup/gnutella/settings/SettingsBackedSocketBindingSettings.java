@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.net.SocketBindingSettings;
 
 import com.google.inject.Singleton;

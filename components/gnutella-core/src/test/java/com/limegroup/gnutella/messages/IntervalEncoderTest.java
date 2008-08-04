@@ -4,11 +4,11 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.GGEP;
 import org.limewire.util.Base32;
 import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class IntervalEncoderTest extends LimeTestCase {

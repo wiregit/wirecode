@@ -12,6 +12,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiRRIterator;
+import org.limewire.core.settings.SSLSettings;
+import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.CountingOutputStream;
 import org.limewire.io.GGEP;
@@ -38,8 +40,6 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.settings.UploadSettings;
 
 @Singleton
 public class HeadPongFactoryImpl implements HeadPongFactory {

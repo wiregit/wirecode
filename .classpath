@@ -53,6 +53,7 @@
 	<classpathentry kind="src" output="private-components/swingui/src/main/resources" path="private-components/swingui/src/main/resources"/>
 	<classpathentry kind="src" output="components/core-api/build/classes" path="components/core-api/src/main/java"/>
 	<classpathentry kind="src" output="components/core-glue/build/classes" path="components/core-glue/src/main/java"/>
+	<classpathentry kind="src" output="components/core-settings/build/classes" path="components/core-settings/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>

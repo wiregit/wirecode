@@ -3,6 +3,8 @@ package com.limegroup.gnutella.messages;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
@@ -11,8 +13,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 public class PingRequestFactoryImpl implements PingRequestFactory {

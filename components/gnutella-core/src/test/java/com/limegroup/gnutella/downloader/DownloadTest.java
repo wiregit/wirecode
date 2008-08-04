@@ -8,15 +8,15 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.ContentSettings;
+import org.limewire.core.settings.DownloadSettings;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.settings.DownloadSettings;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in

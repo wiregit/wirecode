@@ -5,13 +5,13 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.StringArraySetting;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GuiCoreMediator;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
 

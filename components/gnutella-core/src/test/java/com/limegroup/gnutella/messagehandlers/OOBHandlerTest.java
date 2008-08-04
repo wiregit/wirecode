@@ -8,6 +8,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.MessageSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
@@ -39,8 +41,6 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactoryImpl;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 

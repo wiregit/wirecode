@@ -9,6 +9,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.MessageSettings;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessageVerifier;
 
@@ -24,8 +26,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.InspectionResponse;
 import com.limegroup.gnutella.messages.vendor.InspectionResponseFactory;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 
 /**

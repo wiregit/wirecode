@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import org.limewire.collection.FixedSizeExpiringSet;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 
 public class UDPCrawlerPingHandler extends RestrictedResponder {

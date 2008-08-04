@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.limewire.core.settings.MessageSettings;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
@@ -27,8 +29,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
-import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;

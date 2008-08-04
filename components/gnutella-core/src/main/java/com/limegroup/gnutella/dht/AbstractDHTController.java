@@ -24,6 +24,7 @@ import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.core.settings.DHTSettings;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -45,7 +46,6 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AbstractAltLocValue;
 import com.limegroup.gnutella.dht.db.AbstractPushProxiesValue;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**

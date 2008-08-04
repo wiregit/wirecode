@@ -9,9 +9,9 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.BucketQueue;
+import org.limewire.core.settings.ApplicationSettings;
 
 import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.MessageTestUtils;
 
