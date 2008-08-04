@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.limewire.collection.IntSet;
@@ -38,6 +39,11 @@ public interface FileManager {
      * all buddys.
      */
     public FileList getBuddyFileList();
+    
+    /**
+     * Returns all individual Buddy File Lists.
+     */
+    public Map<String, FileList> getAllBuddyLists();
     
     /**
      * Returns the FileList containing Shared Buddy files of this name. If

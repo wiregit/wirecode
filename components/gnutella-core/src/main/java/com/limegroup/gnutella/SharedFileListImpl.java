@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.collection.MultiCollection;
-import org.limewire.inspection.InspectableForSize;
 
 import com.limegroup.gnutella.library.SharingUtils;
 
@@ -30,13 +29,11 @@ public class SharedFileListImpl extends FileListImpl {
      * INVARIANT: no file can be in this and _data.SPECIAL_FILES_TO_SHARE
      * at the same time
      */
-    @InspectableForSize("number of transiently shared files")
     private final Set<File> transientSharedFiles;
     
     /**
      * Individual files that are not in a shared folder.
      */
-    @InspectableForSize("number of individually shared files") 
     private Collection<File> individualSharedFiles; 
     
     public SharedFileListImpl(String name, FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {

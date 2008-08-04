@@ -289,6 +289,7 @@ public class FileManagerImpl implements FileManager, Service {
         _extensions = new HashSet<String>();
 		_completelySharedDirectories = new HashSet<File>();
         storeDirectories = new HashSet<File>();
+        displayDirectories = new HashSet<File>();
     }
 
     public String getServiceName() {
@@ -748,6 +749,7 @@ public class FileManagerImpl implements FileManager, Service {
             // if folder already exists, just return
             if(displayDirectories.contains(folder))
                 return;
+            displayDirectories.add(folder);
         }
         
         _isUpdating = true;
@@ -774,7 +776,7 @@ public class FileManagerImpl implements FileManager, Service {
         // if this was in a new folder, remove it the proper way
         synchronized (displayDirectories) {
            contained = displayDirectories.contains(folder);
-            }
+        }
         if( contained )
             removeFolder(folder, null);
             
