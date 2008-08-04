@@ -18,8 +18,6 @@ public class SwarmHttpSource implements SwarmSource {
 
     private IntervalSet availableRanges = new IntervalSet();
 
-    // private final Range range;
-
     public SwarmHttpSource(URI uri, Range range) {
         this.socketAddress = new InetSocketAddress(uri.getHost(), URIUtils.getPort(uri));
         this.path = uri.getPath();
@@ -47,7 +45,4 @@ public class SwarmHttpSource implements SwarmSource {
     public IntervalSet getAvailableRanges() {
         return availableRanges;
     }
-    // public Range getRange() {
-    // return range;
-    // }
 }
