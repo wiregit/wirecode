@@ -9,7 +9,7 @@ import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.http.SwarmExecutionContext;
+import org.limewire.swarm.http.SwarmHttpExecutionContext;
 import org.limewire.swarm.http.SwarmHttpUtils;
 
 public class GnutellaDownloadReuseStrategy implements ConnectionReuseStrategy {
@@ -51,7 +51,7 @@ public class GnutellaDownloadReuseStrategy implements ConnectionReuseStrategy {
      */
     private boolean isNoRangeAvailableValid(HttpResponse response, HttpContext context) {
         IntervalSet availableRanges = (IntervalSet) context
-                .getAttribute(SwarmExecutionContext.HTTP_AVAILABLE_RANGES);
+                .getAttribute(SwarmHttpExecutionContext.HTTP_AVAILABLE_RANGES);
         if (availableRanges == null || availableRanges.isEmpty()) {
             return false;
         }

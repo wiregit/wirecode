@@ -6,13 +6,13 @@ import org.limewire.swarm.http.SwarmHttpSource;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 
-public class BTSwarmSource extends SwarmHttpSource {
+public class BTSwarmHttpSource extends SwarmHttpSource {
 
-    public BTSwarmSource(BTMetaInfo metaInfo) {
+    public BTSwarmHttpSource(BTMetaInfo metaInfo) {
         this(metaInfo, metaInfo.getWebSeeds()[0]);
     }
 
-    public BTSwarmSource(BTMetaInfo metaInfo, URI uri) {
+    public BTSwarmHttpSource(BTMetaInfo metaInfo, URI uri) {
         super(uri, metaInfo.getFileSystem().getTotalSize());
     }
 }

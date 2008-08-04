@@ -1,4 +1,4 @@
-package org.limewire.swarm.http;
+package org.limewire.swarm;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,9 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
@@ -26,12 +24,17 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
-import org.limewire.swarm.Swarmer;
+import org.limewire.swarm.http.SwarmHttpExecutionContext;
+import org.limewire.swarm.http.SwarmHttpSessionRequestCallback;
+import org.limewire.swarm.http.SwarmHttpStatus;
+import org.limewire.swarm.http.SwarmHttpUtils;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 
 public class SwarmerImpl implements Swarmer {
 
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
+
+    private static final SourceEventListener DEFAULT_SOURCE_EVENT_LISTENER = new ReconnectingSourceEventListener();
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -161,7 +164,7 @@ public class SwarmerImpl implements Swarmer {
         public void initalizeContext(HttpContext context, Object attachment) {
             if (isActive()) {
                 SourceInfo info = (SourceInfo) attachment;
-                context.setAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE, info.getSource());
+                context.setAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE, info.getSource());
                 context.setAttribute(LISTENER, info.getEventListener());
             } else {
                 SwarmHttpUtils.closeConnectionFromContext(context);
@@ -171,7 +174,7 @@ public class SwarmerImpl implements Swarmer {
         public void finalizeContext(HttpContext context) {
             SourceEventListener listener = (SourceEventListener) context.getAttribute(LISTENER);
             SwarmSource source = (SwarmSource) context
-                    .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
+                    .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
             listener.connectionClosed(SwarmerImpl.this, source);
 
             executionHandler.finalizeContext(context);
@@ -181,7 +184,7 @@ public class SwarmerImpl implements Swarmer {
             if (isActive()) {
                 SourceEventListener listener = (SourceEventListener) context.getAttribute(LISTENER);
                 SwarmSource source = (SwarmSource) context
-                        .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
+                        .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
                 listener.responseProcessed(SwarmerImpl.this, source, new SwarmHttpStatus(response.getStatusLine()));
 
                 executionHandler.handleResponse(response, context);
@@ -216,10 +219,7 @@ public class SwarmerImpl implements Swarmer {
         }
     }
 
-    private static final SourceEventListener DEFAULT_SOURCE_EVENT_LISTENER = new ReconnectingSourceEventListener();
-
-    public boolean finished() {
-        // TODO Auto-generated method stub
+      public boolean finished() {
         return false;
     }
 

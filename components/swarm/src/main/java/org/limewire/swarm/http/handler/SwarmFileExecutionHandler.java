@@ -15,9 +15,9 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFile;
-import org.limewire.swarm.http.SwarmExecutionContext;
+import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.http.SwarmHttpExecutionContext;
 import org.limewire.swarm.http.SwarmHttpUtils;
-import org.limewire.swarm.http.SwarmSource;
 import org.limewire.swarm.http.listener.ResponseContentListener;
 import org.limewire.swarm.http.listener.SwarmContentListener;
 
@@ -68,7 +68,7 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
         Range range;
 
         SwarmSource source = (SwarmSource) context
-                .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
+                .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
         IntervalSet availableRanges = source.getAvailableRanges();
 
         range = fileCoordinator.leasePortion(availableRanges);

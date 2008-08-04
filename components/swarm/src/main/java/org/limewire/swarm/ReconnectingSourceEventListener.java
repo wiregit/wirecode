@@ -1,11 +1,9 @@
-package org.limewire.swarm.http;
+package org.limewire.swarm;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.swarm.SwarmStatus;
-import org.limewire.swarm.Swarmer;
 
 public class ReconnectingSourceEventListener implements SourceEventListener {
 

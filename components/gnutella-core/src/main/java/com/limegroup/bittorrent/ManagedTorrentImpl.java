@@ -30,7 +30,7 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.Swarmer;
-import org.limewire.swarm.http.SwarmerImpl;
+import org.limewire.swarm.SwarmerImpl;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.FileUtils;
 
@@ -43,7 +43,7 @@ import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.swarm.BTSwarmCoordinator;
-import com.limegroup.bittorrent.swarm.BTSwarmSource;
+import com.limegroup.bittorrent.swarm.BTSwarmHttpSource;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.FileManager;
@@ -315,7 +315,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             swarmer.start();
 
             for (URI uri : metaInfo.getWebSeeds()) {
-                swarmer.addSource(new BTSwarmSource(metaInfo, uri));
+                swarmer.addSource(new BTSwarmHttpSource(metaInfo, uri));
             }
         }
     }

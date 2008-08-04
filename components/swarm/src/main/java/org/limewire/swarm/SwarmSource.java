@@ -1,4 +1,4 @@
-package org.limewire.swarm.http;
+package org.limewire.swarm;
 
 import java.net.SocketAddress;
 

@@ -10,12 +10,12 @@ import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.DiskException;
+import org.limewire.swarm.SourceEventListener;
+import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmStatus;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.Swarmer;
-import org.limewire.swarm.http.SourceEventListener;
-import org.limewire.swarm.http.SwarmSource;
-import org.limewire.swarm.http.SwarmerImpl;
+import org.limewire.swarm.SwarmerImpl;
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
@@ -60,7 +60,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.start();
 
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        swarmer.addSource(new BTSwarmHttpSource(metaInfo));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
 
@@ -82,7 +82,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.start();
 
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        swarmer.addSource(new BTSwarmHttpSource(metaInfo));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
@@ -105,7 +105,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.start();
 
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        swarmer.addSource(new BTSwarmHttpSource(metaInfo));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
@@ -128,7 +128,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.start();
 
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        swarmer.addSource(new BTSwarmHttpSource(metaInfo));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
@@ -197,7 +197,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                         System.out.println("connectionClosed");
                         if (!btCoordinator.isComplete()) {
                             System.out.println("Adding swarm Source");
-                            swarmer.addSource(new BTSwarmSource(btMetaInfo));
+                            swarmer.addSource(new BTSwarmHttpSource(btMetaInfo));
                         }
 
                     }
