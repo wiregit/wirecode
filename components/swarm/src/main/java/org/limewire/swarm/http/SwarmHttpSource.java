@@ -9,7 +9,7 @@ import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.http.URIUtils;
 
-public class SourceImpl implements SwarmSource {
+public class SwarmHttpSource implements SwarmSource {
 
     private final SocketAddress socketAddress;
 
@@ -19,13 +19,13 @@ public class SourceImpl implements SwarmSource {
 
     // private final Range range;
 
-    public SourceImpl(URI uri, Range range) {
+    public SwarmHttpSource(URI uri, Range range) {
         this.socketAddress = new InetSocketAddress(uri.getHost(), URIUtils.getPort(uri));
         this.path = uri.getPath();
         this.availableRanges.add(range);
     }
 
-    public SourceImpl(URI uri, long fileSize) {
+    public SwarmHttpSource(URI uri, long fileSize) {
         this(uri, Range.createRange(0, fileSize - 1));
     }
 

@@ -26,6 +26,7 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
+import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 
 public class SwarmerImpl implements Swarmer {
@@ -181,7 +182,7 @@ public class SwarmerImpl implements Swarmer {
                 SourceEventListener listener = (SourceEventListener) context.getAttribute(LISTENER);
                 SwarmSource source = (SwarmSource) context
                         .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
-                listener.responseProcessed(SwarmerImpl.this, source, new SwarmHTTPStatus(response.getStatusLine()));
+                listener.responseProcessed(SwarmerImpl.this, source, new SwarmHttpStatus(response.getStatusLine()));
 
                 executionHandler.handleResponse(response, context);
             } else {

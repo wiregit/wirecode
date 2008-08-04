@@ -25,6 +25,7 @@ import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
+import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
 import org.limewire.swarm.file.SwarmFileSystemImpl;
@@ -86,7 +87,7 @@ public class SwarmerImplTest extends BaseTestCase {
             int highByte = 44425 - 1;
             long fileSize = 44425;
             Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-            swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
+            swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
             assertDownload(md5, file, fileSize);
         } finally {
             file.delete();
@@ -113,7 +114,7 @@ public class SwarmerImplTest extends BaseTestCase {
             int highByte = (16 * 1024) - 1;
             long fileSize = highByte + 1;
             Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-            swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
+            swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
             assertDownload(md5, file, fileSize);
         } finally {
             file.delete();
@@ -134,7 +135,7 @@ public class SwarmerImplTest extends BaseTestCase {
             int highByte = (2 * 16 * 1024) - 1;
             long fileSize = highByte + 1;
             Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-            swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
+            swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
             assertDownload(md5, file, fileSize);
         } finally {
             file.delete();
@@ -155,7 +156,7 @@ public class SwarmerImplTest extends BaseTestCase {
             int highByte = 44425 - 1;
             long fileSize = highByte + 1;
             Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-            swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
+            swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
             assertDownload(md5, file, fileSize);
         } finally {
             file.delete();
@@ -184,8 +185,8 @@ public class SwarmerImplTest extends BaseTestCase {
 
             Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
 
-            swarmer.addSource(new SourceImpl(uri, range2));
-            swarmer.addSource(new SourceImpl(uri2, range1));
+            swarmer.addSource(new SwarmHttpSource(uri, range2));
+            swarmer.addSource(new SwarmHttpSource(uri2, range1));
 
             assertDownload(md5, file, fileSize);
         } finally {
@@ -221,9 +222,9 @@ public class SwarmerImplTest extends BaseTestCase {
             Range range3 = Range.createRange(lowByte3, highByte3);
             Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
 
-            swarmer.addSource(new SourceImpl(uri2, range2));
-            swarmer.addSource(new SourceImpl(uri1, range1));
-            swarmer.addSource(new SourceImpl(uri3, range3));
+            swarmer.addSource(new SwarmHttpSource(uri2, range2));
+            swarmer.addSource(new SwarmHttpSource(uri1, range1));
+            swarmer.addSource(new SwarmHttpSource(uri3, range3));
             assertDownload(md5, file, fileSize);
         } finally {
             file.delete();
@@ -247,7 +248,7 @@ public class SwarmerImplTest extends BaseTestCase {
             Range range = Range.createRange(lowByte, highByte);
             Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize,
                     new MD5SumFileVerifier(range, md5));
-            swarmer.addSource(new SourceImpl(uri, range));
+            swarmer.addSource(new SwarmHttpSource(uri, range));
             assertDownload(md5, file, fileSize);
         } finally {
             file.delete();

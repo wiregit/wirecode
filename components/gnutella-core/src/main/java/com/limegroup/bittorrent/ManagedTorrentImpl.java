@@ -29,7 +29,7 @@ import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
-import org.limewire.swarm.http.Swarmer;
+import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmerImpl;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.FileUtils;

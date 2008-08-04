@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.swarm.SwarmStatus;
+import org.limewire.swarm.Swarmer;
 
 public class ReconnectingSourceEventListener implements SourceEventListener {
 

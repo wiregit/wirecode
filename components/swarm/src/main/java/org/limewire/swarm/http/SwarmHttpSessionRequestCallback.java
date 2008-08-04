@@ -2,6 +2,7 @@ package org.limewire.swarm.http;
 
 import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
+import org.limewire.swarm.Swarmer;
 
 public class SwarmHttpSessionRequestCallback implements SessionRequestCallback {
     private final Swarmer swarmer;
