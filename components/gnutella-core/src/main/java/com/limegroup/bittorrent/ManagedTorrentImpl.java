@@ -55,6 +55,7 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -297,7 +298,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                     CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
                     CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
                     CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
-                    CoreProtocolPNames.USER_AGENT, "LimeTest/1.1");
+                    CoreProtocolPNames.USER_AGENT, LimeWireUtils.getHttpServer());
             ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
                     .instance().getScheduledExecutorService(), new SocketsManagerImpl());
             TorrentFileSystem torrentFileSystem = context.getFileSystem();
