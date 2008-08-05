@@ -12,8 +12,6 @@ import java.util.List;
 
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.gui.dnd.FileTransfer;
-
 /**
  * A Transferable that returns a javaFileListFlavor, built up from
  * a list of 'FileTransfer' and 'LazyFileTransfer' items.  The lazy
@@ -24,14 +22,14 @@ public class FileTransferable implements Transferable {
     
     private final List<File> files;
     
-    private final List<? extends FileTransfer> lazyFiles;
+    private final List<? extends File> lazyFiles;
     
     /**
      * Holds the data flavor used on linux desktops for file drags.
      */
     public static final DataFlavor URIFlavor = createURIFlavor();
     
-    public static final List<? extends FileTransfer> EMPTY_FILE_TRANSFER_LiST =
+    public static final List<? extends File> EMPTY_FILE_TRANSFER_LiST =
         Collections.emptyList();
     
     public static final List<File> EMPTY_FILE_LIST = Collections.emptyList();
@@ -53,7 +51,7 @@ public class FileTransferable implements Transferable {
      * @param lazyFiles
      */
     public FileTransferable(List<File> realFiles,
-            List<? extends FileTransfer> lazyFiles) {
+            List<? extends File> lazyFiles) {
         if (realFiles == null) { 
             throw new NullPointerException("realFiles must not be null");
         }
@@ -62,13 +60,13 @@ public class FileTransferable implements Transferable {
         }
         // copy, given list might not me mutable
         this.files = new ArrayList<File>(realFiles);
-        this.lazyFiles = new ArrayList<FileTransfer>(lazyFiles);
+        this.lazyFiles = new ArrayList<File>(lazyFiles);
     }
 
     private List<File> getFiles() {
         if (!lazyFiles.isEmpty()) {
-            for (FileTransfer transfer : lazyFiles) {
-                File f = transfer.getFile();
+            for (File transfer : lazyFiles) {
+                File f = transfer;
                 if (f != null)
                     files.add(f);
             }
