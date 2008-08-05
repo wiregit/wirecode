@@ -13,9 +13,9 @@ import org.apache.http.params.HttpParams;
 import org.limewire.io.DiskException;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.http.SourceEventListener;
+import org.limewire.swarm.Swarmer;
+import org.limewire.swarm.http.SwarmSourceEventListener;
 import org.limewire.swarm.http.SwarmHttpSource;
-import org.limewire.swarm.http.Swarmer;
 import org.limewire.swarm.http.SwarmerImpl;
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
@@ -26,7 +26,6 @@ import com.limegroup.bittorrent.BTContext;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
-import com.limegroup.bittorrent.BTMetaInfoTest;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
@@ -191,7 +190,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                 btCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
         final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                ioReactor, params, new SourceEventListener() {
+                ioReactor, params, new SwarmSourceEventListener() {
 
                     public void connectFailed(Swarmer swarmer, SwarmSource source) {
                         System.out.println("connectFailed");

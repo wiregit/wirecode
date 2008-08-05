@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SwarmerImpl implements Swarmer {
+public class SwarmerImpl /*implements Swarmer*/ {
 
     private Map<Class, SwarmSourceHandler> sourceHandlers = Collections
             .synchronizedMap(new HashMap<Class, SwarmSourceHandler>());
