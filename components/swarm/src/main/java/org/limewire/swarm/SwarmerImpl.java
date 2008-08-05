@@ -16,10 +16,7 @@ public class SwarmerImpl /*implements Swarmer*/ {
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
 
     public SwarmerImpl() {
-        this(null);
-    }
 
-    public SwarmerImpl(SourceEventListener globalSourceEventListener) {
     }
 
     public void addSource(final SwarmSource source) {

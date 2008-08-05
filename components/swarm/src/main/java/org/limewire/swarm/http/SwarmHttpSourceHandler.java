@@ -15,7 +15,6 @@ import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
 import org.apache.http.nio.protocol.NHttpRequestExecutionHandler;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
-import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestConnControl;
@@ -25,19 +24,18 @@ import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
 import org.limewire.swarm.DualSourceEventListener;
-import org.limewire.swarm.ReconnectingSourceEventListener;
 import org.limewire.swarm.SourceEventListener;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
-import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
+import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 
 public class SwarmHttpSourceHandler implements SwarmSourceHandler {
 
     private static final Log LOG = LogFactory.getLog(SwarmHttpSourceHandler.class);
 
-    private static final SourceEventListener DEFAULT_SOURCE_EVENT_LISTENER = new ReconnectingSourceEventListener();
+    private static final SourceEventListener DEFAULT_SOURCE_EVENT_LISTENER = new NoOpSwarmSourceEventListener();
 
     private final SourceEventListener globalSourceEventListener;
 
