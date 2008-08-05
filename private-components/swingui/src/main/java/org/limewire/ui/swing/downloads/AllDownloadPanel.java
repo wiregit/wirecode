@@ -24,11 +24,10 @@ public class AllDownloadPanel extends JPanel {
 	 * Create the panel
 	 */
 	public AllDownloadPanel(EventList<DownloadItem> list) {
-		super();
-		setLayout(new BorderLayout());
+		super(new BorderLayout());
 
 		table = new DownloadTable(list);
-		table.getTableHeader().setVisible(false);
+		table.setTableHeader(null);
 		add(new JScrollPane(table), BorderLayout.CENTER);
 	}
 

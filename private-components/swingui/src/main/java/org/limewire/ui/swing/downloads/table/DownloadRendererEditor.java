@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.downloads.table;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -25,7 +24,6 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -53,22 +51,13 @@ public class DownloadRendererEditor extends JPanel implements
 		TableCellRenderer, TableCellEditor {
 
     private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
-    
-	//TODO: inject colors
-	private Color rolloverBackground=Color.CYAN;
-	
-	private Color rolloverForeground= Color.BLACK;
-	
-	private Color menuShowingBackground = Color.BLUE.brighter();
+
 	
 	//The item being edited by the editor
 	private DownloadItem editItem = null;
 
     private DownloadItem menuEditItem = null;
-	
-	//used to maintain proper color of renderer
-	private DefaultTableCellRenderer delegateRenderer = new DefaultTableCellRenderer();
-	
+		
 	private JPanel buttonPanel;
 	private JLabel iconLabel;
 	private JLabel titleLabel;
@@ -91,7 +80,7 @@ public class DownloadRendererEditor extends JPanel implements
 	private JLabel timeLabel;
 	private DownloadEditorListener editorListener;
 	private MenuListener menuListener;
-    private JPopupMenu popupMenu;
+    private JPopupMenu popupMenu = new JPopupMenu();;
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
@@ -305,8 +294,6 @@ public class DownloadRendererEditor extends JPanel implements
 		gbc.gridwidth = 1;
 		add(timeLabel, gbc);			
 		
-		popupMenu = new JPopupMenu();	
-
 	}
 	
 	@Override
@@ -328,12 +315,8 @@ public class DownloadRendererEditor extends JPanel implements
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		Component delegate = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		Component renderer = getCellComponent(table, value, isSelected, hasFocus, row, column);
-		Color bgColor = value == menuEditItem ? menuShowingBackground : delegate.getBackground();
-		renderer.setBackground(bgColor);
-		return renderer;
-	}
+        return getCellComponent(table, value, isSelected, hasFocus, row, column);
+    }
 
 
 
@@ -341,10 +324,7 @@ public class DownloadRendererEditor extends JPanel implements
 	public Component getTableCellEditorComponent(JTable table, Object value,
 			boolean isSel, int row, int col) {
 	    editItem = (DownloadItem) value;
-		final DownloadRendererEditor editor = getCellComponent(table, value, isSel, true, row, col);
-		editor.setBackground(rolloverBackground);
-		editor.setForeground(rolloverForeground);
-		return editor;
+		return getCellComponent(table, value, isSel, true, row, col);
 	}
 
 	private DownloadRendererEditor getCellComponent(JTable table, Object value,
@@ -354,7 +334,7 @@ public class DownloadRendererEditor extends JPanel implements
 		return this;
 	}
 	
-	public void showPopup(Component c, int x, int y){	    
+	public void showPopupMenu(Component c, int x, int y){	    
 	    menuEditItem = editItem;
 	    popupMenu.removeAll();
 	    DownloadState state = menuEditItem.getState();
@@ -484,10 +464,15 @@ public class DownloadRendererEditor extends JPanel implements
         } else {
             editor.timeLabel.setVisible(false);
         }
-        updateButtons(item);
+        updateButtons(item);        
+
 	}
 
-	@Override
+	public boolean isItemMenuVisible(DownloadItem item) {
+        return item.equals(menuEditItem) && popupMenu.isVisible();
+    }
+
+    @Override
 	public final void addCellEditorListener(CellEditorListener lis) {
 		synchronized (listeners) {
 			if (!listeners.contains(lis))
@@ -581,29 +566,29 @@ public class DownloadRendererEditor extends JPanel implements
 	
 	private void performAction(String actionCommmand, DownloadItem item){
 	    if (actionCommmand == CANCEL_COMMAND) {
-            editItem.cancel();
+	        item.cancel();
         } else if (actionCommmand == PAUSE_COMMAND) {
-            editItem.pause();
+            item.pause();
         } else if (actionCommmand == RESUME_COMMAND) {
-            editItem.resume();
+            item.resume();
         } else if (actionCommmand == TRY_AGAIN_COMMAND) {
-            editItem.resume();
+            item.resume();
         } else if (actionCommmand == LINK_COMMAND){
             GuiUtils.openURL(ERROR_URL);
         } else if (actionCommmand == PREVIEW_COMMAND){
             //TODO preview
-            throw new RuntimeException("Implement "+ actionCommmand + "!");
+            throw new RuntimeException("Implement "+ actionCommmand + " " + item.getTitle() + "!");
         } else if (actionCommmand == LOCATE_COMMAND){
             //TODO locate
-            throw new RuntimeException("Implement "+ actionCommmand + "!");
+            throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
         } else if (actionCommmand == LAUNCH_COMMAND){
             //TODO launch
-            throw new RuntimeException("Implement "+ actionCommmand + "!");
+            throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
         } else if (actionCommmand == PROPERTIES_COMMAND){
             //TODO properties
-            throw new RuntimeException("Implement "+ actionCommmand + "!");
+            throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
         } else if (actionCommmand == REMOVE_COMMAND){
-            downloadItems.remove(menuEditItem);
+            downloadItems.remove(item);
         }
 	}
 

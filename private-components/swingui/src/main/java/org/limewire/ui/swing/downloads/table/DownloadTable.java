@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -10,12 +11,40 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.download.DownloadItem;
 
 import ca.odell.glazedlists.EventList;
 
 public class DownloadTable extends JXTable {
+    /**
+     * these consider the first element odd (not zero based)
+     */
+    private Color oddColor = Color.WHITE;
+    private Color oddForeground = Color.BLACK;
+    private Color evenColor = Color.LIGHT_GRAY;
+    private Color evenForeground = Color.BLACK;
+    private Color menuBackground = Color.BLUE.brighter();
+    private Color menuForeground = Color.BLACK;
+    
+    private DownloadRendererEditor editor;
+    
+    private HighlightPredicate menuRowPredicate = new HighlightPredicate() {
+        
+        
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            if (!adapter.getComponent().isEnabled()) return false;
+            
+            if (adapter.getValue() instanceof DownloadItem){
+                DownloadItem item = (DownloadItem)adapter.getValue();
+               return (editor.isItemMenuVisible(item));
+            }
+            return false;
+        }
+        
+    };
 
 	public DownloadTable(EventList<DownloadItem> downloadItems) {
 		super(new DownloadTableModel(downloadItems));
@@ -24,11 +53,16 @@ public class DownloadTable extends JXTable {
 		setEditable(true);
 		setShowGrid(false, false);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		setHighlighters(HighlighterFactory.createSimpleStriping());
-		//This doesn't work with editing on rollover
+		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based to even and odd are backwards here
+        setHighlighters(new ColorHighlighter(HighlightPredicate.EVEN, oddColor, oddForeground, oddColor, oddForeground),
+                new ColorHighlighter(HighlightPredicate.ODD, evenColor, evenForeground, evenColor, evenForeground),
+                new ColorHighlighter(menuRowPredicate, menuBackground, menuForeground));
+        
+		// This doesn't work with editing on rollover - create custom
+        // HighlightPredicate that detects editing to change editor color
 		//addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, Color.CYAN, Color.BLACK));		
 
-		final DownloadRendererEditor editor = new DownloadRendererEditor();
+		editor = new DownloadRendererEditor();
         editor.initializeEditor(downloadItems);
 		DownloadRendererEditor renderer = new DownloadRendererEditor();
 		
@@ -82,7 +116,13 @@ public class DownloadTable extends JXTable {
 
             private void maybeShowPopup(MouseEvent e) {
                 if (e.isPopupTrigger()) {
-                    editor.showPopup(e.getComponent(), e.getX(), e.getY());
+                    editor.showPopupMenu(e.getComponent(), e.getX(), e.getY());
+                    int col = columnAtPoint(e.getPoint());
+                    int row = rowAtPoint(e.getPoint());
+                    //update editor colors
+                    prepareEditor(editor, row, col);
+                    //editor.repaint() takes about a second to show
+                    repaint();
                 }
             }
 
@@ -90,6 +130,18 @@ public class DownloadTable extends JXTable {
 		
 	}
 	
+
+    // gets rid of default editor color so that editors are colored by highlighters
+    @Override
+    public Component prepareEditor(TableCellEditor editor, int row, int column) {
+        Component comp = super.prepareEditor(editor, row, column);
+        ComponentAdapter adapter = getComponentAdapter(row, column);
+        if (compoundHighlighter != null) {
+            comp = compoundHighlighter.highlight(comp, adapter);
+        }
+        return comp;
+    }
+	   
 	//TODO: get rid of this hack.  GlazedLists isn't playing nicely with the editor
 	//@Override
 	//public void setValueAt(Object aValue, int row, int column) {}
