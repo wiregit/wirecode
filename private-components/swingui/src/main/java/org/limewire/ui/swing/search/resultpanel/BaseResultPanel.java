@@ -19,11 +19,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.Scrollable;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
+import org.limewire.ui.swing.search.ActionColumnTableCellRenderer;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -74,6 +77,10 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         boolean multiColumnSort = false;
         tcc = new TableComparatorChooser<VisualSearchResult>(
             resultsTable, sortedResults, multiColumnSort);
+        
+        TableColumnModel tcm = resultsTable.getColumnModel();
+        TableColumn tc = tcm.getColumn(4);
+        tc.setCellRenderer(new ActionColumnTableCellRenderer());
         
         setMode(ModeListener.Mode.LIST);
     }
