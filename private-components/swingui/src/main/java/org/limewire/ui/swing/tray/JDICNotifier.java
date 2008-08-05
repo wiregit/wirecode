@@ -3,6 +3,7 @@ package org.limewire.ui.swing.tray;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EventObject;
 
 import javax.swing.ActionMap;
 import javax.swing.Icon;
@@ -114,6 +115,16 @@ class JDICNotifier implements TrayNotifier {
 		menu.add(item);
 		
 		return menu;
+	}
+	
+	@Override
+	public boolean isExitEvent(EventObject event) {
+	    if(event != null && event.getSource() instanceof JMenuItem) {
+	        JMenuItem item = (JMenuItem)event.getSource();
+	        return item.getParent() == popupMenu;
+	    } else {
+	        return false;
+	    }
 	}
 	
 	private NotificationWindow buildNotificationWindow() {

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.tray;
 
 import java.awt.Dimension;
+import java.util.EventObject;
 
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
@@ -47,5 +48,10 @@ final class BasicNotifier implements TrayNotifier {
 
     public void updateUI() {
         SwingUtilities.updateComponentTreeUI(notificationWindow);        
+    }
+    
+    @Override
+    public boolean isExitEvent(EventObject event) {
+        return false;
     }
 }

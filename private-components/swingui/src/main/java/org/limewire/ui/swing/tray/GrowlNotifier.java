@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.tray;
 
+import java.util.EventObject;
+
 class GrowlNotifier implements TrayNotifier {
     
     private final Growl mGrowl;
@@ -30,6 +32,11 @@ class GrowlNotifier implements TrayNotifier {
 
     public void updateUI() {
         
+    }
+    
+    @Override
+    public boolean isExitEvent(EventObject event) {
+        return false;
     }
     
 }

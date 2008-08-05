@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.tray;
 
+import java.util.EventObject;
+
 import org.limewire.core.settings.UISettings;
 import org.limewire.util.OSUtils;
 
@@ -20,17 +22,14 @@ class TrayNotifierProxy implements TrayNotifier {
     @Inject
     TrayNotifierProxy(TrayManager trayManager) {
         if (OSUtils.supportsTray() && trayManager.isTrayLibraryLoaded()) {
-            System.out.println("Creating JDIC");
         	notifier = new JDICNotifier();
         	// If add notifications failed, we're screwed.
             if(!showTrayIcon()) {
-                System.out.println("Falling down to basic");
                 notifier = new BasicNotifier();
             }
         } else if (OSUtils.isMacOSX()) {
             notifier = new GrowlNotifier();
         } else {
-            System.out.println("Starting with basic");
             notifier = new BasicNotifier();
         }        
     }
@@ -64,6 +63,11 @@ class TrayNotifierProxy implements TrayNotifier {
         }
         
         notifier.showMessage(notification);
+    }
+    
+    @Override
+    public boolean isExitEvent(EventObject event) {
+        return notifier.isExitEvent(event);
     }
 
 }

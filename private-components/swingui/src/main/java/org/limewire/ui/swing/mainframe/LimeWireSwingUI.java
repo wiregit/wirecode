@@ -123,6 +123,10 @@ public class LimeWireSwingUI extends JPanel {
         trayNotifier.showTrayIcon();
     }
     
+    public TrayNotifier getTrayNotifier() {
+        return trayNotifier;
+    }
+    
     private class MainPanelResizer extends ComponentAdapter {
         private final MainPanel target;
 

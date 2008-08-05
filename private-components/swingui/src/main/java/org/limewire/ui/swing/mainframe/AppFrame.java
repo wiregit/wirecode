@@ -2,8 +2,10 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Image;
 import java.util.Enumeration;
+import java.util.EventObject;
 
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
@@ -11,10 +13,12 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 
+import org.jdesktop.application.Action;
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.core.impl.MockModule;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
+import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Guice;
@@ -57,9 +61,25 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setIconImage(frameIcon);
         getMainFrame().setJMenuBar(new LimeMenuBar());
 
-        LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
+        final LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
         
         ui.showTrayIcon();
+        addExitListener(new ExitListener() {
+            @Override
+            public boolean canExit(EventObject event) {
+                TrayNotifier notifier = ui.getTrayNotifier();
+                if(!notifier.supportsSystemTray() || notifier.isExitEvent(event)) {
+                    return true;
+                } else {
+                    minimizeToTray();
+                    return false;
+                }
+            }
+
+            @Override
+            public void willExit(EventObject event) {
+            }
+        });
         
         show(ui);
         ui.goHome();
@@ -71,7 +91,19 @@ public class AppFrame extends SingleFrameApplication {
 
         started = true;
     }
+    
+    @Action
+    public void minimizeToTray() {
+        getMainFrame().setState(Frame.ICONIFIED);
+        getMainFrame().setVisible(false);
+    }    
 
+    @Action
+    public void restoreView() {
+        getMainFrame().setVisible(true);
+        getMainFrame().setState(Frame.NORMAL);
+    }
+    
     public Injector createInjector() {
         if (injector == null) {
             injector = Guice.createInjector(new MockModule(), new LimeWireSwingUiModule());
