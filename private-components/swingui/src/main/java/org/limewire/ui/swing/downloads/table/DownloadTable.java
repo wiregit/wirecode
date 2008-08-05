@@ -10,11 +10,13 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 
@@ -22,32 +24,26 @@ public class DownloadTable extends JXTable {
     /**
      * these consider the first element odd (not zero based)
      */
-    private Color oddColor = Color.WHITE;
-    private Color oddForeground = Color.BLACK;
-    private Color evenColor = Color.LIGHT_GRAY;
-    private Color evenForeground = Color.BLACK;
-    private Color menuBackground = Color.BLUE.brighter();
-    private Color menuForeground = Color.BLACK;
+    @Resource
+    private Color oddColor;
+    @Resource
+    private Color oddForeground;
+    @Resource
+    private Color evenColor;
+    @Resource
+    private Color evenForeground;
+    @Resource
+    private Color menuRowBackground;
+    @Resource
+    private Color menuRowForeground;
     
     private DownloadRendererEditor editor;
     
-    private HighlightPredicate menuRowPredicate = new HighlightPredicate() {
-        
-        
-        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-            if (!adapter.getComponent().isEnabled()) return false;
-            
-            if (adapter.getValue() instanceof DownloadItem){
-                DownloadItem item = (DownloadItem)adapter.getValue();
-               return (editor.isItemMenuVisible(item));
-            }
-            return false;
-        }
-        
-    };
+    private HighlightPredicate menuRowPredicate = new MenuHighlightPredicate();
 
 	public DownloadTable(EventList<DownloadItem> downloadItems) {
 		super(new DownloadTableModel(downloadItems));
+		GuiUtils.assignResources(this);
 		setRolloverEnabled(false);
 		setFocusable(false);
 		setEditable(true);
@@ -56,7 +52,7 @@ public class DownloadTable extends JXTable {
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based to even and odd are backwards here
         setHighlighters(new ColorHighlighter(HighlightPredicate.EVEN, oddColor, oddForeground, oddColor, oddForeground),
                 new ColorHighlighter(HighlightPredicate.ODD, evenColor, evenForeground, evenColor, evenForeground),
-                new ColorHighlighter(menuRowPredicate, menuBackground, menuForeground));
+                new ColorHighlighter(menuRowPredicate, menuRowBackground, menuRowForeground));
         
 		// This doesn't work with editing on rollover - create custom
         // HighlightPredicate that detects editing to change editor color
@@ -142,42 +138,28 @@ public class DownloadTable extends JXTable {
         return comp;
     }
 	   
-	//TODO: get rid of this hack.  GlazedLists isn't playing nicely with the editor
-	//@Override
-	//public void setValueAt(Object aValue, int row, int column) {}
-
-	
-//	these are necessary if we use java 6 filtering and swingx (switched to glazed lists)
-//	//JXTable screws up java 6 sorting and filtering
-//	@Override
-//	public int convertRowIndexToModel(int viewRowIndex) {
-//		if (getRowSorter() == null) {
-//			return viewRowIndex;
-//		}
-//		return getRowSorter().convertRowIndexToModel(viewRowIndex);
-//	}
-//
-//	//JXTable screws up java 6 sorting and filtering
-//	@Override
-//	public int convertRowIndexToView(int modelRowIndex) {
-//		if (getRowSorter() == null) {
-//			return modelRowIndex;
-//		}
-//		return getRowSorter().convertRowIndexToView(modelRowIndex);
-//	}
-//
-//	//JXTable screws up java 6 sorting and filtering
-//	@Override
-//	public int getRowCount() {
-//		if (getRowSorter() == null) {
-//			return getModel().getRowCount();
-//		}
-//		return getRowSorter().getViewRowCount();
-//	}
 
 	//overridden so that cell editor buttons will always work
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		return row < getRowCount();
 	}
+	
+	
+	/**
+	 * Does this row have a popup menu showing?
+	 */
+    private class MenuHighlightPredicate implements HighlightPredicate {        
+        
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            if (!adapter.getComponent().isEnabled()) return false;
+            
+            if (adapter.getValue() instanceof DownloadItem){
+                DownloadItem item = (DownloadItem)adapter.getValue();
+               return (editor.isItemMenuVisible(item));
+            }
+            return false;
+        }
+        
+    }
 }
