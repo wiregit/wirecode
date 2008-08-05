@@ -84,11 +84,11 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
     public void addSource(SwarmSource source, SourceEventListener sourceEventListener) {
 
         SourceEventListener listener = buildListener(sourceEventListener);
-        SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(this,
-                source, listener);
-
-        ioReactor.connect(source.getAddress(), null, new HttpSourceInfo(source, listener),
-                sessionRequestCallback);
+//        SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(this,
+//                source, listener);
+//
+//        ioReactor.connect(source.getAddress(), null, new HttpSourceInfo(source, listener),
+//                sessionRequestCallback);
     }
 
     private SourceEventListener buildListener(SourceEventListener sourceEventListener) {

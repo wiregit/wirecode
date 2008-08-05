@@ -69,26 +69,27 @@ public class SwarmerImpl implements Swarmer {
         httpProcessor.addInterceptor(new RequestConnControl());
         httpProcessor.addInterceptor(new RequestUserAgent());
         httpProcessor.addInterceptor(new RequestExpectContinue());
-//        httpProcessor.addInterceptor(new HttpRequestInterceptor(){
-//
-//            public void process(HttpRequest arg0, HttpContext arg1) throws HttpException,
-//                    IOException {
-//               arg0.
-//                
-//            }
-//            
-//        });
- 
+        // httpProcessor.addInterceptor(new HttpRequestInterceptor(){
+        //
+        // public void process(HttpRequest arg0, HttpContext arg1) throws
+        // HttpException,
+        // IOException {
+        // arg0.
+        //                
+        // }
+        //            
+        // });
+
         final ConnectionReuseStrategy finalConnectionReuseStrategy = connectionReuseStrategy;
         clientHandler = new AsyncNHttpClientHandler(httpProcessor, new SwarmExecutionHandler(),
                 new ConnectionReuseStrategy() {
 
                     public boolean keepAlive(HttpResponse arg0, HttpContext arg1) {
-                        
+
                         return finalConnectionReuseStrategy.keepAlive(arg0, arg1);
                     }
-            
-        }, params);
+
+                }, params);
 
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
@@ -98,39 +99,20 @@ public class SwarmerImpl implements Swarmer {
     }
 
     public void addSource(final SwarmSource source, SwarmSourceEventListener sourceEventListener) {
-//        if (!started.get())
-//            throw new IllegalStateException("Cannot add source before starting");
+        if (!started.get()) {
+            throw new IllegalStateException("Cannot add source before starting");
+        }
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Adding source: " + source);
+        }
 
         final SwarmSourceEventListener listener = getListener(sourceEventListener);
-        SessionRequestCallback sessionRequestCallback = createSessionRequestCallback(source,
-                listener);
+        SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(this,
+                source, listener);
 
         ioReactor.connect(source.getAddress(), null, new SourceInfo(source, listener),
                 sessionRequestCallback);
-    }
-
-    private SessionRequestCallback createSessionRequestCallback(final SwarmSource source,
-            final SwarmSourceEventListener listener) {
-        return new SessionRequestCallback() {
-            public void cancelled(SessionRequest request) {
-                listener.connectFailed(SwarmerImpl.this, source);
-            };
-
-            public void completed(SessionRequest request) {
-                listener.connected(SwarmerImpl.this, source);
-            };
-
-            public void failed(SessionRequest request) {
-                listener.connectFailed(SwarmerImpl.this, source);
-            };
-
-            public void timeout(SessionRequest request) {
-                listener.connectFailed(SwarmerImpl.this, source);
-            };
-        };
     }
 
     private SwarmSourceEventListener getListener(SwarmSourceEventListener sourceEventListener) {
@@ -212,7 +194,8 @@ public class SwarmerImpl implements Swarmer {
         }
 
         public void finalizeContext(HttpContext context) {
-            SwarmSourceEventListener listener = (SwarmSourceEventListener) context.getAttribute(LISTENER);
+            SwarmSourceEventListener listener = (SwarmSourceEventListener) context
+                    .getAttribute(LISTENER);
             SwarmSource source = (SwarmSource) context
                     .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
             listener.connectionClosed(SwarmerImpl.this, source);
@@ -222,7 +205,8 @@ public class SwarmerImpl implements Swarmer {
 
         public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
             if (isActive()) {
-                SwarmSourceEventListener listener = (SwarmSourceEventListener) context.getAttribute(LISTENER);
+                SwarmSourceEventListener listener = (SwarmSourceEventListener) context
+                        .getAttribute(LISTENER);
                 SwarmSource source = (SwarmSource) context
                         .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
                 listener.responseProcessed(SwarmerImpl.this, source, response.getStatusLine()
@@ -248,11 +232,11 @@ public class SwarmerImpl implements Swarmer {
 
         public HttpRequest submitRequest(HttpContext context) {
             if (isActive()) {
-                HttpIOSession ioSession = (HttpIOSession) context.getAttribute(LimeConnectingIOReactor.IO_SESSION_KEY);
                 HttpRequest request = executionHandler.submitRequest(context);
 
-                if (LOG.isTraceEnabled() && request != null)
+                if (LOG.isTraceEnabled() && request != null) {
                     LOG.trace("Submitting request: " + request.getRequestLine());
+                }
                 return request;
             } else {
                 SwarmHttpUtils.closeConnectionFromContext(context);
@@ -272,8 +256,9 @@ public class SwarmerImpl implements Swarmer {
         }
 
         public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
-            //We can't try submitting a request again too soon after getting the response.
-            //kinda hacky for now, will find a better place for this
+            // We can't try submitting a request again too soon after getting
+            // the response.
+            // kinda hacky for now, will find a better place for this
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
@@ -290,7 +275,7 @@ public class SwarmerImpl implements Swarmer {
 
     public void register(Class clazz, SwarmSourceHandler sourceHandler) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }
