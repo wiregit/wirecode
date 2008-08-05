@@ -10,22 +10,22 @@ import org.apache.http.nio.IOControl;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.swarm.http.handler.ExecutionHandler;
+import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 
 /**
- * An {@link ExecutionHandler} that wraps another handler,
+ * An {@link SwarmHttpExecutionHandler} that wraps another handler,
  * respecting queue statuses.
  * 
  * That is, if a prior request had returned a 503 Queued,
  * this will prevent further requests from being sent until
  * the queue time has elapsed.
  */
-public class QueuableExecutionHandler implements ExecutionHandler {
+public class QueuableExecutionHandler implements SwarmHttpExecutionHandler {
         
-    private final ExecutionHandler delegateHandler;
+    private final SwarmHttpExecutionHandler delegateHandler;
     private final QueueController queueController;
     
-    public QueuableExecutionHandler(ExecutionHandler delegateHandler,
+    public QueuableExecutionHandler(SwarmHttpExecutionHandler delegateHandler,
             QueueController queueController) {
         this.delegateHandler = delegateHandler;
         this.queueController = queueController;

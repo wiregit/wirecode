@@ -30,8 +30,8 @@ import org.limewire.swarm.SourceEventListener;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
-import org.limewire.swarm.http.handler.ExecutionHandler;
-import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
+import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
+import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 
 public class SwarmHttpSourceHandler implements SwarmSourceHandler {
 
@@ -49,7 +49,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
 
     private final AsyncNHttpClientHandler clientHandler;
 
-    private final ExecutionHandler executionHandler;
+    private final SwarmHttpExecutionHandler executionHandler;
 
     private final AtomicBoolean started = new AtomicBoolean(false);
 
@@ -59,7 +59,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
             ConnectingIOReactor ioReactor, ConnectionReuseStrategy connectionReuseStrategy,
             SourceEventListener globalSourceEventListener) {
         this.swarmCoordinator = swarmCoordinator;
-        this.executionHandler = new SwarmFileExecutionHandler(swarmCoordinator);
+        this.executionHandler = new SwarmCoordinatorHttpExecutionHandler(swarmCoordinator);
         this.ioReactor = ioReactor;
 
         if (globalSourceEventListener == null) {

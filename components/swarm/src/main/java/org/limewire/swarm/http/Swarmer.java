@@ -2,6 +2,7 @@ package org.limewire.swarm.http;
 
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
+import org.limewire.swarm.SwarmSource;
 
 
 

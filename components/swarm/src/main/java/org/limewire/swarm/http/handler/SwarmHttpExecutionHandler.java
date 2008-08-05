@@ -13,7 +13,7 @@ import org.apache.http.protocol.HttpContext;
  * A version of {@link NHttpRequestExecutionHandler} without the
  * {@link NHttpRequestExecutionHandler#initalizeContext(HttpContext, Object)} call.
  */
-public interface ExecutionHandler {
+public interface SwarmHttpExecutionHandler {
 
     /**
      * Triggered when the underlying connection is ready to send a new

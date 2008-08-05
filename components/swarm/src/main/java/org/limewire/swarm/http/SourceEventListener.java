@@ -1,5 +1,7 @@
 package org.limewire.swarm.http;
 
+import org.limewire.swarm.SwarmSource;
+
 public interface SourceEventListener {
 
     void connectFailed(Swarmer swarmer, SwarmSource source);

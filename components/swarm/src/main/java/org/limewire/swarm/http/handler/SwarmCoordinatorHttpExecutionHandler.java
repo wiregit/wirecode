@@ -17,18 +17,18 @@ import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.http.SwarmExecutionContext;
 import org.limewire.swarm.http.SwarmHttpUtils;
-import org.limewire.swarm.http.SwarmSource;
+import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.http.listener.ResponseContentListener;
-import org.limewire.swarm.http.listener.SwarmContentListener;
+import org.limewire.swarm.http.listener.SwarmHttpContentListener;
 
-public class SwarmFileExecutionHandler implements ExecutionHandler {
-    private static final Log LOG = LogFactory.getLog(SwarmFileExecutionHandler.class);
+public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionHandler {
+    private static final Log LOG = LogFactory.getLog(SwarmCoordinatorHttpExecutionHandler.class);
 
     private static final String RESPONSE_LISTENER = "swarm.http.fileswarmer.internal.responseListener";
 
     private final SwarmCoordinator fileCoordinator;
 
-    public SwarmFileExecutionHandler(SwarmCoordinator fileCoordinator) {
+    public SwarmCoordinatorHttpExecutionHandler(SwarmCoordinator fileCoordinator) {
         this.fileCoordinator = fileCoordinator;
     }
 
@@ -98,7 +98,7 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
 
         HttpRequest request = new BasicHttpRequest("GET", path);
         request.addHeader(new BasicHeader("Range", "bytes=" + downloadStartRange + "-" + (downloadEndRange)));
-        context.setAttribute(RESPONSE_LISTENER, new SwarmContentListener(fileCoordinator,
+        context.setAttribute(RESPONSE_LISTENER, new SwarmHttpContentListener(fileCoordinator,
                 swarmFile, range));
         return request;
     }

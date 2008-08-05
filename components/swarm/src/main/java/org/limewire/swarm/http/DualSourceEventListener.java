@@ -1,5 +1,7 @@
 package org.limewire.swarm.http;
 
+import org.limewire.swarm.SwarmSource;
+
 public class DualSourceEventListener implements SourceEventListener {
     
     private final SourceEventListener a;

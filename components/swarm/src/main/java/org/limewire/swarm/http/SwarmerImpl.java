@@ -29,7 +29,8 @@ import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
 import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.http.reactor.LimeConnectingIOReactor;
-import org.limewire.swarm.http.handler.ExecutionHandler;
+import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 
 public class SwarmerImpl implements Swarmer {
 
@@ -43,13 +44,13 @@ public class SwarmerImpl implements Swarmer {
 
     private final AsyncNHttpClientHandler clientHandler;
 
-    private final ExecutionHandler executionHandler;
+    private final SwarmHttpExecutionHandler executionHandler;
 
     private final SourceEventListener globalSourceEventListener;
 
     private final SynchronizedHttpProcessor httpProcessor;
 
-    public SwarmerImpl(ExecutionHandler executionHandler,
+    public SwarmerImpl(SwarmHttpExecutionHandler executionHandler,
             ConnectionReuseStrategy connectionReuseStrategy, ConnectingIOReactor ioReactor,
             HttpParams params, SourceEventListener sourceEventListener) {
 

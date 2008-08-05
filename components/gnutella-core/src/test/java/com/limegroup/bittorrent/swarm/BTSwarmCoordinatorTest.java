@@ -2,6 +2,7 @@ package com.limegroup.bittorrent.swarm;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 import junit.framework.Test;
 
@@ -11,21 +12,22 @@ import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.DiskException;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
+import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.http.SourceEventListener;
-import org.limewire.swarm.http.SwarmSource;
+import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.http.Swarmer;
 import org.limewire.swarm.http.SwarmerImpl;
 import org.limewire.swarm.http.SwarmerImplTest;
-import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
+import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.bittorrent.BTContext;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
 import com.limegroup.bittorrent.BTMetaInfoTest;
 import com.limegroup.bittorrent.TorrentContext;
-import com.limegroup.bittorrent.BTContext;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
@@ -47,8 +49,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
     public void testSingleFileTorret() throws Exception {
 
-        File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-single-file.torrent");
+        File torrentFile = createFile("test-single-webseed-single-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -58,17 +59,23 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         final Swarmer swarmer = createSwarmer(torrentContext, null);
 
         swarmer.start();
-
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        long totalSize = torrentFileSystem.getTotalSize();
+        URI uri = metaInfo.getWebSeeds()[0];
+        swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
 
     }
 
+    private File createFile(String fileName) {
+        File torrentFile = new File("/home/pvertenten/workspace/limewire/tests/test-data/"
+                + fileName);
+        return torrentFile;
+    }
+
     public void testMultiFileTorret() throws Exception {
 
-        File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-multiple-file.torrent");
+        File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -81,7 +88,9 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.start();
 
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        long totalSize = torrentFileSystem.getTotalSize();
+        URI uri = metaInfo.getWebSeeds()[0];
+        swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
@@ -90,8 +99,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
     public void testMultiFileTorret2() throws Exception {
 
-        File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-multiple-file.torrent");
+        File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -104,17 +112,18 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         swarmer.start();
 
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        long totalSize = torrentFileSystem.getTotalSize();
+        URI uri = metaInfo.getWebSeeds()[0];
+        swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
-    
+
     public void testMultiFileTorret3() throws Exception {
 
-        File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
-                + "/test-single-webseed-multiple-file.torrent");
+        File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -123,11 +132,14 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
         downloadedFile1.delete();
         downloadedFile2.delete();
-        final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(metaInfo));
+        final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(
+                metaInfo));
 
         swarmer.start();
 
-        swarmer.addSource(new BTSwarmSource(metaInfo));
+        long totalSize = torrentFileSystem.getTotalSize();
+        URI uri = metaInfo.getWebSeeds()[0];
+        swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
@@ -147,7 +159,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         if (pieceStrategy == null) {
             pieceStrategy = new RandomPieceStrategy(torrentContext.getMetaInfo());
         }
-        
+
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         TorrentDiskManager torrentDiskManager = torrentContext.getDiskManager();
         torrentDiskManager.open(new DiskManagerListener() {
@@ -171,12 +183,12 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         HttpParams params = SwarmerImplTest.createHttpParams();
         ConnectingIOReactor ioReactor = SwarmerImplTest.createIOReactor(params);
-        final BTMetaInfo btMetaInfo = torrentContext.getMetaInfo();
         final BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(torrentContext
                 .getMetaInfo(), torrentFileSystem, torrentDiskManager, pieceStrategy);
         btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
-        SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(btCoordinator);
+        SwarmCoordinatorHttpExecutionHandler executionHandler = new SwarmCoordinatorHttpExecutionHandler(
+                btCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
         final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
                 ioReactor, params, new SourceEventListener() {
@@ -196,7 +208,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                         System.out.println("connectionClosed");
                         if (!btCoordinator.isComplete()) {
                             System.out.println("Adding swarm Source");
-                            swarmer.addSource(new BTSwarmSource(btMetaInfo));
+                            swarmer.addSource(source);
                         }
 
                     }
@@ -210,7 +222,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                 });
         return swarmer;
     }
-    
-    //TODO test better variety of torrent files.
-    //TODO test larger torrent files.
+
+    // TODO test better variety of torrent files.
+    // TODO test larger torrent files.
 }

@@ -10,23 +10,23 @@ import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.protocol.HttpContext;
 
 /**
- * An {@link ExecutionHandler} that iterates through a list of other
+ * An {@link SwarmHttpExecutionHandler} that iterates through a list of other
  * execution handlers, allowing each the opportunity to submit a request.
  * When one does have a request to submit, all subsequent states
  * associated with that request flow through to that specific handler.
  */
-public class OrderedExecutionHandler implements ExecutionHandler {
+public class OrderedSwarmHttpExecutionHandler implements SwarmHttpExecutionHandler {
     
     private static final String LAST_HANDLER = "swarm.http.oeh.internal.lasthandler";
     
-    private final List<ExecutionHandler> handlers;
+    private final List<SwarmHttpExecutionHandler> handlers;
     
-    public OrderedExecutionHandler(ExecutionHandler... handlers) {
+    public OrderedSwarmHttpExecutionHandler(SwarmHttpExecutionHandler... handlers) {
         this.handlers = Arrays.asList(handlers);
     }
 
     public void finalizeContext(HttpContext context) {
-        ExecutionHandler handler = (ExecutionHandler)context.getAttribute(LAST_HANDLER);
+        SwarmHttpExecutionHandler handler = (SwarmHttpExecutionHandler)context.getAttribute(LAST_HANDLER);
         if(handler != null) {
             handler.finalizeContext(context);
             context.setAttribute(LAST_HANDLER, null);
@@ -34,18 +34,18 @@ public class OrderedExecutionHandler implements ExecutionHandler {
     }
 
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
-        ExecutionHandler handler = (ExecutionHandler)context.getAttribute(LAST_HANDLER);
+        SwarmHttpExecutionHandler handler = (SwarmHttpExecutionHandler)context.getAttribute(LAST_HANDLER);
         handler.handleResponse(response, context);
     }
 
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
             throws IOException {
-        ExecutionHandler handler = (ExecutionHandler)context.getAttribute(LAST_HANDLER);
+        SwarmHttpExecutionHandler handler = (SwarmHttpExecutionHandler)context.getAttribute(LAST_HANDLER);
         return handler.responseEntity(response, context);
     }
 
     public HttpRequest submitRequest(HttpContext context) {
-        for(ExecutionHandler handler : handlers) {
+        for(SwarmHttpExecutionHandler handler : handlers) {
             HttpRequest request = handler.submitRequest(context);
             if(request != null) {
                 context.setAttribute(LAST_HANDLER, handler);
