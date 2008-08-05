@@ -131,4 +131,7 @@ public interface SwarmCoordinator {
 
     SwarmFileSystem getSwarmFileSystem();
 
+    long write(Range writeRange, ByteBuffer networkUnblockingBuffer) throws IOException;
+
+
 }

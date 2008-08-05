@@ -12,10 +12,13 @@ import org.apache.http.params.HttpParams;
 import org.limewire.io.DiskException;
 import org.limewire.swarm.SourceEventListener;
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.SwarmStatus;
-import org.limewire.swarm.EchoSwarmCoordinatorListener;
+import org.limewire.swarm.LoggingSwarmCoordinatorListener;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.SwarmerImpl;
+import org.limewire.swarm.http.SwarmHttpSource;
+import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
@@ -46,7 +49,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         return buildTestSuite(BTSwarmCoordinatorTest.class);
     }
 
-    public void testSingleFileTorret() throws Exception {
+    public void testSingleFileTorrent() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
                 + "/test-single-webseed-single-file-no-peer.torrent");
@@ -66,7 +69,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
     }
 
-    public void testMultiFileTorret() throws Exception {
+    public void testMultiFileTorrent() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
                 + "/test-single-webseed-multiple-file-no-peer.torrent");
@@ -89,7 +92,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
     }
 
-    public void testMultiFileTorret2() throws Exception {
+    public void testMultiFileTorrent2() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
                 + "/test-single-webseed-multiple-file-no-peer.torrent");
@@ -111,8 +114,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
-    
-    public void testMultiFileTorret3() throws Exception {
+
+    public void testMultiFileTorrent3() throws Exception {
 
         File torrentFile = new File(BTMetaInfoTest.TEST_DATA_DIR
                 + "/test-single-webseed-multiple-file-no-peer.torrent");
@@ -124,7 +127,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
         downloadedFile1.delete();
         downloadedFile2.delete();
-        final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(metaInfo));
+        final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(
+                metaInfo));
 
         swarmer.start();
 
@@ -148,7 +152,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         if (pieceStrategy == null) {
             pieceStrategy = new RandomPieceStrategy(torrentContext.getMetaInfo());
         }
-        
+
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         TorrentDiskManager torrentDiskManager = torrentContext.getDiskManager();
         torrentDiskManager.open(new DiskManagerListener() {
@@ -175,43 +179,45 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         final BTMetaInfo btMetaInfo = torrentContext.getMetaInfo();
         final BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(torrentContext
                 .getMetaInfo(), torrentFileSystem, torrentDiskManager, pieceStrategy);
-        btCoordinator.addListener(new EchoSwarmCoordinatorListener());
+        btCoordinator.addListener(new LoggingSwarmCoordinatorListener());
 
-        SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(btCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-        final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                ioReactor, params, new SourceEventListener() {
+        final Swarmer swarmer = new SwarmerImpl(new SourceEventListener() {
 
-                    public void connectFailed(Swarmer swarmer, SwarmSource source) {
-                        System.out.println("connectFailed");
+            public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+                System.out.println("connectFailed");
 
-                    }
+            }
 
-                    public void connected(Swarmer swarmer, SwarmSource source) {
-                        System.out.println("connected");
+            public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+                System.out.println("connected");
 
-                    }
+            }
 
-                    public void connectionClosed(Swarmer swarmer, SwarmSource source) {
+            public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
 
-                        System.out.println("connectionClosed");
-                        if (!btCoordinator.isComplete()) {
-                            System.out.println("Adding swarm Source");
-                            swarmer.addSource(new BTSwarmHttpSource(btMetaInfo));
-                        }
+                System.out.println("connectionClosed");
+                if (!btCoordinator.isComplete()) {
+                    System.out.println("Adding swarm Source");
+                    swarmSourceHandler.addSource(new BTSwarmHttpSource(btMetaInfo));
+                }
 
-                    }
+            }
 
-                    public void responseProcessed(Swarmer swarmer, SwarmSource source,
-                            SwarmStatus status) {
-                        System.out.println("responseProcessed");
+            public void responseProcessed(SwarmSourceHandler swarmSourceHandler,
+                    SwarmSource source, SwarmStatus status) {
+                System.out.println("responseProcessed");
 
-                    }
+            }
 
-                });
+        });
+        SwarmHttpSourceHandler httpSourceHandler = new SwarmHttpSourceHandler(btCoordinator,
+                params, ioReactor, connectionReuseStrategy, null);
+        swarmer.register(SwarmHttpSource.class, httpSourceHandler);
+        swarmer.register(BTSwarmHttpSource.class, httpSourceHandler);
         return swarmer;
     }
-    
-    //TODO test better variety of torrent files.
-    //TODO test larger torrent files.
+
+    // TODO test better variety of torrent files.
+    // TODO test larger torrent files.
 }

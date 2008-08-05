@@ -19,7 +19,7 @@ import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.http.SwarmHttpExecutionContext;
 import org.limewire.swarm.http.SwarmHttpUtils;
 import org.limewire.swarm.http.listener.ResponseContentListener;
-import org.limewire.swarm.http.listener.SwarmContentListener;
+import org.limewire.swarm.http.listener.SwarmHttpContentListener;
 
 public class SwarmFileExecutionHandler implements ExecutionHandler {
     private static final Log LOG = LogFactory.getLog(SwarmFileExecutionHandler.class);
@@ -98,7 +98,7 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
 
         HttpRequest request = new BasicHttpRequest("GET", path);
         request.addHeader(new BasicHeader("Range", "bytes=" + downloadStartRange + "-" + (downloadEndRange)));
-        context.setAttribute(RESPONSE_LISTENER, new SwarmContentListener(fileCoordinator,
+        context.setAttribute(RESPONSE_LISTENER, new SwarmHttpContentListener(fileCoordinator,
                 swarmFile, range));
         return request;
     }

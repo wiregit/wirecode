@@ -108,7 +108,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
      * @param buffer - buffer containing data to be written.
      */
     private void writeData(Range range, ByteBuffer buffer) throws IOException {
-        // TODO cleanup the concept of the write range.
+        //TODO cleanup the concept of the write range.
         synchronized (scheduleLock) {
             ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
             try {
@@ -117,8 +117,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
                 byteBufferCache.release(buffer);
                 networkUnblockingBuffer.flip();
 
-                long bytesWritten = swarmCoordinator.getSwarmFileSystem().write(
-                        networkUnblockingBuffer, writeRange.getLow());
+                long bytesWritten = swarmCoordinator.write(writeRange, networkUnblockingBuffer);
                 long newLow = writeRange.getLow() + bytesWritten;
                 long newHigh = writeRange.getHigh();
 

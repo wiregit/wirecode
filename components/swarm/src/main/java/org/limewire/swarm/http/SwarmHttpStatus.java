@@ -22,4 +22,11 @@ public class SwarmHttpStatus implements SwarmStatus {
         return status == HttpStatus.SC_PARTIAL_CONTENT || status == HttpStatus.SC_OK;
     }
 
+    @Override
+    public String toString() {
+       return statusLine.getReasonPhrase() + " code: " + statusLine.getStatusCode();
+    }
+    
+    
+
 }

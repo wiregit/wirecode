@@ -11,24 +11,24 @@ public class DualSourceEventListener implements SourceEventListener {
         this.b = b;
     }
 
-    public void connected(Swarmer swarmer, SwarmSource source) {
-        a.connected(swarmer, source);
-        b.connected(swarmer, source);
+    public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+        a.connected(swarmSourceHandler, source);
+        b.connected(swarmSourceHandler, source);
     }
     
-    public void connectFailed(Swarmer swarmer, SwarmSource source) {
-        a.connectFailed(swarmer, source);
-        b.connectFailed(swarmer, source);
+    public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+        a.connectFailed(swarmSourceHandler, source);
+        b.connectFailed(swarmSourceHandler, source);
     }
     
-    public void connectionClosed(Swarmer swarmer, SwarmSource source) {
-        a.connectionClosed(swarmer, source);
-        b.connectionClosed(swarmer, source);
+    public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+        a.connectionClosed(swarmSourceHandler, source);
+        b.connectionClosed(swarmSourceHandler, source);
     }
     
-    public void responseProcessed(Swarmer swarmer, SwarmSource source, SwarmStatus status) {
-        a.responseProcessed(swarmer, source, status);
-        b.responseProcessed(swarmer, source, status);
+    public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source, SwarmStatus status) {
+        a.responseProcessed(swarmSourceHandler, source, status);
+        b.responseProcessed(swarmSourceHandler, source, status);
     }
     
 

@@ -1,9 +1,5 @@
 package org.limewire.swarm;
 
-
-
-
-
 public interface Swarmer {
     
     void addSource(SwarmSource source);
@@ -14,6 +10,8 @@ public interface Swarmer {
     
     void shutdown();
   
-    public boolean finished();
+    public boolean isActive();
+
+    void register(Class clazz, SwarmSourceHandler sourceHandler);
 
 }

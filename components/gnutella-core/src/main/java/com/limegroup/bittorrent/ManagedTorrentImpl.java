@@ -28,9 +28,11 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
-import org.limewire.swarm.EchoSwarmCoordinatorListener;
+import org.limewire.swarm.LoggingSwarmCoordinatorListener;
+import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.SwarmerImpl;
+import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.FileUtils;
 
@@ -282,7 +284,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 if (s == TorrentState.SEEDING || s == TorrentState.VERIFYING)
                     return;
 
-                
                 validateTorrent();
                 webseed();
                 startConnecting();
@@ -304,14 +305,14 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                     .instance().getScheduledExecutorService(), new SocketsManagerImpl());
             TorrentFileSystem torrentFileSystem = context.getFileSystem();
             TorrentDiskManager torrentDiskManager = context.getDiskManager();
-            BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo,
-                    torrentFileSystem, torrentDiskManager);
-            btCoordinator.addListener(new EchoSwarmCoordinatorListener());
-            SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(
-                    btCoordinator);
+            BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
+                    torrentDiskManager);
+            btCoordinator.addListener(new LoggingSwarmCoordinatorListener());
             ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-            final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                    ioReactor, params, null);
+            SwarmSourceHandler swarmSourceHandler = new SwarmHttpSourceHandler(btCoordinator,
+                    params, ioReactor, connectionReuseStrategy, null);
+            final Swarmer swarmer = new SwarmerImpl();
+            swarmer.register(BTSwarmHttpSource.class, swarmSourceHandler);
             swarmer.start();
 
             for (URI uri : metaInfo.getWebSeeds()) {

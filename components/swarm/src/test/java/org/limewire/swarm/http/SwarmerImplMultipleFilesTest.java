@@ -18,7 +18,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.swarm.EchoSwarmCoordinatorListener;
+import org.limewire.swarm.LoggingSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
@@ -112,13 +112,14 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
                 swarmBlockVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
                 selectionStrategy, 32 * 1024);
 
-        SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(swarmCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
 
-        final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                ioReactor, params, null);
+        final Swarmer swarmer = new SwarmerImpl();
+        SwarmHttpSourceHandler httpSourceHandler = new SwarmHttpSourceHandler(swarmCoordinator,
+                params, ioReactor, connectionReuseStrategy, null);
+        swarmer.register(SwarmHttpSource.class, httpSourceHandler);
 
-        swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
+        swarmCoordinator.addListener(new LoggingSwarmCoordinatorListener());
         return swarmer;
     }
     

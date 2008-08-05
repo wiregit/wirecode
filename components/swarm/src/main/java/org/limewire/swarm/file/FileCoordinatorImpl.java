@@ -425,4 +425,15 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         return fileSystem;
     }
 
+    @Override
+    public String toString() {
+        StringBuffer toString = new StringBuffer();
+        toString.append("expected: ").append("0-").append(fileSystem.getCompleteSize()-1).append("\n");
+        toString.append("leased: " + leasedBlocks).append("\n");
+        toString.append("pending: " + pendingBlocks).append("\n");
+        toString.append("written: " + writtenBlocks).append("\n");
+        toString.append("verified: " + verifiedBlocks).append("\n");
+        return toString.toString();
+    }
+
 }

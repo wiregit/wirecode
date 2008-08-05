@@ -17,9 +17,9 @@ import org.limewire.swarm.SwarmWriteJobControl;
 import org.limewire.swarm.http.SwarmHttpContentImpl;
 import org.limewire.util.Objects;
 
-public class SwarmContentListener implements ResponseContentListener {
+public class SwarmHttpContentListener implements ResponseContentListener {
 
-    private static final Log LOG = LogFactory.getLog(SwarmContentListener.class);
+    private static final Log LOG = LogFactory.getLog(SwarmHttpContentListener.class);
 
     private final SwarmCoordinator fileCoordinator;
 
@@ -31,7 +31,7 @@ public class SwarmContentListener implements ResponseContentListener {
     
     private final SwarmFile swarmFile;
     
-    public SwarmContentListener(SwarmCoordinator fileCoordinator, SwarmFile swarmFile, Range range) {
+    public SwarmHttpContentListener(SwarmCoordinator fileCoordinator, SwarmFile swarmFile, Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
         this.expectedRange = Objects.nonNull(range, "range");
         this.swarmFile = swarmFile;

@@ -14,42 +14,49 @@ import org.limewire.swarm.SwarmFileSystem;
  * 
  * 
  */
-public final class EchoSwarmCoordinatorListener implements SwarmCoordinatorListener {
+public final class SysOutSwarmCoordinatorListener implements SwarmCoordinatorListener {
     public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block leased: " + block.toString());
+        System.out.println(swarmCoordinator.toString());
 
     }
 
     public void blockVerificationFailed(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block verification failed: " + block.toString());
+        System.out.println(swarmCoordinator.toString());
 
     }
 
     public void blockVerified(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block verified: " + block.toString());
+        System.out.println(swarmCoordinator.toString());
 
     }
 
     public void blockWritten(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block written: " + block.toString());
+        System.out.println(swarmCoordinator.toString());
     }
 
     public void blockUnleased(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block unleased: " + block.toString());
+        System.out.println(swarmCoordinator.toString());
 
     }
 
-    public void downloadCompleted(SwarmCoordinator fileCoordinator, SwarmFileSystem swarmDownload) {
+    public void downloadCompleted(SwarmCoordinator swarmCoordinator, SwarmFileSystem swarmDownload) {
         System.out.println("download complete");
+        System.out.println(swarmCoordinator.toString());
     }
 
     public void blockPending(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block pending: " + block.toString());
-
+        System.out.println(swarmCoordinator.toString());
     }
 
     public void blockUnpending(SwarmCoordinator swarmCoordinator, Range block) {
         System.out.println("block unpending: " + block.toString());
+        System.out.println(swarmCoordinator.toString());
 
     }
 }
