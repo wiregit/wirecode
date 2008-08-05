@@ -13,7 +13,6 @@ import org.limewire.collection.Range;
 import org.limewire.swarm.AbstractSwarmCoordinator;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmFile;
-import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
 
@@ -90,8 +89,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         avalableBitSet.flip(0, numPieces);
 
         BitField availableRangesBitField = new BitFieldSet(avalableBitSet, numPieces);
-        List<BTInterval> leased = torrentDiskManager.lease(availableRangesBitField, null,
-                pieceStrategy);
+        List<BTInterval> leased = torrentDiskManager.lease(availableRangesBitField, null, pieceStrategy);
 
         Range lease = null;
         if (leased != null && leased.size() > 0) {
@@ -156,7 +154,6 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     public long getAmountVerified() {
-        // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.getAmountVerified() is not implemented.");
     }
@@ -205,12 +202,6 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.wrote(Range) is not implemented.");
-    }
-
-    public SwarmFileSystem getSwarmFileSystem() {
-        // not the job of the BTSwarmCoordinator
-        throw new UnsupportedOperationException(
-                "BTSwarmCoordinator.getSwarmFileSystem() is not implemented.");
     }
 
 }

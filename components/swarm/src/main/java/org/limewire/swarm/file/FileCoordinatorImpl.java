@@ -271,8 +271,8 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
                     fileSystem.closeSwarmFile(swarmFile);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
-                    // TODO need to figure out what we will do in this case,
-                    // most likely jsut log the message
+                    //TODO need to figure out what we will do in this case,
+                    //most likely  jsut log the message
                     e.printStackTrace();
                 }
             }
@@ -419,21 +419,6 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
     public SwarmFile getSwarmFile(Range range) {
         return fileSystem.getSwarmFile(range.getLow());
-    }
-
-    public SwarmFileSystem getSwarmFileSystem() {
-        return fileSystem;
-    }
-
-    @Override
-    public String toString() {
-        StringBuffer toString = new StringBuffer();
-        toString.append("expected: ").append("0-").append(fileSystem.getCompleteSize()-1).append("\n");
-        toString.append("leased: " + leasedBlocks).append("\n");
-        toString.append("pending: " + pendingBlocks).append("\n");
-        toString.append("written: " + writtenBlocks).append("\n");
-        toString.append("verified: " + verifiedBlocks).append("\n");
-        return toString.toString();
     }
 
 }

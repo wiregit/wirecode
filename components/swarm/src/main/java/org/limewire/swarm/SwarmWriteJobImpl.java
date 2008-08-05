@@ -22,7 +22,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
 
     private final ExecutorService jobScheduler;
 
-    private final SwarmCoordinator swarmCoordinator;
+    private final SwarmCoordinator fileCoordinator;
 
     private final Object scheduleLock = new Object();
 
@@ -42,15 +42,15 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
      * Constructor for a SwarmWriteJobImpl, it will write the data for a given
      * range of bytes, by making subsequent calls to this jobs write method.
      * 
-     * @param range - The total range we know we want to write with this job.
-     * @param swarmCoordinator - The coordinator controlling disk access.
-     * @param jobScheduler - The scheduler to use for asynchronous write tasks.
-     * @param callback - A callback to the source controlling network data.
+     * @param range
+     * @param fileCoordinator
+     * @param jobScheduler
+     * @param callback
      */
-    public SwarmWriteJobImpl(Range range, SwarmCoordinator swarmCoordinator,
+    public SwarmWriteJobImpl(Range range, SwarmCoordinator fileCoordinator,
             ExecutorService jobScheduler, SwarmWriteJobControl callback) {
         this.jobScheduler = jobScheduler;
-        this.swarmCoordinator = swarmCoordinator;
+        this.fileCoordinator = fileCoordinator;
         this.range = range;
         this.writeRange = range;
         this.callback = callback;
@@ -67,25 +67,25 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
                 scheduledJob.cancel(false);
                 scheduledJob = null;
             }
-            swarmCoordinator.unpending(range);
+            fileCoordinator.unpending(range);
         }
     }
 
     /**
-     * Schedules a write job to write the data to disk. It buffers first pulls
-     * data out of the network buffer, then creates a write job to write the
-     * data.
+     * Schedules a write job to write the data to disk.
      * 
-     * @param content - the content to write to disk.
+     * @param content
      * @return the number of bytes to be written
      * 
      */
     public long write(final SwarmContent content) throws IOException {
         long written = 0;
+        // TODO do something with the written variable.
+
         synchronized (scheduleLock) {
 
             final ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
-            written = content.read(networkUnblockingBuffer);
+            content.read(networkUnblockingBuffer);
             networkUnblockingBuffer.flip();
 
             scheduledJob = jobScheduler.submit(new Callable<Void>() {
@@ -104,11 +104,11 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
      * is used both during disk & network I/O. (Disk I/O is inherently blocking,
      * and can stall network I/O otherwise.)
      * 
-     * @param range - the range of data pending to be written.
-     * @param buffer - buffer containing data to be written.
+     * @param range
+     * 
+     * @param buffer
      */
     private void writeData(Range range, ByteBuffer buffer) throws IOException {
-        //TODO cleanup the concept of the write range.
         synchronized (scheduleLock) {
             ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
             try {
@@ -117,7 +117,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
                 byteBufferCache.release(buffer);
                 networkUnblockingBuffer.flip();
 
-                long bytesWritten = swarmCoordinator.write(writeRange, networkUnblockingBuffer);
+                long bytesWritten = fileCoordinator.write(writeRange, networkUnblockingBuffer);
                 long newLow = writeRange.getLow() + bytesWritten;
                 long newHigh = writeRange.getHigh();
 
