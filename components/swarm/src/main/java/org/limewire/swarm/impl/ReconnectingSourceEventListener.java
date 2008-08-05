@@ -25,7 +25,7 @@ public class ReconnectingSourceEventListener implements SwarmSourceEventListener
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         SwarmStatus status = connectionStatus.get(source);
         // if (!swarmSourceHandler.isComplete()) {
-        if (status == null || status.isOk()) {
+        if (status == null || status.isOk() && !status.isFinished()) {
             System.out.println("reconnecting: " + source);
             try {
                 Thread.sleep(500);
@@ -42,6 +42,10 @@ public class ReconnectingSourceEventListener implements SwarmSourceEventListener
     public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         connectionStatus.put(source, status);
+    }
+
+    public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+        connectionStatus.put(source, new FinishedSwarmStatus());
     }
 
 }

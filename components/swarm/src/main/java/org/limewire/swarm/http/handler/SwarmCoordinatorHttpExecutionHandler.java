@@ -24,8 +24,6 @@ import org.limewire.swarm.http.listener.SwarmHttpContentListener;
 public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionHandler {
     private static final Log LOG = LogFactory.getLog(SwarmCoordinatorHttpExecutionHandler.class);
 
-    private static final String RESPONSE_LISTENER = "swarm.http.fileswarmer.internal.responseListener";
-
     private final SwarmCoordinator fileCoordinator;
 
     public SwarmCoordinatorHttpExecutionHandler(SwarmCoordinator fileCoordinator) {
@@ -35,10 +33,10 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
     public void finalizeContext(HttpContext context) {
         // Explicitly close content listener, if it was set.
         ResponseContentListener contentListener = (ResponseContentListener) context
-                .getAttribute(RESPONSE_LISTENER);
+                .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
         if (contentListener != null) {
             contentListener.finished();
-            context.setAttribute(RESPONSE_LISTENER, null);
+            context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
         }
     }
 
@@ -50,16 +48,16 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
         int code = response.getStatusLine().getStatusCode();
         if (code >= 200 && code < 300) {
             ResponseContentListener listener = (ResponseContentListener) context
-                    .getAttribute(RESPONSE_LISTENER);
+                    .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
             listener.initialize(response);
-            context.setAttribute(RESPONSE_LISTENER, null);
+            context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
             return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
         } else {
             ResponseContentListener listener = (ResponseContentListener) context
-                    .getAttribute(RESPONSE_LISTENER);
+                    .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
             listener.finished();
-            context.setAttribute(RESPONSE_LISTENER, null);
-            //TODO we need to handle this and not go into infinite loop
+            context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
+            // TODO we need to handle this and not go into infinite loop
             return null;
         }
     }
@@ -97,9 +95,10 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
         }
 
         HttpRequest request = new BasicHttpRequest("GET", path);
-        request.addHeader(new BasicHeader("Range", "bytes=" + downloadStartRange + "-" + (downloadEndRange)));
-        context.setAttribute(RESPONSE_LISTENER, new SwarmHttpContentListener(fileCoordinator,
-                swarmFile, range));
+        request.addHeader(new BasicHeader("Range", "bytes=" + downloadStartRange + "-"
+                + (downloadEndRange)));
+        context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER,
+                new SwarmHttpContentListener(fileCoordinator, swarmFile, range));
         return request;
     }
 }

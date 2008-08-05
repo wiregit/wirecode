@@ -10,5 +10,7 @@ public interface SwarmSourceEventListener {
     void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source);
 
     void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source, SwarmStatus status);
+    
+    void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source);
 
 }

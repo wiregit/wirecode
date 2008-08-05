@@ -5,7 +5,6 @@ import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.SwarmStatus;
 
-
 public class NoOpSwarmSourceEventListener implements SwarmSourceEventListener {
 
     public NoOpSwarmSourceEventListener() {
@@ -26,6 +25,9 @@ public class NoOpSwarmSourceEventListener implements SwarmSourceEventListener {
     public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
 
+    }
+
+    public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
     }
 
 }

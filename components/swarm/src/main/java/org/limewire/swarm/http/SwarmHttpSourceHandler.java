@@ -30,6 +30,7 @@ import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
+import org.limewire.swarm.http.listener.ResponseContentListener;
 import org.limewire.swarm.impl.DualSourceEventListener;
 import org.limewire.swarm.impl.NoOpSwarmSourceEventListener;
 
@@ -91,6 +92,14 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
                 sessionRequestCallback);
     }
 
+    public void addSource(SwarmSource source) {
+        addSource(source, null);
+    }
+
+    public boolean isComplete() {
+        return swarmCoordinator.isComplete();
+    }
+
     private SwarmSourceEventListener buildListener(SwarmSourceEventListener sourceEventListener) {
         final SwarmSourceEventListener listener;
         if (sourceEventListener == null) {
@@ -116,16 +125,17 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
     }
 
     private class SwarmExecutionHandler implements NHttpRequestExecutionHandler {
-        private static final String LISTENER = "swarm.http.internal.eventlistener";
 
         public void initalizeContext(HttpContext context, Object attachment) {
             HttpSourceInfo info = (HttpSourceInfo) attachment;
             context.setAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE, info.getSource());
-            context.setAttribute(LISTENER, info.getSourceEventListener());
+            context.setAttribute(SwarmHttpExecutionContext.SWARM_SOURCE_LISTENER, info
+                    .getSourceEventListener());
         }
 
         public void finalizeContext(HttpContext context) {
-            SwarmSourceEventListener listener = (SwarmSourceEventListener) context.getAttribute(LISTENER);
+            SwarmSourceEventListener listener = (SwarmSourceEventListener) context
+                    .getAttribute(SwarmHttpExecutionContext.SWARM_SOURCE_LISTENER);
             SwarmSource source = (SwarmSource) context
                     .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
             listener.connectionClosed(SwarmHttpSourceHandler.this, source);
@@ -135,24 +145,24 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
 
         public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
             if (isActive()) {
-                SwarmSourceEventListener listener = (SwarmSourceEventListener) context.getAttribute(LISTENER);
+                SwarmSourceEventListener listener = (SwarmSourceEventListener) context
+                        .getAttribute(SwarmHttpExecutionContext.SWARM_SOURCE_LISTENER);
                 SwarmSource source = (SwarmSource) context
                         .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
                 listener.responseProcessed(SwarmHttpSourceHandler.this, source,
                         new SwarmHttpSourceStatus(response.getStatusLine()));
 
                 executionHandler.handleResponse(response, context);
-            } else {
-                throw new IOException("Not active!");
             }
         }
 
         public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
                 throws IOException {
             if (isActive()) {
-                if (LOG.isTraceEnabled())
+                if (LOG.isTraceEnabled()) {
                     LOG.trace("Handling response: " + response.getStatusLine() + ", headers: "
                             + Arrays.asList(response.getAllHeaders()));
+                }
                 return executionHandler.responseEntity(response, context);
             } else {
                 throw new IOException("Not active!");
@@ -163,8 +173,18 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
             if (isActive()) {
                 HttpRequest request = executionHandler.submitRequest(context);
 
-                if (LOG.isTraceEnabled() && request != null)
+                if (LOG.isTraceEnabled() && request != null) {
                     LOG.trace("Submitting request: " + request.getRequestLine());
+                }
+                if (request == null) {
+                    SwarmSource swarmSource = (SwarmSource) context
+                            .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
+                    SwarmSourceEventListener sourceListener = (SwarmSourceEventListener) context
+                            .getAttribute(SwarmHttpExecutionContext.SWARM_SOURCE_LISTENER);
+                    if (swarmSource != null && sourceListener != null) {
+                        sourceListener.finished(SwarmHttpSourceHandler.this, swarmSource);
+                    }
+                }
                 return request;
             } else {
                 SwarmHttpUtils.closeConnectionFromContext(context);
@@ -172,13 +192,4 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
             }
         }
     }
-
-    public void addSource(SwarmSource source) {
-        addSource(source, null);
-    }
-
-    public boolean isComplete() {
-        return swarmCoordinator.isComplete();
-    }
-
 }

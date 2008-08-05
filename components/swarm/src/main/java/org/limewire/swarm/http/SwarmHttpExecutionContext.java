@@ -10,4 +10,6 @@ public interface SwarmHttpExecutionContext {
     public static final String HTTP_SWARM_SOURCE = "swarm.http.source";
     public static final String SWARM_RESPONSE_LISTENER = "swarm.basic.listener";
     public static final String SWARM_RANGE = "swarm.basic.range";
+    public static final String SWARM_SOURCE_LISTENER = "swarm.http.internal.eventlistener";
+
 }

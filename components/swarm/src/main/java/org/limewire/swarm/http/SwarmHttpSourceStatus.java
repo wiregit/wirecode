@@ -24,9 +24,11 @@ public class SwarmHttpSourceStatus implements SwarmStatus {
 
     @Override
     public String toString() {
-       return statusLine.getReasonPhrase() + " code: " + statusLine.getStatusCode();
+        return statusLine.getReasonPhrase() + " code: " + statusLine.getStatusCode();
     }
-    
-    
+
+    public boolean isFinished() {
+        return false;
+    }
 
 }
