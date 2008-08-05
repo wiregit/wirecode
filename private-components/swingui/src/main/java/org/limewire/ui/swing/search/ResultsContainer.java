@@ -36,6 +36,7 @@ public class ResultsContainer extends JXPanel implements ModeListener {
     private final FilterMatcherEditor matcherEditor = new FilterMatcherEditor();
     private Map<String, BaseResultPanel> panelMap =
         new HashMap<String, BaseResultPanel>();
+    private ModeListener.Mode mode = ModeListener.Mode.LIST;
 
     /**
      * See LimeWireUISearchModule for binding information.
@@ -85,6 +86,7 @@ public class ResultsContainer extends JXPanel implements ModeListener {
      * @param mode LIST or TABLE
      */
     public void setMode(ModeListener.Mode mode) {
+        this.mode = mode;
         currentPanel.setMode(mode);
     }
     
@@ -92,6 +94,7 @@ public class ResultsContainer extends JXPanel implements ModeListener {
         //if (currentPanel != null) remove(currentPanel);
         removeAll();
         currentPanel = panelMap.get(category.name());
+        currentPanel.setMode(mode);
         add(currentPanel, BorderLayout.CENTER);
         matcherEditor.categoryChanged(category);
     }

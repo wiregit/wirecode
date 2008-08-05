@@ -15,7 +15,6 @@ import javax.swing.JScrollPane;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.BaseResultPanel;
 
 /**
  * This class displays search results in a panel.
@@ -61,10 +60,6 @@ public class SearchResultsPanel extends JPanel {
             @Override
             public void categorySelected(SearchCategory searchCategory) {
                 resultsContainer.showCategory(searchCategory);
-                BaseResultPanel currentPanel =
-                    resultsContainer.getCurrentPanel();
-                ModeListener.Mode mode = currentPanel.getMode();
-                sortAndFilterPanel.setMode(mode);
             }
         };
         
@@ -72,6 +67,8 @@ public class SearchResultsPanel extends JPanel {
             new SearchTabItems(searchInfo.getSearchCategory(), listener);
         
         layoutComponents();
+        
+        sortAndFilterPanel.addModeListener(resultsContainer);
     }
 
     private JComponent createSponsoredResultsPanel() {

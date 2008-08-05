@@ -81,6 +81,7 @@ class SortAndFilterPanel extends JXPanel {
         listViewToggleButton.setPressedIcon(listViewPressedIcon);
         listViewToggleButton.setSelected(true);
         listViewToggleButton.setMargin(insets);
+        listViewToggleButton.setToolTipText("List View");
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -93,6 +94,7 @@ class SortAndFilterPanel extends JXPanel {
         tableViewToggleButton.setIcon(tableViewUnpressedIcon);
         tableViewToggleButton.setPressedIcon(tableViewPressedIcon);
         tableViewToggleButton.setMargin(insets);
+        tableViewToggleButton.setToolTipText("Table View");
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {

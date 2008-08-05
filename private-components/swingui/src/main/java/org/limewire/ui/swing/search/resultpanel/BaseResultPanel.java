@@ -32,7 +32,6 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
     
     private final JList resultsList;
     private final JTable resultsTable;
-    private ModeListener.Mode mode;
     private final JScrollPane scrollPane = new JScrollPane();
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
@@ -79,14 +78,6 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         setMode(ModeListener.Mode.LIST);
     }
 
-    /**
-     * Gets the current mode, LIST or TABLE.
-     * @return the current mode
-     */
-    public ModeListener.Mode getMode() {
-        return mode;
-    }
-
     @Override
     public Dimension getPreferredScrollableViewportSize() {
         return resultsList.getPreferredScrollableViewportSize();
@@ -120,7 +111,6 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
      * @param mode LIST or TABLE
      */
     public void setMode(Mode mode) {
-        this.mode = mode;
         Component component =
             mode == Mode.LIST ? resultsList :
             mode == Mode.TABLE ? resultsTable :
