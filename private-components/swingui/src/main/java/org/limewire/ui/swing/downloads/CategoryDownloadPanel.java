@@ -22,7 +22,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXCollapsiblePane;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -50,7 +49,7 @@ public class CategoryDownloadPanel extends JPanel {
 	private Highlighter oddHighlighter;
 	private JPanel tablePanel = new JPanel(new VerticalLayout());
 
-	private List<JXTable> tables = new ArrayList<JXTable>();
+	private List<DownloadTable> tables = new ArrayList<DownloadTable>();
 	private List<JPanel> titles = new ArrayList<JPanel>();
 
 	/**
@@ -105,7 +104,7 @@ public class CategoryDownloadPanel extends JPanel {
 		collapsePane.setLayout(new BorderLayout());
 		EventList<DownloadItem> filterList = new FilterList<DownloadItem>(list, new DownloadStateMatcher(states));
 		
-		final JXTable table = new DownloadTable(filterList);
+		final DownloadTable table = new DownloadTable(filterList);
 		tables.add(table);
 		//TODO - list selection from glazed lists
 		table.getSelectionModel().addListSelectionListener(new MultiTableSelectionListener());
@@ -174,7 +173,7 @@ public class CategoryDownloadPanel extends JPanel {
     private void updateStriping() {
 		int length = 0;
 		
-		for (JXTable table : tables) {
+		for (DownloadTable table : tables) {
 						
 			if (table.getRowCount() > 0 && table.isVisible()) {
 				
@@ -183,6 +182,9 @@ public class CategoryDownloadPanel extends JPanel {
 				} else {
 					table.setHighlighters(oddHighlighter);
 				}
+				
+
+                table.addMenuRowHighlighter();
 				
 				length += table.getRowCount();
 			}

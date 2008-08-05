@@ -51,9 +51,8 @@ public class DownloadTable extends JXTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based to even and odd are backwards here
         setHighlighters(new ColorHighlighter(HighlightPredicate.EVEN, oddColor, oddForeground, oddColor, oddForeground),
-                new ColorHighlighter(HighlightPredicate.ODD, evenColor, evenForeground, evenColor, evenForeground),
-                new ColorHighlighter(menuRowPredicate, menuRowBackground, menuRowForeground));
-        
+                new ColorHighlighter(HighlightPredicate.ODD, evenColor, evenForeground, evenColor, evenForeground));
+        addMenuRowHighlighter();
 		// This doesn't work with editing on rollover - create custom
         // HighlightPredicate that detects editing to change editor color
 		//addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, Color.CYAN, Color.BLACK));		
@@ -126,6 +125,11 @@ public class DownloadTable extends JXTable {
 		
 	}
 	
+
+    public void addMenuRowHighlighter() {
+        addHighlighter(new ColorHighlighter(menuRowPredicate, menuRowBackground, menuRowForeground));
+    }
+
 
     // gets rid of default editor color so that editors are colored by highlighters
     @Override
