@@ -25,15 +25,15 @@ import com.google.inject.Singleton;
 public class RosterListenerImpl implements RosterListener {
 
     private final BrowseFactory browseFactory;
-    private final StatusPanel.BrowseAction browseAction;
+    //private final StatusPanel.BrowseAction browseAction;
 
     private Map<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     private final IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
 
     @Inject
-    public RosterListenerImpl(BrowseFactory browseFactory, StatusPanel.BrowseAction browseAction) {
+    public RosterListenerImpl(BrowseFactory browseFactory/*, StatusPanel.BrowseAction browseAction*/) {
         this.browseFactory = browseFactory;
-        this.browseAction = browseAction;
+        //this.browseAction = browseAction;
     }
     
     @Inject
@@ -60,7 +60,7 @@ public class RosterListenerImpl implements RosterListener {
                     if(presence instanceof LimePresence) {
                         // TODO update UI
                         Address address = ((LimePresence)presence).getAddress();
-                        browseAction.setAddress(address);
+                        //browseAction.setAddress(address);
                         browseFactory.createBrowse(address).start(new BrowseListener() {
                             public void handleBrowseResult(SearchResult searchResult) {
                                 //System.out.println(searchResult.getDescription() + ": " + searchResult.getUrn());

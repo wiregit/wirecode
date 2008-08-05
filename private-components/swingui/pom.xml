@@ -62,7 +62,12 @@
 			<artifactId>lw-mock-core</artifactId>
 			<version>${limewire.version}</version>
 		</dependency>
-		<!-- Mozilla Jars--> 
+        <dependency>
+			<groupId>org.limewire</groupId>
+			<artifactId>lw-xmpp</artifactId>
+			<version>${limewire.version}</version>
+		</dependency>
+        <!-- Mozilla Jars--> 
 	    <dependency>
 	      <groupId>mozilla</groupId>
 	      <artifactId>mozswing</artifactId>

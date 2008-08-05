@@ -46,7 +46,7 @@ public class XMPPServiceTest extends ServiceTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();  
-        Thread.sleep(10 * 1000); // allow login, roster, presence, library messages to be
+        Thread.sleep(60 * 10 * 1000); // allow login, roster, presence, library messages to be
                                 // sent, received   
                                 // TODO wait()/notify()
     }
