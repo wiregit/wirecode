@@ -9,10 +9,7 @@ import javax.swing.JComponent;
 
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.home.HomePanel;
-import org.limewire.ui.swing.library.DocumentPanel;
-import org.limewire.ui.swing.library.ImagePanel;
-import org.limewire.ui.swing.library.MusicPanel;
-import org.limewire.ui.swing.library.VideoPanel;
+import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.search.SearchHandler;
 
@@ -86,15 +83,11 @@ class NavigatorImpl implements Navigator {
 
     @Inject
     public void addDefaultNavigableItems(SearchHandler searchHandler, HomePanel homePanel,
-            StorePanel storePanel, MusicPanel musicPanel, VideoPanel videoPanel,
-            ImagePanel imagePanel, DocumentPanel documentPanel, MainDownloadPanel mainDownloadPanel) {
+            StorePanel storePanel, MyLibraryPanel musicPanel, MainDownloadPanel mainDownloadPanel) {
         addNavigablePanel(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel, false);
         addNavigablePanel(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel, false);
 
-        addNavigablePanel(NavCategory.LIBRARY, MusicPanel.NAME, musicPanel, false);
-        addNavigablePanel(NavCategory.LIBRARY, VideoPanel.NAME, videoPanel, false);
-        addNavigablePanel(NavCategory.LIBRARY, ImagePanel.NAME, imagePanel, false);
-        addNavigablePanel(NavCategory.LIBRARY, DocumentPanel.NAME, documentPanel, false);
+        addNavigablePanel(NavCategory.LIBRARY, MyLibraryPanel.NAME, musicPanel, false);
         
         addNavigablePanel(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel, false);
     }

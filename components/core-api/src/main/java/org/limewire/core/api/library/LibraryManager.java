@@ -1,6 +1,9 @@
 package org.limewire.core.api.library;
 
+import java.io.File;
 import java.util.Map;
+
+import ca.odell.glazedlists.EventList;
 
 public interface LibraryManager {
     
@@ -8,9 +11,17 @@ public interface LibraryManager {
     
     void removeLibraryListener(LibraryListListener libraryListener);
     
-    FileList getGnutellaFileList();
+    EventList<FileItem> getAllFiles();
     
-    FileList getBuddiesFileList();
+    EventList<FileItem> getGnutellaList();
     
-    Map<String, FileList> getUniqueLists();
+    EventList<FileItem> getAllBuddyList();
+
+    Map<String, EventList<FileItem>> getUniqueLists();
+    
+    void addBuddy(String name);
+    
+    void removeBuddy(String name);
+    
+    void addGnutellaFile(File file);
 }

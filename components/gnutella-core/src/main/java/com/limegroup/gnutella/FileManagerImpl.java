@@ -846,7 +846,6 @@ public class FileManagerImpl implements FileManager, Service {
         sharedFileList.addPendingFile(file);
 	
         if(fileDesc != null) {
-            sharedFileList.add(fileDesc);
             dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
         } else {
             addFile(file, list);
