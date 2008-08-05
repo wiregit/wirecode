@@ -1,6 +1,7 @@
 package org.limewire.swarm.http;
 
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.Swarmer;
 
 public interface SourceEventListener {
 
