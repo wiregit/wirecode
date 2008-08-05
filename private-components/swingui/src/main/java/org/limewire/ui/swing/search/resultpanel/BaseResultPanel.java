@@ -5,6 +5,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -35,6 +36,7 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
     private final JScrollPane scrollPane = new JScrollPane();
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
+    private final TableComparatorChooser tcc;
     
     BaseResultPanel(String title,
             EventList<VisualSearchResult> eventList,
@@ -69,6 +71,10 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
             new EventTableModel<VisualSearchResult>(
                 sortedResults, new ResultTableFormat());
         resultsTable = new JTable(tableModel);
+        
+        boolean multiColumnSort = false;
+        tcc = new TableComparatorChooser<VisualSearchResult>(
+            resultsTable, sortedResults, multiColumnSort);
         
         setMode(ModeListener.Mode.LIST);
     }

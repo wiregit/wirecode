@@ -6,9 +6,11 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
+import java.awt.FlowLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -72,14 +74,17 @@ public class SearchResultsPanel extends JPanel {
         layoutComponents();
     }
 
-    private SponsoredResultsPanel createSponsoredResultsPanel() {
+    private JComponent createSponsoredResultsPanel() {
         SponsoredResultsPanel srp = new SponsoredResultsPanel();
         srp.addEntry("Advantage Consulting, Inc.\n" +
             "When you really can't afford to fail...\n" +
             "IT Staffing Solutions with an ADVANTAGE");
         srp.addEntry("Object Computing, Inc.\n" +
             "An OO Software Engineering Company");
-        return srp;
+        JScrollPane sp = new JScrollPane(srp);
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        p.add(sp);
+        return p;
     }
     
     private void layoutComponents() {

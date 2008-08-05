@@ -23,7 +23,7 @@ public class ResultTableFormat implements TableFormat<VisualSearchResult> {
     public Object getColumnValue(VisualSearchResult vsr, int column) {
          if (column == 0) return vsr.getFileExtension();
          if (column == 1) return vsr.getDescription();
-         if (column == 2) return vsr.getCategory();
+         if (column == 2) return vsr.getCategory().name();
          if (column == 3) return vsr.getSize();
          if (column == 4) return "action buttons go here";
          return null;
