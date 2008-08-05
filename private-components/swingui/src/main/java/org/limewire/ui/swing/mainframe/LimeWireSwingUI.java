@@ -14,6 +14,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -22,6 +23,7 @@ public class LimeWireSwingUI extends JPanel {
     
     private final LeftPanel leftPanel;
     private final TopPanel topPanel;
+    private final TrayNotifier trayNotifier;
     
     /**
 	 * The color of the lines separating the GUI panels
@@ -32,9 +34,10 @@ public class LimeWireSwingUI extends JPanel {
 	@Inject
     public LimeWireSwingUI(TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler,
-            FriendsPanel friendsPanel) {
+            FriendsPanel friendsPanel, TrayNotifier trayNotifier) {
     	GuiUtils.assignResources(this);
     	        
+    	this.trayNotifier = trayNotifier;
     	this.topPanel = topPanel;
     	this.leftPanel = leftPanel;
         
@@ -114,6 +117,10 @@ public class LimeWireSwingUI extends JPanel {
 
     public void focusOnSearch() {
         topPanel.requestFocusInWindow();
+    }
+    
+    public void showTrayIcon() {
+        trayNotifier.showTrayIcon();
     }
     
     private class MainPanelResizer extends ComponentAdapter {

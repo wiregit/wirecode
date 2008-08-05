@@ -3,6 +3,7 @@ package org.limewire.ui.swing;
 import org.limewire.ui.swing.mainframe.LimeWireUiMainframeModule;
 import org.limewire.ui.swing.nav.LimeWireUiNavModule;
 import org.limewire.ui.swing.search.LimeWireUiSearchModule;
+import org.limewire.ui.swing.tray.LimeWireUiTrayModule;
 
 import com.google.inject.AbstractModule;
 
@@ -13,6 +14,7 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiSearchModule());
         install(new LimeWireUiNavModule());
         install(new LimeWireUiMainframeModule());
+        install(new LimeWireUiTrayModule());
     }
 
 }

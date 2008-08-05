@@ -2,6 +2,7 @@ package org.limewire.ui.swing.util;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -11,8 +12,13 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import javax.swing.JComponent;
+import javax.swing.LookAndFeel;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.plaf.ComponentUI;
 
 import org.jdesktop.application.Application;
+import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.ui.swing.mainframe.AppFrame;
 
 
@@ -168,6 +174,18 @@ public class GuiUtils {
         return NUMBER_FORMAT0.format(rate) + " " + GENERAL_UNIT_KBPSEC;
     }
     
+    /**
+     * Returns the application's default frame.
+     */
+    public static Window getMainFrame() {
+        Application app = Application.getInstance();
+        if(app instanceof SingleFrameApplication) {
+            return ((SingleFrameApplication)app).getMainFrame();
+        } else {
+            return null;
+        }
+    }
+    
 	/**
 	 * Inject fields from AppFrame.properties into object. Fields to be injected
 	 * should be annotated <code>@Resource</code> and defined in AppFrame.properties as
@@ -260,5 +278,47 @@ public class GuiUtils {
         int decimalColor;
         decimalColor = Integer.parseInt(hexString, 16);
         return new Color(decimalColor);
+    }
+    
+    /**
+     * Updates the component to use the native UI resource.
+     */
+    public static ComponentUI getNativeUI(JComponent c) {
+        ComponentUI ret = null;
+        String name = UIManager.getSystemLookAndFeelClassName();
+        if (name != null) {
+            try {
+                Class clazz = Class.forName(name);
+                LookAndFeel lf = (LookAndFeel) clazz.newInstance();
+                lf.initialize();
+                UIDefaults def = lf.getDefaults();
+                ret = def.getUI(c);
+            } catch (ExceptionInInitializerError e) {
+            } catch (ClassNotFoundException e) {
+            } catch (LinkageError e) {
+            } catch (IllegalAccessException e) {
+            } catch (InstantiationException e) {
+            } catch (SecurityException e) {
+            } catch (ClassCastException e) {
+            }
+        }
+
+        // if any of those failed, default to the current UI.
+        if (ret == null)
+            ret = UIManager.getUI(c);
+
+        return ret;
+    }
+    
+    /**
+     * Returns <code>text</code> wrapped by an HTML table tag that is set to a
+     * fixed width.
+     * <p>
+     * Note: It seems to be a possible to trigger a NullPointerException in
+     * Swing when this is used in a JLabel: GUI-239.
+     */
+    public static String restrictWidth(String text, int width) {
+        return "<html><table width=\"" + width + "\"><tr><td>" + text
+                + "</td></tr></table></html>";
     }
 }

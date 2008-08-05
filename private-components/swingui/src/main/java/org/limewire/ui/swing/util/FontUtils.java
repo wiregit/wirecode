@@ -40,5 +40,18 @@ public class FontUtils {
         newMap.put(TextAttribute.UNDERLINE, Integer.valueOf(-1));
         component.setFont(font.deriveFont(newMap));
     }
+    
+    /**
+     * Determines if a font can display up to a point in the string.
+     *
+     * Returns -1 if it can display the whole string.
+     */
+    public static boolean canDisplay(Font f, String s) {
+        int upTo = f.canDisplayUpTo(s);
+        if(upTo >= s.length() || upTo == -1)
+            return true;
+        else
+            return false;
+    }
 
 }

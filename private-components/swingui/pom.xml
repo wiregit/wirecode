@@ -25,7 +25,16 @@
 			<artifactId>lw-common</artifactId>
 			<version>${limewire.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.limewire</groupId>
+			<artifactId>lw-core-settings</artifactId>
+			<version>${limewire.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.limewire</groupId>
+			<artifactId>lw-collection</artifactId>
+			<version>${limewire.version}</version>
+		</dependency>		
 		<dependency>
 			<groupId>org.limewire</groupId>
 			<artifactId>lw-test-util</artifactId>
@@ -72,7 +81,6 @@
 			<artifactId>lw-mock-core</artifactId>
 			<version>${limewire.version}</version>
 		</dependency>
-		<!-- Mozilla Jars--> 
 	    <dependency>
 	      <groupId>mozilla</groupId>
 	      <artifactId>mozswing</artifactId>
@@ -97,6 +105,11 @@
 	      <groupId>mozilla</groupId>
 	      <artifactId>jna</artifactId>
 	      <version>mozswing1.9-06242008</version>
-	    </dependency>		
+	    </dependency>
+		<dependency>
+	      <groupId>org.limewire</groupId>
+	      <artifactId>jdic</artifactId>
+	      <version>20061102-lw-1</version>
+    	</dependency>		    
 	</dependencies>
 </project>

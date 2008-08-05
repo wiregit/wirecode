@@ -58,6 +58,9 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setJMenuBar(new LimeMenuBar());
 
         LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
+        
+        ui.showTrayIcon();
+        
         show(ui);
         ui.goHome();
         ui.focusOnSearch();

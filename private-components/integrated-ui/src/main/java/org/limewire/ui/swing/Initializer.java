@@ -450,11 +450,12 @@ public final class Initializer {
     private void loadUI() {
         splashRef.get().setStatusText(I18n.tr("Loading User Interface..."));
         stopwatch.resetAndLog("update splash for UI");
+        
         Application.launch(AppFrame.class, new String[0]);
-        splashRef.get().dispose();
         
         SwingUtils.invokeAndWait(new Runnable() {
             public void run() {
+                splashRef.get().dispose();
                 if(!AppFrame.isStarted()) {
                     System.exit(1);
                 }
