@@ -14,6 +14,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
+import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
@@ -46,7 +47,7 @@ public class DownloadSerializerImpl implements DownloadSerializer {
         Throwable exception;
         ObjectInputStream in = null;
         try {
-            in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(downloadSerializeSettings.getSaveFile())));
+            in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(downloadSerializeSettings.getSaveFile())));
             return GenericsUtils.scanForList(in.readObject(), DownloadMemento.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable ignored) {
             exception = ignored;
@@ -58,7 +59,7 @@ public class DownloadSerializerImpl implements DownloadSerializer {
         // Falls through to here only on error with normal file.
         
         try {
-            in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(downloadSerializeSettings.getBackupFile())));
+            in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(downloadSerializeSettings.getBackupFile())));
             return GenericsUtils.scanForList(in.readObject(), DownloadMemento.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable ignored) {
             LOG.warn("Error reading normal file.", ignored);

@@ -129,7 +129,7 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         }
         
         
-        ObjectStreamClass clazzToReturn; 
+        ObjectStreamClass clazzToReturn = null; 
         String newName = lookups.get(className);
         if (newName != null) {
             clazzToReturn = ObjectStreamClass.lookup(Class.forName(newName));
@@ -139,10 +139,10 @@ public class ConverterObjectInputStream extends ObjectInputStream {
             String newParent = lookups.get(className.substring(0, index));
             if(newParent != null) {
                 clazzToReturn = ObjectStreamClass.lookup(Class.forName(newParent + className.substring(index)));
-            } else {
-                clazzToReturn = read;
             }
-        } else {            
+        }
+        
+        if(clazzToReturn == null) {
             int index = className.lastIndexOf('.');
             // use "" as lookup key for default package
             String oldPackage = index != -1 ? className.substring(0, index) : "";
