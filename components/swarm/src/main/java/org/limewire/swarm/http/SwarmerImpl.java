@@ -8,16 +8,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
 import org.apache.http.nio.protocol.NHttpRequestExecutionHandler;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
-import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
@@ -27,8 +24,7 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
-import org.limewire.http.reactor.HttpIOSession;
-import org.limewire.http.reactor.LimeConnectingIOReactor;
+import org.limewire.swarm.ReconnectingSourceEventListener;
 import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
@@ -59,7 +55,7 @@ public class SwarmerImpl implements Swarmer {
         this.executionHandler = executionHandler;
         this.ioReactor = ioReactor;
         if (sourceEventListener == null)
-            this.globalSourceEventListener = NULL_LISTENER;
+            this.globalSourceEventListener = DEFAULT_LISTENER;
         else
             this.globalSourceEventListener = sourceEventListener;
 
@@ -123,14 +119,6 @@ public class SwarmerImpl implements Swarmer {
             listener = new DualSourceEventListener(sourceEventListener, globalSourceEventListener);
         }
         return listener;
-    }
-
-    public void addHeaderInterceptor(HttpRequestInterceptor requestInterceptor) {
-        httpProcessor.addInterceptor(requestInterceptor);
-    }
-
-    public void addHeaderInterceptor(HttpResponseInterceptor responseInterceptor) {
-        httpProcessor.addInterceptor(responseInterceptor);
     }
 
     public void start() {
@@ -209,8 +197,8 @@ public class SwarmerImpl implements Swarmer {
                         .getAttribute(LISTENER);
                 SwarmSource source = (SwarmSource) context
                         .getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
-                listener.responseProcessed(SwarmerImpl.this, source, response.getStatusLine()
-                        .getStatusCode());
+                listener.responseProcessed(SwarmerImpl.this, source, new SwarmHttpStatus(response
+                        .getStatusLine()));
 
                 executionHandler.handleResponse(response, context);
             } else {
@@ -245,28 +233,7 @@ public class SwarmerImpl implements Swarmer {
         }
     }
 
-    private static final SwarmSourceEventListener NULL_LISTENER = new SwarmSourceEventListener() {
-        public void connected(Swarmer swarmer, SwarmSource source) {
-        }
-
-        public void connectFailed(Swarmer swarmer, SwarmSource source) {
-        }
-
-        public void connectionClosed(Swarmer swarmer, SwarmSource source) {
-        }
-
-        public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
-            // We can't try submitting a request again too soon after getting
-            // the response.
-            // kinda hacky for now, will find a better place for this
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    };
+    private static final SwarmSourceEventListener DEFAULT_LISTENER = new NoOpSwarmSourceEventListener();
 
     public boolean finished() {
         // TODO Auto-generated method stub
@@ -277,5 +244,4 @@ public class SwarmerImpl implements Swarmer {
         // TODO Auto-generated method stub
 
     }
-
 }

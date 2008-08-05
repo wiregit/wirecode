@@ -190,35 +190,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                 btCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
         final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                ioReactor, params, new SwarmSourceEventListener() {
-
-                    public void connectFailed(Swarmer swarmer, SwarmSource source) {
-                        System.out.println("connectFailed");
-
-                    }
-
-                    public void connected(Swarmer swarmer, SwarmSource source) {
-                        System.out.println("connected");
-
-                    }
-
-                    public void connectionClosed(Swarmer swarmer, SwarmSource source) {
-
-                        System.out.println("connectionClosed");
-                        if (!btCoordinator.isComplete()) {
-                            System.out.println("Adding swarm Source");
-                            swarmer.addSource(source);
-                        }
-
-                    }
-
-                    public void responseProcessed(Swarmer swarmer, SwarmSource source,
-                            int statusCode) {
-                        System.out.println("responseProcessed");
-
-                    }
-
-                });
+                ioReactor, params, null);
         return swarmer;
     }
 

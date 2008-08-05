@@ -1,6 +1,7 @@
 package org.limewire.swarm.http;
 
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmStatus;
 import org.limewire.swarm.Swarmer;
 
 public interface SwarmSourceEventListener {
@@ -11,6 +12,6 @@ public interface SwarmSourceEventListener {
 
     void connectionClosed(Swarmer swarmer, SwarmSource source);
 
-    void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode);
+    void responseProcessed(Swarmer swarmer, SwarmSource source, SwarmStatus status);
 
 }

@@ -1,6 +1,7 @@
 package org.limewire.swarm.http;
 
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmStatus;
 import org.limewire.swarm.Swarmer;
 
 public class DualSourceEventListener implements SwarmSourceEventListener {
@@ -28,9 +29,9 @@ public class DualSourceEventListener implements SwarmSourceEventListener {
         b.connectionClosed(swarmer, source);
     }
     
-    public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
-        a.responseProcessed(swarmer, source, statusCode);
-        b.responseProcessed(swarmer, source, statusCode);
+    public void responseProcessed(Swarmer swarmer, SwarmSource source, SwarmStatus status) {
+        a.responseProcessed(swarmer, source, status);
+        b.responseProcessed(swarmer, source, status);
     }
     
 
