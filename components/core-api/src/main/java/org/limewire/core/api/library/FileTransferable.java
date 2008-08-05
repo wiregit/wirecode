@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.util.OSUtils;
 
 /**
  * A Transferable that returns a javaFileListFlavor, built up from
@@ -97,11 +96,11 @@ public class FileTransferable implements Transferable {
     }
 
     public DataFlavor[] getTransferDataFlavors() {
-        if(OSUtils.isWindows()) {
+//        if(OSUtils.isWindows()) {
             return new DataFlavor[] { DataFlavor.javaFileListFlavor };
-        } else {
-            return new DataFlavor[] { DataFlavor.javaFileListFlavor, URIFlavor };
-        }
+//        } else {
+//            return new DataFlavor[] { DataFlavor.javaFileListFlavor, URIFlavor };
+//        }
     }
 
     public boolean isDataFlavorSupported(DataFlavor flavor) {
