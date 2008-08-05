@@ -179,8 +179,6 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public long getRemainingQueueTime() {
-        // TODO Auto-generated method stub
-        System.out.println("remainingTime="+remainingQueueTime);
         return remainingQueueTime;
     }
 
