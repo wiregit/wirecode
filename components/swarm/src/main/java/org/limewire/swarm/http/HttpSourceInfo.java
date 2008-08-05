@@ -1,14 +1,14 @@
 package org.limewire.swarm.http;
 
-import org.limewire.swarm.SourceEventListener;
+import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSource;
 
 public class HttpSourceInfo {
     public final SwarmSource source;
 
-    public final SourceEventListener sourceEventListener;
+    public final SwarmSourceEventListener sourceEventListener;
 
-    public HttpSourceInfo(SwarmSource source, SourceEventListener sourceEventListener) {
+    public HttpSourceInfo(SwarmSource source, SwarmSourceEventListener sourceEventListener) {
         this.source = source;
         this.sourceEventListener = sourceEventListener;
     }
@@ -17,7 +17,7 @@ public class HttpSourceInfo {
         return source;
     }
 
-    public SourceEventListener getSourceEventListener() {
+    public SwarmSourceEventListener getSourceEventListener() {
         return sourceEventListener;
     }
 }

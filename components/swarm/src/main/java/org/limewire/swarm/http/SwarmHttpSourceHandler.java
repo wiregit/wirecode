@@ -15,6 +15,7 @@ import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
 import org.apache.http.nio.protocol.NHttpRequestExecutionHandler;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
+import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestConnControl;
@@ -23,21 +24,22 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
-import org.limewire.swarm.DualSourceEventListener;
-import org.limewire.swarm.SourceEventListener;
 import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
+import org.limewire.swarm.impl.DualSourceEventListener;
+import org.limewire.swarm.impl.NoOpSwarmSourceEventListener;
 
 public class SwarmHttpSourceHandler implements SwarmSourceHandler {
 
     private static final Log LOG = LogFactory.getLog(SwarmHttpSourceHandler.class);
 
-    private static final SourceEventListener DEFAULT_SOURCE_EVENT_LISTENER = new NoOpSwarmSourceEventListener();
+    private static final SwarmSourceEventListener DEFAULT_SOURCE_EVENT_LISTENER = new NoOpSwarmSourceEventListener();
 
-    private final SourceEventListener globalSourceEventListener;
+    private final SwarmSourceEventListener globalSourceEventListener;
 
     private final SynchronizedHttpProcessor httpProcessor;
 
@@ -55,7 +57,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
 
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator, HttpParams params,
             ConnectingIOReactor ioReactor, ConnectionReuseStrategy connectionReuseStrategy,
-            SourceEventListener globalSourceEventListener) {
+            SwarmSourceEventListener globalSourceEventListener) {
         this.swarmCoordinator = swarmCoordinator;
         this.executionHandler = new SwarmCoordinatorHttpExecutionHandler(swarmCoordinator);
         this.ioReactor = ioReactor;
@@ -79,18 +81,18 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
 
-    public void addSource(SwarmSource source, SourceEventListener sourceEventListener) {
+    public void addSource(SwarmSource source, SwarmSourceEventListener sourceEventListener) {
 
-        SourceEventListener listener = buildListener(sourceEventListener);
-//        SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(this,
-//                source, listener);
-//
-//        ioReactor.connect(source.getAddress(), null, new HttpSourceInfo(source, listener),
-//                sessionRequestCallback);
+        SwarmSourceEventListener listener = buildListener(sourceEventListener);
+        SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(this,
+                source, listener);
+
+        ioReactor.connect(source.getAddress(), null, new HttpSourceInfo(source, listener),
+                sessionRequestCallback);
     }
 
-    private SourceEventListener buildListener(SourceEventListener sourceEventListener) {
-        final SourceEventListener listener;
+    private SwarmSourceEventListener buildListener(SwarmSourceEventListener sourceEventListener) {
+        final SwarmSourceEventListener listener;
         if (sourceEventListener == null) {
             listener = globalSourceEventListener;
         } else {
@@ -123,7 +125,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
         }
 
         public void finalizeContext(HttpContext context) {
-            SourceEventListener listener = (SourceEventListener) context.getAttribute(LISTENER);
+            SwarmSourceEventListener listener = (SwarmSourceEventListener) context.getAttribute(LISTENER);
             SwarmSource source = (SwarmSource) context
                     .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
             listener.connectionClosed(SwarmHttpSourceHandler.this, source);
@@ -133,11 +135,11 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler {
 
         public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
             if (isActive()) {
-                SourceEventListener listener = (SourceEventListener) context.getAttribute(LISTENER);
+                SwarmSourceEventListener listener = (SwarmSourceEventListener) context.getAttribute(LISTENER);
                 SwarmSource source = (SwarmSource) context
                         .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
                 listener.responseProcessed(SwarmHttpSourceHandler.this, source,
-                        new SwarmHttpStatus(response.getStatusLine()));
+                        new SwarmHttpSourceStatus(response.getStatusLine()));
 
                 executionHandler.handleResponse(response, context);
             } else {

@@ -10,11 +10,11 @@ import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.AbstractSwarmCoordinator;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
+import org.limewire.swarm.impl.AbstractSwarmCoordinator;
 
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;

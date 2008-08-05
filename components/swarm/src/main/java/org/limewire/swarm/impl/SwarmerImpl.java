@@ -1,4 +1,4 @@
-package org.limewire.swarm;
+package org.limewire.swarm.impl;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -7,8 +7,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmSourceEventListener;
+import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.Swarmer;
 
-public class SwarmerImpl /*implements Swarmer*/ {
+public class SwarmerImpl implements Swarmer {
 
     private Map<Class, SwarmSourceHandler> sourceHandlers = Collections
             .synchronizedMap(new HashMap<Class, SwarmSourceHandler>());
@@ -23,7 +27,7 @@ public class SwarmerImpl /*implements Swarmer*/ {
         addSource(source, null);
     }
 
-    public void addSource(final SwarmSource source, SourceEventListener sourceEventListener) {
+    public void addSource(final SwarmSource source, SwarmSourceEventListener sourceEventListener) {
         SwarmSourceHandler sourceHandler = sourceHandlers.get(source.getClass());
 
         if (LOG.isDebugEnabled()) {

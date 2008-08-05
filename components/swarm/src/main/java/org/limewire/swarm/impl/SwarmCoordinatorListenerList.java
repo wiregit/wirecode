@@ -1,8 +1,11 @@
-package org.limewire.swarm;
+package org.limewire.swarm.impl;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.collection.Range;
+import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmCoordinatorListener;
+import org.limewire.swarm.SwarmFileSystem;
 
 /**
  * Wrapper class to help fire various events to the SwarmCoordinatorListeners

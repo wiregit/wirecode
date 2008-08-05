@@ -1,4 +1,4 @@
-package org.limewire.swarm;
+package org.limewire.swarm.file;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,6 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.swarm.SwarmContent;
+import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmWriteJob;
+import org.limewire.swarm.SwarmWriteJobControl;
 
 /**
  * 

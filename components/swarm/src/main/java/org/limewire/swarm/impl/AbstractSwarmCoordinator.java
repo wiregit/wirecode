@@ -1,4 +1,8 @@
-package org.limewire.swarm;
+package org.limewire.swarm.impl;
+
+import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmCoordinatorListener;
+
 
 /**
  * Abstract Swarm Coordinator that will hold some common functionality accross Coordinators.

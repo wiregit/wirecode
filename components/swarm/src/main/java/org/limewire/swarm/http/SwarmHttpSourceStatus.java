@@ -4,11 +4,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.limewire.swarm.SwarmStatus;
 
-public class SwarmHttpStatus implements SwarmStatus {
+public class SwarmHttpSourceStatus implements SwarmStatus {
 
     private final StatusLine statusLine;
 
-    public SwarmHttpStatus(StatusLine statusLine) {
+    public SwarmHttpSourceStatus(StatusLine statusLine) {
         assert statusLine != null;
         this.statusLine = statusLine;
     }

@@ -25,6 +25,7 @@ import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
+import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
@@ -33,6 +34,7 @@ import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
+import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
@@ -349,12 +351,14 @@ public class SwarmerImplTest extends BaseTestCase {
         SwarmCoordinator swarmCoordinator = createSwarmCoordinator(file, path, fileSize,
                 swarmFileVerifier);
 
-        SwarmCoordinatorHttpExecutionHandler executionHandler = new SwarmCoordinatorHttpExecutionHandler(swarmCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-        final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                ioReactor, params, null);
-
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
+        
+        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator, params,
+                ioReactor, connectionReuseStrategy, null);
+        Swarmer swarmer = new SwarmerImpl();
+        swarmer.register(SwarmHttpSource.class, sourceHandler);
+        
 
         swarmer.start();
         return swarmer;

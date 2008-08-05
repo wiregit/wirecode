@@ -11,18 +11,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.AbstractSwarmCoordinator;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
-import org.limewire.swarm.SwarmWriteJobImpl;
+import org.limewire.swarm.impl.AbstractSwarmCoordinator;
 
 /**
- * A {@link FileCoordinator} that verifies files using the given
- * {@link SwarmFileVerifier} and reads/writes the files using the given
+ * A {@link FileCoordinator} reads/writes the files using the given
  * {@link SwarmFileSystem}.
  * 
  * This implementation expects the writeService to use either in-place execution

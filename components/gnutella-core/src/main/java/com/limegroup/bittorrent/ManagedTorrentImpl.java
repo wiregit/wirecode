@@ -29,10 +29,12 @@ import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
+import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
-import org.limewire.swarm.http.SwarmerImpl;
+import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
+import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.choking.Choker;
@@ -305,11 +307,12 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
                     torrentDiskManager);
             btCoordinator.addListener(new EchoSwarmCoordinatorListener());
-            SwarmCoordinatorHttpExecutionHandler executionHandler = new SwarmCoordinatorHttpExecutionHandler(
-                    btCoordinator);
             ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-            final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                    ioReactor, params, null);
+
+            SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator, params,
+                    ioReactor, connectionReuseStrategy, null);
+            Swarmer swarmer = new SwarmerImpl();
+            swarmer.register(SwarmHttpSource.class, sourceHandler);
             swarmer.start();
             long completeSize = torrentFileSystem.getTotalSize();
             for (URI uri : metaInfo.getWebSeeds()) {

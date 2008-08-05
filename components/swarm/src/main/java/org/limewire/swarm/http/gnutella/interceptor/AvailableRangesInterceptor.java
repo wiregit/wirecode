@@ -11,7 +11,7 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.http.MalformedHeaderException;
-import org.limewire.swarm.http.SwarmExecutionContext;
+import org.limewire.swarm.http.SwarmHttpExecutionContext;
 import org.limewire.swarm.http.gnutella.GHttp;
 
 public class AvailableRangesInterceptor implements HttpResponseInterceptor {
@@ -78,7 +78,7 @@ public class AvailableRangesInterceptor implements HttpResponseInterceptor {
                 }
                 availableRanges.add(interval);
             }
-            context.setAttribute(SwarmExecutionContext.HTTP_AVAILABLE_RANGES, availableRanges);
+            context.setAttribute(SwarmHttpExecutionContext.HTTP_AVAILABLE_RANGES, availableRanges);
         }
     }
 
