@@ -35,6 +35,10 @@ public class NavTree extends JXPanel implements NavigableTree {
         hiddenList.setVisible(false);
         addNavList(hiddenList);
         
+        hiddenList = new NavList("Sharing", Navigator.NavCategory.SHARING);
+        hiddenList.setVisible(false);
+        addNavList(hiddenList);
+        
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridwidth = GridBagConstraints.REMAINDER;

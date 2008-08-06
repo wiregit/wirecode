@@ -12,15 +12,16 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.TextLayout;
-import java.util.HashMap;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Map;
 
-import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.plaf.metal.MetalToggleButtonUI;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
@@ -32,38 +33,35 @@ import org.limewire.ui.swing.sharing.BuddySharePanel;
 import org.limewire.ui.swing.sharing.GnutellaSharePanel;
 import org.limewire.ui.swing.sharing.IndividualSharePanel;
 import org.limewire.ui.swing.sharing.ShareDropTarget;
+import org.limewire.ui.swing.sharing.SharingNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
-public class FilesSharingSummaryPanel extends JPanel {
+public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator {
     
     private final JLabel title = new JLabel();
-    private final JToggleButton all = new JToggleButton();
-    private final JToggleButton buddies = new JToggleButton();
-    private final JToggleButton some = new JToggleButton();
+    private final JToggleButton gnutellaButton = new JToggleButton();
+    private final JToggleButton buddyButton = new JToggleButton();
+    private final JToggleButton individualButton = new JToggleButton();
     
-    ButtonGroup buttonGroup = new ButtonGroup();
-    
-    private Map<String, NavItem> navItems = new HashMap<String, NavItem>();
-    
-    @Resource private Icon allIcon;    
+    @Resource private Icon gnutellaIcon;    
     @Resource private Icon buddiesIcon;    
-    @Resource private Icon someBuddiesIcon;    
+    @Resource private Icon individualBuddiesIcon;    
     @Resource private Font iconOverlayFont;
     @Resource private Color iconOverlayColor;
+    @Resource private Color highLightColor;
     
-    private final NavigableTarget navTarget;
+    private final Navigator navigator;
         
     @Inject
-    FilesSharingSummaryPanel(@Named("MainTarget") NavigableTarget navTarget, LibraryManager libraryManager) {
+    FilesSharingSummaryPanel(Navigator navigator, LibraryManager libraryManager) {
         GuiUtils.assignResources(this);
         
-        this.navTarget = navTarget;
+        this.navigator = navigator;
         
         libraryManager.addLibraryLisListener(new LibraryListListener() {
             @Override
@@ -73,9 +71,9 @@ public class FilesSharingSummaryPanel extends JPanel {
                 case FILE_REMOVED:
                     SwingUtils.invokeLater(new Runnable() {
                         public void run() {
-                            all.repaint();
-                            some.repaint();
-                            buddies.repaint();
+                            gnutellaButton.repaint();
+                            individualButton.repaint();
+                            buddyButton.repaint();
                         }
                     });
                     break;
@@ -88,36 +86,19 @@ public class FilesSharingSummaryPanel extends JPanel {
         title.setText("Files I'm Sharing");
         
         //TODO: NumberIcons
-        all.setName("FilesSharingSummaryPanel.all");
-        all.setIcon(new NumberIcon(libraryManager.getGnutellaList(), allIcon));
-        all.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showGnutella();
-            }
-        });
-        new ShareDropTarget(all, libraryManager);
+        gnutellaButton.setName("FilesSharingSummaryPanel.all");
+        gnutellaButton.setIcon(new NumberIcon(libraryManager.getGnutellaList(), gnutellaIcon));
+        gnutellaButton.setUI(new HighlightToggleButtonUI(highLightColor));
+        new ShareDropTarget(gnutellaButton, libraryManager);
         
-		buddies.setName("FilesSharingSummaryPanel.buddies");
-		buddies.setIcon(new NumberIcon(libraryManager.getAllBuddyList(), buddiesIcon));
-		buddies.addActionListener(new ActionListener(){
-		    public void actionPerformed(ActionEvent event) {
-		        showBuddy();
-		    }
-		});
-		some.setName("FilesSharingSummaryPanel.some");
-		some.setIcon(new NumberIcon(libraryManager.getUniqueLists(), someBuddiesIcon));
-		some.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showIndividualBuddies();
-            }
-		});
+		buddyButton.setName("FilesSharingSummaryPanel.buddies");
+		buddyButton.setIcon(new NumberIcon(libraryManager.getAllBuddyList(), buddiesIcon));
+		buddyButton.setUI(new HighlightToggleButtonUI(highLightColor));
+
+		individualButton.setName("FilesSharingSummaryPanel.some");
+		individualButton.setIcon(new NumberIcon(libraryManager.getUniqueLists(), individualBuddiesIcon));
+        individualButton.setUI(new HighlightToggleButtonUI(highLightColor));        
 		
-		buttonGroup.add(all);
-		buttonGroup.add(buddies);
-		buttonGroup.add(some);
-                
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         
@@ -131,26 +112,15 @@ public class FilesSharingSummaryPanel extends JPanel {
 
         gbc.gridheight = GridBagConstraints.REMAINDER;
         gbc.gridwidth = 1;
-        add(all, gbc);
+        add(gnutellaButton, gbc);
         
         gbc.gridheight = GridBagConstraints.RELATIVE;
-        add(buddies, gbc);
+        add(buddyButton, gbc);
         
         gbc.gridheight = GridBagConstraints.REMAINDER;
-        add(some, gbc);
+        add(individualButton, gbc);
      
-    }
-    
-    private void showGnutella() {
-        navTarget.showNavigablePanel(navItems.get(GnutellaSharePanel.NAME));
-    }
-    
-    private void showBuddy() {
-        navTarget.showNavigablePanel(navItems.get(BuddySharePanel.NAME));
-    }
-    
-    private void showIndividualBuddies() {
-        navTarget.showNavigablePanel(navItems.get(IndividualSharePanel.NAME));
+        addPropertyChangeListener(new StartupListener(this,libraryManager));
     }
     
     private class NumberIcon implements Icon {
@@ -204,36 +174,80 @@ public class FilesSharingSummaryPanel extends JPanel {
         }
     }
         
-    @Inject
+    //TODO: call this from guice?
     public void addDefaultNavigableItems(GnutellaSharePanel gnutellaShare, BuddySharePanel buddyShare, 
             IndividualSharePanel individualShare) {
-        navItems.put(GnutellaSharePanel.NAME, addNavigablePanel(NavCategory.SHARING, GnutellaSharePanel.NAME, gnutellaShare, false));
-        navItems.put(BuddySharePanel.NAME, addNavigablePanel(NavCategory.SHARING, BuddySharePanel.NAME, buddyShare, false));
-        navItems.put(IndividualSharePanel.NAME, addNavigablePanel(NavCategory.SHARING, IndividualSharePanel.NAME, individualShare, false));
+        NavItem item = addSharingItem(GnutellaSharePanel.NAME, gnutellaShare);
+        gnutellaButton.addActionListener(new SharingButtonAction(item, gnutellaButton));
+        
+        item = addSharingItem(BuddySharePanel.NAME, buddyShare);
+        buddyButton.addActionListener(new SharingButtonAction(item, buddyButton));
+        
+        item = addSharingItem(IndividualSharePanel.NAME, individualShare);
+        individualButton.addActionListener(new SharingButtonAction(item, individualButton));
     }
 
-    public NavItem addNavigablePanel(final NavCategory category, final String name, final JComponent panel,
-            boolean userRemovable) {
-        NavItem item = new NavItem() {
-            @Override
-            public String getName() {
-                return name;
-            }
-            
-            @Override
-            public void remove() {
-                navTarget.removeNavigablePanel(name);
-//                navigator.removeNavigablePanel(category, this);
-            }
-            
-            @Override
-            public void select() {
-//                selectNavigablePanel(category, this);
-            }
-        };
-        navTarget.addNavigablePanel(item, panel);
+    @Override
+    public NavItem addSharingItem(final String title, JComponent sharingPanel) {
+        final NavItem item = navigator.addNavigablePanel(NavCategory.SHARING, title, sharingPanel, false);
         return item;
     }
     
+    private class SharingButtonAction implements ActionListener {
+        private final NavItem item;
+        private final JToggleButton button;
+        
+        public SharingButtonAction(final NavItem item, JToggleButton button) {
+            this.item = item;
+            this.button = button;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            item.select();
+            navigator.addNavListener(new NavSelectionListener(){
+                @Override
+                public void navItemSelected(NavCategory category, NavItem navItem) {
+                    if(navItem != item) {
+                        navigator.removeNavListener(this);
+                        SwingUtils.invokeLater(new Runnable(){
+                            public void run() {
+                                //TODO: this is too slow
+                                button.setSelected(false);
+                            }
+                        });
+                    }
+                }
+            });
+        }      
+    }
+
+    private class StartupListener implements PropertyChangeListener {
+        JComponent owner;
+        LibraryManager libraryManager;
+            
+        public StartupListener(JComponent owner, LibraryManager libraryManager) {
+            this.owner = owner;
+            this.libraryManager = libraryManager;
+        }
+        
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            owner.removePropertyChangeListener(this);
+            addDefaultNavigableItems(new GnutellaSharePanel(libraryManager), 
+                    new BuddySharePanel(libraryManager), 
+                            new IndividualSharePanel());
+        }
+    }
     
+    private class HighlightToggleButtonUI extends MetalToggleButtonUI {
+        Color color;
+        public HighlightToggleButtonUI(Color color) {
+            this.color = color;
+        }
+        @Override
+        public Color getSelectColor() {
+            return color;
+        }
+    }
 }
