@@ -278,14 +278,14 @@ public class SwarmerImplTest extends BaseTestCase {
                 try {
                     String md5 = "8055d620ba0c507c1af957b43648c99f";
 
-                    URI uri = new URI("http://localhost/~pvertenten/pub/");
+                    URI uri1 = new URI("http://localhost:" + TEST_PORT + "/pub/");
                     int lowByte = 0;
                     int highByte = 44425 - 1;
                     long fileSize = highByte + 1;
                     Range range = Range.createRange(lowByte, highByte);
                     Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize,
                             new MD5SumFileVerifier(range, md5));
-                    swarmer.addSource(new SwarmHttpSource(uri, range));
+                    swarmer.addSource(new SwarmHttpSource(uri1, range));
                     assertDownload(md5, file, fileSize);
                 } finally {
                     file.delete();

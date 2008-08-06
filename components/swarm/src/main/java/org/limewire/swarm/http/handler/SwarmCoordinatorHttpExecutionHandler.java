@@ -41,20 +41,28 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
     }
 
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
+        int code = response.getStatusLine().getStatusCode();
+        if (!(code >= 200 && code < 300)) {
+            ResponseContentListener listener = (ResponseContentListener) context
+                    .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
+            if (listener != null) {
+                listener.finished();
+            }
+            SwarmHttpUtils.closeConnectionFromContext(context);
+        }
+
     }
 
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
             throws IOException {
+        ResponseContentListener listener = (ResponseContentListener) context
+                .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
         int code = response.getStatusLine().getStatusCode();
         if (code >= 200 && code < 300) {
-            ResponseContentListener listener = (ResponseContentListener) context
-                    .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
             listener.initialize(response);
             context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
             return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
         } else {
-            ResponseContentListener listener = (ResponseContentListener) context
-                    .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
             listener.finished();
             context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
             return null;

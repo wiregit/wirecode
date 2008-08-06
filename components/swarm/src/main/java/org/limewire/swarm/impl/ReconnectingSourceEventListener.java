@@ -18,16 +18,20 @@ public class ReconnectingSourceEventListener implements SwarmSourceEventListener
     }
 
     public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-        // connected!
+        System.out.println("connected");
     }
 
     public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-        // bad uri, or server does not like us
+        System.out.println("connetionFailed");
     }
 
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         SwarmStatus status = connectionStatus.get(source);
+        connectionClosed(swarmSourceHandler, source, status);
+    }
 
+    private void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
+            SwarmStatus status) {
         if (status != null && status.isFinished() || swarmSourceHandler.isComplete()) {
             System.out.println("finished, not reconnecting: " + source + " status: " + status);
         } else if (status != null && status.isError()) {
