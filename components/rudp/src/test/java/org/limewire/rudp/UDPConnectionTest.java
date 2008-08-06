@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -445,6 +446,183 @@ public final class UDPConnectionTest extends BaseTestCase {
         } finally {
             assertTrue(threadEnder.await(2000 * 60, TimeUnit.MILLISECONDS));
         }
+    }
+    
+    /**
+     * Tests if two connections initiated from the same side are routed
+     * correctly. This means two server connections and two client connections
+     * where the clients both use the same port and the servers both use the
+     * same port. Routing should work because of connection ids.
+     */
+    public void testTwoConnectionsFromOneSide() throws Exception {
+        final int NUM_BYTES = 10 * 1000;
+        // Add some routes to the UDPServiceStub
+        stubService.addReceiver(6346, 6348, 0, 0);
+        stubService.addReceiver(6348, 6346, 0, 0);
+        
+        final CountDownLatch threadEnder = new CountDownLatch(4);
+
+        /**
+         * The server writes NUM_BYTES out.
+         */
+        class Server extends ManagedThread {
+            @Override
+            public void run() {
+                Socket socket = udpSelectorProvider.openSocketChannel().socket();
+                try {
+                    socket.connect(new InetSocketAddress("127.0.0.1", 6348), 2000);
+                    socket.setSoTimeout(TIMEOUT);
+                    OutputStream out = socket.getOutputStream();
+                    for (int i = 0; i < NUM_BYTES; i++) {
+                        out.write(i % 10);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    threadEnder.countDown();
+                }
+            }
+        }
+        
+        Server t1 = new Server();
+        t1.setDaemon(true);
+        Server t2 = new Server();
+        t2.setDaemon(true);
+        
+        t1.start();
+        t2.start();
+
+        /**
+         * Client reads NUM_BYTES from the inputstream.
+         */
+        class Client extends ManagedThread {
+            @Override
+            public void run() {
+                try {
+                 // start the second connection
+                    Socket socket = udpSelectorProvider.openSocketChannel().socket();
+                    socket.connect(new InetSocketAddress("127.0.0.1", 6346), 2000);
+                    socket.setSoTimeout(TIMEOUT);
+                    InputStream in = socket.getInputStream();
+                    for (int i = 0; i < NUM_BYTES; i++) {
+                        int read = in.read();
+                        assertEquals("read so far: " + i, i % 10, read);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    threadEnder.countDown();
+                }
+            }
+            
+        }
+        
+        Client c1 = new Client();
+        c1.setDaemon(true);
+        Client c2 = new Client();
+        c2.setDaemon(true);
+        
+        c1.start();
+        c2.start();
+    
+        assertTrue(threadEnder.await(1000 * 60 * 2, TimeUnit.MILLISECONDS));
+    }
+    
+    /**
+     * Tests if two connections initiated from both side are routed
+     * correctly. This means two server connections and two client connections
+     * where each pair of client, server uses the same port. 
+     */
+    public void testTwoConnectionsFromBothSides() throws Exception {
+        final int NUM_BYTES = 10 * 1000;
+        // Add some routes to the UDPServiceStub
+        stubService.addReceiver(6346, 6348, 0, 0);
+        stubService.addReceiver(6348, 6346, 0, 0);
+        
+        final CountDownLatch threadEnder = new CountDownLatch(4);
+
+        /**
+         * The server writes NUM_BYTES out.
+         */
+        class Server extends ManagedThread {
+            
+            private final int port;
+
+            public Server(int port) {
+                this.port = port;
+            }
+            
+            @Override
+            public void run() {
+                Socket socket = udpSelectorProvider.openSocketChannel().socket();
+                try {
+                    socket.connect(new InetSocketAddress("127.0.0.1", port), 2000);
+                    socket.setSoTimeout(TIMEOUT);
+                    OutputStream out = socket.getOutputStream();
+                    for (int i = 0; i < NUM_BYTES; i++) {
+                        out.write(i % 10);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    threadEnder.countDown();
+                }
+            }
+        }
+        
+        /**
+         * Client reads NUM_BYTES from the inputstream.
+         */
+        class Client extends ManagedThread {
+            
+            private final int port;
+
+            public Client(int port) {
+                this.port = port;
+            }
+            
+            @Override
+            public void run() {
+                try {
+                 // start the second connection
+                    Socket socket = udpSelectorProvider.openSocketChannel().socket();
+                    socket.connect(new InetSocketAddress("127.0.0.1", port), 2000);
+                    socket.setSoTimeout(TIMEOUT);
+                    InputStream in = socket.getInputStream();
+                    for (int i = 0; i < NUM_BYTES; i++) {
+                        int read = in.read();
+                        assertEquals("read so far: " + i, i % 10, read);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    threadEnder.countDown();
+                }
+            }
+            
+        }
+        
+        
+        Server t1 = new Server(6346);
+        t1.setDaemon(true);
+        Server t2 = new Server(6348);
+        t2.setDaemon(true);
+
+        Client c1 = new Client(6346);
+        c1.setDaemon(true);
+        Client c2 = new Client(6348);
+        c2.setDaemon(true);
+        
+        t1.start();
+        Thread.sleep(10);
+        t2.start();
+        Thread.sleep(10);
+        
+        c1.start();
+        Thread.sleep(10);
+        c2.start();
+    
+        assertTrue(threadEnder.await(1000 * 60 * 2, TimeUnit.MILLISECONDS));
     }
 
     /**
