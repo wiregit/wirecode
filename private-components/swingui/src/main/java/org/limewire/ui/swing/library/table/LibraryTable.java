@@ -2,14 +2,14 @@ package org.limewire.ui.swing.library.table;
 
 import javax.swing.ListSelectionModel;
 
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.ui.swing.table.StripedJXTable;
 
 import ca.odell.glazedlists.EventList;
 
 
-public class LibraryTable extends JXTable {
+public class LibraryTable extends StripedJXTable {
 
     public LibraryTable(EventList<FileItem> libraryItems) {
         super(new LibraryTableModel(libraryItems));
