@@ -1,16 +1,31 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.net.address.Address;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.DirectConnectionAddress;
+import org.limewire.net.address.DirectConnectionAddressImpl;
+import org.limewire.net.address.HolePunchAddress;
+import org.limewire.net.address.MediatorAddress;
+import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.ssl.SSLEngineTest;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.RUDPUtils;
+import org.limewire.service.ErrorService;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 
@@ -22,6 +37,8 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddress;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
@@ -36,9 +53,24 @@ public class NetworkManagerImpl implements NetworkManager {
     private final NetworkInstanceUtils networkInstanceUtils;
     private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
     private final SettingListener fwtListener = new FWTChangeListener();
+    private final Provider<ByteBufferCache> bbCache;
     
-    private final EventListenerList<NetworkManagerEvent> listeners =
-        new EventListenerList<NetworkManagerEvent>();
+    private final Object addressLock = new Object();
+    private volatile DirectConnectionAddress directAddress;
+    private volatile MediatorAddress mediatedAddress;
+    private volatile HolePunchAddress holePunchAddress;
+    
+    
+    /** True if TLS is disabled for this session. */
+    private volatile boolean tlsDisabled;
+    
+    /** The Throwable that was the reason TLS failed. */
+    @InspectablePrimitive("reason tls failed")
+    @SuppressWarnings("unused")
+    private volatile String tlsDisabledReason;
+    
+    private final EventListenerList<AddressEvent> listeners =
+        new EventListenerList<AddressEvent>();
     
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -48,7 +80,8 @@ public class NetworkManagerImpl implements NetworkManager {
             Provider<ActivityCallback> activityCallback,
             OutOfBandStatistics outOfBandStatistics,
             NetworkInstanceUtils networkInstanceUtils,
-            Provider<CapabilitiesVMFactory> capabilitiesVMFactory) {
+            Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
+            Provider<ByteBufferCache> bbCache) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
@@ -57,6 +90,7 @@ public class NetworkManagerImpl implements NetworkManager {
         this.outOfBandStatistics = outOfBandStatistics;
         this.networkInstanceUtils = networkInstanceUtils;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
+        this.bbCache = bbCache;
     }
     
     @Inject
@@ -66,13 +100,22 @@ public class NetworkManagerImpl implements NetworkManager {
     
 
     public void start() {
-        ConnectionSettings.LAST_FWT_STATE.addSettingListener(fwtListener);
+        ConnectionSettings.CANNOT_DO_FWT.addSettingListener(fwtListener);
+        if(isIncomingTLSEnabled() || isOutgoingTLSEnabled()) {
+            SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), bbCache.get());
+            if(!sslTester.go()) {
+                Throwable t = sslTester.getLastFailureCause();
+                disableTLS(t);
+                if(!SSLSettings.IGNORE_SSL_EXCEPTIONS.getValue() && !sslTester.isIgnorable(t))
+                    ErrorService.error(t);
+            }
+        }
     }
 
 
     public void stop() {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
-        ConnectionSettings.LAST_FWT_STATE.removeSettingListener(fwtListener);
+        ConnectionSettings.CANNOT_DO_FWT.removeSettingListener(fwtListener);
     }
     
     public void initialize() {
@@ -173,8 +216,43 @@ public class NetworkManagerImpl implements NetworkManager {
         capabilitiesVMFactory.get().updateCapabilities();
         if (connectionManager.get().isShieldedLeaf()) 
             connectionManager.get().sendUpdatedCapabilities();
+        synchronized (addressLock) {
+            maybeFireNewHolePunchAddress();
+        }
     }
-    
+
+    private boolean maybeFireNewHolePunchAddress() {
+        if(isPushProxyHolePunchCapable()) {
+            PushProxyHolePunchAddress newHolePunchAddress = getPushProxyHolePunchAddress();
+            if(holePunchAddress == null || !holePunchAddress.equals(newHolePunchAddress)) {
+                fireHolePunchAddressEvent(newHolePunchAddress);
+                return true;
+            }
+        } else {
+            // TODO newMediatedConnectionAddress(mediatedAddress); ??
+        }
+        return false;
+    }
+
+    private boolean isPushProxyHolePunchCapable() {
+        return supportsFWTVersion() > 0 && mediatedAddress != null;
+    }
+
+    private void fireHolePunchAddressEvent(PushProxyHolePunchAddress holePunchAddress) {
+        this.holePunchAddress = holePunchAddress;
+        fireEvent(new AddressEvent(holePunchAddress, Address.EventType.ADDRESS_CHANGED));
+    }
+
+    private PushProxyHolePunchAddress getPushProxyHolePunchAddress() {
+        try {
+            DirectConnectionAddress directAddress = new DirectConnectionAddressImpl(NetworkUtils.ip2string(getExternalAddress()),
+                    getStableUDPPort(), isIncomingTLSEnabled()); // TODO is that the right port method?
+            return new PushProxyHolePunchAddressImpl(supportsFWTVersion(), directAddress, mediatedAddress);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public boolean addressChanged() {
         activityCallback.get().handleAddressStateChanged();        
         
@@ -209,15 +287,91 @@ public class NetworkManagerImpl implements NetworkManager {
     		if (c.getConnectionCapabilities().remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
     			c.send(huvm);
     	}
-        
-        fireEvent(new NetworkManagerEvent(this, EventType.ADDRESS_CHANGE));
+
+        // TODO
+        //fireEvent(new AddressEvent(null, Address.EventType.ADDRESS_CHANGED));
         
         return true;
     }
 
+    public void externalAddressChanged() {
+        synchronized (addressLock) {
+            maybeFireNewDirectConnectionAddress();
+        }
+    }
+
+    private void maybeFireNewDirectConnectionAddress() {
+        if(isDirectConnectionCapable()) {
+            DirectConnectionAddress newDirectAddress = getDirectConnectionAddress();
+            if(directAddress == null || !directAddress.equals(newDirectAddress)) {
+                fireDirectConnectionAddressEvent(newDirectAddress); 
+            }
+        } else {
+            fireNullAddressEvent();
+        }
+    }
+
+    private boolean isDirectConnectionCapable() {
+        // TODO is that the right port method?
+        return NetworkUtils.isValidAddress(getExternalAddress()) 
+                && acceptedIncomingConnection() && NetworkUtils.isValidPort(getNonForcedPort());
+    }
+
+    public void portChanged() {
+        synchronized (addressLock) {
+            maybeFireNewDirectConnectionAddress();
+        }
+    }
+
+    public void acceptedIncomingConnectionChanged() {
+        synchronized (addressLock) {
+            maybeFireNewDirectConnectionAddress();
+        }
+    }
+
+    private DirectConnectionAddress getDirectConnectionAddress() {
+        try {
+            return new DirectConnectionAddressImpl(NetworkUtils.ip2string(getExternalAddress()),
+                    getNonForcedPort(), isIncomingTLSEnabled()); // TODO is that the right port method?
+        } catch (UnknownHostException e) {
+            // TODO does this warrant ErrorService?
+            ErrorService.error(e);
+            return null;
+        }                                  
+    }
+    
+    private void fireDirectConnectionAddressEvent(DirectConnectionAddress address) {
+        directAddress = address;
+        fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
+    }
+
+    public void newMediatedConnectionAddress(MediatorAddress newMediatorAddress) { 
+        synchronized (addressLock) {
+            if(supportsFWTVersion() > 0) {
+                mediatedAddress = newMediatorAddress;
+                PushProxyHolePunchAddress newHolePunchAddress = getPushProxyHolePunchAddress();
+                if(holePunchAddress == null || !holePunchAddress.equals(newHolePunchAddress)) {
+                    fireHolePunchAddressEvent(newHolePunchAddress);
+                }
+            } else if(mediatedAddress == null || !mediatedAddress.equals(newMediatorAddress)) {
+                fireMediatedConenctionAddressEvent(newMediatorAddress);
+            }           
+        }
+    }
+    
+    private void fireMediatedConenctionAddressEvent(MediatorAddress address) {
+        mediatedAddress = address;
+        fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
+    }
+
+    private void fireNullAddressEvent() {
+        // TODO NullAddress
+        //fireEvent(new AddressEvent(null, Address.EventType.ADDRESS_CHANGED));
+    }
+
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.NetworkManager#acceptedIncomingConnection()
-     */
+    * @see com.limegroup.gnutella.NetworkManager#acceptedIncomingConnection()
+    */
     public boolean acceptedIncomingConnection() {
     	return acceptor.get().acceptedIncoming();
     }
@@ -266,6 +420,35 @@ public class NetworkManagerImpl implements NetworkManager {
         return networkInstanceUtils.isPrivateAddress(addr);
     }
     
+    /** Disables TLS for this session. */
+    public void disableTLS(Throwable reason) {
+        tlsDisabled = true;
+        if(reason != null) {
+            StringWriter writer = new StringWriter();
+            PrintWriter pw = new PrintWriter(writer);
+            reason.printStackTrace(pw);
+            pw.flush();
+            tlsDisabledReason = writer.getBuffer().toString();
+        } else {
+            tlsDisabledReason = null;
+        }
+    }
+    
+    /** Returns true if TLS is disabled for this session. */
+    public boolean isTLSDisabled() {
+        return tlsDisabled;
+    }
+    
+    /** Whether or not incoming TLS is allowed. */
+    public boolean isIncomingTLSEnabled() {
+        return !tlsDisabled && SSLSettings.TLS_INCOMING.getValue();
+    }
+    
+    /** Whether or not outgoing TLS is allowed. */
+    public boolean isOutgoingTLSEnabled() {
+        return !tlsDisabled && SSLSettings.TLS_OUTGOING.getValue();
+    }    
+    
     private class FWTChangeListener implements SettingListener {
         public void settingChanged(SettingEvent evt) {
             if (evt.getEventType() == SettingEvent.EventType.VALUE_CHANGED)
@@ -273,15 +456,15 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
 
-    public void addListener(EventListener<NetworkManagerEvent> listener) {
+    public void addListener(EventListener<AddressEvent> listener) {
         listeners.addListener(listener);
     }
 
-    public boolean removeListener(EventListener<NetworkManagerEvent> listener) {
+    public boolean removeListener(EventListener<AddressEvent> listener) {
         return listeners.removeListener(listener);
     }
     
-    private void fireEvent(NetworkManagerEvent event) {
+    private void fireEvent(AddressEvent event) {
         listeners.broadcast(event);
     }
 }

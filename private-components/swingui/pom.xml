@@ -43,8 +43,13 @@
 			<groupId>org.limewire</groupId>
 			<artifactId>lw-collection</artifactId>
 			<version>${limewire.version}</version>
-		</dependency>		
-		<dependency>
+		</dependency>
+        <dependency>
+			<groupId>org.limewire</groupId>
+			<artifactId>lw-xmpp</artifactId>
+			<version>${limewire.version}</version>
+		</dependency>
+        <dependency>
 			<groupId>org.limewire</groupId>
 			<artifactId>lw-test-util</artifactId>
 			<version>${limewire.version}</version>

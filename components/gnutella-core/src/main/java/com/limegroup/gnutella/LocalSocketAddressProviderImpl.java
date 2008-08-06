@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 
 import com.google.inject.Inject;
@@ -30,7 +29,7 @@ public class LocalSocketAddressProviderImpl implements LocalSocketAddressProvide
     }
     
     public boolean isTLSCapable() {
-        return SSLSettings.isIncomingTLSEnabled();
+        return networkManager.isIncomingTLSEnabled();
     }
 
 }

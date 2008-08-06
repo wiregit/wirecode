@@ -1,15 +1,21 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.HolePunchAddress;
+import org.limewire.net.address.MediatorAddress;
 
-public interface NetworkManager extends Service, ListenerSupport<NetworkManagerEvent> {
+import java.io.IOException;
 
-    public static enum EventType {
-        ADDRESS_CHANGE
-    }
+public interface NetworkManager extends Service, ListenerSupport<AddressEvent> {
+    void disableTLS(Throwable reason);
+
+    boolean isTLSDisabled();
+
+    boolean isIncomingTLSEnabled();
+
+    boolean isOutgoingTLSEnabled();
 
     /** @return true if your IP and port information is valid.
      */
@@ -42,7 +48,7 @@ public interface NetworkManager extends Service, ListenerSupport<NetworkManagerE
     /**
      * Returns the port used for downloads and messaging connections.
      * Used to fill out the My-Address header in ManagedConnection.
-     * @see Acceptor#getPort
+     * @see com.limegroup.gnutella.Acceptor#getPort
      */
     public int getPort();
 
@@ -75,6 +81,30 @@ public interface NetworkManager extends Service, ListenerSupport<NetworkManagerE
      */
     // TODO: Convert to listener pattern
     public boolean addressChanged();
+    
+    /**
+     * used to notify the <code>NetworkManager</code> of a change in
+     * the external IP.
+     */
+    public void externalAddressChanged();
+
+    /**
+     * used to notify the <code>NetworkManager</code> of a change in
+     * the port.
+     */
+    public void portChanged();
+
+    /**
+     * used to notify the <code>NetworkManager</code> that
+     * an incoming connection has been accepted
+     */
+    public void acceptedIncomingConnectionChanged();
+
+    /**
+     * used to notify the <code>NetworkManager</code> of a new
+     * <code>MediatorAddress</code> (i.e., push proxy)
+     */
+    public void newMediatedConnectionAddress(MediatorAddress address);
 
     /** 
      * Returns true if this has accepted an incoming connection, and hence

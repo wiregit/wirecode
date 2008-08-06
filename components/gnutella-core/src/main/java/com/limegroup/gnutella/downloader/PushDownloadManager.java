@@ -31,7 +31,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -251,7 +250,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                                          addr,
                                          port,
                                          Network.MULTICAST,
-                                         SSLSettings.isIncomingTLSEnabled());
+                                         networkManager.isIncomingTLSEnabled());
                 messageRouter.get().sendMulticastPushRequest(pr);
                 if (LOG.isInfoEnabled())
                     LOG.info("Sending push request through multicast " + pr);
@@ -275,14 +274,14 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                                 networkManager.getAddress(),
                                 networkManager.getPort(),
                                 Network.UDP,
-                                SSLSettings.isIncomingTLSEnabled());
+                                networkManager.isIncomingTLSEnabled());
         if (LOG.isInfoEnabled())
                 LOG.info("Sending push request through udp " + pr);
                     
         UDPService udpService = this.udpService.get();
         //and send the push to the node 
         try {
-            InetAddress address = InetAddress.getByName(file.getHost());
+            InetAddress address = InetAddress.getByName(file.getAddress());
             
             //don't bother sending direct push if the node reported invalid
             //address and port.
@@ -362,7 +361,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                                          addr,
                                          port,
                                          Network.TCP,
-                                         SSLSettings.isIncomingTLSEnabled());
+                                         networkManager.isIncomingTLSEnabled());
         
         if (LOG.isInfoEnabled())
             LOG.info("Sending push request through Gnutella: " + pr);
@@ -401,7 +400,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         final String request = "/gnutella/push-proxy?ServerID=" + 
                                Base32.encode(data.getFile().getClientGUID()) +
           (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "") +
-          (SSLSettings.isIncomingTLSEnabled() ? "&tls=true" : "");
+          (networkManager.isIncomingTLSEnabled() ? "&tls=true" : "");
             
         final String nodeString = HTTPHeaderName.NODE.httpStringValue();
         final String nodeValue = data.isFWTransfer() ?

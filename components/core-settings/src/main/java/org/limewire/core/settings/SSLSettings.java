@@ -1,8 +1,5 @@
 package org.limewire.core.settings;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 
@@ -31,34 +28,5 @@ public class SSLSettings extends LimeProps {
     @InspectablePrimitive("reason tls failed")
     @SuppressWarnings("unused")
     private static volatile String tlsDisabledReason;
-    
-    /** Disables TLS for this session. */
-    public static void disableTLS(Throwable reason) {
-        tlsDisabled = true;
-        if(reason != null) {
-            StringWriter writer = new StringWriter();
-            PrintWriter pw = new PrintWriter(writer);
-            reason.printStackTrace(pw);
-            pw.flush();
-            tlsDisabledReason = writer.getBuffer().toString();
-        } else {
-            tlsDisabledReason = null;
-        }
-    }
-    
-    /** Returns true if TLS is disabled for this session. */
-    public static boolean isTLSDisabled() {
-        return tlsDisabled;
-    }
-    
-    /** Whether or not incoming TLS is allowed. */
-    public static boolean isIncomingTLSEnabled() {
-        return !tlsDisabled && TLS_INCOMING.getValue();
-    }
-    
-    /** Whether or not outgoing TLS is allowed. */
-    public static boolean isOutgoingTLSEnabled() {
-        return !tlsDisabled && TLS_OUTGOING.getValue();
-    }    
 
 }

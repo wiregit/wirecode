@@ -3,7 +3,6 @@ package com.limegroup.gnutella.altlocs;
 import java.io.IOException;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
@@ -75,7 +74,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     		    return new DirectAltLoc(new ConnectableImpl(
     		                NetworkUtils.ip2string(networkManager.getAddress()),
     		                networkManager.getPort(),
-    		                SSLSettings.isIncomingTLSEnabled())
+    		                networkManager.isIncomingTLSEnabled())
     		            , urn, networkInstanceUtils, ipPortForSelf);
     		} else { 
     			return new PushAltLoc(pushEndpointFactory.createForSelf(), urn, applicationServices);
@@ -100,7 +99,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	    throw new NullPointerException("cannot accept null URN");
     
     	if (!rfd.needsPush()) {
-            return new DirectAltLoc(new ConnectableImpl(rfd.getHost(), rfd.getPort(), rfd
+            return new DirectAltLoc(new ConnectableImpl(rfd.getAddress(), rfd.getPort(), rfd
                     .isTLSCapable()), urn, networkInstanceUtils, ipPortForSelf);
         } else {
             PushEndpoint copy;

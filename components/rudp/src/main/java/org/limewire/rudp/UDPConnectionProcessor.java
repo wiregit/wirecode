@@ -8,8 +8,8 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ConnectionPendingException;
 import java.nio.channels.SelectionKey;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.rudp.messages.AckMessage;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.FinMessage;
@@ -30,10 +30,10 @@ public class UDPConnectionProcessor {
 
     /** Define the maximum chunk size read for data bytes
         before we will blow out the connection */
-    private static final int   MAX_DATA_SIZE           = 4096;
+    public  static final int   MAX_DATA_SIZE           = 4096;
     
     /** Define the size of the data window */
-    private static final int  DATA_WINDOW_SIZE        = 20;
+    public static final int  DATA_WINDOW_SIZE        = 20;
 
     /** Define the maximum accepted write ahead packet */
     private static final int  DATA_WRITE_AHEAD_MAX    = DATA_WINDOW_SIZE + 5;
@@ -325,7 +325,11 @@ public class UDPConnectionProcessor {
         // which means each side can send/receive a SYN and ACK
 		tryToConnect();
     }
-    
+
+    public byte getTheirConnectionID() {
+        return _theirConnectionID;
+    }
+
     /** Sets the connection id this is using. */
     protected void setConnectionId(byte id) {
         this._myConnectionID = id;
@@ -968,7 +972,8 @@ public class UDPConnectionProcessor {
 
         // First Message from other host - get his connectionID.
         byte       theirConnID = smsg.getSenderConnectionID();
-        if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) { 
+        LOG.debugf("our id: {0}, their id: {1}, their sender id: {2}", _theirConnectionID, theirConnID, smsg.getSenderConnectionID());
+        if ( _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT ) {
             // Keep track of their connectionID
             _theirConnectionID = theirConnID;
         } else if ( _theirConnectionID == theirConnID ) {

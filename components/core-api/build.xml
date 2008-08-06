@@ -9,32 +9,34 @@
 	
     <import file="../common/build-macros.xml" />
     <import file="../common/build.xml"/>
+    <import file="../net/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize" unless="initialized.core-api">
+    <target name="initialize" depends="lw-common.initialize, lw-net.initialize" unless="initialized.core-api">
         <do.setup-properties component="core-api">
 			<src-classpath>
-				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+                <path refid="build.limewire.components.net.buildpath"/>
+                <pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
 				<pathelement location="${limewire.lib.jars}/glazedlists-1.7.0_java15.jar"/>
 			</src-classpath>
         </do.setup-properties>
     </target>
 	
-	<target name="clean">
+	<target name="clean" depends="lw-net.clean">
 	    <do.clean component="core-api"/>
 	</target>
     
-    <target name="compile">
+    <target name="compile" depends="lw-net.compile">
         <!-- Currently no tests - using compile-src in the meantime -->
     	<!--<do.compile component="core-api"/>-->
     	<do.compile-src component="core-api"/>
         <mkdir dir="${build.limewire.components.core-api.tests}"/>
     </target>
 	
-	<target name="compile-src">
+	<target name="compile-src" depends="lw-net.compile-src">
 	    <do.compile-src component="core-api"/>
 	</target>
     
-	<target name="clean-src">
+	<target name="clean-src" depends="lw-net.clean-src">
 	    <do.clean-src component="core-api"/>
 	</target>
 	

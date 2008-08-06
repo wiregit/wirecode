@@ -12,6 +12,7 @@
     <import file="../mock-core/build.xml"/>
 	<import file="../../components/core-settings/build.xml"/>
     <import file="../../components/collection/build.xml"/>
+    <import file="../../components/xmpp/build.xml"/>
     
     <target name="initialize" depends="lw-core-api.initialize, lw-mock-core.initialize, lw-common.initialize, lw-core-settings.initialize, lw-collection.initialize" unless="initialized.swingui">
         <do.setup-private-properties component="swingui">
@@ -36,7 +37,8 @@
 			    <path refid="build.limewire.components.mock-core.buildpath"/>
 				<path refid="build.limewire.components.core-settings.buildpath"/>
 				<path refid="build.limewire.components.collection.buildpath"/>
-			</add-src-classpath>
+                <path refid="build.limewire.components.xmpp.buildpath"/>
+            </add-src-classpath>
         </do.setup-private-properties>
     </target>
 	
@@ -44,14 +46,14 @@
 	    <do.clean component="swingui"/>
 	</target>
     
-    <target name="compile" depends="initialize, lw-core-api.compile, lw-mock-core.compile, lw-common.compile, lw-core-settings.compile, lw-collection.compile">
+    <target name="compile" depends="initialize, lw-core-api.compile, lw-mock-core.compile, lw-common.compile, lw-core-settings.compile, lw-collection.compile, lw-xmpp.compile">
         <!-- Currently no tests - using compile-src in the meantime -->
     	<!--<do.compile component="core-api"/>-->
     	<do.compile-src component="swingui"/>
         <mkdir dir="${build.limewire.components.swingui.tests}"/>
     </target>
 	
-	<target name="compile-src" depends="initialize, lw-core-api.compile-src, lw-mock-core.compile-src, lw-common.compile-src, lw-core-settings.compile-src, lw-collection.compile-src">
+	<target name="compile-src" depends="initialize, lw-core-api.compile-src, lw-mock-core.compile-src, lw-common.compile-src, lw-core-settings.compile-src, lw-collection.compile-src, lw-xmpp.compile-src">
 	    <do.compile-src component="swingui"/>
 	</target>
     

@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
@@ -126,7 +125,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
         else
             data[0] = PingRequest.SCP_LEAF;
         
-        if(SSLSettings.isIncomingTLSEnabled())
+        if(networkManager.isIncomingTLSEnabled())
             data[0] |= PingRequest.SCP_TLS; // add our support for TLS.
         
         return data;

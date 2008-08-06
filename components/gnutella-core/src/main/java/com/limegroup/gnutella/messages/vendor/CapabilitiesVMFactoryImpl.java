@@ -75,7 +75,7 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
             supported.put(mode.getCapabilityName(), dhtManager.get().getVersion().shortValue());
         }
 
-        if (SSLSettings.isIncomingTLSEnabled()) {
+        if (networkManager.get().isIncomingTLSEnabled()) {
             supported.put(CapabilitiesVM.TLS_SUPPORT_BYTES, 1);
         }
 

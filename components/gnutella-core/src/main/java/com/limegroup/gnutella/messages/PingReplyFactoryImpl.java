@@ -8,7 +8,6 @@ import java.util.Collection;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.core.settings.ApplicationSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
@@ -365,7 +364,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         addDHTExtension(ggep);
 
         // add our support of TLS
-        if (SSLSettings.isIncomingTLSEnabled())
+        if (networkManager.isIncomingTLSEnabled())
             ggep.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
 
         return ggep;

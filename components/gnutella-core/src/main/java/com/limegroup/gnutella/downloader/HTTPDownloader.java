@@ -326,7 +326,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		_guid = rfd.getClientGUID();
 		_amountToRead = 0;
 		_port = rfd.getPort();
-		_host = rfd.getHost();
+		_host = rfd.getAddress();
 		_chatEnabled = rfd.isChatEnabled();
         _browseEnabled = rfd.isBrowseHostEnabled();
         _locationsReceived = new HashSet<RemoteFileDesc>();
@@ -711,7 +711,7 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     public void downloadThexBody(URN sha1, IOStateObserver observer) {
-        _thexReader = thexReaderFactory.createHashTreeReader(sha1.httpStringValue(), _root32, _rfd.getFileSize());
+        _thexReader = thexReaderFactory.createHashTreeReader(sha1.httpStringValue(), _root32, _rfd.getSize());
         observerHandler.setDelegate(observer);
         _stateMachine.addState(_thexReader);
     }

@@ -1,36 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-
-import org.limewire.common.LimeWireCommonModule;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
-import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.concurrent.SimpleTimer;
-import org.limewire.http.LimeWireHttpModule;
-import org.limewire.inject.AbstractModule;
-import org.limewire.inspection.Inspector;
-import org.limewire.inspection.InspectorImpl;
-import org.limewire.io.LimeWireIOModule;
-import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.mojito.LimeWireMojitoModule;
-import org.limewire.mojito.io.MessageDispatcherFactory;
-import org.limewire.net.ConnectionDispatcher;
-import org.limewire.net.ConnectionDispatcherImpl;
-import org.limewire.net.LimeWireNetModule;
-import org.limewire.nio.ByteBufferCache;
-import org.limewire.nio.NIODispatcher;
-import org.limewire.promotion.LimeWirePromotionModule;
-import org.limewire.security.SecureMessageVerifier;
-import org.limewire.security.SecureMessageVerifierImpl;
-import org.limewire.security.SecurityToken;
-import org.limewire.security.SettingsProvider;
-import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
-import org.limewire.statistic.LimeWireStatisticsModule;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProviderMethods;
@@ -158,6 +127,9 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressSerializer;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressSerializer;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressSerializer;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.rudp.LimeWireGnutellaRudpModule;
 import com.limegroup.gnutella.search.LimeWireSearchModule;
@@ -191,6 +163,38 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
+import org.limewire.common.LimeWireCommonModule;
+import org.limewire.concurrent.AbstractLazySingletonProvider;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.SimpleTimer;
+import org.limewire.http.LimeWireHttpModule;
+import org.limewire.inject.AbstractModule;
+import org.limewire.inspection.Inspector;
+import org.limewire.inspection.InspectorImpl;
+import org.limewire.io.LimeWireIOModule;
+import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.mojito.LimeWireMojitoModule;
+import org.limewire.mojito.io.MessageDispatcherFactory;
+import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.ConnectionDispatcherImpl;
+import org.limewire.net.LimeWireNetModule;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.NIODispatcher;
+import org.limewire.promotion.LimeWirePromotionModule;
+import org.limewire.security.SecureMessageVerifier;
+import org.limewire.security.SecureMessageVerifierImpl;
+import org.limewire.security.SecurityToken;
+import org.limewire.security.SettingsProvider;
+import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
+import org.limewire.statistic.LimeWireStatisticsModule;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * The module that defines what implementations are used within
@@ -240,6 +244,7 @@ public class LimeWireCoreModule extends AbstractModule {
 
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
+        bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
         bind(DHTControllerFactory.class).to(DHTControllerFactoryImpl.class);
         bind(PingReplyFactory.class).to(PingReplyFactoryImpl.class);
@@ -364,7 +369,6 @@ public class LimeWireCoreModule extends AbstractModule {
         // These are bound because they are Singletons & Services, and must be started.
         bind(Statistics.class);
         bind(CoreRandomGlue.class);
-        bind(TlsTester.class);
         bind(ConnectionAcceptorGlue.class);
         bind(DownloadUpgradeTaskService.class);
         bind(LocalAcceptor.class);
@@ -377,6 +381,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LimeCoreGlue.class);
         bind(QRPUpdater.class);
         bind(DaapManager.class);
+        bind(PushProxyMediatorAddressSerializer.class);
+        bind(PushProxyHolePunchAddressSerializer.class);
+        bind(PushProxyAddressSerializer.class);
         
         bind(FileManager.class).to(FileManagerImpl.class);
     }

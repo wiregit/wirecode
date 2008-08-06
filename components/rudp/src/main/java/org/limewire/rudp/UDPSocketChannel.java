@@ -17,6 +17,8 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.rudp.messages.DataMessage;
+import org.limewire.rudp.messages.RUDPMessage;
+import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.BufferUtils;
 
 
@@ -92,6 +94,19 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
             configureBlocking(false);
         } catch(IOException iox) {
             throw new RuntimeException(iox);
+        }
+    }
+    
+    public boolean isForMe(InetSocketAddress address, SynMessage message) {
+        if(!getRemoteSocketAddress().equals(address)) {
+            return false;
+        } else {
+            byte savedConnectionID = getProcessor().getTheirConnectionID();
+            if(savedConnectionID == UDPMultiplexor.UNASSIGNED_SLOT || savedConnectionID == message.getSenderConnectionID()) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
     

@@ -11,7 +11,6 @@ import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.core.settings.DHTSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -82,7 +81,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         assertNull("First value should be null since not stable", value);
         
         value = pushProxiesPublisher.getValueToPublish();
-        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
+        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), networkManagerStub.isOutgoingTLSEnabled());
         assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, value.getPushProxies().iterator().next()));
     }
     
@@ -101,7 +100,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         
         value = pushProxiesPublisher.getValueToPublish();
         
-        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
+        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), networkManagerStub.isOutgoingTLSEnabled());
         assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, value.getPushProxies().iterator().next()));
         assertEquals(1, value.getFwtVersion());
         

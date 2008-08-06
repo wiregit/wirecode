@@ -37,7 +37,7 @@ public final class ConnectionSettings extends LimeProps {
 	 * do Firewall-to-firewall transfers in the past based on information
 	 * received in pongs.
 	 */
-	public static final BooleanSetting LAST_FWT_STATE =
+	public static final BooleanSetting CANNOT_DO_FWT =
 		FACTORY.createExpirableBooleanSetting("LAST_FWT_STATE", false);
 
 	/**

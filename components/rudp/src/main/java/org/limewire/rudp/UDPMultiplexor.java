@@ -15,8 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 
@@ -88,12 +88,16 @@ public class UDPMultiplexor extends AbstractSelector {
 		// If connID equals 0 and SynMessage then associate with a connection
         // that appears to want it (connecting and with knowledge of it).
 		if ( connID == 0 && msg instanceof SynMessage ) {
+		    LOG.debugf("route sym: {0}", msg);
 			for (int i = 1; i < array.length; i++) {
                 channel = array[i];
                 if(channel == null)
                     continue;
                 
-				if ( channel.isConnectionPending() && channel.getRemoteSocketAddress().equals(addr)) {
+                LOG.debugf("non-empty index: {0}, addr: {1}", i, channel.getRemoteSocketAddress());
+                
+				if ( channel.isConnectionPending() && channel.isForMe(addr, (SynMessage)msg)) {
+				    LOG.debugf("found index: {0}, sender id: {1}", i, ((SynMessage)msg).getSenderConnectionID());
                     channel.getProcessor().handleMessage(msg);
 					break;
 				} 
@@ -103,8 +107,13 @@ public class UDPMultiplexor extends AbstractSelector {
 
 		} else if(array[connID] != null) {  // If valid connID then send on to connection
             channel = array[connID];
+            if (msg instanceof SynMessage) {
+                LOG.debugf("already assigned syn: {0}", msg);
+            }
 			if (channel.getRemoteSocketAddress().equals(addr) )
                 channel.getProcessor().handleMessage(msg);
+		} else {
+		    LOG.debugf("message for non-existing connection: {0}", msg);
 		}
 		
 		if (channel != null && channel.getProcessor().readyOps() != 0)

@@ -50,8 +50,8 @@ public class PushProxiesValueForSelfTest extends BaseTestCase {
         
         Set<? extends IpPort> proxies = value.getPushProxies();
         assertEquals(1, proxies.size());
-        
-        assertContains(proxies, new ConnectableImpl(NetworkUtils.ip2string(networkManagerStub.getAddress()), networkManagerStub.getPort(), SSLSettings.isIncomingTLSEnabled()));
+
+        assertContains(proxies, new ConnectableImpl(NetworkUtils.ip2string(networkManagerStub.getAddress()), networkManagerStub.getPort(), networkManagerStub.isIncomingTLSEnabled()));
         
         
         // let's go firewalled

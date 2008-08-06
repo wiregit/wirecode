@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.DownloadSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -26,6 +25,7 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -235,14 +235,15 @@ public class DownloadWorker {
     private final ScheduledExecutorService nioExecutor;
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final SocketsManager socketsManager;
+    private final NetworkManager networkManager;
 
     protected DownloadWorker(DownloadWorkerSupport manager, RemoteFileDesc rfd,
-            VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory,
-            ScheduledExecutorService backgroundExecutor,
-            ScheduledExecutorService nioExecutor,
-            Provider<PushDownloadManager> pushDownloadManager,
-            SocketsManager socketsManager,
-            DownloadStatsTracker statsTracker) {
+                             VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory,
+                             ScheduledExecutorService backgroundExecutor,
+                             ScheduledExecutorService nioExecutor,
+                             Provider<PushDownloadManager> pushDownloadManager,
+                             SocketsManager socketsManager,
+                             DownloadStatsTracker statsTracker, NetworkManager networkManager) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
@@ -252,6 +253,7 @@ public class DownloadWorker {
         _rfd = rfd;
         _commonOutFile = vf;
         this.statsTracker = statsTracker;
+        this.networkManager = networkManager;
         _currentState = new DownloadState();
 
         // if we'll be debugging, we want to distinguish the different workers
@@ -694,7 +696,7 @@ public class DownloadWorker {
         }
 
         if (LOG.isDebugEnabled())
-            LOG.debug("WORKER: attempting connect to " + _rfd.getHost() + ":"
+            LOG.debug("WORKER: attempting connect to " + _rfd.getAddress() + ":"
                     + _rfd.getPort());
 
         // TODO move to DownloadStatsTracker?
@@ -743,7 +745,7 @@ public class DownloadWorker {
     private void connectDirectly(DirectConnector observer) {
         if (!_interrupted.get()) {
             ConnectType type = _rfd.isTLSCapable()
-                    && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS
+                    && networkManager.isOutgoingTLSEnabled() ? ConnectType.TLS
                     : ConnectType.PLAIN;
             if (LOG.isTraceEnabled())
                 LOG.trace("WORKER: attempt asynchronous direct connection w/ "
@@ -751,7 +753,7 @@ public class DownloadWorker {
             _connectObserver = observer;
             try {
                 Socket socket = socketsManager.connect(
-                        new InetSocketAddress(_rfd.getHost(), _rfd.getPort()),
+                        new InetSocketAddress(_rfd.getAddress(), _rfd.getPort()),
                         NORMAL_CONNECT_TIME, observer, type);
                 if (!observer.isShutdown())
                     observer.setSocket(socket);
@@ -777,7 +779,7 @@ public class DownloadWorker {
             // When the push is complete and we have a socket ready to use
             // the acceptor thread is going to notify us using this object
             final PushDetails details = new PushDetails(_rfd.getClientGUID(),
-                    _rfd.getHost());
+                    _rfd.getAddress());
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
             pushDownloadManager.get().sendPush(_rfd,

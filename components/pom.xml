@@ -54,8 +54,8 @@
     <module>security</module>
     <module>setting</module>
     <module>statistic</module>
-    <!--module>jingle</module>
-    <module>xmpp</module-->
+    <!--module>jingle</module-->
+    <module>xmpp</module>
     <module>test-util</module>
     <module>core-api</module>
     <module>core-settings</module>

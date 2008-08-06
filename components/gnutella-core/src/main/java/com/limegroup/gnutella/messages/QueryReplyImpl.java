@@ -20,7 +20,6 @@ import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.core.settings.FilterSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
@@ -176,7 +175,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
         _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
-        boolean supportsTLS = SSLSettings.isIncomingTLSEnabled();
+        boolean supportsTLS = networkManager.isIncomingTLSEnabled();
         _data.setTLSCapable(supportsTLS);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

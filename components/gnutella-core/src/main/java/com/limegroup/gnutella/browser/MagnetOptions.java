@@ -98,30 +98,28 @@ public class MagnetOptions implements Serializable {
 	 * @param fileDetails
 	 * @return
 	 */
-	public static MagnetOptions createMagnet(FileDetails fileDetails) {
+	public static MagnetOptions createMagnet(FileDetails fileDetails, InetSocketAddress socketAddress, byte [] clientGuid) {
 		Map<Option, List<String>> map = new EnumMap<Option, List<String>>(Option.class);
 		map.put(Option.DN, Collections.singletonList(fileDetails.getFileName()));
 		URN urn = fileDetails.getSHA1Urn();
 		if (urn != null) {
 			addAppend(map, Option.XT, urn.httpStringValue());
 		}
-		InetSocketAddress isa = fileDetails.getInetSocketAddress();
-		String url = null;
-		if (isa != null && urn != null) {
+        String url = null;
+		if (socketAddress != null && urn != null) {
             StringBuilder addr = new StringBuilder("http://");
-			addr.append(isa.getAddress().getHostAddress()).append(':')
-			.append(isa.getPort()).append("/uri-res/N2R?");
+			addr.append(socketAddress.getAddress().getHostAddress()).append(':')
+			.append(socketAddress.getPort()).append("/uri-res/N2R?");
 			addr.append(urn.httpStringValue());
 			url = addr.toString();
 			addAppend(map, Option.XS, url);
 		}
-		byte[] clientGuid = fileDetails.getClientGUID();
 		URN guidUrn = null;
 		if (clientGuid != null) {
 		    guidUrn = URN.createGUIDUrn(new GUID(clientGuid));
 		    addAppend(map, Option.XS, guidUrn.httpStringValue());
 		}
-		long fileSize = fileDetails.getFileSize();
+		long fileSize = fileDetails.getSize();
 		if (fileSize >= 0) {
 		    addAppend(map, Option.XL, Long.toString(fileSize));
 		}

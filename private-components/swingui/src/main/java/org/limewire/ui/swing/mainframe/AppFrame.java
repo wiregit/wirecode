@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Image;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
@@ -19,10 +21,15 @@ import org.limewire.core.impl.MockModule;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.xmpp.client.service.FileOfferHandler;
+import org.limewire.xmpp.client.service.RosterListener;
+import org.limewire.xmpp.client.service.XMPPErrorListener;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Stage;
 
 /**
  * The entry point for the Swing UI.  If the real core is desired,
@@ -95,7 +102,15 @@ public class AppFrame extends SingleFrameApplication {
             injector = Guice.createInjector(new MockModule(), new LimeWireSwingUiModule());
             return injector;
         } else {
-            return Guice.createInjector(injector, new LimeWireSwingUiModule());
+            List<Module> modules = new ArrayList<Module>();
+            modules.add(new LimeWireSwingUiModule());
+            Injector newInjector = Guice.createInjector(injector, Stage.PRODUCTION, modules);
+            
+            // TODO HACK
+            newInjector.getInstance(FileOfferHandler.class);
+            newInjector.getInstance(RosterListener.class);
+            newInjector.getInstance(XMPPErrorListener.class);
+            return newInjector;
         }
     }
 

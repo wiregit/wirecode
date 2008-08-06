@@ -21,7 +21,6 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
@@ -43,7 +42,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;

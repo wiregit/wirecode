@@ -29,14 +29,7 @@ public class WhoIsRequestTest extends BaseTestCase {
         
     @Override
     protected void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(), new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(ProxySettings.class).to(EmptyProxySettings.class);
-                bind(SocketBindingSettings.class).to(EmptySocketBindingSettings.class);
-                bind(NetworkInstanceUtils.class).to(SimpleNetworkInstanceUtils.class);
-            }
-        });        
+        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetTestModule());        
         
         factory = injector.getInstance(WhoIsRequestFactory.class); 
     }

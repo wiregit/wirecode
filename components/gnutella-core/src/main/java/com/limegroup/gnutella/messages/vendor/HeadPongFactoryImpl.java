@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiRRIterator;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.CountingOutputStream;
@@ -211,7 +210,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         // If we're not firewalled and support TLS,
         // spread word about our TLS status.
         if(networkManager.acceptedIncomingConnection() && 
-                SSLSettings.isIncomingTLSEnabled() ) {
+                networkManager.isIncomingTLSEnabled() ) {
             ggep.put(HeadPong.FEATURES, HeadPong.TLS_CAPABLE);
             size += 4;
         }

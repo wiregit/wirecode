@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -81,7 +80,7 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     public Set<? extends IpPort> getPushProxies() {
         if (networkManager.acceptedIncomingConnection() && networkManager.isIpPortValid()) {
             // port should be the same as returned in #get
-            return new StrictIpPortSet<Connectable>(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), SSLSettings.isIncomingTLSEnabled()));
+            return new StrictIpPortSet<Connectable>(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), networkManager.isIncomingTLSEnabled()));
         } else {
             return self.getProxies();
         }

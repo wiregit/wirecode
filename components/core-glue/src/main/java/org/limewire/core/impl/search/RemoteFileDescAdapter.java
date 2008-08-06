@@ -70,7 +70,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
     @Override
     public long getSize() {
-        return rfd.getFileSize();
+        return rfd.getSize();
     }
 
     @Override

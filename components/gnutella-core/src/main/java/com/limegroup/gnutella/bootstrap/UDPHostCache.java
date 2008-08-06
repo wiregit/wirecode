@@ -304,7 +304,9 @@ public class UDPHostCache {
     }
     
     protected void loadDefaults() {
-      // ADD DEFAULT UDP HOST CACHES HERE.
+//        createAndAdd("uhc2.limewire.com", 20181);
+//        createAndAdd("uhc.udp-host-cache.com", 9999);
+//        createAndAdd("uhc3.limewire.com", 51180);
     }
     
     /**

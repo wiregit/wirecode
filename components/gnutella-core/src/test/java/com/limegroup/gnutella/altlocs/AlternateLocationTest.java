@@ -173,7 +173,7 @@ public final class AlternateLocationTest extends LimeTestCase {
 			RemoteFileDesc rfd = al.createRemoteFileDesc(10, remoteFileDescFactory);
 			assertEquals("SHA1s should be equal", al.getSHA1Urn(), rfd.getSHA1Urn());
 			assertEquals("hosts should be equals",al.getHost().getAddress(),
-					rfd.getHost());
+					rfd.getAddress());
 			assertEquals("ports should be equals",al.getHost().getPort(),
 					rfd.getPort());
 		}
@@ -192,7 +192,7 @@ public final class AlternateLocationTest extends LimeTestCase {
         AlternateLocation loc = alternateLocationFactory.create(fwalled);
         
         RemoteFileDesc other = loc.createRemoteFileDesc(3, remoteFileDescFactory);
-        assertEquals("1.2.3.4",other.getHost());
+        assertEquals("1.2.3.4",other.getAddress());
         assertEquals(5,other.getPort());
         
         assertEquals(fwalled.getClientGUID(),other.getClientGUID());
