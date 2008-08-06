@@ -23,7 +23,6 @@ class FilteredTextField extends JTextField implements FocusListener {
     // TODO: RMV so that different icons can be used.
     @Resource private Icon icon;
     
-    private JButton magButton;
     private String defaultText = "Filter results...";
     
     /**
@@ -38,8 +37,6 @@ class FilteredTextField extends JTextField implements FocusListener {
         // The icon PNG file is in swingui/src/main/resources/
         // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
-        
-        magButton = new JButton(icon);
         
         focusLost(null);
         addFocusListener(this);
@@ -78,7 +75,7 @@ class FilteredTextField extends JTextField implements FocusListener {
     @Override
     public Dimension getSize() {
         Dimension size = super.getSize();
-        if(icon != null) {
+        if (icon != null) {
             size.width += icon.getIconWidth();
         }
         return size;

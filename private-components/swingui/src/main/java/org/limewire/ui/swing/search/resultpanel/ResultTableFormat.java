@@ -1,10 +1,11 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
-public class ResultTableFormat implements TableFormat<VisualSearchResult> {
+public class ResultTableFormat
+implements WritableTableFormat<VisualSearchResult> {
     
     private static final String[] COLUMN_NAMES = {
         "Icon", "Name", "Type", "Size", "Actions"
@@ -28,5 +29,16 @@ public class ResultTableFormat implements TableFormat<VisualSearchResult> {
          if (column == 3) return vsr.getSize();
          if (column == 4) return vsr;
          return null;
+    }
+
+    @Override
+    public boolean isEditable(VisualSearchResult baseObject, int column) {
+        return column == 4;
+    }
+
+    @Override
+    public VisualSearchResult setColumnValue(
+        VisualSearchResult baseObject, Object editedValue, int column) {
+        return null;
     }
 }

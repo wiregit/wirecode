@@ -16,17 +16,19 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.Scrollable;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.Highlighter;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
-import org.limewire.ui.swing.search.ActionColumnTableCellRenderer;
+import org.limewire.ui.swing.search.ActionColumnTableCellEditor;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -34,7 +36,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 public class BaseResultPanel extends JXPanel implements Scrollable {
     
     private final JList resultsList;
-    private final JTable resultsTable;
+    private final JXTable resultsTable;
     private final JScrollPane scrollPane = new JScrollPane();
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
@@ -72,7 +74,10 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         EventTableModel<VisualSearchResult> tableModel =
             new EventTableModel<VisualSearchResult>(
                 sortedResults, new ResultTableFormat());
-        resultsTable = new JTable(tableModel);
+        resultsTable = new JXTable(tableModel);
+        
+        Highlighter highlighter = HighlighterFactory.createAlternateStriping();
+        resultsTable.setHighlighters(new Highlighter[] { highlighter });
         
         boolean multiColumnSort = false;
         tcc = new TableComparatorChooser<VisualSearchResult>(
@@ -80,7 +85,9 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         
         TableColumnModel tcm = resultsTable.getColumnModel();
         TableColumn tc = tcm.getColumn(4);
-        tc.setCellRenderer(new ActionColumnTableCellRenderer());
+        ActionColumnTableCellEditor actce = new ActionColumnTableCellEditor();
+        tc.setCellRenderer(actce);
+        tc.setCellEditor(actce);
         
         setMode(ModeListener.Mode.LIST);
     }

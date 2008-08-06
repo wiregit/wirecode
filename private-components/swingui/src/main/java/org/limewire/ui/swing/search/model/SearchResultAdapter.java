@@ -94,6 +94,7 @@ class SearchResultAdapter implements VisualSearchResult {
 
     @Override
     public int hashCode() {
+        /*
         final int prime = 31;
         int result = 1;
         result = prime * result +
@@ -101,6 +102,8 @@ class SearchResultAdapter implements VisualSearchResult {
         result = prime * result +
             ((remoteHosts == null) ? 0 : remoteHosts.hashCode());
         return result;
+        */
+        return getDescription().hashCode(); // TODO: RMV temporary
     }
 
     @Override
@@ -110,6 +113,10 @@ class SearchResultAdapter implements VisualSearchResult {
         if (!(obj instanceof SearchResultAdapter)) return false;
         
         final SearchResultAdapter other = (SearchResultAdapter) obj;
+        
+        // TODO: RMV temporary, same description
+        return getDescription().equals(other.getDescription());
+        /*
         if (coreResults == null) {
             if (other.coreResults != null) return false;
         } else if (!coreResults.equals(other.coreResults)) return false;
@@ -119,5 +126,6 @@ class SearchResultAdapter implements VisualSearchResult {
         } else if (!remoteHosts.equals(other.remoteHosts)) return false;
         
         return true;
+        */
     }
 }

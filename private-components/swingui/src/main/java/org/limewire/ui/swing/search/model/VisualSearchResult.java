@@ -25,5 +25,4 @@ public interface VisualSearchResult {
     long getSize();
     
     String getFileExtension();
-
 }

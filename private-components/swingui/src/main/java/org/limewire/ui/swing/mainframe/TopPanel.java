@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.mainframe;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -15,6 +18,7 @@ import java.util.Collections;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -23,35 +27,36 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.ui.swing.TextFieldWithEnterButton;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectionListener;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 @Singleton
 class TopPanel extends JPanel implements SearchNavigator {
     
-    private final SearchBar searchBar;
+    //private final SearchBar searchBar;
+    private final TextFieldWithEnterButton textField;
     private final FancyTabList searchList;
     private final Navigator navigator;
+    @Resource private Icon enterIcon;
     
     @Inject
     public TopPanel(final SearchHandler searchHandler, Navigator navigator) {
@@ -61,9 +66,9 @@ class TopPanel extends JPanel implements SearchNavigator {
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         setPreferredSize(new Dimension(1024, 40));
         
-        this.searchBar = new SearchBar();
-        searchBar.setColumns(1); // This is required to give it a fixed size.
-        searchBar.setName("TopPanel.searchBar");
+	    GuiUtils.assignResources(this);
+        textField = new TextFieldWithEnterButton(15, "Search...", enterIcon);
+        
         final JComboBox combo = new JComboBox(SearchCategory.values());
         combo.setName("TopPanel.combo");
         JLabel search = new JLabel(I18n.tr("Search"));
@@ -71,9 +76,11 @@ class TopPanel extends JPanel implements SearchNavigator {
 
         combo.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList list, Object value, int index,
-                    boolean isSelected, boolean cellHasFocus) {
-                if(value != null) {
+            public Component getListCellRendererComponent(
+                JList list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
+                
+                if (value != null) {
                     switch((SearchCategory)value) {
                     case ALL: value = I18n.tr("All"); break;
                     case AUDIO: value = I18n.tr("Audio"); break;
@@ -84,13 +91,19 @@ class TopPanel extends JPanel implements SearchNavigator {
                         throw new IllegalArgumentException("invalid category: " + value);
                     }
                 }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                
+                return super.getListCellRendererComponent(
+                    list, value, index, isSelected, cellHasFocus);
             }
         });
-        searchBar.addActionListener(new ActionListener() {
+        
+        textField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                searchHandler.doSearch(new DefaultSearchInfo(searchBar.getText(), (SearchCategory)combo.getSelectedItem()));
+                searchHandler.doSearch(
+                    new DefaultSearchInfo(
+                        textField.getText(),
+                        (SearchCategory) combo.getSelectedItem()));
             }
         });
         
@@ -106,11 +119,9 @@ class TopPanel extends JPanel implements SearchNavigator {
         gbc.insets = new Insets(5, 0, 0, 5);
         add(combo, gbc);
         
-        gbc.ipadx = 150;
-        add(searchBar, gbc);
+        add(textField, gbc);
         
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.ipadx = 0;
         gbc.weightx = 1;
         gbc.insets = new Insets(5, 0, 0, 0);
         searchList = new FancyTabList();
@@ -119,9 +130,12 @@ class TopPanel extends JPanel implements SearchNavigator {
         searchList.setCloseOtherText(I18n.tr("Close other searches"));
         searchList.setFixedLayout(50, 120, 120);
         searchList.setRemovable(true);
-        searchList.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        searchList.setSelectionPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
-        searchList.setHighlightPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY));
+        searchList.setPreferredSize(
+            new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        searchList.setSelectionPainter(new RectanglePainter<JXButton>(
+            2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
+        searchList.setHighlightPainter(new RectanglePainter<JXButton>(
+            2, 2, 0, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY));
         searchList.setMaxTabs(3);
         searchList.setName("TopPanel.SearchList");
         add(searchList, gbc);
@@ -129,12 +143,15 @@ class TopPanel extends JPanel implements SearchNavigator {
     
     @Override
     public boolean requestFocusInWindow() {
-        return searchBar.requestFocusInWindow();
+        return textField.requestFocusInWindow();
     }
     
     @Override
-    public SearchNavItem addSearch(String title, JComponent searchPanel, final Search search) {
-        final NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, title, searchPanel, false);
+    public SearchNavItem addSearch(
+        String title, JComponent searchPanel, final Search search) {
+        
+        final NavItem item = navigator.addNavigablePanel(
+            NavCategory.SEARCH, title, searchPanel, false);
         final SearchAction action = new SearchAction(item, search);
         search.addSearchListener(action);
         final Action moreTextAction = new NoOpAction();
@@ -144,8 +161,12 @@ class TopPanel extends JPanel implements SearchNavigator {
                 search.repeat();
             }
         };
-        final TabActionMap actionMap = new TabActionMap(action, action, moreTextAction, Collections.singletonList(repeat));
+        
+        final TabActionMap actionMap = new TabActionMap(
+            action, action, moreTextAction, Collections.singletonList(repeat));
+        
         searchList.addTabActionMapAt(actionMap, 0);
+        
         return new SearchNavItem() {
             @Override
             public String getName() {
@@ -166,7 +187,7 @@ class TopPanel extends JPanel implements SearchNavigator {
             @Override
             public void sourceCountUpdated(int newSourceCount) {
                 moreTextAction.putValue(Action.NAME, String.valueOf(newSourceCount));
-                if(newSourceCount >= 100) {
+                if (newSourceCount >= 100) {
                     action.killBusy();
                 }
             }
@@ -186,8 +207,8 @@ class TopPanel extends JPanel implements SearchNavigator {
             addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
-                        if(evt.getNewValue().equals(Boolean.TRUE)) {
+                    if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                        if (evt.getNewValue().equals(Boolean.TRUE)) {
                             select();
                         }
                     }
@@ -197,20 +218,21 @@ class TopPanel extends JPanel implements SearchNavigator {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(e.getActionCommand().equals(TabActionMap.SELECT_COMMAND)) {
+            if (e.getActionCommand().equals(TabActionMap.SELECT_COMMAND)) {
                 select();
-            } else if(e.getActionCommand().equals(TabActionMap.REMOVE_COMMAND)) {
+            } else if (e.getActionCommand().equals(TabActionMap.REMOVE_COMMAND)) {
                 remove();
             }
         }
         
         public void select() {
             item.select();
-            searchBar.setText(item.getName());
+            textField.setText(item.getName());
             navigator.addNavListener(new NavSelectionListener() {
                 @Override
-                public void navItemSelected(NavCategory category, NavItem navItem) {
-                    if(navItem != item) {
+                public void navItemSelected(
+                    NavCategory category, NavItem navItem) {
+                    if (navItem != item) {
                         navigator.removeNavListener(this);
                         putValue(Action.SELECTED_KEY, false);
                     }
@@ -259,8 +281,5 @@ class TopPanel extends JPanel implements SearchNavigator {
                 }
             });
         }
-        
     }
-    
-    
 }
