@@ -1,12 +1,11 @@
 package com.limegroup.gnutella;
 
+import java.io.IOException;
+
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.HolePunchAddress;
 import org.limewire.net.address.MediatorAddress;
-
-import java.io.IOException;
 
 public interface NetworkManager extends Service, ListenerSupport<AddressEvent> {
     void disableTLS(Throwable reason);

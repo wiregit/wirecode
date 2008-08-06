@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.limewire.collection.Comparators;
-import org.limewire.core.settings.SSLSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

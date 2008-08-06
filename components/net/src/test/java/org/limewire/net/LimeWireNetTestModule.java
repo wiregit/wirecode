@@ -1,6 +1,5 @@
 package org.limewire.net;
 
-import org.limewire.inject.AbstractModule;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 

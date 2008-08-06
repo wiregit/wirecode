@@ -1,14 +1,13 @@
 package org.limewire.core.impl.xmpp;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Singleton
 class XMPPConfigurationListProvider extends ArrayList<XMPPConnectionConfiguration> {

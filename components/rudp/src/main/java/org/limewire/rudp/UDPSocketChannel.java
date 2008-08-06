@@ -17,7 +17,6 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.rudp.messages.DataMessage;
-import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.BufferUtils;
 

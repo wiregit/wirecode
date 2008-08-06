@@ -1,7 +1,5 @@
 package org.limewire.xmpp.client.service;
 
-import java.util.List;
-
 import org.limewire.net.address.Address;
 
 /**

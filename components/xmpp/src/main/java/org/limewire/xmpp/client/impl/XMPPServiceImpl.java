@@ -1,8 +1,10 @@
 package org.limewire.xmpp.client.impl;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.lifecycle.Asynchronous;
@@ -14,14 +16,12 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.XMPPConnection;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
-import org.limewire.xmpp.client.service.XMPPService;
-import org.limewire.xmpp.client.service.RosterListener;
 import org.limewire.xmpp.client.service.XMPPErrorListener;
+import org.limewire.xmpp.client.service.XMPPService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 @Singleton
 public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent> {

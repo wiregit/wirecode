@@ -1,12 +1,9 @@
 package org.limewire.xmpp.client.impl;
 
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.RosterListener;
+import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.XMPPErrorListener;
 import org.limewire.xmpp.client.service.XMPPService;
-import org.limewire.xmpp.client.impl.XMPPException;
-
-import com.google.inject.Inject;
 
 public class XMPPConnectionConfigurationImpl implements XMPPConnectionConfiguration {
     private final String userName;

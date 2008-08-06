@@ -2,12 +2,9 @@ package org.limewire.net;
 
 import junit.framework.Test;
 
-import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.SimpleNetworkInstanceUtils;
-import org.limewire.util.BaseTestCase;
 import org.limewire.common.LimeWireCommonModule;
+import org.limewire.util.BaseTestCase;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 

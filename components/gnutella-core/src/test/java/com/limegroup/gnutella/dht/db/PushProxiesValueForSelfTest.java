@@ -6,7 +6,6 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;

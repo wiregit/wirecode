@@ -7,7 +7,6 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.DirectConnectionAddress;
 import org.limewire.net.address.HolePunchAddress;
 import org.limewire.net.address.HolePunchAddressSerializer;
-import org.limewire.net.address.MediatorAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
