@@ -10,6 +10,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -300,6 +302,18 @@ public class DownloadRendererEditor extends JPanel implements
 		gbc.gridwidth = 1;
 		add(timeLabel, gbc);			
 		
+		addMouseListener(new MouseAdapter(){
+		    @Override
+		    public void mouseClicked(MouseEvent e){
+		        if (e.getClickCount() == 2 && editItem != null && editItem.isLaunchable()) {
+                    if (editItem.getState() == DownloadState.DONE) {
+                        performAction(LAUNCH_COMMAND, editItem);
+                    } else {
+                        performAction(PREVIEW_COMMAND, editItem);
+                    }
+                }
+		    }
+		});
 	}
 	
 	@Override
