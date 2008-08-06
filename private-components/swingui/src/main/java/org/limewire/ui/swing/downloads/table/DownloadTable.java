@@ -72,19 +72,25 @@ public class DownloadTable extends JXTable {
 		addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				Component component = getComponentAt(e.getPoint());
-				if (component instanceof JTable) {
-					JTable table = (JTable) component;
-					int col = table.columnAtPoint(e.getPoint());
-					int row = table.rowAtPoint(e.getPoint());
-					table.editCellAt(row, col);
-				}
-			}
+                int col = columnAtPoint(e.getPoint());
+                int row = rowAtPoint(e.getPoint());
+                editCellAt(row, col);
+            }
 
 		});
 
 		//clears mouseover color - necessary for coordinating between multiple tables
 		addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e){//adding this to editor messes up popups
+                if (e.getClickCount() == 2){
+                    int col = columnAtPoint(e.getPoint());
+                    int row = rowAtPoint(e.getPoint());
+                    DownloadItem item = (DownloadItem)getValueAt(row, col);
+                    throw new RuntimeException("Implement launch " + item.getTitle() + "!");
+                }
+            }
+		    
 			@Override
 			public void mouseExited(MouseEvent e) {
 				TableCellEditor editor = getCellEditor();
