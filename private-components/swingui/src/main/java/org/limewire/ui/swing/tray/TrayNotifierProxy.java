@@ -20,17 +20,15 @@ class TrayNotifierProxy implements TrayNotifier {
     private boolean inTray;
 
     @Inject
-    TrayNotifierProxy(TrayManager trayManager) {
-        if (OSUtils.supportsTray() && trayManager.isTrayLibraryLoaded()) {
-        	notifier = new JDICNotifier();
-        	// If add notifications failed, we're screwed.
+    TrayNotifierProxy() {
+        if(OSUtils.isMacOSX()) {
+            notifier = new GrowlNotifier();            
+        } else {
+            notifier = new JDICNotifier();
             if(!showTrayIcon()) {
+                // If it failed, revert.
                 notifier = new BasicNotifier();
             }
-        } else if (OSUtils.isMacOSX()) {
-            notifier = new GrowlNotifier();
-        } else {
-            notifier = new BasicNotifier();
         }        
     }
     
@@ -42,7 +40,7 @@ class TrayNotifierProxy implements TrayNotifier {
         if (inTray)
             return true;
         boolean notify = notifier.showTrayIcon();
-        inTray = true;
+        inTray = notify;
         return notify;
     }
 

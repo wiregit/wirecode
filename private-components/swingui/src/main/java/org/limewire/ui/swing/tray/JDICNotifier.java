@@ -30,10 +30,15 @@ class JDICNotifier implements TrayNotifier {
 	
     private static final Log LOG = LogFactory.getLog(DefaultNotificationRenderer.class);
     
+    private static final boolean loaded;
+    
     static {
+        boolean didLoad = false;
         try {
-            System.loadLibrary("jdic");
+            System.loadLibrary("tray");
+            didLoad = true;
         } catch (UnsatisfiedLinkError ule) {}
+        loaded = didLoad;
     }
     
 	private final SystemTray tray;
@@ -45,11 +50,18 @@ class JDICNotifier implements TrayNotifier {
 	private Icon trayIconResource;
 	
 	public JDICNotifier() {
-	    GuiUtils.assignResources(this);
-		tray = SystemTray.getDefaultSystemTray();
-		popupMenu = buildPopupMenu();
-		trayIcon = buildTrayIcon(I18n.tr("LimeWire"));
-		notificationWindow = buildNotificationWindow();
+	    if(loaded) {
+    	    GuiUtils.assignResources(this);
+    		tray = SystemTray.getDefaultSystemTray();
+    		popupMenu = buildPopupMenu();
+    		trayIcon = buildTrayIcon(I18n.tr("LimeWire"));
+    		notificationWindow = buildNotificationWindow();
+	    } else {
+	        tray = null;
+	        trayIcon = null;
+	        notificationWindow = null;
+	        popupMenu = null;
+	    }
 	}
 
 	private TrayIcon buildTrayIcon(String desc) {
