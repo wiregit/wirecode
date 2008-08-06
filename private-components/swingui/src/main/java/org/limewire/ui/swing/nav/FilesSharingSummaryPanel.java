@@ -55,13 +55,11 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     @Resource private Color iconOverlayColor;
     @Resource private Color highLightColor;
     
-    private final Navigator navigator;
+    private Navigator navigator;
         
     @Inject
-    FilesSharingSummaryPanel(Navigator navigator, LibraryManager libraryManager) {
+    FilesSharingSummaryPanel(LibraryManager libraryManager) {
         GuiUtils.assignResources(this);
-        
-        this.navigator = navigator;
         
         libraryManager.addLibraryLisListener(new LibraryListListener() {
             @Override
@@ -121,6 +119,10 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         add(individualButton, gbc);
      
         addPropertyChangeListener(new StartupListener(this,libraryManager));
+    }
+    
+    @Inject void setNavigator(Navigator navigator) {
+        this.navigator = navigator;
     }
     
     private class NumberIcon implements Icon {
