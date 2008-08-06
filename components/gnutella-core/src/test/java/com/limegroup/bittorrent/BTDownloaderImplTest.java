@@ -97,7 +97,7 @@ public class BTDownloaderImplTest extends BaseTestCase {
 //    }
 
     private void finishDownload(BTDownloader downloader) throws InterruptedException {
-        int maxIterations = 45;
+        int maxIterations = 100;
         int index = 0;
         while (!downloader.isCompleted()) {
             if (index++ > maxIterations) {
