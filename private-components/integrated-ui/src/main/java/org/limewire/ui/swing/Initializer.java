@@ -1,6 +1,5 @@
 package org.limewire.ui.swing;
 
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Image;
 import java.io.BufferedInputStream;
@@ -10,26 +9,25 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicHTML;
-import javax.swing.text.View;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
-import org.jdesktop.swingx.JXLabel;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
+import org.limewire.ui.support.ErrorHandler;
 import org.limewire.ui.swing.browser.WinCreatorHook;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.I18n;
@@ -101,7 +99,7 @@ public final class Initializer {
      * If this throws any exceptions, then LimeWire was not able to construct
      * properly and must be shut down.
      */
-    void initialize(String args[], Frame awtSplash, Image splashImage) throws Throwable {
+    void initialize(String args[], Frame awtSplash, Image splashImage) throws Throwable { 
         // ** THE VERY BEGINNING -- DO NOT ADD THINGS BEFORE THIS **
         preinit();
         
@@ -189,10 +187,16 @@ public final class Initializer {
     }
     
     /** Installs all callbacks & listeners. */
-    private void setupCallbacksAndListeners() {        
+    private void setupCallbacksAndListeners() {
+        SwingUtils.invokeAndWait(new Runnable() {
+            @Override
+            public void run() {
+                BugManager.instance();
+            }
+        });
         // Set the error handler so we can receive core errors.
-//        ErrorService.setErrorCallback(new ErrorHandler());
-//        stopwatch.resetAndLog("ErrorHandler install");
+        ErrorService.setErrorCallback(new ErrorHandler());
+        stopwatch.resetAndLog("ErrorHandler install");
         
         // Set the messaging handler so we can receive core messages
 //        org.limewire.service.MessageService.setCallback(new MessageHandler());
@@ -339,8 +343,13 @@ public final class Initializer {
             stopwatch.resetAndLog("set OSX properties");
         }
 
-        LocaleUtils.setLocaleFromPreferences();
-        LocaleUtils.validateLocaleAndFonts();
+        SwingUtils.invokeAndWait(new Runnable() {
+            public void run() {
+                LocaleUtils.setLocaleFromPreferences();                
+                LocaleUtils.validateLocaleAndFonts();
+            }
+        });
+        stopwatch.resetAndLog("set locale");
     }
     
     /** Starts any early core-related functionality. */
@@ -393,11 +402,7 @@ public final class Initializer {
             }
         });
         stopwatch.resetAndLog("return from evt queue");
-//
-//        // Initialize the bug manager
-//        BugManager.instance();
-//        stopwatch.resetAndLog("BugManager instance");
-//        
+        
         splashRef.get().setStatusText(I18n.tr("Loading Browser..."));
         // Not pretty but Mozilla initialization errors should not crash the
         // program
@@ -617,22 +622,8 @@ public final class Initializer {
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
                 public void run() {
-                    JXLabel label = new JXLabel(msgKey);
-                    label.setMaxLineSpan(300);
-                    label.setLineWrap(true);
-                    Object viewObj = label.getClientProperty(BasicHTML.propertyKey);
-                    // JXLabel, by default, doesn't size the width or height according
-                    // to the max line span.  The internal View does, though.
-                    // So we want to take the dimension from the view & set that
-                    // as our preferred size.
-                    if(viewObj instanceof View) {
-                        View view = (View)viewObj;
-                        int width = (int)view.getPreferredSpan(View.X_AXIS);
-                        int height = (int)view.getPreferredSpan(View.Y_AXIS);
-                        label.setPreferredSize(new Dimension(width, height));
-                    }
                     JOptionPane.showMessageDialog(null,
-                            label,
+                            new MultiLineLabel(msgKey, 300),
                             "Error",
                             JOptionPane.ERROR_MESSAGE);
                 }

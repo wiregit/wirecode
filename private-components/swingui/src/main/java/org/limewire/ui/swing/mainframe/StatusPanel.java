@@ -30,6 +30,12 @@ class StatusPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         add(new JLabel("status"));
         add(Box.createHorizontalGlue());
+        add(new JButton(new AbstractAction("Error Test") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new RuntimeException("Test Error");
+            }
+        }));
         add(new JButton(new AbstractAction("Tray Test") {
             @Override
             public void actionPerformed(ActionEvent e) {

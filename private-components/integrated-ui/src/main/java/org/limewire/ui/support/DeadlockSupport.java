@@ -69,9 +69,7 @@ public class DeadlockSupport {
                     if(firstStackTrace != null)
                         deadlock.setStackTrace(firstStackTrace);
                     
-                    deadlock.printStackTrace(); // TODO: Send.
-                    System.err.println(sb.toString());
-                    //DeadlockBugManager.handleDeadlock(deadlock, Thread.currentThread().getName(), sb.toString());
+                    DeadlockBugManager.handleDeadlock(deadlock, Thread.currentThread().getName(), sb.toString());
                     return;
                 }
             }

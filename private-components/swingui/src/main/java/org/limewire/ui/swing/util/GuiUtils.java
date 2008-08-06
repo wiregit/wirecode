@@ -178,9 +178,13 @@ public class GuiUtils {
      * Returns the application's default frame.
      */
     public static Window getMainFrame() {
-        Application app = Application.getInstance();
-        if(app instanceof SingleFrameApplication) {
-            return ((SingleFrameApplication)app).getMainFrame();
+        if(AppFrame.isStarted()) {
+            Application app = Application.getInstance();
+            if(app instanceof SingleFrameApplication) {
+                return ((SingleFrameApplication)app).getMainFrame();
+            } else {
+                return null;
+            }
         } else {
             return null;
         }

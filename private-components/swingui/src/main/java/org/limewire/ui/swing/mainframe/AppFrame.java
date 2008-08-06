@@ -3,11 +3,11 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.limegroup.gnutella.gui.LimeJFrame;
 
 /**
  * The entry point for the Swing UI.  If the real core is desired,
@@ -47,18 +48,19 @@ public class AppFrame extends SingleFrameApplication {
     @Resource
     private Color bgColor;
 
-    @Resource
-    private Image frameIcon;
-
     public static boolean isStarted() {
         return started;
     }
 
     @Override
     protected void startup() {
-        GuiUtils.assignResources(this);
-        
+        GuiUtils.assignResources(this);        
         initColors();
+        
+        String title = getContext().getResourceMap().getString("Application.title");
+        JFrame frame = new LimeJFrame(title);
+        frame.setName("mainFrame");
+        getMainView().setFrame(frame);
         
         // Because we use a browser heavily, which is heavyweight,
         // we must disable all lightweight popups.
@@ -67,14 +69,15 @@ public class AppFrame extends SingleFrameApplication {
 
         Injector injector = createInjector();
 
-        getMainFrame().setIconImage(frameIcon);
         getMainFrame().setJMenuBar(new LimeMenuBar());
 
         LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
         
-        show(ui);
+        show(ui);        
+        restoreView();
+        
         ui.goHome();
         ui.focusOnSearch();
 
@@ -95,6 +98,7 @@ public class AppFrame extends SingleFrameApplication {
     public void restoreView() { // DO NOT CHANGE THIS METHOD NAME!  
         getMainFrame().setVisible(true);
         getMainFrame().setState(Frame.NORMAL);
+        getMainFrame().toFront();
     }
     
     public Injector createInjector() {

@@ -3,11 +3,12 @@ package org.limewire.ui.swing;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.lang.reflect.Method;
 import java.net.URL;
 
 public class Main {
     
-    public static void main(String[] args) throws Throwable {
+    public static void main(String[] args) {
         Frame splash = null;
         Image splashImage = null;
         
@@ -19,15 +20,15 @@ public class Main {
             }
         }
         
+        // load the GUI through reflection so that we don't reference classes here,
+        // which would slow the speed of class-loading, causing the splash to be
+        // displayed later.
         try {
-            new Initializer().initialize(args, splash, splashImage);
+            Class<?> loadClass = Class.forName("org.limewire.ui.swing.GuiLoader");
+            Object loadInstance = loadClass.newInstance();
+            Method loadMethod = loadClass.getMethod("load", new Class[] { String[].class, Frame.class, Image.class } );
+            loadMethod.invoke(loadInstance, args, splash, splashImage);
         } catch(Throwable t) {
-            if(splash != null) {
-                try {
-                    splash.dispose();
-                } catch(Throwable ignored) {}
-            }
-            
             t.printStackTrace();
             System.exit(1);
         }
