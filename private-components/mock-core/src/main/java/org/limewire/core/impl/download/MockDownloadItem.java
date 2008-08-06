@@ -183,9 +183,7 @@ public class MockDownloadItem implements DownloadItem {
     }
 
     private synchronized void setRemainingQueueTime(long l) {
-        long oldTime = remainingQueueTime;
         remainingQueueTime = l;
-        support.firePropertyChange("remainingQueueTime", oldTime, remainingQueueTime);
     }
  
     @Override
