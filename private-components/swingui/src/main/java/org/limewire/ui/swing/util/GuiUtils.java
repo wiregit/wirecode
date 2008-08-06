@@ -46,16 +46,16 @@ public class GuiUtils {
    
 
     static {       
-        resetLocale();
+        setLocale(Locale.getDefault());
     }
     
-    static void resetLocale() {
-        NUMBER_FORMAT0 = NumberFormat.getNumberInstance();
+    static void setLocale(Locale locale) {
+        NUMBER_FORMAT0 = NumberFormat.getNumberInstance(locale);
         NUMBER_FORMAT0.setMaximumFractionDigits(0);
         NUMBER_FORMAT0.setMinimumFractionDigits(0);
         NUMBER_FORMAT0.setGroupingUsed(true);
         
-        NUMBER_FORMAT1 = NumberFormat.getNumberInstance();
+        NUMBER_FORMAT1 = NumberFormat.getNumberInstance(locale);
         NUMBER_FORMAT1.setMaximumFractionDigits(1);
         NUMBER_FORMAT1.setMinimumFractionDigits(1);
         NUMBER_FORMAT1.setGroupingUsed(true);

@@ -24,6 +24,7 @@ public class LocaleUtils {
                 ApplicationSettings.LOCALE_VARIANT.getValue());
         Locale.setDefault(locale);
         StringUtils.setLocale(locale);
+        GuiUtils.setLocale(locale);
         I18n.setLocale(locale);
     }
 

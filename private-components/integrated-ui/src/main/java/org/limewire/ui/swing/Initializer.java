@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -26,6 +28,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.swing.browser.WinCreatorHook;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
@@ -118,8 +121,8 @@ public final class Initializer {
         runExternalChecks(limeWireCore, args);
 
         // Starts some system monitoring for deadlocks.
-//        DeadlockSupport.startDeadlockMonitoring();
-//        stopwatch.resetAndLog("Start deadlock monitor");
+        DeadlockSupport.startDeadlockMonitoring();
+        stopwatch.resetAndLog("Start deadlock monitor");
         
         // Installs properties.
         installProperties();
@@ -154,6 +157,36 @@ public final class Initializer {
         
         // Run any after-init tasks.
         postinit();
+        
+        final Lock a = new ReentrantLock();
+        final Lock b = new ReentrantLock();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for(int i = 0; i < 1000; i++) {
+                    a.lock();
+                    try { Thread.sleep(100); } catch(Exception ignored) {}
+                    b.lock();
+                    b.unlock();
+                    a.unlock();
+                }
+                System.out.println("done A");
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for(int i = 0; i < 1000; i++) {
+                    b.lock();
+                    try { Thread.sleep(100); } catch(Exception ignored) {}
+                    a.lock();
+                    a.unlock();
+                    b.unlock();
+                }
+                System.out.println("done B");
+            }
+        }).start();
+        
     }
     
     
@@ -197,8 +230,8 @@ public final class Initializer {
         
         // Set the default event error handler so we can receive uncaught
         // AWT errors.
-//        DefaultErrorCatcher.install();
-//        stopwatch.resetAndLog("DefaultErrorCatcher install");
+        DefaultErrorCatcher.install();
+        stopwatch.resetAndLog("DefaultErrorCatcher install");
         
         if (OSUtils.isMacOSX()) {
             // Raise the number of allowed concurrent open files to 1024.
@@ -357,8 +390,7 @@ public final class Initializer {
         SwingUtils.invokeAndWait(new Runnable() {
             @Override
             public void run() {
-                // TODO: Get the correct locale
-                splashRef.set(new SplashWindow(splashImage, new Locale("en"), 4));
+                splashRef.set(new SplashWindow(splashImage, Locale.getDefault(), 4));
                 if(!isStartup) {
                     splashRef.get().begin();
                     stopwatch.resetAndLog("begin splash window");
