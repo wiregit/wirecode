@@ -6,10 +6,6 @@ import java.net.URI;
 
 import junit.framework.Test;
 
-import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
-import org.apache.http.params.HttpParams;
 import org.limewire.io.DiskException;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmSourceHandler;
@@ -17,7 +13,6 @@ import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.http.SwarmerImplTest;
-import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -180,18 +175,14 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
         });
 
-        HttpParams params = SwarmerImplTest.createHttpParams();
-        ConnectingIOReactor ioReactor = SwarmerImplTest.createIOReactor(params);
         final BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(torrentContext
                 .getMetaInfo(), torrentFileSystem, torrentDiskManager, pieceStrategy);
         btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
-        ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator, params,
-                ioReactor, connectionReuseStrategy, null);
+        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator);
         Swarmer swarmer = new SwarmerImpl();
         swarmer.register(SwarmHttpSource.class, sourceHandler);
-        
+
         return swarmer;
     }
 

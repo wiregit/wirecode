@@ -8,8 +8,6 @@ import java.security.NoSuchAlgorithmException;
 import junit.framework.Assert;
 import junit.framework.Test;
 
-import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
@@ -33,7 +31,6 @@ import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
-import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -59,7 +56,8 @@ public class SwarmerImplTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        fileServer = new FileServer(TEST_PORT, new File("/home/pvertenten/workspace/limewire/tests/test-data/public_html"));
+        fileServer = new FileServer(TEST_PORT, new File(
+                "/home/pvertenten/workspace/limewire/tests/test-data/public_html"));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -99,7 +97,9 @@ public class SwarmerImplTest extends BaseTestCase {
                     int highByte = 44425 - 1;
                     long fileSize = 44425;
                     Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-                    swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
+                    swarmer
+                            .addSource(new SwarmHttpSource(uri, Range
+                                    .createRange(lowByte, highByte)));
                     assertDownload(md5, file, fileSize);
                 } finally {
                     file.delete();
@@ -131,7 +131,9 @@ public class SwarmerImplTest extends BaseTestCase {
                     int highByte = (16 * 1024) - 1;
                     long fileSize = highByte + 1;
                     Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-                    swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
+                    swarmer
+                            .addSource(new SwarmHttpSource(uri, Range
+                                    .createRange(lowByte, highByte)));
                     assertDownload(md5, file, fileSize);
                 } finally {
                     file.delete();
@@ -156,7 +158,9 @@ public class SwarmerImplTest extends BaseTestCase {
                     int highByte = (2 * 16 * 1024) - 1;
                     long fileSize = highByte + 1;
                     Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-                    swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
+                    swarmer
+                            .addSource(new SwarmHttpSource(uri, Range
+                                    .createRange(lowByte, highByte)));
                     assertDownload(md5, file, fileSize);
                 } finally {
                     file.delete();
@@ -181,7 +185,9 @@ public class SwarmerImplTest extends BaseTestCase {
                     int highByte = 44425 - 1;
                     long fileSize = highByte + 1;
                     Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-                    swarmer.addSource(new SwarmHttpSource(uri, Range.createRange(lowByte, highByte)));
+                    swarmer
+                            .addSource(new SwarmHttpSource(uri, Range
+                                    .createRange(lowByte, highByte)));
                     assertDownload(md5, file, fileSize);
                 } finally {
                     file.delete();
@@ -346,19 +352,14 @@ public class SwarmerImplTest extends BaseTestCase {
         System.out.println("-----------------------------------");
         file.delete();
 
-        HttpParams params = createHttpParams();
-        ConnectingIOReactor ioReactor = createIOReactor(params);
         SwarmCoordinator swarmCoordinator = createSwarmCoordinator(file, path, fileSize,
                 swarmFileVerifier);
 
-        ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
-        
-        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator, params,
-                ioReactor, connectionReuseStrategy, null);
+
+        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator);
         Swarmer swarmer = new SwarmerImpl();
         swarmer.register(SwarmHttpSource.class, sourceHandler);
-        
 
         swarmer.start();
         return swarmer;

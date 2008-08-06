@@ -33,7 +33,6 @@ import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.http.SwarmHttpSourceHandler;
-import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 
@@ -57,6 +56,7 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -294,23 +294,13 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     private void webseed() {
         BTMetaInfo metaInfo = context.getMetaInfo();
         if (metaInfo.hasWebSeeds()) {
-            HttpParams params = new BasicHttpParams();
-            params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
-                    CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
-                    CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
-                    CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
-                    CoreProtocolPNames.USER_AGENT, "LimeTest/1.1");
-            ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
-                    .instance().getScheduledExecutorService(), new SocketsManagerImpl());
             TorrentFileSystem torrentFileSystem = context.getFileSystem();
             TorrentDiskManager torrentDiskManager = context.getDiskManager();
             BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
                     torrentDiskManager);
             btCoordinator.addListener(new EchoSwarmCoordinatorListener());
-            ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
 
-            SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator, params,
-                    ioReactor, connectionReuseStrategy, null);
+            SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator);
             Swarmer swarmer = new SwarmerImpl();
             swarmer.register(SwarmHttpSource.class, sourceHandler);
             swarmer.start();

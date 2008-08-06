@@ -6,18 +6,8 @@ import java.net.URI;
 import junit.framework.Assert;
 import junit.framework.Test;
 
-import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
 import org.limewire.collection.Range;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.http.reactor.LimeConnectingIOReactor;
-import org.limewire.net.SocketsManagerImpl;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
@@ -89,15 +79,6 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
 
         file2.delete();
 
-        HttpParams params = new BasicHttpParams();
-        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
-                CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
-                CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
-                CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
-                CoreProtocolPNames.USER_AGENT, "LimeTest/1.1");
-        ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
-                .instance().getScheduledExecutorService(), new SocketsManagerImpl());
-
         SwarmFileSystemImpl swarmfilesystem = new SwarmFileSystemImpl();
 
         SwarmFileImpl swarmFile1 = new SwarmFileImpl(file1, "gnutella_protocol_0.4.pdf", fileSize1);
@@ -112,12 +93,9 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
                 swarmBlockVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
                 selectionStrategy, 32 * 1024);
 
-        ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
-        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator, params,
-                ioReactor, connectionReuseStrategy, null);
+        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator);
         Swarmer swarmer = new SwarmerImpl();
         swarmer.register(SwarmHttpSource.class, sourceHandler);
 

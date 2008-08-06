@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 
 public class SwarmFileSystemImpl implements SwarmFileSystem {
-    private ArrayList<SwarmFile> swarmFiles = new ArrayList<SwarmFile>();
+    private List<SwarmFile> swarmFiles = Collections.synchronizedList(new ArrayList<SwarmFile>());
 
     private Map<SwarmFile, FileHandle> fileHandles = new HashMap<SwarmFile, FileHandle>();
 
@@ -68,6 +69,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             currentPosition += wrote;
             wroteTotal += wrote;
         }
+
         return wroteTotal;
     }
 
@@ -120,17 +122,21 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         }
 
         public void initialize() throws IOException {
-            if (raFile == null) {
-                raFile = new RandomAccessFile(file, "rw");
-                fileChannel = raFile.getChannel();
+            synchronized (LOCK) {
+                if (raFile == null) {
+                    raFile = new RandomAccessFile(file, "rw");
+                    fileChannel = raFile.getChannel();
+                }
             }
         }
 
         public void close() throws IOException {
-            IOUtils.close(fileChannel);
-            IOUtils.close(raFile);
-            fileChannel = null;
-            raFile = null;
+            synchronized (LOCK) {
+                IOUtils.close(fileChannel);
+                IOUtils.close(raFile);
+                fileChannel = null;
+                raFile = null;
+            }
         }
 
         public void flush() throws IOException {
