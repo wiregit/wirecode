@@ -26,7 +26,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.support.ErrorHandler;
-import org.limewire.ui.swing.browser.WinCreatorHook;
+import org.limewire.ui.swing.browser.MozillaPopupWindow;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
@@ -39,9 +39,12 @@ import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
+import org.mozilla.browser.IMozillaWindow;
+import org.mozilla.browser.IMozillaWindowFactory;
 import org.mozilla.browser.MozillaConfig;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel;
+import org.mozilla.browser.impl.WindowCreator;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -647,7 +650,7 @@ public final class Initializer {
         if (OSUtils.isWindows()) {
             File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
             // Check to see if the correct version of XUL exists.
-            File xulFile = new File(xulInstallPath, "xul-v0.1-do-not-remove");
+            File xulFile = new File(xulInstallPath, "xul-v2.0b2-do-not-remove");
             if (!xulFile.exists()) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("unzip xulrunner to " + xulInstallPath);
@@ -671,9 +674,14 @@ public final class Initializer {
             MozillaConfig.setXULRunnerHome(xulInstallPath);
             File profileDir = new File(CommonUtils.getUserSettingsDir(), "/mozilla-profile");
             profileDir.mkdirs();
-            MozillaConfig.setProfileDir(profileDir);            
+            MozillaConfig.setProfileDir(profileDir);
+            WindowCreator.setWindowFactory(new IMozillaWindowFactory() {
+                @Override
+                public IMozillaWindow create(boolean attachNewBrowserOnCreation) {
+                    return new MozillaPopupWindow(attachNewBrowserOnCreation);
+                }
+            });
             MozillaInitialization.initialize();
-            WinCreatorHook.addHook();
             
             if(LOG.isDebugEnabled())
                 LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());

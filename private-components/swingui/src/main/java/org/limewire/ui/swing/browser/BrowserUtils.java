@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.browser;
 
-import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMWindow2;
@@ -37,30 +36,20 @@ public class BrowserUtils {
     /**
      * Adds LimeDomListener to chromeAdapter
      */
-    public static void addDomListener(final nsIWebBrowserChrome chrome) {
-        MozillaExecutor.mozAsyncExec(new Runnable() {
-            public void run() {               
-                nsIDOMEventTarget eventTarget = XPCOMUtils.qi(
-                        chrome.getWebBrowser().getContentDOMWindow(), nsIDOMWindow2.class)
-                        .getWindowRoot();
-                // TODO: some way to listen for javascript?
-                eventTarget.addEventListener("click", DOM_ADAPTER, true);
-            }
-
-        });
+    public static void addDomListener(final nsIWebBrowserChrome chrome) {         
+        nsIDOMEventTarget eventTarget = XPCOMUtils.qi(
+                chrome.getWebBrowser().getContentDOMWindow(), nsIDOMWindow2.class)
+                .getWindowRoot();
+        // TODO: some way to listen for javascript?
+        eventTarget.addEventListener("click", DOM_ADAPTER, true);
     }
     
     
     public static void removeDomListener(final nsIWebBrowserChrome chrome){
-        MozillaExecutor.mozAsyncExec(new Runnable() {
-            public void run() {
-                nsIDOMEventTarget eventTarget = XPCOMUtils.qi(
-                        chrome.getWebBrowser().getContentDOMWindow(), nsIDOMWindow2.class)
-                        .getWindowRoot();
-                eventTarget.removeEventListener("click", DOM_ADAPTER, true);
-            }
-
-        });
+        nsIDOMEventTarget eventTarget = XPCOMUtils.qi(
+                chrome.getWebBrowser().getContentDOMWindow(), nsIDOMWindow2.class)
+                .getWindowRoot();
+        eventTarget.removeEventListener("click", DOM_ADAPTER, true);
     }
 
 }

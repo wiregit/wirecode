@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.browser;
 
+import org.limewire.ui.swing.util.SwingUtils;
 import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.impl.ChromeAdapter;
 
@@ -21,11 +22,6 @@ public class Browser extends MozillaPanel {
     public Browser(VisibilityMode toolbarVisMode, VisibilityMode statusbarVisMode) {
         super(toolbarVisMode, statusbarVisMode);
     }
-
-    private void initialize() {
-        BrowserUtils.addDomListener(getChromeAdapter());
-        addKeyListener(new MozillaKeyListener(getChromeAdapter()));
-    }
     
     @Override
     public void onSetTitle(String title) {
@@ -36,15 +32,23 @@ public class Browser extends MozillaPanel {
     //overridden to remove LimeDomListener
     @Override
     public void onDetachBrowser() {
-        BrowserUtils.removeDomListener(getChromeAdapter());
+        if(getChromeAdapter() != null) {
+            BrowserUtils.removeDomListener(getChromeAdapter());
+        }
         super.onDetachBrowser();
     }
     
     //overridden for browser initialization that can not be done earlier
     @Override
-    public void onAttachBrowser(ChromeAdapter chromeAdapter, ChromeAdapter parentChromeAdapter){
+    public void onAttachBrowser(final ChromeAdapter chromeAdapter, ChromeAdapter parentChromeAdapter){
         super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
-        initialize();
+        BrowserUtils.addDomListener(chromeAdapter);
+        SwingUtils.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                addKeyListener(new MozillaKeyListener(chromeAdapter));
+            }
+        });
     }
   
 }
