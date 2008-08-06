@@ -19,6 +19,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.core.impl.MockModule;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
+import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.client.service.FileOfferHandler;
@@ -30,7 +31,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.gui.LimeJFrame;
 
 /**
  * The entry point for the Swing UI.  If the real core is desired,
