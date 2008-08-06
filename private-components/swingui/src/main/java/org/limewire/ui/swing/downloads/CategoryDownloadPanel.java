@@ -21,14 +21,18 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.VerticalLayout;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.CompoundHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.Highlighter;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -42,11 +46,16 @@ public class CategoryDownloadPanel extends JPanel {
 
 	
 	
-//TODO: move these out of here
-	private Color oddColor = Color.WHITE;
-	private Color evenColor = Color.LIGHT_GRAY;
-	private Highlighter evenHighlighter;
-	private Highlighter oddHighlighter;
+    @Resource
+    private Color oddColor;
+    @Resource
+    private Color oddForeground;
+    @Resource
+    private Color evenColor;
+    @Resource
+    private Color evenForeground;
+	private Highlighter evenTableHighlighter;
+	private Highlighter oddTableHighlighter;
 	private JPanel tablePanel = new JPanel(new VerticalLayout());
 
 	private List<DownloadTable> tables = new ArrayList<DownloadTable>();
@@ -56,8 +65,13 @@ public class CategoryDownloadPanel extends JPanel {
 	 * Create the panel
 	 */
 	public CategoryDownloadPanel(EventList<DownloadItem> list) {
-		evenHighlighter = HighlighterFactory.createAlternateStriping(oddColor, evenColor);
-		oddHighlighter = HighlighterFactory.createAlternateStriping(evenColor, oddColor);
+	    GuiUtils.assignResources(this);
+	  //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
+        evenTableHighlighter = new CompoundHighlighter(new ColorHighlighter(HighlightPredicate.EVEN, evenColor, evenForeground, evenColor, evenForeground),
+                new ColorHighlighter(HighlightPredicate.ODD, oddColor, oddForeground, oddColor, oddForeground));
+        //oddHighlighter reverses color scheme
+		oddTableHighlighter = new CompoundHighlighter(new ColorHighlighter(HighlightPredicate.EVEN, oddColor, oddForeground, oddColor, oddForeground) ,
+		        new ColorHighlighter(HighlightPredicate.ODD, evenColor, evenForeground, evenColor, evenForeground));
 		setLayout(new BorderLayout());
 		add(new JScrollPane(tablePanel));
 		 		
@@ -73,15 +87,20 @@ public class CategoryDownloadPanel extends JPanel {
 		list.addListEventListener(new ListEventListener<DownloadItem>() {
 			@Override
 			public void listChanged(ListEvent<DownloadItem> listChanges) {
+
 			    //list events probably won't be on EDT
 			    SwingUtils.invokeLater(new Runnable() {
 					public void run() {
-						for (int i = 0; i < titles.size() && i < tables.size(); i++) {
-							boolean isVisible = tables.get(i).getRowCount() > 0;
-							titles.get(i).setVisible(isVisible);
-						}
-						updateStriping();
-					}
+                        if (isVisible()) {
+                            for (int i = 0; i < titles.size() && i < tables.size(); i++) {
+                                boolean isVisible = tables.get(i).getRowCount() > 0;
+                                titles.get(i).setVisible(isVisible);
+                            }
+                            // TODO: should update striping when necessary. this
+                            // currently fires when any download item is updated
+                            updateStriping();
+                        }
+                    }
 
 				});
 			}
@@ -106,7 +125,6 @@ public class CategoryDownloadPanel extends JPanel {
 		
 		final DownloadTable table = new DownloadTable(filterList);
 		tables.add(table);
-		//TODO - list selection from glazed lists
 		table.getSelectionModel().addListSelectionListener(new MultiTableSelectionListener());
 	
 		collapsePane.add(table, BorderLayout.CENTER);
@@ -169,7 +187,7 @@ public class CategoryDownloadPanel extends JPanel {
 		}
 	}
     
-    
+
     private void updateStriping() {
 		int length = 0;
 		
@@ -178,9 +196,9 @@ public class CategoryDownloadPanel extends JPanel {
 			if (table.getRowCount() > 0 && table.isVisible()) {
 				
 				if (length % 2 == 0) {
-					table.setHighlighters(evenHighlighter);
+					table.setHighlighters(evenTableHighlighter);
 				} else {
-					table.setHighlighters(oddHighlighter);
+					table.setHighlighters(oddTableHighlighter);
 				}
 				
 

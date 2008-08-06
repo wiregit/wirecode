@@ -15,6 +15,7 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.Highlighter;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -22,7 +23,7 @@ import ca.odell.glazedlists.EventList;
 
 public class DownloadTable extends JXTable {
     /**
-     * these consider the first element odd (not zero based)
+     * these consider the first element even (zero based)
      */
     @Resource
     private Color oddColor;
@@ -40,6 +41,7 @@ public class DownloadTable extends JXTable {
     private DownloadRendererEditor editor;
     
     private HighlightPredicate menuRowPredicate = new MenuHighlightPredicate();
+    private Highlighter menuRowHighlighter;
 
 	public DownloadTable(EventList<DownloadItem> downloadItems) {
 		super(new DownloadTableModel(downloadItems));
@@ -49,9 +51,9 @@ public class DownloadTable extends JXTable {
 		setEditable(true);
 		setShowGrid(false, false);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based to even and odd are backwards here
-        setHighlighters(new ColorHighlighter(HighlightPredicate.EVEN, oddColor, oddForeground, oddColor, oddForeground),
-                new ColorHighlighter(HighlightPredicate.ODD, evenColor, evenForeground, evenColor, evenForeground));
+		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
+        setHighlighters(new ColorHighlighter(HighlightPredicate.ODD, oddColor, oddForeground, oddColor, oddForeground),
+                new ColorHighlighter(HighlightPredicate.EVEN, evenColor, evenForeground, evenColor, evenForeground));
         addMenuRowHighlighter();
 		// This doesn't work with editing on rollover - create custom
         // HighlightPredicate that detects editing to change editor color
@@ -127,7 +129,10 @@ public class DownloadTable extends JXTable {
 	
 
     public void addMenuRowHighlighter() {
-        addHighlighter(new ColorHighlighter(menuRowPredicate, menuRowBackground, menuRowForeground));
+        if(menuRowHighlighter == null){
+            menuRowHighlighter = new ColorHighlighter(menuRowPredicate, menuRowBackground, menuRowForeground);
+        }
+        addHighlighter(menuRowHighlighter);
     }
 
 

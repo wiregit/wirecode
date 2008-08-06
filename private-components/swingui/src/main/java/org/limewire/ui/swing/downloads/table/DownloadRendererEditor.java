@@ -427,6 +427,7 @@ public class DownloadRendererEditor extends JPanel implements
         downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
+                //TODO: only update if relevant downloadItem was updated
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
