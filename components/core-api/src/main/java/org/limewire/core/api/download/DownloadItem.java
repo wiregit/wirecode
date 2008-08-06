@@ -80,4 +80,9 @@ public interface DownloadItem  {
     
     public int getLocalQueuePriority();
     
+    /**
+     * @return if this downloader can be launched or previewed.
+     */
+    public boolean isLaunchable();
+    
 }

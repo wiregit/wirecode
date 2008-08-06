@@ -192,5 +192,10 @@ public class MockDownloadItem implements DownloadItem {
         return 0;
     }
 
+    @Override
+    public boolean isLaunchable() {
+        return true;
+    }
+
   
 }

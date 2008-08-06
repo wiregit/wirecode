@@ -276,6 +276,11 @@ public class CoreDownloadItem implements DownloadItem {
     public void setQueueTimeCalculator(QueueTimeCalculator queueTimeCalculator) {
         this.queueTimeCalculator = queueTimeCalculator;
     }
+
+    @Override
+    public boolean isLaunchable() {
+        return downloader.isLaunchable();
+    }
     
    
 }

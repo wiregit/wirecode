@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -135,6 +137,8 @@ public class DownloadRendererEditor extends JPanel implements
     private Icon tryAgainIconPressed;
     @Resource
     private Icon tryAgainIconRollover;
+    
+    private List<JComponent> textComponents = new ArrayList<JComponent>();
 
 	/**
 	 * Create the panel
@@ -146,10 +150,12 @@ public class DownloadRendererEditor extends JPanel implements
 		titleLabel = new JLabel();
 		titleLabel.setFont(new Font("", Font.BOLD, 18));
 		titleLabel.setText("Title - title - title");
+		textComponents.add(titleLabel);
 
 		statusLabel = new JLabel();
 		statusLabel.setFont(new Font("", Font.PLAIN, 9));
 		statusLabel.setText("Downloading 2MB of 4322 MPG from Tom");
+        textComponents.add(statusLabel);
 
 		progressBar = new LimeProgressBar();
 		Dimension size = new Dimension(350, 25);
@@ -297,6 +303,14 @@ public class DownloadRendererEditor extends JPanel implements
 	}
 	
 	@Override
+	public void setForeground(Color color){
+	    super.setForeground(color);
+	    for(Component component : getComponents()){
+            component.setForeground(color);
+        }
+	}
+	
+	@Override
 	public void addMouseListener(MouseListener listener){
 	    super.addMouseListener(listener);
 	    for(Component component : getComponents()){
@@ -353,7 +367,9 @@ public class DownloadRendererEditor extends JPanel implements
         case LOCAL_QUEUED:
         case REMOTE_QUEUED:
 	        if (menuEditItem.getCurrentSize() > 0){
-	            popupMenu.add(previewMenuItem);
+	            if (menuEditItem.isLaunchable()) {
+                    popupMenu.add(previewMenuItem);
+                }
 	            popupMenu.add(locateMenuItem);
 	            popupMenu.add(new JSeparator());
 	        } 
@@ -362,7 +378,9 @@ public class DownloadRendererEditor extends JPanel implements
             
 	    case DOWNLOADING:
             popupMenu.add(pauseMenuItem);
-            popupMenu.add(previewMenuItem);
+            if (menuEditItem.isLaunchable()) {
+                popupMenu.add(previewMenuItem);
+            }
             popupMenu.add(locateMenuItem);
             popupMenu.add(new JSeparator());
             popupMenu.add(cancelMenuItem);
@@ -372,7 +390,9 @@ public class DownloadRendererEditor extends JPanel implements
 	    case PAUSED:
             popupMenu.add(resumeMenuItem);
             if (menuEditItem.getCurrentSize() > 0){
-                popupMenu.add(previewMenuItem);
+                if (menuEditItem.isLaunchable()) {
+                    popupMenu.add(previewMenuItem);
+                }
                 popupMenu.add(locateMenuItem);
                 popupMenu.add(new JSeparator());
             } 
@@ -382,7 +402,9 @@ public class DownloadRendererEditor extends JPanel implements
 	    case STALLED:
 	        popupMenu.add(tryAgainMenuItem);
 	        if (menuEditItem.getCurrentSize() > 0){
-                popupMenu.add(previewMenuItem);
+	            if (menuEditItem.isLaunchable()) {
+                    popupMenu.add(previewMenuItem);
+                }
                 popupMenu.add(locateMenuItem);
                 popupMenu.add(new JSeparator());
             } 
