@@ -1,16 +1,26 @@
 package org.limewire.xmpp.client;
 
-import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
-import org.apache.log4j.BasicConfigurator;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
 import org.limewire.inject.AbstractModule;
-import org.limewire.lifecycle.ServiceTestCase;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.net.LimeWireNetModule;
+import org.limewire.net.ProxySettings;
+import org.limewire.net.EmptyProxySettings;
+import org.limewire.net.SocketBindingSettings;
+import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.DirectConnectionAddress;
 import org.limewire.net.address.DirectConnectionAddressImpl;
+import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
 import org.limewire.xmpp.client.impl.XMPPException;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
@@ -22,37 +32,55 @@ import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.XMPPConnection;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.common.LimeWireCommonModule;
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
+import com.google.inject.Injector;
+import com.google.inject.Guice;
+import com.google.inject.Stage;
 
-public class XMPPServiceTest extends ServiceTestCase {
+public class XMPPServiceTest extends BaseTestCase {
+    protected Injector injector;
+    protected ServiceRegistry registry;
+    
     protected RosterListenerMock rosterListener;
     protected RosterListenerMock rosterListener2;
     protected AddressEventTestBroadcaster addressEventBroadcaster;
 
     public XMPPServiceTest(String name) {
         super(name);
-        BasicConfigurator.resetConfiguration();
-        BasicConfigurator.configure();
     }
 
     protected void setUp() throws Exception {
-        super.setUp();  
-        Thread.sleep(60 * 10 * 1000); // allow login, roster, presence, library messages to be
+        super.setUp();
+        injector = createInjector(getModules());
+        registry = injector.getInstance(ServiceRegistry.class);
+        registry.initialize();
+        registry.start();
+        Thread.sleep(10 * 1000); // allow login, roster, presence, library messages to be
                                 // sent, received   
                                 // TODO wait()/notify()
+    }
+    
+    protected Injector createInjector(Module... modules) {
+        return Guice.createInjector(Stage.PRODUCTION, modules);
+    }
+
+    private Module [] getModules() {
+        List<Module> modules = new ArrayList<Module>();
+        modules.add(new LimeWireCommonModule());
+        modules.addAll(getServiceModules());
+        return modules.toArray(new Module[]{});
     }
 
     protected void tearDown() throws Exception {
         super.tearDown();
+        registry.stop();
     }
 
     protected List<Module> getServiceModules() {
@@ -232,6 +260,17 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
+    }
+    
+    class LimeWireNetTestModule extends LimeWireNetModule {
+        
+        @Override
+        protected void configure() {
+            super.configure();
+            bind(ProxySettings.class).to(EmptyProxySettings.class);
+            bind(SocketBindingSettings.class).to(EmptySocketBindingSettings.class);
+            bind(NetworkInstanceUtils.class).to(SimpleNetworkInstanceUtils.class);
+        }
     }
 
 }

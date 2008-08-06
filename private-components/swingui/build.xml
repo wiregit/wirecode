@@ -10,7 +10,6 @@
     <import file="../build-macros.xml"/>
     <import file="../../components/core-api/build.xml"/>
     <import file="../../components/xmpp/build.xml"/>
-    <import file="../../core/build.xml"/>
     <import file="../mock-core/build.xml"/>
     
     <target name="initialize" depends="lw-core-api.initialize, lw-mock-core.initialize, lw-common.initialize, lw-core.initialize" unless="initialized.swingui">
@@ -31,7 +30,6 @@
 			    <path refid="build.limewire.components.core-api.buildpath"/>
 			    <path refid="build.limewire.components.mock-core.buildpath"/>
                 <path refid="build.limewire.components.xmpp.buildpath"/>
-                <pathelement location="../../core"/>
             </add-src-classpath>
         </do.setup-private-properties>
     </target>
