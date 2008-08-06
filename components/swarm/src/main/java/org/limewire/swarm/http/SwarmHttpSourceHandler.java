@@ -29,7 +29,6 @@ import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
-import org.limewire.swarm.impl.NoOpSwarmSourceEventListener;
 import org.limewire.swarm.impl.ReconnectingSourceEventListener;
 
 import com.limegroup.gnutella.util.LimeWireUtils;

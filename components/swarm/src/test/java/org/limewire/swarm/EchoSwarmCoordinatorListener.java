@@ -4,8 +4,6 @@
 package org.limewire.swarm;
 
 import org.limewire.collection.Range;
-import org.limewire.swarm.SwarmCoordinatorListener;
-import org.limewire.swarm.SwarmFileSystem;
 
 /**
  * Class used to track what is happening inside of the swarm coordinator. It

@@ -8,16 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import junit.framework.Assert;
 import junit.framework.Test;
 
-import org.apache.http.nio.reactor.ConnectingIOReactor;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
 import org.limewire.collection.Range;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.http.reactor.LimeConnectingIOReactor;
-import org.limewire.net.SocketsManagerImpl;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
@@ -31,7 +23,6 @@ import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
-import org.limewire.swarm.impl.ReconnectingSourceEventListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -112,6 +103,8 @@ public class SwarmerImplTest extends BaseTestCase {
 
     private File createTestFile(String fileName) {
         File file = new File(System.getProperty("java.io.tmpdir") + "/limetests/" + fileName);
+        file.delete();
+        file.deleteOnExit();
         file.mkdirs();
         return file;
     }

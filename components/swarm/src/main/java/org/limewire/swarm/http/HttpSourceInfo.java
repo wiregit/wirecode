@@ -1,7 +1,7 @@
 package org.limewire.swarm.http;
 
-import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmSourceEventListener;
 
 class HttpSourceInfo {
     public final SwarmSource source;

@@ -2,8 +2,8 @@ package org.limewire.swarm.http;
 
 import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
-import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSourceHandler;
 
 public class SwarmHttpSessionRequestCallback implements SessionRequestCallback {

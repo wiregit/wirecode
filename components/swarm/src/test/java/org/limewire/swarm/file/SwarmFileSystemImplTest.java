@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.limewire.util.FileUtils;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
+
+import org.limewire.util.FileUtils;
 
 public class SwarmFileSystemImplTest extends TestCase {
 

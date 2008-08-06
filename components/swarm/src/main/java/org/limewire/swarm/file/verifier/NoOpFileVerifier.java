@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmBlockVerifier;
+import org.limewire.swarm.SwarmFileSystem;
 
 public class NoOpFileVerifier implements SwarmBlockVerifier {
 
