@@ -34,7 +34,6 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -100,22 +99,15 @@ public class CategoryDownloadPanel extends JPanel {
 	    list.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-
-                //list events probably won't be on EDT
-                SwingUtils.invokeLater(new Runnable() {
-                    public void run() {
-                        if (isVisible()) {
-                            for (int i = 0; i < titles.size() && i < tables.size(); i++) {
-                                boolean isVisible = tables.get(i).getRowCount() > 0;
-                                titles.get(i).setVisible(isVisible);
-                            }
-                            // TODO: should update striping when necessary. this
-                            // currently fires when any download item is updated
-                            updateStriping();
-                        }
+                if (isVisible()) {
+                    for (int i = 0; i < titles.size() && i < tables.size(); i++) {
+                        boolean isVisible = tables.get(i).getRowCount() > 0;
+                        titles.get(i).setVisible(isVisible);
                     }
-
-                });
+                    // TODO: should update striping when necessary. this
+                    // currently fires when any download item is updated
+                    updateStriping();
+                }
             }
         });
 	}

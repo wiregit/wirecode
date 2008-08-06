@@ -38,7 +38,6 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
@@ -441,15 +440,10 @@ public class DownloadRendererEditor extends JPanel implements
         downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                //TODO: only update if relevant downloadItem was updated
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isVisible()) {
-                            updateEditor();
-                        }
-                    }
-                });
+                // TODO: only update if relevant downloadItem was updated
+                if (isVisible()) {
+                    updateEditor();
+                }
             }
         });
         

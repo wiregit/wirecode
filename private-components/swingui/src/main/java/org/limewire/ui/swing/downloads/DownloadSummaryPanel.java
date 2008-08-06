@@ -27,7 +27,6 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -155,14 +154,8 @@ public class DownloadSummaryPanel extends JPanel {
 
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-              //list events probably won't be on EDT
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateTitle();
-                        adjustVisibility();
-                    }
-                });
+                updateTitle();
+                adjustVisibility();
             }
 
         });
@@ -171,23 +164,17 @@ public class DownloadSummaryPanel extends JPanel {
         warningList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                
+
                 boolean addWarning = false;
-                
+
                 while (listChanges.next()) {
                     if (listChanges.getType() == ListEvent.INSERT) {
                         addWarning = true;
                     }
                 }
-                
-                if(addWarning){
-                    // list events probably won't be on EDT
-                    SwingUtils.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            setWarningVisible(true);
-                        }
-                    });
+
+                if (addWarning) {
+                    setWarningVisible(true);
                 }
             }
 

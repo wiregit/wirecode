@@ -13,6 +13,7 @@ import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 
@@ -33,7 +34,7 @@ class DownloadMediator {
 	public DownloadMediator(DownloadListManager downloadManager) {
 	
 		commonBaseList= new FilterList<DownloadItem>(downloadManager.getDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));	
-		
+		commonBaseList = GlazedListsSwing.swingThreadProxyList(commonBaseList);
 		searchBar = new JTextField();
 		filteredList = new FilterList<DownloadItem>(commonBaseList, 
 				new TextComponentMatcherEditor<DownloadItem>(searchBar, new DownloadItemTextFilterator(), true));		

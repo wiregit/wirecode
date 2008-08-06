@@ -23,6 +23,8 @@ import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -39,7 +41,8 @@ class LeftPanel extends JPanel implements NavigableTree {
     public LeftPanel(DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel) {
     	GuiUtils.assignResources(this);
         this.navTree = new NavTree();
-        DownloadSummaryPanel downloadPanel =  DownloadSummaryPanel.createDownloadSummaryPanel(downloadListManager.getDownloads());
+        DownloadSummaryPanel downloadPanel =  DownloadSummaryPanel.createDownloadSummaryPanel(
+                GlazedListsSwing.swingThreadProxyList(downloadListManager.getDownloads()));
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));
