@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.Expand;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
@@ -18,7 +19,6 @@ import org.mozilla.browser.MozillaConfig;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.impl.WindowCreator;
 
-import com.limegroup.gnutella.util.Expand;
 
 public class LimeMozillaInitializer {
     

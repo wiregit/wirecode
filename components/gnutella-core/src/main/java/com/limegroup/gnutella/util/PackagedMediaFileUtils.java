@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.File;
 
+import org.limewire.io.Expand;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;

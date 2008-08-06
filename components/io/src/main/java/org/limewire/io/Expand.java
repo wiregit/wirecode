@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-package com.limegroup.gnutella.util;
+package org.limewire.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -65,7 +65,6 @@ import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.limewire.io.IOUtils;
 import org.limewire.util.FileUtils;
 
 
