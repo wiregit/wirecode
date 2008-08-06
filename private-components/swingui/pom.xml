@@ -13,6 +13,15 @@
 	<packaging>jar</packaging>
 	<version>${limewire.version}</version>
 	<name>LimeWire Swing UI Component</name>
+	
+	<repositories>
+	    <repository>
+	      <id>xnap-commons</id>
+	      <name>XNap Commons Repository</name>
+	      <url>http://xnap-commons.sourceforge.net/repository</url>
+		  <layout>legacy</layout>
+	    </repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -110,6 +119,11 @@
 	      <groupId>org.limewire</groupId>
 	      <artifactId>jdic</artifactId>
 	      <version>20061102-lw-1</version>
-    	</dependency>		    
+    	</dependency>
+	    <dependency>
+	      <groupId>xnap-commons</groupId>
+	      <artifactId>gettext-commons</artifactId>
+	      <version>0.9.1</version>
+	    </dependency>	    	
 	</dependencies>
 </project>

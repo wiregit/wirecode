@@ -30,6 +30,7 @@ import org.limewire.ui.swing.browser.WinCreatorHook;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.LocaleUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -120,9 +121,8 @@ public final class Initializer {
 //        DeadlockSupport.startDeadlockMonitoring();
 //        stopwatch.resetAndLog("Start deadlock monitor");
         
-        // Installs properties & resources.
-        installProperties();        
-        installResources();
+        // Installs properties.
+        installProperties();
         
         // Construct the SetupManager, which may or may not be shown.
 //        final SetupManager setupManager = new SetupManager(limeWireCore.getFirewallService());
@@ -335,18 +335,9 @@ public final class Initializer {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             stopwatch.resetAndLog("set OSX properties");
         }
-    }
-    
-    /** Sets up ResourceManager. */
-    private void installResources() {
-//        GUIMediator.safeInvokeAndWait(new Runnable() {
-//            public void run() {
-//                stopwatch.resetAndLog("wait for event queue");
-//                ResourceManager.instance();
-//                stopwatch.resetAndLog("ResourceManager instance");
-//            }
-//        });
-//        stopwatch.resetAndLog("come back from evt queue");
+
+        LocaleUtils.setLocaleFromPreferences();
+        LocaleUtils.validateLocaleAndFonts();
     }
     
     /** Starts any early core-related functionality. */

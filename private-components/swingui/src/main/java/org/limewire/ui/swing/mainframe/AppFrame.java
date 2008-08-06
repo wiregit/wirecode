@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Image;
 import java.util.Enumeration;
-import java.util.EventObject;
 
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
@@ -18,7 +17,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.core.impl.MockModule;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
-import org.limewire.ui.swing.tray.TrayNotifier;
+import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Guice;
@@ -26,8 +25,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 /**
- * This class is the starting point of the LimeWire application
- * when use of the mock core is desired.
+ * The entry point for the Swing UI.  If the real core is desired,
+ * start from integrated-ui/../Main.  The main method in this class
+ * uses the mock-core.
  */
 public class AppFrame extends SingleFrameApplication {
 
@@ -50,7 +50,9 @@ public class AppFrame extends SingleFrameApplication {
     @Override
     protected void startup() {
         GuiUtils.assignResources(this);
+        
         initColors();
+        
         // Because we use a browser heavily, which is heavyweight,
         // we must disable all lightweight popups.
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -61,25 +63,9 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setIconImage(frameIcon);
         getMainFrame().setJMenuBar(new LimeMenuBar());
 
-        final LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
-        
+        LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
-        addExitListener(new ExitListener() {
-            @Override
-            public boolean canExit(EventObject event) {
-                TrayNotifier notifier = ui.getTrayNotifier();
-                if(!notifier.supportsSystemTray() || notifier.isExitEvent(event)) {
-                    return true;
-                } else {
-                    minimizeToTray();
-                    return false;
-                }
-            }
-
-            @Override
-            public void willExit(EventObject event) {
-            }
-        });
+        addExitListener(new TrayExitListener(ui.getTrayNotifier()));
         
         show(ui);
         ui.goHome();
@@ -93,13 +79,13 @@ public class AppFrame extends SingleFrameApplication {
     }
     
     @Action
-    public void minimizeToTray() {
+    public void minimizeToTray() { // DO NOT CHANGE THIS METHOD NAME!  
         getMainFrame().setState(Frame.ICONIFIED);
         getMainFrame().setVisible(false);
     }    
 
     @Action
-    public void restoreView() {
+    public void restoreView() { // DO NOT CHANGE THIS METHOD NAME!  
         getMainFrame().setVisible(true);
         getMainFrame().setState(Frame.NORMAL);
     }
