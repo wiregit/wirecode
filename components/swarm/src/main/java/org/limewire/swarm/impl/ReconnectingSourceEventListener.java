@@ -32,6 +32,10 @@ public class ReconnectingSourceEventListener implements SwarmSourceEventListener
 
     private void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
+        // TODO we can be smarter about reconnecting
+        // check the explicit error and try recconnecting
+        // or allow a few errors before letting the connection close
+
         if (status != null && status.isFinished() || swarmSourceHandler.isComplete()) {
             System.out.println("finished, not reconnecting: " + source + " status: " + status);
         } else if (status != null && status.isError()) {
