@@ -60,12 +60,21 @@ public class CategoryDownloadPanel extends JPanel {
 
 	private List<DownloadTable> tables = new ArrayList<DownloadTable>();
 	private List<JPanel> titles = new ArrayList<JPanel>();
+	
+	private EventList<DownloadItem> list;
+	
+	public static CategoryDownloadPanel createCategoryDownloadPanel(EventList<DownloadItem> list){
+	    CategoryDownloadPanel panel = new CategoryDownloadPanel(list);
+	    panel.addListListener();
+	    return panel;
+	}
 
 	/**
 	 * Create the panel
 	 */
-	public CategoryDownloadPanel(EventList<DownloadItem> list) {
+	private CategoryDownloadPanel(EventList<DownloadItem> list) {
 	    GuiUtils.assignResources(this);
+	    this.list = list;
 	  //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
         evenTableHighlighter = new CompoundHighlighter(new ColorHighlighter(HighlightPredicate.EVEN, evenColor, evenForeground, evenColor, evenForeground),
                 new ColorHighlighter(HighlightPredicate.ODD, oddColor, oddForeground, oddColor, oddForeground));
@@ -84,13 +93,17 @@ public class CategoryDownloadPanel extends JPanel {
 		addTable(list, I18n.tr("Unsuccessful"),
 				DownloadState.ERROR, DownloadState.STALLED);
 		
-		list.addListEventListener(new ListEventListener<DownloadItem>() {
-			@Override
-			public void listChanged(ListEvent<DownloadItem> listChanges) {
+		updateStriping();
+	}
+	
+	private void addListListener(){
+	    list.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
 
-			    //list events probably won't be on EDT
-			    SwingUtils.invokeLater(new Runnable() {
-					public void run() {
+                //list events probably won't be on EDT
+                SwingUtils.invokeLater(new Runnable() {
+                    public void run() {
                         if (isVisible()) {
                             for (int i = 0; i < titles.size() && i < tables.size(); i++) {
                                 boolean isVisible = tables.get(i).getRowCount() > 0;
@@ -102,12 +115,9 @@ public class CategoryDownloadPanel extends JPanel {
                         }
                     }
 
-				});
-			}
-		});
-
-		
-		updateStriping();
+                });
+            }
+        });
 	}
 
 	/**

@@ -58,7 +58,7 @@ public class MainDownloadPanel extends JPanel {
 		noCategoryPanel.setName(NO_CATEGORY);
 		cardPanel.add(noCategoryPanel, noCategoryPanel.getName());
 		
-		final CategoryDownloadPanel categoryPanel = new CategoryDownloadPanel(downloadMediator.getFilteredList());
+		final CategoryDownloadPanel categoryPanel = CategoryDownloadPanel.createCategoryDownloadPanel(downloadMediator.getFilteredList());
 		categoryPanel.setName(CATEGORY);
 		cardPanel.add(categoryPanel, categoryPanel.getName());
 
