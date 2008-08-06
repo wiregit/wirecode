@@ -1,13 +1,7 @@
 package org.limewire.ui.swing.friends;
 
-import java.awt.Dimension;
 import java.net.URL;
 import java.util.List;
-
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 import org.limewire.ui.swing.friends.Message.Type;
 
@@ -87,31 +81,5 @@ class ChatDocumentBuilder {
         
         builder.append(BOTTOM);
         return builder.toString();
-    }
-    
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                JFrame frame = new JFrame();
-                
-                JScrollPane pane;
-                JEditorPane editor = new JEditorPane();
-                editor.setEditable(false);
-                
-                
-                
-                editor.setContentType("text/html");
-//                editor.setText(builder.toString());
-                
-                pane = new JScrollPane(editor);
-                frame.add(pane);
-                frame.setSize(new Dimension(800, 800));
-                frame.pack();
-                frame.setVisible(true);
-            }
-            
-        });
     }
 }
