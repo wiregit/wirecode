@@ -14,7 +14,7 @@ import org.mozilla.interfaces.nsIWebNavigation;
  * Provides key binding for forward and back navigation for
  * nsIWebBrowserChrome-based browsers.
  */
-public class MozillaKeyListener extends KeyAdapter {
+class MozillaKeyListener extends KeyAdapter {
 
     /**
      * nsIWebNavigation, like most Mozilla classes, is not thread-safe and must

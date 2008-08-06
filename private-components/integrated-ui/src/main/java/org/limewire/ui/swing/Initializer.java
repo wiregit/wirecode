@@ -2,10 +2,6 @@ package org.limewire.ui.swing;
 
 import java.awt.Frame;
 import java.awt.Image;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,30 +17,22 @@ import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.StartupSettings;
-import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.support.ErrorHandler;
-import org.limewire.ui.swing.browser.MozillaPopupWindow;
+import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LocaleUtils;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.util.CommonUtils;
-import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
-import org.mozilla.browser.IMozillaWindow;
-import org.mozilla.browser.IMozillaWindowFactory;
-import org.mozilla.browser.MozillaConfig;
-import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel;
-import org.mozilla.browser.impl.WindowCreator;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -53,7 +41,6 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
-import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
 import com.limegroup.gnutella.util.MacOSXUtils;
@@ -409,10 +396,12 @@ public final class Initializer {
         splashRef.get().setStatusText(I18n.tr("Loading Browser..."));
         // Not pretty but Mozilla initialization errors should not crash the
         // program
-        try {
-            setupXulLibraryPath();
-        } catch (Exception e) {
-            LOG.error("Mozilla initialization failed");
+        if (OSUtils.isWindows() || OSUtils.isMacOSX() || OSUtils.isLinux()) {
+            try {
+                LimeMozillaInitializer.initialize();
+            } catch (Exception e) {
+                LOG.error("Mozilla initialization failed");
+            }
         }
         stopwatch.resetAndLog("Load XUL Library Path");
         SwingUtils.invokeAndWait(new Runnable() {
@@ -641,51 +630,6 @@ public final class Initializer {
             throw new RuntimeException(cause);
         }
         System.exit(1);
-    }
-
-    /**
-     * Adds absolute xulrunner path to java.library.path. This is necessary for MozSwing.
-     */
-    private void setupXulLibraryPath() {
-        if (OSUtils.isWindows()) {
-            File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
-            // Check to see if the correct version of XUL exists.
-            File xulFile = new File(xulInstallPath, "xul-v2.0b2-do-not-remove");
-            if (!xulFile.exists()) {
-                if (LOG.isDebugEnabled())
-                    LOG.debug("unzip xulrunner to " + xulInstallPath);
-                FileUtils.deleteRecursive(xulInstallPath);
-                InputStream in = null;
-                try {
-                    in = new BufferedInputStream(CommonUtils.getResourceStream("xulrunner.zip"));
-                    Expand.expandFile(in, xulInstallPath, true, null);
-                    xulFile.createNewFile();
-                } catch (IOException e) {
-                    ErrorService.error(e);
-                } finally {
-                    IOUtils.close(in);
-                }
-            }
-
-            String newLibraryPath = System.getProperty("java.library.path") + File.pathSeparator
-                    + xulInstallPath.getAbsolutePath();
-            System.setProperty("java.library.path", newLibraryPath);
-            
-            MozillaConfig.setXULRunnerHome(xulInstallPath);
-            File profileDir = new File(CommonUtils.getUserSettingsDir(), "/mozilla-profile");
-            profileDir.mkdirs();
-            MozillaConfig.setProfileDir(profileDir);
-            WindowCreator.setWindowFactory(new IMozillaWindowFactory() {
-                @Override
-                public IMozillaWindow create(boolean attachNewBrowserOnCreation) {
-                    return new MozillaPopupWindow(attachNewBrowserOnCreation);
-                }
-            });
-            MozillaInitialization.initialize();
-            
-            if(LOG.isDebugEnabled())
-                LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
-        }
     }
     
 }

@@ -18,7 +18,7 @@ import org.w3c.dom.Node;
  * Launches target="_blank" links in native browsers and swallows their
  * DomEvents to prevent default behavior.
  */
-public class LimeDomListener implements nsIDOMEventListener {
+class LimeDomListener implements nsIDOMEventListener {
 
     private static final Log LOG = LogFactory.getLog(LimeDomListener.class);
 

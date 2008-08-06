@@ -6,7 +6,7 @@ import org.mozilla.interfaces.nsIDOMWindow2;
 import org.mozilla.interfaces.nsIWebBrowserChrome;
 import org.w3c.dom.Node;
 
-public class BrowserUtils {
+class BrowserUtils {
     
 
     private static final  LimeDomListener DOM_ADAPTER = new LimeDomListener();

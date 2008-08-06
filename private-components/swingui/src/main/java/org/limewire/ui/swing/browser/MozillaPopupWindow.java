@@ -16,7 +16,7 @@ import org.limewire.util.SystemUtils;
 import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.impl.ChromeAdapter;
 
-public class MozillaPopupWindow extends MozillaWindow {
+class MozillaPopupWindow extends MozillaWindow {
 
     @Resource
     private Icon limeIcon;
@@ -26,7 +26,7 @@ public class MozillaPopupWindow extends MozillaWindow {
     
     private File icoFile;
     
-    public MozillaPopupWindow(boolean attachNewBrowserOnCreation) {
+    MozillaPopupWindow(boolean attachNewBrowserOnCreation) {
         super(attachNewBrowserOnCreation, null, null);
         GuiUtils.assignResources(this);
         icoFile = new File(URI.create(ClassLoader.getSystemResource(limeFrameIconLocation).getFile()).getPath()).getAbsoluteFile();

@@ -44,7 +44,7 @@
 	<classpathentry kind="src" output="components/jingle/build/tests" path="components/jingle/src/test/java"/>
 	<classpathentry kind="src" output="components/xmpp/build/classes" path="components/xmpp/src/main/java"/>
 	<classpathentry kind="src" output="components/xmpp/build/tests" path="components/xmpp/src/test/java"/>
-	<classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
+	<classpathentry excluding="windows/|windows/|linux/|osx/" kind="src" path="lib/resources"/>
 	<classpathentry kind="src" path="lib/resources/windows"/>
 	<classpathentry kind="src" output="private-components/integrated-ui/build/classes" path="private-components/integrated-ui/src/main/java"/>
 	<classpathentry kind="src" output="private-components/mock-core/build/classes" path="private-components/mock-core/src/main/java"/>
@@ -54,6 +54,8 @@
 	<classpathentry kind="src" output="components/core-api/build/classes" path="components/core-api/src/main/java"/>
 	<classpathentry kind="src" output="components/core-glue/build/classes" path="components/core-glue/src/main/java"/>
 	<classpathentry kind="src" output="components/core-settings/build/classes" path="components/core-settings/src/main/java"/>
+	<classpathentry kind="src" path="lib/resources/linux"/>
+	<classpathentry kind="src" path="lib/resources/osx"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>

@@ -9,7 +9,7 @@ import org.mozilla.interfaces.nsIWebBrowserChrome;
  * Removes LimeDomListener from popup browser windows when they close.
  *
  */
-public class MozillaClosingListener extends WindowAdapter {
+class MozillaClosingListener extends WindowAdapter {
 
     private nsIWebBrowserChrome chrome;
 
