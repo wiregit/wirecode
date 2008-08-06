@@ -39,7 +39,7 @@ class LeftPanel extends JPanel implements NavigableTree {
     public LeftPanel(DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel) {
     	GuiUtils.assignResources(this);
         this.navTree = new NavTree();
-        DownloadSummaryPanel downloadPanel =  new DownloadSummaryPanel(downloadListManager.getDownloads());
+        DownloadSummaryPanel downloadPanel =  DownloadSummaryPanel.createDownloadSummaryPanel(downloadListManager.getDownloads());
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));

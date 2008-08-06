@@ -7,6 +7,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Comparator;
 
@@ -73,11 +75,21 @@ public class DownloadSummaryPanel extends JPanel {
     private Color allCompleteColor;
 
 
+    /**
+     * instantiates DownloadSummaryPanel and adds listeners
+     */
+    public static DownloadSummaryPanel createDownloadSummaryPanel(final EventList<DownloadItem> itemList){
+        DownloadSummaryPanel panel = new DownloadSummaryPanel(itemList);
+        //adding listeners to EventList can't be done in the constructor (would allow this to escape)
+        panel.addListeners();
+        return panel;
+    }
+    
 
 	/**
 	 * Create the panel
 	 */
-	public DownloadSummaryPanel(final EventList<DownloadItem> itemList) {
+	private DownloadSummaryPanel(final EventList<DownloadItem> itemList) {
 	    GuiUtils.assignResources(this);
 
         setLayout(new BorderLayout());
@@ -116,25 +128,7 @@ public class DownloadSummaryPanel extends JPanel {
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
 		table = new JTable(new DownloadTableModel(chokeList));
 		table.setShowHorizontalLines(false);
-		table.setShowVerticalLines(false);
-		
-		//update title when number of downloads changes and hide or show panel as necessary
-		allList.addListEventListener(new ListEventListener<DownloadItem>() {
-
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-              //list events probably won't be on EDT
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateTitle();
-                        adjustVisibility();
-                    }
-                });
-            }
-
-        });
-		
+		table.setShowVerticalLines(false);		
 		
 		//TODO: sorting
 		table.setDefaultRenderer(DownloadItem.class, new DownloadStatusPanelRenderer());
@@ -151,6 +145,61 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		updateTitle();
 		adjustVisibility();  
+		
+		addListeners();
+	}
+	
+	private void addListeners(){
+	    //update title when number of downloads changes and hide or show panel as necessary
+        allList.addListEventListener(new ListEventListener<DownloadItem>() {
+
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+              //list events probably won't be on EDT
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateTitle();
+                        adjustVisibility();
+                    }
+                });
+            }
+
+        });
+
+        //show warning icon when something is added to warningList
+        warningList.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                
+                boolean addWarning = false;
+                
+                while (listChanges.next()) {
+                    if (listChanges.getType() == ListEvent.INSERT) {
+                        addWarning = true;
+                    }
+                }
+                
+                if(addWarning){
+                    // list events probably won't be on EDT
+                    SwingUtils.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            setWarningVisible(true);
+                        }
+                    });
+                }
+            }
+
+        });
+        
+        //hide warning icon when clicked
+        addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e){
+                setWarningVisible(false);
+            }
+        });
 	}
     
 	//hide panel if there are no downloads.  show it if there are
@@ -202,11 +251,18 @@ public class DownloadSummaryPanel extends JPanel {
         } else {
             titleLabel.setText(I18n.tr("Downloads"));
         }
-        if(warningList.size()>0){
-            titleLabel.setIcon(warningIcon);
-        } else {
-            titleLabel.setIcon(null);
+	    
+        if (warningList.size() == 0) {
+            setWarningVisible(false);
         }
+	}
+	
+	private void setWarningVisible(boolean visible){
+	    if(visible){
+	        titleLabel.setIcon(warningIcon);
+	    } else {
+	        titleLabel.setIcon(null);
+	    }
 	}
 	
 	private class DownloadStatusPanelRenderer extends JPanel implements
