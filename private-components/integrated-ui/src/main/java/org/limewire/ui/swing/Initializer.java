@@ -156,37 +156,7 @@ public final class Initializer {
         runQueuedRequests(limeWireCore);
         
         // Run any after-init tasks.
-        postinit();
-        
-        final Lock a = new ReentrantLock();
-        final Lock b = new ReentrantLock();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for(int i = 0; i < 1000; i++) {
-                    a.lock();
-                    try { Thread.sleep(100); } catch(Exception ignored) {}
-                    b.lock();
-                    b.unlock();
-                    a.unlock();
-                }
-                System.out.println("done A");
-            }
-        }).start();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for(int i = 0; i < 1000; i++) {
-                    b.lock();
-                    try { Thread.sleep(100); } catch(Exception ignored) {}
-                    a.lock();
-                    a.unlock();
-                    b.unlock();
-                }
-                System.out.println("done B");
-            }
-        }).start();
-        
+        postinit();        
     }
     
     
