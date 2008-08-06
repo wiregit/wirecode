@@ -1,36 +1,31 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.util.FontUtils.bold;
-import static org.limewire.ui.swing.util.FontUtils.changeSize;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.Icon;
-import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXLabel;
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.CapsulePainter;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.jdesktop.swingx.painter.CapsulePainter.Portion;
-import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
@@ -39,15 +34,14 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class ConversationPane extends JPanel {
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
-    private static final Color SELF_CHATTER_NAME = new Color(13, 48, 101);
-    private static final Color OTHER_CHATTER_NAME = new Color(119, 19, 36);
     
     @Resource private Icon available;
     @Resource private Icon chatStatusStub;
     @Resource private Icon library;
     @Resource private Icon sharing;
     
-    private DefaultListModel model;
+    private List<Message> messages = new ArrayList<Message>();
+    private JEditorPane editor;
 
     public ConversationPane(Friend friend) {
         GuiUtils.assignResources(this);
@@ -57,32 +51,34 @@ public class ConversationPane extends JPanel {
         setLayout(new BorderLayout());
         add(wrap(header, true), BorderLayout.NORTH);
 
-        JScrollPane scroll = new JScrollPane();
+        JScrollPane scroll = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setOpaque(false);
         scroll.setBorder(BorderFactory.createEmptyBorder());
-        add(scroll, BorderLayout.CENTER);
+        
+        //Needed to add margin to the left side of the scrolling chat pane
+        JPanel chatWrapper = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(0, 8, 0, 0);
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.fill = GridBagConstraints.BOTH;
+        chatWrapper.add(scroll,constraints);
+        
+        add(chatWrapper, BorderLayout.CENTER);
 
-        model = new DefaultListModel();
-        JList list = new JList(model);
-        list.setCellRenderer(new PassThroughCellRenderer());
-        scroll.getViewport().add(list);
+        editor = new JEditorPane();
+        editor.setEditable(false);
+        editor.setContentType("text/html");
+        scroll.getViewport().add(editor);
 
         setBackground(DEFAULT_BACKGROUND);
     }
     
     public void handleMessage(String topic, Message message) {
-        JPanel exch = exchangePanel(message);
-        model.addElement(wrap(exch, false));
+        messages.add(message);
+        editor.setText(ChatDocumentBuilder.buildChatText(messages));
     }
     
-    private static class PassThroughCellRenderer implements ListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index,
-                boolean isSelected, boolean cellHasFocus) {
-            return (Component)value;
-        }
-    }
-
     private JPanel wrap(JPanel panel, boolean isHeader) {
         JPanel wrapper = new JPanel(new GridBagLayout());
         
@@ -127,8 +123,12 @@ public class ConversationPane extends JPanel {
 
         constraints = new GridBagConstraints();
         constraints.insets = new Insets(8, 0, 0, 0);
-        buttonsPanel.add(new JButton(library), constraints);
-        buttonsPanel.add(new JButton(sharing), constraints);
+        JXButton libraryButton = new JXButton(library);
+        libraryButton.setBorderPainted(false);
+        buttonsPanel.add(libraryButton, constraints);
+        JXButton sharingButton = new JXButton(sharing);
+        sharingButton.setBorderPainted(false);
+        buttonsPanel.add(sharingButton, constraints);
 
         JLabel libraryLabel = new JLabel(tr("Library"));
         libraryLabel.setForeground(Color.WHITE);
@@ -150,25 +150,6 @@ public class ConversationPane extends JPanel {
         headerPanel.add(buttonsPanel, BorderLayout.EAST);
         
         return headerPanel;
-    }
-
-    private JPanel exchangePanel(Message message) {
-        JXPanel exch = roundPanel(Color.WHITE, false);
-        exch.setLayout(new GridBagLayout());
-        GridBagConstraints cons = new GridBagConstraints();
-        cons.anchor = GridBagConstraints.WEST;
-        cons.insets = new Insets(8, 8, 2, 8);
-        JLabel name = new JLabel(message.getSenderName());
-        bold(name);
-        changeSize(name, 1.4f);
-        name.setForeground(message.getType() == Type.Received ? OTHER_CHATTER_NAME : SELF_CHATTER_NAME);
-        exch.add(name, cons);
-        JXLabel text = new JXLabel(message.getMessageText());
-        text.setLineWrap(true);
-        cons.gridy = 1;
-        cons.insets = new Insets(2, 8, 8, 8);
-        exch.add(text, cons);
-        return exch;
     }
 
     private JXPanel roundPanel(Color backgroundColor, boolean flatTop) {
