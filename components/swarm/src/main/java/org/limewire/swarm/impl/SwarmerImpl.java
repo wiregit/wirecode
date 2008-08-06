@@ -14,25 +14,25 @@ import org.limewire.swarm.Swarmer;
 
 public class SwarmerImpl implements Swarmer {
 
-    private Map<Class, SwarmSourceHandler> sourceHandlers = Collections
-            .synchronizedMap(new HashMap<Class, SwarmSourceHandler>());
-
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
 
-    public SwarmerImpl() {
+    private final Map<Class, SwarmSourceHandler> sourceHandlers;
 
+    public SwarmerImpl() {
+        sourceHandlers = Collections.synchronizedMap(new HashMap<Class, SwarmSourceHandler>());
     }
 
-    public void addSource(final SwarmSource source) {
+    public void addSource(SwarmSource source) {
         addSource(source, null);
     }
 
-    public void addSource(final SwarmSource source, SwarmSourceEventListener sourceEventListener) {
+    public void addSource(SwarmSource source, SwarmSourceEventListener sourceEventListener) {
         SwarmSourceHandler sourceHandler = sourceHandlers.get(source.getClass());
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Adding source: " + source);
         }
+
         sourceHandler.addSource(source, sourceEventListener);
     }
 
@@ -54,15 +54,6 @@ public class SwarmerImpl implements Swarmer {
                 LOG.warn("Unable to shutdown handler: " + handler);
             }
         }
-    }
-
-    public boolean isActive() {
-        for (SwarmSourceHandler handler : sourceHandlers.values()) {
-            if (handler.isActive()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public void register(Class clazz, SwarmSourceHandler sourceHandler) {

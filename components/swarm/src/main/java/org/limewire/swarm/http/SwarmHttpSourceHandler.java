@@ -30,6 +30,7 @@ import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 import org.limewire.swarm.impl.NoOpSwarmSourceEventListener;
+import org.limewire.swarm.impl.ReconnectingSourceEventListener;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -50,35 +51,35 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
     private final SwarmCoordinator swarmCoordinator;
 
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator) {
-        this(swarmCoordinator, new NoOpSwarmSourceEventListener());
+        this(swarmCoordinator, new ReconnectingSourceEventListener());
     }
 
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator,
             SwarmSourceEventListener defaultSourceEventListener) {
         this.swarmCoordinator = swarmCoordinator;
         if (defaultSourceEventListener == null) {
-            this.defaultSourceEventListener = new NoOpSwarmSourceEventListener();
+            this.defaultSourceEventListener = new ReconnectingSourceEventListener();
         } else {
             this.defaultSourceEventListener = defaultSourceEventListener;
         }
-        
+
         HttpParams params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
                 CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
                 CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
                 CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
                 CoreProtocolPNames.USER_AGENT, LimeWireUtils.getHttpServer());
-        
+
         this.ioReactor = new LimeConnectingIOReactor(params, NIODispatcher.instance()
                 .getScheduledExecutorService(), new SocketsManagerImpl());
-        
+
         this.executionHandler = new SwarmCoordinatorHttpExecutionHandler(swarmCoordinator);
-        
+
         SwarmAsyncNHttpClientHandlerBuilder builder = new SwarmAsyncNHttpClientHandlerBuilder(
                 params, this);
-        
+
         AsyncNHttpClientHandler clientHandler = builder.get();
-        
+
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
 

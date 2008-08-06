@@ -57,7 +57,6 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
                     .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
             listener.finished();
             context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
-            // TODO we need to handle this and not go into infinite loop
             return null;
         }
     }

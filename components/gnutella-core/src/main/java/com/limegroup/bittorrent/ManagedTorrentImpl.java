@@ -13,20 +13,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SyncWrapper;
-import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.net.SocketsManagerImpl;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmSourceHandler;
@@ -56,7 +46,6 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**

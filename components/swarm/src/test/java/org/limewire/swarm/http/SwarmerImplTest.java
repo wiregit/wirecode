@@ -31,6 +31,7 @@ import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
+import org.limewire.swarm.impl.ReconnectingSourceEventListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -363,22 +364,6 @@ public class SwarmerImplTest extends BaseTestCase {
 
         swarmer.start();
         return swarmer;
-    }
-
-    public static ConnectingIOReactor createIOReactor(HttpParams params) {
-        ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
-                .instance().getScheduledExecutorService(), new SocketsManagerImpl());
-        return ioReactor;
-    }
-
-    public static HttpParams createHttpParams() {
-        HttpParams params = new BasicHttpParams();
-        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
-                CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
-                CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
-                CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
-                CoreProtocolPNames.USER_AGENT, "LimeTest/1.1");
-        return params;
     }
 
     private SwarmCoordinator createSwarmCoordinator(File file, String path, long fileSize,

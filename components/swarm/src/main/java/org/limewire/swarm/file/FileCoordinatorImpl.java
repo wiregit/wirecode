@@ -400,6 +400,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         synchronized (LOCK) {
             // TODO handle possible running write jobs.
             // TODO we can cancel the running write jobs through the scheduler
+            // TODO or we can just wait for the jobs to finish
             fileSystem.close();
         }
     }
