@@ -15,4 +15,6 @@ public interface SwarmSourceHandler {
     boolean isActive(); 
     
     boolean isComplete();
+
+    float getMeasuredBandwidth(boolean downstream);
 }

@@ -12,7 +12,6 @@ import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
 import org.apache.http.nio.protocol.NHttpRequestExecutionHandler;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.BasicHttpParams;
@@ -31,6 +30,7 @@ import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 import org.limewire.swarm.impl.ReconnectingSourceEventListener;
 
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestExecutionHandler {
@@ -39,7 +39,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     private final SwarmSourceEventListener defaultSourceEventListener;
 
-    private final ConnectingIOReactor ioReactor;
+    private final LimeConnectingIOReactor ioReactor;
 
     private final IOEventDispatch eventDispatch;
 
@@ -147,12 +147,14 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
             throws IOException {
+
         if (isActive()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Handling response: " + response.getStatusLine() + ", headers: "
                         + Arrays.asList(response.getAllHeaders()));
             }
-            return executionHandler.responseEntity(response, context);
+            ConsumingNHttpEntity entity = executionHandler.responseEntity(response, context);
+            return entity;
         } else {
             throw new IOException("Not active!");
         }
@@ -178,6 +180,14 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         } else {
             SwarmHttpUtils.closeConnectionFromContext(context);
             return null;
+        }
+    }
+
+    public float getMeasuredBandwidth(boolean downstream) {
+        try {
+            return ioReactor.getMeasuredBandwidth(downstream);
+        } catch (InsufficientDataException ide) {
+            return 0;
         }
     }
 }

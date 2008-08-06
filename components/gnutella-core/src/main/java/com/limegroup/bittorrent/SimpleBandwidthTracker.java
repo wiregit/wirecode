@@ -31,7 +31,9 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 
 	public synchronized void count(int added) {
 		startCounting(-1);
-		_amount += added;
+		if (added > 0) {
+            _amount += added;
+        }
 	}
 
 	private void startCounting(long now) {

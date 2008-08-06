@@ -117,6 +117,8 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * The manager of choking logic
      */
     private Choker choker;
+    
+    private Swarmer swarmer = null;
 
     /**
      * Locking this->state.getLock() ok.
@@ -282,7 +284,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 
     private void webseed() {
         BTMetaInfo metaInfo = context.getMetaInfo();
-        if (metaInfo.hasWebSeeds()) {
+        if (swarmer == null && metaInfo.hasWebSeeds()) {
             TorrentFileSystem torrentFileSystem = context.getFileSystem();
             TorrentDiskManager torrentDiskManager = context.getDiskManager();
             BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
@@ -290,7 +292,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
             SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator);
-            Swarmer swarmer = new SwarmerImpl();
+            swarmer = new SwarmerImpl();
             swarmer.register(SwarmHttpSource.class, sourceHandler);
             swarmer.start();
             long completeSize = torrentFileSystem.getTotalSize();
@@ -1226,7 +1228,11 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * com.limegroup.bittorrent.ManagedTorrent#getMeasuredBandwidth(boolean)
      */
     public float getMeasuredBandwidth(boolean downstream) {
-        return linkManager.getMeasuredBandwidth(downstream);
+        float bandwidth = linkManager.getMeasuredBandwidth(downstream);
+        if(swarmer != null) {
+            bandwidth += swarmer.getMeasuredBandwidth(downstream);
+        }
+        return bandwidth;
     }
 
     /*

@@ -1,5 +1,6 @@
 package org.limewire.swarm;
 
+
 public interface Swarmer {
     void addSource(SwarmSource source);
 
@@ -10,4 +11,6 @@ public interface Swarmer {
     void start();
 
     void shutdown();
+
+    float getMeasuredBandwidth(boolean downstream);
 }

@@ -60,4 +60,12 @@ public class SwarmerImpl implements Swarmer {
         sourceHandlers.put(clazz, sourceHandler);
     }
 
+    public float getMeasuredBandwidth(boolean downstream) {
+        float bandwidth = 0;
+        for (SwarmSourceHandler handler : sourceHandlers.values()) {
+            bandwidth += handler.getMeasuredBandwidth(downstream);
+        }
+        return bandwidth;
+    }
+
 }

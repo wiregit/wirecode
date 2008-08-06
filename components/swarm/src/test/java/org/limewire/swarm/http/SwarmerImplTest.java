@@ -93,6 +93,10 @@ public class SwarmerImplTest extends BaseTestCase {
                             .addSource(new SwarmHttpSource(uri, Range
                                     .createRange(lowByte, highByte)));
                     assertDownload(md5, file, fileSize);
+
+                    System.out.println("downstream " + swarmer.getMeasuredBandwidth(true));
+                    System.out.println("upstream " + swarmer.getMeasuredBandwidth(false));
+
                 } finally {
                     file.delete();
                 }
@@ -128,6 +132,7 @@ public class SwarmerImplTest extends BaseTestCase {
                     swarmer
                             .addSource(new SwarmHttpSource(uri, Range
                                     .createRange(lowByte, highByte)));
+
                     assertDownload(md5, file, fileSize);
                 } finally {
                     file.delete();
@@ -353,6 +358,8 @@ public class SwarmerImplTest extends BaseTestCase {
 
         SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator);
         Swarmer swarmer = new SwarmerImpl();
+        swarmer.getMeasuredBandwidth(true);
+        swarmer.getMeasuredBandwidth(false);
         swarmer.register(SwarmHttpSource.class, sourceHandler);
 
         swarmer.start();
