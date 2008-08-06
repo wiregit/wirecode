@@ -433,6 +433,9 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 choker.shutdown();
                 linkManager.shutdown();
                 _connectionFetcher.shutdown();
+                if(swarmer != null) {
+                    swarmer.shutdown();
+                }
             }
         };
         networkInvoker.execute(closer);
@@ -853,11 +856,16 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 
         state.set(TorrentState.SEEDING);
 
+
         // switch the choker logic and resume uploads
         choker.shutdown();
         choker = chokerFactory.getChoker(linkManager, true);
         choker.start();
         choker.rechoke();
+        
+        if(swarmer != null) {
+            swarmer.shutdown();
+        }
 
         // tell the tracker we are a seed now
         trackerManager.announceComplete();

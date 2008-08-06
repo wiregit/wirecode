@@ -158,10 +158,10 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
     }
 
     /** 
-     * Throws {@link UnsupportedOperationException}.
+     * 
      */
     public void shutdown() throws IOException {
-        throw new UnsupportedOperationException();
+        
     }
 
     /** 
