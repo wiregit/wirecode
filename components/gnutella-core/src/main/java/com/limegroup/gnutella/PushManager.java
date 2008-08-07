@@ -36,7 +36,6 @@ public final class PushManager {
      */
     private static final int CONNECT_TIMEOUT = 10000;//10 secs
     
-    private final Provider<FileManager> fileManager;
     private final Provider<SocketsManager> socketsManager;
     private final Provider<HTTPAcceptor> httpAcceptor;
     private final Provider<UDPSelectorProvider> udpSelectorProvider;
@@ -48,12 +47,10 @@ public final class PushManager {
      * @param httpAcceptor
      */
     @Inject
-    public PushManager(Provider<FileManager> fileManager,
-            Provider<SocketsManager> socketsManager,
+    public PushManager(Provider<SocketsManager> socketsManager,
             Provider<HTTPAcceptor> httpAcceptor,
             Provider<UDPSelectorProvider> udpSelectorProvider,
             Provider<NetworkManager> networkManager) {
-        this.fileManager = fileManager;
         this.socketsManager = socketsManager;
         this.httpAcceptor = httpAcceptor;
         this.udpSelectorProvider = udpSelectorProvider;
@@ -96,13 +93,6 @@ public final class PushManager {
         if( guid == null )
             throw new NullPointerException("null guid");
         
-        // TODO: why is this check here?  it's a tiny optimization,
-        // but could potentially kill any sharing of files that aren't
-        // counted in the library.
-        if (fileManager.get().getSharedFileList().size() < 1 
-                && fileManager.get().getIncompleteFileList().size() < 1)
-            return;
-
         // We used to have code here that tested if the guy we are pushing to is
         // 1) hammering us, or 2) is actually firewalled.  1) is done above us
         // now, and 2) isn't as much an issue with the advent of connectback
