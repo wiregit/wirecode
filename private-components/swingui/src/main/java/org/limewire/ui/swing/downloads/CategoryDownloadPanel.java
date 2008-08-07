@@ -203,8 +203,8 @@ public class CategoryDownloadPanel extends JPanel {
 					table.setHighlighters(oddTableHighlighter);
 				}
 				
-
-                table.addMenuRowHighlighter();
+                // highlighter isn't working so this is handled in DownloadTable
+                // table.addMenuRowHighlighter();
 				
 				length += table.getRowCount();
 			}

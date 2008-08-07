@@ -8,13 +8,14 @@ import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.Highlighter;
+//import org.jdesktop.swingx.decorator.Highlighter;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -34,13 +35,13 @@ public class DownloadTable extends JXTable {
     private Color evenForeground;
     @Resource
     private Color menuRowBackground;
-    @Resource
-    private Color menuRowForeground;
+//    @Resource
+//    private Color menuRowForeground;
     
     private DownloadRendererEditor editor;
     
-    private HighlightPredicate menuRowPredicate = new MenuHighlightPredicate();
-    private Highlighter menuRowHighlighter;
+//    private HighlightPredicate menuRowPredicate = new MenuHighlightPredicate();
+//    private Highlighter menuRowHighlighter;
 
 	public DownloadTable(EventList<DownloadItem> downloadItems) {
 		super(new DownloadTableModel(downloadItems));
@@ -53,7 +54,7 @@ public class DownloadTable extends JXTable {
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
         setHighlighters(new ColorHighlighter(HighlightPredicate.ODD, oddColor, oddForeground, oddColor, oddForeground),
                 new ColorHighlighter(HighlightPredicate.EVEN, evenColor, evenForeground, evenColor, evenForeground));
-        addMenuRowHighlighter();
+     //   addMenuRowHighlighter();
 		// This doesn't work with editing on rollover - create custom
         // HighlightPredicate that detects editing to change editor color
 		//addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, Color.CYAN, Color.BLACK));		
@@ -133,11 +134,24 @@ public class DownloadTable extends JXTable {
 	}
 	
 
-    public void addMenuRowHighlighter() {
-        if(menuRowHighlighter == null){
-            menuRowHighlighter = new ColorHighlighter(menuRowPredicate, menuRowBackground, menuRowForeground);
-        }
-        addHighlighter(menuRowHighlighter);
+//    public void addMenuRowHighlighter() {
+//        if(menuRowHighlighter == null){
+//            menuRowHighlighter = new ColorHighlighter(menuRowPredicate, menuRowBackground, menuRowForeground);
+//        }
+//        addHighlighter(menuRowHighlighter);
+//    }
+    
+
+    //ensure menu showing color is drawn.  this will not be necessary when highlighter is fixed.
+    @Override
+    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+        Component comp = super.prepareRenderer(renderer, row, column);
+
+        // HACK - menuRowHighlighter should be handling this but it fails under
+        // certain circumstances.  this will not be necessary when highlighter is fixed.
+        adjustMenuShowingColor(comp, (DownloadItem) getValueAt(row, column));
+
+        return comp;
     }
 
 
@@ -149,9 +163,19 @@ public class DownloadTable extends JXTable {
         if (compoundHighlighter != null) {
             comp = compoundHighlighter.highlight(comp, adapter);
         }
+        
+        //HACK - menuRowHighlighter should be handling this but it fails under certain circumstances
+        adjustMenuShowingColor(comp,(DownloadItem) getValueAt(row, column));  
+        
         return comp;
     }
 	   
+    // HACK - menuRowHighlighter should be handling this but it fails under
+    // certain circumstances.  this will not be necessary when highlighter is fixed.
+    private void adjustMenuShowingColor(Component comp, DownloadItem item) {
+        if (this.editor.isItemMenuVisible(item))
+            comp.setBackground(menuRowBackground);
+    }
 
 	//overridden so that cell editor buttons will always work
 	@Override
@@ -160,20 +184,21 @@ public class DownloadTable extends JXTable {
 	}
 	
 	
-	/**
-	 * Does this row have a popup menu showing?
-	 */
-    private class MenuHighlightPredicate implements HighlightPredicate {        
-        
-        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
-            if (!adapter.getComponent().isEnabled()) return false;
-            
-            if (adapter.getValue() instanceof DownloadItem){
-                DownloadItem item = (DownloadItem)adapter.getValue();
-               return (editor.isItemMenuVisible(item));
-            }
-            return false;
-        }
-        
-    }
+	//Not working
+//	/**
+//	 * Does this row have a popup menu showing?
+//	 */
+//    private class MenuHighlightPredicate implements HighlightPredicate {        
+//        
+//        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+//            if (!adapter.getComponent().isEnabled()) return false;
+//            
+//            if (adapter.getValue() instanceof DownloadItem){
+//                DownloadItem item = (DownloadItem)adapter.getValue();
+//               return (editor.isItemMenuVisible(item));
+//            }
+//            return false;
+//        }
+//        
+//    }
 }
