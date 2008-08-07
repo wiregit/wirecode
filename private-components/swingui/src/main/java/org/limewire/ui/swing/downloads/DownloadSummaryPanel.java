@@ -296,16 +296,16 @@ public class DownloadSummaryPanel extends JPanel {
 	    switch(state){
         case DOWNLOADING:
             return 8;
-        case PAUSED:
+        case DONE:
             return 7;
-        case CONNECTING:
+        case PAUSED:
             return 6;
-        case LOCAL_QUEUED:
-        case REMOTE_QUEUED:
+        case CONNECTING:
             return 5;
         case FINISHING:
             return 4;
-	    case DONE:
+        case LOCAL_QUEUED:
+        case REMOTE_QUEUED:
             return 3;
         case STALLED:
             return 2;
