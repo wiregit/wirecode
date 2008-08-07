@@ -134,7 +134,7 @@ class UDPConnection extends AbstractNBSocket implements RUDPSocket {
     
     @Override
     public void bind(SocketAddress bindpoint) throws IOException {
-        throw new IOException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -158,18 +158,18 @@ class UDPConnection extends AbstractNBSocket implements RUDPSocket {
     }
 
     @Override
-    public void sendUrgentData (int data) throws IOException  {
-        throw new IOException("not implemented");
+    public void sendUrgentData(int data) throws IOException  {
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void setOOBInline(boolean on) throws SocketException {
-        throw new SocketException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public boolean getOOBInline() throws SocketException {
-        throw new SocketException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -204,34 +204,32 @@ class UDPConnection extends AbstractNBSocket implements RUDPSocket {
 
     @Override
     public void setTrafficClass(int tc) throws SocketException {
-        throw new SocketException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public int getTrafficClass() throws SocketException {
-        throw new SocketException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void setReuseAddress(boolean on) throws SocketException {
-        throw new SocketException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public boolean getReuseAddress() throws SocketException {
-        throw new SocketException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void shutdownInput() throws IOException {
-        throw new SocketException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
     public void shutdownOutput() throws IOException {
-        throw new IOException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
-    
-    
     
 }
