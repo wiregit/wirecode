@@ -42,7 +42,6 @@ public final class PushManager {
     private final Provider<NetworkManager> networkManager;
 
     /**
-     * @param fileManager
      * @param socketsManager
      * @param httpAcceptor
      */
