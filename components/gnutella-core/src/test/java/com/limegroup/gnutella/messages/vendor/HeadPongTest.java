@@ -572,6 +572,9 @@ public class HeadPongTest extends LimeTestCase {
         
         SSLSettings.TLS_INCOMING.setValue(true);
         networkManager.setAcceptedIncomingConnection(true);
+        networkManager.setTls(true);
+        networkManager.setIncomingTLS(true);
+        networkManager.setOutgoingTLS(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
         setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();

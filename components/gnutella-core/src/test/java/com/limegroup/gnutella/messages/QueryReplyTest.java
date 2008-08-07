@@ -69,7 +69,6 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
@@ -121,14 +120,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
 	    cleanFiles(_sharedDir, false);
-	    injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                NetworkManagerStub networkManagerStub = new NetworkManagerStub();
-                networkManagerStub.setAcceptedIncomingConnection(true);
-                bind(NetworkManager.class).toInstance(networkManagerStub);
-            }
-	    });
+	    injector = LimeTestUtils.createInjector();
 	    
         byte[] data = new byte[16];
         new Random().nextBytes(data);
@@ -782,10 +774,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             atLeast(0).of(mockNetworkManager).isPrivateAddress(addr);
             will(returnValue(false));
             atLeast(0).of(mockNetworkManager).getAddress();
-            will(returnValue(InetAddress.getLocalHost().getAddress()));
-            
+            will(returnValue(InetAddress.getLocalHost().getAddress()));            
             atLeast(0).of(mockNetworkManager).acceptedIncomingConnection();
             will(returnValue(acceptedIncomingConnection));
+            atLeast(0).of(mockNetworkManager).isIncomingTLSEnabled();
+            will(returnValue(true));
         }});
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
@@ -812,10 +805,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             atLeast(0).of(mockNetworkManager).isPrivateAddress(addr);
             will(returnValue(false));
             atLeast(0).of(mockNetworkManager).getAddress();
-            will(returnValue(InetAddress.getLocalHost().getAddress()));
-            
+            will(returnValue(InetAddress.getLocalHost().getAddress()));            
             atLeast(0).of(mockNetworkManager).acceptedIncomingConnection();
             will(returnValue(acceptedIncomingConnection));
+            atLeast(0).of(mockNetworkManager).isIncomingTLSEnabled();
+            will(returnValue(true));
         }});
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
@@ -2095,9 +2089,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                NetworkManagerStub networkManagerStub = new NetworkManagerStub();
-                networkManagerStub.setAcceptedIncomingConnection(true);
-                bind(NetworkManager.class).toInstance(networkManagerStub);
                 bind(NetworkInstanceUtils.class).toInstance(mockNetworkInstanceUtils);
             }
 	    });

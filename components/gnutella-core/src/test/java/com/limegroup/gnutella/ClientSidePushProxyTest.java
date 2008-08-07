@@ -25,7 +25,6 @@ import javax.net.ssl.SSLServerSocket;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.nio.ssl.SSLUtils;
@@ -120,8 +119,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         downloadManager.clearAllDownloads();
         
         //      Turn off by default, explicitly test elsewhere.
-        SSLSettings.TLS_INCOMING.setValue(false);
-        SSLSettings.TLS_OUTGOING.setValue(false);
+        networkManagerStub.setIncomingTLS(false);
+        networkManagerStub.setOutgoingTLS(false);
         // duplicate queries are sent out each time, so avoid the DuplicateFilter
         Thread.sleep(2000);        
 
@@ -164,7 +163,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     
     private void doQRPCGTest(boolean sendTLS, boolean settingOn, boolean listenTLS) throws Exception {
         if(settingOn)
-            SSLSettings.TLS_OUTGOING.setValue(true);
+            networkManagerStub.setOutgoingTLS(true);
         
     	setAccepted(false);
         BlockingConnectionUtils.drain(testUP[0]);
@@ -261,7 +260,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     
     private void doHTTPRequestTest(boolean settingOn, boolean expectTLS) throws Exception {
         if(settingOn)
-            SSLSettings.TLS_INCOMING.setValue(true);
+            networkManagerStub.setIncomingTLS(true);
         
     	setAccepted(true);
         BlockingConnectionUtils.drain(testUP[0]);
@@ -410,7 +409,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         setAccepted(true);
         
         if(settingOn)
-            SSLSettings.TLS_INCOMING.setValue(true);
+            networkManagerStub.setIncomingTLS(true);
         
         BlockingConnectionUtils.drain(testUP[0]);
         // some setup

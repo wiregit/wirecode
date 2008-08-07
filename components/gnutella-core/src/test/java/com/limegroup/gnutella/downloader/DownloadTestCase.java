@@ -161,6 +161,9 @@ public abstract class DownloadTestCase extends LimeTestCase {
         networkManager = (NetworkManagerStub) injector.getInstance(NetworkManager.class);
         networkManager.setAcceptedIncomingConnection(true);
         networkManager.setAddress(NetworkUtils.getLocalAddress().getAddress());
+        networkManager.setTls(true);
+        networkManager.setOutgoingTLS(false);
+        networkManager.setIncomingTLS(true);
 
         ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector
                 .getInstance(ConnectionManager.class);
@@ -188,8 +191,6 @@ public abstract class DownloadTestCase extends LimeTestCase {
         managedDownloader = null;
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        SSLSettings.TLS_OUTGOING.setValue(false);
-        SSLSettings.TLS_INCOMING.setValue(true);
 
         // Don't wait for network connections for testing
         RequeryManager.NO_DELAY = true;

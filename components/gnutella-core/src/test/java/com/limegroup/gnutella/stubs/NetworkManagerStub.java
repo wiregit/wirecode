@@ -29,6 +29,9 @@ public class NetworkManagerStub implements NetworkManager {
     private boolean oobCapable;
     private int stableUDPPort = 7777;
     private int fwtVersion;
+    private boolean incomingTLS;
+    private boolean outgoingTLS;
+    private boolean tls;
 
     private EventListenerList<AddressEvent> listeners = new EventListenerList<AddressEvent>();
 
@@ -211,19 +214,31 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public void disableTLS(Throwable reason) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        tls = false;
     }
 
     public boolean isTLSDisabled() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return !tls;
     }
 
     public boolean isIncomingTLSEnabled() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return incomingTLS;
     }
 
     public boolean isOutgoingTLSEnabled() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return outgoingTLS;
+    }
+
+    public void setIncomingTLS(boolean incomingTLS) {
+        this.incomingTLS = incomingTLS;
+    }
+
+    public void setOutgoingTLS(boolean outgoingTLS) {
+        this.outgoingTLS = outgoingTLS;
+    }
+
+    public void setTls(boolean tls) {
+        this.tls = tls;
     }
 
     public void portChanged() {

@@ -81,6 +81,9 @@ public class PingReplyTest extends LimeTestCase {
         networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setPort(5555);
         networkManagerStub.setAddress(new byte[] { 89, 1, 45, 54 }) ;
+        networkManagerStub.setTls(true);
+        networkManagerStub.setIncomingTLS(true);
+        networkManagerStub.setOutgoingTLS(true);
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
