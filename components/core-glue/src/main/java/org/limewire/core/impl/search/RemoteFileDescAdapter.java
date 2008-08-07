@@ -54,18 +54,21 @@ public class RemoteFileDescAdapter implements SearchResult {
 
     @Override
     public ResultType getResultType() {
-        MediaType type = MediaType.getMediaTypeForExtension(getFileExtension());
-        if (type == MediaType.getAudioMediaType()) {
-            return ResultType.AUDIO;
-        } else if (type == MediaType.getVideoMediaType()) {
-            return ResultType.VIDEO;
-        } else if (type == MediaType.getImageMediaType()) {
-            return ResultType.IMAGE;
-        } else if (type == MediaType.getDocumentMediaType()) {
-            return ResultType.DOCUMENT;
-        } else {
-            return ResultType.UNKNOWN;
+        String extension = getFileExtension();
+        if(extension != null) {
+            MediaType type = MediaType.getMediaTypeForExtension(extension);
+            if (type == MediaType.getAudioMediaType()) {
+                return ResultType.AUDIO;
+            } else if (type == MediaType.getVideoMediaType()) {
+                return ResultType.VIDEO;
+            } else if (type == MediaType.getImageMediaType()) {
+                return ResultType.IMAGE;
+            } else if (type == MediaType.getDocumentMediaType()) {
+                return ResultType.DOCUMENT;
+            }
         }
+        
+        return ResultType.UNKNOWN;
     }
 
     @Override

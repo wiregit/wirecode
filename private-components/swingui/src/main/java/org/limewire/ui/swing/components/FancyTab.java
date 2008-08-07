@@ -291,13 +291,17 @@ public class FancyTab extends JXPanel {
             switch(tabState) {
             case SELECTED:
                 FontUtils.removeUnderline(mainButton);
+                FontUtils.removeUnderline(additionalText);
                 mainButton.setForeground(props.getSelectionColor());
+                additionalText.setForeground(props.getSelectionColor());
                 this.setBackgroundPainter(props.getSelectedPainter());
                 removeButton.setIcon(removeSelectedIcon);
                 break;
             case BACKGROUND:
                 FontUtils.underline(mainButton);
+                FontUtils.underline(additionalText);
                 mainButton.setForeground(props.getNormalColor());
+                additionalText.setForeground(props.getNormalColor());
                 this.setBackgroundPainter(props.getNormalPainter());
                 removeButton.setIcon(removeBackgroundIcon);
                 break;
