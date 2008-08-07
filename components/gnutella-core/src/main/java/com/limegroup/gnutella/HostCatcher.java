@@ -290,10 +290,10 @@ public class HostCatcher implements Service {
      */
     private List<EndpointObserver> _catchersWaiting = new LinkedList<EndpointObserver>();
     
-//    /**
-//     * The last allowed time that we can continue ranking pongs.
-//     */
-//    private long lastAllowedPongRankTime = 0;
+    /**
+     * The last allowed time that we can continue ranking pongs.
+     */
+    private long lastAllowedPongRankTime = 0;
     
     /**
      * The amount of time we're allowed to do pong ranking after
@@ -493,9 +493,9 @@ public class HostCatcher implements Service {
         if(have >= MAX_CONNECTIONS)
             return false;
             
-//        long now = System.currentTimeMillis();
-//        if(now > lastAllowedPongRankTime)
-//            return false;
+        long now = System.currentTimeMillis();
+        if(now > lastAllowedPongRankTime)
+            return false;
 
         int size;
         if(connectionServices.isSupernode()) {
@@ -1342,10 +1342,10 @@ public class HostCatcher implements Service {
      * out bootstrap pongs if necessary.
      */
     public void expire() {
-//        synchronized(this) {
-//            long now = System.currentTimeMillis();
-//            lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
-//        }
+        synchronized(this) {
+            long now = System.currentTimeMillis();
+            lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
+        }
         
         recoverHosts();
         
