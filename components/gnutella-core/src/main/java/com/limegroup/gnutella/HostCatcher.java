@@ -494,8 +494,8 @@ public class HostCatcher implements Service {
             return false;
             
         long now = System.currentTimeMillis();
-//        if(now > lastAllowedPongRankTime)
-//            return false;
+        if(now > lastAllowedPongRankTime)
+            return false;
 
         int size;
         if(connectionServices.isSupernode()) {
