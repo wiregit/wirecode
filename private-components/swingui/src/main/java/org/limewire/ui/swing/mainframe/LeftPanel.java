@@ -16,11 +16,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavSelectionListener;
 import org.limewire.ui.swing.nav.NavTree;
-import org.limewire.ui.swing.nav.NavigableTree;
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.swing.GlazedListsSwing;
@@ -29,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class LeftPanel extends JPanel implements NavigableTree {
+class LeftPanel extends JPanel {
 
     private final NavTree navTree;
     
@@ -38,9 +34,9 @@ class LeftPanel extends JPanel implements NavigableTree {
     private Color lineColor;
 
     @Inject
-    public LeftPanel(DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel) {
+    public LeftPanel(NavTree navTree, DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel) {
     	GuiUtils.assignResources(this);
-        this.navTree = new NavTree();
+        this.navTree = navTree;
         DownloadSummaryPanel downloadPanel =  DownloadSummaryPanel.createDownloadSummaryPanel(
                 GlazedListsSwing.swingThreadProxyList(downloadListManager.getDownloads()));
         setMinimumSize(new Dimension(150, 0));
@@ -91,27 +87,6 @@ class LeftPanel extends JPanel implements NavigableTree {
         gbc.insets = new Insets(2, 5, 2, 0);
         gbc.weighty = 0;
         add(filesSharingPanel, gbc);
-    }
-
-    @Override
-    public void addNavigableItem(NavCategory category, NavItem navItem,
-            boolean userRemovable) {
-        navTree.addNavigableItem(category, navItem, userRemovable);
-    }
-
-    @Override
-    public void addNavSelectionListener(NavSelectionListener listener) {
-        navTree.addNavSelectionListener(listener);
-    }
-    
-    @Override
-    public void removeNavigableItem(NavCategory category, NavItem navItem) {
-        navTree.removeNavigableItem(category, navItem);
-    }
-    
-    @Override
-    public void selectNavigableItem(NavCategory category, NavItem navItem) {
-        navTree.selectNavigableItem(category, navItem);
     }
     
     public void goHome() {

@@ -15,7 +15,6 @@ import org.limewire.ui.swing.search.SearchHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 @Singleton
 class NavigatorImpl implements Navigator {
@@ -25,7 +24,7 @@ class NavigatorImpl implements Navigator {
     private final CopyOnWriteArrayList<NavSelectionListener> listeners = new CopyOnWriteArrayList<NavSelectionListener>();
 
     @Inject
-    public NavigatorImpl(@Named("MainTarget") NavigableTarget navTarget, @Named("MainTree") NavigableTree navTree) {
+    public NavigatorImpl(NavigableTarget navTarget, NavigableTree navTree) {
         this.navTarget = navTarget;
         this.navTree = navTree;
         

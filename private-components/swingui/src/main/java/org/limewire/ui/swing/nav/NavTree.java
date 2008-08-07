@@ -15,6 +15,9 @@ import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class NavTree extends JXPanel implements NavigableTree {
         
     private final List<NavSelectionListener> navSelectionListeners = new ArrayList<NavSelectionListener>();
