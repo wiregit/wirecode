@@ -142,6 +142,7 @@ implements TableCellEditor, TableCellRenderer {
                 junkButton : new JButton();
             button.setIcon(upIcon);
             button.setRolloverIcon(overIcon);
+            button.setPressedIcon(downIcon);
             button.setSelectedIcon(downIcon);
             
             button.setToolTipText(TOOLTIPS[buttonIndex]);

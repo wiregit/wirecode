@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -34,6 +35,8 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 public class BaseResultPanel extends JXPanel implements Scrollable {
+    
+    private static final int ACTION_COLUMN = 4;
     
     private final JList resultsList;
     private final JXTable resultsTable;
@@ -76,6 +79,20 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
                 sortedResults, new ResultTableFormat());
         resultsTable = new JXTable(tableModel);
         
+        // This enables rollover icons on the buttons to work.
+        // Note that this approach ... calling editCellAt
+        // based on mouse movements ... could be an issue
+        // if other cells in the table are truely editable.
+        resultsTable.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int col = resultsTable.columnAtPoint(e.getPoint());
+                if (col != ACTION_COLUMN) return;
+                int row = resultsTable.rowAtPoint(e.getPoint());
+                resultsTable.editCellAt(row, col);
+            }
+        });
+        
         Highlighter highlighter = HighlighterFactory.createAlternateStriping();
         resultsTable.setHighlighters(new Highlighter[] { highlighter });
         
@@ -84,7 +101,7 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
             resultsTable, sortedResults, multiColumnSort);
         
         TableColumnModel tcm = resultsTable.getColumnModel();
-        TableColumn tc = tcm.getColumn(4);
+        TableColumn tc = tcm.getColumn(ACTION_COLUMN);
         ActionColumnTableCellEditor actce = new ActionColumnTableCellEditor();
         tc.setCellRenderer(actce);
         tc.setCellEditor(actce);

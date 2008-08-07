@@ -56,7 +56,10 @@ class TopPanel extends JPanel implements SearchNavigator {
     private final TextFieldWithEnterButton textField;
     private final FancyTabList searchList;
     private final Navigator navigator;
-    @Resource private Icon enterIcon;
+    
+    @Resource private Icon enterUpIcon;
+    @Resource private Icon enterOverIcon;
+    @Resource private Icon enterDownIcon;
     
     @Inject
     public TopPanel(final SearchHandler searchHandler, Navigator navigator) {
@@ -67,7 +70,8 @@ class TopPanel extends JPanel implements SearchNavigator {
         setPreferredSize(new Dimension(1024, 40));
         
 	    GuiUtils.assignResources(this);
-        textField = new TextFieldWithEnterButton(15, "Search...", enterIcon);
+        textField = new TextFieldWithEnterButton(
+            15, "Search...", enterUpIcon, enterOverIcon, enterDownIcon);
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
         combo.setName("TopPanel.combo");
@@ -83,10 +87,10 @@ class TopPanel extends JPanel implements SearchNavigator {
                 if (value != null) {
                     switch((SearchCategory)value) {
                     case ALL: value = I18n.tr("All"); break;
-                    case AUDIO: value = I18n.tr("Audio"); break;
+                    case AUDIO: value = I18n.tr("Music"); break;
                     case DOCUMENTS: value = I18n.tr("Documents"); break;
                     case IMAGES: value = I18n.tr("Images"); break;
-                    case VIDEO: value = I18n.tr("Video"); break;
+                    case VIDEO: value = I18n.tr("Videos"); break;
                     default:
                         throw new IllegalArgumentException("invalid category: " + value);
                     }

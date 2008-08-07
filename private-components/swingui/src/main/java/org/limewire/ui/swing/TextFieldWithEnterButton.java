@@ -15,6 +15,8 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * This is a custom component that includes a JTextField and a JButton.
@@ -30,7 +32,7 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
     private JTextField textField;
     private List<ActionListener> listeners = new ArrayList<ActionListener>();
     private String promptText;
-    private boolean empty = true;
+    private boolean empty;
     
     /**
      * Creates a FilteredTextField that displays a given number of columns.
@@ -40,7 +42,8 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      * @param icon the Icon to be display on the button
      */
     public TextFieldWithEnterButton(
-        int columns, String promptText, Icon icon) {
+        int columns, String promptText,
+        Icon upIcon, Icon overIcon, Icon downIcon) {
         
         this.promptText = promptText;
         
@@ -48,6 +51,7 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
         
         // Configure the JTextField.
         textField = new JTextField(columns);
+        prompt();
         textField.addFocusListener(this);
         textField.addActionListener(new ActionListener() {
             @Override
@@ -55,16 +59,31 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
                 notifyListeners();
             }
         });
-        prompt();
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent event) {
+                updateEmpty();
+            }
+            @Override
+            public void insertUpdate(DocumentEvent event) {
+                updateEmpty();
+            }
+            @Override
+            public void removeUpdate(DocumentEvent event) {
+                updateEmpty();
+            }
+        });
         add(textField);
         
         // Configure the JButton.
-        button = new JButton(icon);
+        button = new JButton(upIcon);
+        button.setEnabled(false);
+        button.setRolloverIcon(overIcon);
+        button.setPressedIcon(downIcon);
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
-        Dimension size =
-            new Dimension(icon.getIconWidth(), icon.getIconHeight());
-        button.setPreferredSize(size);
+        button.setPreferredSize(
+            getButtonSize(new Icon[] { upIcon, overIcon, downIcon }));
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -79,19 +98,12 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
         setBorder(border);
     }
     
+    /**
+     * Adds an ActionListener.
+     * @param listener the ActionListener
+     */
     public synchronized void addActionListener(ActionListener listener) {
         listeners.add(listener);
-    }
-    
-    private synchronized void notifyListeners() {
-        for (ActionListener listener : listeners) {
-            ActionEvent event = new ActionEvent(this, 0, null);
-            listener.actionPerformed(event);
-        }
-    }
-    
-    public synchronized void removeActionListener(ActionListener listener) {
-        listeners.remove(listener);
     }
     
     /**
@@ -112,8 +124,19 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      */
     @Override
     public void focusLost(FocusEvent e) {
-        empty = textField.getText().length() == 0;
-        prompt();
+        if (empty) prompt();
+    }
+    
+    private Dimension getButtonSize(Icon[] icons) {
+        int width = 0;
+        int height = 0;
+        
+        for (Icon icon : icons) {
+            width = Math.max(width, icon.getIconWidth());
+            height = Math.max(height, icon.getIconHeight());
+        }
+        
+        return new Dimension(width, height);
     }
     
     /**
@@ -124,11 +147,33 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
         return empty ? "" : textField.getText();
     }
     
-    private void prompt() {
-        if (empty) {
-            textField.setForeground(Color.GRAY);
-            textField.setText(promptText);
+    /**
+     * Notifies ActionListeners only if the text field isn't empty.
+     */
+    private synchronized void notifyListeners() {
+        if (empty) return;
+        
+        for (ActionListener listener : listeners) {
+            ActionEvent event = new ActionEvent(this, 0, null);
+            listener.actionPerformed(event);
         }
+    }
+    
+    /**
+     * Prompts the user by added grayed text to the text field.
+     */
+    private void prompt() {
+        textField.setForeground(Color.GRAY);
+        textField.setText(promptText);
+        empty = true;
+    }
+    
+    /**
+     * Removes an ActionListener.
+     * @param listener the ActionListener
+     */
+    public synchronized void removeActionListener(ActionListener listener) {
+        listeners.remove(listener);
     }
     
     /**
@@ -137,6 +182,14 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      */
     public void setText(String text) {
         textField.setText(text);
-        empty = false;
+        updateEmpty();
+    }
+    
+    /**
+     * Updates the value of the empty flag.
+     */
+    private void updateEmpty() {
+        empty = textField.getText().length() == 0;
+        button.setEnabled(!empty);
     }
 }

@@ -68,7 +68,10 @@ public class FancyTab extends JXPanel {
     //@Resource // Currently not picked up -- background is not shown.
     private Icon removeBackgroundIcon = null;
 
-    public FancyTab(TabActionMap actionMap, ButtonGroup group, FancyTabProperties fancyTabProperties) {
+    public FancyTab(TabActionMap actionMap,
+            ButtonGroup group,
+            FancyTabProperties fancyTabProperties) {
+        
         GuiUtils.assignResources(this);
         
         this.tabActions = actionMap;
@@ -85,7 +88,8 @@ public class FancyTab extends JXPanel {
         mainButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                changeState(e.getStateChange() == ItemEvent.SELECTED ? TabState.SELECTED : TabState.BACKGROUND);
+                changeState(e.getStateChange() == ItemEvent.SELECTED ?
+                    TabState.SELECTED : TabState.BACKGROUND);
             }
         });
             
@@ -113,22 +117,22 @@ public class FancyTab extends JXPanel {
         layout.setAutoCreateGaps(true);
         
         layout.setHorizontalGroup(layout.createSequentialGroup()
-                .addGap(5)
-                .addComponent(busyLabel)
-                .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                .addComponent(additionalText)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(removeButton)
-                .addGap(5)
-                );
+            .addGap(5)
+            .addComponent(busyLabel)
+            .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+            .addComponent(additionalText)
+            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(removeButton)
+            .addGap(5)
+            );
         
         layout.setVerticalGroup(
-                    layout.createParallelGroup(GroupLayout.Alignment.CENTER, true)
-                    .addComponent(busyLabel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(additionalText, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(removeButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                );
+            layout.createParallelGroup(GroupLayout.Alignment.CENTER, true)
+            .addComponent(busyLabel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(additionalText, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(removeButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            );
     }
     
     @Override
@@ -140,7 +144,8 @@ public class FancyTab extends JXPanel {
         final JXBusyLabel busy = new JXBusyLabel(new Dimension(16, 16));
         busy.setVisible(false);
         
-        if(tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) == Boolean.TRUE) {
+        if(tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) ==
+            Boolean.TRUE) {
             busy.setBusy(true);
             busy.setVisible(true);
         }
@@ -218,6 +223,7 @@ public class FancyTab extends JXPanel {
         button.setModel(new NoToggleModel());
         button.setAction(tabActions.getMainAction());
         button.setActionCommand(TabActionMap.SELECT_COMMAND);
+        button.setBorder(null);
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
         button.setMargin(new Insets(0, 0, 0, 0));
