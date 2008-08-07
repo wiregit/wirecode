@@ -1,8 +1,14 @@
 package org.limewire.ui.swing.browser;
 
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
 import org.limewire.ui.swing.util.SwingUtils;
+import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaPanel;
+import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
+import org.mozilla.interfaces.nsIBaseWindow;
 
 
 /**
@@ -47,8 +53,38 @@ public class Browser extends MozillaPanel {
             @Override
             public void run() {
                 addKeyListener(new MozillaKeyListener(chromeAdapter));
+                addComponentListener(new VisibilityListener());
             }
         });
+    }
+    
+    private class VisibilityListener extends ComponentAdapter {
+        @Override
+        public void componentHidden(ComponentEvent e) {
+            setBrowserVisibility(false);
+        }
+
+        @Override
+        public void componentShown(ComponentEvent e) {
+            setBrowserVisibility(true);
+        }
+
+    }
+    
+    private void setBrowserVisibility(final boolean isVisible) {
+        // Mozilla is not threadsafe so most mozilla methods must be called on the
+        // mozilla thread. This is asynchronous so as not to tie up the EDT.
+        MozillaExecutor.mozAsyncExec(new Runnable() {
+            public void run() {
+                ChromeAdapter chromeAdapter = getChromeAdapter();
+                if (chromeAdapter != null) {
+                    nsIBaseWindow baseWindow = XPCOMUtils.qi(chromeAdapter.getWebBrowser(),
+                            nsIBaseWindow.class);
+                    baseWindow.setVisibility(isVisible);
+                }
+            }
+        });
+
     }
   
 }
