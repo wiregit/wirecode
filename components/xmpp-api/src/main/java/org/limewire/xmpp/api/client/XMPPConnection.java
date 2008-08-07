@@ -1,6 +1,5 @@
-package org.limewire.xmpp.client.service;
+package org.limewire.xmpp.api.client;
 
-import org.limewire.xmpp.client.impl.XMPPException;
 
 public interface XMPPConnection {
     public XMPPConnectionConfiguration getConfiguration();

@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.net.address.Address;
-import org.limewire.xmpp.client.service.LimePresence;
-import org.limewire.xmpp.client.service.Presence;
-import org.limewire.xmpp.client.service.PresenceListener;
-import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.User;
-import org.limewire.xmpp.client.service.XMPPConnection;
-import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.xmpp.api.client.LimePresence;
+import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.RosterListener;
+import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -49,7 +48,7 @@ public class RosterListenerImpl implements RosterListener {
         final String name = user.getName();
         user.addPresenceListener(new PresenceListener() {
             public void presenceChanged(Presence presence) {
-                String id = StringUtils.parseBareAddress(presence.getJID());
+                String id = parseBareAddress(presence.getJID());
                 if(presence.getType().equals(Presence.Type.available)) {
                     if(roster.get(id) == null) {
                         roster.put(id, new ArrayList<Presence>());
@@ -100,6 +99,30 @@ public class RosterListenerImpl implements RosterListener {
 
     public void userDeleted(String id) {
         
+    }
+    
+    /**
+     * Returns the XMPP address with any resource information removed. For example,
+     * for the address "matt@jivesoftware.com/Smack", "matt@jivesoftware.com" would
+     * be returned.
+     *
+     * @param xmppAddress the XMPP address.
+     * @return the bare XMPP address without resource information.
+     */
+    private static String parseBareAddress(String xmppAddress) {
+        if (xmppAddress == null) {
+            return null;
+        }
+        int slashIndex = xmppAddress.indexOf("/");
+        if (slashIndex < 0) {
+            return xmppAddress;
+        }
+        else if (slashIndex == 0) {
+            return "";
+        }
+        else {
+            return xmppAddress.substring(0, slashIndex);
+        }
     }
 }
 

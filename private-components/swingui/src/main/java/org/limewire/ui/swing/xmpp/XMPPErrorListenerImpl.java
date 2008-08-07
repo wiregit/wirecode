@@ -3,9 +3,9 @@ package org.limewire.ui.swing.xmpp;
 import com.google.inject.Singleton;
 import com.google.inject.Inject;
 
-import org.limewire.xmpp.client.impl.XMPPException;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
-import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.xmpp.api.client.XMPPErrorListener;
+import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.XMPPService;
 
 @Singleton
 class XMPPErrorListenerImpl implements XMPPErrorListener{

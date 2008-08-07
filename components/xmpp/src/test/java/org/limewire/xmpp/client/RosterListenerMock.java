@@ -3,13 +3,13 @@ package org.limewire.xmpp.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.Presence;
-import org.limewire.xmpp.client.service.FileMetaData;
-import org.limewire.xmpp.client.service.User;
-import org.limewire.xmpp.client.service.PresenceListener;
-import org.limewire.xmpp.client.service.LimePresence;
-import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.api.client.LimePresence;
+import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.RosterListener;
+import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPService;
 import org.jivesoftware.smack.util.StringUtils;
 
 import com.google.inject.Inject;

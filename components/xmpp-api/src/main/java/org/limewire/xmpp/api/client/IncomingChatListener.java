@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.service;
+package org.limewire.xmpp.api.client;
 
 /**
  * A listener style class that is notified of new incoming chats

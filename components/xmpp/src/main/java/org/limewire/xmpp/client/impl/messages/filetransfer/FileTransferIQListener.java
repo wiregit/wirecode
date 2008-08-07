@@ -6,7 +6,7 @@ import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.limewire.xmpp.client.service.FileOfferHandler;
+import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;

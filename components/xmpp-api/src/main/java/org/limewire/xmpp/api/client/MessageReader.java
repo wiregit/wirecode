@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.service;
+package org.limewire.xmpp.api.client;
 
 /**
  * Called by the xmpp service when a chat message is received

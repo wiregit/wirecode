@@ -7,10 +7,10 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.limewire.net.address.Address;
+import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
-import org.limewire.xmpp.client.service.FileMetaData;
-import org.limewire.xmpp.client.service.LimePresence;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 

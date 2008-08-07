@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.service;
+package org.limewire.xmpp.api.client;
 
 /**
  * Allows the xmpp service user to provide configuration for xmpp login.

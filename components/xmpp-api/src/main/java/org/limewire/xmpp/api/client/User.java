@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.service;
+package org.limewire.xmpp.api.client;
 
 /**
  * Represents a user ("buddy") in a persons roster

@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
-import org.limewire.xmpp.client.service.FileMetaData;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 

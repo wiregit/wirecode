@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 

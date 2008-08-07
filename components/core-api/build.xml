@@ -10,42 +10,44 @@
     <import file="../common/build-macros.xml" />
     <import file="../common/build.xml"/>
     <import file="../net/build.xml"/>
+    <import file="../xmpp-api/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize, lw-net.initialize" unless="initialized.core-api">
+    <target name="initialize" depends="lw-common.initialize, lw-net.initialize, lw-xmpp-api.initialize" unless="initialized.core-api">
         <do.setup-properties component="core-api">
 			<src-classpath>
                 <path refid="build.limewire.components.net.buildpath"/>
+                <path refid="build.limewire.components.xmpp-api.buildpath"/>
                 <pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
 				<pathelement location="${limewire.lib.jars}/glazedlists-1.7.0_java15.jar"/>
 			</src-classpath>
         </do.setup-properties>
     </target>
 	
-	<target name="clean" depends="lw-net.clean">
+	<target name="clean" depends="initialize">
 	    <do.clean component="core-api"/>
 	</target>
     
-    <target name="compile" depends="lw-net.compile">
+    <target name="compile" depends="lw-net.compile, lw-xmpp-api.compile">
         <!-- Currently no tests - using compile-src in the meantime -->
     	<!--<do.compile component="core-api"/>-->
     	<do.compile-src component="core-api"/>
         <mkdir dir="${build.limewire.components.core-api.tests}"/>
     </target>
 	
-	<target name="compile-src" depends="lw-net.compile-src">
+	<target name="compile-src" depends="lw-net.compile-src, lw-xmpp-api.compile-src">
 	    <do.compile-src component="core-api"/>
 	</target>
     
-	<target name="clean-src" depends="lw-net.clean-src">
+	<target name="clean-src" depends="initialize">
 	    <do.clean-src component="core-api"/>
 	</target>
 	
-	<target name="compile-tests">
+	<target name="compile-tests" depends="compile-src">
 	    <!--<do.compile-tests component="core-api"/>-->
 	    <mkdir dir="${build.limewire.components.core-api.tests}"/>
 	</target>
 	
-	<target name="clean-tests">
+	<target name="clean-tests" depends="initialize">
 	    <do.clean-tests component="core-api"/>
 	</target>
 	

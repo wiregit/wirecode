@@ -31,6 +31,11 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
+      <artifactId>lw-xmpp-api</artifactId>
+       <version>${limewire.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
       <artifactId>lw-smack</artifactId>
       <version>3.1</version>
     </dependency>

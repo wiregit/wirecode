@@ -22,9 +22,9 @@ import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.client.service.FileOfferHandler;
-import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
+import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.RosterListener;
+import org.limewire.xmpp.api.client.XMPPErrorListener;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;

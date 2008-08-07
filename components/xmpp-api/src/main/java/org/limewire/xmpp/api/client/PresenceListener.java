@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.service;
+package org.limewire.xmpp.api.client;
 
 /**
  * Allows users of the xmpp service to listen for presence changes of

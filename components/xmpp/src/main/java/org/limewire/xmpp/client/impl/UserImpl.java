@@ -7,9 +7,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.client.service.Presence;
-import org.limewire.xmpp.client.service.PresenceListener;
-import org.limewire.xmpp.client.service.User;
+import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.User;
 
 public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);

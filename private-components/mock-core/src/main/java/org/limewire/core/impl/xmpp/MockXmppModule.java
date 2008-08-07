@@ -1,6 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.AbstractModule;
 

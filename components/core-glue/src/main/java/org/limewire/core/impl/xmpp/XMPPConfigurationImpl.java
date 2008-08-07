@@ -1,8 +1,8 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
-import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
+import org.limewire.xmpp.api.client.RosterListener;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPErrorListener;
 
 public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
 

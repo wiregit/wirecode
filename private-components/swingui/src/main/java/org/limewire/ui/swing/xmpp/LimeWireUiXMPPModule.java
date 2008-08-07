@@ -1,9 +1,9 @@
 package org.limewire.ui.swing.xmpp;
 
 import org.limewire.inject.AbstractModule;
-import org.limewire.xmpp.client.service.FileOfferHandler;
-import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
+import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.RosterListener;
+import org.limewire.xmpp.api.client.XMPPErrorListener;
 
 public class LimeWireUiXMPPModule extends AbstractModule {
     protected void configure() {

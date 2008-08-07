@@ -17,18 +17,19 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.listener.EventListener;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.RosterListener;
+import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
-import org.limewire.xmpp.client.service.FileOfferHandler;
-import org.limewire.xmpp.client.service.User;
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
-import org.limewire.xmpp.client.service.RosterListener;
 
 //import com.limegroup.gnutella.BrowseHostReplyHandler;
 
-class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnection, EventListener<AddressEvent> {
+class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection, EventListener<AddressEvent> {
     
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     
@@ -48,7 +49,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
         this.configuration = configuration;
         this.fileOfferHandler = fileOfferHandler;
         this.addressFactory = addressFactory;
-        this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener>();
+        this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.api.client.RosterListener>();
         if(configuration.getRosterListener() != null) {
             this.rosterListeners.add(configuration.getRosterListener());
         }

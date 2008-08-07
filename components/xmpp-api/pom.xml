@@ -8,10 +8,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>lw-core-api</artifactId>
+  <artifactId>lw-xmpp-api</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
-  <name>LimeWire Core API Component</name>
+  <name>LimeWire XMPP API Component</name>
 
   <dependencies>
     <dependency>
@@ -20,20 +20,10 @@
     	<version>${limewire.version}</version>
     </dependency>
     <dependency>
-    	<groupId>org.limewire</groupId>
-    	<artifactId>lw-xmpp-api</artifactId>
-    	<version>${limewire.version}</version>
-    </dependency>    
-    <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>
 	  <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>net.java.dev.glazedlists</groupId>
-    	<artifactId>glazedlists_java15</artifactId>
-    	<version>1.7.0</version>
     </dependency>
   </dependencies>
 </project>

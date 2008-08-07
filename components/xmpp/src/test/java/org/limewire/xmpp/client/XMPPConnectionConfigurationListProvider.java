@@ -3,7 +3,7 @@ package org.limewire.xmpp.client;
 import java.util.List;
 import java.util.Arrays;
 
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 import com.google.inject.Provider;
 

@@ -2,11 +2,11 @@ package org.limewire.core.impl.xmpp;
 
 import java.util.List;
 
-import org.limewire.xmpp.client.service.FileOfferHandler;
-import org.limewire.xmpp.client.service.XMPPConnection;
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
-import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPErrorListener;
+import org.limewire.xmpp.api.client.XMPPService;
 
 class MockXmppService implements XMPPService {
 

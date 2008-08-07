@@ -1,8 +1,8 @@
 package org.limewire.xmpp.client;
 
-import org.limewire.xmpp.client.service.IncomingChatListener;
-import org.limewire.xmpp.client.service.MessageWriter;
-import org.limewire.xmpp.client.service.MessageReader;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
 
 public class IncomingChatListenerMock implements IncomingChatListener {
     MessageWriter writer;
