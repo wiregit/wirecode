@@ -10,10 +10,6 @@ import org.limewire.swarm.SwarmFileSystem;
 
 public class NoOpFileVerifier implements SwarmBlockVerifier {
 
-    public long getBlockSize() {
-        return 1024;
-    }
-
     public List<Range> scanForVerifiableRanges(IntervalSet writtenBlocks, long completeSize) {
         return Collections.emptyList();
     }

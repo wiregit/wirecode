@@ -18,7 +18,4 @@ public interface SwarmBlockVerifier {
      * Returns true if a range is verified, false otherwise.
      */
     boolean verify(Range range, SwarmFileSystem swarmFile);
-
-    /** Returns a suggested block size, for easier verification. */
-    long getBlockSize();
 }

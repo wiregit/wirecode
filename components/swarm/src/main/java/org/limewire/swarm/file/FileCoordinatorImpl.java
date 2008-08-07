@@ -32,10 +32,10 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
     private static final Log LOG = LogFactory.getLog(FileCoordinatorImpl.class);
 
     /** The minimum blocksize to lease. */
-    private static final long DEFAULT_MIN_BLOCK_SIZE = 16 * 1024;
+    private static final long DEFAULT_BLOCK_SIZE = 16 * 1024;
 
     /** The minimum block size to use. */
-    private final long minBlockSize;
+    private final long blockSize;
 
     /** All ranges that are out on lease. */
     private final IntervalSet leasedBlocks;
@@ -69,11 +69,11 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
     public FileCoordinatorImpl(SwarmFileSystem fileSystem, SwarmBlockVerifier swarmFileVerifier,
             ExecutorService writeService, SwarmBlockSelector selectionStrategy) {
-        this(fileSystem, swarmFileVerifier, writeService, selectionStrategy, DEFAULT_MIN_BLOCK_SIZE);
+        this(fileSystem, swarmFileVerifier, writeService, selectionStrategy, DEFAULT_BLOCK_SIZE);
     }
 
     public FileCoordinatorImpl(SwarmFileSystem fileSystem, SwarmBlockVerifier swarmFileVerifier,
-            ExecutorService writeService, SwarmBlockSelector selectionStrategy, long minBlockSize) {
+            ExecutorService writeService, SwarmBlockSelector selectionStrategy, long blockSize) {
         this.leasedBlocks = new IntervalSet();
         this.writtenBlocks = new IntervalSet();
         this.pendingBlocks = new IntervalSet();
@@ -82,7 +82,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         this.fileSystem = fileSystem;
         this.writeService = writeService;
         this.swarmBlockVerifier = swarmFileVerifier;
-        this.minBlockSize = minBlockSize;
+        this.blockSize = blockSize;
     }
 
     public Range lease() {
@@ -93,16 +93,14 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         // Lease modifies, so clone.
         if (availableRanges != null)
             availableRanges = availableRanges.clone();
-        return lease(availableRanges, Math.max(minBlockSize, swarmBlockVerifier.getBlockSize()),
-                blockSelector);
+        return lease(availableRanges, blockSize, blockSelector);
     }
 
     public Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector swarmSelector) {
         // Lease modifies, so clone.
         if (availableRanges != null)
             availableRanges = availableRanges.clone();
-        return lease(availableRanges, Math.max(minBlockSize, swarmBlockVerifier.getBlockSize()),
-                blockSelector);
+        return lease(availableRanges, blockSize, blockSelector);
     }
 
     protected Range lease(IntervalSet availableRanges, long blockSize,
@@ -269,8 +267,8 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
                     fileSystem.closeSwarmFile(swarmFile);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
-                    //TODO need to figure out what we will do in this case,
-                    //most likely  jsut log the message
+                    // TODO need to figure out what we will do in this case,
+                    // most likely jsut log the message
                     e.printStackTrace();
                 }
             }

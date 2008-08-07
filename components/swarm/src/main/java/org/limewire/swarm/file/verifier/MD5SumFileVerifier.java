@@ -32,10 +32,6 @@ public class MD5SumFileVerifier implements SwarmBlockVerifier {
         rangeMD5s.put(range, md5String);
     }
 
-    public long getBlockSize() {
-        return 1024;
-    }
-
     public List<Range> scanForVerifiableRanges(IntervalSet writtenBlocks, long completeSize) {
         List<Range> ret = new ArrayList<Range>();
         for (Map.Entry<Range, String> entry : rangeMD5s.entrySet()) {

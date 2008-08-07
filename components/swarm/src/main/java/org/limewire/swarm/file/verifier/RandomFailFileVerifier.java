@@ -11,10 +11,6 @@ public class RandomFailFileVerifier implements SwarmBlockVerifier {
 
     private static final double PERCENTAGE_FAIL = 0.10;
 
-    public long getBlockSize() {
-        return 1024;
-    }
-
     public List<Range> scanForVerifiableRanges(IntervalSet writtenBlocks, long completeSize) {
         return writtenBlocks.getAllIntervalsAsList();
     }
