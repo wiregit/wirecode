@@ -99,6 +99,13 @@ public class MockLibraryManager implements LibraryManager {
 
     @Override
     public void addGnutellaFile(File file) {
+        MockFileItem item = new MockFileItem(file.getName(), 1000,12345,23456);
+        gnutellaList.add(item);
+    }
+
+    @Override
+    public void removeGnutellaFile(File file) {
+        // TODO Auto-generated method stub
         
     }
 }

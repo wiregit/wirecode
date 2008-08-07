@@ -174,4 +174,9 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     public void addGnutellaFile(File file) { 
         fileManager.addSharedFileAlways(file);
     }
+
+    @Override
+    public void removeGnutellaFile(File file) {
+        fileManager.getSharedFileList().remove(fileManager.getFileDesc(file));
+    }
 }

@@ -24,4 +24,6 @@ public interface LibraryManager {
     void removeBuddy(String name);
     
     void addGnutellaFile(File file);
+    
+    void removeGnutellaFile(File file);
 }

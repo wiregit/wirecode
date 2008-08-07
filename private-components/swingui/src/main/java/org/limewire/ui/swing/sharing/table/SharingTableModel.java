@@ -9,7 +9,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 public class SharingTableModel extends EventTableModel<FileItem> {
 
     private final EventList<FileItem> sharedItems;
-    private static final int COLUMN_COUNT = 4;
+    private static final int COLUMN_COUNT = 5;
     
     public SharingTableModel(EventList<FileItem> sharedItems) {
         super(sharedItems, new SharingTableFormat());
@@ -33,6 +33,7 @@ public class SharingTableModel extends EventTableModel<FileItem> {
             else if(column == 1) return "Size";
             else if(column == 2) return "Created";
             else if(column == 3) return "Modified";
+            else if(column == 4) return "Actions";
             
             throw new IllegalStateException("Unknown column:" + column);
         }
@@ -43,6 +44,7 @@ public class SharingTableModel extends EventTableModel<FileItem> {
             else if(column == 1) return baseObject.getSize();
             else if(column == 2) return baseObject.getCreationTime();
             else if(column == 3) return baseObject.getLastModifiedTime();
+            else if(column == 4) return baseObject;
             
             throw new IllegalStateException("Unknown column:" + column);
         }        

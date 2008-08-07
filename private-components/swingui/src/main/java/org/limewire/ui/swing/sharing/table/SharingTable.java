@@ -18,4 +18,13 @@ public class SharingTable extends StripedJXTable {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setHighlighters(HighlighterFactory.createSimpleStriping());
     }
+    
+    @Override
+    public boolean isCellEditable(int row, int column) {
+    	//TODO: this needs to be fixed to be non static in case
+    	//	a column is removed or moved
+        if(column == 4)
+            return true;
+        return false;        
+    }
 }
