@@ -17,6 +17,7 @@ import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.swing.GlazedListsSwing;
@@ -34,11 +35,10 @@ class LeftPanel extends JPanel {
     private Color lineColor;
 
     @Inject
-    public LeftPanel(NavTree navTree, DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel) {
+    public LeftPanel(NavTree navTree, DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel, Navigator navigator) {
     	GuiUtils.assignResources(this);
         this.navTree = navTree;
-        DownloadSummaryPanel downloadPanel =  DownloadSummaryPanel.createDownloadSummaryPanel(
-                GlazedListsSwing.swingThreadProxyList(downloadListManager.getDownloads()));
+        DownloadSummaryPanel downloadPanel = new DownloadSummaryPanel(GlazedListsSwing.swingThreadProxyList(downloadListManager.getDownloads()), navigator);
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));

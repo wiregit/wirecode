@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Comparator;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,6 +26,10 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavSelectionListener;
+import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -52,6 +57,7 @@ public class DownloadSummaryPanel extends JPanel {
 	
 	private JLabel titleLabel;
 	private JLabel moreLabel;
+	private JLabel completeLabel;
 	private EventList<DownloadItem> allList;
     private EventList<DownloadItem> warningList;
     private EventList<DownloadItem> unfinishedList;
@@ -73,32 +79,42 @@ public class DownloadSummaryPanel extends JPanel {
     @Resource
     private Color allCompleteColor;
 
+    @Resource
+    private Color highlightColor;
+    @Resource
+    private Color highlightFontColor;
+    @Resource
+    private Color fontColor;
 
-    /**
-     * instantiates DownloadSummaryPanel and adds listeners
-     */
-    public static DownloadSummaryPanel createDownloadSummaryPanel(final EventList<DownloadItem> itemList){
-        DownloadSummaryPanel panel = new DownloadSummaryPanel(itemList);
-        //adding listeners to EventList can't be done in the constructor (would allow this to escape)
-        panel.addListeners();
-        return panel;
-    }
-    
+    private Navigator navigator;
+
+
+    private boolean selected;
+
+
+    private DownloadStatusPanelRenderer downloadStatusPanelRenderer;
+
+
+     
 
 	/**
 	 * Create the panel
+	 * @param navigator2 
 	 */
-	private DownloadSummaryPanel(final EventList<DownloadItem> itemList) {
+	public DownloadSummaryPanel(final EventList<DownloadItem> itemList, Navigator navigator) {
 	    GuiUtils.assignResources(this);
+	    
+	    this.navigator = navigator;
+        this.allList = itemList;
 
         setLayout(new BorderLayout());
                 
         completePanel = new JPanel(new BorderLayout());
-        JLabel completeLabel = new JLabel("<html><u>" + I18n.tr("Downloads Complete") + "</u></html>", JLabel.CENTER);
+        completePanel.setOpaque(false);
+        completeLabel = new JLabel("<html><u>" + I18n.tr("Downloads Complete") + "</u></html>", JLabel.CENTER);
         completeLabel.setForeground(allCompleteColor);
         completePanel.add(completeLabel);
         
-	    this.allList = itemList;
         unfinishedList = new FilterList<DownloadItem>(allList, new DownloadStateExcluder(DownloadState.DONE));
         warningList = new FilterList<DownloadItem>(allList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		
@@ -128,12 +144,15 @@ public class DownloadSummaryPanel extends JPanel {
 		table = new JTable(new DownloadTableModel(chokeList));
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
+		table.setOpaque(false);
 		
 		//TODO: sorting
-		table.setDefaultRenderer(DownloadItem.class, new DownloadStatusPanelRenderer());
+		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
+		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
+        cardPanel.setOpaque(false);
 
         add(cardPanel, BorderLayout.CENTER);
 
@@ -146,8 +165,10 @@ public class DownloadSummaryPanel extends JPanel {
 		adjustVisibility();  
 		
 		addListeners();
+		
 	}
 	
+    
 	private void addListeners(){
 	    //update title when number of downloads changes and hide or show panel as necessary
         allList.addListEventListener(new ListEventListener<DownloadItem>() {
@@ -187,6 +208,39 @@ public class DownloadSummaryPanel extends JPanel {
                 setWarningVisible(false);
             }
         });
+        
+        navigator.addNavListener(new NavSelectionListener(){
+            @Override
+            public void navItemSelected(NavCategory category, NavItem navItem) {
+               setSelected(category == NavCategory.DOWNLOAD);
+            }            
+        });
+	}
+	
+	private void setSelected(boolean selected) {
+	    if (isSelected() != selected) {
+            this.selected = selected;
+            setOpaque(selected);
+            if (selected) {
+                setBackground(highlightColor);
+                setBorder(BorderFactory.createLoweredBevelBorder());
+                titleLabel.setForeground(highlightFontColor);
+                moreLabel.setForeground(highlightFontColor);
+                completeLabel.setForeground(highlightColor);
+                downloadStatusPanelRenderer.setForeground(highlightFontColor);
+            } else {
+             //   setBackground(Color.WHITE);
+                setBorder(null);
+                titleLabel.setForeground(fontColor);
+                moreLabel.setForeground(moreColor);
+                completeLabel.setForeground(allCompleteColor);
+                downloadStatusPanelRenderer.setForeground(fontColor);
+            }
+        }
+    }
+	
+	private boolean isSelected(){
+	    return selected;
 	}
     
 	//hide panel if there are no downloads.  show it if there are
@@ -260,6 +314,8 @@ public class DownloadSummaryPanel extends JPanel {
 
 		public DownloadStatusPanelRenderer() {
 			super(new GridBagLayout());
+			nameLabel = new JLabel();
+            percentLabel = new JLabel();
 
 	        FontUtils.changeSize(nameLabel, -1);
 	        FontUtils.changeSize(percentLabel, -1);
@@ -272,14 +328,28 @@ public class DownloadSummaryPanel extends JPanel {
 			gbc.fill = GridBagConstraints.BOTH;
 			gbc.anchor = GridBagConstraints.WEST;
 			nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
+			nameLabel.setOpaque(false);
 			add(nameLabel, gbc);
 
 			gbc.gridx = 1;
 			gbc.weightx = 0;
 			gbc.anchor = GridBagConstraints.EAST;
 			percentLabel.setAlignmentY(JLabel.RIGHT_ALIGNMENT);
+			
 			add(percentLabel, gbc);
 		}
+		
+		@Override
+		public void setForeground(Color c) {
+            super.setForeground(c);
+            //prevent NPE at super construction
+            if (nameLabel != null) {
+                nameLabel.setForeground(c);
+            }
+            if (percentLabel != null) {
+                percentLabel.setForeground(c);
+            }
+        }
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table,
