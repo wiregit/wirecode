@@ -117,13 +117,13 @@ public final class PushManager {
                 LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
             // TODO: should FW-FW connections also use TLS?
             NBSocket socket = udpSelectorProvider.get().openSocketChannel().socket();
-            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushObserver(data, true, httpAcceptor.get()));
+            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushConnectObserver(data, true, httpAcceptor.get()));
         } else {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
                 ConnectType type = tlsCapable && networkManager.get().isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
-                socketsManager.get().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false, httpAcceptor.get()), type);
+                socketsManager.get().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushConnectObserver(data, false, httpAcceptor.get()), type);
             } catch(IOException iox) {
             }
         }
@@ -158,12 +158,12 @@ public final class PushManager {
     }
     
     /** Non-blocking observer for connect events related to pushing. */
-    private static class PushObserver implements ConnectObserver {
+    private static class PushConnectObserver implements ConnectObserver {
         private final PushData data;
         private final boolean fwt;
         private final HTTPAcceptor httpAcceptor;
         
-        PushObserver(PushData data, boolean fwt, HTTPAcceptor httpAcceptor) {
+        PushConnectObserver(PushData data, boolean fwt, HTTPAcceptor httpAcceptor) {
             this.data = data;
             this.fwt = fwt;
             this.httpAcceptor = httpAcceptor;
@@ -181,12 +181,12 @@ public final class PushManager {
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
-            ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data, fwt, httpAcceptor));
+            ((NIOMultiplexor) socket).setWriteObserver(new GivLineWriter(socket, data, fwt, httpAcceptor));
         }
     }    
 
-    /** Non-blocking observer for connect events related to pushing. */
-    private static class PushConnector implements ChannelWriter {
+    /** Non-blocking writer that writes out the give line after a socket connection has been established. */
+    private static class GivLineWriter implements ChannelWriter {
         
         private InterestWritableByteChannel channel;
         private final ByteBuffer buffer;
@@ -194,7 +194,7 @@ public final class PushManager {
         private HTTPConnectionData data;
         private HTTPAcceptor httpAcceptor;
 
-        public PushConnector(Socket socket, PushData data, boolean fwTransfer,
+        public GivLineWriter(Socket socket, PushData data, boolean fwTransfer,
                 HTTPAcceptor httpAcceptor) throws IOException {
             this.socket = socket;
             this.data = new HTTPConnectionData();
