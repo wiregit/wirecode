@@ -90,6 +90,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
     
     public boolean add(FileDesc fileDesc) {
         if(addFileDesc(fileDesc)) {
+            fileManager.setDirtySaveLater();
             fireAddEvent(fileDesc);
             return true;
         } else
@@ -127,6 +128,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
     
     public boolean remove(FileDesc fileDesc) {
         if(removeFileDesc(fileDesc)) {
+            fileManager.setDirtySaveLater();
             fireRemoveEvent(fileDesc);
             return true;
         } else {
@@ -276,6 +278,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
      */
     protected void updateFileDescs(FileDesc oldFileDesc, FileDesc newFileDesc) {     
         if (removeFileDesc(oldFileDesc)) {
+            fileManager.setDirtySaveLater();
             if(addFileDesc(newFileDesc)) {
                 fireChangeEvent(oldFileDesc, newFileDesc);
             } else {

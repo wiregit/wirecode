@@ -9,7 +9,8 @@ import ca.odell.glazedlists.swing.EventTableModel;
 public class SharingTableModel extends EventTableModel<FileItem> {
 
     private final EventList<FileItem> sharedItems;
-    private static final int COLUMN_COUNT = 5;
+    
+    public static final String[] columnLabels = new String[] {"Name", "Size", "Created", "Modified", "Hits", "Uploads", "Actions"};
     
     public SharingTableModel(EventList<FileItem> sharedItems) {
         super(sharedItems, new SharingTableFormat());
@@ -24,18 +25,15 @@ public class SharingTableModel extends EventTableModel<FileItem> {
 
         @Override
         public int getColumnCount() {
-            return COLUMN_COUNT;
+            return columnLabels.length;
         }
 
         @Override
         public String getColumnName(int column) {
-            if(column == 0) return "Name";
-            else if(column == 1) return "Size";
-            else if(column == 2) return "Created";
-            else if(column == 3) return "Modified";
-            else if(column == 4) return "Actions";
-            
-            throw new IllegalStateException("Unknown column:" + column);
+            if(column < 0 || column >= columnLabels.length)
+                throw new IllegalStateException("Unknown column:" + column);
+
+            return columnLabels[column];
         }
 
         @Override
@@ -44,7 +42,9 @@ public class SharingTableModel extends EventTableModel<FileItem> {
             else if(column == 1) return baseObject.getSize();
             else if(column == 2) return baseObject.getCreationTime();
             else if(column == 3) return baseObject.getLastModifiedTime();
-            else if(column == 4) return baseObject;
+            else if(column == 4) return baseObject.getNumHits();
+            else if(column == 5) return baseObject.getNumUploads();
+            else if(column == 6) return baseObject;
             
             throw new IllegalStateException("Unknown column:" + column);
         }        

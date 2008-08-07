@@ -21,9 +21,8 @@ public class SharingTable extends StripedJXTable {
     
     @Override
     public boolean isCellEditable(int row, int column) {
-    	//TODO: this needs to be fixed to be non static in case
-    	//	a column is removed or moved
-        if(column == 4)
+        // as long as an editor has been installed, assuming we want to use it
+        if(getColumnModel().getColumn(column).getCellEditor() != null)
             return true;
         return false;        
     }

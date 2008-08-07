@@ -343,6 +343,11 @@ public interface FileManager {
      * Returns the number of files
      */
     public int size();
+    
+    /**
+     * Allows a FileList to set a dirty flag so changes can be written to disk.
+     */
+    public void setDirtySaveLater();
 
     /** 
      * registers a listener for FileManagerEvents

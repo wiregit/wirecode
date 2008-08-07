@@ -1639,6 +1639,11 @@ public class FileManagerImpl implements FileManager, Service {
         }
     }
     
+    public void setDirtySaveLater() {
+        if(saver != null)
+            saver.setDirty();
+    }
+    
     private class Saver implements Runnable, FileEventListener {
         
         private AtomicBoolean isDirty = new AtomicBoolean(false);

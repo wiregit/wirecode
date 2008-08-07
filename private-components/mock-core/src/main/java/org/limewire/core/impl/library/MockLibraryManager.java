@@ -32,24 +32,24 @@ public class MockLibraryManager implements LibraryManager {
     }
     
     private void initializeMockGnutellaData(){
-        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456);
+        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456, 5,1);
         gnutellaList.add(item);
         
-        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512);
+        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,3,2);
         gnutellaList.add(item);
         
-        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123);
+        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0);
         gnutellaList.add(item);
     }
     
     private void initializeMockBuddyData(){
-        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456);
+        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1);
         buddyList.add(item);
         
-        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512);
+        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,5,0);
         buddyList.add(item);
         
-        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123);
+        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0);
         buddyList.add(item);
     }
     
@@ -99,7 +99,7 @@ public class MockLibraryManager implements LibraryManager {
 
     @Override
     public void addGnutellaFile(File file) {
-        MockFileItem item = new MockFileItem(file.getName(), 1000,12345,23456);
+        MockFileItem item = new MockFileItem(file.getName(), 1000,12345,23456, 0,0);
         gnutellaList.add(item);
     }
 

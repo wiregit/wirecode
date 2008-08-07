@@ -30,7 +30,7 @@ import javax.swing.table.TableCellRenderer;
  *          editor.cancelCellEditing();
  *      }
  */
-public class MultiButtonCellTablerRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
+public class MultiButtonTableCellRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
 
     /**
      *  The horizontal gap in the layout. 
@@ -49,11 +49,11 @@ public class MultiButtonCellTablerRendererEditor extends JPanel implements Table
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
-    public MultiButtonCellTablerRendererEditor(int minRowHeight) {
+    public MultiButtonTableCellRendererEditor(int minRowHeight) {
         this(new ArrayList<Action>(), minRowHeight);
     }
     
-    public MultiButtonCellTablerRendererEditor(List<Action> actions, int minRowHeight) {
+    public MultiButtonTableCellRendererEditor(List<Action> actions, int minRowHeight) {
         setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
         
         //default size paint the rows
@@ -143,5 +143,4 @@ public class MultiButtonCellTablerRendererEditor extends JPanel implements Table
         cancelCellEditing();
         return true;
     }
-    
 }

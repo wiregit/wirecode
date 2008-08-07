@@ -16,4 +16,8 @@ public interface FileItem {
     long getCreationTime();
     
     long getLastModifiedTime();
+    
+    int getNumHits();
+    
+    int getNumUploads();
 }

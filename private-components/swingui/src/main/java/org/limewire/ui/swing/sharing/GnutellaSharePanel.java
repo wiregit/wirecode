@@ -19,7 +19,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
-import org.limewire.ui.swing.table.MultiButtonCellTablerRendererEditor;
+import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
 public class GnutellaSharePanel extends JPanel {
@@ -33,8 +33,8 @@ public class GnutellaSharePanel extends JPanel {
     @Resource
     private Icon cancelIcon;
     
-    MultiButtonCellTablerRendererEditor editor;
-    MultiButtonCellTablerRendererEditor renderer;
+    MultiButtonTableCellRendererEditor editor;
+    MultiButtonTableCellRendererEditor renderer;
     
     public GnutellaSharePanel(LibraryManager libraryManager) {
         setLayout(new BorderLayout());
@@ -45,14 +45,14 @@ public class GnutellaSharePanel extends JPanel {
                
         table = new SharingTable(libraryManager.getGnutellaList());
         
-        editor = new MultiButtonCellTablerRendererEditor(20);
+        editor = new MultiButtonTableCellRendererEditor(20);
         editor.addActions(createActions(editor));
-        renderer = new MultiButtonCellTablerRendererEditor(20);
+        renderer = new MultiButtonTableCellRendererEditor(20);
         renderer.addActions(createActions(renderer));
         
         //TODO: this needs to be fixed, if rows are columns or rows
         //  are removed this stops working
-        TableColumn tc = table.getColumn(4);
+        TableColumn tc = table.getColumn(6);
         tc.setCellEditor(editor);
         tc.setCellRenderer(renderer);
 
