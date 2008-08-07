@@ -30,15 +30,32 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.LargestGapStartPieceSt
 import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomGapStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
+import com.limegroup.gnutella.util.FileServer;
 
 public class BTSwarmCoordinatorTest extends BaseTestCase {
+    private static final int TEST_PORT = 8080;
+
+    private FileServer fileServer = null;
 
     public BTSwarmCoordinatorTest(String name) {
         super(name);
     }
 
-    public static Test suite() {
-        return buildTestSuite(BTSwarmCoordinatorTest.class);
+    @Override
+    protected void setUp() throws Exception {
+        fileServer = new FileServer(TEST_PORT, new File(
+                "/home/pvertenten/workspace/limewire/tests/test-data/public_html"));
+        fileServer.start();
+        Thread.sleep(1000);
+        super.setUp();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        System.out.println("===================================");
+        fileServer.stop();
+        fileServer.destroy();
+        super.tearDown();
     }
 
     public void testSingleFileTorret() throws Exception {
@@ -48,8 +65,12 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File completeFile = torrentFileSystem.getCompleteFile();
+        completeFile.delete();
         File downloadedFile = torrentFileSystem.getIncompleteFiles().get(0);
         downloadedFile.delete();
+        completeFile.deleteOnExit();
+        downloadedFile.deleteOnExit();
         final Swarmer swarmer = createSwarmer(torrentContext, null);
 
         swarmer.start();
@@ -61,12 +82,6 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
 
     }
 
-    private File createFile(String fileName) {
-        File torrentFile = new File("/home/pvertenten/workspace/limewire/tests/test-data/"
-                + fileName);
-        return torrentFile;
-    }
-
     public void testMultiFileTorret() throws Exception {
 
         File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
@@ -74,10 +89,15 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File completeFile = torrentFileSystem.getCompleteFile();
+        completeFile.delete();
         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
         File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
         downloadedFile1.delete();
         downloadedFile2.delete();
+        completeFile.deleteOnExit();
+        downloadedFile1.deleteOnExit();
+        downloadedFile2.deleteOnExit();
         final Swarmer swarmer = createSwarmer(torrentContext, null);
 
         swarmer.start();
@@ -98,10 +118,16 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File completeFile = torrentFileSystem.getCompleteFile();
+        completeFile.delete();
         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
         File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
         downloadedFile1.delete();
         downloadedFile2.delete();
+        completeFile.deleteOnExit();
+        downloadedFile1.deleteOnExit();
+        downloadedFile2.deleteOnExit();
+
         final Swarmer swarmer = createSwarmer(torrentContext, new RandomGapStrategy(metaInfo));
 
         swarmer.start();
@@ -122,10 +148,16 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File completeFile = torrentFileSystem.getCompleteFile();
+        completeFile.delete();
         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
         File downloadedFile2 = torrentFileSystem.getIncompleteFiles().get(1);
         downloadedFile1.delete();
         downloadedFile2.delete();
+        completeFile.deleteOnExit();
+        downloadedFile1.deleteOnExit();
+        downloadedFile2.deleteOnExit();
+
         final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(
                 metaInfo));
 
@@ -138,6 +170,42 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
         SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
+    }
+
+    public void testVuzeCreatedTorrent() throws Exception {
+
+        File torrentFile = createFile("test_vuze_getright.torrent");
+
+        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File completeFile = torrentFileSystem.getCompleteFile();
+        completeFile.delete();
+        File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+
+        downloadedFile1.delete();
+        completeFile.deleteOnExit();
+        downloadedFile1.deleteOnExit();
+
+        final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(
+                metaInfo));
+
+        swarmer.start();
+
+        long totalSize = torrentFileSystem.getTotalSize();
+        URI uri1 = metaInfo.getWebSeeds()[0];
+        URI uri2 = metaInfo.getWebSeeds()[1];
+        swarmer.addSource(new SwarmHttpSource(uri1, totalSize));
+        swarmer.addSource(new SwarmHttpSource(uri2, totalSize));
+
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+
+    }
+
+    private File createFile(String fileName) {
+        File torrentFile = new File("/home/pvertenten/workspace/limewire/tests/test-data/"
+                + fileName);
+        return torrentFile;
     }
 
     public static BTMetaInfo createMetaInfo(File torrentFile) throws IOException {
