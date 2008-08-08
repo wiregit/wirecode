@@ -31,6 +31,7 @@
 				<pathelement location="${limewire.lib.jars}/jna.jar"/>
 				<pathelement location="${limewire.lib.jars}/jdic.jar"/>
 				<pathelement location="${limewire.lib.jars}/gettext-commons.jar"/>
+				<pathelement location="${limewire.lib.jars}/miglayout.jar"/>
 				<path refid="build.limewire.components.common.buildpath"/>
 			    <path refid="build.limewire.components.core-api.buildpath"/>
 			    <path refid="build.limewire.components.mock-core.buildpath"/>
