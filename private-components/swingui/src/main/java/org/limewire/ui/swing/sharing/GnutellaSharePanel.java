@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.DropMode;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -44,6 +45,8 @@ public class GnutellaSharePanel extends JPanel {
         this.libraryManager = libraryManager;
                
         table = new SharingTable(libraryManager.getGnutellaList());
+        table.setTransferHandler(new SharingTransferHandler(libraryManager));
+        table.setDropMode(DropMode.ON);
         
         editor = new MultiButtonTableCellRendererEditor(20);
         editor.addActions(createActions(editor));
