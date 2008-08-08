@@ -2,7 +2,6 @@ package org.limewire.logging;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.logging.LogImpl;
 import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
