@@ -23,9 +23,16 @@ import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+
 public class GnutellaSharePanel extends JPanel {
 
     public static final String NAME = "GnutellaShare";
+    
+    private SharingHeaderPanel headerPanel;
     
     private final JXTable table;
     
@@ -33,6 +40,9 @@ public class GnutellaSharePanel extends JPanel {
 
     @Resource
     private Icon cancelIcon;
+    @Resource
+    private Icon sharingIcon;
+    
     
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
@@ -44,7 +54,13 @@ public class GnutellaSharePanel extends JPanel {
         
         this.libraryManager = libraryManager;
                
-        table = new SharingTable(libraryManager.getGnutellaList());
+        headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the LimeWire Network");
+        
+        
+        FilterList<FileItem> filteredList = new FilterList<FileItem>(libraryManager.getGnutellaList(), 
+                new TextComponentMatcherEditor(headerPanel.getFilterBox(), new SharingTextFilterer()));
+        
+        table = new SharingTable(filteredList);
         table.setTransferHandler(new SharingTransferHandler(libraryManager));
         table.setDropMode(DropMode.ON);
         
@@ -59,6 +75,7 @@ public class GnutellaSharePanel extends JPanel {
         tc.setCellEditor(editor);
         tc.setCellRenderer(renderer);
 
+        add(headerPanel, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
     }
     
@@ -93,4 +110,10 @@ public class GnutellaSharePanel extends JPanel {
         
     }
 
+    private class SharingTextFilterer implements TextFilterator<FileItem> {
+        @Override
+        public void getFilterStrings(List<String> baseList, FileItem element) {
+           baseList.add(element.getName());
+        }
+    }
 }

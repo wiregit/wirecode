@@ -13,7 +13,7 @@ import javax.swing.JTextField;
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-class FilteredTextField extends JTextField implements FocusListener {
+public class FilteredTextField extends JTextField implements FocusListener {
     
     private String PROMPT_TEXT = "Filter results...";
     
@@ -21,7 +21,7 @@ class FilteredTextField extends JTextField implements FocusListener {
      * Creates a FilteredTextField that displays a given number of columns.
      * @param columns
      */
-    FilteredTextField(int columns) {
+    public FilteredTextField(int columns) {
         super(columns);
         
         //focusLost(null);

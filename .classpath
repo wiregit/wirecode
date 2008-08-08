@@ -137,5 +137,6 @@
 	<classpathentry kind="lib" path="lib/jars/jstun.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmf.jar"/>
 	<classpathentry kind="lib" path="lib/jars/EventBus-1.2b.jar"/>
+	<classpathentry kind="lib" path="lib/jars/miglayout.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
