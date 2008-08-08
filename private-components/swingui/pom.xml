@@ -124,6 +124,11 @@
 	      <groupId>xnap-commons</groupId>
 	      <artifactId>gettext-commons</artifactId>
 	      <version>0.9.1</version>
-	    </dependency>	    	
+	    </dependency>
+	    <dependency>
+      		<groupId>org.limewire</groupId>
+      		<artifactId>miglayout</artifactId>
+      		<version>1.0</version>
+        </dependency>		    	
 	</dependencies>
 </project>
