@@ -68,6 +68,8 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
             new EventListModel<VisualSearchResult>(eventList);
         
         resultsList = new JList(eventListModel);
+        // TODO: RMV Write this renderer!
+        //resultsList.setCellRenderer(new SearchResultListCellRenderer());
         resultsList.setSelectionModel(selectionModel);
         resultsList.addMouseListener(new ResultDownloader());
         
