@@ -11,6 +11,7 @@ import javax.swing.JToolBar;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.SystemUtils;
 import org.mozilla.browser.MozillaWindow;
@@ -45,7 +46,7 @@ class MozillaPopupWindow extends MozillaWindow {
         toolbar.add(new AbstractAction("Out") {
             // TODO: Add a picture.
             public void actionPerformed(ActionEvent e) {
-                GuiUtils.openURL(getUrl());
+                NativeLaunchUtils.openURL(getUrl());
             }
         });
     }

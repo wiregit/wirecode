@@ -36,6 +36,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
@@ -596,7 +597,7 @@ public class DownloadRendererEditor extends JPanel implements
         } else if (actionCommmand == TRY_AGAIN_COMMAND) {
             item.resume();
         } else if (actionCommmand == LINK_COMMAND){
-            GuiUtils.openURL(ERROR_URL);
+            NativeLaunchUtils.openURL(ERROR_URL);
         } else if (actionCommmand == PREVIEW_COMMAND){
             //TODO preview
             throw new RuntimeException("Implement "+ actionCommmand + " " + item.getTitle() + "!");

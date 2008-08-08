@@ -1,6 +1,10 @@
-package com.limegroup.gnutella.util;
+package org.limewire.util;
 
 import java.util.NoSuchElementException;
+
+import org.limewire.util.QuotedStringTokenizer;
+
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
 import junit.framework.Test;

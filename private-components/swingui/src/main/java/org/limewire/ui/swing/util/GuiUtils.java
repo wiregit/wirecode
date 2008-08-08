@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -201,27 +202,6 @@ public class GuiUtils {
 		Application.getInstance().getContext().getResourceMap(AppFrame.class)
 				.injectFields(object);
 	}
-	
-    /**
-     * Acts as a proxy for the Launcher class so that other classes only need
-     * to know about this mediator class.
-     *
-     * <p>Opens the specified url in a browser.
-     *
-     * @param url the url to open
-     * @return an int indicating the success of the browser launch
-     */
-    public static final int openURL(String url) {
-        // TODO: Fix dependencies so this works!
-        throw new RuntimeException("Implement me!");
-//        try {
-//            return Launcher.openURL(url);
-//        } catch(IOException ioe) {
-//            // TODO: Show an error
-//            //GUIMediator.showError(I18n.tr("LimeWire could not locate your web browser to display the following webpage: {0}.", url));
-//            return -1;
-//        }
-    }
     
     /**
      * Returns a {@link MouseListener} that listens for events

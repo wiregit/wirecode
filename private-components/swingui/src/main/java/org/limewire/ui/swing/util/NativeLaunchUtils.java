@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.ui.swing.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +44,7 @@ import org.limewire.util.SystemUtils;
  *  (<a href="mailto:ejalbert@cs.stanford.edu">ejalbert@cs.stanford.edu</a>)
  * @version 1.4b1 (Released June 20, 2001)
  */
- //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public final class Launcher {
+public final class NativeLaunchUtils {
 
 	/**
 	 * <tt>boolean</tt> specifying whether or not the necessary Mac
@@ -74,7 +73,7 @@ public final class Launcher {
 	/** 
 	 * This class should be never be instantiated; this just ensures so. 
 	 */
-	private Launcher() {}
+	private NativeLaunchUtils() {}
 	
 	/**
 	 * Opens the specified url in a browser. 
@@ -84,35 +83,30 @@ public final class Launcher {
 	 * namely a url that ends in .htm or .html.
 	 *
 	 * @param url  The url to open
-	 *
-	 * @return  An int indicating the success of the browser launch
-	 *
-	 * @throws IOException if the url cannot be loaded do to an IO problem
 	 */
-	public static int openURL(String url) throws IOException {	   
-		if(OSUtils.isWindows()) {
-			return openURLWindows(url);
-		}	   
-		else if(OSUtils.isMacOSX()) {
-			openURLMac(url);
-		}
-		else {
-		    // Other OS
-			launchFileOther(url);
-		}
-		return -1;
-	}
+	public static void openURL(String url) {
+	    try {
+            if (OSUtils.isWindows()) {
+                openURLWindows(url);
+            } else if (OSUtils.isMacOSX()) {
+                openURLMac(url);
+            } else {
+                // Other OS
+                launchFileOther(url);
+            }
+	    } catch(IOException iox) {
+	        // TODO: Show an error.
+	    }
+    }
 
 	/**
 	 * Opens the default web browser on windows, passing it the specified
 	 * url.
 	 *
 	 * @param url the url to open in the browser
-	 * @return the error code of the native call, -1 if the call failed
-	 *  for any reason
 	 */
-	private static int openURLWindows(String url) throws IOException {
-		return SystemUtils.openURL(url);
+	private static void openURLWindows(String url) throws IOException {
+		SystemUtils.openURL(url);
 	}
 	
 	/**
@@ -156,26 +150,35 @@ public final class Launcher {
 	 * @return an object for accessing the launch process; null, if the process
 	 *         can be represented (e.g. the file was launched through a native
 	 *         call)
-	 * @throws IOException
-	 *             if the file cannot be launched
-	 * @throws SecurityException
-	 *             if the file has an extension that is not allowed
 	 */
-	public static LimeProcess launchFile(File file) throws IOException, SecurityException {
+	public static Process launchFile(File file) {
+	    try {
+	        return launchFileImpl(file);
+	    } catch(LaunchException le) {
+	        // TODO: show an error
+	    } catch(IOException iox) {
+	        // TODO: show an error
+	    } catch(SecurityException se) {
+	        // TODO: show an error
+	    }
+	    return null;
+	}
+	
+	private static Process launchFileImpl(File file) throws IOException, SecurityException {
 		String path = file.getCanonicalPath();
 		String extCheckString = path.toLowerCase(Locale.US);
 
         // expand pmf files before display
-        if (extCheckString.endsWith(".pmf")) {
-            file = PackagedMediaFileUtils.preparePMFFile(file.toString());
-            // don't launch an invalid file
-            if (file == null) {
-            	throw new IOException("Invalid file");
-            }
-
-            path = file.getCanonicalPath();
-            extCheckString = path.toLowerCase(Locale.US);
-        }
+//        if (extCheckString.endsWith(".pmf")) {
+//            file = PackagedMediaFileUtils.preparePMFFile(file.toString());
+//            // don't launch an invalid file
+//            if (file == null) {
+//            	throw new IOException("Invalid file");
+//            }
+//
+//            path = file.getCanonicalPath();
+//            extCheckString = path.toLowerCase(Locale.US);
+//        }
 
 		if(!extCheckString.endsWith(".exe") &&
 		   !extCheckString.endsWith(".vbs") &&
@@ -183,20 +186,18 @@ public final class Launcher {
 		   !extCheckString.endsWith(".bat") &&
 		   !extCheckString.endsWith(".sys") &&
 		   !extCheckString.endsWith(".com")) {
-			if(OSUtils.isWindows()) {
-				launchFileWindows(path);
-				return null;
-			}
-			else if(OSUtils.isMacOSX()) {
-				return launchFileMacOSX(path);
-			}
-			else {
-			    // Other OS, use helper apps
-				return launchFileOther(path);
-			}
-		} else {
-			throw new SecurityException();
-		}	
+			if (OSUtils.isWindows()) {
+                launchFileWindows(path);
+                return null;
+            } else if (OSUtils.isMacOSX()) {
+                return launchFileMacOSX(path);
+            } else {
+                // Other OS, use helper apps
+                return launchFileOther(path);
+            }
+        } else {
+            throw new SecurityException();
+        }	
 	}
 
     /**
@@ -206,7 +207,20 @@ public final class Launcher {
      * @return null, if not supported by platform; the launched process otherwise
      * @see #launchFile(File)
      */
-    public static LimeProcess launchExplorer(File file) throws IOException, SecurityException {
+    public static Process launchExplorer(File file) {
+        try {
+            return launchExplorerImpl(file);
+        } catch(LaunchException le) {
+            // TODO: show error
+        } catch (SecurityException e) {
+            // TODO: show error
+        } catch (IOException e) {
+            // TODO: show error
+        }
+        return null;
+    }
+    
+    private static Process launchExplorerImpl(File file) throws IOException, SecurityException {
         if (OSUtils.isWindows()) {
             String explorePath = file.getPath(); 
             try { 
@@ -215,16 +229,15 @@ public final class Launcher {
             } 
             
             if(file.isDirectory()) {
-                // launches explorer in the directory
-                LimeProcess.exec(new String[] { "explorer", explorePath });
+                return exec(new String[] { "explorer", explorePath });
             } else {
                 // launches explorer and highlights the file
-                return LimeProcess.exec(new String[] { "explorer", "/select,", explorePath });
+                return exec(new String[] { "explorer", "/select,", explorePath });
             }
             
         } else if (OSUtils.isMacOSX()) {
             // launches the Finder and highlights the file
-            return LimeProcess.exec(selectFileCommand(file));
+            return exec(selectFileCommand(file));
         }
         return null;
     }
@@ -255,8 +268,8 @@ public final class Launcher {
 	 * @throws IOException if an I/O error occurs in making the runtime.exec()
 	 *  call or in getting the canonical path of the file
 	 */
-	private static LimeProcess launchFileMacOSX(final String file) throws IOException {
-	    return LimeProcess.exec(new String[]{"open", file});
+	private static Process launchFileMacOSX(final String file) throws IOException {
+	    return exec(new String[]{"open", file});
 	}
     
     /**
@@ -314,7 +327,7 @@ public final class Launcher {
 	 *                      or if the Process created by the Runtime.exec call
 	 *                      throws an InterruptedException
 	 */
-	private static LimeProcess launchFileOther(String path) throws IOException {
+	private static Process launchFileOther(String path) throws IOException {
 	    String handler;
 	    if (MediaType.getAudioMediaType().matches(path)) {
 	    	handler = URLHandlerSettings.AUDIO_PLAYER.getValue();
@@ -332,6 +345,42 @@ public final class Launcher {
 	    	strs[i] = StringUtils.replace(tok.nextToken(), "$URL$", path);
 	    }
 
-	    return LimeProcess.exec(strs);
+	    return exec(strs);
     }
+	
+	private static Process exec(String... commands) throws LaunchException {
+	    ProcessBuilder pb = new ProcessBuilder(commands);
+	    try {
+            return pb.start();
+        } catch (IOException e) {
+            throw new LaunchException(e, commands);
+        }
+	}
+	
+	public static class LaunchException extends IOException {
+	    
+	    private final String[] command;
+
+	    /**
+	     * @param cause the exception that occurred during execution of command
+	     * @param command the executed command
+	     */
+	    public LaunchException(IOException cause, String... command) {
+	        this.command = command;
+	        
+	        initCause(cause);
+	    }
+
+	    /**
+	     * @param command the executed command
+	     */
+	    public LaunchException(String... command) {
+	        this.command = command;
+	    }
+
+	    public String[] getCommand() {
+	        return command;
+	    }
+	}
+	    
 }
