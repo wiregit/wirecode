@@ -9,7 +9,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 import junit.framework.Test;
 
-public class QuotedStringTokenizerTest extends LimeTestCase {
+public class QuotedStringTokenizerTest extends BaseTestCase {
 
     public QuotedStringTokenizerTest(String name) {
 		super(name);
