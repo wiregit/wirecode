@@ -205,6 +205,7 @@ public class CoreDownloadItem implements DownloadItem {
         case BUSY:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
+        case WAITING_FOR_USER:
             return DownloadState.CONNECTING;
 
         case COMPLETE:
@@ -221,7 +222,6 @@ public class CoreDownloadItem implements DownloadItem {
             return DownloadState.PAUSED;
 
         
-        case WAITING_FOR_USER:
         case GAVE_UP://"GAVE_UP" means no sources
             return DownloadState.STALLED;
 
