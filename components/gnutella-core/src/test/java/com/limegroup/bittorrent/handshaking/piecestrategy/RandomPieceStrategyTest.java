@@ -40,8 +40,6 @@ public class RandomPieceStrategyTest extends BaseTestCase {
         final int numBlocks = 10;
 
         final int pieceIndex1 = 5;
-        final int pieceIndex2 = 6;
-        final int pieceIndex3 = 5;
 
         context.checking(new Expectations() {
             {

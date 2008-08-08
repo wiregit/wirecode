@@ -69,13 +69,17 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
         this.eventDispatch = eventDispatch;
     }
     
-    public float getMeasuredBandwidth(boolean downstream) throws InsufficientDataException {
-        if(downstream) {
-            down.measureBandwidth();
-            return down.getMeasuredBandwidth();
-        } else {
-            up.measureBandwidth();
-            return up.getMeasuredBandwidth();
+    public float getMeasuredBandwidth(boolean downstream) {
+        try {
+            if (downstream) {
+                down.measureBandwidth();
+                return down.getMeasuredBandwidth();
+            } else {
+                up.measureBandwidth();
+                return up.getMeasuredBandwidth();
+            }
+        } catch (InsufficientDataException e) {
+            return 0;
         }
     }
     

@@ -4,24 +4,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
-import org.limewire.collection.BitField;
 import org.limewire.collection.NECallable;
-import org.limewire.http.entity.Piece;
 import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmWriteJobControl;
 
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
-import com.limegroup.bittorrent.PieceReadListener;
-import com.limegroup.bittorrent.disk.DiskManagerListener;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
-import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
-import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class BTSwarmWriteJobTest extends LimeTestCase {

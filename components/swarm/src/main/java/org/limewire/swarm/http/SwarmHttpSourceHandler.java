@@ -30,7 +30,6 @@ import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 import org.limewire.swarm.impl.ReconnectingSourceEventListener;
 
-import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestExecutionHandler {
@@ -103,7 +102,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     public void shutdown() throws IOException {
         started.set(false);
-        //executionHandler.shutdown();
+        // executionHandler.shutdown();
         ioReactor.shutdown();
     }
 
@@ -142,16 +141,9 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
             listener.responseProcessed(SwarmHttpSourceHandler.this, source,
                     new SwarmHttpSourceStatus(response.getStatusLine()));
 
-            logReponse(response);
+            logReponse("response", response);
 
             executionHandler.handleResponse(response, context);
-        }
-    }
-
-    private void logReponse(HttpResponse response) {
-        System.out.println("response: " + response.getStatusLine());
-        for (int i = 0; i < response.getAllHeaders().length; i++) {
-            System.out.println(response.getAllHeaders()[i]);
         }
     }
 
@@ -187,7 +179,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
                 }
             }
 
-            logRequest(request);
+            logRequest("request", request);
             return request;
         } else {
             SwarmHttpUtils.closeConnectionFromContext(context);
@@ -195,20 +187,33 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         }
     }
 
-    private void logRequest(HttpRequest request) {
-        if (request != null) {
-            System.out.println("request: " + request.getRequestLine());
-            for (int i = 0; i < request.getAllHeaders().length; i++) {
-                System.out.println(request.getAllHeaders()[i]);
+    public float getMeasuredBandwidth(boolean downstream) {
+        return ioReactor.getMeasuredBandwidth(downstream);
+    }
+
+    private void logRequest(String message, HttpRequest request) {
+        if (LOG.isTraceEnabled()) {
+            String log;
+            if (request != null) {
+                log = message + ": " + request.getRequestLine() + " headers: "
+                        + Arrays.asList(request.getAllHeaders());
+            } else {
+                log = message + ": null";
             }
+            LOG.trace(log);
         }
     }
 
-    public float getMeasuredBandwidth(boolean downstream) {
-        try {
-            return ioReactor.getMeasuredBandwidth(downstream);
-        } catch (InsufficientDataException ide) {
-            return 0;
+    private void logReponse(String message, HttpResponse response) {
+        if (LOG.isTraceEnabled()) {
+            String log;
+            if (response != null) {
+                log = message + ": " + response.getStatusLine() + " headers: "
+                        + Arrays.asList(response.getAllHeaders());
+            } else {
+                log = message + ": null";
+            }
+            LOG.trace(log);
         }
     }
 }
