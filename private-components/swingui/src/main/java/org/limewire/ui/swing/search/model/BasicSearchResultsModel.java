@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.util.MediaType;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -23,8 +24,11 @@ public class BasicSearchResultsModel {
     
     public BasicSearchResultsModel() {
         allSearchResults = new BasicEventList<SearchResult>();        
-        groupingListUrns = new GroupingList<SearchResult>(allSearchResults, new UrnComparator());
-        groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(groupingListUrns, new SearchResultGrouper(resultCount)); 
+        groupingListUrns = new GroupingList<SearchResult>(
+            allSearchResults, new UrnComparator());
+        groupedUrnResults =
+            new FunctionList<List<SearchResult>, VisualSearchResult>(
+                groupingListUrns, new SearchResultGrouper(resultCount)); 
     }
     
     public int getResultCount() {
@@ -36,6 +40,12 @@ public class BasicSearchResultsModel {
     }
     
     public void addSearchResult(SearchResult result) {
+        System.out.println(
+            "BasicSearchResults: got " + result.getDescription());
+        String extension = result.getFileExtension();
+        MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
+        System.out.println("BasicSearchResults: media type is " + mediaType);
+        
         allSearchResults.add(result);
     }
     
@@ -46,8 +56,9 @@ public class BasicSearchResultsModel {
         }
     }
     
-    private static class SearchResultGrouper implements
-            AdvancedFunction<List<SearchResult>, VisualSearchResult> {
+    private static class SearchResultGrouper
+    implements AdvancedFunction<List<SearchResult>, VisualSearchResult> {
+        
         private final AtomicInteger resultCount;
         
         public SearchResultGrouper(AtomicInteger resultCount) {
@@ -75,9 +86,5 @@ public class BasicSearchResultsModel {
             resultCount.addAndGet(transformedValue.getSources().size());
             return transformedValue;
         }
-
     }
-    
-    
-
 }
