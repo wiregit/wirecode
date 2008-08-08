@@ -99,6 +99,7 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         boolean multiColumnSort = false;
         tcc = new TableComparatorChooser<VisualSearchResult>(
             resultsTable, sortedResults, multiColumnSort);
+        // Does tcc need to be used anywhere?
         
         TableColumnModel tcm = resultsTable.getColumnModel();
         TableColumn tc = tcm.getColumn(ACTION_COLUMN);

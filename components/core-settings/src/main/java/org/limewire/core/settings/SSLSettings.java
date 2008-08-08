@@ -1,6 +1,5 @@
 package org.limewire.core.settings;
 
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 
 /** Settings related to SSL/TLS. */
@@ -19,14 +18,5 @@ public class SSLSettings extends LimeProps {
     /** False if we want to report exceptions in TLS handling. */
     public static final BooleanSetting IGNORE_SSL_EXCEPTIONS =
         FACTORY.createRemoteBooleanSetting("IGNORE_SSL_EXCEPTIONS", true, "TLS.ignoreException");
-    
-    
-    /** True if TLS is disabled for this session. */
-    private static volatile boolean tlsDisabled;
-    
-    /** The Throwable that was the reason TLS failed. */
-    @InspectablePrimitive("reason tls failed")
-    @SuppressWarnings("unused")
-    private static volatile String tlsDisabledReason;
 
 }

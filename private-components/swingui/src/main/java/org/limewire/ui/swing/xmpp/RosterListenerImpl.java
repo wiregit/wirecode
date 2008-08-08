@@ -45,7 +45,7 @@ public class RosterListenerImpl implements RosterListener {
         if(roster.get(user.getId()) == null) {
             roster.put(user.getId(), new ArrayList<Presence>());
         }
-        final String name = user.getName();
+      //  final String name = user.getName();
         user.addPresenceListener(new PresenceListener() {
             public void presenceChanged(Presence presence) {
                 String id = parseBareAddress(presence.getJID());
