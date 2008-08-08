@@ -9,7 +9,13 @@ public interface SwarmSource {
     SocketAddress getAddress();
 
     String getPath();
-    
+
     IntervalSet getAvailableRanges();
+    
+    Type getType();
+
+    public static enum Type {
+        HTTP
+    }
 
 }

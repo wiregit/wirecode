@@ -18,6 +18,7 @@ import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.FileServer;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Test cases for the BTDownloader.
@@ -32,7 +33,7 @@ import com.limegroup.gnutella.util.FileServer;
  * work.
  * 
  */
-public class BTDownloaderImplTest extends BaseTestCase {
+public class BTDownloaderImplTest extends LimeTestCase {
     private static final int TEST_PORT = 8080;
 
     private boolean localIsPrivateBackup = false;
@@ -55,7 +56,8 @@ public class BTDownloaderImplTest extends BaseTestCase {
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
-        fileServer = new FileServer(TEST_PORT, new File("/home/pvertenten/workspace/limewire/tests/test-data/public_html"));
+        fileServer = new FileServer(TEST_PORT, new File(
+                "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/public_html"));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -72,214 +74,242 @@ public class BTDownloaderImplTest extends BaseTestCase {
     }
 
     public void testSingleFilePeer() throws Exception {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-peer-dl-single-file.torrent";
-        File torrentFile = new File(torrentfilePath);
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        File torrentFile = createFile("test-peer-dl-single-file.torrent");
 
+        BTDownloader downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+
         File completeFile = torrentFileSystem.getCompleteFile();
-        try {
+        completeFile.delete();
+        completeFile.deleteOnExit();
 
-            File incompleteFile = torrentFileSystem.getIncompleteFiles().get(0);
-            incompleteFile.delete();
+        File incompleteFile = torrentFileSystem.getIncompleteFiles().get(0);
+        incompleteFile.delete();
+        incompleteFile.deleteOnExit();
 
-            completeFile.delete();
-            downloader.startDownload();
-            finishDownload(downloader);
-            SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
+        downloader.startDownload();
+        finishDownload(downloader);
 
-        } finally {
-            if (completeFile != null) {
-                completeFile.delete();
-            }
-        }
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
     }
 
-   
-
     public void testMultipleFilePeer() throws Exception {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-peer-dl-multiple-file.torrent";
-        File torrentFile = new File(torrentfilePath);
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        File torrentFile = createFile("test-peer-dl-multiple-file.torrent");
 
+        BTDownloader downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+
         File rootFile = torrentFileSystem.getCompleteFile();
         try {
-
             FileUtils.deleteRecursive(rootFile);
+            rootFile.deleteOnExit();
+
             File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
             incompleteFile1.delete();
+            incompleteFile1.deleteOnExit();
+
             File completeFile1 = torrentFileSystem.getFiles().get(0);
             completeFile1.delete();
+            completeFile1.deleteOnExit();
 
             File incompleteFile2 = torrentFileSystem.getIncompleteFiles().get(1);
             incompleteFile2.delete();
+            incompleteFile2.deleteOnExit();
+
             File completeFile2 = torrentFileSystem.getFiles().get(1);
             completeFile2.delete();
+            completeFile2.deleteOnExit();
+
             downloader.startDownload();
             finishDownload(downloader);
+
             SwarmerImplTest
                     .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
             SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
                     411090);
         } finally {
             if (rootFile != null) {
-                rootFile.delete();
+                FileUtils.deleteRecursive(rootFile);
             }
         }
     }
 
     public void testSingleWebSeedSingleFileNoPeer() throws Exception {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-single-webseed-single-file-no-peer.torrent";
-        File torrentFile = new File(torrentfilePath);
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        File torrentFile = createFile("test-single-webseed-single-file-no-peer.torrent");
 
+        BTDownloader downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+
         File rootFile = torrentFileSystem.getCompleteFile();
-        try {
+        rootFile.delete();
+        rootFile.deleteOnExit();
 
-            FileUtils.deleteRecursive(rootFile);
-            File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
-            incompleteFile1.delete();
-            File completeFile1 = torrentFileSystem.getFiles().get(0);
-            completeFile1.delete();
+        File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+        incompleteFile1.delete();
+        incompleteFile1.deleteOnExit();
 
-            downloader.startDownload();
-            finishDownload(downloader);
-            SwarmerImplTest
-                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
-        } finally {
-            if (rootFile != null) {
-                rootFile.delete();
-            }
-        }
+        File completeFile1 = torrentFileSystem.getFiles().get(0);
+        completeFile1.delete();
+        completeFile1.deleteOnExit();
+
+        downloader.startDownload();
+        finishDownload(downloader);
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
     }
 
     public void testMultiWebSeedSingleFileNoPeer() throws Exception {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-multiple-webseed-single-file-no-peer.torrent";
-        File torrentFile = new File(torrentfilePath);
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
 
+        BTDownloader downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+
         File rootFile = torrentFileSystem.getCompleteFile();
-        try {
+        rootFile.delete();
+        rootFile.deleteOnExit();
 
-            FileUtils.deleteRecursive(rootFile);
-            File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
-            incompleteFile1.delete();
-            File completeFile1 = torrentFileSystem.getFiles().get(0);
-            completeFile1.delete();
+        File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+        incompleteFile1.delete();
+        incompleteFile1.deleteOnExit();
 
-            downloader.startDownload();
-            finishDownload(downloader);
-            SwarmerImplTest
-                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
-        } finally {
-            if (rootFile != null) {
-                rootFile.delete();
-            }
-        }
+        File completeFile1 = torrentFileSystem.getFiles().get(0);
+        completeFile1.delete();
+        completeFile1.deleteOnExit();
+
+        downloader.startDownload();
+        finishDownload(downloader);
+
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
     }
 
     public void testSingleWebSeedMultipleFileNoPeer() throws Exception {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-single-webseed-multiple-file-no-peer.torrent";
-        File torrentFile = new File(torrentfilePath);
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
 
+        BTDownloader downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+
         File rootFile = torrentFileSystem.getCompleteFile();
         try {
 
             FileUtils.deleteRecursive(rootFile);
+            rootFile.deleteOnExit();
+
             File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
             incompleteFile1.delete();
+            incompleteFile1.deleteOnExit();
+
             File completeFile1 = torrentFileSystem.getFiles().get(0);
             completeFile1.delete();
+            completeFile1.deleteOnExit();
 
             File incompleteFile2 = torrentFileSystem.getIncompleteFiles().get(1);
             incompleteFile2.delete();
+            incompleteFile2.deleteOnExit();
+
             File completeFile2 = torrentFileSystem.getFiles().get(1);
             completeFile2.delete();
+            completeFile2.deleteOnExit();
 
             downloader.startDownload();
             finishDownload(downloader);
+
             SwarmerImplTest
                     .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
             SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
                     411090);
         } finally {
             if (rootFile != null) {
-                rootFile.delete();
+                FileUtils.deleteRecursive(rootFile);
             }
         }
     }
 
     public void testMultiWebSeedMultipleFileNoPeer() throws Exception {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-multiple-webseed-multiple-file-no-peer.torrent";
-        File torrentFile = new File(torrentfilePath);
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        File torrentFile = createFile("test-multiple-webseed-multiple-file-no-peer.torrent");
 
+        BTDownloader downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+
         File rootFile = torrentFileSystem.getCompleteFile();
         try {
-
             FileUtils.deleteRecursive(rootFile);
+            rootFile.deleteOnExit();
+
             File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
             incompleteFile1.delete();
+            incompleteFile1.deleteOnExit();
+
             File completeFile1 = torrentFileSystem.getFiles().get(0);
             completeFile1.delete();
+            completeFile1.deleteOnExit();
 
             File incompleteFile2 = torrentFileSystem.getIncompleteFiles().get(1);
             incompleteFile2.delete();
+            incompleteFile2.deleteOnExit();
+
             File completeFile2 = torrentFileSystem.getFiles().get(1);
             completeFile2.delete();
+            completeFile2.deleteOnExit();
 
             downloader.startDownload();
             finishDownload(downloader);
+
             SwarmerImplTest
                     .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
             SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
                     411090);
         } finally {
             if (rootFile != null) {
-                rootFile.delete();
+                FileUtils.deleteRecursive(rootFile);
             }
         }
     }
-    
-    public void testSingleWebSeedSingleFilePeers() throws Exception {
-        //TODO force peers and webseed to not have all pieces
-        //only when used togetehr have all the pieces
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/test-single-webseed-single-file-peer.torrent";
-        File torrentFile = new File(torrentfilePath);
-        BTDownloader downloader = createBTDownloader(torrentFile);
 
+    public void testSingleWebSeedSingleFilePeers() throws Exception {
+        // TODO force peers and webseed to not have all pieces
+        // only when used together have all the pieces
+
+        File torrentFile = createFile("test-single-webseed-single-file-peer.torrent");
+
+        BTDownloader downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+
         File rootFile = torrentFileSystem.getCompleteFile();
         try {
-
             FileUtils.deleteRecursive(rootFile);
+            rootFile.deleteOnExit();
+
             File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
             incompleteFile1.delete();
+            incompleteFile1.deleteOnExit();
+
             File completeFile1 = torrentFileSystem.getFiles().get(0);
             completeFile1.delete();
+            completeFile1.deleteOnExit();
 
             downloader.startDownload();
             finishDownload(downloader);
+
             SwarmerImplTest
                     .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
         } finally {
             if (rootFile != null) {
-                rootFile.delete();
+                FileUtils.deleteRecursive(rootFile);
             }
         }
+    }
+
+    private File createFile(String fileName) {
+        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/torrents/"
+                + fileName;
+        File torrentFile = new File(torrentfilePath);
+        return torrentFile;
     }
 
     private BTDownloader createBTDownloader(File torrentFile) throws IOException {
@@ -294,7 +324,7 @@ public class BTDownloaderImplTest extends BaseTestCase {
         downloader.initBtMetaInfo(metaInfo);
         return downloader;
     }
-    
+
     private void finishDownload(BTDownloader downloader) throws InterruptedException {
         int maxIterations = 100;
         int index = 0;

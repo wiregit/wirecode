@@ -6,13 +6,10 @@ import java.net.URI;
 
 import org.limewire.io.DiskException;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
-import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
-import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.impl.SwarmerImpl;
-import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTContext;
@@ -29,8 +26,9 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomGapStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.gnutella.util.FileServer;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class BTSwarmCoordinatorTest extends BaseTestCase {
+public class BTSwarmCoordinatorTest extends LimeTestCase {
     private static final int TEST_PORT = 8080;
 
     private FileServer fileServer = null;
@@ -42,7 +40,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         fileServer = new FileServer(TEST_PORT, new File(
-                "/home/pvertenten/workspace/limewire/tests/test-data/public_html"));
+                "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/public_html"));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -67,8 +65,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         completeFile.delete();
         File downloadedFile = torrentFileSystem.getIncompleteFiles().get(0);
         downloadedFile.delete();
-//        completeFile.deleteOnExit();
-//        downloadedFile.deleteOnExit();
+        completeFile.deleteOnExit();
+        downloadedFile.deleteOnExit();
         final Swarmer swarmer = createSwarmer(torrentContext, null);
 
         swarmer.start();
@@ -201,7 +199,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
     }
 
     private File createFile(String fileName) {
-        File torrentFile = new File("/home/pvertenten/workspace/limewire/tests/test-data/"
+        File torrentFile = new File("/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/torrents/"
                 + fileName);
         return torrentFile;
     }
@@ -245,9 +243,7 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
                 .getMetaInfo(), torrentFileSystem, torrentDiskManager, pieceStrategy);
         btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
-        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator);
-        Swarmer swarmer = new SwarmerImpl();
-        swarmer.register(SwarmHttpSource.class, sourceHandler);
+        Swarmer swarmer = new SwarmerImpl(btCoordinator);
 
         return swarmer;
     }

@@ -15,7 +15,6 @@ import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
-import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
@@ -49,7 +48,7 @@ public class SwarmerImplTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         fileServer = new FileServer(TEST_PORT, new File(
-                "/home/pvertenten/workspace/limewire/tests/test-data/public_html"));
+                "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/public_html"));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -322,29 +321,30 @@ public class SwarmerImplTest extends BaseTestCase {
         });
     }
 
-//    public void testMediumFileSwarm() throws Exception {
-//        runTest(new TestRun() {
-//            public void run() throws Exception {
-//                File file = createTestFile("testMediumFileSwarm.pdf");
-//                try {
-//                    String md5 = "9efd0799bec290d89745f3b479e3fec8";
-//
-//                    URI uri1 = new URI(
-//                            "http://ftp.belnet.be/packages/damnsmalllinux/current/dsl-4.4.3-initrd.iso");
-//                    int lowByte = 0;
-//                    int highByte = 10252982 - 1;
-//                    long fileSize = 100000000;
-//                    Range range = Range.createRange(lowByte, highByte);
-//                    Swarmer swarmer = createSwarmer(file, "dsl-4.4.3-initrd.iso", fileSize,
-//                            new MD5SumFileVerifier(range, md5));
-//                    swarmer.addSource(new SwarmHttpSource(uri1, range));
-//                    assertDownload(md5, file, fileSize);
-//                } finally {
-//                    file.delete();
-//                }
-//            }
-//        });
-//    }
+    // public void testMediumFileSwarm() throws Exception {
+    // runTest(new TestRun() {
+    // public void run() throws Exception {
+    // File file = createTestFile("testMediumFileSwarm.pdf");
+    // try {
+    // String md5 = "9efd0799bec290d89745f3b479e3fec8";
+    //
+    // URI uri1 = new URI(
+    // "http://ftp.belnet.be/packages/damnsmalllinux/current/dsl-4.4.3-initrd.iso"
+    // );
+    // int lowByte = 0;
+    // int highByte = 10252982 - 1;
+    // long fileSize = 100000000;
+    // Range range = Range.createRange(lowByte, highByte);
+    // Swarmer swarmer = createSwarmer(file, "dsl-4.4.3-initrd.iso", fileSize,
+    // new MD5SumFileVerifier(range, md5));
+    // swarmer.addSource(new SwarmHttpSource(uri1, range));
+    // assertDownload(md5, file, fileSize);
+    // } finally {
+    // file.delete();
+    // }
+    // }
+    // });
+    // }
 
     /**
      * Asserts that the given file has the correct size, and matches the given
@@ -403,11 +403,9 @@ public class SwarmerImplTest extends BaseTestCase {
 
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
-        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator);
-        Swarmer swarmer = new SwarmerImpl();
+        Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
         swarmer.getMeasuredBandwidth(true);
         swarmer.getMeasuredBandwidth(false);
-        swarmer.register(SwarmHttpSource.class, sourceHandler);
 
         swarmer.start();
         return swarmer;

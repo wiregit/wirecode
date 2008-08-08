@@ -6,7 +6,7 @@ public interface Swarmer {
 
     void addSource(SwarmSource source, SwarmSourceEventListener sourceEventListener);
 
-    void register(Class clazz, SwarmSourceHandler sourceHandler);
+    void register(SwarmSource.Type type, SwarmSourceHandler sourceHandler);
 
     void start();
 

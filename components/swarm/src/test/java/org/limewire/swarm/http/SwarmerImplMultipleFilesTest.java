@@ -95,10 +95,8 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
 
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
-        SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(swarmCoordinator);
-        Swarmer swarmer = new SwarmerImpl();
-        swarmer.register(SwarmHttpSource.class, sourceHandler);
-
+        Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
+        
         return swarmer;
     }
 

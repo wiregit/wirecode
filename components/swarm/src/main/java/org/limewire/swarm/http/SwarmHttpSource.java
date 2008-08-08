@@ -45,4 +45,8 @@ public class SwarmHttpSource implements SwarmSource {
     public IntervalSet getAvailableRanges() {
         return availableRanges;
     }
+
+    public Type getType() {
+        return SwarmSource.Type.HTTP;
+    }
 }

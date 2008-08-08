@@ -291,9 +291,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                     torrentDiskManager);
             btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
-            SwarmSourceHandler sourceHandler = new SwarmHttpSourceHandler(btCoordinator);
-            swarmer = new SwarmerImpl();
-            swarmer.register(SwarmHttpSource.class, sourceHandler);
+            swarmer = new SwarmerImpl(btCoordinator);
             swarmer.start();
             long completeSize = torrentFileSystem.getTotalSize();
             for (URI uri : metaInfo.getWebSeeds()) {
@@ -433,9 +431,9 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 choker.shutdown();
                 linkManager.shutdown();
                 _connectionFetcher.shutdown();
-//                if(swarmer != null) {
-//                    swarmer.shutdown();
-//                }
+                if(swarmer != null) {
+                    swarmer.shutdown();
+                }
             }
         };
         networkInvoker.execute(closer);
@@ -863,9 +861,9 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         choker.start();
         choker.rechoke();
         
-//        if(swarmer != null) {
-//            swarmer.shutdown();
-//        }
+        if(swarmer != null) {
+            swarmer.shutdown();
+        }
 
         // tell the tracker we are a seed now
         trackerManager.announceComplete();
