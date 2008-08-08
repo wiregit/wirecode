@@ -6,7 +6,6 @@ import java.io.IOException;
 import junit.framework.Assert;
 
 import org.limewire.swarm.http.SwarmerImplTest;
-import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Guice;
