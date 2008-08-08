@@ -18,6 +18,7 @@ import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
 import org.limewire.swarm.impl.AbstractSwarmCoordinator;
+import org.limewire.util.Objects;
 
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -46,14 +47,10 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     public BTSwarmCoordinator(BTMetaInfo btMetaInfo, TorrentFileSystem torrentFileSystem,
             TorrentDiskManager torrentDiskManager, PieceStrategy pieceStrategy) {
-        assert btMetaInfo != null;
-        assert torrentFileSystem != null;
-        assert torrentDiskManager != null;
-        assert pieceStrategy != null;
-        this.btMetaInfo = btMetaInfo;
-        this.torrentFileSystem = torrentFileSystem;
-        this.torrentDiskManager = torrentDiskManager;
-        this.pieceStrategy = pieceStrategy;
+        this.btMetaInfo = Objects.nonNull(btMetaInfo, "btMetaInfo");
+        this.torrentFileSystem = Objects.nonNull(torrentFileSystem, "torrentFileSystem");
+        this.torrentDiskManager = Objects.nonNull(torrentDiskManager, "torrentDiskManager");
+        this.pieceStrategy = Objects.nonNull(pieceStrategy, "pieceStrategy");
         this.requested = Collections.synchronizedSet(new HashSet<BTInterval>());
     }
 
