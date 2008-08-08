@@ -190,7 +190,8 @@ class TopPanel extends JPanel implements SearchNavigator {
             
             @Override
             public void sourceCountUpdated(int newSourceCount) {
-                moreTextAction.putValue(Action.NAME, String.valueOf(newSourceCount));
+                moreTextAction.putValue(Action.NAME,
+                    String.valueOf(newSourceCount));
                 if (newSourceCount >= 100) {
                     action.killBusy();
                 }
@@ -250,7 +251,9 @@ class TopPanel extends JPanel implements SearchNavigator {
         }
         
         @Override
-        public void handleSearchResult(SearchResult searchResult) {}
+        public void handleSearchResult(SearchResult searchResult) {
+            System.out.println("TopPanel: got " + searchResult.getDescription());
+        }
         
         @Override
         public void searchStarted() {
