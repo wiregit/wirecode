@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
+import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -91,7 +92,7 @@ public class DownloadTable extends JXTable {
 		        int col = columnAtPoint(e.getPoint());
                 int row = rowAtPoint(e.getPoint());
                 
-                if (e.getClickCount() == 2){
+                if (e.getClickCount() == 2 && (e.getComponent() instanceof JButton)){
                     DownloadItem item = (DownloadItem)getValueAt(row, col);
                     throw new RuntimeException("Implement launch " + item.getTitle() + "!");
                 }
