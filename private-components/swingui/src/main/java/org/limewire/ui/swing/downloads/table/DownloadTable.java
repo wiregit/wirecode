@@ -92,16 +92,17 @@ public class DownloadTable extends JXTable {
 		        int col = columnAtPoint(e.getPoint());
                 int row = rowAtPoint(e.getPoint());
                 
-                if (e.getClickCount() == 2 && (e.getComponent() instanceof JButton)){
-                    DownloadItem item = (DownloadItem)getValueAt(row, col);
-                    throw new RuntimeException("Implement launch " + item.getTitle() + "!");
-                }
-                
-              //force update editor colors
-                prepareEditor(editor, row, col);
-                //editor.repaint() takes about a second to show sometimes
-                repaint();
+                if (row >= 0 && col >= 0) {
+                    if (e.getClickCount() == 2 && (e.getComponent() instanceof JButton)) {
+                        DownloadItem item = (DownloadItem) getValueAt(row, col);
+                        throw new RuntimeException("Implement launch " + item.getTitle() + "!");
+                    }
 
+                    // force update editor colors
+                    prepareEditor(editor, row, col);
+                    // editor.repaint() takes about a second to show sometimes
+                    repaint();
+                }
             }
 		    
 			@Override
@@ -132,13 +133,15 @@ public class DownloadTable extends JXTable {
 
             private void maybeShowPopup(MouseEvent e) {
                 if (e.isPopupTrigger()) {
-                    editor.showPopupMenu(e.getComponent(), e.getX(), e.getY());
                     int col = columnAtPoint(e.getPoint());
                     int row = rowAtPoint(e.getPoint());
-                    //force update editor colors
-                    prepareEditor(editor, row, col);
-                    //editor.repaint() takes about a second to show sometimes
-                    repaint();
+                    if (row >= 0 && col >= 0) {
+                        editor.showPopupMenu(e.getComponent(), e.getX(), e.getY());
+                        // force update editor colors
+                        prepareEditor(editor, row, col);
+                        // editor.repaint() takes about a second to show sometimes
+                        repaint();
+                    }
                 }
             }
 
