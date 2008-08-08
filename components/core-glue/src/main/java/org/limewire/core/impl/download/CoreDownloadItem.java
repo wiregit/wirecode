@@ -2,6 +2,7 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -294,6 +295,11 @@ public class CoreDownloadItem implements DownloadItem {
     @Override
     public boolean isLaunchable() {
         return downloader.isLaunchable();
+    }
+
+    @Override
+    public File getFile() {
+        return downloader.getFile();
     }
     
    

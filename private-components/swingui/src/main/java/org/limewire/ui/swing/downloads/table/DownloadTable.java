@@ -19,6 +19,7 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 //import org.jdesktop.swingx.decorator.Highlighter;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 
@@ -93,9 +94,13 @@ public class DownloadTable extends JXTable {
                 int row = rowAtPoint(e.getPoint());
                 
                 if (row >= 0 && col >= 0) {
-                    if (e.getClickCount() == 2 && (e.getComponent() instanceof JButton)) {
+                    Component component = e.getComponent();
+                    //launch file on double click unless the click is on a button
+                    if (e.getClickCount() == 2 && !(component.getComponentAt(e.getPoint()) instanceof JButton)) {
                         DownloadItem item = (DownloadItem) getValueAt(row, col);
-                        throw new RuntimeException("Implement launch " + item.getTitle() + "!");
+                        if (item.isLaunchable()) {
+                            NativeLaunchUtils.launchFile(item.getFile());
+                        }
                     }
 
                     // force update editor colors

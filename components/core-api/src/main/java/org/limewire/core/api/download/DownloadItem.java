@@ -1,6 +1,7 @@
 package org.limewire.core.api.download;
 
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.List;
 
 
@@ -84,5 +85,7 @@ public interface DownloadItem  {
      * @return if this downloader can be launched or previewed.
      */
     public boolean isLaunchable();
+
+    public File getFile();
     
 }

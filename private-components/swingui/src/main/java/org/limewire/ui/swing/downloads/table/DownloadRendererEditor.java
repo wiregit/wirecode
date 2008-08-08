@@ -599,14 +599,11 @@ public class DownloadRendererEditor extends JPanel implements
         } else if (actionCommmand == LINK_COMMAND){
             NativeLaunchUtils.openURL(ERROR_URL);
         } else if (actionCommmand == PREVIEW_COMMAND){
-            //TODO preview
-            throw new RuntimeException("Implement "+ actionCommmand + " " + item.getTitle() + "!");
+            NativeLaunchUtils.launchFile(item.getFile());
         } else if (actionCommmand == LOCATE_COMMAND){
-            //TODO locate
-            throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
+            NativeLaunchUtils.launchExplorer(item.getFile());
         } else if (actionCommmand == LAUNCH_COMMAND){
-            //TODO launch
-            throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
+            NativeLaunchUtils.launchFile(item.getFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
             //TODO properties
             throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");

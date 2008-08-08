@@ -2,6 +2,7 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -195,6 +196,11 @@ public class MockDownloadItem implements DownloadItem {
     @Override
     public boolean isLaunchable() {
         return true;
+    }
+
+    @Override
+    public File getFile() {
+        return new File("A FILE!");
     }
 
   
