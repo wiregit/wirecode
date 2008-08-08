@@ -226,7 +226,7 @@ public class DownloadSummaryPanel extends JPanel {
                 setBorder(BorderFactory.createLoweredBevelBorder());
                 titleLabel.setForeground(highlightFontColor);
                 moreLabel.setForeground(highlightFontColor);
-                completeLabel.setForeground(highlightColor);
+                completeLabel.setForeground(highlightFontColor);
                 downloadStatusPanelRenderer.setForeground(highlightFontColor);
             } else {
              //   setBackground(Color.WHITE);
