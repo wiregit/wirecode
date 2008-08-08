@@ -3,12 +3,12 @@ package org.limewire.core.api.download;
 public enum DownloadState {
 	//(cancellable, pausable, resumable, searchAgainable)
 	DONE(false, false, false, false), 
-	CONNECTING(true, false, false, false), 
+	CONNECTING(true, true, false, false), 
 	DOWNLOADING(true, true, false, false), 
 	PAUSED(true, false, true, false), 
 	FINISHING(true, false, false, false), 
-    LOCAL_QUEUED(true, false, false, false), 
-    REMOTE_QUEUED(true, false, false, false), 
+    LOCAL_QUEUED(true, true, false, false), 
+    REMOTE_QUEUED(true, true, false, false), 
 	CANCELLED(false, false, false, false), 
 	STALLED(true, false, false, true), 
 	ERROR(true, false, false, false);
