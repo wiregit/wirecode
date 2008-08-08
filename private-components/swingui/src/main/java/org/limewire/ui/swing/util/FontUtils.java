@@ -13,6 +13,7 @@ public class FontUtils {
     
     public static void changeSize(JComponent component, float increment) {
         Font font = component.getFont();
+        if (font == null) return;
         float newSize = font.getSize() + increment;
         component.setFont(font.deriveFont(newSize));
     }
@@ -27,6 +28,7 @@ public class FontUtils {
 
     public static void underline(JComponent component) {
         Font font = component.getFont();
+        if (font == null) return;
         Map<TextAttribute, ?> map = font.getAttributes();
         Map<TextAttribute, Object> newMap = new HashMap<TextAttribute, Object>(map);
         newMap.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
@@ -35,6 +37,7 @@ public class FontUtils {
     
     public static void removeUnderline(JComponent component) {
         Font font = component.getFont();
+        if (font == null) return;
         Map<TextAttribute, ?> map = font.getAttributes();
         Map<TextAttribute, Object> newMap = new HashMap<TextAttribute, Object>(map);
         newMap.put(TextAttribute.UNDERLINE, Integer.valueOf(-1));
