@@ -5,8 +5,8 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.limewire.ui.swing.friends.Friend.State;
 import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -20,11 +20,11 @@ public class ConversationPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
 
-                ConversationPane pane = new ConversationPane(new FriendImpl("Will Benedict", "Just listening to some jams", State.Available));
+                ConversationPane pane = new ConversationPane(new MockFriend("Will Benedict", "Just listening to some jams", Mode.available));
                 frame.add(pane);
                 
                 for(int i = 0; i < 10; i++) {
-                    pane.handleMessage("foo", new MessageImpl("Foo Bar", 
+                    pane.handleMessage("foo", new MockMessage("Foo Bar", 
                             "This is a message This is a message This is a message This is a message This is a message This is a message ",
                             Math.random() < 0.5 ? Type.Received : Type.Sent));
                 }
@@ -35,58 +35,5 @@ public class ConversationPaneHarness {
                 frame.setVisible(true);
             }
         });
-    }
-    
-    private static class MessageImpl implements Message {
-        private final String message, sender;
-        private final Type type;
-
-        public MessageImpl(String sender, String message, Type type) {
-            this.message = message;
-            this.sender = sender;
-            this.type = type;
-        }
-
-        @Override
-        public String getMessageText() {
-            return message;
-        }
-
-        @Override
-        public String getSenderName() {
-            return sender;
-        }
-
-        @Override
-        public Type getType() {
-            return type;
-        }
-        
-    }
-    
-    private static class FriendImpl implements Friend {
-        private final String name, status;
-        private final State state;
-        
-        public FriendImpl(String name, String status, State state) {
-            this.name = name;
-            this.state = state;
-            this.status = status;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String getStatus() {
-            return status;
-        }
-
-        @Override
-        public State getState() {
-            return state;
-        }
     }
 }
