@@ -20,9 +20,18 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,6 +50,27 @@ public class MainDownloadPanel extends JPanel {
 	
 	private final DownloadMediator downloadMediator;
 
+    private final Action pauseAction = new AbstractAction(I18n.tr("Pause All")) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            downloadMediator.pauseAll();
+        }
+    };
+
+    private final Action resumeAction = new AbstractAction(I18n.tr("Resume All")) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            downloadMediator.resumeAll();
+        }
+    };
+
+    private final Action clearAction = new AbstractAction(I18n.tr("Clear Finished")) {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            downloadMediator.clearFinished();
+        }
+    };
+    
 	/**
 	 * Create the panel
 	 */
@@ -48,6 +78,10 @@ public class MainDownloadPanel extends JPanel {
 	public MainDownloadPanel(DownloadListManager downloadListManager) {
 		this.downloadMediator = new DownloadMediator(downloadListManager);
 		setLayout(new BorderLayout());
+		
+        resumeAction.setEnabled(false);
+        pauseAction.setEnabled(false);
+        clearAction.setEnabled(false);
 
 		cardPanel = new JPanel();
 		cardLayout = new CardLayout();
@@ -65,13 +99,41 @@ public class MainDownloadPanel extends JPanel {
 		final DownloadSettingsPanel settingsPanel = new DownloadSettingsPanel();
 		settingsPanel.setBorder(new LineBorder(Color.BLACK, 1, false));
 		add(settingsPanel, BorderLayout.NORTH);
-	}
+		
+		final EventList<DownloadItem> pausableList = new FilterList<DownloadItem>(downloadMediator.getFilteredList(), 
+		        new PausableMatcher());
+		final EventList<DownloadItem> resumableList = new FilterList<DownloadItem>(downloadMediator.getFilteredList(), 
+                new ResumableMatcher());
+		final EventList<DownloadItem> doneList = new FilterList<DownloadItem>(downloadMediator.getFilteredList(), 
+                        new DownloadStateMatcher(DownloadState.DONE));
+		
+		pausableList.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                pauseAction.setEnabled(pausableList.size() > 0);
+            }
+        });
+
+        resumableList.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                resumeAction.setEnabled(resumableList.size() > 0);
+            }
+        });
+        
+        doneList.addListEventListener(new ListEventListener<DownloadItem>() {
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                clearAction.setEnabled(doneList.size() > 0);
+            }
+        });
+    }
 	
 	public void setCategorized(boolean categorized){
 		cardLayout.show(cardPanel, categorized? CATEGORY : NO_CATEGORY);
 	}
 	
-	
+    
 	private class DownloadSettingsPanel extends JPanel {
 
 		private final JButton pauseAllButton;
@@ -81,23 +143,6 @@ public class MainDownloadPanel extends JPanel {
 		private final JTextField searchBar;
 		private final JLabel titleLabel;
 		
-		private final Action pauseAction = new AbstractAction(I18n.tr("Pause All")) {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				downloadMediator.pauseAll();
-			}
-
-		};
-		
-		private final Action resumeAction = new AbstractAction(I18n.tr("Resume All")) {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				downloadMediator.resumeAll();
-			}
-
-		};
 
 		private final Action categorizeAction = new AbstractAction(I18n.tr("Categorize downloads")) {
 
@@ -107,16 +152,7 @@ public class MainDownloadPanel extends JPanel {
 			}
 
 		};
-		
-		private final Action clearAction = new AbstractAction(I18n.tr("Clear Finished")) {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				downloadMediator.clearFinished();
-			}
-
-		};
-		
+			
 		
 
 		public DownloadSettingsPanel() {
@@ -129,7 +165,7 @@ public class MainDownloadPanel extends JPanel {
 			titleLabel = new JLabel(I18n.tr("Downloads"));
 			FontUtils.changeStyle(titleLabel, Font.BOLD);
 			FontUtils.changeSize(titleLabel, 5);
-			searchBar = downloadMediator.getFilterBar();
+			searchBar = downloadMediator.getFilterTextField();
 			//TODO: make SearchBar work with filtering
 			//searchBar.setDefaultText(I18n.tr("Filter downloads..."));
 			Dimension dim = searchBar.getPreferredSize();
@@ -175,5 +211,19 @@ public class MainDownloadPanel extends JPanel {
 	
 		}
 	}
+	
+	private static class PausableMatcher implements Matcher<DownloadItem> {
+        @Override
+        public boolean matches(DownloadItem item) {
+            return item.getState().isPausable();
+        }
+    }
+
+    private static class ResumableMatcher implements Matcher<DownloadItem> {
+        @Override
+        public boolean matches(DownloadItem item) {
+            return item.getState().isResumable();
+        }
+    }
 
 }

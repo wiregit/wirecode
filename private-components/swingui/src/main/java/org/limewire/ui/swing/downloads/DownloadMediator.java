@@ -20,9 +20,10 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 class DownloadMediator {
 
 	
-	private JTextField searchBar;
+	private JTextField filterField;
+	
 	/**
-	 * filtered by textbox
+	 * filtered by filterField
 	 */
 	private EventList<DownloadItem> filteredList;
 	
@@ -35,9 +36,9 @@ class DownloadMediator {
 	
 		commonBaseList= new FilterList<DownloadItem>(downloadManager.getDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));	
 		commonBaseList = GlazedListsSwing.swingThreadProxyList(commonBaseList);
-		searchBar = new JTextField();
+		filterField = new JTextField();
 		filteredList = new FilterList<DownloadItem>(commonBaseList, 
-				new TextComponentMatcherEditor<DownloadItem>(searchBar, new DownloadItemTextFilterator(), true));		
+				new TextComponentMatcherEditor<DownloadItem>(filterField, new DownloadItemTextFilterator(), true));		
 	}
 
 	
@@ -95,14 +96,25 @@ class DownloadMediator {
 		}
 	}
 
-	public JTextField getFilterBar(){
-		return searchBar;
+    /**
+     * @return the text field filtering the filtered list
+     */
+	public JTextField getFilterTextField(){
+		return filterField;
 	}
 	
+	/**
+	 * @return a Swing thread safe list of DownloadItems filtered by the text field
+	 * @see getFilterBar()
+	 */
 	public EventList<DownloadItem> getFilteredList(){
 		return filteredList;
 	}
 	
+	/**
+	 * 
+	 * @return a Swing thread safe list of all DownloadItems
+	 */
 	public EventList<DownloadItem> getUnfilteredList(){
 		return commonBaseList;
 	}
