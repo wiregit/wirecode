@@ -33,6 +33,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.Category;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -359,7 +360,9 @@ public class DownloadRendererEditor extends JPanel implements
 	    switch(state){
 	    
 	    case DONE:
-	        popupMenu.add(launchMenuItem);
+	        if (isLaunchable(menuEditItem)) {
+                popupMenu.add(launchMenuItem);
+            }
 	        popupMenu.add(locateMenuItem);
 	        popupMenu.add(removeMenuItem);
 	        break;
@@ -370,7 +373,7 @@ public class DownloadRendererEditor extends JPanel implements
         case LOCAL_QUEUED:
         case REMOTE_QUEUED:
 	        if (menuEditItem.getCurrentSize() > 0){
-	            if (menuEditItem.isLaunchable()) {
+	            if (isLaunchable(menuEditItem)) {
                     popupMenu.add(previewMenuItem);
                 }
 	            popupMenu.add(locateMenuItem);
@@ -381,7 +384,7 @@ public class DownloadRendererEditor extends JPanel implements
             
 	    case DOWNLOADING:
             popupMenu.add(pauseMenuItem);
-            if (menuEditItem.isLaunchable()) {
+            if (isLaunchable(menuEditItem)) {
                 popupMenu.add(previewMenuItem);
             }
             popupMenu.add(locateMenuItem);
@@ -393,7 +396,7 @@ public class DownloadRendererEditor extends JPanel implements
 	    case PAUSED:
             popupMenu.add(resumeMenuItem);
             if (menuEditItem.getCurrentSize() > 0){
-                if (menuEditItem.isLaunchable()) {
+                if (isLaunchable(menuEditItem)) {
                     popupMenu.add(previewMenuItem);
                 }
                 popupMenu.add(locateMenuItem);
@@ -405,7 +408,7 @@ public class DownloadRendererEditor extends JPanel implements
 	    case STALLED:
 	        popupMenu.add(tryAgainMenuItem);
 	        if (menuEditItem.getCurrentSize() > 0){
-	            if (menuEditItem.isLaunchable()) {
+	            if (isLaunchable(menuEditItem)) {
                     popupMenu.add(previewMenuItem);
                 }
                 popupMenu.add(locateMenuItem);
@@ -421,7 +424,12 @@ public class DownloadRendererEditor extends JPanel implements
         popupMenu.show(c, x, y);
 	}
 	
-	/**
+	private boolean isLaunchable(DownloadItem item) {
+        return item.isLaunchable() && item.getCategory() != Category.PROGRAM;
+    }
+
+
+    /**
      * Binds editor to downloadItems so that the editor automatically updates
      * when downloadItems changes and popup menus work.  This is required for Editors
      */
