@@ -29,12 +29,12 @@ public class TabActionMap {
     private Action removeOthers;
     private Action removeAll;
         
-    public TabActionMap(Action mainAction, Action removeAction, Action moreTextAction,
-            List<Action> rightClickActions) {
+    public TabActionMap(Action mainAction, Action removeAction,
+            Action moreTextAction, List<Action> rightClickActions) {
         this.main = mainAction;
         this.remove = removeAction;
         this.moreText = moreTextAction;
-        if(rightClickActions == null) {
+        if (rightClickActions == null) {
             this.rightClick = Collections.emptyList();
         } else {
             this.rightClick = rightClickActions;
@@ -77,7 +77,8 @@ public class TabActionMap {
      * Wraps the given {@link Action} for use within a list {@link TabActionMap},
      * suitable for constructing a {@link FancyTabList}.
      */
-    public static List<TabActionMap> createMapForMainActions(Action... selectActions) {
+    public static List<TabActionMap> createMapForMainActions(
+            Action... selectActions) {
         return createMapForMainActions(Arrays.asList(selectActions));
     }
     
@@ -85,12 +86,13 @@ public class TabActionMap {
      * Wraps the given {@link Action} for use within a list {@link TabActionMap},
      * suitable for constructing a {@link FancyTabList}.
      */
-    public static List<TabActionMap> createMapForMainActions(Collection<? extends Action> mainActions) {
+    public static List<TabActionMap> createMapForMainActions(
+            Collection<? extends Action> mainActions) {
+        
         List<TabActionMap> maps = new ArrayList<TabActionMap>();
         for(Action action : mainActions) {
             maps.add(new TabActionMap(action, null, null, null));
         }
         return maps;
     }
-
 }
