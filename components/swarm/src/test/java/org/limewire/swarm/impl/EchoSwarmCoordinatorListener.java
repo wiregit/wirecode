@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.swarm.http;
+package org.limewire.swarm.impl;
 
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmCoordinator;

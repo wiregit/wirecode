@@ -14,6 +14,7 @@ import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
+import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
@@ -21,6 +22,7 @@ import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
+import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -34,6 +36,12 @@ import com.limegroup.gnutella.util.FileServer;
 public class SwarmerImplTest extends BaseTestCase {
     private static final int TEST_PORT = 8080;
 
+    /**
+     * A directory containing the download data for this unit tests.
+     */
+    public static final String FILE_DIR = System.getProperty("user.dir")
+            + "/tests/test-data/bittorrent/public_html";
+
     private FileServer fileServer = null;
 
     public SwarmerImplTest(String name) {
@@ -46,8 +54,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        fileServer = new FileServer(TEST_PORT, new File(
-                "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/public_html"));
+        fileServer = new FileServer(TEST_PORT, new File(FILE_DIR));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -267,6 +274,54 @@ public class SwarmerImplTest extends BaseTestCase {
                 }
             }
         });
+    }
+
+    public void testMultipleFiles() throws Exception {
+        long fileSize1 = 44425;
+        long fileSize2 = 18;
+        File file1 = createTestFile("/testMultipleFiles.pdf");
+        File file2 = createTestFile("/testMultipleFiles.txt");
+        String md51 = "8055d620ba0c507c1af957b43648c99f";
+        String md52 = "b534f966248fde84b5a7bbb399db1c3d";
+        URI uri = new URI("http://localhost:" + TEST_PORT + "/pub/");
+
+        Range range1 = Range.createRange(0, fileSize1 - 1);
+        Range range2 = Range.createRange(fileSize1, fileSize1 + fileSize2 - 1);
+        final SwarmSource swarmSource = new SwarmHttpSource(uri, (fileSize1 + fileSize2));
+        MD5SumFileVerifier swarmBlockVerifier = new MD5SumFileVerifier();
+        swarmBlockVerifier.addMD5Check(range1, md51);
+        swarmBlockVerifier.addMD5Check(range2, md52);
+        file1.delete();
+        file2.delete();
+
+        SwarmFileSystemImpl swarmfilesystem = new SwarmFileSystemImpl();
+        SwarmFileImpl swarmFile1 = new SwarmFileImpl(file1, "gnutella_protocol_0.4.pdf", fileSize1);
+        swarmfilesystem.addSwarmFile(swarmFile1);
+        SwarmFileImpl swarmFile2 = new SwarmFileImpl(file2, "hi.txt", fileSize2);
+        swarmfilesystem.addSwarmFile(swarmFile2);
+        SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
+        SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,
+                swarmBlockVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
+                selectionStrategy, 32 * 1024);
+        swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
+
+        Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
+        swarmer.start();
+
+        swarmer.addSource(swarmSource);
+
+        Thread.sleep(3000);
+
+        Assert.assertTrue(file1.exists());
+        Assert.assertEquals(fileSize1, file1.length());
+        String testmd5 = FileUtils.getMD5(file1);
+
+        Assert.assertEquals(md51, testmd5);
+
+        Assert.assertTrue(file2.exists());
+        Assert.assertEquals(fileSize2, file2.length());
+        testmd5 = FileUtils.getMD5(file2);
+        Assert.assertEquals(md52, testmd5);
     }
 
     /**

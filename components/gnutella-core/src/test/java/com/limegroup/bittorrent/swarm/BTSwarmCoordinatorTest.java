@@ -6,9 +6,9 @@ import java.net.URI;
 
 import org.limewire.io.DiskException;
 import org.limewire.swarm.Swarmer;
-import org.limewire.swarm.http.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.http.SwarmerImplTest;
+import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 
@@ -208,6 +208,39 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
 
     }
+    
+    public void testProblemTorrent() throws Exception {
+
+        File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
+
+        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+        File completeFile = torrentFileSystem.getCompleteFile();
+        completeFile.delete();
+        File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+
+        downloadedFile1.delete();
+        completeFile.deleteOnExit();
+        downloadedFile1.deleteOnExit();
+
+        final Swarmer swarmer = createSwarmer(torrentContext, new LargestGapStartPieceStrategy(
+                metaInfo));
+
+        swarmer.start();
+
+        long totalSize = torrentFileSystem.getTotalSize();
+        URI uri1 = metaInfo.getWebSeeds()[0];
+        URI uri2 = metaInfo.getWebSeeds()[1];
+        URI uri3 = metaInfo.getWebSeeds()[2];
+        swarmer.addSource(new SwarmHttpSource(uri1, totalSize));
+        swarmer.addSource(new SwarmHttpSource(uri2, totalSize));
+        swarmer.addSource(new SwarmHttpSource(uri3, totalSize));
+
+        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+
+    }
+    
 
     private File createFile(String fileName) {
         File torrentFile = new File(TORRENT_DIR + "/" + fileName);

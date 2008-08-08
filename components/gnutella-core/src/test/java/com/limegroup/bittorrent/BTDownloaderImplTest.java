@@ -25,15 +25,21 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * It takes a torrent file and downloads it, then checks the files contents
  * against an MD5.
  * 
- * Currently it assumes there is a tracker running on the localhost at port
- * 3456.
- * 
- * There needs to be a peer seeding the file at that tracker for the test to
- * work.
- * 
  */
 public class BTDownloaderImplTest extends LimeTestCase {
     private static final int TEST_PORT = 8080;
+
+    /**
+     * A directory containing the torrent data for this unit test.
+     */
+    public static final String TORRENT_DIR = System.getProperty("user.dir")
+            + "/test-data/bittorrent/torrents";
+
+    /**
+     * A directory containing the torrent data for this unit test.
+     */
+    public static final String FILE_DIR = System.getProperty("user.dir")
+            + "/test-data/bittorrent/public_html";
 
     private boolean localIsPrivateBackup = false;
 
@@ -55,8 +61,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         forceIPAddressStringBackup = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
-        fileServer = new FileServer(TEST_PORT, new File(
-                "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/public_html"));
+        fileServer = new FileServer(TEST_PORT, new File(FILE_DIR));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -305,8 +310,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     }
 
     private File createFile(String fileName) {
-        String torrentfilePath = "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/torrents/"
-                + fileName;
+        String torrentfilePath = TORRENT_DIR + "/" + fileName;
         File torrentFile = new File(torrentfilePath);
         return torrentFile;
     }

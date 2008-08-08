@@ -19,7 +19,6 @@ import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.Swarmer;
-import org.limewire.swarm.http.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
@@ -287,7 +286,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             TorrentDiskManager torrentDiskManager = context.getDiskManager();
             BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
                     torrentDiskManager);
-            btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
             swarmer = new SwarmerImpl(btCoordinator);
             swarmer.start();
