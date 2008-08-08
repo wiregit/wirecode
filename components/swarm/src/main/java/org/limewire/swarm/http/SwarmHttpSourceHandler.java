@@ -29,6 +29,7 @@ import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.http.handler.SwarmCoordinatorHttpExecutionHandler;
 import org.limewire.swarm.http.handler.SwarmHttpExecutionHandler;
 import org.limewire.swarm.impl.ReconnectingSourceEventListener;
+import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -54,7 +55,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator,
             SwarmSourceEventListener defaultSourceEventListener) {
-        this.swarmCoordinator = swarmCoordinator;
+        this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
         if (defaultSourceEventListener == null) {
             this.defaultSourceEventListener = new ReconnectingSourceEventListener();
         } else {

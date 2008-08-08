@@ -31,6 +31,18 @@ import com.limegroup.gnutella.util.LimeTestCase;
 public class BTSwarmCoordinatorTest extends LimeTestCase {
     private static final int TEST_PORT = 8080;
 
+    /**
+     * A directory containing the torrent data for this unit test.
+     */
+    public static final String TORRENT_DIR = System.getProperty("user.dir")
+            + "/test-data/bittorrent/torrents";
+
+    /**
+     * A directory containing the torrent data for this unit test.
+     */
+    public static final String FILE_DIR = System.getProperty("user.dir")
+            + "/test-data/bittorrent/public_html";
+
     private FileServer fileServer = null;
 
     public BTSwarmCoordinatorTest(String name) {
@@ -39,8 +51,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        fileServer = new FileServer(TEST_PORT, new File(
-                "/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/public_html"));
+        fileServer = new FileServer(TEST_PORT, new File(FILE_DIR));
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -199,8 +210,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     }
 
     private File createFile(String fileName) {
-        File torrentFile = new File("/home/pvertenten/workspace/limewire/tests/test-data/bittorrent/torrents/"
-                + fileName);
+        File torrentFile = new File(TORRENT_DIR + "/" + fileName);
         return torrentFile;
     }
 
