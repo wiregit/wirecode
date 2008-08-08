@@ -104,8 +104,10 @@ public class DownloadRendererEditor extends JPanel implements
 	private Icon imageIcon;
 	@Resource
 	private Icon videoIcon;
-	@Resource
-	private Icon documentIcon;
+    @Resource
+    private Icon documentIcon;
+    @Resource
+    private Icon programIcon;
     @Resource
     private Icon otherIcon;
     @Resource
@@ -460,6 +462,8 @@ public class DownloadRendererEditor extends JPanel implements
                 break;
             case VIDEO:
                 editor.iconLabel.setIcon(videoIcon);
+            case PROGRAM:
+                editor.iconLabel.setIcon(programIcon);
                 break;
             default:
                 editor.iconLabel.setIcon(otherIcon);

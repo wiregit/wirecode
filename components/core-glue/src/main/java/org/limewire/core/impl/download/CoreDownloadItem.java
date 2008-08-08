@@ -9,6 +9,8 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.listener.EventListener;
+import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -72,8 +74,20 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public Category getCategory() {
-        // TODO Auto-generated method stub
-        return Category.AUDIO;
+        String ext = FileUtils.getFileExtension(downloader.getFile());
+        MediaType type = MediaType.getMediaTypeForExtension(ext);
+        if (type == MediaType.getAudioMediaType()) {
+            return Category.AUDIO;
+        } else if (type == MediaType.getVideoMediaType()) {
+            return Category.VIDEO;
+        } else if (type == MediaType.getImageMediaType()) {
+            return Category.IMAGE;
+        } else if (type == MediaType.getDocumentMediaType()) {
+            return Category.DOCUMENT;
+        } else if (type == MediaType.getProgramMediaType()) {
+            return Category.PROGRAM;
+        }
+        return Category.OTHER;      
     }
 
     @Override

@@ -13,7 +13,7 @@ import java.util.List;
 public interface DownloadItem  {	
 
 	public static enum Category {
-		VIDEO, AUDIO, DOCUMENT, IMAGE
+		VIDEO, AUDIO, DOCUMENT, IMAGE, PROGRAM, OTHER
 	};
 	
 	public static enum ErrorState {
