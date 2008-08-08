@@ -18,6 +18,8 @@ import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
 import org.limewire.swarm.impl.AbstractSwarmCoordinator;
+import org.limewire.swarm.impl.LoggingSwarmCoordinatorListener;
+import org.limewire.util.Objects;
 
 /**
  * A {@link FileCoordinator} reads/writes the files using the given
@@ -74,15 +76,17 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
     public FileCoordinatorImpl(SwarmFileSystem fileSystem, SwarmBlockVerifier swarmFileVerifier,
             ExecutorService writeService, SwarmBlockSelector selectionStrategy, long blockSize) {
+        this.blockSelector = Objects.nonNull(selectionStrategy, "selectionStrategy");
+        this.fileSystem = Objects.nonNull(fileSystem, "fileSystem");
+        this.writeService = Objects.nonNull(writeService, "writeService");
+        this.swarmBlockVerifier = Objects.nonNull(swarmFileVerifier, "swarmFileVerifier");
+        assert blockSize > 0;
         this.leasedBlocks = new IntervalSet();
         this.writtenBlocks = new IntervalSet();
         this.pendingBlocks = new IntervalSet();
         this.verifiedBlocks = new IntervalSet();
-        this.blockSelector = selectionStrategy;
-        this.fileSystem = fileSystem;
-        this.writeService = writeService;
-        this.swarmBlockVerifier = swarmFileVerifier;
         this.blockSize = blockSize;
+        addListener(new LoggingSwarmCoordinatorListener());
     }
 
     public Range lease() {
@@ -90,21 +94,20 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
     }
 
     public Range leasePortion(IntervalSet availableRanges) {
-        // Lease modifies, so clone.
-        if (availableRanges != null)
-            availableRanges = availableRanges.clone();
         return lease(availableRanges, blockSize, blockSelector);
     }
 
     public Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector swarmSelector) {
-        // Lease modifies, so clone.
-        if (availableRanges != null)
-            availableRanges = availableRanges.clone();
         return lease(availableRanges, blockSize, blockSelector);
     }
 
     protected Range lease(IntervalSet availableRanges, long blockSize,
             SwarmBlockSelector swarmSelector) {
+        // Lease modifies, so clone.
+        if (availableRanges != null) {
+            availableRanges = availableRanges.clone();
+        }
+
         IntervalSet neededBytes = new IntervalSet();
         availableRanges = getAvailableRangesForLease(availableRanges, neededBytes);
 

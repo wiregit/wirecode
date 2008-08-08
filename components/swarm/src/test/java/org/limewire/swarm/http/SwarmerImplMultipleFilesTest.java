@@ -8,7 +8,6 @@ import junit.framework.Test;
 
 import org.limewire.collection.Range;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;

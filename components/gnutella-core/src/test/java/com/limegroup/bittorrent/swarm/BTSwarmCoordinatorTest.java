@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.limewire.io.DiskException;
-import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.Swarmer;
+import org.limewire.swarm.http.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.impl.SwarmerImpl;
