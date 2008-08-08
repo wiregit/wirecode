@@ -5,11 +5,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
-import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -29,13 +30,14 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.MutableComboBoxModel;
 import javax.swing.Timer;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.MattePainter;
 import org.limewire.ui.swing.components.BoxPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.OSUtils;
@@ -72,7 +74,7 @@ class NotificationWindow extends AnimatedWindow {
 
     private String title;
 
-    private JPanel mainPanel;
+    private JXPanel mainPanel;
 
     private Icon titleIcon;
 
@@ -403,7 +405,8 @@ class NotificationWindow extends AnimatedWindow {
 
     private void initialize() {
         setAlwaysOnTop(true);
-        mainPanel = new MainPanel(new BorderLayout(0, 10)); 
+        mainPanel = new JXPanel(new BorderLayout(0, 10));
+        mainPanel.setBackgroundPainter(new MattePainter(new GradientPaint(new Point2D.Double(0, 0.2d), Color.LIGHT_GRAY, new Point2D.Double(0, .8d), Color.WHITE), true));
         mainPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory
                 .createLineBorder(Color.black, 2), BorderFactory
                 .createEmptyBorder(10, 10, 10, 10)));
@@ -417,6 +420,7 @@ class NotificationWindow extends AnimatedWindow {
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
         titleLabel = new JLabel();
+        titleLabel.setOpaque(false);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
         topPanel.add(titleLabel);
 
@@ -433,6 +437,7 @@ class NotificationWindow extends AnimatedWindow {
         topPanel.add(Box.createHorizontalStrut(3));
 
         notificationIndexLabel = new JLabel();
+        notificationIndexLabel.setOpaque(false);
         notificationIndexLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         topPanel.add(notificationIndexLabel);
         topPanel.add(Box.createHorizontalStrut(3));
@@ -707,38 +712,4 @@ class NotificationWindow extends AnimatedWindow {
         }
 
     }
-
-    public class MainPanel extends JPanel {
-        // TODO: Re-add gradients using painters
-        /*
-        // used to paint background
-        private Ditherer DITHERER = new Ditherer(62,
-                ThemeFileHandler.SEARCH_PANEL_BG_1.getValue(),
-                ThemeFileHandler.SEARCH_PANEL_BG_2.getValue());
-*/
-        public MainPanel(LayoutManager layoutManager) {
-            super(layoutManager);
-        }
-  /*      
-        @Override
-        protected void paintComponent(Graphics g) {
-            if (!DITHERER.getFromColor().equals(DITHERER.getToColor())) {
-                Dimension size = getSize();
-                DITHERER.draw(g, size.height, size.width);
-            } else {
-                super.paintComponent(g);
-            }
-        }
-
-        @Override
-        public void updateUI() {
-            super.updateUI();
-            DITHERER = new Ditherer(62,
-                    ThemeFileHandler.SEARCH_PANEL_BG_1.getValue(),
-                    ThemeFileHandler.SEARCH_PANEL_BG_2.getValue());
-            setBackground(ThemeFileHandler.SEARCH_PANEL_BG_2.getValue());
-        }
- */
-    }
-
 }
