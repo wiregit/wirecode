@@ -55,10 +55,5 @@
       <version>${limewire.version}</version>
 	  <scope>test</scope>
     </dependency>
-    <!--dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-jingle</artifactId>
-      <version>${limewire.version}</version>
-    </dependency-->
   </dependencies>
 </project>

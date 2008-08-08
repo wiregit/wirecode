@@ -20,6 +20,8 @@
                 <path refid="build.limewire.components.common.buildpath"/>
                 <path refid="build.limewire.components.net.buildpath"/>
                 <path refid="build.limewire.components.xmpp-api.buildpath"/>
+				<pathelement location="${limewire.lib.jars}/smack.jar"/>
+				<pathelement location="${limewire.lib.jars}/smackx.jar"/>
             </src-classpath>
             <build-tests-classpath>
                 <path refid="tests.limewire.components.common.classpath"/>
