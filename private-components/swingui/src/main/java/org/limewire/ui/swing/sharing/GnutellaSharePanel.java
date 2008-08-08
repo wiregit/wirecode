@@ -24,7 +24,6 @@ import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
@@ -58,7 +57,7 @@ public class GnutellaSharePanel extends JPanel {
         
         
         FilterList<FileItem> filteredList = new FilterList<FileItem>(libraryManager.getGnutellaList(), 
-                new TextComponentMatcherEditor(headerPanel.getFilterBox(), new SharingTextFilterer()));
+                new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         
         table = new SharingTable(filteredList);
         table.setTransferHandler(new SharingTransferHandler(libraryManager));

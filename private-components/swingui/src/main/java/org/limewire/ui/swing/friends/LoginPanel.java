@@ -75,6 +75,7 @@ public class LoginPanel extends JPanel {
         return builder.getPanel();
     }
     
+    @SuppressWarnings("unused")
     private JPanel noConnectionAvailablePanel() {
         FormLayout layout = new FormLayout("c:p:g", "7dlu,p, p, 7dlu");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);

@@ -7,7 +7,6 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 

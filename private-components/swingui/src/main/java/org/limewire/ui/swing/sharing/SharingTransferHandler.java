@@ -37,6 +37,7 @@ public class SharingTransferHandler extends TransferHandler {
      * Performs the actual importing of the files. Note the files are not
      * directly added to the Model but rather added to the FileMananager first.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public boolean importData(TransferHandler.TransferSupport info) {
         if(!info.isDrop())

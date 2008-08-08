@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;

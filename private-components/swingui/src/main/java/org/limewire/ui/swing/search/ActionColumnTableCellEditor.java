@@ -160,6 +160,7 @@ implements TableCellEditor, TableCellRenderer {
         }
         
         junkButton.addItemListener(new ItemListener() {
+            @SuppressWarnings("unchecked")
             @Override
             public void itemStateChanged(ItemEvent event) {
                 if (internalSelect) return;

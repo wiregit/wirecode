@@ -3,7 +3,6 @@ package org.limewire.ui.swing.browser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaRuntimeException;
