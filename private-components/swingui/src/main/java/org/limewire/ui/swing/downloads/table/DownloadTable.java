@@ -39,6 +39,11 @@ public class DownloadTable extends JXTable {
 //    private Color menuRowForeground;
     
     private DownloadRendererEditor editor;
+
+    /**
+     * Whether or not selected rows get a different color.  True by default.
+     */
+    private boolean rowSelectionShown = true;
     
 //    private HighlightPredicate menuRowPredicate = new MenuHighlightPredicate();
 //    private Highlighter menuRowHighlighter;
@@ -83,12 +88,19 @@ public class DownloadTable extends JXTable {
 		addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mouseClicked(MouseEvent e){//adding this to editor messes up popups
+		        int col = columnAtPoint(e.getPoint());
+                int row = rowAtPoint(e.getPoint());
+                
                 if (e.getClickCount() == 2){
-                    int col = columnAtPoint(e.getPoint());
-                    int row = rowAtPoint(e.getPoint());
                     DownloadItem item = (DownloadItem)getValueAt(row, col);
                     throw new RuntimeException("Implement launch " + item.getTitle() + "!");
                 }
+                
+              //force update editor colors
+                prepareEditor(editor, row, col);
+                //editor.repaint() takes about a second to show sometimes
+                repaint();
+
             }
 		    
 			@Override
@@ -122,9 +134,9 @@ public class DownloadTable extends JXTable {
                     editor.showPopupMenu(e.getComponent(), e.getX(), e.getY());
                     int col = columnAtPoint(e.getPoint());
                     int row = rowAtPoint(e.getPoint());
-                    //update editor colors
+                    //force update editor colors
                     prepareEditor(editor, row, col);
-                    //editor.repaint() takes about a second to show
+                    //editor.repaint() takes about a second to show sometimes
                     repaint();
                 }
             }
@@ -133,6 +145,14 @@ public class DownloadTable extends JXTable {
 		
 	}
 	
+	
+	public void setRowSelectionShown(boolean rowSelectionShown){
+	    this.rowSelectionShown = rowSelectionShown;
+	}
+	
+	public boolean isRowSelectionShown(){
+	    return rowSelectionShown;
+	}
 
 //    public void addMenuRowHighlighter() {
 //        if(menuRowHighlighter == null){
@@ -147,15 +167,17 @@ public class DownloadTable extends JXTable {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
         Component comp = super.prepareRenderer(renderer, row, column);
 
+        adjustRowSelectionColor(comp, row);
+        
         // HACK - menuRowHighlighter should be handling this but it fails under
-        // certain circumstances.  this will not be necessary when highlighter is fixed.
+        // certain circumstances.  this will not be necessary when highlighter is fixed.       
         adjustMenuShowingColor(comp, (DownloadItem) getValueAt(row, column));
 
         return comp;
     }
 
 
-    // gets rid of default editor color so that editors are colored by highlighters
+    // gets rid of default editor color so that editors are colored by highlighters and selection color is shown
     @Override
     public Component prepareEditor(TableCellEditor editor, int row, int column) {
         Component comp = super.prepareEditor(editor, row, column);
@@ -163,6 +185,8 @@ public class DownloadTable extends JXTable {
         if (compoundHighlighter != null) {
             comp = compoundHighlighter.highlight(comp, adapter);
         }
+
+        adjustRowSelectionColor(comp, row);
         
         //HACK - menuRowHighlighter should be handling this but it fails under certain circumstances
         adjustMenuShowingColor(comp,(DownloadItem) getValueAt(row, column));  
@@ -175,6 +199,18 @@ public class DownloadTable extends JXTable {
     private void adjustMenuShowingColor(Component comp, DownloadItem item) {
         if (this.editor.isItemMenuVisible(item))
             comp.setBackground(menuRowBackground);
+    }
+    
+    /**
+     * fixes row selection color. this is necessary to prevent editing from
+     * messing up the colors.
+     */
+    private void adjustRowSelectionColor(Component comp, int row) {
+        if (isRowSelectionShown()) {
+            if (row == getSelectedRow()) {
+                comp.setBackground(getSelectionBackground());
+            }
+        }
     }
 
 	//overridden so that cell editor buttons will always work
