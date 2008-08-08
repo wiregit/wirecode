@@ -12,7 +12,7 @@ public class BTMetaInfoTest extends BaseTestCase {
      * A directory containing the test data for this unit test.
      */
     public static final String TEST_DATA_DIR = System.getProperty("user.dir")
-            + "/tests/test-data";
+            + "/test-data/bittorrent/torrents";
 
     public BTMetaInfoTest(String name) {
         super(name);
@@ -35,7 +35,7 @@ public class BTMetaInfoTest extends BaseTestCase {
     }
     
     public void testSingleWebSeedSingleFile() throws Exception {
-        File file = getFile("test-single-webseed-single-file.torrent");
+        File file = getFile("test-single-webseed-single-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
@@ -47,11 +47,11 @@ public class BTMetaInfoTest extends BaseTestCase {
         Assert.assertEquals(false, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
         Assert.assertEquals(1, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://pvertenten-pc.limewire.com/~pvertenten/pub/gnutella_protocol_0.4.pdf", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo.getWebSeeds()[0].toString());
     }
     
     public void testMultipleWebSeedSingleFile() throws Exception {
-        File file = getFile("test-multiple-webseed-single-file.torrent");
+        File file = getFile("test-multiple-webseed-single-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
@@ -63,13 +63,13 @@ public class BTMetaInfoTest extends BaseTestCase {
         Assert.assertEquals(true, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
         Assert.assertEquals(3, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://mirror.com/file.exe", metaInfo.getWebSeeds()[0].toString());
-        Assert.assertEquals("http://mirror1.com/file.exe", metaInfo.getWebSeeds()[1].toString());
-        Assert.assertEquals("http://mirror2.com/file.exe", metaInfo.getWebSeeds()[2].toString());
+        Assert.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
+        Assert.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo.getWebSeeds()[2].toString());
     }
     
     public void testSingleWebSeedMultipleFile() throws Exception {
-        File file = getFile("test-single-webseed-multiple-file.torrent");
+        File file = getFile("test-single-webseed-multiple-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
@@ -82,11 +82,11 @@ public class BTMetaInfoTest extends BaseTestCase {
         Assert.assertEquals(true, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
         Assert.assertEquals(1, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://pvertenten-pc.limewire.com/~pvertenten/pub/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[0].toString());
     }
     
     public void testMultipleWebSeedMultipleFile() throws Exception {
-        File file = getFile("test-multiple-webseed-multiple-file.torrent");
+        File file = getFile("test-multiple-webseed-multiple-file-no-peer.torrent");
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
@@ -97,10 +97,9 @@ public class BTMetaInfoTest extends BaseTestCase {
                 .toString());
         Assert.assertEquals(true, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
-        Assert.assertEquals(3, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://mirror.com/pub/", metaInfo.getWebSeeds()[0].toString());
-        Assert.assertEquals("http://mirror1.com/pub/", metaInfo.getWebSeeds()[1].toString());
-        Assert.assertEquals("http://mirror2.com/pub/", metaInfo.getWebSeeds()[2].toString());
+        Assert.assertEquals(2, metaInfo.getWebSeeds().length);
+        Assert.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
     }
 
     /**
