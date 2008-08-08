@@ -37,7 +37,6 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     private final PieceStrategy pieceStrategy;
 
-    //TODO need to change to use interval-set, or something.
     private final Set<BTInterval> requested;
 
     public BTSwarmCoordinator(BTMetaInfo btMetaInfo, TorrentFileSystem torrentFileSystem,
