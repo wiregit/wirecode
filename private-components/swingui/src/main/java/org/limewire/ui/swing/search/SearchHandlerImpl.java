@@ -43,8 +43,11 @@ class SearchHandlerImpl implements SearchHandler {
         
         String panelTitle = info.getTitle();
         final BasicSearchResultsModel model = new BasicSearchResultsModel();
-        SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(info, model.getVisualSearchResults(), search);
-        final SearchNavItem item = searchNavigator.addSearch(panelTitle, searchPanel, search);
+        SearchResultsPanel searchPanel =
+            panelFactory.createSearchResultsPanel(
+                info, model.getVisualSearchResults(), search);
+        final SearchNavItem item =
+            searchNavigator.addSearch(panelTitle, searchPanel, search);
         item.select();
         
         search.addSearchListener(new SearchListener() {
@@ -53,6 +56,8 @@ class SearchHandlerImpl implements SearchHandler {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
+                        System.out.println(
+                            "SearchHandlerImpl: adding " + searchResult.getDescription());
                         model.addSearchResult(searchResult);
                         // We can update the source count here because
                         // we never expect things to remove -- changes
@@ -75,7 +80,5 @@ class SearchHandlerImpl implements SearchHandler {
         });
         
         search.start();
-        
     }
-
 }
