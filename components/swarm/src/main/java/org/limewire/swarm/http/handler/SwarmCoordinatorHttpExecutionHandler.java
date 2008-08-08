@@ -24,33 +24,21 @@ import org.limewire.swarm.http.listener.SwarmHttpContentListener;
 public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionHandler {
     private static final Log LOG = LogFactory.getLog(SwarmCoordinatorHttpExecutionHandler.class);
 
-    private final SwarmCoordinator fileCoordinator;
+    private final SwarmCoordinator swarmCoordinator;
 
     public SwarmCoordinatorHttpExecutionHandler(SwarmCoordinator fileCoordinator) {
-        this.fileCoordinator = fileCoordinator;
+        this.swarmCoordinator = fileCoordinator;
     }
 
     public void finalizeContext(HttpContext context) {
-        // Explicitly close content listener, if it was set.
-        ResponseContentListener contentListener = (ResponseContentListener) context
-                .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
-        if (contentListener != null) {
-            contentListener.finished();
-            context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
-        }
+        closeContentListener(context);
     }
 
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
         int code = response.getStatusLine().getStatusCode();
         if (!(code >= 200 && code < 300)) {
-            ResponseContentListener listener = (ResponseContentListener) context
-                    .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
-            if (listener != null) {
-                listener.finished();
-            }
-            SwarmHttpUtils.closeConnectionFromContext(context);
+            closeConnection(context);
         }
-
     }
 
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
@@ -76,7 +64,7 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
                 .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
         IntervalSet availableRanges = source.getAvailableRanges();
 
-        range = fileCoordinator.leasePortion(availableRanges);
+        range = swarmCoordinator.leasePortion(availableRanges);
 
         if (range == null) {
             LOG.debug("No range available to lease.");
@@ -84,13 +72,13 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
             return null;
         }
 
-        SwarmFile swarmFile = fileCoordinator.getSwarmFile(range);
+        SwarmFile swarmFile = swarmCoordinator.getSwarmFile(range);
         long fileEndByte = swarmFile.getEndByte();
 
         if (range.getHigh() > fileEndByte) {
             Range oldRange = range;
             range = Range.createRange(range.getLow(), fileEndByte);
-            range = fileCoordinator.renewLease(oldRange, range);
+            range = swarmCoordinator.renewLease(oldRange, range);
         }
 
         long downloadStartRange = range.getLow() - swarmFile.getStartByte();
@@ -105,7 +93,26 @@ public class SwarmCoordinatorHttpExecutionHandler implements SwarmHttpExecutionH
         request.addHeader(new BasicHeader("Range", "bytes=" + downloadStartRange + "-"
                 + (downloadEndRange)));
         context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER,
-                new SwarmHttpContentListener(fileCoordinator, swarmFile, range));
+                new SwarmHttpContentListener(swarmCoordinator, swarmFile, range));
         return request;
+    }
+
+    private void closeContentListener(HttpContext context) {
+        // Explicitly close content listener, if it was set.
+        ResponseContentListener contentListener = (ResponseContentListener) context
+                .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
+        if (contentListener != null) {
+            contentListener.finished();
+            context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
+        }
+    }
+
+    private void closeConnection(HttpContext context) {
+        closeContentListener(context);
+        SwarmHttpUtils.closeConnectionFromContext(context);
+    }
+
+    public void shutdown() throws IOException {
+        swarmCoordinator.finish();
     }
 }

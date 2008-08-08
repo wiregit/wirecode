@@ -103,6 +103,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     public void shutdown() throws IOException {
         started.set(false);
+        //executionHandler.shutdown();
         ioReactor.shutdown();
     }
 
@@ -141,7 +142,16 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
             listener.responseProcessed(SwarmHttpSourceHandler.this, source,
                     new SwarmHttpSourceStatus(response.getStatusLine()));
 
+            logReponse(response);
+
             executionHandler.handleResponse(response, context);
+        }
+    }
+
+    private void logReponse(HttpResponse response) {
+        System.out.println("response: " + response.getStatusLine());
+        for (int i = 0; i < response.getAllHeaders().length; i++) {
+            System.out.println(response.getAllHeaders()[i]);
         }
     }
 
@@ -176,10 +186,21 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
                     sourceListener.finished(SwarmHttpSourceHandler.this, swarmSource);
                 }
             }
+
+            logRequest(request);
             return request;
         } else {
             SwarmHttpUtils.closeConnectionFromContext(context);
             return null;
+        }
+    }
+
+    private void logRequest(HttpRequest request) {
+        if (request != null) {
+            System.out.println("request: " + request.getRequestLine());
+            for (int i = 0; i < request.getAllHeaders().length; i++) {
+                System.out.println(request.getAllHeaders()[i]);
+            }
         }
     }
 

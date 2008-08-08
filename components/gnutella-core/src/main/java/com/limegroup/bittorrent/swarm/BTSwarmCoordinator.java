@@ -3,7 +3,10 @@ package com.limegroup.bittorrent.swarm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.limewire.collection.BitField;
 import org.limewire.collection.BitFieldSet;
@@ -34,6 +37,9 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     private final PieceStrategy pieceStrategy;
 
+    //TODO need to change to use interval-set, or something.
+    private final Set<BTInterval> requested;
+
     public BTSwarmCoordinator(BTMetaInfo btMetaInfo, TorrentFileSystem torrentFileSystem,
             TorrentDiskManager torrentDiskManager) {
         this(btMetaInfo, torrentFileSystem, torrentDiskManager, new RandomPieceStrategy(btMetaInfo));
@@ -49,6 +55,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         this.torrentFileSystem = torrentFileSystem;
         this.torrentDiskManager = torrentDiskManager;
         this.pieceStrategy = pieceStrategy;
+        this.requested = Collections.synchronizedSet(new HashSet<BTInterval>());
     }
 
     public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobControl callback) {
@@ -89,10 +96,12 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         avalableBitSet.flip(0, numPieces);
 
         BitField availableRangesBitField = new BitFieldSet(avalableBitSet, numPieces);
-        List<BTInterval> leased = torrentDiskManager.lease(availableRangesBitField, null, pieceStrategy);
+        List<BTInterval> leased = torrentDiskManager.lease(availableRangesBitField, requested,
+                pieceStrategy);
 
         Range lease = null;
         if (leased != null && leased.size() > 0) {
+            requested.addAll(leased);
             BTInterval firstBlock = leased.get(0);
             long startByte = btMetaInfo.getLowByte(firstBlock);
             long endByte = btMetaInfo.getHighByte(leased.get(leased.size() - 1));
@@ -106,6 +115,8 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         List<BTInterval> oldInterval = createBTInterval(oldLease);
         List<BTInterval> newInterval = createBTInterval(newLease);
         torrentDiskManager.renewLease(oldInterval, newInterval);
+        requested.removeAll(oldInterval);
+        requested.addAll(newInterval);
         return newLease;
     }
 
@@ -113,6 +124,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         List<BTInterval> pieces = createBTInterval(range);
         for (BTInterval btInterval : pieces) {
             torrentDiskManager.releaseInterval(btInterval);
+            requested.remove(btInterval);
         }
     }
 

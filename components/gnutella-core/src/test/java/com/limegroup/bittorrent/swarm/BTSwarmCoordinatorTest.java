@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
-import junit.framework.Test;
-
 import org.limewire.io.DiskException;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmSourceHandler;
@@ -69,8 +67,8 @@ public class BTSwarmCoordinatorTest extends BaseTestCase {
         completeFile.delete();
         File downloadedFile = torrentFileSystem.getIncompleteFiles().get(0);
         downloadedFile.delete();
-        completeFile.deleteOnExit();
-        downloadedFile.deleteOnExit();
+//        completeFile.deleteOnExit();
+//        downloadedFile.deleteOnExit();
         final Swarmer swarmer = createSwarmer(torrentContext, null);
 
         swarmer.start();

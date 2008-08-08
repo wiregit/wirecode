@@ -11,6 +11,7 @@ import com.limegroup.bittorrent.BTMetaInfo;
 
 public class LargestGapStartPieceStrategy extends AbstractPieceStrategy {
 
+    //TODO test this
     private static final int DEFAULT_MAX_NUM_PIECES = 10;
 
     private final int maxNumPieces;

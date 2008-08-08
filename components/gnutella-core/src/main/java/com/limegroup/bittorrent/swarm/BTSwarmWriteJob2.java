@@ -13,7 +13,7 @@ import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 
-public class BTSwarmWriteJob implements SwarmWriteJob {
+public class BTSwarmWriteJob2 implements SwarmWriteJob {
 
     private final List<BTInterval> pieces;
 
@@ -25,29 +25,26 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
 
     private final Object writeLock = new Object();
 
-    private int index = 0;
+    private long piecePosition;
 
-    private BTInterval piece = null;
+    private long pieceLow;
 
-    //TODO will use this later as the maxBufferSize 
-    private final int maxBufferSize;
+    private int pieceIndex = 0;
 
-    public BTSwarmWriteJob(List<BTInterval> pieces, TorrentDiskManager torrentDiskManager,
+    public BTSwarmWriteJob2(List<BTInterval> pieces, TorrentDiskManager torrentDiskManager,
             SwarmWriteJobControl callback) {
-        this(pieces, torrentDiskManager, callback, 8 * 1024);
-    }
-
-    public BTSwarmWriteJob(List<BTInterval> pieces, TorrentDiskManager torrentDiskManager,
-            SwarmWriteJobControl callback, int maxBufferSize) {
         assert pieces != null;
+        assert pieces.size() > 0;
         assert torrentDiskManager != null;
         assert callback != null;
-        assert maxBufferSize > 0;
+
         this.pieces = pieces;
         this.torrentDiskManager = torrentDiskManager;
         this.callback = callback;
         this.byteBuffer = null;
-        this.maxBufferSize = maxBufferSize;
+        this.piecePosition = pieces.get(0).get32BitLow();
+        this.pieceLow = pieces.get(0).get32BitLow();
+
     }
 
     public void cancel() {
@@ -59,24 +56,30 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
 
     public long write(SwarmContent content) throws IOException {
         synchronized (writeLock) {
+
+            BTInterval piece = pieces.get(pieceIndex);
             if (byteBuffer == null) {
-                piece = pieces.get(index++);
-                // TODO instead of writing all of the data for the piece to a
-                // buffer.
-                // use a real buffer and keep track of which pieces have
-                // finished.
-                // just resize the piece that is being written to disk so that
-                // the verifying folder can figure things out.
-                byteBuffer = ByteBuffer.allocate(piece.get32BitLength());
+                int bufferSize = 8 * 1024;
+                if (bufferSize + piecePosition > piece.getHigh()) {
+                    bufferSize = (int) (piece.get32BitHigh() - piecePosition) + 1;
+                }
+
+                byteBuffer = ByteBuffer.allocate(bufferSize);
             }
 
-            long read = 0;
-            read = content.read(byteBuffer);
+            long read = content.read(byteBuffer);
+            piecePosition += read;
             callback.resume();
+
             if (byteBuffer.remaining() == 0) {
                 // piece is done reading
                 final byte[] data = byteBuffer.array();
                 byteBuffer = null;
+                final int pieceId = piece.getId();
+
+                final long pieceLow = this.pieceLow;
+                final long pieceHigh = pieceLow + data.length - 1;
+
                 torrentDiskManager.writeBlock(new NECallable<BTPiece>() {
 
                     public BTPiece call() {
@@ -87,13 +90,23 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
                             }
 
                             public BTInterval getInterval() {
-                                return piece;
+                                BTInterval interval = new BTInterval(pieceLow, pieceHigh, pieceId);
+                                return interval;
                             }
                         };
                     }
 
                 });
 
+                this.pieceLow = pieceHigh + 1;
+                if (piecePosition == piece.getHigh()) {
+                    if (pieceIndex + 1 == pieces.size()) {
+                        return read;
+                    }
+                    System.out.println("next peice time");
+                    this.pieceLow = pieces.get(++pieceIndex).getLow();
+                    piecePosition = pieceLow;
+                }
             }
             return read;
         }

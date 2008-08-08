@@ -71,4 +71,6 @@ public interface SwarmHttpExecutionHandler {
      */
     void finalizeContext(HttpContext context);
 
+    void shutdown() throws IOException;
+
 }

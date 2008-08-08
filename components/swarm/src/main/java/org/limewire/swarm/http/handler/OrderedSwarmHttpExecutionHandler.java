@@ -56,6 +56,10 @@ public class OrderedSwarmHttpExecutionHandler implements SwarmHttpExecutionHandl
         context.setAttribute(LAST_HANDLER, null);
         return null;
     }
+
+    public void shutdown() {
+        // TODO Auto-generated method stub
+    }
     
     
 

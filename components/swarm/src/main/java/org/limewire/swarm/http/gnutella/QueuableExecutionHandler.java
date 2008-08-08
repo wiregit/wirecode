@@ -89,4 +89,8 @@ public class QueuableExecutionHandler implements SwarmHttpExecutionHandler {
         }
     }
 
+    public void shutdown() {
+     // TODO Auto-generated method stub
+    }
+
 }

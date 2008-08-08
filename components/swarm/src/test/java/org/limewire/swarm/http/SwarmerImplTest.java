@@ -422,7 +422,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
         SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,
                 swarmFileVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
-                selectionStrategy);
+                selectionStrategy, 10000000);
         return swarmCoordinator;
     }
 
