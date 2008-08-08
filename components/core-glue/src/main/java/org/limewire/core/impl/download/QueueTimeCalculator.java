@@ -40,21 +40,21 @@ public class QueueTimeCalculator {
     }
 
     public long getRemainingQueueTime(DownloadItem queueItem) {
+
+        downloadingList.getReadWriteLock().readLock().lock();
         
         if(queueItem.getState() != DownloadState.LOCAL_QUEUED){
             return DownloadItem.UNKNOWN_TIME;
         }
         
         int priority = queueItem.getLocalQueuePriority();
-        //top priority is 1
+        //top priority is 1 (but may briefly be 0 when resuming)
         int index = priority - 1;
         
-        downloadingList.getReadWriteLock().readLock().lock();
-        try {
-            if (index >= downloadingList.size()) {
+        try {            
+            if (index >= downloadingList.size() || index < 0) {
                 return DownloadItem.UNKNOWN_TIME;
             }
-            System.out.println(downloadingList.get(index).getRemainingDownloadTime());
             return downloadingList.get(index).getRemainingDownloadTime();
         } finally {
             downloadingList.getReadWriteLock().readLock().unlock();
