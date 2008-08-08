@@ -11,14 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.CapsulePainter;
@@ -26,7 +24,9 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.jdesktop.swingx.painter.CapsulePainter.Portion;
-import org.limewire.ui.swing.util.GuiUtils;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -35,16 +35,19 @@ import org.limewire.ui.swing.util.GuiUtils;
 public class ConversationPane extends JPanel {
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     
-    @Resource private Icon available;
-    @Resource private Icon chatStatusStub;
-    @Resource private Icon library;
-    @Resource private Icon sharing;
+//    @Resource private Icon available;
+//    @Resource private Icon chatStatusStub;
+//    @Resource private Icon library;
+//    @Resource private Icon sharing;
     
     private List<Message> messages = new ArrayList<Message>();
     private JEditorPane editor;
+    private IconLibrary icons;
 
-    public ConversationPane(Friend friend) {
-        GuiUtils.assignResources(this);
+    @AssistedInject
+    public ConversationPane(@Assisted Friend friend, IconLibrary icons) {
+//        GuiUtils.assignResources(this);
+        this.icons = icons;
         
         JPanel header = headerPanel(friend);
         
@@ -101,9 +104,9 @@ public class ConversationPane extends JPanel {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridheight = 2;
         constraints.insets = new Insets(8, 8, 8, 0);
-        statusPanel.add(new JLabel(chatStatusStub), constraints);
+        statusPanel.add(new JLabel(icons.getChatStatusStub()), constraints);
 
-        JLabel name = new JLabel(friend.getName(), available, SwingConstants.LEFT);
+        JLabel name = new JLabel(friend.getName(), icons.getAvailable(), SwingConstants.LEFT);
         name.setForeground(Color.WHITE);
         constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.SOUTHWEST;
@@ -123,10 +126,10 @@ public class ConversationPane extends JPanel {
 
         constraints = new GridBagConstraints();
         constraints.insets = new Insets(8, 0, 0, 0);
-        JXButton libraryButton = new JXButton(library);
+        JXButton libraryButton = new JXButton(icons.getLibrary());
         libraryButton.setBorderPainted(false);
         buttonsPanel.add(libraryButton, constraints);
-        JXButton sharingButton = new JXButton(sharing);
+        JXButton sharingButton = new JXButton(icons.getSharing());
         sharingButton.setBorderPainted(false);
         buttonsPanel.add(sharingButton, constraints);
 

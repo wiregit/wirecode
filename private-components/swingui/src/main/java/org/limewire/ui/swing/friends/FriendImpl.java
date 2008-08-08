@@ -8,12 +8,14 @@ import org.limewire.xmpp.api.client.Presence.Mode;
  *
  */
 public class FriendImpl extends AbstractBean implements Friend {
-    private String name;
+    private final String name;
     private String status;
     private Mode mode;
     
     public FriendImpl(String name, String status, Mode mode) {
         this.name = name;
+        this.status = status;
+        this.mode = mode;
     }
 
     @Override
@@ -32,12 +34,6 @@ public class FriendImpl extends AbstractBean implements Friend {
         return name;
     }
     
-    public void setName(String name) {
-        String oldName = getName();
-        this.name = name;
-        firePropertyChange("name", oldName, name);
-    }
-
     @Override
     public String getStatus() {
         return status;

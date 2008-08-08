@@ -21,7 +21,7 @@ public class FriendsPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
 
-                FriendsPane pane = new FriendsPane();
+                FriendsPane pane = new FriendsPane(new IconLibraryImpl());
                 frame.add(pane);
 
                 final ArrayList<FriendImpl> friends = new ArrayList<FriendImpl>();
@@ -30,6 +30,11 @@ public class FriendsPaneHarness {
                     pane.addFriend(friend);
                     friends.add(friend);
                 }
+
+                frame.setPreferredSize(new Dimension(470, 400));
+
+                frame.pack();
+                frame.setVisible(true);
 
                 new Thread(new Runnable() {
                     @Override
@@ -45,17 +50,13 @@ public class FriendsPaneHarness {
                         }
                     }
                 }).start();
-
-                frame.setPreferredSize(new Dimension(470, 400));
-
-                frame.pack();
-                frame.setVisible(true);
             }
         });
     }
 
     private static Mode randomMode() {
         int val = (int) (Math.random() * 10);
-        return modes[val / 2];
+        Mode mode = modes[val / 2];
+        return mode == null ? modes[0] : mode;
     }
 }
