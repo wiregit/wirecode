@@ -169,7 +169,7 @@ public class FancyTab extends JXPanel {
         
         if(tabActions.getMoreTextAction() != null) {
             label.setOpaque(false);
-            label.setFont(props.getTextFont());
+            label.setFont(mainButton.getFont());
             
             String name = (String)tabActions.getMoreTextAction().getValue(Action.NAME);
             if(name != null) {

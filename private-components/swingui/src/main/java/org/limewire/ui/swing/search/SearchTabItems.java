@@ -17,6 +17,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 
 /**
@@ -27,20 +28,21 @@ import org.limewire.ui.swing.components.TabActionMap;
  */
 class SearchTabItems extends JXPanel {
 
-    private final List<SearchTabAction> searchTabs;
+    private final List<TabActionMap> searchTabs;
 
     private final SearchTabListener listener;
 
     SearchTabItems(SearchCategory category, SearchTabListener listener) {
         this.listener = listener;
-        this.searchTabs = new ArrayList<SearchTabAction>();
-        searchTabs.add(new SearchTabAction("All types", SearchCategory.ALL));
-        searchTabs.add(new SearchTabAction("Audio", SearchCategory.AUDIO));
-        searchTabs.add(new SearchTabAction("Videos", SearchCategory.VIDEO));
-        searchTabs.add(new SearchTabAction("Images", SearchCategory.IMAGES));
-        searchTabs.add(new SearchTabAction("Documents", SearchCategory.DOCUMENTS));
+        this.searchTabs = new ArrayList<TabActionMap>();
+        searchTabs.add(newTabActionMap(new SearchTabAction("All types", SearchCategory.ALL)));
+        searchTabs.add(newTabActionMap(new SearchTabAction("Audio", SearchCategory.AUDIO)));
+        searchTabs.add(newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
+        searchTabs.add(newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGES)));
+        searchTabs.add(newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENTS)));
 
-        for (SearchTabAction action : searchTabs) {
+        for (TabActionMap map : searchTabs) {
+            SearchTabAction action = (SearchTabAction)map.getMainAction();
             if (category == action.getCategory()) {
                 action.putValue(Action.SELECTED_KEY, true);
                 listener.categorySelected(category);
@@ -54,7 +56,7 @@ class SearchTabItems extends JXPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.RELATIVE;
 
-        FancyTabList ttp = new FancyTabList(TabActionMap.createMapForMainActions(searchTabs));
+        FancyTabList ttp = new FancyTabList(searchTabs);
         ttp.setFlowedLayout(new Insets(0, 2, 0, 5));
         ttp.setHighlightPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.WHITE,
                 0f, Color.WHITE));
@@ -63,6 +65,12 @@ class SearchTabItems extends JXPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx = 1;
         add(Box.createGlue(), gbc);
+    }
+    
+    private TabActionMap newTabActionMap(SearchTabAction action) {
+        Action moreText = new NoOpAction();
+        moreText.putValue(Action.NAME, "#");
+        return new TabActionMap(action, null, moreText, null);
     }
 
     private class SearchTabAction extends AbstractAction {
