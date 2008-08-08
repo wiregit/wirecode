@@ -35,7 +35,7 @@ class ChatDocumentBuilder {
                         "background: url(" + getURL("/org/limewire/ui/swing/mainframe/resources/icons/friends/bottom-right.png") + ") no-repeat top right;}" +
                     "img.corner {" +
                        "border: none;" +
-                       "display: block !important;" +
+                       "display: block;" +
                     "}" +
                 "</style>" +
             "</head>" +
