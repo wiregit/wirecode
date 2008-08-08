@@ -19,10 +19,8 @@ import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.EchoSwarmCoordinatorListener;
-import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
-import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 

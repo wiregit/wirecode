@@ -84,6 +84,7 @@ public class BTMetaInfoMementoImpl implements BTMetaInfoMemento, Serializable {
         serialObjects.put("private", aPrivate);
     }
 
+    @SuppressWarnings("unchecked")
     public URI[] getWebSeeds() {
         List<URI> uris = (List<URI>) serialObjects.get("url-list");
         return uris == null ? null : uris.toArray(new URI[uris.size()]);
