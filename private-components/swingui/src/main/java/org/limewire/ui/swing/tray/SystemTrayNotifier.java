@@ -1,22 +1,24 @@
 package org.limewire.ui.swing.tray;
 
+import java.awt.AWTException;
 import java.awt.Dimension;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EventObject;
 
 import javax.swing.ActionMap;
 import javax.swing.Icon;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
-import org.jdesktop.jdic.tray.SystemTray;
-import org.jdesktop.jdic.tray.TrayIcon;
 import org.limewire.core.settings.UISettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -24,35 +26,23 @@ import org.limewire.ui.swing.util.I18n;
 
 /**
  * Puts an icon and menu in the system tray.
- * Works on Windows, Linux, and any other platforms JDIC supports.
  */
-class JDICNotifier implements TrayNotifier {
+class SystemTrayNotifier implements TrayNotifier {
 	
     private static final Log LOG = LogFactory.getLog(DefaultNotificationRenderer.class);
-    
-    private static final boolean loaded;
-    
-    static {
-        boolean didLoad = false;
-        try {
-            System.loadLibrary("tray");
-            didLoad = true;
-        } catch (UnsatisfiedLinkError ule) {}
-        loaded = didLoad;
-    }
     
 	private final SystemTray tray;
 	private final TrayIcon trayIcon;
 	private final NotificationWindow notificationWindow;
-	private final JPopupMenu popupMenu;
+	private final PopupMenu popupMenu;
 	
 	@Resource
 	private Icon trayIconResource;
 	
-	public JDICNotifier() {
-	    if(loaded) {
+	public SystemTrayNotifier() {
+	    if(SystemTray.isSupported()) {
     	    GuiUtils.assignResources(this);
-    		tray = SystemTray.getDefaultSystemTray();
+    		tray = SystemTray.getSystemTray();
     		popupMenu = buildPopupMenu();
     		trayIcon = buildTrayIcon(I18n.tr("LimeWire"));
     		notificationWindow = buildNotificationWindow();
@@ -65,8 +55,7 @@ class JDICNotifier implements TrayNotifier {
 	}
 
 	private TrayIcon buildTrayIcon(String desc) {
-        //String tip = "LimeWire: Running the Gnutella Network";
-        TrayIcon icon = new TrayIcon(trayIconResource, desc, popupMenu);
+        TrayIcon icon = new TrayIcon(((ImageIcon)trayIconResource).getImage(), desc, popupMenu);
         
     	// left click restores.  This happens on the awt thread.
         icon.addActionListener(new ActionListener() {
@@ -76,15 +65,15 @@ class JDICNotifier implements TrayNotifier {
         	}
         });
         
-        icon.setIconAutoSize(true);
+        icon.setImageAutoSize(true);
         return icon;
 	}
 	
-	private JPopupMenu buildPopupMenu() {
-		JPopupMenu menu = new TrayPopupMenu();
+	private PopupMenu buildPopupMenu() {
+		PopupMenu menu = new PopupMenu();
 		
 		// restore
-		JMenuItem item = new JMenuItem(I18n.tr("Restore"));
+		MenuItem item = new MenuItem(I18n.tr("Restore"));
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			    ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
@@ -96,7 +85,7 @@ class JDICNotifier implements TrayNotifier {
 		menu.addSeparator();
 		
 		// about box
-		item = new JMenuItem(I18n.tr("About"));
+		item = new MenuItem(I18n.tr("About"));
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			    ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
@@ -108,7 +97,7 @@ class JDICNotifier implements TrayNotifier {
 		menu.addSeparator();
 		
 		//exit after transfers
-		item = new JMenuItem(I18n.tr("Exit after Transfers"));
+		item = new MenuItem(I18n.tr("Exit after Transfers"));
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			    ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
@@ -118,7 +107,7 @@ class JDICNotifier implements TrayNotifier {
 		menu.add(item);
 		
 		// exit
-		item = new JMenuItem(I18n.tr("Exit"));
+		item = new MenuItem(I18n.tr("Exit"));
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Application.getInstance().exit(e);
@@ -131,8 +120,8 @@ class JDICNotifier implements TrayNotifier {
 	
 	@Override
 	public boolean isExitEvent(EventObject event) {
-	    if(event != null && event.getSource() instanceof JMenuItem) {
-	        JMenuItem item = (JMenuItem)event.getSource();
+	    if(event != null && event.getSource() instanceof MenuItem) {
+	        MenuItem item = (MenuItem)event.getSource();
 	        return item.getParent() == popupMenu;
 	    } else {
 	        return false;
@@ -153,15 +142,14 @@ class JDICNotifier implements TrayNotifier {
 	    }
 	    
 	    try {
-	        tray.addTrayIcon(trayIcon);
+	        tray.add(trayIcon);
+        } catch (AWTException e) {
+            return false;
 	    } catch(IllegalArgumentException iae) {
-	        // Sometimes JDIC can't load the trayIcon :(
 	        return false;
 	    }
 
-        // XXX use the actual icon size once the necessary call is available in JDIC 
-        //notificationWindow.setParentSize(_icon.getSize());
-        notificationWindow.setParentSize(new Dimension(22, 22));
+        notificationWindow.setParentSize(trayIcon.getSize());
 
         return true;
 	}
@@ -171,7 +159,7 @@ class JDICNotifier implements TrayNotifier {
 	}
 
 	public void hideTrayIcon() {
-		tray.removeTrayIcon(trayIcon);
+		tray.remove(trayIcon);
 		notificationWindow.setParentLocation(null);
 		notificationWindow.setParentSize(null);
 	}
@@ -180,7 +168,8 @@ class JDICNotifier implements TrayNotifier {
 	    try {
 	        notificationWindow.addNotification(notification);
 	        try {
-	            notificationWindow.setParentLocation(trayIcon.getLocationOnScreen());
+	            // TODO: trayIcon.getLocationOnScreen not available in AWT TrayIcon
+	            notificationWindow.setParentLocation(null);
 	        } catch (NullPointerException ignore) {
 	            // thrown if the native peer is not found (GUI-273)?
 	        }

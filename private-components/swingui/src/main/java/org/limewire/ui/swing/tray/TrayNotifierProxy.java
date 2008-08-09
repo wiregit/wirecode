@@ -24,7 +24,7 @@ class TrayNotifierProxy implements TrayNotifier {
         if(OSUtils.isMacOSX()) {
             notifier = new GrowlNotifier();            
         } else {
-            notifier = new JDICNotifier();
+            notifier = new SystemTrayNotifier();
             if(!showTrayIcon()) {
                 // If it failed, revert.
                 notifier = new BasicNotifier();
