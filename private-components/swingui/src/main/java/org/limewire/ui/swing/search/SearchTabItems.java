@@ -34,9 +34,10 @@ class SearchTabItems extends JXPanel {
 
     SearchTabItems(SearchCategory category, SearchTabListener listener) {
         this.listener = listener;
+        
         this.searchTabs = new ArrayList<TabActionMap>();
-        searchTabs.add(newTabActionMap(new SearchTabAction("All types", SearchCategory.ALL)));
-        searchTabs.add(newTabActionMap(new SearchTabAction("Audio", SearchCategory.AUDIO)));
+        searchTabs.add(newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
+        searchTabs.add(newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
         searchTabs.add(newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
         searchTabs.add(newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGES)));
         searchTabs.add(newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENTS)));
@@ -58,8 +59,8 @@ class SearchTabItems extends JXPanel {
 
         FancyTabList ttp = new FancyTabList(searchTabs);
         ttp.setFlowedLayout(new Insets(0, 2, 0, 5));
-        ttp.setHighlightPainter(new RectanglePainter<JXButton>(2, 2, 0, 2, 5, 5, true, Color.WHITE,
-                0f, Color.WHITE));
+        ttp.setHighlightPainter(new RectanglePainter<JXButton>(
+            2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
         add(ttp, gbc);
 
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -94,5 +95,4 @@ class SearchTabItems extends JXPanel {
     static interface SearchTabListener {
         void categorySelected(SearchCategory searchCategory);
     }
-
 }
