@@ -43,6 +43,8 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class FancyTab extends JXPanel {
 
+    private static final int GAP = 2;
+
     private final TabActionMap tabActions;
     private final AbstractButton mainButton;
     private final AbstractButton removeButton;
@@ -114,16 +116,17 @@ public class FancyTab extends JXPanel {
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
         
-        layout.setAutoCreateGaps(true);
+        // RMV commented this out to reduce horizontal space in SearchTabItems.
+        //layout.setAutoCreateGaps(true);
         
         layout.setHorizontalGroup(layout.createSequentialGroup()
-            .addGap(5)
+            .addGap(GAP)
             .addComponent(busyLabel)
             .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
             .addComponent(additionalText)
             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(removeButton)
-            .addGap(5)
+            .addGap(GAP)
             );
         
         layout.setVerticalGroup(
