@@ -105,7 +105,6 @@ public class CertificateVerifierImpl implements CertificateVerifier {
                 populateCertList(keyStore, issuerCert, certs);
             } catch (KeyStoreException ex) {
                 LOG.error("KeyStoreException caught while walking chain.", ex);
-                return;
             }
         }
     }

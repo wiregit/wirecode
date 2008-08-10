@@ -220,9 +220,9 @@ public class TEAMACCalculatorTest extends BaseTestCase {
             throws NoSuchMethodException, IllegalAccessException,
             java.lang.reflect.InvocationTargetException {
             Long result = (Long) PrivilegedAccessor.invokeMethod(this, "encrypt", 
-                                     new Object[] { new Long(arg)},
+                                     new Object[] {arg},
                                      new Class[] { long.class });
-            return result.longValue();
+            return result;
         }
     }
     

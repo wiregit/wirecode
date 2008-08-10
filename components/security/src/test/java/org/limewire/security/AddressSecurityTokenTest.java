@@ -40,7 +40,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
             rand.nextBytes(qk);
             Arrays.sort(qk);
         }
-        AddressSecurityToken key1 = null, key2 = null;
+        AddressSecurityToken key1, key2;
         key1 = new AddressSecurityToken(qk,macManager);
         key2 = new AddressSecurityToken(qk,macManager);
         assertEquals(key1,key2);
@@ -57,7 +57,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
     }
 
     public void testSimpleGeneration() throws Exception {
-        InetAddress ip = null;
+        InetAddress ip;
         ip = InetAddress.getByName("www.limewire.com");
         int port = 6346;
         AbstractSecurityToken qk1 = new AddressSecurityToken(ip, port,macManager);

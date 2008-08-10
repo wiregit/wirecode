@@ -15,11 +15,11 @@ public class CertificateTools {
      */
     public static String encodeBytesToString(byte bytes[]) {
         StringBuilder string = new StringBuilder(bytes.length * 2);
-        for (int i = 0; i < bytes.length; i++) {
+        for (byte b : bytes) {
             // look up high nibble char
-            string.append(HEX_CHARS[(bytes[i] & 0xf0) >>> 4]);
+            string.append(HEX_CHARS[(b & 0xf0) >>> 4]);
             // look up low nibble char
-            string.append(HEX_CHARS[bytes[i] & 0x0f]);
+            string.append(HEX_CHARS[b & 0x0f]);
         }
         return string.toString();
     }

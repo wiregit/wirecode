@@ -111,8 +111,7 @@ public class SignatureVerifier {
         try {
             EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base32.decode(base32Key));
             KeyFactory kf = KeyFactory.getInstance(alg);
-            PublicKey key = kf.generatePublic(pubKeySpec);
-            return key;
+            return kf.generatePublic(pubKeySpec);
         } catch(NoSuchAlgorithmException nsae) {
             LOG.error("Invalid algorithm: " + alg, nsae);
             return null;
