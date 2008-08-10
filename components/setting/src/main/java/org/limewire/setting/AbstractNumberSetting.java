@@ -63,7 +63,7 @@ public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> ex
      * Normalizes a value to an acceptable value for this setting.
      */
     protected String normalizeValue(String value) {
-        Comparable<T> comparableValue = null;
+        Comparable<T> comparableValue;
         try {
             comparableValue = convertToComparable(value);
         } catch (NumberFormatException e) {

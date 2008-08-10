@@ -65,7 +65,7 @@ public abstract class AbstractSettingsGroup implements SettingsGroup {
                 return null;
             }
             
-            return listeners.toArray(new SettingsGroupListener[0]);
+            return listeners.toArray(new SettingsGroupListener[listeners.size()]);
         }
     }
     

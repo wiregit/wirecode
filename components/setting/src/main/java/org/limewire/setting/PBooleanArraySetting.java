@@ -48,7 +48,7 @@ public class PBooleanArraySetting extends AbstractSetting {
     /**
      * Splits the string into an Array
      */
-    private static final String[] encode(String src) {
+    private static String[] encode(String src) {
         
         if (src == null || src.length()==0) {
             return (new String[0]);
@@ -60,7 +60,7 @@ public class PBooleanArraySetting extends AbstractSetting {
     /**
      * Separates each field of the array by a semicolon
      */
-    private static final String decode(String[] src) {
+    private static String decode(String[] src) {
         
         if (src == null || src.length==0) {
             return "";

@@ -31,7 +31,7 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
 	IntSetting(Properties defaultProps, Properties props, String key, 
           int defaultInt, int minRemoteVal, int maxRemoteVal) {
 		super(defaultProps, props, key, String.valueOf(defaultInt), true,
-                            new Integer(minRemoteVal), new Integer(maxRemoteVal));
+                minRemoteVal, maxRemoteVal);
     }
         
 	/**

@@ -139,8 +139,8 @@ public final class PasswordSetting extends AbstractSetting {
      * a known algorithm prefix)
      */
     private static boolean isEncrypted(String password) {
-        for(int i = 0; i < ALGORITHMS.length; i++) {
-            if (password.startsWith(ALGORITHMS[i] + SEPERATOR)) {
+        for (String algorithm : ALGORITHMS) {
+            if (password.startsWith(algorithm + SEPERATOR)) {
                 return true;
             }
         }
@@ -177,17 +177,17 @@ public final class PasswordSetting extends AbstractSetting {
     /**
      * Encodes and returns b as hex string
      */
-    private static String toHexString(byte[] b) {
-        StringBuilder buffer = new StringBuilder(b.length * 2);
-        for(int i = 0; i < b.length; i++) {
-            buffer.append(HEX[((b[i] >> 4) & 0xF)]).append(HEX[b[i] & 0xF]);
+    private static String toHexString(byte[] bytes) {
+        StringBuilder buffer = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            buffer.append(HEX[((b >> 4) & 0xF)]).append(HEX[b & 0xF]);
         }
         return buffer.toString();
     }
 
     public static String toEncrypted(String algorithm, String value) {
-        for(int i = 0; i < ALGORITHMS.length; i++) {
-            if (ALGORITHMS[i].equals(algorithm)) {
+        for (String s : ALGORITHMS) {
+            if (s.equals(algorithm)) {
                 return algorithm + SEPERATOR + value;
             }
         }

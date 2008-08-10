@@ -12,8 +12,7 @@ import java.util.Properties;
  * {@link SettingsFactory#createFileSetSetting(String, File[])}.
  */
 public class FileSetting extends AbstractSetting {
-    
-    private File value;
+
     private String absolutePath;
 
 
@@ -54,7 +53,7 @@ public class FileSetting extends AbstractSetting {
      */
     @Override
     protected void loadValue(String sValue) {
-        value = new File(sValue);
+        File value = new File(sValue);
         absolutePath = value.getAbsolutePath();
     }
 

@@ -92,7 +92,7 @@ public final class SettingsGroupManager {
                 return null;
             }
             
-            return listeners.toArray(new SettingsGroupManagerListener[0]);
+            return listeners.toArray(new SettingsGroupManagerListener[listeners.size()]);
         }
     }
     
@@ -119,7 +119,7 @@ public final class SettingsGroupManager {
      * Returns all {@link SettingsGroup}s that are currently registered
      */
     public SettingsGroup[] getSettingsGroups() {
-        return PROPS.toArray(new SettingsGroup[0]);
+        return PROPS.toArray(new SettingsGroup[PROPS.size()]);
     }
     
     /**

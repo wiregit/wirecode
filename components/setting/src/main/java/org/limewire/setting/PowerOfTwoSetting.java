@@ -75,7 +75,7 @@ public final class PowerOfTwoSetting extends LongSetting {
     
     /** Utility method to determine if a long is zero or a power of two 
      */
-    private static final boolean isPowerOfTwo(long x) {
+    private static boolean isPowerOfTwo(long x) {
         if (x <= 0) {
             return false;
         }

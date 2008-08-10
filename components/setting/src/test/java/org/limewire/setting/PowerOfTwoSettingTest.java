@@ -52,22 +52,22 @@ public class PowerOfTwoSettingTest extends BaseTestCase {
             new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", 65, 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
-        } catch (IllegalArgumentException expectedException) {;}
+        } catch (IllegalArgumentException expectedException) {}
         try {
             new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", 192, 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
-        } catch (IllegalArgumentException expectedException) {;}
+        } catch (IllegalArgumentException expectedException) {        }
         try {
             new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", 0, 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
-        } catch (IllegalArgumentException expectedException) {;}
+        } catch (IllegalArgumentException expectedException) {}
         try {
             new PowerOfTwoSetting(new Properties(), new Properties(), 
                     "", -2, 1, BIG_POWER_OF_TWO);
             fail("PowerOfTwoSetting has a default value that isn't a power of two.");
-        } catch (IllegalArgumentException expectedException) {;}
+        } catch (IllegalArgumentException expectedException) {}
     }
     
     public void testSetValue() throws Exception {

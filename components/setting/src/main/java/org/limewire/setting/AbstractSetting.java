@@ -155,7 +155,7 @@ public abstract class AbstractSetting implements Setting {
                 return null;
             }
             
-            return listeners.toArray(new SettingListener[0]);
+            return listeners.toArray(new SettingListener[listeners.size()]);
         }
     }
     

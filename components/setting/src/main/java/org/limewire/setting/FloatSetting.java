@@ -31,7 +31,7 @@ public class FloatSetting extends AbstractNumberSetting<Float> {
     FloatSetting(Properties defaultProps, Properties props, String key, 
                  float defaultFloat, float min, float max) {
 		super(defaultProps, props, key, String.valueOf(defaultFloat), 
-              true, new Float(min), new Float(max) );
+              true, min, max);
 	}
         
 	/**
@@ -59,7 +59,7 @@ public class FloatSetting extends AbstractNumberSetting<Float> {
     @Override
     protected void loadValue(String sValue) {
         try {
-            value = Float.valueOf(sValue.trim()).floatValue();
+            value = Float.valueOf(sValue.trim());
         } catch(NumberFormatException nfe) {
             revertToDefault();
         }
