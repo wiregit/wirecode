@@ -27,7 +27,7 @@ public class FriendsPaneHarness {
                 final ArrayList<FriendImpl> friends = new ArrayList<FriendImpl>();
                 for (int i = 0; i < 10; i++) {
                     FriendImpl friend = new FriendImpl("foo" + i, "Sort-in", randomMode());
-                    pane.addFriend(friend);
+                    pane.handleFriendLogin(new FriendLoginEvent(friend));
                     friends.add(friend);
                 }
 

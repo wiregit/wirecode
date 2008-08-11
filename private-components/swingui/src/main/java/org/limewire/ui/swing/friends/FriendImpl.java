@@ -23,6 +23,7 @@ public class FriendImpl extends AbstractBean implements Friend {
         return mode;
     }
     
+//    @Override
     public void setMode(Mode mode) {
         Mode oldMode = getMode();
         this.mode = mode;
@@ -39,6 +40,7 @@ public class FriendImpl extends AbstractBean implements Friend {
         return status;
     }
     
+//    @Override
     public void setStatus(String status) {
         String oldStatus = getStatus();
         this.status = status;

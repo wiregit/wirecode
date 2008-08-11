@@ -34,25 +34,15 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class ConversationPane extends JPanel {
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
-    
-//    @Resource private Icon available;
-//    @Resource private Icon chatStatusStub;
-//    @Resource private Icon library;
-//    @Resource private Icon sharing;
-    
     private List<Message> messages = new ArrayList<Message>();
     private JEditorPane editor;
     private IconLibrary icons;
 
     @AssistedInject
     public ConversationPane(@Assisted Friend friend, IconLibrary icons) {
-//        GuiUtils.assignResources(this);
         this.icons = icons;
         
-        JPanel header = headerPanel(friend);
-        
         setLayout(new BorderLayout());
-        add(wrap(header, true), BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setOpaque(false);
@@ -73,6 +63,8 @@ public class ConversationPane extends JPanel {
         editor.setEditable(false);
         editor.setContentType("text/html");
         scroll.getViewport().add(editor);
+        
+        add(footerPanel(), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
     }
@@ -82,6 +74,14 @@ public class ConversationPane extends JPanel {
         editor.setText(ChatDocumentBuilder.buildChatText(messages));
     }
     
+    private JPanel footerPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JXButton("Library"), BorderLayout.NORTH);
+        panel.add(new ResizingInputPanel(), BorderLayout.CENTER);
+        return panel;
+    }
+    
+    @SuppressWarnings("unused")
     private JPanel wrap(JPanel panel, boolean isHeader) {
         JPanel wrapper = new JPanel(new GridBagLayout());
         
@@ -93,6 +93,7 @@ public class ConversationPane extends JPanel {
         return wrapper;
     }
 
+    @SuppressWarnings("unused")
     private JPanel headerPanel(Friend friend) {
         JXPanel headerPanel = roundPanel(new Color(144, 144, 144), true);
         

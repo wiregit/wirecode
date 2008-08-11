@@ -21,6 +21,7 @@ class IconLibraryImpl implements IconLibrary {
     @Resource private Icon chatStatusStub;
     @Resource private Icon library;
     @Resource private Icon sharing;
+    @Resource private Icon closeChat;
     
     public IconLibraryImpl() {
         GuiUtils.assignResources(this);
@@ -56,5 +57,9 @@ class IconLibraryImpl implements IconLibrary {
 
     public Icon getSharing() {
         return sharing;
+    }
+    
+    public Icon getCloseChat() {
+        return closeChat;
     }
 }

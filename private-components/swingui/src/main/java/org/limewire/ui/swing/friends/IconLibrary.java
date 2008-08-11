@@ -23,5 +23,7 @@ interface IconLibrary {
     Icon getLibrary();
 
     Icon getSharing();
+    
+    Icon getCloseChat();
 
 }

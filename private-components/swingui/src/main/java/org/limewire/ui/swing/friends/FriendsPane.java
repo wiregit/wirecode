@@ -3,6 +3,7 @@ package org.limewire.ui.swing.friends;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GradientPaint;
 
 import javax.swing.BorderFactory;
@@ -17,6 +18,8 @@ import javax.swing.border.Border;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.bushe.swing.event.annotation.AnnotationProcessor;
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -28,30 +31,31 @@ import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventListModel;
 
-import com.google.inject.Inject;
-
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
-class FriendsPane extends JPanel {
-    private EventList<FriendImpl> friends;
+public class FriendsPane extends JPanel {
+    private EventList<Friend> friends;
     
-    @Inject
     public FriendsPane(IconLibrary icons) {
         super(new BorderLayout());
-        friends = new BasicEventList<FriendImpl>();
-        ObservableElementList<FriendImpl> observableList = new ObservableElementList<FriendImpl>(friends, GlazedLists.beanConnector(FriendImpl.class));
-        SortedList<FriendImpl> sortedObservables = new SortedList<FriendImpl>(observableList,  new FriendAvailabilityComparator());
-        JList list = new JList(new EventListModel<FriendImpl>(sortedObservables));
+        friends = new BasicEventList<Friend>();
+        ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
+        SortedList<Friend> sortedObservables = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
+        JList list = new JList(new EventListModel<Friend>(sortedObservables));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setCellRenderer(new FriendCellRenderer(icons));
         JScrollPane scroll = new JScrollPane(list);
         add(scroll);
+        setPreferredSize(new Dimension(120, 200));
+        
+        AnnotationProcessor.process(this);
     }
     
-    public void addFriend(FriendImpl friend) {
-        friends.add(friend);
+    @EventSubscriber
+    public void handleFriendLogin(FriendLoginEvent event) {
+        friends.add(event.getFriend());
     }
     
     private static class FriendCellRenderer implements ListCellRenderer {

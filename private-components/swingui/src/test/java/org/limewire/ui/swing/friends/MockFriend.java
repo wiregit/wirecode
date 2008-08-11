@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import java.beans.PropertyChangeListener;
+
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 class MockFriend implements Friend {
@@ -25,5 +27,13 @@ class MockFriend implements Friend {
     @Override
     public Mode getMode() {
         return state;
+    }
+
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
     }
 }
