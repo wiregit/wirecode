@@ -11,9 +11,11 @@ import org.mozilla.browser.IMozillaWindow.VisibilityMode;
 public class StorePanel  extends JPanel{
     public static final String NAME = "LimeWire Store";
     
+    private Browser browser;
+    
     public StorePanel(){
         setLayout(new GridBagLayout());
-        Browser browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN);
+        browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN);
         browser.load("http://store.limewire.com");
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -21,5 +23,9 @@ public class StorePanel  extends JPanel{
         gbc.weightx = 1;
         gbc.weighty = 1;
         add(browser, gbc);
+    }
+    
+    public void load(String url){
+        browser.load(url);
     }
 }

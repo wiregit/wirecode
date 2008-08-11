@@ -11,7 +11,10 @@ import javax.swing.JScrollPane;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.sponsored.SponsoredResult;
+import org.limewire.ui.swing.search.sponsored.SponsoredResult.LinkTarget;
 
 import ca.odell.glazedlists.EventList;
 
@@ -43,12 +46,21 @@ public class SearchResultsPanel extends JPanel {
      */
     private final SortAndFilterPanel sortAndFilterPanel;
 
+    /**
+     * NavTree used by SponsoredResultsPanel
+     * 
+     */
+    private NavTree navTree;
+
     @AssistedInject
     public SearchResultsPanel(
             @Assisted SearchInfo searchInfo,
             @Assisted EventList<VisualSearchResult> visualSearchResults,
             @Assisted Search search,
+            NavTree navTree,
             ResultsContainerFactory containerFactory) {
+        
+        this.navTree = navTree;
         
         this.sortAndFilterPanel = new SortAndFilterPanel();
         EventList<VisualSearchResult> list =
@@ -77,12 +89,16 @@ public class SearchResultsPanel extends JPanel {
     }
 
     private JComponent createSponsoredResultsPanel() {
-        SponsoredResultsPanel srp = new SponsoredResultsPanel();
-        srp.addEntry("Advantage Consulting, Inc.\n" +
-            "When you really can't afford to fail...\n" +
-            "IT Staffing Solutions with an ADVANTAGE");
-        srp.addEntry("Object Computing, Inc.\n" +
-            "An OO Software Engineering Company");
+        SponsoredResultsPanel srp = new SponsoredResultsPanel(navTree);
+        
+        srp.addEntry(new SponsoredResult("Internal Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
+                "store.limewire.com", "http://www.store.limewire.com/store/app/pages/help/Help/", 
+                LinkTarget.INTERNAL));
+        
+        srp.addEntry(new SponsoredResult("External Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
+                "google.com", "http://google.com", 
+                LinkTarget.EXTERNAL));
+        
         JScrollPane sp = new JScrollPane(srp);
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
         p.add(sp);
