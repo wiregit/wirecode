@@ -25,12 +25,14 @@ public class SharingHeaderPanel extends JXPanel {
     
     private JLabel descriptionLabel;
     private JTextField filterBox;
+    private ViewSelectionPanel viewSelectionPanel;
     
-    public SharingHeaderPanel(Icon icon, String text) {
+    public SharingHeaderPanel(Icon icon, String text, ViewSelectionPanel viewPanel) {
         GuiUtils.assignResources(this);
         
         setBackground(Color.LIGHT_GRAY);
     
+        this.viewSelectionPanel = viewPanel;
         createComponents(icon, text);
         layoutComponents();
     }
@@ -49,5 +51,6 @@ public class SharingHeaderPanel extends JXPanel {
 
         add(descriptionLabel, "push");
         add(filterBox);
+        add(viewSelectionPanel);
     }
 }

@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.FileItem.Category;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -20,12 +21,12 @@ public class FileListAdapter implements FileList {
     
     @Override
     public void addFile(File file) {
-        eventList.add(new MockFileItem(file.getName(), 1000,12345,23456, 0,0));
+        eventList.add(new MockFileItem(file.getName(), 1000,12345,23456, 0,0, Category.IMAGE));
     }
 
     @Override
     public void removeFile(File file) {
-        eventList.remove(new MockFileItem(file.getName(), 1000,12345,23456, 0,0));
+        eventList.remove(new MockFileItem(file.getName(), 1000,12345,23456, 0,0, Category.IMAGE));
     }
     
     public void addFileItem(FileItem fileItem) {

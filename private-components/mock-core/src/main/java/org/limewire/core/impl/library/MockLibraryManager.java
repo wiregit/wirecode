@@ -7,6 +7,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.FileItem.Category;
 
 import ca.odell.glazedlists.EventList;
 
@@ -27,29 +28,29 @@ public class MockLibraryManager implements LibraryManager {
     }
     
     private void initializeMockGnutellaData(){
-        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456, 5,1);
+        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,3,2);
+        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,3,2, Category.AUDIO);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0);
+        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
     }
     
     private void initializeMockBuddyData(){
-        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1);
+        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1, Category.IMAGE);
         buddyList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,5,0);
+        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,5,0, Category.OTHER);
         buddyList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0);
+        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.OTHER);
         buddyList.addFileItem(item);
         allFileList.addFileItem(item);
     }

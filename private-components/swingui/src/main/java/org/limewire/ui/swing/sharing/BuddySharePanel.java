@@ -49,7 +49,7 @@ public class BuddySharePanel extends JPanel {
         setLayout(new BorderLayout());
         GuiUtils.assignResources(this); 
         
-        headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with All Friends");
+        headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with All Friends",  new ViewSelectionPanel(null, null));
         
         table = new SharingTable(fileList.getModel());
         table.setDropMode(DropMode.ON);

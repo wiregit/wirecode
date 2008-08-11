@@ -7,6 +7,11 @@ import java.io.File;
  */
 public interface FileItem {
 
+    //TODO: there's about three identical categories floating around
+    public static enum Category {
+        VIDEO, AUDIO, DOCUMENT, IMAGE, PROGRAM, OTHER
+    };
+    
     File getFile();
     
     String getName();
@@ -20,4 +25,6 @@ public interface FileItem {
     int getNumHits();
     
     int getNumUploads();
+    
+    Category getCategory();
 }

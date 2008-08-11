@@ -1,7 +1,10 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DropMode;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableCellEditor;
@@ -31,11 +35,22 @@ public class GnutellaSharePanel extends JPanel {
 
     public static final String NAME = "GnutellaShare";
     
+    private static final String TABLE = "TABLE";
+    private static final String LIST = "LIST";
+    
     private SharingHeaderPanel headerPanel;
     
-    private final JXTable table;
+    private ViewSelectionPanel viewSelectionPanel;
+    
+    private JPanel cardPanel;
+    
+    private JXTable table;
+    
+    private SharingFancyPanel sharingFancyPanel;
     
     private final FileList fileList;
+    
+    private final CardLayout cardLayout;
 
     @Resource
     private Icon cancelIcon;
@@ -52,9 +67,27 @@ public class GnutellaSharePanel extends JPanel {
         GuiUtils.assignResources(this); 
         
         this.fileList = fileList;
-               
-        headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the LimeWire Network");
         
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel();
+        cardPanel.setLayout(cardLayout);
+
+        
+        viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, cardLayout, LIST), 
+                new ItemAction(cardPanel, cardLayout, TABLE));
+        
+        headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the LimeWire Network", viewSelectionPanel);
+        
+        
+        createCenterCards();
+
+
+        add(headerPanel, BorderLayout.NORTH);
+        add(cardPanel);
+    }
+    
+    private void createCenterCards() {
+
         
         FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
                 new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
@@ -73,9 +106,13 @@ public class GnutellaSharePanel extends JPanel {
         TableColumn tc = table.getColumn(6);
         tc.setCellEditor(editor);
         tc.setCellRenderer(renderer);
-
-        add(headerPanel, BorderLayout.NORTH);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        
+        sharingFancyPanel = new SharingFancyPanel(filteredList);
+        
+        cardPanel.add(new JScrollPane(table),TABLE);
+        cardPanel.add(new JScrollPane(sharingFancyPanel), LIST);
+        
+        
     }
     
     private List<Action> createActions(TableCellEditor editor) {
@@ -109,6 +146,27 @@ public class GnutellaSharePanel extends JPanel {
         
     }
 
+    private class ItemAction implements ItemListener {
+
+        private final JComponent component;
+        private final CardLayout cardLayout;
+        private final String cardName;
+        
+        public ItemAction(JComponent component, CardLayout cardLayout, String cardName) {
+            this.component = component;
+            this.cardLayout = cardLayout;
+            this.cardName = cardName;
+        }
+        
+        @Override
+        public void itemStateChanged(ItemEvent event) {
+            if (event.getStateChange() == ItemEvent.SELECTED) {
+                cardLayout.show(component, cardName);
+            }
+        } 
+        
+    }
+    
     private class SharingTextFilterer implements TextFilterator<FileItem> {
         @Override
         public void getFilterStrings(List<String> baseList, FileItem element) {

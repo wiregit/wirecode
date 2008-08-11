@@ -12,15 +12,17 @@ public class MockFileItem implements FileItem {
     private final long lastModifiedTime;
     private final int numHits;
     private final int numUploads;
+    private final Category category;
     
     public MockFileItem(String name, long size, long creationTime, long lastModified,
-            int numHits, int numUploads) {
+            int numHits, int numUploads, Category category) {
         this.name = name;
         this.size = size;
         this.creationTime = creationTime;
         this.lastModifiedTime = lastModified;
         this.numHits = numHits;
         this.numUploads = numUploads;
+        this.category = category;
     }
     
     @Override
@@ -56,5 +58,10 @@ public class MockFileItem implements FileItem {
     @Override
     public int getNumUploads() {
         return numUploads;
+    }
+
+    @Override
+    public Category getCategory() {
+        return category;
     }
 }
