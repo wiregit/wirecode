@@ -18,6 +18,7 @@ import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.search.sponsored.SponsoredResult.LinkTarget;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 public class SponsoredResultsPanel extends JPanel {
@@ -43,7 +44,7 @@ public class SponsoredResultsPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         
-        JLabel title = new JLabel("Sponsored Results");
+        JLabel title = new JLabel(I18n.tr("Sponsored Results"));
         FontUtils.changeSize(title, 2);
         FontUtils.bold(title);
         add(title, gbc);
