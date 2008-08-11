@@ -1,12 +1,11 @@
 package com.limegroup.gnutella.downloader;
 
-import java.net.Socket;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.SocketsManager;
+import org.limewire.net.TLSManager;
 
 import com.google.inject.Provider;
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 class DownloadWorkerStub extends DownloadWorker {
@@ -16,9 +15,9 @@ class DownloadWorkerStub extends DownloadWorker {
             HTTPDownloaderFactory httpDownloaderFactory,
             ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,
-            NetworkManager networkManager) {
+            TLSManager TLSManager) {
         super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
-                pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl(), networkManager);
+                pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl(), TLSManager);
     }
 
     @Override
@@ -34,11 +33,4 @@ class DownloadWorkerStub extends DownloadWorker {
     @Override
     void interrupt() {
     }
-
-    public void run() {
-    }
-
-    synchronized void setPushSocket(Socket s) {
-    }
-
 }

@@ -12,13 +12,13 @@ import junit.framework.Test;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
+import org.limewire.net.TLSManager;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
@@ -60,6 +60,9 @@ public class MulticastTest extends LimeTestCase {
     private LifecycleManager lifeCycleManager;
     
     private RemoteFileDescFactory remoteFileDescFactory;
+    
+    private TLSManager TLSManager;
+            
     protected Injector injector;
 
     public MulticastTest(String name) {
@@ -119,6 +122,7 @@ public class MulticastTest extends LimeTestCase {
         forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
+        TLSManager = injector.getInstance(NetworkManager.class);
         
         lifeCycleManager.start();
 		connectionServices.connect();
@@ -147,7 +151,7 @@ public class MulticastTest extends LimeTestCase {
     private static void sleep(int time) {
         try {
             Thread.sleep(time);
-        } catch(InterruptedException e) {}
+        } catch(InterruptedException ignore) {}
 	}
     
     /**
@@ -269,7 +273,7 @@ public class MulticastTest extends LimeTestCase {
         U_HANDLER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
-        SSLSettings.TLS_INCOMING.setValue(true);
+        TLSManager.setIncomingTLSEnabled(true);
         pushDownloadManager.sendPush(rfd);
         
         
@@ -335,7 +339,7 @@ public class MulticastTest extends LimeTestCase {
         U_HANDLER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
-        SSLSettings.TLS_INCOMING.setValue(false);
+        TLSManager.setIncomingTLSEnabled(false);
         pushDownloadManager.sendPush(rfd);
         
         

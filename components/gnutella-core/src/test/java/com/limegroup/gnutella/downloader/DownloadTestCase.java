@@ -76,7 +76,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     protected int[] PORTS = { 6321, 6322, 6323, 6324, 6325 };
 
-    protected Object COMPLETE_LOCK = new Object();
+    protected final Object COMPLETE_LOCK = new Object();
 
     protected boolean REMOVED = false;
 
@@ -161,8 +161,8 @@ public abstract class DownloadTestCase extends LimeTestCase {
         networkManager.setAcceptedIncomingConnection(true);
         networkManager.setAddress(NetworkUtils.getLocalAddress().getAddress());
         networkManager.setTls(true);
-        networkManager.setOutgoingTLS(false);
-        networkManager.setIncomingTLS(true);
+        networkManager.setOutgoingTLSEnabled(false);
+        networkManager.setIncomingTLSEnabled(true);
 
         ConnectionManagerStub connectionManager = (ConnectionManagerStub) injector
                 .getInstance(ConnectionManager.class);
@@ -286,7 +286,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
      */
     protected void tGeneric(RemoteFileDesc[] rfds, RemoteFileDesc[] later,
             List<? extends RemoteFileDesc> alts) throws Exception {
-        Downloader download = null;
+        Downloader download;
         download = downloadServices.download(rfds, alts, null, false);
         tGeneric(download, later, rfds);
     }
@@ -328,7 +328,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
      * Performs a generic download of the file specified in <tt>rfds</tt>.
      */
     protected void tGenericCorrupt(RemoteFileDesc[] rfds, RemoteFileDesc[] later) throws Exception {
-        Downloader download = null;
+        Downloader download;
 
         download = downloadServices.download(rfds, false, null);
         if (later != null) {
@@ -517,7 +517,6 @@ public abstract class DownloadTestCase extends LimeTestCase {
                 return;
             }
         }
-        return;
     }
 
     protected final class MyCallback extends ActivityCallbackStub {

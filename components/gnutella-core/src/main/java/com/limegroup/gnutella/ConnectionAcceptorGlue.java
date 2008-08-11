@@ -52,7 +52,7 @@ class ConnectionAcceptorGlue {
     }
 
     @Inject
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "UnusedDeclaration"})
     private void register(org.limewire.lifecycle.ServiceRegistry registry) {
         // TODO: This really should be a bunch of services that depend on the
         //       dispatchers being started.  We workaround that by starting

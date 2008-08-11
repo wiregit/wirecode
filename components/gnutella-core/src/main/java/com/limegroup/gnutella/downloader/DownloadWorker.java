@@ -17,6 +17,7 @@ import org.limewire.collection.Range;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.TLSManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.statemachine.IOStateObserver;
@@ -25,7 +26,6 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -222,7 +222,7 @@ public class DownloadWorker {
     private DirectConnector _connectObserver;
 
     /** The current state of the non-blocking download. */
-    private DownloadState _currentState;
+    private final DownloadState _currentState;
 
     /**
      * Whether or not the worker is involved in a stealing operation (as either
@@ -235,7 +235,7 @@ public class DownloadWorker {
     private final ScheduledExecutorService nioExecutor;
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final SocketsManager socketsManager;
-    private final NetworkManager networkManager;
+    private final TLSManager TLSManager;
 
     protected DownloadWorker(DownloadWorkerSupport manager, RemoteFileDesc rfd,
                              VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory,
@@ -243,7 +243,7 @@ public class DownloadWorker {
                              ScheduledExecutorService nioExecutor,
                              Provider<PushDownloadManager> pushDownloadManager,
                              SocketsManager socketsManager,
-                             DownloadStatsTracker statsTracker, NetworkManager networkManager) {
+                             DownloadStatsTracker statsTracker, TLSManager TLSManager) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
@@ -253,7 +253,7 @@ public class DownloadWorker {
         _rfd = rfd;
         _commonOutFile = vf;
         this.statsTracker = statsTracker;
-        this.networkManager = networkManager;
+        this.TLSManager = TLSManager;
         _currentState = new DownloadState();
 
         // if we'll be debugging, we want to distinguish the different workers
@@ -745,7 +745,7 @@ public class DownloadWorker {
     private void connectDirectly(DirectConnector observer) {
         if (!_interrupted.get()) {
             ConnectType type = _rfd.isTLSCapable()
-                    && networkManager.isOutgoingTLSEnabled() ? ConnectType.TLS
+                    && TLSManager.isOutgoingTLSEnabled() ? ConnectType.TLS
                     : ConnectType.PLAIN;
             if (LOG.isTraceEnabled())
                 LOG.trace("WORKER: attempt asynchronous direct connection w/ "
@@ -796,19 +796,20 @@ public class DownloadWorker {
     }
 
     String getInfo() {
-        if (_downloader != null) {
-            synchronized (_downloader) {
+        HTTPDownloader downloader = _downloader;
+        if (downloader != null) {
+            synchronized (downloader) {
                 return this + "hashcode "
-                        + System.identityHashCode(_downloader)
+                        + System.identityHashCode(downloader)
                         + " will release? " + _shouldRelease + " interrupted? "
-                        + _interrupted.get() + " active? " + _downloader.isActive()
-                        + " victim? " + _downloader.isVictim()
+                        + _interrupted.get() + " active? " + downloader.isActive()
+                        + " victim? " + downloader.isVictim()
                         + " initial reading "
-                        + _downloader.getInitialReadingPoint()
+                        + downloader.getInitialReadingPoint()
                         + " initial writing "
-                        + _downloader.getInitialWritingPoint()
-                        + " amount to read " + _downloader.getAmountToRead()
-                        + " amount read " + _downloader.getAmountRead()
+                        + downloader.getInitialWritingPoint()
+                        + " amount to read " + downloader.getAmountToRead()
+                        + " amount read " + downloader.getAmountRead()
                         + " is in stealing " + isStealing() + "\n";
             }
         } else
@@ -877,6 +878,7 @@ public class DownloadWorker {
      * @param victim The possibly null victim to steal from.
      * @return
      */
+    @SuppressWarnings({"ThrowFromFinallyBlock"})
     private ConnectionStatus completeAssignAndRequestImpl(IOException x,
             Range range, DownloadWorker victim) {
         try {
@@ -1015,11 +1017,12 @@ public class DownloadWorker {
         // in case this worker became a victim during the header exchange, we do
         // not
         // clip any ranges.
-        synchronized (_downloader) {
+        HTTPDownloader downloader = _downloader;
+        synchronized (downloader) {
             long low = expectedRange.getLow();
             long high = expectedRange.getHigh();
-            long newLow = _downloader.getInitialReadingPoint();
-            long newHigh = (_downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
+            long newLow = downloader.getInitialReadingPoint();
+            long newHigh = (downloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
             if (newHigh - newLow >= 0) {
                 if (newLow > low) {
                     if (LOG.isDebugEnabled())
@@ -1043,7 +1046,7 @@ public class DownloadWorker {
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("WORKER:" + " assigning white " + newLow + "-"
-                            + newHigh + " to " + _downloader);
+                            + newHigh + " to " + downloader);
                 }
             } else
                 LOG.debug("debouched at birth");
@@ -1057,7 +1060,7 @@ public class DownloadWorker {
      *         have the ranges we need
      */
     private Range pickAvailableInterval() throws NoSuchRangeException {
-        Range interval = null;
+        Range interval;
         // If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if (!_downloader.getRemoteFileDesc().isPartialSource()) {
@@ -1292,7 +1295,7 @@ public class DownloadWorker {
                     return worker;
             } else {
                 // see if he is the slowest one
-                float hisSpeed = 0;
+                float hisSpeed;
                 try {
                     h.getMeasuredBandwidth();
                     hisSpeed = h.getAverageBandwidth();

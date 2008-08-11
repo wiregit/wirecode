@@ -14,10 +14,10 @@ import junit.framework.Test;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.TLSManager;
 import org.limewire.nio.NIOSocket;
 
 import com.google.inject.AbstractModule;
@@ -61,6 +61,7 @@ public class UDPPushTest extends LimeTestCase {
     private ConnectionDispatcher connectionDispatcher;
 
     private Injector injector;
+    private TLSManager tlsManager;
 
     public UDPPushTest(String name) {
         super(name);
@@ -95,6 +96,8 @@ public class UDPPushTest extends LimeTestCase {
         
         messageFactory = injector.getInstance(MessageFactory.class);
         connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        
+        tlsManager = injector.getInstance(TLSManager.class);
 
         // initialize test data
         long now = System.currentTimeMillis();
@@ -319,9 +322,9 @@ public class UDPPushTest extends LimeTestCase {
      * different files and both succeed.
      */
     public void testPushContainsTLS() throws Exception {
-        SSLSettings.TLS_INCOMING.setValue(false);
+        tlsManager.setIncomingTLSEnabled(false);
         requestPush(rfd1);
-        SSLSettings.TLS_INCOMING.setValue(true);
+        tlsManager.setIncomingTLSEnabled(true);
         requestPush(rfd2);
 
         try {

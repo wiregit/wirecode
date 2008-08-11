@@ -7,8 +7,8 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.LimeProps;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.NetworkInstanceUtils;
@@ -28,6 +28,7 @@ import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.setting.BooleanSetting;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -61,12 +62,12 @@ public class NetworkManagerImpl implements NetworkManager {
     private volatile HolePunchAddress holePunchAddress;
     
     
-    /** True if TLS is disabled for this session. */
-    private volatile boolean tlsDisabled;
+    /** True if TLS is supported for this session. */
+    private volatile boolean tlsSupported = true;
     
     /** The Throwable that was the reason TLS failed. */
     @InspectablePrimitive("reason tls failed")
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "FieldCanBeLocal", "UnusedDeclaration"})
     private volatile String tlsDisabledReason;
     
     private final EventListenerList<AddressEvent> listeners =
@@ -105,7 +106,7 @@ public class NetworkManagerImpl implements NetworkManager {
             SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), bbCache.get());
             if(!sslTester.go()) {
                 Throwable t = sslTester.getLastFailureCause();
-                disableTLS(t);
+                setTLSNotSupported(t);
                 if(!SSLSettings.IGNORE_SSL_EXCEPTIONS.getValue() && !sslTester.isIgnorable(t))
                     ErrorService.error(t);
             }
@@ -421,8 +422,8 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
     /** Disables TLS for this session. */
-    public void disableTLS(Throwable reason) {
-        tlsDisabled = true;
+    private void setTLSNotSupported(Throwable reason) {
+        tlsSupported = false;
         if(reason != null) {
             StringWriter writer = new StringWriter();
             PrintWriter pw = new PrintWriter(writer);
@@ -435,20 +436,28 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
     /** Returns true if TLS is disabled for this session. */
-    public boolean isTLSDisabled() {
-        return tlsDisabled;
+    public boolean isTLSSupported() {
+        return tlsSupported;
     }
     
     /** Whether or not incoming TLS is allowed. */
     public boolean isIncomingTLSEnabled() {
-        return !tlsDisabled && SSLSettings.TLS_INCOMING.getValue();
+        return tlsSupported && SSLSettings.TLS_INCOMING.getValue();
     }
-    
+
+    public void setIncomingTLSEnabled(boolean enabled) {
+        SSLSettings.TLS_INCOMING.setValue(enabled);
+    }
+
     /** Whether or not outgoing TLS is allowed. */
     public boolean isOutgoingTLSEnabled() {
-        return !tlsDisabled && SSLSettings.TLS_OUTGOING.getValue();
-    }    
-    
+        return tlsSupported && SSLSettings.TLS_OUTGOING.getValue();
+    }
+
+    public void setOutgoingTLSEnabled(boolean enabled) {
+        SSLSettings.TLS_OUTGOING.setValue(enabled);
+    }
+
     private class FWTChangeListener implements SettingListener {
         public void settingChanged(SettingEvent evt) {
             if (evt.getEventType() == SettingEvent.EventType.VALUE_CHANGED)
@@ -466,5 +475,23 @@ public class NetworkManagerImpl implements NetworkManager {
     
     private void fireEvent(AddressEvent event) {
         listeners.broadcast(event);
+    }
+    
+    private static class SSLSettings extends LimeProps {
+    
+        private SSLSettings() {}
+        
+        /** Whether or not we want to accept incoming TLS connections. */
+        public static final BooleanSetting TLS_INCOMING =
+            FACTORY.createBooleanSetting("TLS_INCOMING", true);
+        
+        /** Whether or not we want to make outgoing connections with TLS. */
+        public static final BooleanSetting TLS_OUTGOING =
+            FACTORY.createBooleanSetting("TLS_OUTGOING", true);
+        
+        /** False if we want to report exceptions in TLS handling. */
+        public static final BooleanSetting IGNORE_SSL_EXCEPTIONS =
+            FACTORY.createRemoteBooleanSetting("IGNORE_SSL_EXCEPTIONS", true, "TLS.ignoreException");
+    
     }
 }

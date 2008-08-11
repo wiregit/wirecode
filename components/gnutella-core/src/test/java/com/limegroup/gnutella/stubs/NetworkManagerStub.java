@@ -7,7 +7,6 @@ import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.HolePunchAddress;
 import org.limewire.net.address.MediatorAddress;
 
 import com.google.inject.Singleton;
@@ -49,7 +48,7 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public void externalAddressChanged() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        
     }
 
     public boolean canDoFWT() {
@@ -213,11 +212,7 @@ public class NetworkManagerStub implements NetworkManager {
         return null;
     }
 
-    public void disableTLS(Throwable reason) {
-        tls = false;
-    }
-
-    public boolean isTLSDisabled() {
+    public boolean isTLSSupported() {
         return !tls;
     }
 
@@ -229,31 +224,27 @@ public class NetworkManagerStub implements NetworkManager {
         return outgoingTLS;
     }
 
-    public void setIncomingTLS(boolean incomingTLS) {
+    public void setIncomingTLSEnabled(boolean incomingTLS) {
         this.incomingTLS = incomingTLS;
     }
 
-    public void setOutgoingTLS(boolean outgoingTLS) {
+    public void setOutgoingTLSEnabled(boolean outgoingTLS) {
         this.outgoingTLS = outgoingTLS;
     }
 
     public void setTls(boolean tls) {
         this.tls = tls;
-    }
+    }   
 
     public void portChanged() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        
     }
 
     public void acceptedIncomingConnectionChanged() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        
     }
 
     public void newMediatedConnectionAddress(MediatorAddress address) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public void newHolePunchConnectionAddress(HolePunchAddress address) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        
     }
 }

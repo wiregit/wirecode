@@ -31,7 +31,6 @@ import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.BadGGEPBlockException;
@@ -43,6 +42,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.TLSManager;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
@@ -101,8 +101,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private SecurityToken _token;
     
     private Injector injector;
-    
-	public QueryReplyTest(String name) {
+    private TLSManager tlsManager;
+
+    public QueryReplyTest(String name) {
 		super(name);
 	}
 
@@ -125,7 +126,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         byte[] data = new byte[16];
         new Random().nextBytes(data);
         _token = new AddressSecurityToken(data, injector.getInstance(MACCalculatorRepositoryManager.class));
-	}
+        tlsManager = injector.getInstance(TLSManager.class);
+    }
 		
 	/**
 	 * Runs the legacy unit test that was formerly in QueryReply.
@@ -491,7 +493,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         //Create extended QHD from scratch with different bits set
-        SSLSettings.TLS_INCOMING.setValue(false);
+        tlsManager.setIncomingTLSEnabled(false);
         responses=new Response[2];
         responses[0]=responseFactory.createResponse(11, 22, "Sample.txt");
         responses[1]=responseFactory.createResponse(0x2FF2, 0xF11F, "Another file  ");
@@ -540,7 +542,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         //Create extended QHD from scratch with different bits set
-        SSLSettings.TLS_INCOMING.setValue(true);
+        tlsManager.setIncomingTLSEnabled(true);
         responses=new Response[2];
         responses[0]=responseFactory.createResponse(11, 22, "Sample.txt");
         responses[1]=responseFactory.createResponse(0x2FF2, 0xF11F, "Another file  ");
@@ -591,7 +593,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         //Create extended QHD from scratch with different bits set
         // Do not set multicast, as that will unset pushing, busy, etc..
         // and generally confuse the test.
-        SSLSettings.TLS_INCOMING.setValue(false);
+        tlsManager.setIncomingTLSEnabled(false);
         responses=new Response[2];
         responses[0]=responseFactory.createResponse(11, 22, "Sample.txt");
         responses[1]=responseFactory.createResponse(0x2FF2, 0xF11F, "Another file  ");
@@ -654,7 +656,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         Set proxies = new TreeSet(IpPort.COMPARATOR);
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
-        SSLSettings.TLS_INCOMING.setValue(false);
+        tlsManager.setIncomingTLSEnabled(false);
         qr=queryReplyFactory.createQueryReply(guid, (byte)5, 0xFFFF,
                 ip, u4, responses, guid, new byte[0], true, false,
                 false, true, false, false, true, proxies, null);
@@ -788,13 +790,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             }
 	    });
         
-        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);               
-        
-        QueryReply query=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6346,
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+
+        //query.setMulticastAllowed(true);
+        return queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6346,
                 addr, 0l, new Response[0], new byte[16], needsPush, isBusy, true, false,
                 false, false);
-        //query.setMulticastAllowed(true);
-        return query;
     }
     
     private QueryReply getQueryReplyWithCalculateQOSInputsOldStyle(final boolean acceptedIncomingConnection) throws UnknownHostException, BadPacketException {
@@ -829,14 +830,14 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
 
     public void testGGEPUtil() throws Exception {
-        GGEP testGGEP = null;
+        GGEP testGGEP;
 
         // test standard null GGEP....
         try {
             // this shouldn't even work....
-            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,false,
-                                                    new HashSet(), null), 
-                                0, null);
+            new GGEP(_ggepUtil.getQRGGEP(false, false, false,false,
+                                         new HashSet(), null), 
+                     0, null);
             fail("expected exception");
         }
         catch (BadGGEPBlockException expected) {}
@@ -885,7 +886,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         
         // assert token is not written
         try {
-            ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false,false, null, null), 0, null);
+            new GGEP(_ggepUtil.getQRGGEP(false, false, false,false, null, null), 0, null);
             fail("exception should have been thrown");
         }
         catch (BadGGEPBlockException bgbe) {
@@ -963,7 +964,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
     public void testBadPushProxyInput() throws Exception {
         byte[] badBytes = new byte[6];
-        GGEP ggep = null;
+        GGEP ggep;
         // test a bad ip
         // 0.0.0.0 is a bad address
 
@@ -1038,7 +1039,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
     public void testManualPushProxyInput() throws Exception {
         Random rand = new Random();
-        GGEP ggep = null;
+        GGEP ggep;
         for (int i = 0; i < 10; i++) {
             byte[] bytes = new byte[6*(i+1)];
             rand.nextBytes(bytes);

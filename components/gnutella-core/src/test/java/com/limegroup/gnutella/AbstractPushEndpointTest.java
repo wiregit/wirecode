@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Arrays;
 
 import junit.framework.Test;
 
@@ -50,10 +51,8 @@ public class AbstractPushEndpointTest extends BaseTestCase {
     private IpPort tls6;
     private PushEndpointFactory factory;
     private PushEndpointCacheImpl pushEndpointCache;
-    private HTTPHeaderUtils httpHeaderUtils;
-    private NetworkInstanceUtils networkInstanceUtils;
-    
-	public AbstractPushEndpointTest(String name) {
+
+    public AbstractPushEndpointTest(String name) {
 		super(name);
 	}
     
@@ -79,8 +78,8 @@ public class AbstractPushEndpointTest extends BaseTestCase {
         
 
         Injector injector = LimeTestUtils.createInjector();
-        httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
-        networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        HTTPHeaderUtils httpHeaderUtils = injector.getInstance(HTTPHeaderUtils.class);
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
         
         pushEndpointCache = new PushEndpointCacheImpl(new ScheduledExecutorServiceStub(), httpHeaderUtils, networkInstanceUtils);
         factory = new PushEndpointFactoryImpl(Providers.of((PushEndpointCache)pushEndpointCache), null, networkInstanceUtils);
@@ -545,8 +544,6 @@ public class AbstractPushEndpointTest extends BaseTestCase {
         assertEquals(0,four.getFWTVersion());
         assertEquals(4,four.getProxies().size());
         
-        IpPortSet sent = new IpPortSet();
-        sent.addAll(set6);
         assertTrue(set6.containsAll(four.getProxies()));
         
         // test a PE that carries its external address
@@ -629,8 +626,7 @@ public class AbstractPushEndpointTest extends BaseTestCase {
     
     private IpPortSet ippset(IpPort... ipps) {
         IpPortSet set = new IpPortSet();
-        for(int i = 0; i < ipps.length; i++)
-            set.add(ipps[i]);
+        set.addAll(Arrays.asList(ipps));
         return set;
     }
     

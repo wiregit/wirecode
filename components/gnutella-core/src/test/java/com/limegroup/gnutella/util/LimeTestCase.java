@@ -9,7 +9,6 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LimeProps;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UISettings;
@@ -128,7 +127,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
             if (shutdownBackend[ii]) Backend.shutdown(ii == 1);
         }
         // Wait a couople seconds for any shutdown error reports.
-        try { Thread.sleep(2000); } catch (InterruptedException ex) {}
+        try { Thread.sleep(2000); } catch (InterruptedException ignore) {}
         Backend.setErrorCallback(null);
     }
     
@@ -205,7 +204,8 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
         FilterSettings.MAX_RESPONSES_PER_REPLY.setValue(256);
         ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.setValue(true);
-        SSLSettings.TLS_OUTGOING.setValue(false);
+        // TODO
+        // SSLSettings.TLS_OUTGOING.setValue(false);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         SearchSettings.ENABLE_SPAM_FILTER.setValue(false);
         SharingSettings.setSaveDirectory(_savedDir);

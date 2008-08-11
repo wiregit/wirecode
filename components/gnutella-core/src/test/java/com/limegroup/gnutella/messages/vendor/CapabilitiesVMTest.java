@@ -5,9 +5,9 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
+import org.limewire.net.TLSManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -23,6 +23,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
 
     private CapabilitiesVMFactory factory;
     private MessageFactory messageFactory;
+    private TLSManager tlsManager;
 
     public CapabilitiesVMTest(String name) {
         super(name);
@@ -46,6 +47,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         });
         factory = injector.getInstance(CapabilitiesVMFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
+        tlsManager = injector.getInstance(TLSManager.class);
     }
     
     public void testStaticConstructor() throws Exception {
@@ -77,12 +79,12 @@ public class CapabilitiesVMTest extends BaseTestCase {
     }
     
     public void testTLSCapability() throws Exception {
-        SSLSettings.TLS_INCOMING.setValue(false);
+        tlsManager.setIncomingTLSEnabled(false);
         CapabilitiesVM vmp = factory.getCapabilitiesVM();
         assertEquals(-1, vmp.supportsTLS());
         assertEquals(-1, vmp.supportsCapability("TLS!".getBytes()));
         
-        SSLSettings.TLS_INCOMING.setValue(true);
+        tlsManager.setIncomingTLSEnabled(true);
         factory.updateCapabilities();
         vmp = factory.getCapabilitiesVM();
         assertEquals(1, vmp.supportsTLS());
@@ -129,7 +131,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
     }
 
     public void testBadCases() throws Exception {
-        ByteArrayOutputStream baos = null;
+        ByteArrayOutputStream baos;
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
         try {

@@ -119,8 +119,8 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         downloadManager.clearAllDownloads();
         
         //      Turn off by default, explicitly test elsewhere.
-        networkManagerStub.setIncomingTLS(false);
-        networkManagerStub.setOutgoingTLS(false);
+        networkManagerStub.setIncomingTLSEnabled(false);
+        networkManagerStub.setOutgoingTLSEnabled(false);
         // duplicate queries are sent out each time, so avoid the DuplicateFilter
         Thread.sleep(2000);        
 
@@ -129,7 +129,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         testUP[0].flush();
         
         // we expect to get a PushProxy request
-        Message m = null;
+        Message m;
         do {
             m = testUP[0].receive(TIMEOUT);
         } while (!(m instanceof PushProxyRequest));
@@ -163,7 +163,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     
     private void doQRPCGTest(boolean sendTLS, boolean settingOn, boolean listenTLS) throws Exception {
         if(settingOn)
-            networkManagerStub.setOutgoingTLS(true);
+            networkManagerStub.setOutgoingTLSEnabled(true);
         
     	setAccepted(false);
         BlockingConnectionUtils.drain(testUP[0]);
@@ -179,7 +179,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // await a response
-        Message m = null;
+        Message m;
         do {
             m = testUP[0].receive(TIMEOUT);
         } while (!(m instanceof QueryReply));
@@ -232,7 +232,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                 assertNotNull(givSock);
 
                 // start reading and confirming the HTTP request
-                String currLine = null;
+                String currLine;
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(givSock.getInputStream()));
 
@@ -260,7 +260,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     
     private void doHTTPRequestTest(boolean settingOn, boolean expectTLS) throws Exception {
         if(settingOn)
-            networkManagerStub.setIncomingTLS(true);
+            networkManagerStub.setIncomingTLSEnabled(true);
         
     	setAccepted(true);
         BlockingConnectionUtils.drain(testUP[0]);
@@ -272,7 +272,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         searchServices.query(guid, "boalt.org");
 
         // the testUP[0] should get it
-        Message m = null;
+        Message m;
         do {
             m = testUP[0].receive(TIMEOUT);
         } while (!(m instanceof QueryRequest));
@@ -310,7 +310,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                 assertNotNull(httpSock);
         
                 // start reading and confirming the HTTP request
-                String currLine = null;
+                String currLine;
                 BufferedReader reader = 
                     new BufferedReader(new
                                        InputStreamReader(httpSock.getInputStream()));
@@ -359,7 +359,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
                     m = testUP[0].receive(TIMEOUT);
                     assertTrue(!(m instanceof PushRequest));
                 } while (true) ;
-            } catch (InterruptedIOException expected) {}
+            } catch (InterruptedIOException ignore) {}
     
             // now make a connection to the leaf to confirm that it will send a
             // correct download request
@@ -409,7 +409,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         setAccepted(true);
         
         if(settingOn)
-            networkManagerStub.setIncomingTLS(true);
+            networkManagerStub.setIncomingTLSEnabled(true);
         
         BlockingConnectionUtils.drain(testUP[0]);
         // some setup
@@ -420,7 +420,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         searchServices.query(guid, "golf is awesome");
 
         // the testUP[0] should get it
-        Message m = null;
+        Message m;
         do {
             m = testUP[0].receive(TIMEOUT);
         } while (!(m instanceof QueryRequest));
@@ -472,7 +472,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         searchServices.query(guid, "berkeley.edu");
 
         // the testUP[0] should get it
-        Message m = null;
+        Message m;
         do {
             m = testUP[0].receive(TIMEOUT);
         } while (!(m instanceof QueryRequest));

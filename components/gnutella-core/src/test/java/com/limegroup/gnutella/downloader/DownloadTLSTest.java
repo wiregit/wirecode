@@ -55,7 +55,7 @@ public class DownloadTLSTest extends DownloadTestCase {
 
     public void testSimpleTLSDownload10() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        networkManager.setOutgoingTLS(true);
+        networkManager.setOutgoingTLSEnabled(true);
         RemoteFileDesc rfd = newRFD(TPORTS[0], true);
         RemoteFileDesc[] rfds = { rfd };
         tGeneric(rfds);
@@ -63,7 +63,7 @@ public class DownloadTLSTest extends DownloadTestCase {
 
     public void testSimpleTLSDownload11() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        networkManager.setOutgoingTLS(true);
+        networkManager.setOutgoingTLSEnabled(true);
         RemoteFileDesc rfd = newRFDWithURN(TPORTS[0], true);
         RemoteFileDesc[] rfds = { rfd };
         tGeneric(rfds);
@@ -71,7 +71,7 @@ public class DownloadTLSTest extends DownloadTestCase {
 
     public void testSimpleTLSDownload10OutgoingOff() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        networkManager.setOutgoingTLS(false);
+        networkManager.setOutgoingTLSEnabled(false);
         RemoteFileDesc rfd = newRFD(PORTS[0], true);
         RemoteFileDesc[] rfds = { rfd };
         tGeneric(rfds);
@@ -79,7 +79,7 @@ public class DownloadTLSTest extends DownloadTestCase {
 
     public void testSimpleTLSDownload11OutgoingOff() throws Exception {
         LOG.info("-Testing non-swarmed download...");
-        networkManager.setOutgoingTLS(false);
+        networkManager.setOutgoingTLSEnabled(false);
         RemoteFileDesc rfd = newRFDWithURN(PORTS[0], true);
         RemoteFileDesc[] rfds = { rfd };
         tGeneric(rfds);
@@ -87,7 +87,7 @@ public class DownloadTLSTest extends DownloadTestCase {
 
     public void testSimpleTLSSwarm() throws Exception {
         LOG.info("-Testing swarming from two sources...");
-        networkManager.setOutgoingTLS(true);
+        networkManager.setOutgoingTLSEnabled(true);
 
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE = 500;
@@ -119,7 +119,7 @@ public class DownloadTLSTest extends DownloadTestCase {
 
     public void testTwoTLSAlternateLocations() throws Exception {
         LOG.info("-Testing Two AlternateLocations w/ TLS...");
-        networkManager.setOutgoingTLS(true);
+        networkManager.setOutgoingTLSEnabled(true);
 
         final int RATE = 50;
         testTlsUploaders[0].setRate(RATE);
@@ -163,7 +163,7 @@ public class DownloadTLSTest extends DownloadTestCase {
         // This is a modification of simple swarming based on alternate location
         // for the second swarm
         LOG.info("-Testing swarming from two sources one based on alt w/ TLS...");
-        networkManager.setOutgoingTLS(true);
+        networkManager.setOutgoingTLSEnabled(true);
 
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE = 500;
@@ -204,7 +204,7 @@ public class DownloadTLSTest extends DownloadTestCase {
 
     public void testSimpleDownloadWithInitialTLSAlts() throws Exception {
         LOG.info("-Testing download with initial TLS alts");
-        networkManager.setOutgoingTLS(true);
+        networkManager.setOutgoingTLSEnabled(true);
 
         //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE = 500;

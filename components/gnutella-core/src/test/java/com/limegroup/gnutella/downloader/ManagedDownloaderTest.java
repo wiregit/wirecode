@@ -27,6 +27,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.TLSManager;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -120,7 +121,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             } 
         });
         allModules.addAll(Arrays.asList(modules));
-        injector = LimeTestUtils.createInjector(allModules.toArray(new Module[0]));
+        injector = LimeTestUtils.createInjector(allModules.toArray(new Module[allModules.size()]));
         ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
         connectionManager.setConnected(true);
                 
@@ -301,7 +302,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         networkManager.setAddress(new byte[] { 127, 0, 0, 1 });
         
         IncompleteFileManager ifm = injector.getInstance(IncompleteFileManager.class);
-        RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
+        RemoteFileDesc rfd=newRFD("some file.txt", FileDescStub.DEFAULT_URN);
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
         
@@ -357,7 +358,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             uploader.setSendThexTree(false);
             downloader=
 				gnutellaDownloaderFactory.createManagedDownloader(
-                        new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())}, null, null, null, false);
+                        new RemoteFileDesc[] {newRFD("another testfile.txt", FileDescStub.DEFAULT_URN)}, null, null, null, false);
         
             downloader.initialize();
             requestStart(downloader);
@@ -572,7 +573,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     }
     
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "SynchronizeOnNonFinalField"})
     private void requestStart(ManagedDownloader dl) throws Exception {
         List<CoreDownloader> waiting = (List<CoreDownloader>)PrivilegedAccessor.getValue(downloadManager, "waiting");
         List<CoreDownloader> active = (List<CoreDownloader>)PrivilegedAccessor.getValue(downloadManager, "active");
@@ -682,7 +683,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
         public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
                 VerifyingFile incompleteFile, boolean inNetwork) {
-            return new AltLocDownloaderStub(rfd, incompleteFile, networkManager,
+            return new AltLocDownloaderStub(rfd, networkManager,
                     alternateLocationFactory, downloadManager, creationTimeCache.get(),
                     bandwidthManager, pushEndpointCache, pushEndpointFactory,
                     remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
@@ -694,13 +695,13 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	private boolean _stubFalts;
         private final RemoteFileDesc rfd;
         
-    	public AltLocDownloaderStub(RemoteFileDesc rfd, VerifyingFile incompleteFile,
-                NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
-                DownloadManager downloadManager, CreationTimeCache creationTimeCache,
-                BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
-                PushEndpointFactory pushEndpointFactory,
-                RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
-                TcpBandwidthStatistics tcpBandwidthStatistics, NetworkInstanceUtils networkInstanceUtils) {
+    	public AltLocDownloaderStub(RemoteFileDesc rfd,
+                                    NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
+                                    DownloadManager downloadManager, CreationTimeCache creationTimeCache,
+                                    BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
+                                    PushEndpointFactory pushEndpointFactory,
+                                    RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
+                                    TcpBandwidthStatistics tcpBandwidthStatistics, NetworkInstanceUtils networkInstanceUtils) {
             super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
                     creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory,
                     remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
@@ -769,9 +770,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 HTTPDownloaderFactory httpDownloaderFactory,
                 ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,
-                NetworkManager networkManager) {
+                TLSManager TLSManager) {
             super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
-                    pushDownloadManager, socketsManager, networkManager);
+                    pushDownloadManager, socketsManager, TLSManager);
         }
 
         public void setHTTPDownloader(HTTPDownloader httpDownloader) {

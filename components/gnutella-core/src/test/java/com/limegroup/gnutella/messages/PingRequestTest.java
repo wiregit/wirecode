@@ -9,10 +9,10 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.io.GGEP;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.net.TLSManager;
 import org.limewire.util.NameValue;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -30,6 +30,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     private PingRequestFactory pingRequestFactory;
     private MessageFactory messageFactory;
     private ConnectionServices connectionServices;
+    private TLSManager tlsManager;
 
     public PingRequestTest(String name) {
         super(name);
@@ -57,6 +58,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         pingRequestFactory = injector.getInstance(PingRequestFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
+        tlsManager = injector.getInstance(TLSManager.class);
     }
 
     public void testQueryKeyPing() throws Exception {
@@ -108,9 +110,9 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         //OK, ggep ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
-        Message m = null;
+        Message m;
         m = messageFactory.read(stream, Network.TCP);
-        PingRequest pr = null;
+        PingRequest pr;
         pr = (PingRequest)m;
         assertTrue(!pr.isQueryKeyRequest());
         pr.hop();
@@ -150,9 +152,9 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         }
         //OK, Big ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
-        Message m = null;
+        Message m;
         m = messageFactory.read(stream, Network.TCP);
-        PingRequest pr = null;
+        PingRequest pr;
         pr = (PingRequest)m;
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
         pr.write(outBuffer);
@@ -231,7 +233,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
-        SSLSettings.TLS_INCOMING.setValue(true);
+        tlsManager.setIncomingTLSEnabled(true);
         assertTrue(connectionServices.isSupernode());
         pr = pingRequestFactory.createUDPPing();
         assertFalse(pr.requestsIP());
@@ -240,7 +242,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0x2, data[0] & 0x2);
         
         // +UP -TLS
-        SSLSettings.TLS_INCOMING.setValue(false);
+        tlsManager.setIncomingTLSEnabled(false);
         assertTrue(connectionServices.isSupernode());
         pr = pingRequestFactory.createUDPPing();
         assertFalse(pr.requestsIP());
@@ -251,7 +253,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         // Test -UP +TLS
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-        SSLSettings.TLS_INCOMING.setValue(true);
+        tlsManager.setIncomingTLSEnabled(true);
         assertFalse(connectionServices.isSupernode());
         pr = pingRequestFactory.createUDPPing();
         assertFalse(pr.requestsIP());
@@ -260,7 +262,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0x2, data[0] & 0x2);
         
         // Test -UP -TLS
-        SSLSettings.TLS_INCOMING.setValue(false);
+        tlsManager.setIncomingTLSEnabled(false);
         assertFalse(connectionServices.isSupernode());
         pr = pingRequestFactory.createUDPPing();
         assertFalse(pr.requestsIP());
@@ -302,7 +304,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     private PingRequest make(List ggeps) throws Exception {
         return (PingRequest)PrivilegedAccessor.invokeConstructor(
             PingRequestImpl.class,
-            new Object[] { new byte[16], new Byte((byte)1), ggeps },
+            new Object[] { new byte[16], (byte) 1, ggeps },
             new Class[] { byte[].class, byte.class, List.class });
     }
 }

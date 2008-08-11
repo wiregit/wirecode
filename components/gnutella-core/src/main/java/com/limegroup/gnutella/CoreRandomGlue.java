@@ -93,7 +93,7 @@ class CoreRandomGlue {
         this.altLocManager = altLocManager;
     }
     
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "UnusedDeclaration"})
     @Inject private void register(ServiceRegistry registry) {
         registry.register(new Service() {            
             public void initialize() {

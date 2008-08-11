@@ -3,11 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -24,21 +20,16 @@ import junit.framework.Test;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.UltrapeerSettings;
-import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.TLSManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
@@ -69,7 +60,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -87,6 +77,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     private ConnectionServices connectionServices;
     private TestManagedConnectionFactory testConnectionFactory;
     private LifecycleManager lifecycleManager;
+    private TLSManager TLSManager;
 
     public ConnectionManagerTest(String name) {
         super(name);        
@@ -109,6 +100,7 @@ public class ConnectionManagerTest extends LimeTestCase {
             } 
         });
         finishSetUp();
+        TLSManager = injector.getInstance(NetworkManager.class);
     }
     
     private void finishSetUp() throws Exception {        
@@ -118,7 +110,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         connectionManager = injector.getInstance(ConnectionManager.class);
         connectionManager.addEventListener(LISTENER);
         
-        testConnectionFactory = (TestManagedConnectionFactory)injector.getInstance(TestManagedConnectionFactory.class);
+        testConnectionFactory = injector.getInstance(TestManagedConnectionFactory.class);
         
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
@@ -487,7 +479,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public void testGoodTLSHost() throws Exception {
-        SSLSettings.TLS_OUTGOING.setValue(true);
+        TLSManager.setOutgoingTLSEnabled(true);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
         connectionServices.connect();
@@ -503,7 +495,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public void testGoodTLSHostNotUsedIfNoSetting() throws Exception {
-        SSLSettings.TLS_OUTGOING.setValue(false);
+        TLSManager.setOutgoingTLSEnabled(false);
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         CATCHER.endpoint.setTLSCapable(true);        
         connectionServices.connect();
@@ -574,7 +566,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         //test time changed during session
         long now = System.currentTimeMillis();
         PrivilegedAccessor.setValue(connectionManager, 
-                "_connectTime", new Long(now+(60L*60L*1000L)));
+                "_connectTime", now + (60L * 60L * 1000L));
         mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
@@ -696,20 +688,9 @@ public class ConnectionManagerTest extends LimeTestCase {
         }
     }
 
-    private void sleep() {
-        sleep(5000);
-    }
-
-    private void sleep(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-        }
-    }
-    
     private void setConnectTime() throws Exception {
         PrivilegedAccessor.setValue(connectionManager, 
-                "_connectTime", new Integer(0));
+                "_connectTime", 0);
     }
     
     private void initializeStart(RoutedConnection c) throws Exception {
@@ -1129,7 +1110,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     private void pretendConnected() throws Exception {
-        PrivilegedAccessor.setValue(connectionManager, "_disconnectTime", new Integer(0));
+        PrivilegedAccessor.setValue(connectionManager, "_disconnectTime", 0);
         PrivilegedAccessor.invokeMethod(connectionManager, "setPreferredConnections");
     }
     

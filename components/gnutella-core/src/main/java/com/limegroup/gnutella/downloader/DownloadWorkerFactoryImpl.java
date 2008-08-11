@@ -4,12 +4,12 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.TLSManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 @Singleton
@@ -22,7 +22,7 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
     private final SocketsManager socketsManager;
     @InspectionPoint("download connection stats")
     private final DownloadStatsTracker statsTracker;
-    private final NetworkManager networkManager;
+    private final TLSManager TLSManager;
 
     @Inject
     public DownloadWorkerFactoryImpl(
@@ -31,14 +31,14 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
             @Named("nioExecutor")ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager,
             SocketsManager socketsManager,
-            DownloadStatsTracker statsTracker, NetworkManager networkManager) {
+            DownloadStatsTracker statsTracker, TLSManager TLSManager) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
         this.pushDownloadManager = pushDownloadManager;
         this.socketsManager = socketsManager;
         this.statsTracker = statsTracker;
-        this.networkManager = networkManager;
+        this.TLSManager = TLSManager;
     }
     
 
@@ -49,7 +49,7 @@ class DownloadWorkerFactoryImpl implements DownloadWorkerFactory {
             RemoteFileDesc rfd, VerifyingFile vf) {
         return new DownloadWorker(manager, rfd, vf, httpDownloaderFactory,
                 backgroundExecutor, nioExecutor, pushDownloadManager,
-                socketsManager, statsTracker, networkManager);
+                socketsManager, statsTracker, TLSManager);
     }
 
 }

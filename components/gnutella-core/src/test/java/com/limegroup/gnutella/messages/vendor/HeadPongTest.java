@@ -20,7 +20,6 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Range;
-import org.limewire.core.settings.SSLSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
@@ -66,7 +65,8 @@ public class HeadPongTest extends LimeTestCase {
     private Injector injector;
     private Mockery mockery;
     private DownloadManager downloadManager;
-        
+    private NetworkManagerStub networkManager;
+
     public HeadPongTest(String name) {
         super(name);
     }
@@ -80,7 +80,6 @@ public class HeadPongTest extends LimeTestCase {
     }
 
     public void setUp() throws Exception {
-        SSLSettings.TLS_INCOMING.setValue(false);
         mockery = new Mockery();
         downloadManager = mockery.mock(DownloadManager.class);
                 
@@ -96,16 +95,16 @@ public class HeadPongTest extends LimeTestCase {
         
         headPongFactory = injector.getInstance(HeadPongFactory.class);       
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
+        networkManager = (NetworkManagerStub) injector.getInstance(NetworkManager.class);
         networkManager.setAcceptedIncomingConnection(true);
-
-        //altLocManager.purge();
+        networkManager.setIncomingTLSEnabled(false);
     }
     
     public void tearDown() throws Exception {
         mockery.assertIsSatisfied();
         
-        SSLSettings.TLS_INCOMING.revertToDefault();
+        // TODO ?
+        //SSLSettings.TLS_INCOMING.revertToDefault();
         //altLocManager.purge();
     }
     
@@ -522,7 +521,6 @@ public class HeadPongTest extends LimeTestCase {
     }
     
     public void testWriteBasicGGEPHeadPong() throws Exception {
-        NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         byte[] guid = new byte[16];
         Random r = new Random();
         r.nextBytes(guid);
@@ -532,7 +530,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        SSLSettings.TLS_INCOMING.setValue(false);
+        networkManager.setIncomingTLSEnabled(false);
         networkManager.setAcceptedIncomingConnection(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
         setupFileManager(fd, UrnHelper.SHA1);
@@ -570,11 +568,11 @@ public class HeadPongTest extends LimeTestCase {
         req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        SSLSettings.TLS_INCOMING.setValue(true);
+        networkManager.setIncomingTLSEnabled(true);
         networkManager.setAcceptedIncomingConnection(true);
         networkManager.setTls(true);
-        networkManager.setIncomingTLS(true);
-        networkManager.setOutgoingTLS(true);
+        networkManager.setIncomingTLSEnabled(true);
+        networkManager.setOutgoingTLSEnabled(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
         setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
@@ -612,7 +610,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setUrn(UrnHelper.SHA1);
         req.setGuid(guid);
         
-        SSLSettings.TLS_INCOMING.setValue(true);
+        networkManager.setIncomingTLSEnabled(true);
         networkManager.setAcceptedIncomingConnection(false);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
         setupFileManager(fd, UrnHelper.SHA1); 

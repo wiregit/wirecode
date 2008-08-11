@@ -4,17 +4,11 @@ import java.io.IOException;
 
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.MediatorAddress;
 
-public interface NetworkManager extends Service, ListenerSupport<AddressEvent> {
-    void disableTLS(Throwable reason);
-
-    boolean isTLSDisabled();
-
-    boolean isIncomingTLSEnabled();
-
-    boolean isOutgoingTLSEnabled();
+public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, TLSManager {
 
     /** @return true if your IP and port information is valid.
      */
