@@ -8,6 +8,9 @@ import javax.swing.JPanel;
 import org.limewire.ui.swing.browser.Browser;
 import org.mozilla.browser.IMozillaWindow.VisibilityMode;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class StorePanel  extends JPanel{
     public static final String NAME = "LimeWire Store";
     

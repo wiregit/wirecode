@@ -2,7 +2,7 @@ package org.limewire.ui.swing.search.sponsored;
 
 public class SponsoredResult {
 
-    public static enum LinkTarget {INTERNAL, EXTERNAL}
+    public static enum LinkTarget {STORE, EXTERNAL}
 
     private String text;
 

@@ -11,6 +11,7 @@ import javax.swing.JScrollPane;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.sponsored.SponsoredResult;
@@ -51,6 +52,12 @@ public class SearchResultsPanel extends JPanel {
      * 
      */
     private NavTree navTree;
+    
+    /**
+     * StorePanel used by SponsoredResultsPanel
+     * 
+     */
+    private StorePanel storePanel;
 
     @AssistedInject
     public SearchResultsPanel(
@@ -58,9 +65,11 @@ public class SearchResultsPanel extends JPanel {
             @Assisted EventList<VisualSearchResult> visualSearchResults,
             @Assisted Search search,
             NavTree navTree,
+            StorePanel storePanel,
             ResultsContainerFactory containerFactory) {
         
         this.navTree = navTree;
+        this.storePanel = storePanel;
         
         this.sortAndFilterPanel = new SortAndFilterPanel();
         EventList<VisualSearchResult> list =
@@ -89,11 +98,11 @@ public class SearchResultsPanel extends JPanel {
     }
 
     private JComponent createSponsoredResultsPanel() {
-        SponsoredResultsPanel srp = new SponsoredResultsPanel(navTree);
+        SponsoredResultsPanel srp = new SponsoredResultsPanel(navTree, storePanel);
         
         srp.addEntry(new SponsoredResult("Internal Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
                 "store.limewire.com", "http://www.store.limewire.com/store/app/pages/help/Help/", 
-                LinkTarget.INTERNAL));
+                LinkTarget.STORE));
         
         srp.addEntry(new SponsoredResult("External Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
                 "google.com", "http://google.com", 
