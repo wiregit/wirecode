@@ -63,13 +63,9 @@ public class ResultsContainer extends JXPanel implements ModeListener {
     }
 
     public void synchronizeResultCount(SearchCategory key, final Action action) {
-        BaseResultPanel panel = panelMap.get(key.name());
-        action.putValue(Action.NAME, null);
-        action.putValue("RESULT-COUNT", 0);
         // Adds itself as a listener to the list & keeps the action in sync.
-        new SourceCountMaintainer(panel.getResultsEventList(), action);
+        new SourceCountMaintainer(panelMap.get(key.name()).getResultsEventList(), action);
     }
-    
     
     /**
      * Changes whether the list view or table view is displayed.
