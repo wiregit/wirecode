@@ -219,7 +219,25 @@ public interface DHTManager extends ConnectionLifecycleListener,
      */
     public void handleDHTContactsMessage(DHTContactsMessage msg);
     
+    /**
+     * Calls the {@link MojitoDHT#get(EntityKey)} if a bootstrappable DHT is available.
+     * Also handles the locking properly to ensure thread safety.
+     * 
+     * @param eKey the entity key used to perform lookup in the DHT.
+     * 
+     * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
+     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
+     */
     public DHTFuture<FindValueResult> get(EntityKey eKey);
     
+    /**
+     * Calls the {@link MojitoDHT#put(KUID, DHTValue)} if a bootstrappable DHT is available.
+     * Also handles the locking properly to ensure thread safety.
+     * 
+     * @param eKey the entity key used to perform lookup in the DHT.
+     * 
+     * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
+     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
+     */
     public DHTFuture<StoreResult> put(KUID key, DHTValue value);
 }
