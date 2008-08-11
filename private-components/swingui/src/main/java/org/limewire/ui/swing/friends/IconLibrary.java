@@ -13,6 +13,8 @@ interface IconLibrary {
     Icon getAway();
     
     Icon getChatting();
+    
+    Icon getEndChat();
 
     Icon getDoNotDisturb();
 
