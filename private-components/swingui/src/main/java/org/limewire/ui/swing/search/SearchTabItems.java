@@ -6,7 +6,10 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -66,6 +69,15 @@ class SearchTabItems extends JXPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx = 1;
         add(Box.createGlue(), gbc);
+    }
+    
+    public Collection<Map.Entry<SearchCategory, Action>> getResultCountActions() {
+        Map<SearchCategory, Action> counts = new EnumMap<SearchCategory, Action>(SearchCategory.class);
+        for(TabActionMap map : searchTabs) {
+            SearchCategory category = ((SearchTabAction)map.getMainAction()).getCategory();
+            counts.put(category, map.getMoreTextAction());
+        }
+        return counts.entrySet();
     }
     
     private TabActionMap newTabActionMap(SearchTabAction action) {

@@ -252,7 +252,6 @@ class TopPanel extends JPanel implements SearchNavigator {
         
         @Override
         public void handleSearchResult(SearchResult searchResult) {
-            System.out.println("TopPanel: got " + searchResult.getDescription());
         }
         
         @Override

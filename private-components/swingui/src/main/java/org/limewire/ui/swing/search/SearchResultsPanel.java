@@ -1,13 +1,10 @@
 package org.limewire.ui.swing.search;
 
-import ca.odell.glazedlists.EventList;
-
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -15,6 +12,11 @@ import javax.swing.JScrollPane;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+
+import ca.odell.glazedlists.EventList;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * This class displays search results in a panel.
@@ -65,6 +67,9 @@ public class SearchResultsPanel extends JPanel {
         
         this.searchTab =
             new SearchTabItems(searchInfo.getSearchCategory(), listener);
+        for(Map.Entry<SearchCategory, Action> entry : searchTab.getResultCountActions()) {
+            resultsContainer.synchronizeResultCount(entry.getKey(), entry.getValue());
+        }
         
         layoutComponents();
         

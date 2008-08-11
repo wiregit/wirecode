@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.util.MediaType;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -40,12 +39,6 @@ public class BasicSearchResultsModel {
     }
     
     public void addSearchResult(SearchResult result) {
-        System.out.println(
-            "BasicSearchResults: got " + result.getDescription());
-        String extension = result.getFileExtension();
-        MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
-        System.out.println("BasicSearchResults: media type is " + mediaType);
-        
         allSearchResults.add(result);
     }
     

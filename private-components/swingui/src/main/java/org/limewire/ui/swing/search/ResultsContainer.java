@@ -1,18 +1,10 @@
 package org.limewire.ui.swing.search;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.ListSelection;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.swing.EventSelectionModel;
-
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
 import java.awt.BorderLayout;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.Action;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.ResultType;
@@ -26,6 +18,13 @@ import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.matchers.Matcher;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 /**
  * This class is a panel that displays search results.
  * @see org.limewire.ui.swing.search.SearchResultsPanel.
@@ -33,7 +32,6 @@ import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 public class ResultsContainer extends JXPanel implements ModeListener {
 
     private BaseResultPanel currentPanel;
-    private final FilterMatcherEditor matcherEditor = new FilterMatcherEditor();
     private Map<String, BaseResultPanel> panelMap =
         new HashMap<String, BaseResultPanel>();
     private ModeListener.Mode mode = ModeListener.Mode.LIST;
@@ -52,34 +50,26 @@ public class ResultsContainer extends JXPanel implements ModeListener {
         
         setLayout(new BorderLayout());
         
-        FilterList<VisualSearchResult> filterList =
-            new FilterList<VisualSearchResult>(
-                visualSearchResults, matcherEditor);
-        
-        EventSelectionModel<VisualSearchResult> eventSelectionModel =
-            new EventSelectionModel<VisualSearchResult>(filterList);
-        eventSelectionModel.setSelectionMode(
-            ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
-        
         panelMap.put(SearchCategory.ALL.name(),
-            allFactory.create(filterList, eventSelectionModel, search));
+            allFactory.create(visualSearchResults, search));
         panelMap.put(SearchCategory.AUDIO.name(),
-            audioFactory.create(filterList, eventSelectionModel, search));
+            audioFactory.create(filter(ResultType.AUDIO, visualSearchResults), search));
         panelMap.put(SearchCategory.VIDEO.name(),
-            videoFactory.create(filterList, eventSelectionModel, search));
+            videoFactory.create(filter(ResultType.VIDEO, visualSearchResults), search));
         panelMap.put(SearchCategory.IMAGES.name(),
-            imagesFactory.create(filterList, eventSelectionModel, search));
+            imagesFactory.create(filter(ResultType.IMAGE, visualSearchResults), search));
         panelMap.put(SearchCategory.DOCUMENTS.name(),
-            documentsFactory.create(filterList, eventSelectionModel, search));
+            documentsFactory.create(filter(ResultType.DOCUMENT, visualSearchResults), search));
+    }
+
+    public void synchronizeResultCount(SearchCategory key, final Action action) {
+        BaseResultPanel panel = panelMap.get(key.name());
+        action.putValue(Action.NAME, null);
+        action.putValue("RESULT-COUNT", 0);
+        // Adds itself as a listener to the list & keeps the action in sync.
+        new SourceCountMaintainer(panel.getResultsEventList(), action);
     }
     
-    /**
-     * Gets the currently displayed panel.
-     * @return the panel
-     */
-    public BaseResultPanel getCurrentPanel() {
-        return currentPanel;
-    }
     
     /**
      * Changes whether the list view or table view is displayed.
@@ -91,44 +81,24 @@ public class ResultsContainer extends JXPanel implements ModeListener {
     }
     
     void showCategory(SearchCategory category) {
+        // TODO: This should be using a CardLayout and showing
+        //       the right panel instead of removing and re-adding.
+        //       Otherwise, state (such as where you have scrolled
+        //       to) is likely lost when flipping between categories.
+        
         //if (currentPanel != null) remove(currentPanel);
         removeAll();
         currentPanel = panelMap.get(category.name());
         currentPanel.setMode(mode);
         add(currentPanel, BorderLayout.CENTER);
-        matcherEditor.categoryChanged(category);
     }
-
-    private static class FilterMatcherEditor
-    extends AbstractMatcherEditor<VisualSearchResult> {
-        
-        void categoryChanged(SearchCategory category) {
-            if (category == SearchCategory.ALL) {
-                fireMatchAll();
-            } else {
-                final ResultType type = typeForCategory(category);
-                fireChanged(new Matcher<VisualSearchResult>() {
-                    @Override
-                    public boolean matches(VisualSearchResult item) {
-                        return item.getCategory() == type;
-                    }
-                });
-            }
-        }
-
-        private ResultType typeForCategory(SearchCategory category) {
-            switch (category) {
-            case AUDIO:
-                return ResultType.AUDIO;
-            case DOCUMENTS:
-                return ResultType.DOCUMENT;
-            case IMAGES:
-                return ResultType.IMAGE;
-            case VIDEO:
-                return ResultType.VIDEO;
-            default:
-                throw new IllegalArgumentException(category.name());
-            }
-        }
+    
+    private EventList<VisualSearchResult> filter(final ResultType category, EventList<VisualSearchResult> list) {
+        return new FilterList<VisualSearchResult>(list, new Matcher<VisualSearchResult>() {
+            @Override
+            public boolean matches(VisualSearchResult item) {
+                return item.getCategory() == category;
+            }        
+        });
     }
 }

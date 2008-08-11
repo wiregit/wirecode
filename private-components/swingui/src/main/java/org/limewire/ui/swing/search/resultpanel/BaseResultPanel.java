@@ -1,12 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.swing.EventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TableComparatorChooser;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -34,10 +27,19 @@ import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.EventListModel;
+import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
+
 public class BaseResultPanel extends JXPanel implements Scrollable {
     
     private static final int ACTION_COLUMN = 4;
     
+    private final EventList<VisualSearchResult> baseEventList;
     private final JList resultsList;
     private final JXTable resultsTable;
     private final JScrollPane scrollPane = new JScrollPane();
@@ -47,9 +49,8 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
     
     BaseResultPanel(String title,
             EventList<VisualSearchResult> eventList,
-            EventSelectionModel<VisualSearchResult> selectionModel,
             SearchResultDownloader searchResultDownloader, Search search) {
-        
+        this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
         
@@ -70,7 +71,8 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         resultsList = new JList(eventListModel);
         // TODO: RMV Write this renderer!
         //resultsList.setCellRenderer(new SearchResultListCellRenderer());
-        resultsList.setSelectionModel(selectionModel);
+        resultsList.setSelectionModel(new EventSelectionModel<VisualSearchResult>(eventList));
+        resultsList.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         resultsList.addMouseListener(new ResultDownloader());
         
         SortedList<VisualSearchResult> sortedResults =
@@ -111,6 +113,10 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         
         setMode(ModeListener.Mode.LIST);
     }
+    
+    public EventList<VisualSearchResult> getResultsEventList() {
+        return baseEventList;
+    }
 
     @Override
     public Dimension getPreferredScrollableViewportSize() {
@@ -149,7 +155,9 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
             mode == Mode.LIST ? resultsList :
             mode == Mode.TABLE ? resultsTable :
             null;
-        scrollPane.setViewportView(component);
+        if(component != scrollPane.getViewport().getView()) {
+            scrollPane.setViewportView(component);
+        }
     }
     
     private class ResultDownloader extends MouseAdapter {

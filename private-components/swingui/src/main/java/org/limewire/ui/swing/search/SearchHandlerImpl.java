@@ -56,8 +56,6 @@ class SearchHandlerImpl implements SearchHandler {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        System.out.println(
-                            "SearchHandlerImpl: adding " + searchResult.getDescription());
                         model.addSearchResult(searchResult);
                         // We can update the source count here because
                         // we never expect things to remove -- changes

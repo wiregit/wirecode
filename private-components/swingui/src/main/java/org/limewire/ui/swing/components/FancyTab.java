@@ -184,8 +184,12 @@ public class FancyTab extends JXPanel {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(evt.getPropertyName().equals(Action.NAME)) {
-                        label.setText("(" + (String)evt.getNewValue() + ")");
-                        label.setVisible(true);
+                        if(evt.getNewValue() != null) {
+                            label.setText("(" + (String)evt.getNewValue() + ")");
+                            label.setVisible(true);
+                        } else {
+                            label.setVisible(false);
+                        }
                     }
                 }
             });

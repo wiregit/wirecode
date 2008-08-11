@@ -578,12 +578,12 @@ public final class Initializer {
 //        if(OSUtils.isMacOSX())
 //            UIManager.put("ProgressBar.repaintInterval", new Integer(500));
 //        
-//        if(LOG.isTraceEnabled()) {
-//            long stopMemory = Runtime.getRuntime().totalMemory()
-//                            - Runtime.getRuntime().freeMemory();
-//            LOG.trace("STOP Initializer, using: " + stopMemory +
-//                      " memory, consumed: " + (stopMemory - startMemory));
-//        }
+        if(LOG.isTraceEnabled()) {
+            long stopMemory = Runtime.getRuntime().totalMemory()
+                            - Runtime.getRuntime().freeMemory();
+            LOG.trace("STOP Initializer, using: " + stopMemory +
+                      " memory, consumed: " + (stopMemory - startMemory));
+        }
     }
     
     /**
