@@ -58,8 +58,7 @@ public class LoginPanel extends JPanel {
         userNameField = new JTextField(18);
         passwordField = new JPasswordField(18);
         rememberMeCheckbox = new JCheckBox(tr("Remember me"));
-        signInButton = new JButton(tr("Sign in"));
-        signInButton.setAction(new SignInAction());
+        signInButton = new JButton(new SignInAction());
 
         FormLayout layout = new FormLayout("7dlu, p, 7dlu", "7dlu, p, 10dlu, p, 7dlu");
         PanelBuilder builder = new PanelBuilder(layout);
@@ -133,6 +132,10 @@ public class LoginPanel extends JPanel {
     }
     
     class SignInAction extends AbstractAction {
+        public SignInAction() {
+            super(tr("Sign in"));
+        }
+        
         public void actionPerformed(ActionEvent e) {
             List<XMPPConnection> connections = xmppService.getConnections();
             for(XMPPConnection connection : connections) {
