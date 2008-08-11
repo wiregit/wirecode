@@ -1,56 +1,57 @@
 package org.limewire.core.impl.library;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
 
-import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
 
 
 public class MockLibraryManager implements LibraryManager {
 
-    private EventList<FileItem> allFileList;
-    private EventList<FileItem> gnutellaList;
-    private EventList<FileItem> buddyList;
+    private FileListAdapter allFileList;
+    private FileListAdapter gnutellaList;
+    private FileListAdapter buddyList;
     
     public MockLibraryManager() {
-        allFileList = GlazedLists.threadSafeList(new BasicEventList<FileItem>());
-        gnutellaList = GlazedLists.threadSafeList(new BasicEventList<FileItem>());
-        buddyList = GlazedLists.threadSafeList(new BasicEventList<FileItem>());
+        allFileList = new FileListAdapter();
+        gnutellaList = new FileListAdapter();
+        buddyList = new FileListAdapter();
 
         initializeMockGnutellaData();
         initializeMockBuddyData();
-        
-        allFileList.addAll(gnutellaList);
-        allFileList.addAll(buddyList);
     }
     
     private void initializeMockGnutellaData(){
         MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456, 5,1);
-        gnutellaList.add(item);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
         
         item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,3,2);
-        gnutellaList.add(item);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
         
         item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0);
-        gnutellaList.add(item);
+        gnutellaList.addFileItem(item);
+        allFileList.addFileItem(item);
     }
     
     private void initializeMockBuddyData(){
         MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1);
-        buddyList.add(item);
+        buddyList.addFileItem(item);
+        allFileList.addFileItem(item);
         
         item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,5,0);
-        buddyList.add(item);
+        buddyList.addFileItem(item);
+        allFileList.addFileItem(item);
         
         item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0);
-        buddyList.add(item);
+        buddyList.addFileItem(item);
+        allFileList.addFileItem(item);
     }
     
     @Override
@@ -58,19 +59,20 @@ public class MockLibraryManager implements LibraryManager {
         // TODO Auto-generated method stub
         
     }
+    
 
     @Override
-    public EventList<FileItem> getAllFiles() {
+    public FileList getLibraryList() {
         return allFileList;
-    }   
+    }
     
     @Override
-    public EventList<FileItem> getAllBuddyList() {
+    public FileList getAllBuddyList() {
         return buddyList;
     }
-
+    
     @Override
-    public EventList<FileItem> getGnutellaList() {
+    public FileList getGnutellaList() {
         return gnutellaList;
     }
 
@@ -93,18 +95,6 @@ public class MockLibraryManager implements LibraryManager {
 
     @Override
     public void removeBuddy(String name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void addGnutellaFile(File file) {
-        MockFileItem item = new MockFileItem(file.getName(), 1000,12345,23456, 0,0);
-        gnutellaList.add(item);
-    }
-
-    @Override
-    public void removeGnutellaFile(File file) {
         // TODO Auto-generated method stub
         
     }

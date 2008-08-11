@@ -25,7 +25,7 @@ public class MyLibraryPanel extends JPanel {
     public MyLibraryPanel(LibraryManager libraryManager){
         setLayout(new BorderLayout());
 
-        table = new LibraryTable(libraryManager.getAllFiles()); 
+        table = new LibraryTable(libraryManager.getLibraryList().getModel()); 
         JScrollPane scrollPane = new JScrollPane(table);
         
         add(scrollPane, BorderLayout.CENTER);

@@ -17,7 +17,7 @@ import javax.swing.table.TableColumn;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
@@ -32,7 +32,7 @@ public class BuddySharePanel extends JPanel {
     
     private final JXTable table;
     
-    private final LibraryManager libraryManager;
+    private final FileList fileList;
     
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
@@ -43,16 +43,15 @@ public class BuddySharePanel extends JPanel {
     private Icon sharingIcon;
     
     @Inject
-    public BuddySharePanel(LibraryManager libraryManager) {
-       
-        this.libraryManager = libraryManager;
+    public BuddySharePanel(FileList fileList) {
+        this.fileList = fileList;
         
         setLayout(new BorderLayout());
         GuiUtils.assignResources(this); 
         
         headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with All Friends");
         
-        table = new SharingTable(libraryManager.getAllBuddyList());
+        table = new SharingTable(fileList.getModel());
         table.setDropMode(DropMode.ON);
         
         editor = new MultiButtonTableCellRendererEditor(20);
@@ -72,21 +71,21 @@ public class BuddySharePanel extends JPanel {
     
     private List<Action> createActions(TableCellEditor editor) {
         List<Action> list = new ArrayList<Action>();
-        list.add(new MyAction(editor, libraryManager, table, cancelIcon ));
+        list.add(new MyAction(editor, fileList, table, cancelIcon ));
         return list;
     }
     
     private class MyAction extends AbstractAction {
 
         private TableCellEditor editor;
-        private LibraryManager libraryManager;
+        private FileList fileList;
         private JXTable table;
         
-        public MyAction(TableCellEditor editor, LibraryManager libraryManager, JXTable table, Icon icon) {
+        public MyAction(TableCellEditor editor, FileList fileList, JXTable table, Icon icon) {
             super("", icon);
             
             this.editor = editor;
-            this.libraryManager = libraryManager;
+            this.fileList = fileList;
             this.table = table;
         }
         
@@ -96,7 +95,7 @@ public class BuddySharePanel extends JPanel {
 
             SharingTableModel model = (SharingTableModel) table.getModel();
             FileItem item = model.getFileItem(table.getSelectedRow());
-            libraryManager.removeGnutellaFile(item.getFile());
+            fileList.removeFile(item.getFile());
         }
         
     }

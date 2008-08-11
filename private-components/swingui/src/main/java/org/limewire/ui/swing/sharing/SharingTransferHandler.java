@@ -9,17 +9,17 @@ import java.util.List;
 
 import javax.swing.TransferHandler;
 
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.FileList;
 
 /**
  * A transfer handler for adding shared files to a table.
  */
 public class SharingTransferHandler extends TransferHandler {
     
-    private LibraryManager libraryManager;
+    private FileList fileList;
     
-    public SharingTransferHandler(LibraryManager libraryManager) {
-        this.libraryManager = libraryManager;
+    public SharingTransferHandler(FileList fileList) {
+        this.fileList = fileList;
     }
 
     /**
@@ -54,7 +54,7 @@ public class SharingTransferHandler extends TransferHandler {
         }
         
         for(File f : list) {
-            libraryManager.addGnutellaFile(f);
+            fileList.addFile(f);
         }
         
         return true;

@@ -85,12 +85,12 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         
         //TODO: NumberIcons
         gnutellaButton.setName("FilesSharingSummaryPanel.all");
-        gnutellaButton.setIcon(new NumberIcon(libraryManager.getGnutellaList(), gnutellaIcon));
+        gnutellaButton.setIcon(new NumberIcon(libraryManager.getGnutellaList().getModel(), gnutellaIcon));
         gnutellaButton.setUI(new HighlightToggleButtonUI(highLightColor));
-        new ShareDropTarget(gnutellaButton, libraryManager);
+        new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaList());
         
 		buddyButton.setName("FilesSharingSummaryPanel.buddies");
-		buddyButton.setIcon(new NumberIcon(libraryManager.getAllBuddyList(), buddiesIcon));
+		buddyButton.setIcon(new NumberIcon(libraryManager.getAllBuddyList().getModel(), buddiesIcon));
 		buddyButton.setUI(new HighlightToggleButtonUI(highLightColor));
 
 		individualButton.setName("FilesSharingSummaryPanel.some");
@@ -236,8 +236,8 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             owner.removePropertyChangeListener(this);
-            addDefaultNavigableItems(new GnutellaSharePanel(libraryManager), 
-                    new BuddySharePanel(libraryManager), 
+            addDefaultNavigableItems(new GnutellaSharePanel(libraryManager.getGnutellaList()), 
+                    new BuddySharePanel(libraryManager.getAllBuddyList()), 
                             new IndividualSharePanel());
         }
     }

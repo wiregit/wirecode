@@ -12,16 +12,16 @@ import java.awt.dnd.DropTargetListener;
 import java.io.File;
 import java.util.List;
 
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.FileList;
 
 public class ShareDropTarget implements DropTargetListener {
 
     private DropTarget dropTarget;
-    private LibraryManager libraryManager;
+    private FileList fileList;
     
-    public ShareDropTarget(Component component, LibraryManager libraryManager) {
+    public ShareDropTarget(Component component, FileList fileList) {
         dropTarget = new DropTarget(component, DnDConstants.ACTION_COPY, this, true, null);
-        this.libraryManager = libraryManager;
+        this.fileList = fileList;
     }
     
     
@@ -49,9 +49,9 @@ public class ShareDropTarget implements DropTargetListener {
             Transferable transferable = dtde.getTransferable();
 
             try {
-                List fileList = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                for(int i = 0; i < fileList.size(); i++) {
-                    libraryManager.addGnutellaFile((File)fileList.get(i));
+                List filesList = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                for(int i = 0; i < filesList.size(); i++) {
+                    fileList.addFile((File)filesList.get(i));
                 }
               dtde.dropComplete(true);
             } catch (Exception e) { 

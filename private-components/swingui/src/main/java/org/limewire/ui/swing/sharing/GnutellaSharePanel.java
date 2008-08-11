@@ -17,7 +17,7 @@ import javax.swing.table.TableColumn;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
@@ -35,7 +35,7 @@ public class GnutellaSharePanel extends JPanel {
     
     private final JXTable table;
     
-    private final LibraryManager libraryManager;
+    private final FileList fileList;
 
     @Resource
     private Icon cancelIcon;
@@ -46,21 +46,21 @@ public class GnutellaSharePanel extends JPanel {
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
     
-    public GnutellaSharePanel(LibraryManager libraryManager) {
+    public GnutellaSharePanel(FileList fileList) {
         setLayout(new BorderLayout());
         
         GuiUtils.assignResources(this); 
         
-        this.libraryManager = libraryManager;
+        this.fileList = fileList;
                
         headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the LimeWire Network");
         
         
-        FilterList<FileItem> filteredList = new FilterList<FileItem>(libraryManager.getGnutellaList(), 
+        FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
                 new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         
         table = new SharingTable(filteredList);
-        table.setTransferHandler(new SharingTransferHandler(libraryManager));
+        table.setTransferHandler(new SharingTransferHandler(fileList));
         table.setDropMode(DropMode.ON);
         
         editor = new MultiButtonTableCellRendererEditor(20);
@@ -80,21 +80,21 @@ public class GnutellaSharePanel extends JPanel {
     
     private List<Action> createActions(TableCellEditor editor) {
         List<Action> list = new ArrayList<Action>();
-        list.add(new MyAction(editor, libraryManager, table, cancelIcon ));
+        list.add(new MyAction(editor, fileList, table, cancelIcon ));
         return list;
     }
     
     private class MyAction extends AbstractAction {
 
         private TableCellEditor editor;
-        private LibraryManager libraryManager;
+        private FileList fileList;
         private JXTable table;
         
-        public MyAction(TableCellEditor editor, LibraryManager libraryManager, JXTable table, Icon icon) {
+        public MyAction(TableCellEditor editor, FileList fileList, JXTable table, Icon icon) {
             super("", icon);
             
             this.editor = editor;
-            this.libraryManager = libraryManager;
+            this.fileList = fileList;
             this.table = table;
         }
         
@@ -104,7 +104,7 @@ public class GnutellaSharePanel extends JPanel {
 
             SharingTableModel model = (SharingTableModel) table.getModel();
             FileItem item = model.getFileItem(table.getSelectedRow());
-            libraryManager.removeGnutellaFile(item.getFile());
+            fileList.removeFile(item.getFile());
         }
         
     }
