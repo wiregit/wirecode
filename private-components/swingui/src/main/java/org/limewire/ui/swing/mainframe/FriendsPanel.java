@@ -12,7 +12,9 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.LoginPanel;
+import org.limewire.xmpp.api.client.XMPPService;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
@@ -24,12 +26,14 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendsPanel extends JXCollapsiblePane {
     private final LoginPanel loginPanel;
-    public FriendsPanel() {
+    
+    @Inject
+    public FriendsPanel(XMPPService xmppService) {
         super(Direction.UP);
         AnnotationProcessor.process(this);
         setLayout(new GridLayout(10, 1));
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        loginPanel = new LoginPanel();
+        loginPanel = new LoginPanel(xmppService);
         add(loginPanel);
         setCollapsed(true);
     }

@@ -15,6 +15,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.listener.EventListener;
+import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.FileOfferHandler;
@@ -40,8 +41,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     
     private final CopyOnWriteArrayList<RosterListener> rosterListeners;
     private final HashMap<String, UserImpl> users;
-    protected AddressIQListener addressIQListener;
+    protected volatile AddressIQListener addressIQListener;
     protected FileTransferIQListener fileTransferIQListener;
+    protected volatile AddressEvent queuedEvent;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        FileOfferHandler fileOfferHandler,
@@ -120,7 +122,14 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                         // TODO conncurrency control
                         ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     }
-                    addressIQListener = new AddressIQListener(connection, addressFactory);
+                    Address address = null;
+                    synchronized (XMPPConnectionImpl.this) {
+                        if(queuedEvent != null) {
+                            address = queuedEvent.getSource();
+                        }
+                    }
+                    addressIQListener = new AddressIQListener(connection, addressFactory, address);
+                    queuedEvent = null;
                     XMPPConnectionImpl.this.rosterListeners.add(addressIQListener);
                     connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
                     ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
@@ -254,6 +263,12 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
 //    }
 
     public void handleEvent(AddressEvent event) {
-        addressIQListener.handleEvent(event);
+        synchronized (this) {
+            if(addressIQListener != null) {
+                addressIQListener.handleEvent(event);    
+            } else {
+                queuedEvent = event;
+            }
+        }
     }
 }

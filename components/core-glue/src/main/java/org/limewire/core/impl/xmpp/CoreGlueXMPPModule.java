@@ -1,6 +1,7 @@
 package org.limewire.core.impl.xmpp;
 
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.inject.AbstractModule;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
@@ -12,6 +13,7 @@ public class CoreGlueXMPPModule extends AbstractModule {
     protected void configure() {
         binder().install(new LimeWireXMPPModule());
         bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).to(XMPPConfigurationListProvider.class);
-        bind(new TypeLiteral<List<XMPPSettings.XMPPServerConfiguration>>(){}).toProvider(XMPPSettings.XMPPServerConfigs.class);
+        bind(new TypeLiteral<Map<String, XMPPServerSettings.XMPPServerConfiguration>>(){}).toProvider(XMPPServerSettings.XMPPServerConfigs.class);
+        bind(new TypeLiteral<Map<String, XMPPUserSettings.XMPPUserConfiguration>>(){}).toProvider(XMPPUserSettings.XMPPUserConfigs.class);
     }
 }

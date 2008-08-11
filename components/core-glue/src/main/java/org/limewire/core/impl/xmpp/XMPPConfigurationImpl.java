@@ -6,14 +6,17 @@ import org.limewire.xmpp.api.client.XMPPErrorListener;
 
 public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
 
-    private final XMPPSettings.XMPPServerConfiguration serverConfiguration;
+    private final XMPPServerSettings.XMPPServerConfiguration serverConfiguration;
+    private final XMPPUserSettings.XMPPUserConfiguration userConfiguration;
     private final RosterListener rosterListener;
     private final XMPPErrorListener errorListener;
 
-    public XMPPConfigurationImpl(XMPPSettings.XMPPServerConfiguration serverConfiguration,
-                                    RosterListener rosterListener,
-                                    XMPPErrorListener errorListener) {
+    public XMPPConfigurationImpl(XMPPServerSettings.XMPPServerConfiguration serverConfiguration,
+                                 XMPPUserSettings.XMPPUserConfiguration userConfiguration,
+                                 RosterListener rosterListener,
+                                 XMPPErrorListener errorListener) {
         this.serverConfiguration = serverConfiguration;
+        this.userConfiguration = userConfiguration;
         this.rosterListener = rosterListener;
         this.errorListener = errorListener;
     }
@@ -23,11 +26,19 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     }
 
     public String getUsername() {
-        return serverConfiguration.getUsername();
+        return userConfiguration.getUsername();
+    }
+
+    public void setUsername(String username) {
+        userConfiguration.setUsername(username);
     }
 
     public String getPassword() {
-        return serverConfiguration.getPassword();
+        return userConfiguration.getPassword();
+    }
+
+    public void setPassword(String password) {
+        userConfiguration.setPassword(password);
     }
 
     public String getHost() {
@@ -43,7 +54,11 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     }
 
     public boolean isAutoLogin() {
-        return serverConfiguration.isAutoLogin();
+        return userConfiguration.isAutoLogin();
+    }
+
+    public void setAutoLogin(boolean autoLogin) {
+        userConfiguration.setAutoLogin(autoLogin);
     }
 
     public RosterListener getRosterListener() {

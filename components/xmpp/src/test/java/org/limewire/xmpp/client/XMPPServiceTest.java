@@ -27,7 +27,6 @@ import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
-import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.common.LimeWireCommonModule;
@@ -75,7 +74,7 @@ public class XMPPServiceTest extends BaseTestCase {
         List<Module> modules = new ArrayList<Module>();
         modules.add(new LimeWireCommonModule());
         modules.addAll(getServiceModules());
-        return modules.toArray(new Module[]{});
+        return modules.toArray(new Module[modules.size()]);
     }
 
     protected void tearDown() throws Exception {
@@ -86,9 +85,9 @@ public class XMPPServiceTest extends BaseTestCase {
     protected List<Module> getServiceModules() {
         rosterListener = new RosterListenerMock();
         rosterListener2 = new RosterListenerMock();
-        final XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
+        final XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationMock("limebuddy1@gmail.com",
                 "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener);
-        final XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com",
+        final XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationMock("limebuddy2@gmail.com",
                 "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2);
         Module xmppModule = new LimeWireXMPPModule();
         addressEventBroadcaster = new AddressEventTestBroadcaster();

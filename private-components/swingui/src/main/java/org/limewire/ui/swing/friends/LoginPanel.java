@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -18,11 +18,16 @@ import javax.swing.JToggleButton;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
+import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.XMPPException;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import com.limegroup.gnutella.gui.actions.AbstractAction;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -40,8 +45,10 @@ public class LoginPanel extends JPanel {
     private JButton signInButton;
     private JTextField userNameField;
     private JPanel topPanel;
+    private final XMPPService xmppService;
 
-    public LoginPanel() {
+    public LoginPanel(XMPPService xmppService) {
+        this.xmppService = xmppService;
         GuiUtils.assignResources(this);
 
         initComponents();
@@ -52,6 +59,7 @@ public class LoginPanel extends JPanel {
         passwordField = new JPasswordField(18);
         rememberMeCheckbox = new JCheckBox(tr("Remember me"));
         signInButton = new JButton(tr("Sign in"));
+        signInButton.setAction(new SignInAction());
 
         FormLayout layout = new FormLayout("7dlu, p, 7dlu", "7dlu, p, 10dlu, p, 7dlu");
         PanelBuilder builder = new PanelBuilder(layout);
@@ -122,5 +130,24 @@ public class LoginPanel extends JPanel {
         
         detailsPanelBuilder.add(inputPanel, cc.xy(1, 2));
         return detailsPanelBuilder.getPanel();
+    }
+    
+    class SignInAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            List<XMPPConnection> connections = xmppService.getConnections();
+            for(XMPPConnection connection : connections) {
+                if(connection.getConfiguration().getServiceName().equals("gmail.com")) {
+                    connection.getConfiguration().setUsername(userNameField.getText());
+                    connection.getConfiguration().setPassword(new String(passwordField.getPassword()));
+                    connection.getConfiguration().setAutoLogin(rememberMeCheckbox.isSelected());
+                    try {
+                        connection.login();
+                    } catch (XMPPException e1) {
+                        // TODO
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 }

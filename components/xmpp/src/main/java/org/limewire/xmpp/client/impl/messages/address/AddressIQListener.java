@@ -39,9 +39,11 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
     private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
 
     public AddressIQListener(XMPPConnection connection,
-                             AddressFactory factory) {
+                             AddressFactory factory,
+                             Address address) {
         this.connection = connection;
         this.factory = factory;
+        this.address = address;
     }
 
     public void processPacket(Packet packet) {
