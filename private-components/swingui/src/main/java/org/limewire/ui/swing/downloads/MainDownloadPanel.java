@@ -166,8 +166,6 @@ public class MainDownloadPanel extends JPanel {
 			FontUtils.changeStyle(titleLabel, Font.BOLD);
 			FontUtils.changeSize(titleLabel, 5);
 			searchBar = downloadMediator.getFilterTextField();
-			//TODO: make SearchBar work with filtering
-			//searchBar.setDefaultText(I18n.tr("Filter downloads..."));
 			Dimension dim = searchBar.getPreferredSize();
 			searchBar.setPreferredSize(new Dimension(150, dim.height));
 			
