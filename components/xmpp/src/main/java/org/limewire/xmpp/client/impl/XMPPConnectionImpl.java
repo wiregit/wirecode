@@ -160,17 +160,18 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         }
 
         public void entriesAdded(Collection<String> addedIds) {
-            for(String id : addedIds) {
+            synchronized (users) {
                 Roster roster = connection.getRoster();
-                RosterEntry rosterEntry = roster.getEntry(id);
-                UserImpl user = new UserImpl(id, rosterEntry.getName());
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("user " + user + " added");
-                }
-                synchronized (users) {
+                for(String id : addedIds) {             
+                    RosterEntry rosterEntry = roster.getEntry(id);
+                    UserImpl user = new UserImpl(id, rosterEntry.getName());
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("user " + user + " added");
+                    }
                     users.put(id, user);
+                    fireUserAdded(user);                    
                 }
-                fireUserAdded(user);
+                users.notifyAll();
             }
         }
 
@@ -181,17 +182,18 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         }
 
         public void entriesUpdated(Collection<String> updatedIds) {
-            for(String id : updatedIds) {
-                Roster roster = connection.getRoster();
-                RosterEntry rosterEntry = roster.getEntry(id);
-                UserImpl user = new UserImpl(id, rosterEntry.getName());
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("user " + user + " updated");
-                }
-                synchronized (users) {
+            synchronized (users) {
+                for(String id : updatedIds) {
+                    Roster roster = connection.getRoster();
+                    RosterEntry rosterEntry = roster.getEntry(id);
+                    UserImpl user = new UserImpl(id, rosterEntry.getName());
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("user " + user + " updated");
+                    }
                     users.put(id, user);
+                    fireUserUpdated(user);
                 }
-                fireUserUpdated(user);
+                users.notifyAll();
             }
         }
 
@@ -202,15 +204,16 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         }
 
         public void entriesDeleted(Collection<String> removedIds) {
-            for(String id : removedIds) {
-                User user;
-                synchronized (users) {                    
+            synchronized (users) {
+                for(String id : removedIds) {
+                    User user;
                     user = users.remove(id);
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("user " + user + " removed");
+                    }
+                    fireUserDeleted(id);
                 }
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("user " + user + " removed");
-                }
-                fireUserDeleted(id);
+                users.notifyAll();
             }
         }
         
@@ -226,6 +229,16 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     public void run() {
                         UserImpl user;
                         synchronized (users) {
+                            // TODO is it possible to receive a presence
+                            // TODO for someone NOT in your roster
+                            
+                            while(users.isEmpty()) {
+                                try {
+                                    users.wait();
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                             user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
                         }
                         if(LOG.isDebugEnabled()) {
