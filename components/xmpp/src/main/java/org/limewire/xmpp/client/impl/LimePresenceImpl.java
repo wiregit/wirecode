@@ -1,5 +1,8 @@
 package org.limewire.xmpp.client.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketCollector;
@@ -17,9 +20,12 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
     
     private Address address;
+    
+    private List<FileMetaData> files;
 
     LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection) {
         super(presence, connection);
+        files = new ArrayList<FileMetaData>();
     }
     
     public Address getAddress() {
@@ -55,5 +61,13 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         transferIQ.setTo(getJID());
         transferIQ.setPacketID(IQ.nextID());
         connection.sendPacket(transferIQ);
+    }
+
+    public List<FileMetaData> getFiles() {
+        return files;
+    }
+    
+    public void addFile(FileMetaData file) {
+        files.add(file);
     }
 }

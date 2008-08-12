@@ -1,5 +1,7 @@
 package org.limewire.xmpp.api.client;
 
+import java.util.List;
+
 import org.limewire.net.address.Address;
 
 /**
@@ -20,4 +22,8 @@ public interface LimePresence extends Presence {
      * to the lime buddy
      */
     public Address getAddress();
+    
+    public List<FileMetaData> getFiles();
+    
+    public void addFile(FileMetaData file);
 }
