@@ -12,6 +12,7 @@ import javax.swing.JTextArea;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
@@ -22,41 +23,55 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
-public class SponsoredResultsPanel extends JPanel {
+import com.google.inject.Inject;
+
+class SponsoredResultsPanel extends JXPanel {
     
   
-   private NavTree navTree;
-   
+    private final NavTree navTree;
+    private final StorePanel storePanel;
 
-   @Resource
-   private Color linkColor;
-   @Resource
-   private Color visibleUrlColor;
+    @Resource
+    private Color linkColor;
+
+    @Resource
+    private Color visibleUrlColor;
     
-    private GridBagConstraints gbc = new GridBagConstraints();
+    private JLabel title;
 
-
-    private StorePanel storePanel;
     
+    @Inject
     public SponsoredResultsPanel(NavTree navTree, StorePanel storePanel) {
         GuiUtils.assignResources(this);
         this.navTree = navTree;
         this.storePanel = storePanel;
         setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         
+        title = createTitleLabel();
+        add(title, gbc);
+    }
+    
+    void setTitleVisible(boolean visible) {
+        title.setVisible(visible);
+    }
+    
+    JLabel createTitleLabel() {
         JLabel title = new JLabel(I18n.tr("Sponsored Results"));
         FontUtils.changeSize(title, 2);
         FontUtils.bold(title);
-        add(title, gbc);
-        
-        gbc.insets.top = 10; // leave space above each entry that follow
-        gbc.insets.left = 5; // indent entries a little
+        return title;
     }
    
 
     public void addEntry(SponsoredResult result){
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.insets.top = 10; // leave space above each entry that follow
+        gbc.insets.left = 5; // indent entries a little
         add(new SponsoredResultView(result), gbc);
     }
         

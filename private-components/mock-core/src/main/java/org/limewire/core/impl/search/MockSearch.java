@@ -22,6 +22,8 @@ import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 public class MockSearch implements Search {
     
     private CopyOnWriteArrayList<SearchListener> listeners = new CopyOnWriteArrayList<SearchListener>();
+    
+    private int repeatCount = 0;
 
     public MockSearch(SearchDetails searchDetails) {
         // TODO Auto-generated constructor stub
@@ -63,12 +65,6 @@ public class MockSearch implements Search {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                SponsoredResult sponsored = new MockSponsoredResult("Internal Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
-                        "store.limewire.com", "http://www.store.limewire.com/store/app/pages/help/Help/", SponsoredResultTarget.STORE);
-                SponsoredResult sponsored2 = new MockSponsoredResult("External Ad", "a ad a daflad fajla\naldjfla awejl sdaf", "google.com",
-                        "http://google.com", SponsoredResultTarget.EXTERNAL);
-                handleSponsoredResults(sponsored, sponsored2);
-                      
                 handleSearchResult(
                         new MockSearchResult("5.0. Blues" + suffix, "ogg", ResultType.AUDIO, 123456789L, Arrays.asList(new MockRemoteHost("bob")), "test" + suffix));
                 handleSearchResult(
@@ -77,6 +73,14 @@ public class MockSearch implements Search {
                         new MockSearchResult("Standdown Situps" + suffix, "ogv", ResultType.VIDEO, 123456L, Arrays.asList(new MockRemoteHost("dick")), "test1" + suffix));
                 handleSearchResult(
                         new MockSearchResult("Craziness" + suffix, "tmp", ResultType.UNKNOWN, 1L, Arrays.asList(new MockRemoteHost("harry"), new MockRemoteHost("larry")), "test2" + suffix));
+                
+                try { Thread.sleep(1000); } catch(InterruptedException ignored) {}
+                SponsoredResult sponsored = new MockSponsoredResult("Internal Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
+                        "store.limewire.com", "http://www.store.limewire.com/store/app/pages/help/Help/", SponsoredResultTarget.STORE);
+                SponsoredResult sponsored2 = new MockSponsoredResult("External Ad", "a ad a daflad fajla\naldjfla awejl sdaf", "google.com",
+                        "http://google.com", SponsoredResultTarget.EXTERNAL);
+                handleSponsoredResults(sponsored, sponsored2);
+                      
             }
         }).start();
     }
@@ -97,7 +101,11 @@ public class MockSearch implements Search {
     
     @Override
     public void repeat() {
-        start();
+
+        for(SearchListener listener : listeners) {
+            listener.searchStarted();
+        }
+        addResults("rp" + repeatCount++);
     }
 
     private static class MockSearchResult implements SearchResult {

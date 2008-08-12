@@ -1,20 +1,18 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JList;
-import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.Scrollable;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Highlighter;
@@ -35,17 +33,19 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 
-public class BaseResultPanel extends JXPanel implements Scrollable {
+public class BaseResultPanel extends JXPanel {
     
     private static final int ACTION_COLUMN = 4;
     
+    private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
     private final JList resultsList;
     private final JXTable resultsTable;
-    private final JScrollPane scrollPane = new JScrollPane();
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     private final TableComparatorChooser tcc;
+    
+    private Scrollable visibileComponent;
     
     BaseResultPanel(String title,
             EventList<VisualSearchResult> eventList,
@@ -54,9 +54,8 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
         
-        setLayout(new BorderLayout());
-        add(scrollPane, BorderLayout.CENTER);
-        
+        setLayout(layout);
+                
         // TODO: RMV The latest screen mockups do not include this title!
         /*
         JLabel titleLabel = new JLabel(title);
@@ -68,7 +67,7 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         EventListModel<VisualSearchResult> eventListModel =
             new EventListModel<VisualSearchResult>(eventList);
         
-        resultsList = new JList(eventListModel);
+        resultsList = new JXList(eventListModel);
         // TODO: RMV Write this renderer!
         //resultsList.setCellRenderer(new SearchResultListCellRenderer());
         resultsList.setSelectionModel(new EventSelectionModel<VisualSearchResult>(eventList));
@@ -111,39 +110,13 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
         tc.setCellRenderer(actce);
         tc.setCellEditor(actce);
         
+        add(resultsList, ModeListener.Mode.LIST.name());
+        add(resultsTable, ModeListener.Mode.TABLE.name());
         setMode(ModeListener.Mode.LIST);
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {
         return baseEventList;
-    }
-
-    @Override
-    public Dimension getPreferredScrollableViewportSize() {
-        return resultsList.getPreferredScrollableViewportSize();
-    }
-
-    @Override
-    public int getScrollableBlockIncrement(
-        Rectangle visibleRect, int orientation, int direction) {
-        return resultsList.getScrollableBlockIncrement(
-            visibleRect, orientation, direction);
-    }
-
-    @Override
-    public boolean getScrollableTracksViewportHeight() {
-        return resultsList.getScrollableTracksViewportHeight();
-    }
-
-    @Override
-    public boolean getScrollableTracksViewportWidth() {
-        return true;
-    }
-
-    @Override
-    public int getScrollableUnitIncrement(Rectangle visibleRect,
-            int orientation, int direction) {
-        return resultsList.getScrollableUnitIncrement(visibleRect, orientation, direction);
     }
     
     /**
@@ -151,12 +124,11 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
      * @param mode LIST or TABLE
      */
     public void setMode(Mode mode) {
-        Component component =
-            mode == Mode.LIST ? resultsList :
-            mode == Mode.TABLE ? resultsTable :
-            null;
-        if(component != scrollPane.getViewport().getView()) {
-            scrollPane.setViewportView(component);
+        layout.show(this, mode.name());
+        switch(mode) {
+        case LIST: this.visibileComponent = resultsList; break;
+        case TABLE: this.visibileComponent = resultsTable; break;
+        default: throw new IllegalStateException("unsupported mode: " + mode);
         }
     }
     
@@ -181,6 +153,14 @@ public class BaseResultPanel extends JXPanel implements Scrollable {
                     sle.printStackTrace();
                 }
             }
+        }
+    }
+
+    public Component getScrollPaneHeader() {
+        if(visibileComponent == resultsTable) {
+            return resultsTable.getTableHeader();
+        } else {
+            return null;
         }
     }
 }

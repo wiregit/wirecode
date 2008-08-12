@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
-import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,12 +30,14 @@ import com.google.inject.assistedinject.AssistedInject;
  * This class is a panel that displays search results.
  * @see org.limewire.ui.swing.search.SearchResultsPanel.
  */
-public class ResultsContainer extends JXPanel implements ModeListener {
+public class ResultsContainer extends JXPanel {
 
     private BaseResultPanel currentPanel;
     private Map<String, BaseResultPanel> panelMap =
         new HashMap<String, BaseResultPanel>();
     private ModeListener.Mode mode = ModeListener.Mode.LIST;
+    
+    private final CardLayout cardLayout = new CardLayout();
 
     /**
      * See LimeWireUISearchModule for binding information.
@@ -48,8 +51,6 @@ public class ResultsContainer extends JXPanel implements ModeListener {
         ImagesResultsPanelFactory imagesFactory,
         DocumentsResultsPanelFactory documentsFactory) {
         
-        setLayout(new BorderLayout());
-        
         panelMap.put(SearchCategory.ALL.name(),
             allFactory.create(visualSearchResults, search));
         panelMap.put(SearchCategory.AUDIO.name(),
@@ -60,6 +61,12 @@ public class ResultsContainer extends JXPanel implements ModeListener {
             imagesFactory.create(filter(ResultType.IMAGE, visualSearchResults), search));
         panelMap.put(SearchCategory.DOCUMENTS.name(),
             documentsFactory.create(filter(ResultType.DOCUMENT, visualSearchResults), search));
+        
+        setLayout(cardLayout);
+        
+        for(Map.Entry<String, BaseResultPanel> entry : panelMap.entrySet()) {
+            add(entry.getValue(), entry.getKey());
+        }
     }
 
     public void synchronizeResultCount(SearchCategory key, final Action action) {
@@ -77,16 +84,10 @@ public class ResultsContainer extends JXPanel implements ModeListener {
     }
     
     void showCategory(SearchCategory category) {
-        // TODO: This should be using a CardLayout and showing
-        //       the right panel instead of removing and re-adding.
-        //       Otherwise, state (such as where you have scrolled
-        //       to) is likely lost when flipping between categories.
-        
-        //if (currentPanel != null) remove(currentPanel);
-        removeAll();
-        currentPanel = panelMap.get(category.name());
+        currentPanel = panelMap.get(category.name()); 
+        cardLayout.show(this, category.name());
         currentPanel.setMode(mode);
-        add(currentPanel, BorderLayout.CENTER);
+        
     }
     
     private EventList<VisualSearchResult> filter(final ResultType category, EventList<VisualSearchResult> list) {
@@ -97,4 +98,9 @@ public class ResultsContainer extends JXPanel implements ModeListener {
             }        
         });
     }
+
+    public Component getScrollPaneHeader() {
+        return currentPanel.getScrollPaneHeader();
+    }
+    
 }

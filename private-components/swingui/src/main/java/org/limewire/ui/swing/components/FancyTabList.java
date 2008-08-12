@@ -3,8 +3,6 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,8 +21,6 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.GroupLayout.Group;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -53,8 +49,6 @@ public class FancyTabList extends JXPanel {
     private int minimumWidth;
     private int maximumWidth;
     private int preferredWidth;
-    
-    private Insets tabInsets;
         
     @Resource
     private Icon moreTriangle;
@@ -216,11 +210,6 @@ public class FancyTabList extends JXPanel {
      */
     public void setFlowedLayout(Insets insets) {
         this.layoutStyle = LayoutStyle.FLOWED;
-        if(insets != null) {
-            this.tabInsets = insets;
-        } else {
-            this.tabInsets = new Insets(0, 1, 5, 1);
-        }
         layoutTabs();
     }
     
