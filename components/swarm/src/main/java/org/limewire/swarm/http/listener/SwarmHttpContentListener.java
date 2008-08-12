@@ -2,6 +2,8 @@ package org.limewire.swarm.http.listener;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.IOControl;
@@ -15,8 +17,10 @@ import org.limewire.swarm.http.SwarmHttpUtils;
 import org.limewire.util.Objects;
 
 public class SwarmHttpContentListener implements ResponseContentListener {
-    
-    private final SwarmCoordinator fileCoordinator;
+
+    private static final Log LOG = LogFactory.getLog(SwarmHttpContentListener.class);
+
+    private final SwarmCoordinator swarmCoordinator;
 
     private boolean finished;
 
@@ -28,21 +32,34 @@ public class SwarmHttpContentListener implements ResponseContentListener {
 
     public SwarmHttpContentListener(SwarmCoordinator fileCoordinator, SwarmFile swarmFile,
             Range range) {
-        this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
+        this.swarmCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
         this.leaseRange = Objects.nonNull(range, "range");
         this.swarmFile = swarmFile;
     }
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
-        if (finished) {
-            throw new IOException("Already finished.");
-        }
+        if (!swarmCoordinator.isComplete()) {
+            LOG.trace("");
 
-        if (!decoder.isCompleted()) {
-            if (writeJob == null) {
-                writeJob = fileCoordinator.createWriteJob(leaseRange, createControl(ioctrl));
+            if (finished) {
+                String message = "Already finished.";
+                LOG.warn(message);
+                throw new IOException(message);
             }
-            writeJob.write(new SwarmHttpContentImpl(decoder));
+
+            if (!decoder.isCompleted()) {
+                if (writeJob == null) {
+                    writeJob = swarmCoordinator.createWriteJob(leaseRange, createControl(ioctrl));
+                }
+                try {
+                    writeJob.write(new SwarmHttpContentImpl(decoder));
+                } catch (IOException e) {
+                    LOG.warn(e.getMessage(), e);
+                    throw e;
+                }
+            }
+        } else {
+            LOG.warn("contentAvailable called when swarmCoordinator already complete.");
         }
     }
 
@@ -62,18 +79,22 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     }
 
     public void finished() {
+        LOG.trace("");
         if (!finished) {
             finished = true;
             if (leaseRange != null) {
-                fileCoordinator.unlease(leaseRange);
+                swarmCoordinator.unlease(leaseRange);
                 leaseRange = null;
             }
         }
     }
 
     public void initialize(HttpResponse response) throws IOException {
+        LOG.trace("");
         if (finished) {
-            throw new IOException("Already finished");
+            String message = "Already finished";
+            LOG.warn(message);
+            throw new IOException(message);
         }
 
         Range actualRange = SwarmHttpUtils.parseContentRange(response);
@@ -85,22 +106,21 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     }
 
     private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
+        LOG.trace("");
         if (actualRange == null || leaseRange == null) {
             throw new IOException("No actual or expected range?");
         }
 
         if (actualRange.getLow() < leaseRange.getLow()
                 || actualRange.getHigh() > leaseRange.getHigh()) {
-            // TODO handle off ranges
-            // this exception gets eaten inside the httpnio code, so we need
-            // better logging/handling on our end
-            throw new IOException("Invalid actual range.  Expected: " + leaseRange
-                    + ", Actual: " + actualRange);
+            String message = "Invalid actual range.  Expected: " + leaseRange + ", Actual: "
+                    + actualRange;
+            LOG.warn(message);
+            throw new IOException(message);
         }
 
         if (!actualRange.equals(leaseRange)) {
-            // TODO double check this logic
-            leaseRange = fileCoordinator.renewLease(leaseRange, actualRange);
+            leaseRange = swarmCoordinator.renewLease(leaseRange, actualRange);
         }
     }
 }

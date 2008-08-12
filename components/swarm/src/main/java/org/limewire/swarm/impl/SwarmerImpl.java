@@ -91,4 +91,22 @@ public class SwarmerImpl implements Swarmer {
         return sourceHandlers.containsKey(type);
     }
 
+    public boolean hasSource(SwarmSource source) {
+        for (SwarmSourceHandler handler : sourceHandlers.values()) {
+            if (handler.hasSource(source)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isBadSource(SwarmSource source) {
+        for (SwarmSourceHandler handler : sourceHandlers.values()) {
+            if (handler.isBadSource(source)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

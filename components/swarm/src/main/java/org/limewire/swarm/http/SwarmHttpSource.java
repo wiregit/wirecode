@@ -22,6 +22,8 @@ public class SwarmHttpSource extends AbstractSwarmSource {
 
     private IntervalSet availableRanges = new IntervalSet();
 
+    private final String id;
+
     public SwarmHttpSource(URI uri, Range range) {
         this.socketAddress = new InetSocketAddress(uri.getHost(), URIUtils.getPort(uri));
         this.path = uri.getPath();
@@ -29,6 +31,7 @@ public class SwarmHttpSource extends AbstractSwarmSource {
         addListener(new ReconnectingSwarmSourceListener());
         addListener(new EchoSwarmSourceListener());
         addListener(new LoggingSwarmSourceListener());
+        id = uri.toString() + "-" + range.toString();
     }
 
     public SwarmHttpSource(URI uri, long fileSize) {
@@ -55,5 +58,19 @@ public class SwarmHttpSource extends AbstractSwarmSource {
 
     public SwarmSourceType getType() {
         return SwarmSourceType.HTTP;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SwarmHttpSource)) {
+            return false;
+        }
+        SwarmHttpSource source = (SwarmHttpSource) obj;
+        return id.equals(source.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

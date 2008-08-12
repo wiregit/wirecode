@@ -1,7 +1,10 @@
 package org.limewire.swarm.http;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -16,6 +19,7 @@ import org.apache.http.nio.entity.ConsumingNHttpEntityTemplate;
 import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
 import org.apache.http.nio.protocol.NHttpRequestExecutionHandler;
 import org.apache.http.nio.reactor.IOEventDispatch;
+import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
@@ -37,6 +41,27 @@ import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+/**
+ * The SwarmHttpSource handler is responsible for processing http source
+ * connections.
+ * 
+ * It will attempt to lease a range of bytes to download from the given
+ * SwarmCoordinator, then it will attempt to download those bytes by submitting
+ * a Partial Content http request to the connections server. Upon a successful
+ * download it will write the bytes in batch asynchronously as they come in on
+ * the reading connection.
+ * 
+ * When finished writing the bytes it has read from the connection it will try
+ * to lease more bytes and begin the process anew.
+ * 
+ * When there are no more bytes left to lease, the swarm sources state will be
+ * marked as finished, and the connection to it will be closed.
+ * 
+ * Additionally the swarmSource can be checked to see if it is finished by use
+ * of the isFinished() flag. This can be used to override teh default behavior,
+ * which is to download until there are no more bytes to lease.
+ * 
+ */
 public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestExecutionHandler {
 
     private static final Log LOG = LogFactory.getLog(SwarmHttpSourceHandler.class);
@@ -49,15 +74,23 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     private final SwarmCoordinator swarmCoordinator;
 
+    private final List<SwarmSource> sources;
+
+    private final List<SwarmSource> badSources;
+
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator,
             LimeConnectingIOReactor ioReactor, IOEventDispatch ioEventDispatch) {
         this.swarmCoordinator = swarmCoordinator;
         this.ioReactor = ioReactor;
         this.eventDispatch = ioEventDispatch;
+        this.sources = Collections.synchronizedList(new ArrayList<SwarmSource>());
+        this.badSources = Collections.synchronizedList(new ArrayList<SwarmSource>());
     }
 
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
+        this.sources = Collections.synchronizedList(new ArrayList<SwarmSource>());
+        this.badSources = Collections.synchronizedList(new ArrayList<SwarmSource>());
 
         HttpParams params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
@@ -75,15 +108,22 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         AsyncNHttpClientHandler clientHandler = builder.get();
 
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
+
     }
 
     public void addSource(SwarmSource source) {
         LOG.trace("Adding source: " + source);
-        SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(this,
-                source);
+
+        SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(source);
+
+        LOG.trace("Connecting source to ioReactor: " + source);
 
         ioReactor.connect(source.getAddress(), null, new HttpSourceAttachment(source),
                 sessionRequestCallback);
+    }
+
+    public List<SwarmSource> getSources() {
+        return new ArrayList<SwarmSource>(sources);
     }
 
     public boolean isComplete() {
@@ -93,6 +133,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
     public void shutdown() throws IOException {
         LOG.trace("Shutting down: " + this);
         started.set(false);
+        LOG.trace("Shutting ioReactor: " + ioReactor);
         ioReactor.shutdown();
     }
 
@@ -120,6 +161,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
     }
 
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
+        // TODO handle IOExceptions
         LOG.trace("handleResponse: " + this);
         if (isActive()) {
             SwarmSource source = getSwarmSource(context);
@@ -133,43 +175,46 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
                 closeConnection(context);
             }
         }
+
     }
 
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
             throws IOException {
-        LOG.trace("responseEntity: " + this);
-        if (isActive()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Handling response: " + response.getStatusLine() + ", headers: "
-                        + Arrays.asList(response.getAllHeaders()));
-            }
-            ResponseContentListener listener = (ResponseContentListener) context
-                    .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
-            int code = response.getStatusLine().getStatusCode();
-            if (code >= 200 && code < 300) {
-                listener.initialize(response);
-                context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
-                return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
-            } else {
-                listener.finished();
-                context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
-                return null;
-            }
-        } else {
-            System.out.println("responseEntity called while not active!");
-            LOG.warn("responseEntity called while not active!");
-            throw new IOException("Not active!");
+        LOG.trace(this);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Handling response: " + response.getStatusLine() + ", headers: "
+                    + Arrays.asList(response.getAllHeaders()));
         }
+        ResponseContentListener listener = (ResponseContentListener) context
+                .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
+        int code = response.getStatusLine().getStatusCode();
+        if (code >= 200 && code < 300) {
+            listener.initialize(response);
+            context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
+            return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
+        } else {
+            listener.finished();
+            context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER, null);
+            return null;
+        }
+
     }
 
     public HttpRequest submitRequest(HttpContext context) {
-        LOG.trace("submitRequest: " + this);
+        LOG.trace(this);
         if (isActive()) {
-            HttpRequest request = buildRequest(context);
-            LOG.trace(SwarmHttpUtils.logRequest("submitRequest", request));
+            SwarmSource swarmSource = getSwarmSource(context);
+            HttpRequest request = null;
+            if (swarmSource.isFinished() || isComplete()) {
+                LOG.trace("swarmSource.isFinished(): " + swarmSource.isFinished()
+                        + " isComplete(): " + isComplete());
+            } else {
+                request = buildRequest(context);
+                LOG.trace(SwarmHttpUtils.logRequest("submitRequest", request));
+            }
 
             if (request == null) {
-                SwarmSource swarmSource = getSwarmSource(context);
+
                 LOG.debug("No more data to request for this swarm source: " + swarmSource
                         + " finishing all listeners then closing connection from context.");
                 closeConnection(context);
@@ -311,5 +356,44 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         public Range getDownloadRange() {
             return downloadRange;
         }
+    }
+
+    private class SwarmHttpSessionRequestCallback implements SessionRequestCallback {
+        private final SwarmSource source;
+
+        public SwarmHttpSessionRequestCallback(SwarmSource source) {
+            this.source = source;
+        }
+
+        public void cancelled(SessionRequest request) {
+            sources.remove(source);
+            source.connectFailed(SwarmHttpSourceHandler.this);
+        };
+
+        public void completed(SessionRequest request) {
+            sources.add(source);
+            source.connected(SwarmHttpSourceHandler.this);
+        };
+
+        public void failed(SessionRequest request) {
+            sources.remove(source);
+            badSources.add(source);// TODO
+            source.connectFailed(SwarmHttpSourceHandler.this);
+        };
+
+        public void timeout(SessionRequest request) {
+            sources.remove(source);
+            badSources.add(source);// TODO
+            source.connectFailed(SwarmHttpSourceHandler.this);
+        };
+
+    }
+
+    public boolean hasSource(SwarmSource source) {
+        return sources.contains(source);
+    }
+
+    public boolean isBadSource(SwarmSource source) {
+        return badSources.contains(source);
     }
 }

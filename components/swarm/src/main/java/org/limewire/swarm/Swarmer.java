@@ -12,4 +12,9 @@ public interface Swarmer {
     float getMeasuredBandwidth(boolean downstream);
 
     boolean hasHandler(SwarmSourceType type);
+    
+    boolean hasSource(SwarmSource source);
+    
+    boolean isBadSource(SwarmSource source);
+    
 }

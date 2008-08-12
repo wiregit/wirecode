@@ -3,7 +3,6 @@ package org.limewire.swarm;
 import java.net.SocketAddress;
 
 import org.limewire.collection.IntervalSet;
-import org.limewire.swarm.impl.SwarmSourceListenerList;
 
 public interface SwarmSource {
 

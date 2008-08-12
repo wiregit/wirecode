@@ -19,7 +19,6 @@ import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.Swarmer;
-import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 
@@ -32,6 +31,7 @@ import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.swarm.BTSwarmCoordinator;
+import com.limegroup.bittorrent.swarm.BTSwarmHttpSource;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.FileManager;
@@ -114,8 +114,8 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * The manager of choking logic
      */
     private Choker choker;
-    
-    private Swarmer swarmer = null;
+
+    private final Swarmer swarmer;
 
     /**
      * Locking this->state.getLock() ok.
@@ -177,6 +177,14 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         linkManager = linkManagerFactory.getLinkManager();
         trackerManager = trackerManagerFactory.getTrackerManager(this);
         this.firstChunkVerifiedEventDispatched = new AtomicBoolean(false);
+
+        BTMetaInfo metaInfo = context.getMetaInfo();
+        TorrentFileSystem torrentFileSystem = context.getFileSystem();
+        TorrentDiskManager torrentDiskManager = context.getDiskManager();
+        BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
+                torrentDiskManager);
+
+        swarmer = new SwarmerImpl(btCoordinator);
     }
 
     /*
@@ -271,7 +279,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 if (s == TorrentState.SEEDING || s == TorrentState.VERIFYING)
                     return;
 
-                webseed();
+                swarmer.start();
                 validateTorrent();
                 startConnecting();
             }
@@ -280,18 +288,17 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     }
 
     private void webseed() {
+        // TODO use combination of BTSwarmSource isfinished method refactor
+        // BTConnectionfetcher to
+        // to iteratively reconnect to the SwarmSource, instead of keeping a
+        // connection until the download is finished.
         BTMetaInfo metaInfo = context.getMetaInfo();
-        if (swarmer == null && metaInfo.hasWebSeeds()) {
+        if (metaInfo.hasWebSeeds()) {
             TorrentFileSystem torrentFileSystem = context.getFileSystem();
-            TorrentDiskManager torrentDiskManager = context.getDiskManager();
-            BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
-                    torrentDiskManager);
 
-            swarmer = new SwarmerImpl(btCoordinator);
-            swarmer.start();
             long completeSize = torrentFileSystem.getTotalSize();
             for (URI uri : metaInfo.getWebSeeds()) {
-                swarmer.addSource(new SwarmHttpSource(uri, completeSize));
+                swarmer.addSource(new BTSwarmHttpSource(uri, completeSize));
             }
         }
     }
@@ -338,6 +345,9 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         if (shouldFetch)
             _connectionFetcher.fetch();
 
+        // starting webseed downloads
+        webseed();
+
         // connect to tracker(s)
         trackerManager.announceStart();
 
@@ -345,11 +355,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         choker.start();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#stop()
-     */
     /*
      * (non-Javadoc)
      * 
@@ -427,9 +432,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 choker.shutdown();
                 linkManager.shutdown();
                 _connectionFetcher.shutdown();
-                if(swarmer != null) {
-                    swarmer.shutdown();
-                }
+                swarmer.shutdown();
             }
         };
         networkInvoker.execute(closer);
@@ -850,16 +853,13 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 
         state.set(TorrentState.SEEDING);
 
-
         // switch the choker logic and resume uploads
         choker.shutdown();
         choker = chokerFactory.getChoker(linkManager, true);
         choker.start();
         choker.rechoke();
-        
-        if(swarmer != null) {
-            swarmer.shutdown();
-        }
+
+        swarmer.shutdown();
 
         // tell the tracker we are a seed now
         trackerManager.announceComplete();
@@ -1231,9 +1231,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      */
     public float getMeasuredBandwidth(boolean downstream) {
         float bandwidth = linkManager.getMeasuredBandwidth(downstream);
-        if(swarmer != null) {
-            bandwidth += swarmer.getMeasuredBandwidth(downstream);
-        }
+        bandwidth += swarmer.getMeasuredBandwidth(downstream);
         return bandwidth;
     }
 
@@ -1266,6 +1264,10 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 
     public BTLinkManager getLinkManager() {
         return linkManager;
+    }
+
+    public Swarmer getSwarmer() {
+        return swarmer;
     }
 
 }

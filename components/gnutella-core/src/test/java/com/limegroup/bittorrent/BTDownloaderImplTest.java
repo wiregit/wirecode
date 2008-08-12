@@ -165,28 +165,32 @@ public class BTDownloaderImplTest extends LimeTestCase {
     }
 
     public void testMultiWebSeedSingleFileNoPeer() throws Exception {
-        File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
+        for (int i = 0; i < 10; i++) {
+            System.out.println("iteration: " + i);
+            File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
-        TorrentContext torrentContext = downloader.getTorrentContext();
-        TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+            BTDownloader downloader = createBTDownloader(torrentFile);
+            TorrentContext torrentContext = downloader.getTorrentContext();
+            TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
-        File rootFile = torrentFileSystem.getCompleteFile();
-        rootFile.delete();
-        rootFile.deleteOnExit();
+            File rootFile = torrentFileSystem.getCompleteFile();
+            rootFile.delete();
+            rootFile.deleteOnExit();
 
-        File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
-        incompleteFile1.delete();
-        incompleteFile1.deleteOnExit();
+            File incompleteFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+            incompleteFile1.delete();
+            incompleteFile1.deleteOnExit();
 
-        File completeFile1 = torrentFileSystem.getFiles().get(0);
-        completeFile1.delete();
-        completeFile1.deleteOnExit();
+            File completeFile1 = torrentFileSystem.getFiles().get(0);
+            completeFile1.delete();
+            completeFile1.deleteOnExit();
 
-        downloader.startDownload();
-        finishDownload(downloader);
+            downloader.startDownload();
+            finishDownload(downloader);
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+            SwarmerImplTest
+                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+        }
     }
 
     public void testSingleWebSeedMultipleFileNoPeer() throws Exception {

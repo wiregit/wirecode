@@ -35,7 +35,8 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
         // check the explicit error and try reconnecting
         // or allow a few errors before letting the connection close
 
-        if (status != null && status.isFinished() || swarmSourceHandler.isComplete()) {
+        if (status != null && status.isFinished() || swarmSourceHandler.isComplete()
+                || source.isFinished()) {
             LOG.trace("finished, not reconnecting: " + source + " status: " + status);
         } else if (status != null && status.isError()) {
             LOG.trace("error, not reconnecting: " + source + " status: " + status);
