@@ -1,7 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;

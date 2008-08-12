@@ -3,7 +3,6 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -208,7 +207,7 @@ public class FancyTabList extends JXPanel {
      * Renders the tabs in a flowed layout, placing each tab next to each other,
      * using the given insets around each tab.
      */
-    public void setFlowedLayout(Insets insets) {
+    public void setFlowedLayout() {
         this.layoutStyle = LayoutStyle.FLOWED;
         layoutTabs();
     }

@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +53,7 @@ class SearchTabItems {
         }
 
         FancyTabList ttp = new FancyTabList(searchActionMaps);
-        ttp.setFlowedLayout(new Insets(0, 2, 0, 5));
+        ttp.setFlowedLayout();
         ttp.setHighlightPainter(new RectanglePainter<JXButton>(
             2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
 
