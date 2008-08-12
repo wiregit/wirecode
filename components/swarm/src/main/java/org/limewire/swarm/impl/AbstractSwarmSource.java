@@ -37,4 +37,8 @@ public abstract class AbstractSwarmSource implements SwarmSource {
         listenerList.addListener(listener);
     }
 
+    public boolean isFinished() {
+        return false;
+    }
+
 }

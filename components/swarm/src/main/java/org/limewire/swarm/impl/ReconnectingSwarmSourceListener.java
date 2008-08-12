@@ -22,11 +22,11 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
     }
 
     public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-
+        LOG.trace("connected: " + source);
     }
 
     public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-
+        LOG.trace("connectFailed: " + source);
     }
 
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
@@ -53,16 +53,20 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
             }
             // re-add this source back to the swarmer
             swarmSourceHandler.addSource(source);
+        } else {
+            LOG.trace("connectionClosed: " + source + " status: " + status);
         }
     }
 
     public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         connectionStatus.put(source, status);
+        LOG.trace("responseProcessed: " + source + " status: " + status);
     }
 
     public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         connectionStatus.put(source, new FinishedSwarmStatus());
+        LOG.trace("finished: " + source);
     }
 
 }

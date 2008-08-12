@@ -14,6 +14,8 @@ public interface SwarmSource {
     IntervalSet getAvailableRanges();
 
     SwarmSourceType getType();
+    
+    public boolean isFinished();
 
     void connectFailed(SwarmSourceHandler swarmSourceHandler);
 
