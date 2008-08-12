@@ -75,27 +75,29 @@ public class CoreSearch implements Search {
             listener.searchStarted();
         }
 
-        doSearch();
+        doSearch(true);
     }
     
-    private void doSearch() {
+    private void doSearch(boolean initial) {
         searchGuid = searchServices.newQueryGUID();
         listenerList.addQueryReplyListener(searchGuid, qrListener);
 
         searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
                 MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
         
-        PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
-            @Override
-            public void process(PromotionMessageContainer result) {
-                //TODO: put the proper info in the SponsoredResult
-                CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(result.getURL(), result.getDescription(),
-                        result.getURL(), result.getURL(), SponsoredResultTarget.STORE);
-                handleSponsoredResults(coreSponsoredResult);
-            }           
-        };
-        
-        promotionSearcher.search(searchDetails.getSearchQuery(), callback, geoLocation.getGeocodeInformation());
+        if(initial) {
+            PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
+                @Override
+                public void process(PromotionMessageContainer result) {
+                    //TODO: put the proper info in the SponsoredResult
+                    CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(result.getURL(), result.getDescription(),
+                            result.getURL(), result.getURL(), SponsoredResultTarget.STORE);
+                    handleSponsoredResults(coreSponsoredResult);
+                }           
+            };
+            
+            promotionSearcher.search(searchDetails.getSearchQuery(), callback, geoLocation.getGeocodeInformation());
+        }
     }
     
     @Override
@@ -110,7 +112,7 @@ public class CoreSearch implements Search {
             listener.searchStarted();
         }
         
-        doSearch();
+        doSearch(false);
     }
 
     @Override
