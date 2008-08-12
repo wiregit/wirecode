@@ -73,7 +73,7 @@ public class MockSearch implements Search {
                 msr.setResultType(ResultType.UNKNOWN);
                 msr.setSize(1L);
                 msr.addSource("phoebe");
-                msr.setUrn("my/urn");
+                msr.setUrn("www.partytime.com");
                 msr.setProperty(SearchResult.PropertyKey.ARTIST_NAME,
                     "Night Life");
                 msr.setProperty(SearchResult.PropertyKey.COMMENT,
@@ -93,7 +93,7 @@ public class MockSearch implements Search {
                 msr.setResultType(ResultType.AUDIO);
                 msr.setSize(1234L);
                 msr.addSource("monica");
-                msr.setUrn("my/urn");
+                msr.setUrn("www.solarsystem.net");
                 msr.setProperty(SearchResult.PropertyKey.ARTIST_NAME,
                     "The Buddies");
                 msr.setProperty(SearchResult.PropertyKey.COMMENT,
@@ -114,7 +114,7 @@ public class MockSearch implements Search {
                 msr.setSize(1234L);
                 msr.addSource("chandler");
                 msr.addSource("joey");
-                msr.setUrn("my/urn");
+                msr.setUrn("www.stlzoo.com");
                 msr.setProperty(SearchResult.PropertyKey.ARTIST_NAME,
                     "St. Louis Zoo");
                 msr.setProperty(SearchResult.PropertyKey.COMMENT,
