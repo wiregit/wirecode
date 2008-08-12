@@ -2,6 +2,8 @@ package org.limewire.xmpp.client.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -44,7 +46,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     private volatile org.jivesoftware.smack.XMPPConnection connection;
     
     private final CopyOnWriteArrayList<RosterListener> rosterListeners;
-    private final HashMap<String, UserImpl> users;
+    private final Map<String, UserImpl> users;
     protected volatile AddressIQListener addressIQListener;
     protected FileTransferIQListener fileTransferIQListener;
     protected volatile AddressEvent queuedEvent;
@@ -59,7 +61,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         if(configuration.getRosterListener() != null) {
             this.rosterListeners.add(configuration.getRosterListener());
         }
-        this.users = new HashMap<String, UserImpl>();
+        this.users = new TreeMap<String, UserImpl>(String.CASE_INSENSITIVE_ORDER);
     }
     
     public void addRosterListener(RosterListener rosterListener) {
