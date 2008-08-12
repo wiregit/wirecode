@@ -78,8 +78,7 @@ public class HeadTest extends LimeTestCase {
 	 * file descs for the partial and complete files
 	 */
     private IncompleteFileDescStub _partial, _partialLarge;
-    private FileDescStub _complete;
-	/**
+    /**
 	 * an interval that can fit in a packet, and one that can't
 	 */
     private IntervalSet _ranges, _rangesMedium, _rangesJustFit, _rangesTooBig, _rangesLarge, _rangesOnlyLarge;
@@ -130,8 +129,9 @@ public class HeadTest extends LimeTestCase {
 	    
 	    NetworkManagerStub networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
 	    networkManager.setAcceptedIncomingConnection(true);
+        networkManager.setIncomingTLSEnabled(true);
 	    
-	    ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
+        ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
 	    connectionManager.setPushProxies(new HashSet<Connectable>(Collections.singletonList(new ConnectableImpl("1.2.3.4", 6346, false))));
 	    
 	    int base=0;
@@ -187,15 +187,15 @@ public class HeadTest extends LimeTestCase {
             }
         };
         _partialLarge.setRangesByte(_rangesLarge.toBytes());
-		_complete = new FileDescStub("complete",_haveFull,2);
+        FileDescStub complete = new FileDescStub("complete", _haveFull, 2);
 		
         Map urns = new HashMap();
         urns.put(_havePartial,_partial);
-        urns.put(_haveFull,_complete);
+        urns.put(_haveFull, complete);
         urns.put(_largeURN, _partialLarge);
         List descs = new LinkedList();
         descs.add(_partial);
-        descs.add(_complete);
+        descs.add(complete);
         descs.add(_partialLarge);
         
         FileManagerStub fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
@@ -206,7 +206,7 @@ public class HeadTest extends LimeTestCase {
         
         assertEquals(_partial,fileManager.getFileDesc(_havePartial));
         assertEquals(_partialLarge,fileManager.getFileDesc(_largeURN));
-        assertEquals(_complete,fileManager.getFileDesc(_haveFull));
+        assertEquals(complete,fileManager.getFileDesc(_haveFull));
         
         
         blankRFD = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 1, "file", 1, new byte[16], 1, false,
