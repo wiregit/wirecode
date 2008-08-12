@@ -1,18 +1,20 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.Map;
-import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * This class is responsible for rendering an individual SearchResult
@@ -21,14 +23,14 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class SearchResultListCellRenderer extends DefaultListCellRenderer {
 
-    //@Resource private Icon downloadIcon;
+    @Resource private Icon downloadIcon;
 
     public SearchResultListCellRenderer() {
         // Cause the @Resource fields to be injected
         // using properties in AppFrame.properties.
         // The icon PNG file is in swingui/src/main/resources/
         // org/limewire/ui/swing/mainframe/resources/icons.
-        //GuiUtils.assignResources(this);
+        GuiUtils.assignResources(this);
     }
 
     @Override
@@ -86,11 +88,7 @@ public class SearchResultListCellRenderer extends DefaultListCellRenderer {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        //System.out.println("icon width = " + downloadIcon.getIconWidth());
-        //System.out.println("icon height = " + downloadIcon.getIconHeight());
-        //JLabel label = new JLabel(downloadIcon);
-        JLabel label = new JLabel("icon");
-        label.setBorder(BorderFactory.createLineBorder(Color.RED));
+        JLabel label = new JLabel(downloadIcon);
         panel.add(label, gbc);
 
         gbc.gridx++;
@@ -98,6 +96,9 @@ public class SearchResultListCellRenderer extends DefaultListCellRenderer {
 
         gbc.gridy++;
         panel.add(new JLabel(subheading), gbc);
+
+        // TODO: RMV Add spacing between rows!
+        //panel.insets = new Insets(10, 0, 10, 0);
 
         return panel;
     }
