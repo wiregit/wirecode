@@ -87,7 +87,6 @@ public class MockSearch implements Search {
     
     private void handleSponsoredResults(SponsoredResult... sponsoredResults){
         List<SponsoredResult> mockList =  Arrays.asList(sponsoredResults);
-        Arrays.asList(sponsoredResults);
         for(SearchListener listener : listeners) {
             listener.handleSponsoredResults(mockList);
         }
