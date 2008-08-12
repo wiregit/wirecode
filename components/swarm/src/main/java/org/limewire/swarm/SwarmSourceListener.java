@@ -1,7 +1,7 @@
 package org.limewire.swarm;
 
 
-public interface SwarmSourceEventListener {
+public interface SwarmSourceListener {
 
     void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source);
 

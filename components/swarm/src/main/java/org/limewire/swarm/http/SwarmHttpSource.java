@@ -6,12 +6,15 @@ import java.net.URI;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceType;
+import org.limewire.swarm.impl.AbstractSwarmSource;
+import org.limewire.swarm.impl.EchoSwarmSourceListener;
+import org.limewire.swarm.impl.LoggingSwarmSourceListener;
+import org.limewire.swarm.impl.ReconnectingSwarmSourceListener;
 
 import com.limegroup.gnutella.http.URIUtils;
 
-public class SwarmHttpSource implements SwarmSource {
+public class SwarmHttpSource extends AbstractSwarmSource {
 
     private final SocketAddress socketAddress;
 
@@ -23,6 +26,9 @@ public class SwarmHttpSource implements SwarmSource {
         this.socketAddress = new InetSocketAddress(uri.getHost(), URIUtils.getPort(uri));
         this.path = uri.getPath();
         this.availableRanges.add(range);
+        addListener(new ReconnectingSwarmSourceListener());
+        addListener(new EchoSwarmSourceListener());
+        addListener(new LoggingSwarmSourceListener());
     }
 
     public SwarmHttpSource(URI uri, long fileSize) {

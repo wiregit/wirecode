@@ -1,17 +1,17 @@
 package org.limewire.swarm.impl;
 
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceEventListener;
+import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.SwarmStatus;
 
-public class DualSourceEventListener implements SwarmSourceEventListener {
+public class DualSourceEventListener implements SwarmSourceListener {
 
-    private final SwarmSourceEventListener a;
+    private final SwarmSourceListener a;
 
-    private final SwarmSourceEventListener b;
+    private final SwarmSourceListener b;
 
-    public DualSourceEventListener(SwarmSourceEventListener a, SwarmSourceEventListener b) {
+    public DualSourceEventListener(SwarmSourceListener a, SwarmSourceListener b) {
         this.a = a;
         this.b = b;
     }

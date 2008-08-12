@@ -4,25 +4,29 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceEventListener;
+import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.SwarmStatus;
 
-public class ReconnectingSourceEventListener implements SwarmSourceEventListener {
+public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
+
+    private static final Log LOG = LogFactory.getLog(ReconnectingSwarmSourceListener.class);
 
     private final Map<SwarmSource, SwarmStatus> connectionStatus;
 
-    public ReconnectingSourceEventListener() {
+    public ReconnectingSwarmSourceListener() {
         connectionStatus = Collections.synchronizedMap(new WeakHashMap<SwarmSource, SwarmStatus>());
     }
 
     public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-        System.out.println("connected");
+
     }
 
     public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-        System.out.println("connetionFailed");
+
     }
 
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
@@ -33,19 +37,19 @@ public class ReconnectingSourceEventListener implements SwarmSourceEventListener
     private void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         // TODO we can be smarter about reconnecting
-        // check the explicit error and try recconnecting
+        // check the explicit error and try reconnecting
         // or allow a few errors before letting the connection close
 
         if (status != null && status.isFinished() || swarmSourceHandler.isComplete()) {
-            System.out.println("finished, not reconnecting: " + source + " status: " + status);
+            LOG.trace("finished, not reconnecting: " + source + " status: " + status);
         } else if (status != null && status.isError()) {
-            System.out.println("error, not reconnecting: " + source + " status: " + status);
+            LOG.trace("error, not reconnecting: " + source + " status: " + status);
         } else if (status == null || status.isOk()) {
-            System.out.println("reconnecting: " + source + " status: " + status);
+            LOG.trace("reconnecting: " + source + " status: " + status);
             try {
                 Thread.sleep(500);// wait a little before connecting
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOG.warn("sleep interrupted", e);
             }
             // re-add this source back to the swarmer
             swarmSourceHandler.addSource(source);

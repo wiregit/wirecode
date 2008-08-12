@@ -9,7 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceEventListener;
+import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.SwarmSourceType;
@@ -40,10 +40,6 @@ public class SwarmerImpl implements Swarmer {
     }
 
     public void addSource(SwarmSource source) {
-        addSource(source, null);
-    }
-
-    public void addSource(SwarmSource source, SwarmSourceEventListener sourceEventListener) {
         SwarmSourceType type = source.getType();
 
         if (!hasHandler(type)) {
@@ -55,7 +51,7 @@ public class SwarmerImpl implements Swarmer {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Adding source: " + source);
         }
-        sourceHandler.addSource(source, sourceEventListener);
+        sourceHandler.addSource(source);
 
     }
 

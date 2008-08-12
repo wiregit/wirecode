@@ -1,11 +1,11 @@
 package org.limewire.swarm.impl;
 
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceEventListener;
+import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.SwarmStatus;
 
-public class NoOpSwarmSourceEventListener implements SwarmSourceEventListener {
+public class NoOpSwarmSourceEventListener implements SwarmSourceListener {
 
     public NoOpSwarmSourceEventListener() {
     }
