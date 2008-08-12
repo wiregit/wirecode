@@ -134,7 +134,7 @@ public final class GeocodeInformation {
 
     public void setProperty(String name, String value) {
         Property prop = getStrings2Properties().get(name);
-        if(prop != null && value != null) {
+        if (prop != null) {
             setProperty(prop, value);
         }
     }
