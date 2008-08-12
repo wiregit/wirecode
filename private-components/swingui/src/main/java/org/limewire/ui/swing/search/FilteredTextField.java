@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.FocusEvent;
@@ -26,6 +27,11 @@ public class FilteredTextField extends JTextField implements FocusListener {
         
         //focusLost(null);
         addFocusListener(this);
+    }
+    
+    @Override
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
     }
     
     /**

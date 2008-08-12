@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.util.Map;
 
@@ -8,6 +8,8 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -71,6 +73,8 @@ public class SearchResultsPanel extends JPanel {
         this.navTree = navTree;
         this.storePanel = storePanel;
         
+        setBackground(Color.LIGHT_GRAY);
+        
         this.sortAndFilterPanel = new SortAndFilterPanel();
         EventList<VisualSearchResult> list =
             sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults);
@@ -115,16 +119,15 @@ public class SearchResultsPanel extends JPanel {
     }
     
     private void layoutComponents() {
-        JPanel northPanel = new JPanel(new BorderLayout());
-        northPanel.add(searchTab, BorderLayout.CENTER);
-        northPanel.add(sortAndFilterPanel, BorderLayout.EAST);
+        MigLayout layout = new MigLayout(
+                "insets 0 0 0 0, gap 0!",
+                "[grow][grow][125::]",
+                "[][grow]");
         
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(resultsContainer, BorderLayout.CENTER);
-        centerPanel.add(createSponsoredResultsPanel(), BorderLayout.EAST);
-        
-        setLayout(new BorderLayout());
-        add(northPanel, BorderLayout.NORTH);
-        add(centerPanel, BorderLayout.CENTER);
+        setLayout(layout);
+        add(searchTab.getSearchTab(), "push, growy");
+        add(sortAndFilterPanel, "span, wrap, align right");
+        add(resultsContainer, "span 2, grow, push");
+        add(createSponsoredResultsPanel(), "grow, align right");
     }
 }

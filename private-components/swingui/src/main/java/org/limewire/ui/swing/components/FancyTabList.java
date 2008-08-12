@@ -24,6 +24,8 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.GroupLayout.Group;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
@@ -282,17 +284,28 @@ public class FancyTabList extends JXPanel {
      * using the given insets around each tab.
      */
     private void layoutFlowed() {
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = tabInsets;
-        for(FancyTab tab : getPendingVisibleTabs()) {
-            add(tab, gbc);
-        }
+        GroupLayout layout = new GroupLayout(this);
+        setLayout(layout);
 
+        layout.setAutoCreateGaps(false);
+        layout.setAutoCreateContainerGaps(false);
+        
+        Group horGroup = layout.createSequentialGroup();
+        layout.setHorizontalGroup(horGroup);
+        
+        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
+        layout.setVerticalGroup(layout.createSequentialGroup()
+                .addGroup(verGroup));
+        
+        for(FancyTab tab : getPendingVisibleTabs()) {
+            horGroup.addComponent(tab);
+            verGroup.addComponent(tab, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
+        }
+        
         if(tabs.size() > maxTabs) {
-            add(new FancyTabMoreButton(tabs, moreTriangle, props), gbc);
+            JComponent more = new FancyTabMoreButton(tabs, moreTriangle, props);
+            horGroup.addComponent(more);
+            verGroup.addComponent(more);
         }
     }
 

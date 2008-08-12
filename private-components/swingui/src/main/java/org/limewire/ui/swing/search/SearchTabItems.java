@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -13,10 +11,8 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.Box;
 
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTabList;
@@ -24,28 +20,30 @@ import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 
 /**
- * This class is a panel that displays the numbers of different types of files
+ * This class contains the numbers of different types of files
  * that matched given search criteria.
  * 
  * @see org.limewire.ui.swing.search.SearchResultsPanel.
  */
-class SearchTabItems extends JXPanel {
+class SearchTabItems {
 
-    private final List<TabActionMap> searchTabs;
+    private final List<TabActionMap> searchActionMaps;
 
     private final SearchTabListener listener;
+    
+    private final FancyTabList searchTab;
 
     SearchTabItems(SearchCategory category, SearchTabListener listener) {
         this.listener = listener;
         
-        this.searchTabs = new ArrayList<TabActionMap>();
-        searchTabs.add(newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
-        searchTabs.add(newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
-        searchTabs.add(newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
-        searchTabs.add(newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGES)));
-        searchTabs.add(newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENTS)));
+        this.searchActionMaps = new ArrayList<TabActionMap>();
+        searchActionMaps.add(newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
+        searchActionMaps.add(newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
+        searchActionMaps.add(newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
+        searchActionMaps.add(newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGES)));
+        searchActionMaps.add(newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENTS)));
 
-        for (TabActionMap map : searchTabs) {
+        for (TabActionMap map : searchActionMaps) {
             SearchTabAction action = (SearchTabAction)map.getMainAction();
             if (category == action.getCategory()) {
                 action.putValue(Action.SELECTED_KEY, true);
@@ -55,25 +53,21 @@ class SearchTabItems extends JXPanel {
             }
         }
 
-        setLayout(new GridBagLayout());
-        setBackground(Color.LIGHT_GRAY);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridwidth = GridBagConstraints.RELATIVE;
-
-        FancyTabList ttp = new FancyTabList(searchTabs);
+        FancyTabList ttp = new FancyTabList(searchActionMaps);
         ttp.setFlowedLayout(new Insets(0, 2, 0, 5));
         ttp.setHighlightPainter(new RectanglePainter<JXButton>(
             2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
-        add(ttp, gbc);
 
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx = 1;
-        add(Box.createGlue(), gbc);
+        this.searchTab = ttp;
+    }
+    
+    public FancyTabList getSearchTab() {
+        return searchTab;
     }
     
     public Collection<Map.Entry<SearchCategory, Action>> getResultCountActions() {
         Map<SearchCategory, Action> counts = new EnumMap<SearchCategory, Action>(SearchCategory.class);
-        for(TabActionMap map : searchTabs) {
+        for(TabActionMap map : searchActionMaps) {
             SearchCategory category = ((SearchTabAction)map.getMainAction()).getCategory();
             counts.put(category, map.getMoreTextAction());
         }

@@ -31,6 +31,7 @@ import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
 import javax.swing.SwingUtilities;
 import javax.swing.JToggleButton.ToggleButtonModel;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
@@ -42,8 +43,6 @@ import org.limewire.ui.swing.util.GuiUtils;
  * A fancy 'tab' for use in a {@link FancyTabList}.
  */
 public class FancyTab extends JXPanel {
-
-    private static final int GAP = 2;
 
     private final TabActionMap tabActions;
     private final AbstractButton mainButton;
@@ -116,18 +115,19 @@ public class FancyTab extends JXPanel {
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
         
-        // RMV commented this out to reduce horizontal space in SearchTabItems.
-        //layout.setAutoCreateGaps(true);
+        layout.setAutoCreateGaps(true);
         
         layout.setHorizontalGroup(layout.createSequentialGroup()
-            .addGap(GAP)
+            .addGap(5)
             .addComponent(busyLabel)
+            .addPreferredGap(ComponentPlacement.RELATED)
             .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+            .addPreferredGap(ComponentPlacement.RELATED)
             .addComponent(additionalText)
             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(removeButton)
-            .addGap(GAP)
-            );
+            .addGap(5)    
+        );
         
         layout.setVerticalGroup(
             layout.createParallelGroup(GroupLayout.Alignment.CENTER, true)

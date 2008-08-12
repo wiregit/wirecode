@@ -55,10 +55,9 @@ public class SourceCountMaintainer implements ListEventListener<VisualSearchResu
                     totalCount -= countList.remove(changeIndex);
                     break;
                 case ListEvent.UPDATE:
-                    totalCount -= countList.get(changeIndex);
                     newSources = source.get(changeIndex).getSources().size();
                     totalCount += newSources;
-                    countList.set(changeIndex, newSources);
+                    totalCount -= countList.set(changeIndex, newSources);
                     break;
                 default: throw new IllegalStateException("invalid type: " + changeType);
                 }
