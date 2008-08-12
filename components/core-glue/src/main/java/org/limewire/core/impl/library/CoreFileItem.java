@@ -1,6 +1,8 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.util.FileUtils;
@@ -18,6 +20,7 @@ public class CoreFileItem implements FileItem {
     private final int numHits;
     private final int numUploads;
     private final Category category;
+    private final Map<String,String> map;
     
     public CoreFileItem(FileDesc fileDesc) { 
         this.file = fileDesc.getFile();
@@ -28,6 +31,7 @@ public class CoreFileItem implements FileItem {
         this.numHits = fileDesc.getHitCount();
         this.numUploads = fileDesc.getCompletedUploads();
         this.category = getCategory(fileDesc.getFile());
+        this.map = new HashMap<String,String>();
     }
     
     @Override
@@ -85,6 +89,11 @@ public class CoreFileItem implements FileItem {
             return Category.PROGRAM;
         }
         return Category.OTHER;   
+    }
+
+    @Override
+    public String getProperty(String key) {
+        return map.get(key);
     }
 
 }

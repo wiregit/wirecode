@@ -19,24 +19,39 @@ public class Line extends JComponent {
      * Creates a line that uses a <tt>color</tt>.
      */
     public Line(Color color) {
+        this(color, 1);
+    }
+    
+    /**
+     * Creates a line <tt>height</tt> pixels high that uses a <tt>color</tt>.
+     */
+    public Line(Color color, int height) {
         if(color == null)
             throw new IllegalArgumentException("color must not be null");
         
         setColor(color);
-        initSize();
+        initSize(height);
     }
     
     /**
      * Creates a line that uses a color from the current theme.
      */
 	public Line() {
-    	uiColor = UIManager.getColor("controlShadow");
-    	initSize();
+	    this(1);
     }
+	
+	/**
+	 * Creates a line <tt>height</tt> pixels high, that uses a color from the
+	 * current theme.
+	 */
+	public Line(int height) {
+	    uiColor = UIManager.getColor("controlShadow");
+	    initSize(height);
+	}
        
-    private void initSize() {
-        setPreferredSize(new Dimension(1, 1));
-        setMaximumSize(new Dimension(Short.MAX_VALUE, 1));		
+    private void initSize(int height) {
+        setPreferredSize(new Dimension(1, height));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, height));		
 	}
 
     public void setColor(Color color) {

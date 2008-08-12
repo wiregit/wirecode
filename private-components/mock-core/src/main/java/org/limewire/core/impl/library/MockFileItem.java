@@ -64,4 +64,9 @@ public class MockFileItem implements FileItem {
     public Category getCategory() {
         return category;
     }
+
+    @Override
+    public String getProperty(String key) {
+        return null;
+    }
 }

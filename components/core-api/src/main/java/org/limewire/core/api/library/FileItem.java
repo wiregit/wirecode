@@ -27,4 +27,10 @@ public interface FileItem {
     int getNumUploads();
     
     Category getCategory();
+    
+    /**
+     * Returns xml data about this fileItem
+     */
+    String getProperty(String key);
+    
 }

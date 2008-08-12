@@ -107,11 +107,13 @@ public class GnutellaSharePanel extends JPanel {
         tc.setCellEditor(editor);
         tc.setCellRenderer(renderer);
         
-        sharingFancyPanel = new SharingFancyPanel(filteredList);
+        JScrollPane scrollPane = new JScrollPane();
+        sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane);
+        scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),TABLE);
-        cardPanel.add(new JScrollPane(sharingFancyPanel), LIST);
-        
+        cardPanel.add(scrollPane, LIST);
+        cardLayout.show(cardPanel, LIST);
         
     }
     
