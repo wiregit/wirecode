@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
 import org.jivesoftware.smack.Roster;
@@ -17,15 +15,18 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.listener.EventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterListener;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
@@ -225,21 +226,26 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
 
         public void presenceChanged(final org.jivesoftware.smack.packet.Presence presence) {
             if(!presence.getFrom().equals(connection.getUser())) {
-                Thread t = ThreadExecutor.newManagedThread(new Runnable() {
+                Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
                     public void run() {
                         UserImpl user;
                         synchronized (users) {
-                            // TODO is it possible to receive a presence
-                            // TODO for someone NOT in your roster
-                            
-                            while(users.isEmpty()) {
+                            user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                            while(user == null) {
                                 try {
+                                    LOG.debugf("presence {0} waiting for roster entry for user {1} ...",
+                                            presence.getFrom(), StringUtils.parseBareAddress(presence.getFrom()));
                                     users.wait();
                                 } catch (InterruptedException e) {
                                     throw new RuntimeException(e);
                                 }
+                                user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                                if(user != null) {
+                                    LOG.debugf("found user {0} for presence {1}",
+                                            StringUtils.parseBareAddress(presence.getFrom()), presence.getFrom());    
+                                }
                             }
-                            user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                            
                         }
                         if(LOG.isDebugEnabled()) {
                             LOG.debug("user " + user + " presence changed to " + presence.getType());
@@ -256,7 +262,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                             }
                         }
                     }
-                }, "presence-handler-" + presence.getFrom());
+                }));
                 t.start();
             }
         }
