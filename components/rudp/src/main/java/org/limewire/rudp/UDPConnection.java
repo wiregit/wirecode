@@ -174,7 +174,7 @@ class UDPConnection extends AbstractNBSocket implements RUDPSocket {
 
     @Override
     public synchronized void setSendBufferSize(int size) throws SocketException {
-        channel.socket().setSendBufferSize(size);
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -184,7 +184,7 @@ class UDPConnection extends AbstractNBSocket implements RUDPSocket {
 
     @Override
     public synchronized void setReceiveBufferSize(int size) throws SocketException {
-        channel.socket().setReceiveBufferSize(size);
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
