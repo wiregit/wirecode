@@ -367,6 +367,7 @@ public class SwarmerImplTest extends BaseTestCase {
                     Swarmer swarmer = createSwarmer(file, "LimeWireLinux.deb", fileSize,
                             new MD5SumFileVerifier(range, md5));
                     swarmer.addSource(new SwarmHttpSource(uri1, range));
+                    Thread.sleep(20000);
                     assertDownload(md5, file, fileSize);
                 } finally {
                     file.delete();

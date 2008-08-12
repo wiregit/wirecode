@@ -29,9 +29,6 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
 
     private BTInterval piece = null;
 
-    //TODO will use this later as the maxBufferSize 
-    private final int maxBufferSize;
-
     public BTSwarmWriteJob(List<BTInterval> pieces, TorrentDiskManager torrentDiskManager,
             SwarmWriteJobControl callback) {
         this(pieces, torrentDiskManager, callback, 8 * 1024);
@@ -47,7 +44,6 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
         this.torrentDiskManager = torrentDiskManager;
         this.callback = callback;
         this.byteBuffer = null;
-        this.maxBufferSize = maxBufferSize;
     }
 
     public void cancel() {
@@ -61,12 +57,7 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
         synchronized (writeLock) {
             if (byteBuffer == null) {
                 piece = pieces.get(index++);
-                // TODO instead of writing all of the data for the piece to a
-                // buffer.
-                // use a real buffer and keep track of which pieces have
-                // finished.
-                // just resize the piece that is being written to disk so that
-                // the verifying folder can figure things out.
+                // TODO Use the SwarmWriteJob2 implementation instead
                 byteBuffer = ByteBuffer.allocate(piece.get32BitLength());
             }
 

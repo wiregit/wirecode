@@ -40,7 +40,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
 
     private final ByteBufferCache byteBufferCache;
 
-    private static final int BUFFER_SIZE = 8192;
+    private static final int BUFFER_SIZE = 1024 * 16;
 
     /**
      * Constructor for a SwarmWriteJobImpl, it will write the data for a given
@@ -91,14 +91,17 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
             final ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
             content.read(networkUnblockingBuffer);
             networkUnblockingBuffer.flip();
-
+            written = networkUnblockingBuffer.limit();
+            LOG.trace("Going to write: " + written + " bytes.");
             scheduledJob = jobScheduler.submit(new Callable<Void>() {
                 public Void call() throws Exception {
                     writeData(range, networkUnblockingBuffer);
                     return null;
                 }
             });
+
         }
+
         return written;
     }
 
@@ -114,28 +117,32 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
      */
     private void writeData(Range range, ByteBuffer buffer) throws IOException {
         synchronized (scheduleLock) {
-            ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
             try {
+                long bytesWritten = 0;
+                long totalWritten = 0;
+                do {
 
-                networkUnblockingBuffer.put(buffer);
-                byteBufferCache.release(buffer);
-                networkUnblockingBuffer.flip();
+                    bytesWritten = fileCoordinator.write(writeRange, buffer);
 
-                long bytesWritten = fileCoordinator.write(writeRange, networkUnblockingBuffer);
-                long newLow = writeRange.getLow() + bytesWritten;
-                long newHigh = writeRange.getHigh();
+                    long newLow = writeRange.getLow() + bytesWritten;
+                    long newHigh = writeRange.getHigh();
 
-                LOG.trace("Re-requesting I/O");
-                callback.resume();
+                    LOG.trace("Re-requesting I/O");
+                    callback.resume();
 
-                if (newLow <= newHigh) {
-                    Range newRange = Range.createRange(newLow, newHigh);
-                    this.writeRange = newRange;
-                }
+                    if (newLow <= newHigh) {
+                        Range newRange = Range.createRange(newLow, newHigh);
+                        this.writeRange = newRange;
+                    }
+
+                    totalWritten += bytesWritten;
+                } while (buffer.hasRemaining());
+                LOG.trace("wrote: " + totalWritten + " bytes");
             } finally {
-                byteBufferCache.release(networkUnblockingBuffer);
+                byteBufferCache.release(buffer);
                 callback.resume();
             }
+
         }
 
     }

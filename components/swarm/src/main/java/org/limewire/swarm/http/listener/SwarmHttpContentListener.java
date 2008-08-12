@@ -20,7 +20,7 @@ public class SwarmHttpContentListener implements ResponseContentListener {
 
     private boolean finished;
 
-    private Range expectedRange;
+    private Range leaseRange;
 
     private SwarmWriteJob writeJob;
 
@@ -29,7 +29,7 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     public SwarmHttpContentListener(SwarmCoordinator fileCoordinator, SwarmFile swarmFile,
             Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
-        this.expectedRange = Objects.nonNull(range, "range");
+        this.leaseRange = Objects.nonNull(range, "range");
         this.swarmFile = swarmFile;
     }
 
@@ -40,7 +40,7 @@ public class SwarmHttpContentListener implements ResponseContentListener {
 
         if (!decoder.isCompleted()) {
             if (writeJob == null) {
-                writeJob = fileCoordinator.createWriteJob(expectedRange, createControl(ioctrl));
+                writeJob = fileCoordinator.createWriteJob(leaseRange, createControl(ioctrl));
             }
             writeJob.write(new SwarmHttpContentImpl(decoder));
         }
@@ -64,9 +64,9 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     public void finished() {
         if (!finished) {
             finished = true;
-            if (expectedRange != null) {
-                fileCoordinator.unlease(expectedRange);
-                expectedRange = null;
+            if (leaseRange != null) {
+                fileCoordinator.unlease(leaseRange);
+                leaseRange = null;
             }
         }
     }
@@ -85,22 +85,22 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     }
 
     private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
-        if (actualRange == null || expectedRange == null) {
+        if (actualRange == null || leaseRange == null) {
             throw new IOException("No actual or expected range?");
         }
 
-        if (actualRange.getLow() < expectedRange.getLow()
-                || actualRange.getHigh() > expectedRange.getHigh()) {
+        if (actualRange.getLow() < leaseRange.getLow()
+                || actualRange.getHigh() > leaseRange.getHigh()) {
             // TODO handle off ranges
             // this exception gets eaten inside the httpnio code, so we need
             // better logging/handling on our end
-            throw new IOException("Invalid actual range.  Expected: " + expectedRange
+            throw new IOException("Invalid actual range.  Expected: " + leaseRange
                     + ", Actual: " + actualRange);
         }
 
-        if (!actualRange.equals(expectedRange)) {
+        if (!actualRange.equals(leaseRange)) {
             // TODO double check this logic
-            expectedRange = fileCoordinator.renewLease(expectedRange, actualRange);
+            leaseRange = fileCoordinator.renewLease(leaseRange, actualRange);
         }
     }
 }

@@ -1,8 +1,10 @@
 package org.limewire.swarm.http;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.IOControl;
 import org.apache.http.protocol.ExecutionContext;
@@ -92,20 +94,19 @@ public class SwarmHttpUtils {
             throw IOUtils.getIOException("Invalid number: " + number, nfe);
         }
     }
-    
+
     public static Range parseContentRange(HttpResponse response) throws IOException {
         Range actualRange;
-        
+
         Header contentRange = response.getFirstHeader("Content-Range");
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
-        
 
         if (contentLengthHeader != null) {
             long contentLength = SwarmHttpUtils.numberFor(contentLengthHeader.getValue());
             if (contentLength < 0) {
                 throw new IOException("Invalid content length: " + contentLength);
             }
-            
+
             if (contentRange != null) {
                 // If a range exists, that's what we want.
                 actualRange = SwarmHttpUtils.rangeForContentRange(contentRange.getValue(),
@@ -122,5 +123,23 @@ public class SwarmHttpUtils {
             throw new IOException("No content length, though content range existed.");
         }
         return actualRange;
+    }
+
+    public static String logRequest(String message, HttpRequest request) {
+        String requestLine = request != null ? request.getRequestLine().toString() : "null";
+        String headers = request != null ? Arrays.asList(request.getAllHeaders()).toString()
+                : "null";
+
+        String log = message + " request : " + requestLine + " headers: " + headers;
+        return log;
+    }
+
+    public static String logReponse(String message, HttpResponse response) {
+        String statusLine = response != null ? response.getStatusLine().toString() : "null";
+        String headers = response != null ? Arrays.asList(response.getAllHeaders()).toString()
+                : "null";
+
+        String log = message + ": " + statusLine + " headers: " + headers;
+        return log;
     }
 }

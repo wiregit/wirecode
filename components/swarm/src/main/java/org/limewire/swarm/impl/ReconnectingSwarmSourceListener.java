@@ -1,24 +1,20 @@
 package org.limewire.swarm.impl;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmStatus;
 
 public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
 
     private static final Log LOG = LogFactory.getLog(ReconnectingSwarmSourceListener.class);
 
-    private final Map<SwarmSource, SwarmStatus> connectionStatus;
+    private SwarmStatus connectionStatus = null;
 
     public ReconnectingSwarmSourceListener() {
-        connectionStatus = Collections.synchronizedMap(new WeakHashMap<SwarmSource, SwarmStatus>());
+
     }
 
     public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
@@ -30,8 +26,7 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
     }
 
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-        SwarmStatus status = connectionStatus.get(source);
-        connectionClosed(swarmSourceHandler, source, status);
+        connectionClosed(swarmSourceHandler, source, connectionStatus);
     }
 
     private void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
@@ -60,12 +55,12 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
 
     public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
-        connectionStatus.put(source, status);
+        connectionStatus = status;
         LOG.trace("responseProcessed: " + source + " status: " + status);
     }
 
     public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
-        connectionStatus.put(source, new FinishedSwarmStatus());
+        connectionStatus = new FinishedSwarmStatus();
         LOG.trace("finished: " + source);
     }
 
