@@ -49,6 +49,13 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     private final SwarmCoordinator swarmCoordinator;
 
+    public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator,
+            LimeConnectingIOReactor ioReactor, IOEventDispatch ioEventDispatch) {
+        this.swarmCoordinator = swarmCoordinator;
+        this.ioReactor = ioReactor;
+        this.eventDispatch = ioEventDispatch;
+    }
+
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
 
@@ -190,7 +197,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         if (requestParameters != null) {
             SwarmFile swarmFile = requestParameters.getSwarmFile();
             Range leaseRange = requestParameters.getLeaseRange();
-            
+
             context.setAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER,
                     new SwarmHttpContentListener(swarmCoordinator, swarmFile, leaseRange));
 
