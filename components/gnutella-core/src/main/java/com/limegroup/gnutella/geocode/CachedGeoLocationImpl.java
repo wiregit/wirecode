@@ -70,6 +70,7 @@ public class CachedGeoLocationImpl implements CachedGeoLocation {
                         return;
                     }
                 } catch (UnknownHostException e) {
+                    LOG.warn("Unable to get host by name", e);	
                 }
             }
         }
