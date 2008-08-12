@@ -20,7 +20,6 @@ import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
-import org.limewire.ui.swing.search.ActionColumnTableCellEditor;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -68,10 +67,11 @@ public class BaseResultPanel extends JXPanel {
             new EventListModel<VisualSearchResult>(eventList);
         
         resultsList = new JXList(eventListModel);
-        // TODO: RMV Write this renderer!
-        //resultsList.setCellRenderer(new SearchResultListCellRenderer());
-        resultsList.setSelectionModel(new EventSelectionModel<VisualSearchResult>(eventList));
-        resultsList.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        resultsList.setCellRenderer(new SearchResultListCellRenderer());
+        resultsList.setSelectionModel(
+            new EventSelectionModel<VisualSearchResult>(eventList));
+        resultsList.setSelectionMode(
+            ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         resultsList.addMouseListener(new ResultDownloader());
         
         SortedList<VisualSearchResult> sortedResults =

@@ -7,9 +7,13 @@ import org.limewire.core.api.endpoint.RemoteHost;
 
 public interface SearchResult {
 
+    enum PropertyKey {
+        ALBUM_TITLE, ARTIST_NAME, COMMENT, QUALITY, TRACK_NAME, TRACK_TIME
+    }
+
     String getUrn();
 
-    Map<Object, Object> getProperties();
+    Map<PropertyKey, Object> getProperties();
     
     ResultType getResultType();
     
