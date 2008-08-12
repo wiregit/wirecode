@@ -9,10 +9,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceHandler;
-import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.SwarmSourceType;
+import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.util.Objects;
 
