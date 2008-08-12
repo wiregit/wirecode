@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.Action;
@@ -13,11 +14,10 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.sponsored.SponsoredResult;
-import org.limewire.ui.swing.search.sponsored.SponsoredResult.LinkTarget;
 
 import ca.odell.glazedlists.EventList;
 
@@ -60,6 +60,11 @@ public class SearchResultsPanel extends JPanel {
      * 
      */
     private StorePanel storePanel;
+    
+    /**
+     * The subpanel that displays sponsored results
+     */
+    private SponsoredResultsPanel sponsoredResultsPanel;
 
     @AssistedInject
     public SearchResultsPanel(
@@ -102,20 +107,18 @@ public class SearchResultsPanel extends JPanel {
     }
 
     private JComponent createSponsoredResultsPanel() {
-        SponsoredResultsPanel srp = new SponsoredResultsPanel(navTree, storePanel);
+        sponsoredResultsPanel = new SponsoredResultsPanel(navTree, storePanel);  
         
-        srp.addEntry(new SponsoredResult("Internal Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
-                "store.limewire.com", "http://www.store.limewire.com/store/app/pages/help/Help/", 
-                LinkTarget.STORE));
-        
-        srp.addEntry(new SponsoredResult("External Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
-                "google.com", "http://google.com", 
-                LinkTarget.EXTERNAL));
-        
-        JScrollPane sp = new JScrollPane(srp);
+        JScrollPane sp = new JScrollPane(sponsoredResultsPanel);
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
         p.add(sp);
         return p;
+    }
+    
+    public void addSponsoredResults(List<SponsoredResult> sponsoredResults){
+        for(SponsoredResult result : sponsoredResults){
+            sponsoredResultsPanel.addEntry(result);
+        }
     }
     
     private void layoutComponents() {

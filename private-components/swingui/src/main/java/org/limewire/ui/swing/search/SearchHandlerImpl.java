@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search;
 
-import javax.swing.SwingUtilities;
+import java.util.List;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -8,7 +8,9 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 
@@ -43,7 +45,7 @@ class SearchHandlerImpl implements SearchHandler {
         
         String panelTitle = info.getTitle();
         final BasicSearchResultsModel model = new BasicSearchResultsModel();
-        SearchResultsPanel searchPanel =
+        final SearchResultsPanel searchPanel =
             panelFactory.createSearchResultsPanel(
                 info, model.getVisualSearchResults(), search);
         final SearchNavItem item =
@@ -53,7 +55,7 @@ class SearchHandlerImpl implements SearchHandler {
         search.addSearchListener(new SearchListener() {
             @Override
             public void handleSearchResult(final SearchResult searchResult) {
-                SwingUtilities.invokeLater(new Runnable() {
+                SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
                         model.addSearchResult(searchResult);
@@ -74,6 +76,16 @@ class SearchHandlerImpl implements SearchHandler {
 
             @Override
             public void searchStopped() {
+            }
+
+            @Override
+            public void handleSponsoredResults(final List<SponsoredResult> sponsoredResults) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        searchPanel.addSponsoredResults(sponsoredResults);
+                    }
+                });
             }
         });
         

@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -34,6 +35,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.TextFieldWithEnterButton;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
@@ -287,6 +289,11 @@ class TopPanel extends JPanel implements SearchNavigator {
                     killBusy();
                 }
             });
+        }
+
+        @Override
+        public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {
+            // do nothing
         }
     }
 }

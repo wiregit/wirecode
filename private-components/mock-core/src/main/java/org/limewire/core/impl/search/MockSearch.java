@@ -15,6 +15,9 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 
 public class MockSearch implements Search {
     
@@ -60,6 +63,12 @@ public class MockSearch implements Search {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                SponsoredResult sponsored = new MockSponsoredResult("Internal Ad", "a ad a daflad fajla\naldjfla awejl sdaf", 
+                        "store.limewire.com", "http://www.store.limewire.com/store/app/pages/help/Help/", SponsoredResultTarget.STORE);
+                SponsoredResult sponsored2 = new MockSponsoredResult("External Ad", "a ad a daflad fajla\naldjfla awejl sdaf", "google.com",
+                        "http://google.com", SponsoredResultTarget.EXTERNAL);
+                handleSponsoredResults(sponsored, sponsored2);
+                      
                 handleSearchResult(
                         new MockSearchResult("5.0. Blues" + suffix, "ogg", ResultType.AUDIO, 123456789L, Arrays.asList(new MockRemoteHost("bob")), "test" + suffix));
                 handleSearchResult(
@@ -70,6 +79,14 @@ public class MockSearch implements Search {
                         new MockSearchResult("Craziness" + suffix, "tmp", ResultType.UNKNOWN, 1L, Arrays.asList(new MockRemoteHost("harry"), new MockRemoteHost("larry")), "test2" + suffix));
             }
         }).start();
+    }
+    
+    private void handleSponsoredResults(SponsoredResult... sponsoredResults){
+        List<SponsoredResult> mockList =  Arrays.asList(sponsoredResults);
+        Arrays.asList(sponsoredResults);
+        for(SearchListener listener : listeners) {
+            listener.handleSponsoredResults(mockList);
+        }
     }
     
     private void handleSearchResult(MockSearchResult mock) {

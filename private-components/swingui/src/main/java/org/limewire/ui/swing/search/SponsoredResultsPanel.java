@@ -13,10 +13,10 @@ import javax.swing.JTextArea;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.VerticalLayout;
+import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavTree;
-import org.limewire.ui.swing.search.sponsored.SponsoredResult;
-import org.limewire.ui.swing.search.sponsored.SponsoredResult.LinkTarget;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -102,7 +102,7 @@ public class SponsoredResultsPanel extends JPanel {
         }
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (result.getTarget() == LinkTarget.EXTERNAL) {
+            if (result.getTarget() == SponsoredResultTarget.EXTERNAL) {
                 NativeLaunchUtils.openURL(result.getUrl());
             } else {
                 storePanel.load(result.getUrl());
