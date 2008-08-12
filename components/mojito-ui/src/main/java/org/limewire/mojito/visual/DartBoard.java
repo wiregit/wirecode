@@ -29,9 +29,6 @@ class DartBoard extends Painter {
     private static final long DURATION = ATTACK + RELEASE;
     
     private static final int RESOLUTION = 16;
-    static {
-        assert RESOLUTION > 1 && RESOLUTION < 31;
-    }
     
     private final List<Node> nodes = new LinkedList<Node>();
     
@@ -58,7 +55,7 @@ class DartBoard extends Painter {
         double arc_x = width/2d-radius;
         double arc_y = height/2d-radius;
         double arc_width = 2d*radius;
-        double arc_height = arc_width;
+        double arc_height = 2d*radius;
         
         g.setColor(Color.orange);
         g.setStroke(TWO_PIXEL_STROKE);
@@ -85,7 +82,7 @@ class DartBoard extends Painter {
         
         synchronized (nodes) {
             for (Iterator<Node> it = nodes.iterator(); it.hasNext(); ) {
-                if (it.next().paint(localhost, width, height, radius, g)) {
+                if (it.next().paint(localhost, radius, g)) {
                     it.remove();
                 }
             }
@@ -155,8 +152,8 @@ class DartBoard extends Painter {
             return r;
         }
         
-        public boolean paint(Point2D.Double localhost, 
-                double width, double height, double radius, Graphics2D g) {
+        public boolean paint(Point2D.Double localhost,
+                             double radius, Graphics2D g) {
             
             int power = 0;
             

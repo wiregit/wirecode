@@ -85,7 +85,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                     
                     try { 
                         Thread.sleep(SLEEP); 
-                    } catch (InterruptedException err) {}
+                    } catch (InterruptedException ignore) {}
                 }
             }
         };
@@ -193,6 +193,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         }
     }
     
+    @SuppressWarnings({"InfiniteLoopStatement"})
     public static void main(String[] args) throws Exception {
         ArcsVisualizer arcs = new ArcsVisualizer(KUID.createRandomID());
         
@@ -209,7 +210,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         final int sleep = 100;
         
         while(true) {
-            
+
             // Simulate an received or sent message
             nodeId = KUID.createRandomID();
             if (generator.nextBoolean()) {

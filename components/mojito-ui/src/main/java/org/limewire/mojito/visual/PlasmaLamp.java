@@ -59,7 +59,7 @@ class PlasmaLamp extends Painter {
         double arc_x = width/2d-radius;
         double arc_y = height/2d-radius;
         double arc_width = 2d*radius;
-        double arc_height = arc_width;
+        double arc_height = 2d*radius;
         
         g2.setColor(Color.orange);
         g2.setStroke(TWO_PIXEL_STROKE);
