@@ -7,6 +7,7 @@ import java.net.URI;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmSourceType;
 
 import com.limegroup.gnutella.http.URIUtils;
 
@@ -46,7 +47,7 @@ public class SwarmHttpSource implements SwarmSource {
         return availableRanges;
     }
 
-    public Type getType() {
-        return SwarmSource.Type.HTTP;
+    public SwarmSourceType getType() {
+        return SwarmSourceType.HTTP;
     }
 }

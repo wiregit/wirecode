@@ -11,11 +11,7 @@ public interface SwarmSource {
     String getPath();
 
     IntervalSet getAvailableRanges();
-    
-    Type getType();
 
-    public static enum Type {
-        HTTP
-    }
+    SwarmSourceType getType();
 
 }

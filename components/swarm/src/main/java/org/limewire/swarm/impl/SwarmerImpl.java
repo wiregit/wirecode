@@ -12,6 +12,7 @@ import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceEventListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.Swarmer;
+import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.util.Objects;
 
@@ -19,22 +20,22 @@ public class SwarmerImpl implements Swarmer {
 
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
 
-    private final Map<SwarmSource.Type, SwarmSourceHandler> sourceHandlers;
+    private final Map<SwarmSourceType, SwarmSourceHandler> sourceHandlers;
 
     private final SwarmCoordinator swarmCoordinator;
 
     public SwarmerImpl(SwarmCoordinator swarmCoordinator) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
         this.sourceHandlers = Collections
-                .synchronizedMap(new HashMap<SwarmSource.Type, SwarmSourceHandler>());
-        register(SwarmSource.Type.HTTP, new SwarmHttpSourceHandler(swarmCoordinator));
+                .synchronizedMap(new HashMap<SwarmSourceType, SwarmSourceHandler>());
+        register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator));
     }
 
     public SwarmSourceHandler getSwarmSourceHandler(Class<SwarmSource> clazz) {
         return sourceHandlers.get(clazz);
     }
 
-    public void register(SwarmSource.Type type, SwarmSourceHandler sourceHandler) {
+    public void register(SwarmSourceType type, SwarmSourceHandler sourceHandler) {
         sourceHandlers.put(type, sourceHandler);
     }
 
@@ -43,13 +44,19 @@ public class SwarmerImpl implements Swarmer {
     }
 
     public void addSource(SwarmSource source, SwarmSourceEventListener sourceEventListener) {
-        SwarmSourceHandler sourceHandler = sourceHandlers.get(source.getType());
+        SwarmSourceType type = source.getType();
 
+        if (!hasHandler(type)) {
+            throw new IllegalStateException("No swarm source handler is registered for type: "
+                    + type);
+        }
+
+        SwarmSourceHandler sourceHandler = sourceHandlers.get(type);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Adding source: " + source);
         }
-
         sourceHandler.addSource(source, sourceEventListener);
+
     }
 
     public void start() {
@@ -57,7 +64,7 @@ public class SwarmerImpl implements Swarmer {
             try {
                 handler.start();
             } catch (IOException iox) {
-                LOG.warn("Unable to start handler: " + handler);
+                LOG.warn("Unable to start swarm source handler: " + handler);
             }
         }
     }
@@ -67,13 +74,13 @@ public class SwarmerImpl implements Swarmer {
             try {
                 handler.shutdown();
             } catch (IOException iox) {
-                LOG.warn("Unable to shutdown swarm handler: " + handler);
+                LOG.warn("Unable to shutdown swarm source handler: " + handler);
             }
         }
         try {
             swarmCoordinator.finish();
         } catch (IOException iox) {
-            LOG.warn("Unable to swarm coordinator" + swarmCoordinator);
+            LOG.warn("Unable to shutdown swarm coordinator: " + swarmCoordinator);
         }
     }
 
@@ -83,6 +90,10 @@ public class SwarmerImpl implements Swarmer {
             bandwidth += handler.getMeasuredBandwidth(downstream);
         }
         return bandwidth;
+    }
+
+    public boolean hasHandler(SwarmSourceType type) {
+        return sourceHandlers.containsKey(type);
     }
 
 }
