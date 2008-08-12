@@ -31,7 +31,7 @@ public class NavTree extends JXPanel implements NavigableTree {
         addNavList(new NavList("LimeWire", Navigator.NavCategory.LIMEWIRE));
         addNavList(new NavList("Library", Navigator.NavCategory.LIBRARY));
         
-        NavList hiddenList = new NavList("None", Navigator.NavCategory.DOWNLOAD);
+        NavList hiddenList = new NavList("Download", Navigator.NavCategory.DOWNLOAD);
         hiddenList.setVisible(false);
         addNavList(hiddenList);
         
