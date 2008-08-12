@@ -48,7 +48,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
 
     @Override
-    public Map<Object, Object> getProperties() {
+    public Map<SearchResult.PropertyKey, Object> getProperties() {
         return Collections.emptyMap();
     }
 
