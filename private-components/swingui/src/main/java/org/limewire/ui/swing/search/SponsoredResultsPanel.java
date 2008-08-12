@@ -18,6 +18,7 @@ import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.search.sponsored.SponsoredResult.LinkTarget;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
@@ -28,9 +29,9 @@ public class SponsoredResultsPanel extends JPanel {
    
 
    @Resource
-   private Color linkColor = Color.BLUE;
+   private Color linkColor;
    @Resource
-   private Color visibleUrlColor = Color.GREEN.darker();
+   private Color visibleUrlColor;
     
     private GridBagConstraints gbc = new GridBagConstraints();
 
@@ -38,6 +39,7 @@ public class SponsoredResultsPanel extends JPanel {
     private StorePanel storePanel;
     
     public SponsoredResultsPanel(NavTree navTree, StorePanel storePanel) {
+        GuiUtils.assignResources(this);
         this.navTree = navTree;
         this.storePanel = storePanel;
         setLayout(new GridBagLayout());
