@@ -8,7 +8,6 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.impl.AbstractSwarmSource;
-import org.limewire.swarm.impl.EchoSwarmSourceListener;
 import org.limewire.swarm.impl.LoggingSwarmSourceListener;
 import org.limewire.swarm.impl.ReconnectingSwarmSourceListener;
 
@@ -29,8 +28,8 @@ public class SwarmHttpSource extends AbstractSwarmSource {
         this.path = uri.getPath();
         this.availableRanges.add(range);
         addListener(new ReconnectingSwarmSourceListener());
-        addListener(new EchoSwarmSourceListener());
         addListener(new LoggingSwarmSourceListener());
+        //addListener(new EchoSwarmSourceListener());
         id = uri.toString() + "-" + range.toString();
     }
 
