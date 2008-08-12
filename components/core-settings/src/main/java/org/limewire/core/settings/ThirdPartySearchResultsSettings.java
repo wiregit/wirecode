@@ -1,6 +1,5 @@
 package org.limewire.core.settings;
 
-import org.limewire.promotion.PromotionBinder;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringSetting;
@@ -19,13 +18,13 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
         FACTORY.createRemoteBooleanSetting("PROMOTION_SYSTEM_IS_ENABLED", false, "Promo.promotionSystemIsEnabled");    
  
     /**
-     * The url we use to search for {@link PromotionBinder}s.
+     * The url we use to search for {@link org.limewire.promotion.PromotionBinder}s.
      */    
     public static final StringSetting SEARCH_URL =
         FACTORY.createRemoteStringSetting("SEARCH_URL", "http://binders.links.limewire.com/lwp/getBuckets.php", "Promo.searchUrl");
 
     /**
-     * The url we use to redirect for {@link PromotionBinder}s.
+     * The url we use to redirect for {@link org.limewire.promotion.PromotionBinder}s.
      */    
     public static final StringSetting REDIRECT_URL =
         FACTORY.createRemoteStringSetting("REDIRECT_URL", "http://binders.links.limewire.com/lwp/redirect.php", "Promo.redirectUrl");    
