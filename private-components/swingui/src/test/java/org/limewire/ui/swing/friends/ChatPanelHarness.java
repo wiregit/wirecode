@@ -55,7 +55,6 @@ public class ChatPanelHarness {
         addFriend.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Publishing friend login");
                 new FriendLoginEvent(new FriendImpl(nameField.getText(), moodField.getText(), Mode.available)).publish();
             }
         });

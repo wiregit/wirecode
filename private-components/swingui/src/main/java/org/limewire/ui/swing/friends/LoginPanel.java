@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.List;
@@ -15,16 +17,18 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -35,6 +39,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * TODO: Swap labels on network button press?
  * TODO: Use xmpp API
  */
+@Singleton
 public class LoginPanel extends JPanel {
     @Resource private Icon gmail;
     @Resource private Icon facebook;
@@ -48,6 +53,7 @@ public class LoginPanel extends JPanel {
     private JPanel topPanel;
     private final XMPPService xmppService;
 
+    @Inject
     public LoginPanel(XMPPService xmppService) {
         this.xmppService = xmppService;
         GuiUtils.assignResources(this);
@@ -83,7 +89,11 @@ public class LoginPanel extends JPanel {
         return builder.getPanel();
     }
     
-    @SuppressWarnings("unused")
+    private void loginFailed() {
+        topPanel.removeAll();
+        topPanel.add(noConnectionAvailablePanel());
+    }
+    
     private JPanel noConnectionAvailablePanel() {
         FormLayout layout = new FormLayout("c:p:g", "7dlu,p, p, 7dlu");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
@@ -150,8 +160,16 @@ public class LoginPanel extends JPanel {
                                     connection.getConfiguration().setAutoLogin(rememberMeCheckbox.isSelected());
                                     try {
                                         connection.login();
+                                        
+                                        new XMPPConnectionEstablishedEvent().publish();
+                                        
                                     } catch (XMPPException e1) {
-                                        throw new RuntimeException(e1);
+                                        SwingUtilities.invokeLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                loginFailed();
+                                            }
+                                        });
                                     }
                                 }
                             }

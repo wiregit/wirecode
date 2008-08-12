@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -46,9 +48,11 @@ public class FriendsPane extends JPanel {
         JList list = new JList(new EventListModel<Friend>(sortedObservables));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setCellRenderer(new FriendCellRenderer(icons));
-        JScrollPane scroll = new JScrollPane(list);
+        JScrollPane scroll = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll);
         setPreferredSize(new Dimension(120, 200));
+        
+        list.addMouseListener(new LaunchChatListener());
         
         AnnotationProcessor.process(this);
     }
@@ -100,7 +104,7 @@ public class FriendsPane extends JPanel {
                 cell.setForeground(list.getForeground());
             }
             cell.setBorder(EMPTY_BORDER);
-
+            
             return cell;
         }
         
@@ -114,6 +118,18 @@ public class FriendsPane extends JPanel {
                 return icons.getDoNotDisturb();
             }
             return icons.getAway();
+        }
+    }
+
+    private static class LaunchChatListener extends MouseAdapter {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (e.getClickCount() == 2) {
+                JList list = (JList)e.getSource();
+                Friend friend = (Friend)list.getSelectedValue();
+                new ConversationStartedEvent(friend).publish();
+             }
         }
     }
 }
