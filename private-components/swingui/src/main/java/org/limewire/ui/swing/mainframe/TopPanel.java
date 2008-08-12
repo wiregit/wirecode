@@ -72,6 +72,7 @@ class TopPanel extends JPanel implements SearchNavigator {
 	    GuiUtils.assignResources(this);
         textField = new TextFieldWithEnterButton(
             15, "Search...", enterUpIcon, enterOverIcon, enterDownIcon);
+        textField.setMaximumSize(120);
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
         combo.setName("TopPanel.combo");
