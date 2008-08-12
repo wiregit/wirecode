@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
 
 /**
  * This is a custom component that includes a JTextField and a JButton.
@@ -138,7 +139,7 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
         
         return new Dimension(width, height);
     }
-    
+
     /**
      * Gets the text displayed in the JTextField.
      * @return the text
@@ -174,6 +175,15 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      */
     public synchronized void removeActionListener(ActionListener listener) {
         listeners.remove(listener);
+    }
+
+    /**
+     * Sets the maximum number of characters that can be entered.
+     * @param size the size
+     */
+    public void setMaximumSize(int size) {
+        AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        doc.setDocumentFilter(new DocumentLengthFilter(size));
     }
     
     /**
