@@ -86,7 +86,7 @@ class PresenceImpl implements Presence {
     }
 
     public Mode getMode() {
-        return Mode.valueOf(presence.getMode().toString());
+        return presence.getMode() != null ? Mode.valueOf(presence.getMode().toString()) : Mode.available;
     }
 
     public String toString() {

@@ -12,6 +12,10 @@ public interface Presence {
     enum Mode {
         chat, available, away, xa, dnd
     }
+    
+    public static final int MIN_PRIORITY = -127;
+    
+    public static final int MAX_PRIORITY = 127;
 
     /**
      * the jid of the user.  jid's have the form <code>user@host.com/client</code>
@@ -25,7 +29,7 @@ public interface Presence {
     public Type getType();
 
     /**
-     * @return the presence status message
+     * @return the presence status message; can be <code>null</code>
      */
     public String getStatus();
 

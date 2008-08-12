@@ -17,4 +17,10 @@ public interface XMPPConnection {
     public void logout();
     public boolean isLoggedIn();
     public void addRosterListener(RosterListener rosterListener);
+
+    /**
+     * Sets a new <code>&lt;presence&gt;</code> mode (i.e., status)
+     * @param mode the new mode to set
+     */
+    public void setMode(Presence.Mode mode);
 }

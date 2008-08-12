@@ -68,4 +68,10 @@ public class UserImpl implements User {
     public String toString() {
         return StringUtils.toString(this, id, name);
     }
+
+    public void updatePresence(Presence updatedPresence) {
+        presences.remove(updatedPresence.getJID());
+        presences.put(updatedPresence.getJID(), updatedPresence);
+        firePresenceListeners(updatedPresence);
+    }
 }

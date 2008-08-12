@@ -10,9 +10,11 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.listener.EventListener;
 import org.limewire.net.address.Address;
@@ -23,6 +25,7 @@ import org.limewire.xmpp.api.client.RosterListener;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
@@ -60,6 +63,16 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     
     public void addRosterListener(RosterListener rosterListener) {
         rosterListeners.add(rosterListener);
+    }
+
+    public void setMode(Presence.Mode mode) {
+        connection.sendPacket(getPresenceForMode(mode));
+    }
+
+    private Packet getPresenceForMode(Presence.Mode mode) {
+        return new org.jivesoftware.smack.packet.Presence(
+                org.jivesoftware.smack.packet.Presence.Type.available,
+                null, Presence.MIN_PRIORITY, org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.toString()));
     }
 
     public XMPPConnectionConfiguration getConfiguration() {
@@ -118,10 +131,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("adding connection listener for "+ connection.toString());
                     }
-                    if(!ServiceDiscoveryManager.getInstanceFor(connection).includesFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
-                        // TODO conncurrency control
-                        ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
-                    }
+                    ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     Address address = null;
                     synchronized (XMPPConnectionImpl.this) {
                         if(queuedEvent != null) {
@@ -224,22 +234,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                         synchronized (user) {
                             if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
                                 if(!user.getPresences().containsKey(presence.getFrom())) {
-                                    try {
-                                        if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
-                                            if(LOG.isDebugEnabled()) {
-                                                LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
-                                            }
-                                            LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
-                                            limePresense.subscribeAndWaitForAddress();
-                                            user.addPresense(limePresense);
-                                        } else {
-                                            user.addPresense(new PresenceImpl(presence, connection));
-                                        }
-                                    } catch (org.jivesoftware.smack.XMPPException exception) {
-                                        LOG.error(exception.getMessage(), exception);
-                                    }
+                                    addNewPresence(user, presence);
                                 } else {
-                                    // TODO update presence
+                                    updatePresence(user, presence);
                                 }
                             } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
                                 user.removePresense(new PresenceImpl(presence, connection));
@@ -249,6 +246,36 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 }, "presence-handler-" + presence.getFrom());
                 t.start();
             }
+        }
+
+        private void addNewPresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
+            try {
+                ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(connection);
+                DiscoverInfo discoverInfo = serviceDiscoveryManager.discoverInfo(presence.getFrom());
+                if (discoverInfo.containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
+                    }
+                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
+                    limePresense.subscribeAndWaitForAddress();
+                    user.addPresense(limePresense);
+                } else {
+                    user.addPresense(new PresenceImpl(presence, connection));
+                }
+            } catch (org.jivesoftware.smack.XMPPException exception) {
+                LOG.error(exception.getMessage(), exception);
+            }
+        }
+
+        private void updatePresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
+            Presence currentPresence = user.getPresences().get(presence.getFrom());
+            Presence updatedPresence;
+            if(currentPresence instanceof LimePresenceImpl) {
+                updatedPresence = new LimePresenceImpl(presence, connection);    
+            } else {
+                updatedPresence = new PresenceImpl(presence, connection);   
+            }
+            user.updatePresence(updatedPresence);
         }
     }
     

@@ -1,23 +1,30 @@
 package org.limewire.xmpp.client;
 
-import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
-import com.google.inject.Injector;
-import com.google.inject.Guice;
-import com.google.inject.Stage;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
+import org.limewire.common.LimeWireCommonModule;
 import org.limewire.inject.AbstractModule;
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.net.EmptyProxySettings;
+import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.ProxySettings;
-import org.limewire.net.EmptyProxySettings;
 import org.limewire.net.SocketBindingSettings;
-import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.DirectConnectionAddress;
 import org.limewire.net.address.DirectConnectionAddressImpl;
+import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.limewire.xmpp.api.client.LimePresence;
@@ -28,20 +35,13 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
-import org.limewire.util.BaseTestCase;
-import org.limewire.common.LimeWireCommonModule;
-import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
 
 public class XMPPServiceTest extends BaseTestCase {
     protected Injector injector;
@@ -130,6 +130,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
         LimePresence buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
+        assertEquals(Presence.Mode.available, buddy2.getMode());
         DirectConnectionAddress address = (DirectConnectionAddress)buddy2.getAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
@@ -139,6 +140,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
         LimePresence buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
+        assertEquals(Presence.Mode.available, buddy2.getMode());
         address = (DirectConnectionAddress)buddy1.getAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
@@ -151,6 +153,38 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(connections.get(0).isLoggedIn());
         connections.get(0).logout();
         assertFalse(connections.get(0).isLoggedIn());
+    }
+    
+    public void testStatusChanges() throws InterruptedException, UnknownHostException {
+        assertEquals(1, rosterListener.roster.size());
+        assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
+        assertEquals(0, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        
+        assertEquals(1, rosterListener2.roster.size());
+        assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
+        assertEquals(0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+                Address.EventType.ADDRESS_CHANGED));
+        
+        Thread.sleep(1000); 
+        
+        LimePresence buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        assertEquals(Presence.Type.available, buddy2.getType());
+        assertEquals(Presence.Mode.available, buddy2.getMode());
+
+        XMPPService xmppService = injector.getInstance(XMPPService.class);
+        for(XMPPConnection connection : xmppService.getConnections()) {
+            if(connection.getConfiguration().getUsername().equals("limebuddy2@gmail.com")) {
+                connection.setMode(Presence.Mode.away);
+            }
+        }
+        
+        Thread.sleep(1000); 
+        
+        buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        assertEquals(Presence.Type.available, buddy2.getType());
+        assertEquals(Presence.Mode.away, buddy2.getMode());
     }
     
     public void testChat() throws InterruptedException, XMPPException, IOException {

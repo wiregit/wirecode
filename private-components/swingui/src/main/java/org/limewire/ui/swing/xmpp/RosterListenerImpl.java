@@ -3,11 +3,16 @@ package org.limewire.ui.swing.xmpp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Date;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.net.address.Address;
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
@@ -47,7 +52,7 @@ public class RosterListenerImpl implements RosterListener {
         }
       //  final String name = user.getName();
         user.addPresenceListener(new PresenceListener() {
-            public void presenceChanged(Presence presence) {
+            public void presenceChanged(final Presence presence) {
                 String id = parseBareAddress(presence.getJID());
                 if(presence.getType().equals(Presence.Type.available)) {
                     if(roster.get(id) == null) {
@@ -61,8 +66,7 @@ public class RosterListenerImpl implements RosterListener {
                         //browseAction.setAddress(address);
                         browseFactory.createBrowse(address).start(new BrowseListener() {
                             public void handleBrowseResult(SearchResult searchResult) {
-                                //System.out.println(searchResult.getDescription() + ": " + searchResult.getUrn());
-                                // TODO update UI
+                                ((LimePresence)presence).addFile(new FileMetaDataAdapter(searchResult));
                             }
                         });
                     } else {
@@ -122,6 +126,49 @@ public class RosterListenerImpl implements RosterListener {
         }
         else {
             return xmppAddress.substring(0, slashIndex);
+        }
+    }
+
+    private class FileMetaDataAdapter implements FileMetaData {
+        private SearchResult searchResult;
+        public FileMetaDataAdapter(SearchResult searchResult) {
+            this.searchResult = searchResult;
+        }
+
+        public String getId() {
+            return searchResult.getUrn();
+        }
+
+        public String getName() {
+            return ""; // TODO
+        }
+
+        public long getSize() {
+            return searchResult.getSize();
+        }
+
+        public String getDescription() {
+            return searchResult.getDescription();
+        }
+
+        public long getIndex() {
+            return -1; // TODO
+        }
+
+        public Map<String, String> getMetaData() {
+            return null;  // TODO
+        }
+
+        public Set<URI> getURIs() throws URISyntaxException {
+            return null; // TODO
+        }
+
+        public Date getCreateTime() {
+            return new Date(); // TODO
+        }
+
+        public String toXML() {
+            return null; // TODO
         }
     }
 }

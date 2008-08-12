@@ -37,13 +37,17 @@ public class RosterListenerMock implements RosterListener {
                     if(roster.get(id) == null) {
                         roster.put(id, new ArrayList<Presence>());
                     }
-                    roster.get(id).add(presence);
-                    presence.setIncomingChatListener(listener);
-                    if(presence instanceof LimePresence) {
-                        System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
-                        // TODO browse host
-                    } else {                            
-                        System.out.println("user " + presence.getJID() + " (" + name + ") available");
+                    if(!contains(roster.get(id), presence.getJID())) {
+                        roster.get(id).add(presence);
+                        presence.setIncomingChatListener(listener);
+                        if(presence instanceof LimePresence) {
+                            System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
+                            // TODO browse host
+                        } else {                            
+                            System.out.println("user " + presence.getJID() + " (" + name + ") available");
+                        }
+                    } else {
+                        replace(roster.get(id), presence);
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     if(roster.get(id) == null) {
@@ -52,8 +56,7 @@ public class RosterListenerMock implements RosterListener {
                     remove(id, presence);
                     if(presence instanceof LimePresence) {
                         System.out.println("lime user " + presence.getJID() + " (" + name + ") unavailable");
-                    } else {
-                        
+                    } else {                        
                         System.out.println("user " + presence.getJID() + " (" + name + ") unavailable");
                     }
                 } else {
@@ -61,6 +64,24 @@ public class RosterListenerMock implements RosterListener {
                 }
             }
         });
+    }
+
+    private void replace(ArrayList<Presence> presences, Presence presence) {
+        for(Presence p : presences) {
+            if(p.getJID().equals(presence.getJID())) {
+                presences.remove(p);
+                presences.add(presence);
+            }
+        }
+    }
+
+    private boolean contains(ArrayList<Presence> presences, String jid) {
+        for(Presence presence : presences) {
+            if(presence.getJID().equals(jid)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void remove(String id, Presence p) {

@@ -151,8 +151,7 @@ public class LoginPanel extends JPanel {
                                     try {
                                         connection.login();
                                     } catch (XMPPException e1) {
-                                        // TODO
-                                        e1.printStackTrace();
+                                        throw new RuntimeException(e1);
                                     }
                                 }
                             }
