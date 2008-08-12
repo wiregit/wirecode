@@ -194,26 +194,23 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     private void logRequest(String message, HttpRequest request) {
         if (LOG.isTraceEnabled()) {
-            String log;
-            if (request != null) {
-                log = message + ": " + request.getRequestLine() + " headers: "
-                        + Arrays.asList(request.getAllHeaders());
-            } else {
-                log = message + ": null";
-            }
+            String requestLine = request != null ? request.getRequestLine().toString() : "null";
+            String headers = request != null ? Arrays.asList(request.getAllHeaders()).toString()
+                    : "null";
+
+            String log = message + ": " + requestLine + " headers: " + headers;
             LOG.trace(log);
         }
     }
 
     private void logReponse(String message, HttpResponse response) {
         if (LOG.isTraceEnabled()) {
-            String log;
-            if (response != null) {
-                log = message + ": " + response.getStatusLine() + " headers: "
-                        + Arrays.asList(response.getAllHeaders());
-            } else {
-                log = message + ": null";
-            }
+            String statusLine = response != null ? response.getStatusLine().toString() : "null";
+            String headers = response != null ? Arrays.asList(response.getAllHeaders()).toString()
+                    : "null";
+
+            String log = message + ": " + statusLine + " headers: " + headers;
+
             LOG.trace(log);
         }
     }
