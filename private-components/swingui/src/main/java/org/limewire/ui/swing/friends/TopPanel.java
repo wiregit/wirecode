@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,8 +14,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.util.FontUtils;
-
-import com.limegroup.gnutella.gui.actions.AbstractAction;
 
 public class TopPanel extends JPanel {
     
