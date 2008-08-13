@@ -9,12 +9,21 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.MediatorAddress;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
+    
+    public static final Module MODULE = new AbstractModule() {
+        protected void configure() {
+            bind(NetworkManager.class).to(NetworkManagerStub.class);
+        }
+    };
+    
     private boolean acceptedIncomingConnection;
     private byte[] address = new byte[] { 127, 0, 0, 1 };
     private int port = 5555;
