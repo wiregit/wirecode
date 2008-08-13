@@ -58,7 +58,7 @@ public class BTMetaInfoTest extends BaseTestCase {
         Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
         Assert.assertEquals(2, metaInfo.getNumBlocks());
         Assert.assertEquals(32768, metaInfo.getPieceLength());
-        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+        Assert.assertEquals("http://localhost:3456/tracker/announce", metaInfo.getTrackers()[0]
                 .toString());
         Assert.assertEquals(true, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
