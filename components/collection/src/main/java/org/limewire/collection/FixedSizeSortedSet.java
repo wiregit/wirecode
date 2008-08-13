@@ -336,7 +336,8 @@ public class FixedSizeSortedSet<E> implements Iterable<E> {
      * Determines if this set contains the specified object.
      * Equality is determined by equals, not compareTo.
      */
-    public boolean contains(E o) {
+    @SuppressWarnings({"SuspiciousMethodCalls"})
+    public boolean contains(Object o) {
         return (_map.get(o) != null); //some equal key exists in the map
     }
 
