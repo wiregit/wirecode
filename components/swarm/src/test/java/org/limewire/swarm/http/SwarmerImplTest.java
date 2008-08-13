@@ -69,8 +69,7 @@ public class SwarmerImplTest extends BaseTestCase {
     }
 
     public void runTest(TestRun testRun) throws Exception {
-        for (int i = 0; i < 5; i++) {
-            System.out.println("iteration: " + i);
+        for (int i = 0; i < 1; i++) {
             testRun.run();
         }
 
@@ -352,29 +351,29 @@ public class SwarmerImplTest extends BaseTestCase {
         });
     }
 
-    public void testSimpleSmallFileSwarm2() throws Exception {
-        runTest(new TestRun() {
-            public void run() throws Exception {
-                File file = createTestFile("testSimpleSmallFileSwarm2.pdf");
-                try {
-                    String md5 = "4eb024f612ab7391d90dcf294807ad4b";
-
-                    URI uri1 = new URI("http://localhost:" + TEST_PORT + "/pub2/");
-                    int lowByte = 0;
-                    int highByte = 10252982 - 1;
-                    long fileSize = highByte + 1;
-                    Range range = Range.createRange(lowByte, highByte);
-                    Swarmer swarmer = createSwarmer(file, "LimeWireLinux.deb", fileSize,
-                            new MD5SumFileVerifier(range, md5));
-                    swarmer.addSource(new SwarmHttpSource(uri1, range));
-                    Thread.sleep(20000);
-                    assertDownload(md5, file, fileSize);
-                } finally {
-                    file.delete();
-                }
-            }
-        });
-    }
+    // public void testSimpleSmallFileSwarm2() throws Exception {
+    // runTest(new TestRun() {
+    // public void run() throws Exception {
+    // File file = createTestFile("testSimpleSmallFileSwarm2.pdf");
+    // try {
+    // String md5 = "4eb024f612ab7391d90dcf294807ad4b";
+    //
+    // URI uri1 = new URI("http://localhost:" + TEST_PORT + "/pub2/");
+    // int lowByte = 0;
+    // int highByte = 10252982 - 1;
+    // long fileSize = highByte + 1;
+    // Range range = Range.createRange(lowByte, highByte);
+    // Swarmer swarmer = createSwarmer(file, "LimeWireLinux.deb", fileSize,
+    // new MD5SumFileVerifier(range, md5));
+    // swarmer.addSource(new SwarmHttpSource(uri1, range));
+    // Thread.sleep(20000);
+    // assertDownload(md5, file, fileSize);
+    // } finally {
+    // file.delete();
+    // }
+    // }
+    // });
+    // }
 
     // public void testMediumFileSwarm() throws Exception {
     // runTest(new TestRun() {
