@@ -47,8 +47,7 @@ public class BucketQueueTest extends BaseTestCase {
         BucketQueue bq = new BucketQueue(5, 10);
         //Integer curInt = new Integer(4);
         for(int i=0; i<5; i++) {
-            Integer curInt = i;
-            bq.insert(curInt, i);
+            bq.insert(i, i);
         }
 
         Iterator iter = bq.iterator();
@@ -60,7 +59,8 @@ public class BucketQueueTest extends BaseTestCase {
     }
    
 	
-	public void testLegacy() {
+	@SuppressWarnings({"UnusedAssignment", "RedundantStringConstructorCall"})
+    public void testLegacy() {
         // for the test the objects need to be
         //  a != b && a.equals(b)
         Object e4= "test";
@@ -138,7 +138,7 @@ public class BucketQueueTest extends BaseTestCase {
         } catch (NoSuchElementException e) { }            
 
         // different .equals than objects above
-        Object f1= "nother test";
+        Object f1= new String("nother test");
         assertTrue(!q.removeAll(f1));
         assertNull(q.insert(e0, 0));
         assertNull(q.insert(e4, 4));

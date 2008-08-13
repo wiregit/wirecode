@@ -164,18 +164,6 @@ public final class Comparators {
         return FILE_COMPARATOR;
     }
     
-    /** 
-     * Returns a Comparator that uses the natural compareTo methods on the
-     * given objects.
-     */
-    public static <T extends Comparable<T>> Comparator<T> naturalComparator() {
-        return new Comparator<T>() {
-            public int compare(T o1, T o2) {
-                return o1.compareTo(o2);
-            }
-        };
-    }
-    
     /**
      * Instance assessor for the <code>Comparator</code> for case insensitive
      * <code>String</code>s.  This is an instance because the
@@ -273,9 +261,7 @@ public final class Comparators {
      * must use this method.
      */
     public static int intCompareTo(Integer thisInt, Integer anotherInt) {
-    	int thisVal = thisInt;
-    	int anotherVal = anotherInt;
-    	return (thisVal<anotherVal ? -1 : (thisVal==anotherVal ? 0 : 1));
+        return (thisInt < (int) anotherInt ? -1 : (thisInt == (int) anotherInt ? 0 : 1));
     }
     
     /**
@@ -295,8 +281,6 @@ public final class Comparators {
      *  argument (signed comparison).
      */
     public static int longCompareTo(Long firstLong, Long secondLong) {
-        long firstVal = firstLong;
-        long secondVal = secondLong;
-        return (firstVal<secondVal ? -1 : (firstVal==secondVal ? 0 : 1));
+        return (firstLong < (long) secondLong ? -1 : (firstLong == (long) secondLong ? 0 : 1));
     }
 }
