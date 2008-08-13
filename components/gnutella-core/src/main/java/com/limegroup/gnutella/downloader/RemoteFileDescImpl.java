@@ -238,7 +238,11 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      * @see com.limegroup.gnutella.RemoteFileDesc#getAvailableRanges()
      */
     public IntervalSet getAvailableRanges() {
-        return _availableRanges.clone();
+        try {
+            return _availableRanges.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /* (non-Javadoc)
@@ -640,7 +644,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     public InetAddress getInetAddress() {
         try {
             return InetAddress.getByName(getAddress());
-        }catch(UnknownHostException bad){}
+        } catch(UnknownHostException ignore){}
         return null;
     }
     
