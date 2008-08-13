@@ -73,7 +73,7 @@ public class FriendsPane extends JPanel {
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
-            JXPanel cell = new JXPanel(new MigLayout("", "3[]6[]push[]", "1[]1"));
+            JXPanel cell = new JXPanel(new MigLayout("insets 0 2 0 1", "3[]6[]push[]", "1[]1"));
             Friend friend = (Friend) value;
             cell.add(new JLabel(getIcon(friend)));
             

@@ -12,25 +12,28 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
+import org.limewire.ui.swing.util.FontUtils;
 
 import com.limegroup.gnutella.gui.actions.AbstractAction;
 
 public class TopPanel extends JPanel {
-    private final IconLibrary icons;
     
     public TopPanel(IconLibrary icons) {
-        this.icons = icons;
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
-        setLayout(new MigLayout("", "[][][]push[]", "0[]0"));
+        setLayout(new MigLayout("insets 0 0 0 0", "3[][]0:push[]0[]0", "0[]0"));
         
         JLabel friend = new JLabel();
+        friend.setForeground(getForeground());
         add(friend);
         
         JLabel friendStatus = new JLabel();
+        friendStatus.setForeground(getForeground());
+        FontUtils.changeSize(friendStatus, -1.8f);
         add(friendStatus);
         
         JXButton options = new JXButton(tr("Options"));
+        FontUtils.changeSize(options, -2.8f);
         options.setForeground(getForeground());
         options.setBackground(getBackground());
         options.setBorderPainted(false);
