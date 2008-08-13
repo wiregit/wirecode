@@ -84,8 +84,6 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
      */
     public long write(final SwarmContent content) throws IOException {
         long written = 0;
-        // TODO do something with the written variable.
-
         synchronized (scheduleLock) {
 
             final ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);

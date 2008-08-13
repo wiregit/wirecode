@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.limewire.collection.NECallable;
 import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
 
 import com.google.inject.internal.Objects;
 import com.limegroup.bittorrent.BTInterval;
-import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 
 public class BTSwarmWriteJob implements SwarmWriteJob {
@@ -71,6 +69,10 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
                     bufferSize = (int) (piece.get32BitHigh() - piecePosition) + 1;
                 }
 
+                if (bufferSize == 0) {
+                    return 0;
+                }
+
                 byteBuffer = ByteBuffer.allocate(bufferSize);
             }
 
@@ -87,32 +89,16 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
                 final long pieceLow = this.pieceLow;
                 final long pieceHigh = pieceLow + data.length - 1;
 
-                torrentDiskManager.writeBlock(new NECallable<BTPiece>() {
-
-                    public BTPiece call() {
-                        return new BTPiece() {
-
-                            public byte[] getData() {
-                                return data;
-                            }
-
-                            public BTInterval getInterval() {
-                                BTInterval interval = new BTInterval(pieceLow, pieceHigh, pieceId);
-                                return interval;
-                            }
-                        };
-                    }
-
-                });
+                torrentDiskManager.writeBlock(new BTNECallable(pieceId, pieceLow, pieceHigh, data));
 
                 this.pieceLow = pieceHigh + 1;
-                if (piecePosition == piece.getHigh()) {
+                if (piecePosition >= piece.getHigh()) {
                     if (pieceIndex + 1 == pieces.size()) {
                         return read;
                     }
                     System.out.println("next peice time");
                     this.pieceLow = pieces.get(++pieceIndex).getLow();
-                    piecePosition = pieceLow;
+                    this.piecePosition = this.pieceLow;
                 }
             }
             return read;
