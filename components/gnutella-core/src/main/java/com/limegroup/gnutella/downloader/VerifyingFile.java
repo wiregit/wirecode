@@ -613,11 +613,11 @@ public class VerifyingFile {
                 while (chunksScheduledPerFile > 0) {
                     try {
                         wait();
-                    } catch (InterruptedException ie) { }
+                    } catch (InterruptedException ignore) { }
                 }
             }
             fos.close();
-        } catch (IOException ioe) {}
+        } catch (IOException ignore) {}
     }
     
     /////////////////////////private helpers//////////////////////////////
@@ -803,22 +803,25 @@ public class VerifyingFile {
         int chunkSize = getChunkSize();
         
         if(fullScan) {
-            IntervalSet temp = partialBlocks.clone();
+            IntervalSet temp = null;
+            try {
+                temp = partialBlocks.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
             temp.add(Range.createRange(0, existingFileSize));
             partial = temp.getAllIntervalsAsList();
         } else {
             partial = partialBlocks.getAllIntervalsAsList();
         }
-        
-        for (int i = 0; i < partial.size() ; i++) {
-            Range current = partial.get(i);
-            
+
+        for (Range current : partial) {
             // find the beginning of the first chunk offset
             long lowChunkOffset = current.getLow() - current.getLow() % chunkSize;
             if (current.getLow() % chunkSize != 0)
                 lowChunkOffset += chunkSize;
-            while (current.getHigh() >= lowChunkOffset+chunkSize-1) {
-                Range complete = Range.createRange(lowChunkOffset, lowChunkOffset+chunkSize -1); 
+            while (current.getHigh() >= lowChunkOffset + chunkSize - 1) {
+                Range complete = Range.createRange(lowChunkOffset, lowChunkOffset + chunkSize - 1);
                 verifyable.add(complete);
                 lowChunkOffset += chunkSize;
             }

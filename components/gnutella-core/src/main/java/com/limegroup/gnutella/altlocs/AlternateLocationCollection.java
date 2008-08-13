@@ -182,7 +182,7 @@ public class AlternateLocationCollection<T extends AlternateLocation>
     /**
      * @return true is this contains loc
      */
-    public synchronized boolean contains(AlternateLocation loc) {
+    public synchronized boolean contains(T loc) {
         return LOCATIONS.contains(loc);
     }
         
