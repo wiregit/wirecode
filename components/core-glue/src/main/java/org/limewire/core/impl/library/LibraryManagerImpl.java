@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -177,9 +180,13 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         private FileManager fileManager;
         
+        private Map<File, FileItem> lookup;
+        
         public GnutellaFileList(FileManager fileManager) {
             this.fileManager = fileManager;
             this.fileManager.getSharedFileList().addFileListListener(this);
+            
+            lookup = new HashMap<File, FileItem>();
         }
         
         @Override
@@ -195,18 +202,32 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            eventList.add(new CoreFileItem(fileDesc));
+            String ext = FileUtils.getFileExtension(fileDesc.getFile());
+            if(MediaType.getMediaTypeForExtension(ext) == MediaType.getImageMediaType()) {
+                FileItem newItem = new CoreImageFileItem(fileDesc);
+                lookup.put(fileDesc.getFile(), newItem);
+                eventList.add(newItem);
+            } else {
+                FileItem newItem = new CoreFileItem(fileDesc);  
+                lookup.put(fileDesc.getFile(), newItem);
+                eventList.add(newItem);
+            }
         }
 
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
-            eventList.remove(new CoreFileItem(oldDesc));
-            eventList.add(new CoreFileItem(newDesc));
+            FileItem old = lookup.remove(oldDesc.getFile());
+            FileItem newItem = new CoreFileItem(newDesc);
+            lookup.put(newDesc.getFile(), newItem);
+            
+            eventList.remove(old);
+            eventList.add(newItem);
         }
 
         @Override
         public void removeEvent(FileDesc fileDesc) {
-            eventList.remove(new CoreFileItem(fileDesc));
+            FileItem old = lookup.remove(fileDesc.getFile());
+            eventList.remove(old);
         }
         
     }

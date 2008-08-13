@@ -13,6 +13,7 @@ import javax.swing.JScrollPane;
 
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.table.SharingFancyAudioTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingFancyDefaultTableFormat;
@@ -31,16 +32,18 @@ public class SharingFancyPanel extends JPanel {
     
     private SharingFancyTablePanel musicTable;
     private SharingFancyTablePanel videoTable;
-    private SharingFancyTablePanel imageTable;
+    private SharingFancyListPanel imageList;
     private SharingFancyTablePanel documentTable;
     private SharingFancyTablePanel otherTable;
     //TODO: what to do about programs??
     
     private final JScrollPane scrollPane;
     
-    public SharingFancyPanel(EventList<FileItem> eventList, JScrollPane scrollPane) {
+    public SharingFancyPanel(EventList<FileItem> eventList, JScrollPane scrollPane, FileList originalList) {
 
         this.scrollPane = scrollPane;
+        
+        ShareDropTarget drop = new ShareDropTarget(this, originalList);
 
         List<EventList<FileItem>> list = new ArrayList<EventList<FileItem>>();
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.AUDIO)));
@@ -49,18 +52,18 @@ public class SharingFancyPanel extends JPanel {
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.DOCUMENT)));
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.OTHER)));
         
-        musicTable = new SharingFancyTablePanel(music, list.get(0), new SharingFancyAudioTableFormat());
-        videoTable = new SharingFancyTablePanel(video, list.get(1), new SharingFancyDefaultTableFormat(),false);
-        imageTable = new SharingFancyTablePanel(image, list.get(2), new SharingFancyDefaultTableFormat(), false);
-        documentTable = new SharingFancyTablePanel(doc, list.get(3), new SharingFancyDefaultTableFormat(), false);
-        otherTable = new SharingFancyTablePanel(other, list.get(4), new SharingFancyDefaultTableFormat());
+        musicTable = new SharingFancyTablePanel(music, list.get(0), new SharingFancyAudioTableFormat(), drop.getDropTarget());
+        videoTable = new SharingFancyTablePanel(video, list.get(1), new SharingFancyDefaultTableFormat(),false, drop.getDropTarget());
+        imageList = new SharingFancyListPanel(image, list.get(2), drop.getDropTarget());
+        documentTable = new SharingFancyTablePanel(doc, list.get(3), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget());
+        otherTable = new SharingFancyTablePanel(other, list.get(4), new SharingFancyDefaultTableFormat(), drop.getDropTarget());
         
         
         SharingShortcutPanel shortcuts = new SharingShortcutPanel(
                 new String[]{music, video, image, doc, other},
                 new Action[]{new BookmarkJumpAction(this, musicTable),
                              new BookmarkJumpAction(this, videoTable),
-                             new BookmarkJumpAction(this, imageTable),
+                             new BookmarkJumpAction(this, imageList),
                              new BookmarkJumpAction(this, documentTable),
                              new BookmarkJumpAction(this, otherTable)},
                 list);
@@ -71,9 +74,11 @@ public class SharingFancyPanel extends JPanel {
         
        add(musicTable);
        add(videoTable);
-       add(imageTable);
+       add(imageList);
        add(documentTable);
        add(otherTable);
+
+       this.setDropTarget(drop.getDropTarget());
     }
     
     /**

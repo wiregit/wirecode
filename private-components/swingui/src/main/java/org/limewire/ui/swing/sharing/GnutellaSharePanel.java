@@ -108,7 +108,7 @@ public class GnutellaSharePanel extends JPanel {
         tc.setCellRenderer(renderer);
         
         JScrollPane scrollPane = new JScrollPane();
-        sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane);
+        sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList);
         scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),TABLE);
