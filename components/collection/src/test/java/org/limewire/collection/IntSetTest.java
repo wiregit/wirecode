@@ -220,9 +220,9 @@ public class IntSetTest extends BaseTestCase {
     }
     
     private static int search(IntSet s, int num) throws Exception {
-        return ((Integer)PrivilegedAccessor.invokeMethod(
-            s, "search", new Object[] {new Integer(num)}, 
-            new Class[] {int.class})).intValue();
+        return (Integer) PrivilegedAccessor.invokeMethod(
+                s, "search", new Object[]{num},
+                new Class[]{int.class});
     }
     
     private static Object newInterval(int num) throws Exception {
@@ -230,7 +230,7 @@ public class IntSetTest extends BaseTestCase {
             IntSet.class, "Interval");
             
         return PrivilegedAccessor.invokeConstructor(
-            interval, new Object[] { new Integer(num) },
+            interval, new Object[] {num},
             new Class[] { int.class } );
     }
     

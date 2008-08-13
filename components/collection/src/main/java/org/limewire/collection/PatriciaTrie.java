@@ -720,7 +720,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             if (child.bitIndex > parent.bitIndex) {
                 child.parent = parent;
             }
-        };
+        }
         
         // Fix H's parent and child Nodes
         {         
@@ -740,7 +740,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             } else {
                 h.parent.right = p;
             }
-        };
+        }
         
         // Copy the remaining fields from H to P
         //p.bitIndex = h.bitIndex;

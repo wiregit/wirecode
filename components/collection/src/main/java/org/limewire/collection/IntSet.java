@@ -121,7 +121,7 @@ public class IntSet {
     }
     
     /** Returns the i'th Interval in this. */
-    private final Interval get(int i) {
+    private Interval get(int i) {
         return list.get(i);
     }
 
@@ -135,7 +135,7 @@ public class IntSet {
      * be used because they only return exact matches.  Also, they require
      * allocating a dummy Interval to represent x.
      */
-    private final int search(int x) {
+    private int search(int x) {
         int low=0;
         int high=list.size()-1;
 
@@ -309,11 +309,11 @@ public class IntSet {
         for (IntSetIterator iter = this.iterator(); iter.hasNext(); ) {
             int x = iter.next();
             if (! s.contains(x))
-                removeList.add(new Integer(x));
+                removeList.add(x);
         }
         //It's marginally more efficient to remove items from end to beginning.
         for (int i=removeList.size()-1; i>=0; i--) {
-            int x = (removeList.get(i)).intValue();
+            int x = removeList.get(i);
             this.remove(x);
         }
         //Did we remove any items?

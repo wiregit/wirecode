@@ -350,21 +350,20 @@ public class TrieTest extends BaseTestCase {
     }
 
     // accessible helper for private int Trie.match(String, int, int, String)
-    private static final int match(final StringTrie trie, final String a,
+    private static int match(final StringTrie trie, final String a,
                                    int startOffset, int stopOffset,
                                    final String b) throws Throwable {
         try {
-            return ((Integer)
+            return (Integer)
                     PrivilegedAccessor.invokeMethod(trie, "match",
-                        new Object[] {a,
-                                      new Integer(startOffset), //native
-                                      new Integer(stopOffset),  //native
-                                      b},
-                        new Class[]  {String.class,
-                                      int.class, //native
-                                      int.class, //native
-                                      String.class})
-                   ).intValue(); // unwrap the native int result
+                            new Object[]{a,
+                                    startOffset, //native
+                                    stopOffset,  //native
+                                    b},
+                            new Class[]{String.class,
+                                    int.class, //native
+                                    int.class, //native
+                                    String.class}); // unwrap the native int result
         } catch(Exception e) {
             if( e.getCause() != null )
                 throw e.getCause();
@@ -381,7 +380,7 @@ public class TrieTest extends BaseTestCase {
         try {
             iter.next();
             fail("expected NoSuchElementException");
-        } catch (NoSuchElementException e) { }
+        } catch (NoSuchElementException ignore) { }
     }
 
     private Object expectNextSame(final Object expected, final Iterator iter) {

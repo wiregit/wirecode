@@ -102,6 +102,7 @@ public class FixedSizeArrayHashSet<E> extends HashSet<E> implements RandomAccess
         return map.isEmpty();
     }
 
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     @Override
     public boolean contains(Object o) {
         return map.containsKey(o);

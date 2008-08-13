@@ -234,7 +234,7 @@ public class FixedSizeSortedSet<E> implements Iterable<E> {
     ////////////////////////Sorted Set methods///////////////////////
     @Override
     @SuppressWarnings("unchecked")
-    public Object  clone() {
+    public Object  clone() throws CloneNotSupportedException {
         FixedSizeSortedSet<E> ret = new FixedSizeSortedSet<E>(_maxSize);
         ret._sortedSet = (SortedSet<E>)((TreeSet<E>)_sortedSet).clone();
         ret._map = (Map<E, E>)((HashMap<E, E>)_map).clone();
@@ -336,7 +336,7 @@ public class FixedSizeSortedSet<E> implements Iterable<E> {
      * Determines if this set contains the specified object.
      * Equality is determined by equals, not compareTo.
      */
-    public boolean contains(Object o) {
+    public boolean contains(E o) {
         return (_map.get(o) != null); //some equal key exists in the map
     }
 
@@ -403,6 +403,7 @@ public class FixedSizeSortedSet<E> implements Iterable<E> {
      * we can find what is causing the data to go out of synch, we need
      * to clean up the structures to prevent errors from going out of control.
      */
+     @SuppressWarnings({"SuspiciousMethodCalls"})
      private void stabilize() {
         // First clean up the map for any entries that may not be in the set.
         for(Iterator iter = _map.entrySet().iterator(); iter.hasNext(); ) {

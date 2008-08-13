@@ -9,12 +9,12 @@ import org.limewire.util.BaseTestCase;
 
 @SuppressWarnings("unchecked")
 public class FixedsizePriorityQueueTest extends BaseTestCase {
-    private final Integer one=new Integer(1);
-    private final Integer two=new Integer(2);
-    private final Integer three=new Integer(3);
-    private final Integer four=new Integer(4);
-    private final Integer five=new Integer(5);
-    private final Integer six=new Integer(6);
+    private final Integer one= 1;
+    private final Integer two= 2;
+    private final Integer three= 3;
+    private final Integer four= 4;
+    private final Integer five= 5;
+    private final Integer six= 6;
     
     /**
      * The default queue for testing, with a capacity of 4 and the elements 2,

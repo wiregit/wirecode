@@ -85,24 +85,24 @@ public class FixedSizeArrayHashMapTest extends BaseTestCase {
     }
     
     public void testRemove() throws Exception {
-        RandomAccessMap m = new FixedSizeArrayHashMap(3);
+        RandomAccessMap<Integer, Integer> m = new FixedSizeArrayHashMap<Integer, Integer>(3);
         m.put(1, 11); m.put(2, 22); m.put(3, 33);
         assertTrue(m.containsKey(2));
-        assertEquals(3, m.getKeyAt(0));
-        assertEquals(2, m.getKeyAt(1));
-        assertEquals(1, m.getKeyAt(2));
-        assertEquals(33, m.getValueAt(0));
-        assertEquals(22, m.getValueAt(1));
-        assertEquals(11, m.getValueAt(2));
-        assertEquals(22, m.remove(2));
-        assertEquals(3, m.getKeyAt(0));
-        assertEquals(1, m.getKeyAt(1));
+        assertEquals(3, (int) m.getKeyAt(0));
+        assertEquals(2, (int) m.getKeyAt(1));
+        assertEquals(1, (int) m.getKeyAt(2));
+        assertEquals(33, (int) m.getValueAt(0));
+        assertEquals(22, (int) m.getValueAt(1));
+        assertEquals(11, (int) m.getValueAt(2));
+        assertEquals(22, (int) m.remove(2));
+        assertEquals(3, (int) m.getKeyAt(0));
+        assertEquals(1, (int) m.getKeyAt(1));
         try {
             m.getKeyAt(2);
             fail("expected exception");
         } catch(IndexOutOfBoundsException expected) {}
-        assertEquals(33, m.getValueAt(0));
-        assertEquals(11, m.getValueAt(1));
+        assertEquals(33, (int) m.getValueAt(0));
+        assertEquals(11, (int) m.getValueAt(1));
         try {
             m.getValueAt(2);
             fail("expected exception");
@@ -112,10 +112,10 @@ public class FixedSizeArrayHashMapTest extends BaseTestCase {
         assertNull(m.remove(4));
         assertEquals(2, m.size());
         
-        assertEquals(new Integer(11), m.remove(new Integer(1)));
+        assertEquals(new Integer(11), m.remove(1));
         assertEquals(1, m.size());
-        assertEquals(3, m.getKeyAt(0));
-        assertEquals(33, m.getValueAt(0));
+        assertEquals(3, (int) m.getKeyAt(0));
+        assertEquals(33, (int) m.getValueAt(0));
         try {
             m.getKeyAt(1);
             fail("expected exception");
@@ -141,15 +141,15 @@ public class FixedSizeArrayHashMapTest extends BaseTestCase {
     }
     
     public void testIndexing() throws Exception {
-        FixedSizeArrayHashMap m = new FixedSizeArrayHashMap(3);
+        FixedSizeArrayHashMap<Integer, Integer> m = new FixedSizeArrayHashMap<Integer, Integer>(3);
         m.put(1, 11); m.put(2, 22); m.put(3, 33);
-        assertEquals(3, m.getKeyAt(0));
-        assertEquals(2, m.getKeyAt(1));
-        assertEquals(1, m.getKeyAt(2));
+        assertEquals(3, (int) m.getKeyAt(0));
+        assertEquals(2, (int) m.getKeyAt(1));
+        assertEquals(1, (int) m.getKeyAt(2));
         m.put(4, 44);
-        assertEquals(4, m.getKeyAt(0));
-        assertEquals(3, m.getKeyAt(1));
-        assertEquals(2, m.getKeyAt(2));
+        assertEquals(4, (int) m.getKeyAt(0));
+        assertEquals(3, (int) m.getKeyAt(1));
+        assertEquals(2, (int) m.getKeyAt(2));
     }
     
     public void testClone() throws Exception {

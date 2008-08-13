@@ -64,7 +64,7 @@ public class FixedSizeLIFOSet<E> extends LIFOSet<E> {
 		 * Removes the first-in (eldest) element from the
 		 * Set if has reached its maximum capacity.
 		 */
-		FIFO;
+		FIFO
 	}
 	
     final int maxSize;

@@ -120,8 +120,9 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
      */
     public void clear() {
         repOk();
-        for (int i=0; i<buckets.length; i++) 
-            buckets[i].clear();        
+        for (Buffer<E> bucket : buckets) {
+            bucket.clear();
+        }
         size=0;
         repOk();
     }
@@ -156,8 +157,8 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
         repOk();
         //1. For each bucket, remove o, noting if any elements were removed.
         boolean ret=false;
-        for (int i=0; i<buckets.length; i++) {
-            ret=ret | buckets[i].removeAll(o);
+        for (Buffer<E> bucket : buckets) {
+            ret = ret | bucket.removeAll(o);
         }
         //2.  Maintain size invariant.  The problem is that removeAll() can
         //remove multiple elements from this.  As a slight optimization, we
@@ -165,8 +166,9 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
         //before and after the call to removeAll(..).  But I favor simplicity.
         if (ret) {
             this.size=0;
-            for (int i=0; i<buckets.length; i++)
-                this.size+=buckets[i].getSize();
+            for (Buffer<E> bucket : buckets) {
+                this.size += bucket.getSize();
+            }
         }
         repOk();
         return ret;
@@ -292,7 +294,7 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
 
     /** Returns a shallow copy of this, of type BucketQueue */
     @Override
-    public BucketQueue<E> clone() {
+    public BucketQueue<E> clone() throws CloneNotSupportedException {
         return new BucketQueue<E>(this);        
     }
 

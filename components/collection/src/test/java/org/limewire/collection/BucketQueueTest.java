@@ -47,7 +47,7 @@ public class BucketQueueTest extends BaseTestCase {
         BucketQueue bq = new BucketQueue(5, 10);
         //Integer curInt = new Integer(4);
         for(int i=0; i<5; i++) {
-            Integer curInt = new Integer(i);
+            Integer curInt = i;
             bq.insert(curInt, i);
         }
 
@@ -63,10 +63,10 @@ public class BucketQueueTest extends BaseTestCase {
 	public void testLegacy() {
         // for the test the objects need to be
         //  a != b && a.equals(b)
-        Object e4= new String("test");
-        Object e2a= new String("test");
-        Object e2b= new String("test");
-        Object e0= new String("test");
+        Object e4= "test";
+        Object e2a= "test";
+        Object e2b= "test";
+        Object e0= "test";
         BucketQueue q=new BucketQueue(5, 10);
         assertTrue(q.isEmpty());
 
@@ -138,7 +138,7 @@ public class BucketQueueTest extends BaseTestCase {
         } catch (NoSuchElementException e) { }            
 
         // different .equals than objects above
-        Object f1= new String("nother test");
+        Object f1= "nother test";
         assertTrue(!q.removeAll(f1));
         assertNull(q.insert(e0, 0));
         assertNull(q.insert(e4, 4));

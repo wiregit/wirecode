@@ -717,7 +717,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
          (w < 1<<15 ?
           (w < 1<<7 ?
            (w < 1<<3 ?
-            (w < 1<<1 ? (w < 1<<0 ? (w<0 ? 32 : 0) : 1) : (w < 1<<2 ? 2 : 3)) :
+            (w < 1<<1 ? (w < 1 ? (w<0 ? 32 : 0) : 1) : (w < 1<<2 ? 2 : 3)) :
             (w < 1<<5 ? (w < 1<<4 ? 4 : 5) : (w < 1<<6 ? 6 : 7))) :
            (w < 1<<11 ?
             (w < 1<<9 ? (w < 1<<8 ? 8 : 9) : (w < 1<<10 ? 10 : 11)) :
@@ -1031,7 +1031,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @see     java.util.BitSet#size()
      */
     @Override
-    public Object clone() {
+    public Object clone() throws CloneNotSupportedException {
 	BitSet result = null;
 	try {
 	    result = (BitSet) super.clone();

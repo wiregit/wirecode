@@ -86,12 +86,12 @@ public class OrView extends BooleanFunction {
 
 	public int nextSetBit(int startIndex) {
 		long smallest = Long.MAX_VALUE;
-		for (int i = 0; i < fields.length; i++) {
-			int current = fields[i].nextSetBit(startIndex);
-			if (current == -1)
-				continue;
-			smallest = Math.min(current, smallest);
-		}
+        for (BitField field : fields) {
+            int current = field.nextSetBit(startIndex);
+            if (current == -1)
+                continue;
+            smallest = Math.min(current, smallest);
+        }
 		return smallest == Long.MAX_VALUE ? -1 : (int)smallest;
 	}
 

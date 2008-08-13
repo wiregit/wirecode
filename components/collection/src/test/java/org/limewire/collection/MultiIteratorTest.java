@@ -26,15 +26,15 @@ public class MultiIteratorTest extends BaseTestCase {
 	public void testSeqTraversal() throws Exception {
 		List l1 = new ArrayList();
     	for (int i =0;i < 10; i++)
-    		l1.add(new Integer(i));
+    		l1.add(i);
     	
     	List l2 = new ArrayList();
     	for (int i = 10;i < 20; i++)
-    		l2.add(new Integer(i));
+    		l2.add(i);
     	
     	List l3 = new ArrayList();
     	for (int i = 20;i < 30; i++)
-    		l3.add(new Integer(i));
+    		l3.add(i);
     	
     	List control = new ArrayList();
     	control.addAll(l1);
@@ -43,12 +43,12 @@ public class MultiIteratorTest extends BaseTestCase {
     	
     	List test = new ArrayList();
     	for(Iterator iter = new MultiIterator(
-    			new Iterator[]{l1.iterator(),
-    					Collections.EMPTY_LIST.iterator(),
-    					l2.iterator(),
-    					Collections.EMPTY_LIST.iterator(),
-    					l3.iterator(),
-    					Collections.EMPTY_LIST.iterator()});
+                l1.iterator(),
+                Collections.EMPTY_LIST.iterator(),
+                l2.iterator(),
+                Collections.EMPTY_LIST.iterator(),
+                l3.iterator(),
+                Collections.EMPTY_LIST.iterator());
     		iter.hasNext();)
     		test.add(iter.next());
     	
@@ -61,15 +61,15 @@ public class MultiIteratorTest extends BaseTestCase {
     public void testRRTraversal() throws Exception {
     	List l1 = new ArrayList();
     	for (int i =0;i < 10; i++)
-    		l1.add(new Integer(i));
+    		l1.add(i);
     	
     	List l2 = new ArrayList();
     	for (int i = 10;i < 20; i++)
-    		l2.add(new Integer(i));
+    		l2.add(i);
     	
     	List l3 = new ArrayList();
     	for (int i = 20;i < 30; i++)
-    		l3.add(new Integer(i));
+    		l3.add(i);
     	
     	List control = new ArrayList();
     	for(int i = 0; i < 10; i++) {
@@ -95,15 +95,15 @@ public class MultiIteratorTest extends BaseTestCase {
     public void testRRRemoval() throws Exception {
     	List l1 = new ArrayList();
     	for (int i =0;i < 10; i++)
-    		l1.add(new Integer(i));
+    		l1.add(i);
     	
     	List l2 = new ArrayList();
     	for (int i = 10;i < 20; i++)
-    		l2.add(new Integer(i));
+    		l2.add(i);
     	
     	List l3 = new ArrayList();
     	for (int i = 20;i < 30; i++)
-    		l3.add(new Integer(i));
+    		l3.add(i);
     	
     	int j = 6;
     	for(Iterator iter = new MultiRRIterator(

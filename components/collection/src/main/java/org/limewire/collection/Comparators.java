@@ -168,7 +168,7 @@ public final class Comparators {
      * Returns a Comparator that uses the natural compareTo methods on the
      * given objects.
      */
-    public static <T extends Comparable<T>> Comparator<T> naturalComparator(Class<? extends T> clazz) {
+    public static <T extends Comparable<T>> Comparator<T> naturalComparator() {
         return new Comparator<T>() {
             public int compare(T o1, T o2) {
                 return o1.compareTo(o2);
@@ -273,8 +273,8 @@ public final class Comparators {
      * must use this method.
      */
     public static int intCompareTo(Integer thisInt, Integer anotherInt) {
-    	int thisVal = thisInt.intValue();
-    	int anotherVal = anotherInt.intValue();
+    	int thisVal = thisInt;
+    	int anotherVal = anotherInt;
     	return (thisVal<anotherVal ? -1 : (thisVal==anotherVal ? 0 : 1));
     }
     
@@ -295,8 +295,8 @@ public final class Comparators {
      *  argument (signed comparison).
      */
     public static int longCompareTo(Long firstLong, Long secondLong) {
-        long firstVal = firstLong.longValue();
-        long secondVal = secondLong.longValue();
+        long firstVal = firstLong;
+        long secondVal = secondLong;
         return (firstVal<secondVal ? -1 : (firstVal==secondVal ? 0 : 1));
     }
 }

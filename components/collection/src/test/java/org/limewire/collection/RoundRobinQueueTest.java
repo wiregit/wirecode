@@ -28,7 +28,7 @@ public class RoundRobinQueueTest extends BaseTestCase {
 	
 	public static void globalSetUp() throws Exception {
 		for (int i = 0;i<objects.length;i++)
-			objects[i]= new Integer(i);
+			objects[i]= i;
 	}
 	
 	@Override
@@ -41,12 +41,14 @@ public class RoundRobinQueueTest extends BaseTestCase {
 		
 		
 		//add all objects to the queue
-		for (int i = 0;i<objects.length;i++)
-			queue.enqueue(objects[i]);
+        for (Integer object : objects) {
+            queue.enqueue(object);
+        }
 		
 		//iterate once
-		for (int i = 0;i<objects.length;i++)
-			assertEquals(objects[i],queue.next());
+        for (Integer object : objects) {
+            assertEquals(object, queue.next());
+        }
 		
 		//get few more objects, we should start from the beginning now
 		assertEquals(objects[0],queue.next());

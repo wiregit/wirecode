@@ -364,7 +364,7 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
 
     /** Returns a shallow copy of this, of type Buffer */
     @Override
-    public Buffer<E> clone() {
+    public Buffer<E> clone() throws CloneNotSupportedException {
         return new Buffer<E>(this);        
     }
 
@@ -373,12 +373,12 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
         StringBuilder buf=new StringBuilder();
         buf.append("[");
         boolean isFirst=true;
-        for (Iterator iter=iterator(); iter.hasNext(); ) {
-            if (! isFirst) 
+        for (Object o : this) {
+            if (!isFirst)
                 buf.append(", ");
             else
-                isFirst=false;
-            buf.append(iter.next().toString());            
+                isFirst = false;
+            buf.append(o.toString());
         }
         buf.append("]");
         return buf.toString();

@@ -9,7 +9,6 @@ package org.limewire.collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
 * Provides a better-defined replacement policy version of 
@@ -131,7 +130,7 @@ public class FixedsizeForgetfulHashMap<K, V> extends LinkedHashMap<K, V> {
      * Returns true if the eldest entry should be removed.
      */
     @Override
-    protected boolean removeEldestEntry(Entry<K, V> eldest) {
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
         return size() > MAXIMUM_SIZE;
     }
 

@@ -153,6 +153,7 @@ public class LIFOSet<E> implements Set<E>{
         return reverse.toArray();
     }
 
+    @SuppressWarnings({"SuspiciousToArrayCall"})
     public <T> T[] toArray(T[] a) {
         List<E> reverse = new ArrayList<E>(list);
         Collections.reverse(reverse);

@@ -102,7 +102,7 @@ public class LIFOSetTest extends BaseTestCase {
         lifo = new LIFOSet<String>();
         lifo.add(test);
         lifo.add(test4);
-        String[] s = lifo.toArray(new String[] {});
+        String[] s = lifo.toArray(new String[lifo.size()]);
         assertEquals(s[0], test4);
         assertEquals(s[1], test);
     }

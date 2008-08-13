@@ -152,7 +152,7 @@ public class RRProcessingQueue {
 		}
 		
 		Runnable next() {
-			return list.isEmpty() ? null : (Runnable) list.remove(0);
+			return list.isEmpty() ? null : list.remove(0);
 		}
 	}
     

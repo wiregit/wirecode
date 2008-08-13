@@ -2,6 +2,7 @@ package org.limewire.collection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Arrays;
 
 import junit.framework.Test;
 
@@ -125,8 +126,7 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         
         // test addAll()
         Collection col = new ArrayList();
-        for (int i = 0; i < 10; i++)
-            col.add(obj[i]);
+        col.addAll(Arrays.asList(obj));
         
         set.addAll(col);
         assertEquals(set.size(), MAX_SIZE);
@@ -139,8 +139,7 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         col.clear();
         
         // test removeAll()
-        for (int i = 6; i < 10; i++)
-            col.add(obj[i]);
+        col.addAll(Arrays.asList(obj).subList(6, 10));
         
         set.removeAll(col);
         

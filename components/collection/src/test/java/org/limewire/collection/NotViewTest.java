@@ -6,7 +6,6 @@ import org.limewire.util.BaseTestCase;
 
 public class NotViewTest extends BaseTestCase {
     private NotView nv;
-    private BitSet bs;
     private BitField bf;
     
     public NotViewTest(String name) {
@@ -19,8 +18,8 @@ public class NotViewTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        
-        bs = new BitSet();
+
+        BitSet bs = new BitSet();
         bs.set(1);
         bs.set(3);
         bs.set(4);

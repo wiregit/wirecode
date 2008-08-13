@@ -135,6 +135,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      * @param o element whose presence in this set is to be tested.
      * @return <tt>true</tt> if this set contains the specified element.
      */
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     @Override
     public boolean contains(Object o) {
         return map.containsKey(o);
@@ -180,7 +181,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      */
     @Override
     @SuppressWarnings("unchecked")
-    public FixedsizeForgetfulHashSet<E> clone() {
+    public FixedsizeForgetfulHashSet<E> clone() throws CloneNotSupportedException {
         try { 
             FixedsizeForgetfulHashSet<E> newSet = (FixedsizeForgetfulHashSet<E>)super.clone();
             newSet.map = map.clone();

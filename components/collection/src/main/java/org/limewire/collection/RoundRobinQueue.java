@@ -61,7 +61,7 @@ public class RoundRobinQueue<T>  {
 	 * Removes the next occurrence of the specified object
 	 * @param o the object to remove from the queue. 
 	 */
-	public synchronized void remove (Object o) {
+	public synchronized void remove (T o) {
 		_current.remove(o);
 	}
 	
@@ -69,7 +69,7 @@ public class RoundRobinQueue<T>  {
 	 * Removes all occurrences of the given object in the list.
 	 * @param o the object to remove.
 	 */
-	public synchronized void removeAllOccurences(Object o) {
+	public synchronized void removeAllOccurences(T o) {
 		Iterator iterator = _current.iterator();
 		while(iterator.hasNext())
 			if (iterator.next().equals(o))

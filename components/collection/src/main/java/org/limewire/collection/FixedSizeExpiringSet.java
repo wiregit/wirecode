@@ -55,7 +55,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     /*
      * Default time after which the entries expire 10 minutes
      */
-    private static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000 * 1000 * 1000;
+    private static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000;
 
     private final int _maxSize;
     private final long _expireTime;
@@ -115,11 +115,12 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
      * 
      * @see java.util.Collection#contains(java.lang.Object)
      */
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     public boolean contains(Object arg0) {
         Long time = _map.get(arg0);
         if (time == null)
             return false;
-        else if (time.longValue() < System.nanoTime()) {
+        else if (time < System.nanoTime()) {
             _map.remove(arg0);
             return false;
         } else
@@ -151,6 +152,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
      * 
      * @see java.util.Collection#toArray(java.lang.Object[])
      */
+    @SuppressWarnings({"SuspiciousToArrayCall"})
     public <B>B[] toArray(B[] arg0) {
         expire(false);
         return _map.keySet().toArray(arg0);
@@ -214,6 +216,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
      * @see java.util.Collection#retainAll
      * (java.util.Collection)
      */
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     public boolean retainAll(Collection<?> arg0) {
         Map<T,Long> map = new HashMap<T,Long>();
         boolean ret = false;
@@ -238,8 +241,9 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
         if (arg0.isEmpty())
             return false;
         boolean ret = false;
-        for (Iterator<?> iter = arg0.iterator(); iter.hasNext();)
-            ret |= remove(iter.next());
+        for (Object anArg0 : arg0) {
+            ret |= remove(anArg0);
+        }
         return ret;
     }
 

@@ -452,11 +452,10 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.finished();
         
         cursor.starting();
-        for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry<Character,String> entry = i.next();
+        for (Entry<Character, String> entry : charTrie.entrySet()) {
             cursor.select(entry);
-            if(Arrays.asList(toRemove).contains(entry.getKey()))
-                fail("got an: " + entry);    
+            if (Arrays.asList(toRemove).contains(entry.getKey()))
+                fail("got an: " + entry);
         }
         cursor.finished();
     }
@@ -517,11 +516,10 @@ public class PatriciaTrieTest extends BaseTestCase {
         cursor.remove(toRemove);
 
         cursor.starting();
-        for(Iterator<Map.Entry<Character, String>> i = charTrie.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry<Character,String> entry = i.next();
+        for (Entry<Character, String> entry : charTrie.entrySet()) {
             cursor.select(entry);
-            if(Arrays.asList(toRemove).contains(entry.getKey()))
-                fail("got an: " + entry);    
+            if (Arrays.asList(toRemove).contains(entry.getKey()))
+                fail("got an: " + entry);
         }
         cursor.finished();
     }
@@ -550,8 +548,8 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertEquals(control.size(), sortedControl.size());
         assertEquals(sortedControl.size(), trie.size());
         Iterator<String> iter = trie.values().iterator();
-        for(int i = 0; i < control.size(); i++) {
-            assertEquals(control.get(i), iter.next());
+        for (String aControl : control) {
+            assertEquals(aControl, iter.next());
         }
         
         Random rnd = new Random();
@@ -572,8 +570,9 @@ public class PatriciaTrieTest extends BaseTestCase {
         
         // reset hamlet
         trie.clear();
-        for(int i = 0; i < original.size(); i++) 
-            trie.put(original.get(i), original.get(i));
+        for (String anOriginal : original) {
+            trie.put(anOriginal, anOriginal);
+        }
         
         assertEquals(sortedControl.values().toArray(), trie.values().toArray());
         assertEquals(sortedControl.keySet().toArray(), trie.keySet().toArray());
@@ -996,6 +995,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertEquals(1, strings.size());
     }
     
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
     public void testSelectWithAllNullBitKey() {
         PatriciaTrie<String, String> trie 
             = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
@@ -1042,8 +1042,8 @@ public class PatriciaTrieTest extends BaseTestCase {
         }
         
         void remove(Object... objects) {
-            for(int i = 0; i < objects.length; i++) {
-                int idx = keys.indexOf(objects[i]);
+            for (Object object : objects) {
+                int idx = keys.indexOf(object);
                 keys.remove(idx);
                 values.remove(idx);
             }
@@ -1061,7 +1061,7 @@ public class PatriciaTrieTest extends BaseTestCase {
             assertEquals(values.get(index++), o);
         }
 
-        public SelectStatus select(Entry<? extends Object, ? extends Object> entry) {
+        public SelectStatus select(Entry<?, ?> entry) {
           //  System.out.println("Scanning: " + entry.getKey());
             assertEquals(keys.get(index), entry.getKey());
             assertEquals(values.get(index), entry.getValue());
@@ -1089,7 +1089,7 @@ public class PatriciaTrieTest extends BaseTestCase {
 
     private static class IntegerKeyCreator implements KeyAnalyzer<Integer> {
 
-        public static final int[] createIntBitMask(final int bitCount) {
+        public static int[] createIntBitMask(final int bitCount) {
             int[] bits = new int[bitCount];
             for (int i = 0; i < bitCount; i++) {
                 bits[i] = 1 << (bitCount - i - 1);
@@ -1148,8 +1148,8 @@ public class PatriciaTrieTest extends BaseTestCase {
         }
         
         public boolean isPrefix(Integer prefix, int offset, int length, Integer key) {
-            int addr1 = prefix.intValue();
-            int addr2 = key.intValue();
+            int addr1 = prefix;
+            int addr2 = key;
             addr1 = addr1 << offset;
             
             int mask = 0;
@@ -1166,7 +1166,7 @@ public class PatriciaTrieTest extends BaseTestCase {
 
     private static class AlphaKeyCreator implements KeyAnalyzer<Character> {
 
-        public static final int[] createIntBitMask(final int bitCount) {
+        public static int[] createIntBitMask(final int bitCount) {
             int[] bits = new int[bitCount];
             for (int i = 0; i < bitCount; i++) {
                 bits[i] = 1 << (bitCount - i - 1);

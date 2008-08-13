@@ -138,7 +138,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * @param o this contains a x s.t. o.equals(x).  Note that
      *  priority is ignored in this operation.
      */
-    public boolean contains(Object o) {
+    public boolean contains(E o) {
         return tree.contains(o);
     }
 
@@ -147,7 +147,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      *
      * @return true this contained an x such that o.equals(x).
      */
-    public boolean remove(Object o) {
+    public boolean remove(E o) {
         return tree.remove(o);
     }
 

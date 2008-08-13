@@ -60,12 +60,12 @@ public class AndView extends BooleanFunction {
 
 	public int nextClearBit(int startIndex) {
 		long smallest = Long.MAX_VALUE;
-		for (int i = 0; i < fields.length; i++) {
-			int current = fields[i].nextClearBit(startIndex);
-			if (current == -1)
-				continue;
-			smallest = Math.min(current, smallest);
-		}
+        for (BitField field : fields) {
+            int current = field.nextClearBit(startIndex);
+            if (current == -1)
+                continue;
+            smallest = Math.min(current, smallest);
+        }
 		return smallest == Long.MAX_VALUE ? -1 : (int)smallest;
 	}
 

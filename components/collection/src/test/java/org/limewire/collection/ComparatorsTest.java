@@ -26,9 +26,9 @@ public class ComparatorsTest extends BaseTestCase {
      * @throws Exception if an error occurs
      */
     public void testLongComparator() throws Exception {
-        Long one = new Long(1);
-        Long two = new Long(2);
-        Long three = new Long(3);
+        Long one = (long) 1;
+        Long two = (long) 2;
+        Long three = (long) 3;
         String a = "a";
         String b = "b";
         String c = "c";
@@ -59,9 +59,9 @@ public class ComparatorsTest extends BaseTestCase {
      * @throws Exception if an error occurs
      */
     public void testInverseLongComparator() throws Exception {
-        Long one = new Long(1);
-        Long two = new Long(2);
-        Long three = new Long(3);
+        Long one = (long) 1;
+        Long two = (long) 2;
+        Long three = (long) 3;
         String a = "a";
         String b = "b";
         String c = "c";
@@ -85,8 +85,8 @@ public class ComparatorsTest extends BaseTestCase {
      * @throws Exception if an error occurs
      */
     public void testLongCompareTo() throws Exception {
-        Long firstLong = new Long(1);
-        Long secondLong = new Long(1);
+        Long firstLong = (long) 1;
+        Long secondLong = (long) 1;
         
         // check the case where the arguments are equal.
         int result = Comparators.longCompareTo(firstLong, secondLong);
@@ -98,7 +98,7 @@ public class ComparatorsTest extends BaseTestCase {
         
         // check the case where the first argument is less than the second
         // argument
-        firstLong = new Long(0);
+        firstLong = (long) 0;
         result = Comparators.longCompareTo(firstLong, secondLong);
         assertLessThan("unexpected value", 0, result);
         // make sure we get the same value as the Long class.
@@ -108,7 +108,7 @@ public class ComparatorsTest extends BaseTestCase {
 
         // check the case where the second argument is less than the first
         // argument
-        firstLong = new Long(4);
+        firstLong = (long) 4;
         result = Comparators.longCompareTo(firstLong, secondLong);
         assertGreaterThan("unexpected value", 0, result);
 

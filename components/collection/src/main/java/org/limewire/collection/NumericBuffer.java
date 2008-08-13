@@ -59,7 +59,7 @@ public class NumericBuffer<T extends Number> extends Buffer<T> {
 	 */
 	public Number sum() {
 		if (isEmpty())
-			return new Integer(0);
+			return 0;
 		Number n = first();
 		if (n instanceof Float || n instanceof Double)
 			return doubleSum();

@@ -60,7 +60,11 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
     @SuppressWarnings("unchecked")
     public Object clone() {
         FixedSizeArrayHashMap<K, V> newSet = (FixedSizeArrayHashMap<K, V>)super.clone();
-        newSet.buf = buf.clone();
+        try {
+            newSet.buf = buf.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
         return newSet;
     }
     
@@ -165,13 +169,13 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
     
     private class ArrayHashMapEntryIterator extends UnmodifiableIterator<Map.Entry<K, V>> {
         private final Iterator<Map.Entry<K,V>> iter = buf.iterator();
-        private Map.Entry<K, V> current;
+
         public boolean hasNext() {
             return iter.hasNext();
         }
         
         public Map.Entry<K, V> next() {
-            current = iter.next();
+            Map.Entry<K, V> current = iter.next();
             return current;
         }
     }

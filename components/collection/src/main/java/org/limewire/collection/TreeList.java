@@ -671,37 +671,37 @@ public class TreeList<E> extends AbstractList<E> {
         }
 
         private AVLNode<E> rotateLeft() {
-            AVLNode<E> newTop = right; // can't be faedelung!
+            AVLNode<E> newRoot = right; // can't be faedelung!
             AVLNode<E> movedNode = getRightSubTree().getLeftSubTree();
 
-            int newTopPosition = relativePosition + getOffset(newTop);
-            int myNewPosition = -newTop.relativePosition;
-            int movedPosition = getOffset(newTop) + getOffset(movedNode);
+            int newTopPosition = relativePosition + getOffset(newRoot);
+            int myNewPosition = -newRoot.relativePosition;
+            int movedPosition = getOffset(newRoot) + getOffset(movedNode);
 
-            setRight(movedNode, newTop);
-            newTop.setLeft(this, null);
+            setRight(movedNode, newRoot);
+            newRoot.setLeft(this, null);
 
-            setOffset(newTop, newTopPosition);
+            setOffset(newRoot, newTopPosition);
             setOffset(this, myNewPosition);
             setOffset(movedNode, movedPosition);
-            return newTop;
+            return newRoot;
         }
 
         private AVLNode<E> rotateRight() {
-            AVLNode<E> newTop = left; // can't be faedelung
+            AVLNode<E> newRoot = left; // can't be faedelung
             AVLNode<E> movedNode = getLeftSubTree().getRightSubTree();
 
-            int newTopPosition = relativePosition + getOffset(newTop);
-            int myNewPosition = -newTop.relativePosition;
-            int movedPosition = getOffset(newTop) + getOffset(movedNode);
+            int newTopPosition = relativePosition + getOffset(newRoot);
+            int myNewPosition = -newRoot.relativePosition;
+            int movedPosition = getOffset(newRoot) + getOffset(movedNode);
 
-            setLeft(movedNode, newTop);
-            newTop.setRight(this, null);
+            setLeft(movedNode, newRoot);
+            newRoot.setRight(this, null);
 
-            setOffset(newTop, newTopPosition);
+            setOffset(newRoot, newTopPosition);
             setOffset(this, myNewPosition);
             setOffset(movedNode, movedPosition);
-            return newTop;
+            return newRoot;
         }
 
         /**

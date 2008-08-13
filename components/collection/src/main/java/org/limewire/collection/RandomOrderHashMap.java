@@ -26,7 +26,7 @@ public class RandomOrderHashMap<K, V> extends FixedSizeArrayHashMap<K, V> {
     }
 
     @Override
-    protected Iterator<Entry<K, V>> newEntryIterator() {
+    protected Iterator<Map.Entry<K, V>> newEntryIterator() {
         return new RandomIterator();
     }
     

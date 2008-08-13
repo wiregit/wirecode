@@ -124,7 +124,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 * @param o element whose presence in this set is to be tested.
 	 * @return <tt>true</tt> if this set contains the specified element.
 	 */
-	@Override
+	@SuppressWarnings({"SuspiciousMethodCalls"})
+    @Override
     public boolean contains(Object o) {
 		return map.containsKey(o);
 	}
@@ -169,7 +170,7 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 */
 	@Override
     @SuppressWarnings("unchecked")
-    public Object clone() {
+    public Object clone() throws CloneNotSupportedException {
 		try { 
 			IdentityHashSet<E> newSet = (IdentityHashSet<E>) super.clone();
 			newSet.map = (IdentityHashMap<E, Object>) map.clone();
@@ -198,8 +199,9 @@ implements Set<E>, Cloneable, java.io.Serializable
 		s.writeInt(map.size());
 
 //		Write out all elements in the proper order.
-		for (Iterator i=map.keySet().iterator(); i.hasNext(); )
-			s.writeObject(i.next());
+        for (Object o : map.keySet()) {
+            s.writeObject(o);
+        }
 	}
 
 	/**

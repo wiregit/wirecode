@@ -226,7 +226,7 @@ public class SparseIntSet extends AbstractSet<Integer> {
     public boolean contains(Object o) {
         if (! (o instanceof Integer))
             return false;
-        int i = ((Integer)o).intValue();
+        int i = (Integer) o;
         int point = binarySearch(i);
         return point >= 0;
     }
@@ -241,6 +241,7 @@ public class SparseIntSet extends AbstractSet<Integer> {
         return size;
     }
     
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     @Override
     public boolean retainAll(Collection<?> o) {
         

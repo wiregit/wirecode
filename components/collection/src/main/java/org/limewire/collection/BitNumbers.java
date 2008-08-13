@@ -112,9 +112,9 @@ public class BitNumbers {
     public boolean isEmpty() {
         if(data == null)
             return true;
-        
-        for(int i = 0; i < data.length; i++)
-            if(data[i] != 0)
+
+        for (byte b : data)
+            if (b != 0)
                 return false;
         return true;
     }

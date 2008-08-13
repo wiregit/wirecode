@@ -53,7 +53,7 @@ public class RoundRobinSetQueue<T> extends RoundRobinQueue<T> {
 	 * @see com.limegroup.gnutella.util.RoundRobinQueue#remove(java.lang.Object)
 	 */
 	@Override
-    public synchronized void remove(Object o) {
+    public synchronized void remove(T o) {
 		if (_uniqueness.contains(o)) {
 			_uniqueness.remove(o);
 			super.remove(o);
@@ -64,7 +64,7 @@ public class RoundRobinSetQueue<T> extends RoundRobinQueue<T> {
 	 * @see com.limegroup.gnutella.util.RoundRobinQueue#removeAllOccurences(java.lang.Object)
 	 */
 	@Override
-    public synchronized void removeAllOccurences(Object o) {
+    public synchronized void removeAllOccurences(T o) {
 		remove(o);
 	}
 }

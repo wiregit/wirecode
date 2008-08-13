@@ -3,6 +3,7 @@ package org.limewire.collection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * A <code>Collection</code> that delegates to other collections. <code>MultiCollection</code>
@@ -41,8 +42,7 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
     public MultiCollection(Collection<? extends T>... collections) {
 		super((Iterable<? extends T>[])collections);
 		List<Collection<? extends T>> l = new ArrayList<Collection<? extends T>>(collections.length);
-		for (Collection<? extends T> o : collections)
-			l.add(o);
+        l.addAll(Arrays.asList(collections));
 		this.collections = l;
 	}
 	

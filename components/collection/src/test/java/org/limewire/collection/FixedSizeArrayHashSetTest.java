@@ -75,7 +75,7 @@ public class FixedSizeArrayHashSetTest extends BaseTestCase {
     }
     
     public void testIndexing() throws Exception {
-        FixedSizeArrayHashSet s = new FixedSizeArrayHashSet(3);
+        FixedSizeArrayHashSet<Integer> s = new FixedSizeArrayHashSet<Integer>(3);
         s.add(1);s.add(2);s.add(3);
         assertEquals(new Integer(3),s.get(0));
         assertEquals(new Integer(2),s.get(1));

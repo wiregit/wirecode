@@ -976,11 +976,11 @@ public class IntervalSetTest extends BaseTestCase {
         assertEquals(49, invl.get(1).getHigh());
     }
     
-    public void testClone() {
+    public void testClone() throws CloneNotSupportedException {
         iSet = IntervalSet.createSingletonSet(0,100);
         // [0-100]
         assertEquals(1, iSet.getNumberOfIntervals());
-        IntervalSet clone = (IntervalSet)iSet.clone();
+        IntervalSet clone = iSet.clone();
         assertEquals(1, clone.getAllIntervalsAsList().size());
         assertEquals(new Interval(0, 100), clone.getAllIntervals().next());
         clone.delete(clone.getFirst());
