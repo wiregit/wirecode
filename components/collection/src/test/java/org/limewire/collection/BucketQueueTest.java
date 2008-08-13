@@ -63,10 +63,19 @@ public class BucketQueueTest extends BaseTestCase {
     public void testLegacy() {
         // for the test the objects need to be
         //  a != b && a.equals(b)
-        Object e4= "test";
-        Object e2a= "test";
-        Object e2b= "test";
-        Object e0= "test";
+        Object e4= new String("test");
+        Object e2a= new String("test");
+        Object e2b= new String("test");
+        Object e0= new String("test");
+        
+        assertTrue(e4.equals(e2a) && e4.equals(e2b) && e4.equals(e0));
+        assertTrue(e2a.equals(e2b) && e2a.equals(e0));
+        assertTrue(e2b.equals(e0));
+        
+        assertTrue(e4 != e2a && e4 != e2b && e4 != e0);
+        assertTrue(e2a != e2b  && e2a != e0);
+        assertTrue(e2b != e0);
+        
         BucketQueue q=new BucketQueue(5, 10);
         assertTrue(q.isEmpty());
 
