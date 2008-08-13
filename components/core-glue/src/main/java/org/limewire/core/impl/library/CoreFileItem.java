@@ -20,7 +20,7 @@ public class CoreFileItem implements FileItem {
     private final int numHits;
     private final int numUploads;
     private final Category category;
-    private final Map<String,String> map;
+    private final Map<String,Object> map;
     
     public CoreFileItem(FileDesc fileDesc) { 
         this.file = fileDesc.getFile();
@@ -31,7 +31,7 @@ public class CoreFileItem implements FileItem {
         this.numHits = fileDesc.getHitCount();
         this.numUploads = fileDesc.getCompletedUploads();
         this.category = getCategory(fileDesc.getFile());
-        this.map = new HashMap<String,String>();
+        this.map = new HashMap<String,Object>();
     }
     
     @Override
@@ -92,8 +92,13 @@ public class CoreFileItem implements FileItem {
     }
 
     @Override
-    public String getProperty(String key) {
+    public Object getProperty(String key) {
         return map.get(key);
+    }
+    
+    @Override
+    public void setProperty(String key, Object value) {
+        map.put(key, value);
     }
 
 }

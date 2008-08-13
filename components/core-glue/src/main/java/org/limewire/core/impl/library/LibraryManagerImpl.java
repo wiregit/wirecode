@@ -13,8 +13,6 @@ import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -202,16 +200,9 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            String ext = FileUtils.getFileExtension(fileDesc.getFile());
-            if(MediaType.getMediaTypeForExtension(ext) == MediaType.getImageMediaType()) {
-                FileItem newItem = new CoreImageFileItem(fileDesc);
-                lookup.put(fileDesc.getFile(), newItem);
-                eventList.add(newItem);
-            } else {
-                FileItem newItem = new CoreFileItem(fileDesc);  
-                lookup.put(fileDesc.getFile(), newItem);
-                eventList.add(newItem);
-            }
+            FileItem newItem = new CoreFileItem(fileDesc);  
+            lookup.put(fileDesc.getFile(), newItem);
+            eventList.add(newItem);
         }
 
         @Override

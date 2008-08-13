@@ -31,6 +31,8 @@ public interface FileItem {
     /**
      * Returns xml data about this fileItem
      */
-    String getProperty(String key);
+    Object getProperty(String key);
+    
+    void setProperty(String key, Object object);
     
 }

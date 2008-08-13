@@ -2,6 +2,11 @@ package org.limewire.ui.swing.images;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.net.MalformedURLException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JList;
@@ -10,8 +15,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 
 import org.jdesktop.swingx.JXList;
+import org.jdesktop.swingx.graphics.GraphicsUtilities;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.ImageFileItem;
+import org.limewire.ui.swing.util.ImageScaler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventListModel;
@@ -44,17 +51,44 @@ public class ImageList extends JXList {
         public Component getListCellRendererComponent(JList list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
 
-            if(value instanceof ImageFileItem) {
-                ImageFileItem item = (ImageFileItem) value;
-                if(item.getThumbnail() != null)
-                    setIcon(new ImageIcon(item.getThumbnail()));
-            } else 
-                setText((String) value);
+             FileItem item = (FileItem)value;
+             ImageIcon imageIcon = (ImageIcon) item.getProperty("Image");
+             if(imageIcon != null)
+                 setIcon(imageIcon);
+             else {
+                 //TODO: this is really bad, but doing this to fix the build
+                 //         will move to this on a background thread 
+                 Image image = createImage(item.getFile());
+                 ImageIcon icon = new ImageIcon(image);
+                 item.setProperty("Image", icon);
+                 setIcon(icon);
+             }
             
             this.setBackground(isSelected ? Color.BLUE : Color.WHITE);
             this.setForeground(isSelected ? Color.WHITE : Color.WHITE );
             
             return this;
+        }
+        
+        private Image createImage(File file) {
+            BufferedImage image = null;
+            try { 
+                image = GraphicsUtilities.loadCompatibleImage(file.toURI().toURL());
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } 
+            
+            // if the image is larger than our viewport, resize the image before saving
+            if( image != null && (image.getWidth() > ImageFileItem.HEIGHT || 
+                    image.getHeight() > ImageFileItem.HEIGHT) ) {
+                image = ImageScaler.getRatioPreservedScaledImage(image, ImageFileItem.WIDTH, 
+                      ImageFileItem.HEIGHT, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false);
+            } 
+            return image;
         }
         
     }

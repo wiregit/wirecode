@@ -66,7 +66,12 @@ public class MockFileItem implements FileItem {
     }
 
     @Override
-    public String getProperty(String key) {
+    public Object getProperty(String key) {
         return null;
+    }
+    
+    @Override
+    public void setProperty(String key, Object object) {
+        
     }
 }
