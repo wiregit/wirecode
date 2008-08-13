@@ -47,6 +47,16 @@ public class RefreshTimerTest extends GUIBaseTestCase {
         refreshTimer.updateUptimeHistory(30, 10, 2);
         assertEquals(new String[] { "10", "30" }, uptimeHistory.getValue());
         
+        // go back to shorter history length
+        refreshTimer.updateUptimeHistory(10, 10, 1);
+        assertEquals(new String[] { "10" }, uptimeHistory.getValue());
+                
+        refreshTimer.updateUptimeHistory(20, 10, 1);
+        assertEquals(new String[] { "20" }, uptimeHistory.getValue());
+        
+        // now with longer history, but not first interval
+        refreshTimer.updateUptimeHistory(30, 10, 2);
+        assertEquals(new String[] { "30" }, uptimeHistory.getValue());
     }
 
 }
