@@ -336,7 +336,7 @@ public interface MessageRouter extends Service {
 
     /**
      * Returns the push handler registered for the <code>guid</code>, could also
-     * be {@link ForMeReplyHandler}.
+     * be {@link ForMeReplyHandler} or any of the leaves that are push proxied.
      * 
      * @param guid the client guid
      * 

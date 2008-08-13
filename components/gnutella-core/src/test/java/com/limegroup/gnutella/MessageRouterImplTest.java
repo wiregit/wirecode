@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -42,6 +44,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -51,9 +54,11 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.GnutellaConnection;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -68,6 +73,8 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -79,6 +86,8 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
+import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -999,6 +1008,86 @@ public final class MessageRouterImplTest extends LimeTestCase {
     	//the entry in the routing table should be gone
     	ReplyHandler r = headRt.getReplyHandler(ping.getGUID());
     	assertNull(r);
+    }
+    
+    /**
+     * Ensures that push requests are forwared to handlers in push route table.
+     */
+    public void testForwardPushRequestsToHandlersInPushRouteTable() {
+        
+        Injector injector = LimeTestUtils.createInjector(NetworkManagerStub.MODULE);
+        messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
+        messageRouterImpl.start();
+        
+        final GUID guid = new GUID();
+        PushProxyRequest pushProxyRequest = new PushProxyRequest(guid);
+        final RoutedConnection connection = context.mock(RoutedConnection.class);
+        
+        context.checking(new Expectations() {{
+            one(connection).send(with(any(PushProxyAcknowledgement.class)));
+            one(connection).setPushProxyFor(true);
+            allowing(connection).isOpen();
+            will(returnValue(true));
+            allowing(connection).isSupernodeClientConnection();
+            will(returnValue(true));
+        }});
+        
+        messageRouterImpl.handlePushProxyRequest(pushProxyRequest, connection);
+        context.assertIsSatisfied();
+        
+        final PushRequest pushRequest = new PushRequestImpl(GUID.makeGuid(), (byte)1, guid.bytes(), 500,
+                NetworkUtils.toByteAddress(-444000909), 500);
+        final ReplyHandler requestor = context.mock(ReplyHandler.class);
+
+        context.checking(new Expectations() {{
+            never(requestor).countDroppedMessage();
+            one(connection).handlePushRequest(pushRequest, requestor);
+        }});
+        
+        messageRouterImpl.handleMessage(pushRequest, requestor);
+        
+        context.assertIsSatisfied();
+    }
+    
+    /**
+     * Ensures that push requests are forwarded to leaves even if they are not
+     * in the push route table. This could be the case if the push request is
+     * not due to a previously sent query reply.
+     */
+    public void testForwardPushRequestToLeavesNotInPushRouteTable() {
+        final ConnectionManager connectionManager = context.mock(ConnectionManager.class);
+        final GUID guid = new GUID();
+        final RoutedConnection leaf = context.mock(RoutedConnection.class);
+        
+        context.checking(new Expectations() {{
+            allowing(connectionManager).addEventListener(with(any(ConnectionLifecycleListener.class)));
+            allowing(connectionManager).getInitializedClientConnections();
+            will(returnValue(Collections.singletonList(leaf)));
+            allowing(connectionManager).isSupernode();
+            will(returnValue(true));
+            allowing(leaf).isPushProxyFor();
+            will(returnValue(true));
+            allowing(leaf).getClientGUID();
+            will(returnValue(guid.bytes()));
+        }});
+        
+        Injector injector = LimeTestUtils.createInjector(NetworkManagerStub.MODULE, 
+                TestUtils.bind(ConnectionManager.class).toInstances(connectionManager));
+        messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
+        messageRouterImpl.start();
+        
+        final PushRequest pushRequest = new PushRequestImpl(GUID.makeGuid(), (byte)1, guid.bytes(), 500,
+                NetworkUtils.toByteAddress(-444000909), 500);
+        final ReplyHandler requestor = context.mock(ReplyHandler.class);
+
+        context.checking(new Expectations() {{
+            never(requestor).countDroppedMessage();
+            one(leaf).handlePushRequest(pushRequest, requestor);
+        }});
+        
+        messageRouterImpl.handleMessage(pushRequest, requestor);
+        
+        context.assertIsSatisfied();
     }
     
     @SuppressWarnings("unchecked")

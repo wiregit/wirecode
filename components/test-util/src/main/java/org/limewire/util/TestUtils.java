@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+
 public class TestUtils {
 
     /**
@@ -73,6 +76,62 @@ public class TestUtils {
     public static File getResourceInPackage(String resourceName, Class nearResource) {
         String name = nearResource.getPackage().getName().replace(".", "/");
         return getResourceFile(name + "/" + resourceName);
+    }
+
+    public static <T, F extends T> Module createInstanceModule(final Class<T> interfaze, final F implemenation) {
+        return new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(interfaze).toInstance(implemenation);
+            }
+        };
+    }
+    
+    /**
+     * Experimental fluent interface to binding test classes. 
+     */
+    public static To bind(Class... interfaces) {
+        return new To(interfaces);
+    }
+    
+    public static class To {
+        
+        private final Class[] interfaces;
+
+        public To(Class...interfaces) {
+            this.interfaces = interfaces;
+        }
+        
+        public Module to(final Class... implementations) {
+            if (interfaces.length != implementations.length) {
+                throw new IllegalArgumentException("length of interfaces doesn't not match implementations");
+            }
+            return new AbstractModule() {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void configure() {
+                    for (int i = 0; i < interfaces.length; i++) {
+                        bind(interfaces[i]).to(implementations[i]);
+                    }
+                }
+            };
+        }
+        
+        public Module toInstances(final Object...instances) {
+            if (interfaces.length != instances.length) {
+                throw new IllegalArgumentException("length of interfaces doesn't not match instances");
+            }
+            return new AbstractModule() {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void configure() {
+                    for (int i = 0; i < interfaces.length; i++) {
+                        bind(interfaces[i]).toInstance(instances[i]);
+                    }
+                }
+            };
+        }
+        
     }
 
 }

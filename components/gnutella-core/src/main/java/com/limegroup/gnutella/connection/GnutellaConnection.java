@@ -925,6 +925,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
                             myIp == null ? null : new IpPortImpl(myIp,networkManager.getPort()), 
                                     this);
                 }
+            } else if (m instanceof PushProxyRequest && m.getHops() == 0) {
+                PushProxyRequest pushProxyRequest = (PushProxyRequest)m;
+                clientGUID = pushProxyRequest.getClientGUID().bytes();
             }
 
             if (m instanceof QueryRequest)
