@@ -684,9 +684,13 @@ class VerifyingFolder implements TorrentDiskManager {
 				// part of it (a.k.a. endgame?)
 				if (endgame && needed.isEmpty() && !iterator.hasNext()) {
 					LOG.debug("endgame");
-					needed = requested.clone();
-					
-					// exclude the specified intervals again
+                    try {
+                        needed = requested.clone();
+                    } catch (CloneNotSupportedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    // exclude the specified intervals again
 					for (Range excluded : exclude) 
 						needed.delete(excluded);
 				}
@@ -857,10 +861,14 @@ class VerifyingFolder implements TorrentDiskManager {
         synchronized(this) {
             // Deep-copy the IntervalSet to avoid ConcurrentModificationExceptions
             Map<Integer, IntervalSet> partial = new HashMap<Integer, IntervalSet>(partialBlocks.size());
-            for(Map.Entry<Integer, IntervalSet> entry : partialBlocks.entrySet())
-                partial.put(entry.getKey(), entry.getValue().clone());
-            memento.setPartialBlocks(partial);
-            memento.setVerifiedBlocks((BitSet)verifiedBlocks.clone());
+            try {
+                for(Map.Entry<Integer, IntervalSet> entry : partialBlocks.entrySet())
+                    partial.put(entry.getKey(), entry.getValue().clone());
+                memento.setPartialBlocks(partial);
+                memento.setVerifiedBlocks((BitSet)verifiedBlocks.clone());
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
             memento.setVerifying(isVerifying);
         }
         if (BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue()) {
@@ -950,8 +958,12 @@ class VerifyingFolder implements TorrentDiskManager {
         public BlockRangeMap clone() {
 			BlockRangeMap clone = new BlockRangeMap(size());
 			for (Map.Entry<Integer, IntervalSet> e : entrySet())
-				clone.put(e.getKey(), e.getValue().clone());
-			return clone;
+                try {
+                    clone.put(e.getKey(), e.getValue().clone());
+                } catch (CloneNotSupportedException e1) {
+                    throw new RuntimeException(e1);
+                }
+            return clone;
 		}
 	}
 }
