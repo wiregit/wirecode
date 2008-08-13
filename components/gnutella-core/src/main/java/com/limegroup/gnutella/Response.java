@@ -63,7 +63,8 @@ public interface Response {
     public String getName();
 
     /**
-     * Returns this' metadata.
+     * Returns this' metadata or <code>null</code> if there is no meta
+     * data for this response.
      */
     public LimeXMLDocument getDocument();
 
