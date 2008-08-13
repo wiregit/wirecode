@@ -99,13 +99,11 @@ public class QueryUtils {
      * Strips an extension off of a file's filename.
      */
     public static String ripExtension(String fileName) {
-        String retString = null;
         int extStart = fileName.lastIndexOf('.');
         if (extStart == -1)
-            retString = fileName;
+            return fileName;
         else
-            retString = fileName.substring(0, extStart);
-        return retString;
+            return fileName.substring(0, extStart);
     }
 
     /**
