@@ -31,9 +31,9 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     private final SwarmFile swarmFile;
 
     public SwarmHttpContentListener(SwarmCoordinator fileCoordinator, SwarmFile swarmFile,
-            Range range) {
+            Range leaseRange) {
         this.swarmCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
-        this.leaseRange = Objects.nonNull(range, "range");
+        this.leaseRange = Objects.nonNull(leaseRange, "leaseRange");
         this.swarmFile = swarmFile;
     }
 
