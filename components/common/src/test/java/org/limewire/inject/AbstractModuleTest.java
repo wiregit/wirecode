@@ -1,5 +1,7 @@
 package org.limewire.inject;
 
+import java.util.Arrays;
+
 import junit.framework.Test;
 
 import org.limewire.concurrent.AbstractLazySingletonProvider;
@@ -9,6 +11,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.name.Names;
 
 public class AbstractModuleTest extends BaseTestCase {
@@ -36,6 +39,27 @@ public class AbstractModuleTest extends BaseTestCase {
         assertSame(i3, i2);
         assertSame(i3, i1);
     }
+    
+    public void testWrapperModuleSingletons() {
+        Injector parent = Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(S1.class).to(S1I.class);
+            }
+        });
+        Injector child = Guice.createInjector(Stage.PRODUCTION, Arrays.asList(Modules.providersFrom(parent), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(S2.class).to(S2I.class);
+                bind(S3I.class);
+            }
+        }));
+        
+        assertSame(parent.getInstance(S1.class), child.getInstance(S1.class));
+        assertTrue(S1I.created);
+        assertTrue(S2I.created);
+        assertTrue(S3I.created);
+    }
 
     
     private static interface I1 {}
@@ -48,6 +72,24 @@ public class AbstractModuleTest extends BaseTestCase {
         protected I3 createObject() {
             return new I3() {};
         }
+    }
+    
+    private static interface S1 {}
+    @Singleton
+    private static class S1I implements S1 {
+        private static boolean created = false;
+        S1I () { created = true; }
+    }
+    private static interface S2 {}
+    @Singleton
+    private static class S2I implements S2 {
+        private static boolean created = false;
+        S2I () { created = true; }
+    }
+    @Singleton
+    private static class S3I {
+        private static boolean created = false;
+        S3I () { created = true; }
     }
     
    

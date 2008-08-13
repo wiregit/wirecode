@@ -3,9 +3,11 @@ package org.limewire.core.impl;
 import org.limewire.core.api.Application;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+@Singleton
 class ApplicationImpl implements Application {
     
     private final ApplicationServices applicationServices;

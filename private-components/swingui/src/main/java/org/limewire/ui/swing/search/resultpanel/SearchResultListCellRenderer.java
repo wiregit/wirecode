@@ -4,13 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.util.Map;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.search.model.VisualSearchResult;

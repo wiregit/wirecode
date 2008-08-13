@@ -12,7 +12,7 @@ class FileOfferHandlerImpl implements FileOfferHandler {
     
     @Inject
     public void register(XMPPService xmppService) {
-        xmppService.register(this);
+        xmppService.setFileOfferHandler(this);
     }
 
     public void fileOfferred(FileMetaData f) {

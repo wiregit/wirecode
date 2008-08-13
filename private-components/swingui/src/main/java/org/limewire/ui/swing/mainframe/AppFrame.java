@@ -18,6 +18,7 @@ import org.jdesktop.application.Action;
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.core.impl.MockModule;
+import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
@@ -100,12 +101,13 @@ public class AppFrame extends SingleFrameApplication {
     
     public Injector createInjector() {
         if (injector == null) {
-            injector = Guice.createInjector(new MockModule(), new LimeWireSwingUiModule());
+            injector = Guice.createInjector(Stage.PRODUCTION, new MockModule(), new LimeWireSwingUiModule());
             return injector;
         } else {
             List<Module> modules = new ArrayList<Module>();
             modules.add(new LimeWireSwingUiModule());
-            return Guice.createInjector(injector, Stage.PRODUCTION, modules);
+            modules.add(Modules.providersFrom(injector)); // Add all the parent bindings
+            return Guice.createInjector(Stage.PRODUCTION, modules);
         }
     }
 

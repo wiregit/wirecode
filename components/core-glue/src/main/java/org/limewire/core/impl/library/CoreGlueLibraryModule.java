@@ -3,13 +3,11 @@ package org.limewire.core.impl.library;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.inject.AbstractModule;
 
-import com.google.inject.Scopes;
-
 public class CoreGlueLibraryModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(LibraryManager.class).to(LibraryManagerImpl.class).in(Scopes.SINGLETON);
+        bind(LibraryManager.class).to(LibraryManagerImpl.class);
     }
 
 }

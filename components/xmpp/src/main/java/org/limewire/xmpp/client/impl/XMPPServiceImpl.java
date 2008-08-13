@@ -43,6 +43,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.configurations = configurations;
         this.addressFactory = addressFactory;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
+        System.out.println("constructing i: " + this);
     }
     
     @Inject
@@ -62,11 +63,11 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 //        }
 //    }
 
-    public void register(XMPPErrorListener errorListener) {
+    public void setXmppErrorListener(XMPPErrorListener errorListener) {
         this.errorListener = errorListener;
     }
 
-    public void register(FileOfferHandler offerHandler) {
+    public void setFileOfferHandler(FileOfferHandler offerHandler) {
         this.fileOfferHandler = offerHandler;
     }
 

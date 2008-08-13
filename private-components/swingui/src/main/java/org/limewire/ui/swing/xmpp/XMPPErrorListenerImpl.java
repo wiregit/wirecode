@@ -12,7 +12,7 @@ class XMPPErrorListenerImpl implements XMPPErrorListener{
     
     @Inject
     public void register(XMPPService xmppService) {
-        xmppService.register(this);
+        xmppService.setXmppErrorListener(this);
     }
     public void error(XMPPException exception) {
         // TODO update UI

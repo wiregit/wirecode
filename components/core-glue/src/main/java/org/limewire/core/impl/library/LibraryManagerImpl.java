@@ -18,12 +18,14 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileListListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 
+@Singleton
 class LibraryManagerImpl implements LibraryManager, FileEventListener {
     
     private final FileManager fileManager;

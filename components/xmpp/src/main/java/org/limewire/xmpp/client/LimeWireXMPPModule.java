@@ -11,12 +11,11 @@ import org.limewire.xmpp.client.impl.XMPPServiceImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
-import com.google.inject.Scopes;
 
 public class LimeWireXMPPModule extends AbstractModule {
     
     protected void configure() {
-        bind(XMPPService.class).to(XMPPServiceImpl.class).in(Scopes.SINGLETON);
+        bind(XMPPService.class).to(XMPPServiceImpl.class);
     }
 
     public Provider<FileOfferHandler> getNoOpFileAcceptor() {

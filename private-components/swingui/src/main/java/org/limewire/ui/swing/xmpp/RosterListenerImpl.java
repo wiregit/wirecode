@@ -41,9 +41,11 @@ public class RosterListenerImpl implements RosterListener {
     
     @Inject
     public void register(XMPPService xmppService) {
+        System.out.println("xmpps is: " + xmppService);
+        try {
         for(XMPPConnection connection : xmppService.getConnections()) {
             connection.addRosterListener(this);
-        }
+        } } catch(RuntimeException re) { re.printStackTrace(); throw re; }
     }
 
     public void userAdded(User user) {
