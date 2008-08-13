@@ -165,7 +165,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
     }
 
     public void testMultiWebSeedSingleFileNoPeer() throws Exception {
-        for (int i = 0; i < 10; i++) {
             File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
 
             BTDownloader downloader = createBTDownloader(torrentFile);
@@ -189,7 +188,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
             SwarmerImplTest
                     .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
-        }
     }
 
     public void testSingleWebSeedMultipleFileNoPeer() throws Exception {
