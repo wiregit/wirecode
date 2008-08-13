@@ -111,7 +111,7 @@ class DynamicQRTStorage implements QRTTableStorage {
     }
 
     @Override
-    public DynamicQRTStorage clone() {
+    public DynamicQRTStorage clone() throws CloneNotSupportedException {
         return new DynamicQRTStorage(storage.clone());
     }
     

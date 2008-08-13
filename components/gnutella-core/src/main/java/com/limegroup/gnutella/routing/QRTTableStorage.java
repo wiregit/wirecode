@@ -51,7 +51,7 @@ interface QRTTableStorage extends BitField, Iterable<Integer> {
     /**
      * @return a clone of this storage.
      */
-    public QRTTableStorage clone();
+    public QRTTableStorage clone() throws CloneNotSupportedException;
     
     /**
      * sets all entries present in other to be present in this as well.

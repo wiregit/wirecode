@@ -34,7 +34,7 @@ class BitSetQRTTableStorage implements QRTTableStorage {
     }
     
     @Override
-    public QRTTableStorage clone() {
+    public QRTTableStorage clone() throws CloneNotSupportedException {
         return new BitSetQRTTableStorage((BitSet)bitSet.clone(), bitTableLength);
     }
     

@@ -112,7 +112,7 @@ class SparseSetStorage implements QRTTableStorage {
     }
     
     @Override
-    public QRTTableStorage clone() {
+    public QRTTableStorage clone() throws CloneNotSupportedException {
         SparseIntSet copy = new SparseIntSet();
         copy.addAll(set);
         return new SparseSetStorage(copy, length);

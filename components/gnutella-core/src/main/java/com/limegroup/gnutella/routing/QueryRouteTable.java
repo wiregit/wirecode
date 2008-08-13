@@ -543,7 +543,12 @@ public class QueryRouteTable {
             //      this.bitTable.get is true, prev.bitTable.get
             //      is false, and vice versa.            
             if(!this.storage.equals(prev.storage) ) {
-                QRTTableStorage xOr = this.storage.clone();
+                QRTTableStorage xOr = null;
+                try {
+                    xOr = this.storage.clone();
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
                 xOr.xor(prev.storage);
                 for (int i : xOr) {
                     data[i] = this.storage.get(i) ?
