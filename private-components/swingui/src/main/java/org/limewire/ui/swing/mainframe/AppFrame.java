@@ -22,9 +22,6 @@ import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.FileOfferHandler;
-import org.limewire.xmpp.api.client.RosterListener;
-import org.limewire.xmpp.api.client.XMPPErrorListener;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -108,13 +105,7 @@ public class AppFrame extends SingleFrameApplication {
         } else {
             List<Module> modules = new ArrayList<Module>();
             modules.add(new LimeWireSwingUiModule());
-            Injector newInjector = Guice.createInjector(injector, Stage.PRODUCTION, modules);
-            
-            // TODO HACK
-            newInjector.getInstance(FileOfferHandler.class);
-            newInjector.getInstance(RosterListener.class);
-            newInjector.getInstance(XMPPErrorListener.class);
-            return newInjector;
+            return Guice.createInjector(injector, Stage.PRODUCTION, modules);
         }
     }
 

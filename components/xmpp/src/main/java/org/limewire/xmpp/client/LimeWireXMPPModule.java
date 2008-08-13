@@ -16,7 +16,6 @@ import com.google.inject.Scopes;
 public class LimeWireXMPPModule extends AbstractModule {
     
     protected void configure() {
-        bind(XMPPServiceImpl.class).in(Scopes.SINGLETON);
         bind(XMPPService.class).to(XMPPServiceImpl.class).in(Scopes.SINGLETON);
     }
 
@@ -25,7 +24,7 @@ public class LimeWireXMPPModule extends AbstractModule {
             public FileOfferHandler get() {
                 return new FileOfferHandler() {
                     public void register(XMPPService xmppService) {
-                        //To change body of implemented methods use File | Settings | File Templates.
+                        
                     }
 
                     public void fileOfferred(FileMetaData f) {

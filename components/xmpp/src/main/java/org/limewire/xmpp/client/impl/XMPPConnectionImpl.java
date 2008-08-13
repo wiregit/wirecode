@@ -264,7 +264,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                             }
                         }
                     }
-                }));
+                }), "presence-thread-" + presence.getFrom());
                 t.start();
             }
         }
