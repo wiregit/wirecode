@@ -43,7 +43,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.configurations = configurations;
         this.addressFactory = addressFactory;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
-        System.out.println("constructing i: " + this);
     }
     
     @Inject
