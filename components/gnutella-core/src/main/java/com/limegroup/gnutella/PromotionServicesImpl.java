@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import org.limewire.core.settings.ThirdPartySearchResultsSettings;
+import org.limewire.core.settings.PromotionSettings;
 import org.limewire.lifecycle.Service;
 import org.limewire.promotion.InitializeException;
 import org.limewire.promotion.PromotionBinderRepository;
@@ -41,12 +41,12 @@ final class PromotionServicesImpl implements PromotionServices, Service {
     public void start() {
         try {
             promotionBinderRepository.init(
-                        ThirdPartySearchResultsSettings.SEARCH_URL.getValue(),
-                        ThirdPartySearchResultsSettings.BUCKET_ID_MODULUS.getValue()
+                        PromotionSettings.SEARCH_URL.getValue(),
+                        PromotionSettings.BUCKET_ID_MODULUS.getValue()
                     );
             
             promotionSearcher.init(
-                        ThirdPartySearchResultsSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
+                        PromotionSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
                     );
 
             isRunning = true;

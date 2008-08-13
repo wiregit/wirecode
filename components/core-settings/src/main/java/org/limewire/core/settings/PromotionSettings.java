@@ -8,8 +8,8 @@ import org.limewire.setting.StringSetting;
  * Settings for The LimeWire Store&#8482; song search results. This is used by
  * {@link com.limegroup.gnutella.PromotionServicesImpl}.
  */
-public final class ThirdPartySearchResultsSettings extends LimeProps {
-    private ThirdPartySearchResultsSettings() {}
+public final class PromotionSettings extends LimeProps {
+    private PromotionSettings() {}
 
     /**
      * Enables the promotion system when <code>true</code>.
