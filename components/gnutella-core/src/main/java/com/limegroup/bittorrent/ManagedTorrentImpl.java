@@ -31,6 +31,7 @@ import com.limegroup.bittorrent.disk.DiskManagerListener;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
+import com.limegroup.bittorrent.handshaking.piecestrategy.LargestGapStartPieceStrategy;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.swarm.BTSwarmCoordinator;
@@ -189,7 +190,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         TorrentFileSystem torrentFileSystem = context.getFileSystem();
         TorrentDiskManager torrentDiskManager = context.getDiskManager();
         BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(metaInfo, torrentFileSystem,
-                torrentDiskManager);
+                torrentDiskManager, new LargestGapStartPieceStrategy(metaInfo));
 
         swarmer = new SwarmerImpl(btCoordinator);
         swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(btCoordinator, LimeWireUtils.getHttpServer()));
@@ -237,22 +238,12 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.Torrent#isComplete()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.ManagedTorrent#isComplete()
      */
     public boolean isComplete() {
         return state.get() != TorrentState.DISK_PROBLEM && _folder.isComplete();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#start()
-     */
     /*
      * (non-Javadoc)
      * 
@@ -386,11 +377,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.DiskManagerListener#diskExceptionHappened()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see
      * com.limegroup.bittorrent.ManagedTorrent#diskExceptionHappened(org.limewire
      * .io.DiskException)
@@ -488,11 +474,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.Torrent#pause()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.ManagedTorrent#pause()
      */
     public synchronized void pause() {
@@ -508,11 +489,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             stopImpl();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#resume()
-     */
     /*
      * (non-Javadoc)
      * 
@@ -961,11 +937,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.Torrent#isPaused()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.ManagedTorrent#isPaused()
      */
     public boolean isPaused() {
@@ -1040,11 +1011,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.Torrent#getNumConnections()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.ManagedTorrent#getNumConnections()
      */
     public int getNumConnections() {
@@ -1054,22 +1020,12 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.Torrent#getNumPeers()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.ManagedTorrent#getNumPeers()
      */
     public int getNumPeers() {
         return _peers.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getNumBusyPeers()
-     */
     /*
      * (non-Javadoc)
      * 
@@ -1109,11 +1065,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.Torrent#getTotalDownloaded()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.ManagedTorrent#getTotalDownloaded()
      */
     public long getTotalDownloaded() {
@@ -1129,11 +1080,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         return _info.getRatio();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getAmountLost()
-     */
     /*
      * (non-Javadoc)
      * 
@@ -1210,22 +1156,13 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.Torrent#measureBandwidth()
-     */
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.ManagedTorrent#measureBandwidth()
      */
     public void measureBandwidth() {
         linkManager.measureBandwidth();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getMeasuredBandwidth(boolean)
-     */
+
     /*
      * (non-Javadoc)
      * 
