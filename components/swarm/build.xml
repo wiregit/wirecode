@@ -43,7 +43,7 @@
 	</target>
 	
 	<target name="compile-tests">
-	    <do.compile-tests component="http"/>
+	    <do.compile-tests component="swarm"/>
 	</target>
 	
 	<target name="clean-tests">
