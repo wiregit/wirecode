@@ -14,6 +14,7 @@ import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.bittorrent.BTContext;
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -29,7 +30,6 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomGapStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class BTSwarmCoordinatorTest extends LimeTestCase {
     private static final int TEST_PORT = 8080;
@@ -37,14 +37,14 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     /**
      * A directory containing the torrent data for this unit test.
      */
-    public static final String TORRENT_DIR = System.getProperty("user.dir")
-            + "/test-data/bittorrent/torrents";
+    public static final File TORRENT_DIR = TestUtils
+    .getResourceFile("org/limewire/swarm/bittorrent/torrents");
 
     /**
      * A directory containing the torrent data for this unit test.
      */
-    public static final String FILE_DIR = System.getProperty("user.dir")
-            + "/test-data/bittorrent/public_html";
+    public static final File FILE_DIR =  TestUtils
+    .getResourceFile("org/limewire/swarm/bittorrent/public_html");
 
     private FileServer fileServer = null;
 
@@ -54,7 +54,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        fileServer = new FileServer(TEST_PORT, new File(FILE_DIR));
+        fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -245,7 +245,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     }
 
     private File createFile(String fileName) {
-        File torrentFile = new File(TORRENT_DIR + "/" + fileName);
+        File torrentFile = new File(TORRENT_DIR.getAbsoluteFile() + "/" + fileName);
         return torrentFile;
     }
 

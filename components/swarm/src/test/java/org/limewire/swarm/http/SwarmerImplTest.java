@@ -41,7 +41,7 @@ public class SwarmerImplTest extends BaseTestCase {
      * A directory containing the download data for this unit tests.
      */
     public static final File FILE_DIR = TestUtils
-            .getResourceFile("test-data/bittorrent/public_html");
+            .getResourceFile("org/limewire/swarm/bittorrent/public_html");
 
     private FileServer fileServer = null;
 

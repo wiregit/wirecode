@@ -24,7 +24,10 @@ public class SwarmFileSystemImplTest extends TestCase {
     }
 
     private File createFile(String fileName) {
-        return new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
+        File file = new File(System.getProperty("java.io.tmpdir") + "/limetests/" + fileName);
+        file.mkdirs();
+        file.deleteOnExit();
+        return file;
     }
 
     public void testWrite1() throws IOException {

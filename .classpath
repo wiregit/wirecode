@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
+	<classpathentry kind="src" path="components/swarm/src/test/resources"/>
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/resources"/>
 	<classpathentry excluding="windows/|macosx/|target/" kind="src" output="gui" path="gui"/>
 	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
