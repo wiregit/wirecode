@@ -16,12 +16,11 @@ public class RandomFailFileVerifier implements SwarmBlockVerifier {
     }
 
     public boolean verify(Range range, SwarmFileSystem swarmFile) {
-        boolean verified = true;
         if (PERCENTAGE_FAIL > Math.random()) {
-            verified = false;
+            return false;
         }
 
-        return verified;
+        return true;
     }
 
 }
