@@ -19,12 +19,12 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.xmpp.PresenceUpdateEvent;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -35,15 +35,19 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventListModel;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
 public class FriendsPane extends JPanel {
-    private EventList<Friend> friends;
-    private final WeakHashMap<String, FriendImpl> idToFriendMap;
     
+    private static final Log LOG = LogFactory.getLog(FriendsPane.class);
+    
+    private EventList<Friend> friends;
+    private final WeakHashMap<String, FriendImpl> idToFriendMap;    
+
     public FriendsPane(IconLibrary icons) {
         super(new BorderLayout());
         friends = new BasicEventList<Friend>();
@@ -64,6 +68,7 @@ public class FriendsPane extends JPanel {
     
     @EventSubscriber
     public void handlePresenceUpdate(PresenceUpdateEvent event) {
+        LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
         Presence presence = event.getPresence();
         FriendImpl friend = idToFriendMap.get(presence.getJID());
         switch(presence.getType()) {
