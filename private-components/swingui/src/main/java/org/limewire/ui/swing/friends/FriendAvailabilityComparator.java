@@ -24,7 +24,15 @@ class FriendAvailabilityComparator implements Comparator<Friend> {
         } else if (b_mode_index > a_mode_index) {
             return -1;
         }
-        return a.getName().compareTo(b.getName());
+        String a_name = a.getName();
+        String b_name = b.getName();
+        if (a_name == null) {
+            return 1;
+        }
+        if (b_name == null) {
+            return -1;
+        }
+        return a_name.compareTo(b_name);
     }
     
     private static int order(Friend friend) {

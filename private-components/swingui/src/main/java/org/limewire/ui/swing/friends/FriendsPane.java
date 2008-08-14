@@ -94,8 +94,8 @@ public class FriendsPane extends JPanel {
         //TODO
     }
     
-    private static class FriendCellRenderer implements ListCellRenderer {
-        private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+    private class FriendCellRenderer implements ListCellRenderer {
+        private final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
         private final IconLibrary icons;
         
         public FriendCellRenderer(IconLibrary icons) {
@@ -112,7 +112,7 @@ public class FriendsPane extends JPanel {
             JLabel friendName = new JLabel();
             cell.add(friendName);
             
-            friendName.setText(friend.getName());
+            friendName.setText(safe(friend.getName(), friend.getId()));
             friendName.setFont(list.getFont());
 
             cell.add(new JLabel(icons.getEndChat()));
@@ -138,6 +138,10 @@ public class FriendsPane extends JPanel {
             cell.setBorder(EMPTY_BORDER);
             
             return cell;
+        }
+        
+        private String safe(String str, String str2) {
+            return (str == null || "".equals(str2)) ? str2 : str;
         }
         
         private Icon getIcon(Friend friend) {

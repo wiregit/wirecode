@@ -46,6 +46,21 @@ public class FriendAvailabilityComparatorTest extends TestCase {
             assertEquals(sorted[i], friends.get(i).getName());
         }
     }
+
+    public void testHandleNullFriendName() {
+        populateFriends("a_xa", Mode.xa);
+        populateFriends(null, Mode.xa);
+        populateFriends(null, Mode.chat);
+        populateFriends("a_chat", Mode.chat);
+        
+        Collections.sort(friends, new FriendAvailabilityComparator());
+        
+        String[] sorted = new String[] {"a_chat", null, "a_xa", null};
+        
+        for(int i = 0; i < sorted.length; i++) {
+            assertEquals(sorted[i], friends.get(i).getName());
+        }
+    }
     
 //    public void testOrderSortingForChatStatus() {
 //        friends.add(new MockFriend("b_chat", "foo", Mode.chat));
