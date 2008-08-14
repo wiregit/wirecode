@@ -6,12 +6,12 @@ import java.net.URI;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.http.URIUtils;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.impl.AbstractSwarmSource;
 import org.limewire.swarm.impl.LoggingSwarmSourceListener;
 import org.limewire.swarm.impl.ReconnectingSwarmSourceListener;
 
-import com.limegroup.gnutella.http.URIUtils;
 
 public class SwarmHttpSource extends AbstractSwarmSource {
 

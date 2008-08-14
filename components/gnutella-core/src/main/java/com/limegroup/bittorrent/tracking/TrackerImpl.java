@@ -12,6 +12,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpConnectionParams;
+import org.limewire.http.URIUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
@@ -25,7 +26,6 @@ import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

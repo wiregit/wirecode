@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.http;
+package org.limewire.http;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.StringTokenizer;
 
-import org.limewire.http.Constants;
 import org.limewire.service.ErrorService;
 
 /**

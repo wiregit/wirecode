@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 
 import junit.framework.Test;
 
+import org.limewire.http.URIUtils;
 import org.limewire.util.BaseTestCase;
 
 public class URIUtilsTest extends BaseTestCase {

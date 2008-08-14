@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.http.URIUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BEncoder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.security.SHA1;
 
 /**
