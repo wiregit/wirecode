@@ -77,16 +77,6 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
     private final List<SwarmSource> badSources;
 
     private final SwarmSourceStats stats;
-
-    public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator,
-            LimeConnectingIOReactor ioReactor, IOEventDispatch ioEventDispatch) {
-        this.swarmCoordinator = swarmCoordinator;
-        this.ioReactor = ioReactor;
-        this.eventDispatch = ioEventDispatch;
-        this.sources = Collections.synchronizedList(new ArrayList<SwarmSource>());
-        this.badSources = Collections.synchronizedList(new ArrayList<SwarmSource>());
-        this.stats = new SwarmSourceStats();
-    }
     
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator, String userAgent) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
