@@ -16,7 +16,8 @@ import com.limegroup.gnutella.ActivityCallbackAdapter;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
 import org.limewire.core.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.FileServer;
+import org.limewire.http.util.FileServer;
+
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

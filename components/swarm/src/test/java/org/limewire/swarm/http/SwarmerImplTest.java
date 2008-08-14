@@ -10,6 +10,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.Range;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.http.util.FileServer;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
@@ -27,8 +28,7 @@ import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
-
-import com.limegroup.gnutella.util.FileServer;
+import org.limewire.util.TestUtils;
 
 /**
  * 
@@ -40,8 +40,8 @@ public class SwarmerImplTest extends BaseTestCase {
     /**
      * A directory containing the download data for this unit tests.
      */
-    public static final String FILE_DIR = System.getProperty("user.dir")
-            + "/tests/test-data/bittorrent/public_html";
+    public static final File FILE_DIR = TestUtils
+            .getResourceFile("test-data/bittorrent/public_html");
 
     private FileServer fileServer = null;
 
@@ -55,7 +55,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        fileServer = new FileServer(TEST_PORT, new File(FILE_DIR));
+        fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
         Thread.sleep(1000);
         super.setUp();
@@ -307,7 +307,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
         swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator,
-        "LimeTest/1.1"));
+                "LimeTest/1.1"));
         swarmer.start();
 
         swarmer.addSource(swarmSource);
@@ -462,7 +462,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
         swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator,
-        "LimeTest/1.1"));
+                "LimeTest/1.1"));
         swarmer.getMeasuredBandwidth(true);
         swarmer.getMeasuredBandwidth(false);
 

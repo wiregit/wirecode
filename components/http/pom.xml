@@ -66,6 +66,16 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.0-alpha5-20080522.192134-5</version>
-    </dependency>    
+    </dependency> 
+   <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>org.mortbay.jetty</artifactId>
+      <version>5.1.12</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>javax.servlet</artifactId>
+      <version>5.1.12</version>
+    </dependency>
   </dependencies>
 </project>

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
+import org.limewire.http.util.FileServer;
 import org.limewire.io.DiskException;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
@@ -27,7 +28,6 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.LargestGapStartPieceSt
 import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomGapStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
-import com.limegroup.gnutella.util.FileServer;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
