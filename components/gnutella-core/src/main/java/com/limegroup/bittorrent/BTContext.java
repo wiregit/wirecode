@@ -16,7 +16,7 @@ public class BTContext implements TorrentContext {
 	private TorrentDiskManager diskManager;
 	private final DiskManagerFactory diskManagerFactory;
 	
-	BTContext(BTMetaInfo info, DiskManagerFactory diskManagerFactory) {
+	public BTContext(BTMetaInfo info, DiskManagerFactory diskManagerFactory) {
 	    this.diskManagerFactory = diskManagerFactory;
 		this.info = info;
 		info.setContext(this);

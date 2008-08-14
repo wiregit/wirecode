@@ -81,4 +81,23 @@ public class URIUtils {
     private static boolean isDelimiter(String s) {
         return RESERVED.contains(s);
     }
+
+    /**
+     * Returns the port for the given URI. If no port can be found, it checks the scheme.
+     * If the scheme is http port 80 is returned, if https 443.
+     * @param uri
+     * @return
+     */
+    public static int getPort(URI uri) {
+        int port = uri.getPort();
+        if (port == -1) {
+            String scheme = uri.getScheme();
+            if ("http".equals(scheme)) {
+                port = 80;
+            } else if ("https".equals(scheme)) {
+                port = 443;
+            }
+        }
+        return port;
+    }
 }

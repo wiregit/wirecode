@@ -54,6 +54,7 @@
     <module>security</module>
     <module>setting</module>
     <module>statistic</module>
+    <module>swarm</module>
     <module>xmpp</module>
     <module>test-util</module>
     <module>core-api</module>

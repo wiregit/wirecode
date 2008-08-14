@@ -3,6 +3,7 @@ package com.limegroup.bittorrent;
 import java.net.URI;
 import java.security.MessageDigest;
 
+import com.limegroup.bittorrent.disk.BlockRangeMap;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
@@ -69,6 +70,12 @@ public interface BTMetaInfo {
      * @return array of <tt>URL</tt> storing the addresses of the trackers
      */
     public abstract URI[] getTrackers();
+    
+    /**
+     * 
+     * @return array of <tt>URL</tt> storing the addresses of the webseeds, null if no such addresses exist.
+     */
+    public abstract URI[] getWebSeeds();
 
     /**
      * Returns which message digest was used to create _hashes.
@@ -82,5 +89,34 @@ public interface BTMetaInfo {
      * Serializes this, including information about the written ranges.
      */
     public abstract BTMetaInfoMemento toMemento();
+
+    public abstract boolean isMultiFileTorrent();
+
+    public abstract void setWebSeeds(URI[] uris);
+    
+    public abstract BTInterval getPiece(int pieceIndex);
+    
+    public abstract int getPieceSize(int pieceIndex);
+    
+    public abstract boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck);
+
+    public abstract BTInterval getPieceAt(long i);
+    
+    
+    /**
+     * Gets the highByte of the given BTInterval
+     * @param piece
+     * @return
+     */
+    public long getHighByte(BTInterval btInterval);
+    
+    /**
+     * Gets the lowByte of the given BTInterval
+     * @param piece
+     * @return
+     */
+    public long getLowByte(BTInterval btInterval);
+
+    public abstract boolean hasWebSeeds();
 
 }

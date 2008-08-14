@@ -13,7 +13,12 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -892,5 +897,50 @@ public class FileUtils {
                     throw new IOException("unable to copy file");
             }
         }
+    }
+    
+    /**
+     * Utility method to copy an input stream into the target output stream.
+     * @param inputStream
+     * @param outputStream
+     * @throws IOException
+     */
+    public static void write(InputStream inputStream, OutputStream outputStream) throws IOException {
+        int numRead = 0;
+        byte[] buffer = new byte[1024];
+        while ((numRead = inputStream.read(buffer,0,buffer.length)) != -1) {
+            outputStream.write(buffer,0,numRead);
+        }
+    }
+
+    /**
+     * Utility method to generate an MD5 hash from a target file.
+     * 
+     * @param file
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
+    public static String getMD5(File file) throws NoSuchAlgorithmException, IOException {
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        ByteBuffer byteBuffer = ByteBuffer.allocate(16 * 1024);
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
+            FileChannel fileChannel = fileInputStream.getChannel();
+            while (fileChannel.read(byteBuffer) != -1) {
+                byteBuffer.flip();
+                m.update(byteBuffer);
+                byteBuffer.clear();
+            }
+
+        } finally {
+            if (fileInputStream != null) {
+                fileInputStream.close();
+            }
+        }
+        byte[] digest = m.digest();
+        String md5 = new BigInteger(1, digest).toString(16);
+        return md5;
     }
 }

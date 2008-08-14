@@ -1,0 +1,114 @@
+package com.limegroup.bittorrent;
+
+import java.io.File;
+
+import junit.framework.Assert;
+
+import org.limewire.util.BaseTestCase;
+import org.limewire.util.FileUtils;
+
+public class BTMetaInfoTest extends BaseTestCase {
+    /**
+     * A directory containing the test data for this unit test.
+     */
+    public static final String TEST_DATA_DIR = System.getProperty("user.dir")
+            + "/test-data/bittorrent/torrents";
+
+    public BTMetaInfoTest(String name) {
+        super(name);
+    }
+
+    public void testBasics() throws Exception {
+        File file = getFile("test-basics.torrent");
+        byte[] bytes = FileUtils.readFileFully(file);
+        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+
+        Assert.assertEquals(44425, metaInfo.getFileSystem().getTotalSize());
+        Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
+        Assert.assertEquals(262144, metaInfo.getPieceLength());
+        Assert.assertEquals((int)Math.ceil((double)metaInfo.getFileSystem().getTotalSize()/metaInfo.getPieceLength()), metaInfo.getNumBlocks());
+        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+                .toString());
+        Assert.assertEquals(false, metaInfo.isPrivate());
+        Assert.assertNull(metaInfo.getWebSeeds());
+    }
+    
+    public void testSingleWebSeedSingleFile() throws Exception {
+        File file = getFile("test-single-webseed-single-file-no-peer.torrent");
+        byte[] bytes = FileUtils.readFileFully(file);
+        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
+        Assert.assertEquals(1, metaInfo.getNumBlocks());
+        Assert.assertEquals(262144, metaInfo.getPieceLength());
+        Assert.assertEquals("http://localhost/~pvertenten/tracker/announce.php", metaInfo.getTrackers()[0]
+                .toString());
+        Assert.assertEquals(false, metaInfo.isPrivate());
+        Assert.assertNotNull(metaInfo.getWebSeeds());
+        Assert.assertEquals(1, metaInfo.getWebSeeds().length);
+        Assert.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo.getWebSeeds()[0].toString());
+    }
+    
+    public void testMultipleWebSeedSingleFile() throws Exception {
+        File file = getFile("test-multiple-webseed-single-file-no-peer.torrent");
+        byte[] bytes = FileUtils.readFileFully(file);
+        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
+        Assert.assertEquals(2, metaInfo.getNumBlocks());
+        Assert.assertEquals(32768, metaInfo.getPieceLength());
+        Assert.assertEquals("http://localhost:3456/tracker/announce", metaInfo.getTrackers()[0]
+                .toString());
+        Assert.assertEquals(true, metaInfo.isPrivate());
+        Assert.assertNotNull(metaInfo.getWebSeeds());
+        Assert.assertEquals(3, metaInfo.getWebSeeds().length);
+        Assert.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
+        Assert.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo.getWebSeeds()[2].toString());
+    }
+    
+    public void testSingleWebSeedMultipleFile() throws Exception {
+        File file = getFile("test-single-webseed-multiple-file-no-peer.torrent");
+        byte[] bytes = FileUtils.readFileFully(file);
+        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        Assert.assertEquals("test", metaInfo.getName());
+ 
+        Assert.assertEquals(2, metaInfo.getNumBlocks());
+        Assert.assertEquals(262144, metaInfo.getPieceLength());
+        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+                .toString());
+        Assert.assertEquals(true, metaInfo.isPrivate());
+        Assert.assertNotNull(metaInfo.getWebSeeds());
+        Assert.assertEquals(1, metaInfo.getWebSeeds().length);
+        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[0].toString());
+    }
+    
+    public void testMultipleWebSeedMultipleFile() throws Exception {
+        File file = getFile("test-multiple-webseed-multiple-file-no-peer.torrent");
+        byte[] bytes = FileUtils.readFileFully(file);
+        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+        BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
+        Assert.assertEquals("test", metaInfo.getName());
+        Assert.assertEquals(2, metaInfo.getNumBlocks());
+        Assert.assertEquals(262144, metaInfo.getPieceLength());
+        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+                .toString());
+        Assert.assertEquals(true, metaInfo.isPrivate());
+        Assert.assertNotNull(metaInfo.getWebSeeds());
+        Assert.assertEquals(2, metaInfo.getWebSeeds().length);
+        Assert.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
+    }
+
+    /**
+     * Returns a file in the TEST_DATA_DIR by the given filename.
+     * @param fileName
+     * @return
+     */
+    private File getFile(String fileName) {
+        File file = new File(TEST_DATA_DIR + "/" + fileName);
+        return file;
+    }
+}

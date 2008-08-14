@@ -529,4 +529,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         return false;
     }
 
+    public TorrentContext getTorrentContext() {
+        return torrentContext;
+    }
 }

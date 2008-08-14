@@ -2,6 +2,8 @@ package com.limegroup.bittorrent;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.swarm.Swarmer;
+
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
 
 /**
@@ -62,7 +64,7 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      * 
      * @return true if it was added
      */
-    boolean addConnection(final BTLink btc);
+    boolean addConnection(final BTConnection btc);
 
     /**
      * @return a peer we should try to connect to next
@@ -116,4 +118,8 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      *         but all are choked.
      */
     boolean isSuspended();    
+    
+    BTLinkManager getLinkManager();
+    
+    Swarmer getSwarmer();
 }

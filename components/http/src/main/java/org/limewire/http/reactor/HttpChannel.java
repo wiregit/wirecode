@@ -40,7 +40,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     private ByteBuffer methodBuffer;
 
     private volatile boolean pendingClose = false;
-    
+
+    private final SimpleBandwidthTracker up, down;
+
     /**
      * Constructs a channel optionally pushing back a string that will be read
      * first. LimeWire's acceptor eats the first word of a connection to
@@ -53,7 +55,8 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
      * @param method if != null, the content will be pushed back into the
      *        channel
      */
-    public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
+    public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method,
+            SimpleBandwidthTracker up, SimpleBandwidthTracker down) {
         if (session == null) {
             throw new IllegalArgumentException("session must not be null");
         }
@@ -66,6 +69,13 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         if (method != null) {
             this.methodBuffer = ByteBuffer.wrap(method.getBytes());
         }
+        this.up = up;
+        this.down = down;
+    }
+
+    public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
+        this(session, eventDispatch, method, new SimpleBandwidthTracker(),
+                new SimpleBandwidthTracker());
     }
 
     /**
@@ -81,12 +91,17 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         if (methodBuffer != null) {
             int read = BufferUtils.transfer(methodBuffer, buffer, false);
             if (methodBuffer.hasRemaining()) {
+                down.count(read);
                 return read;
             }
             methodBuffer = null;
-            return read + readSource.read(buffer);
+            read = read + readSource.read(buffer);
+            down.count(read);
+            return read;
         }
-        return readSource.read(buffer);
+        int read = readSource.read(buffer);
+        down.count(read);
+        return read;
     }
 
     public void close() throws IOException {
@@ -112,7 +127,9 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public int write(ByteBuffer buffer) throws IOException {
-        return writeSource.write(buffer);
+        int written = writeSource.write(buffer);
+        up.count(written);
+        return written;
     }
 
     public void handleRead() throws IOException {

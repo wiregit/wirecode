@@ -705,7 +705,7 @@ PieceSendListener, PieceReadListener {
 		
 		// get new ranges to request if necessary
 		while (_requesting.size() < MAX_REQUESTS) {
-			BTInterval in = context.getDiskManager().leaseRandom(_available, _requesting);
+			BTInterval in = context.getDiskManager().leaseBTInterval(_available, _requesting, null);
 			if (in == null)
 				break;
 			_requesting.add(in);
@@ -915,4 +915,8 @@ PieceSendListener, PieceReadListener {
 		sendNotInterested();
 		choke();
 	}
+
+    public boolean hasPiece(int pieceIndex) {
+        return _available.get(pieceIndex);
+    }
 }

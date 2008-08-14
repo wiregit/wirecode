@@ -19,4 +19,7 @@ public class MalformedHeaderException extends ProtocolException {
         super(message);
     }
 
+    public MalformedHeaderException(Throwable e) {
+        this(e.getMessage(), e);
+    }
 }

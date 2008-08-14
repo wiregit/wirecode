@@ -30,7 +30,6 @@ public class Modules {
     public static Module providersFrom(final Injector parent) {
         return new Module() {
             @SuppressWarnings("unchecked")
-            @Override
             public void configure(Binder binder) {
                 // These types cannot be rebound.
                 Key loggerKey = Key.get(Logger.class);
