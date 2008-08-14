@@ -499,8 +499,8 @@ public class DownloadRendererEditor extends JPanel implements
 
 	}
 
-	public boolean isItemMenuVisible(DownloadItem item) {
-        return item.equals(menuEditItem) && popupMenu.isVisible();
+	public boolean isMenuVisible() {
+        return popupMenu.isVisible();
     }
 
     @Override

@@ -10,6 +10,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -17,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
@@ -24,6 +27,8 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.downloads.table.SimpleDownloadTable;
+import org.limewire.ui.swing.sharing.ViewSelectionPanel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -47,6 +52,7 @@ public class MainDownloadPanel extends JPanel {
 	private final JPanel cardPanel;
 	private static final String NO_CATEGORY = "noCategory";
 	private static final String CATEGORY = "category";
+    protected static final String TABLE = "simpleDownloadTable";
 	
 	private final DownloadMediator downloadMediator;
 
@@ -70,6 +76,7 @@ public class MainDownloadPanel extends JPanel {
             downloadMediator.clearFinished();
         }
     };
+    private ViewSelectionPanel viewSelectionPanel;
     
 	/**
 	 * Create the panel
@@ -87,18 +94,27 @@ public class MainDownloadPanel extends JPanel {
 		cardLayout = new CardLayout();
 		cardPanel.setLayout(cardLayout);
 		add(cardPanel, BorderLayout.CENTER);
-
-		final AllDownloadPanel noCategoryPanel = new AllDownloadPanel(downloadMediator.getFilteredList());
+		
+        
+        final AllDownloadPanel noCategoryPanel = new AllDownloadPanel(downloadMediator.getFilteredList());
 		noCategoryPanel.setName(NO_CATEGORY);
 		cardPanel.add(noCategoryPanel, noCategoryPanel.getName());
 		
 		final CategoryDownloadPanel categoryPanel = CategoryDownloadPanel.createCategoryDownloadPanel(downloadMediator.getFilteredList());
 		categoryPanel.setName(CATEGORY);
 		cardPanel.add(categoryPanel, categoryPanel.getName());
+		
+	    final SimpleDownloadTable simpleTable = new SimpleDownloadTable(downloadMediator.getFilteredList());
+        simpleTable.setName(TABLE);
+        cardPanel.add(new JScrollPane(simpleTable), simpleTable.getName());
+		
 
 		final DownloadSettingsPanel settingsPanel = new DownloadSettingsPanel();
 		settingsPanel.setBorder(new LineBorder(Color.BLACK, 1, false));
 		add(settingsPanel, BorderLayout.NORTH);
+		
+		cardLayout.show(cardPanel, NO_CATEGORY);
+		
 		
 		final EventList<DownloadItem> pausableList = new FilterList<DownloadItem>(downloadMediator.getFilteredList(), 
 		        new PausableMatcher());
@@ -148,7 +164,7 @@ public class MainDownloadPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setCategorized(categorizeCheckBox.isSelected());
+				setCategorized(isCategorized());
 			}
 
 		};
@@ -168,6 +184,30 @@ public class MainDownloadPanel extends JPanel {
 			searchBar = downloadMediator.getFilterTextField();
 			Dimension dim = searchBar.getPreferredSize();
 			searchBar.setPreferredSize(new Dimension(150, dim.height));
+			
+
+	        ItemListener tableListener = new ItemListener() {
+	            @Override
+	            public void itemStateChanged(ItemEvent e) {
+	                if (e.getStateChange() == ItemEvent.SELECTED) {
+	                    cardLayout.show(cardPanel, TABLE);
+	                    categorizeCheckBox.setEnabled(false);
+	                }
+	            }
+	        };
+
+	        ItemListener listListener = new ItemListener() {
+	            @Override
+	            public void itemStateChanged(ItemEvent e) {
+	                if (e.getStateChange() == ItemEvent.SELECTED) {
+	                    String whichList = isCategorized() ? CATEGORY : NO_CATEGORY;
+	                    cardLayout.show(cardPanel, whichList);
+                        categorizeCheckBox.setEnabled(true);
+	                }
+	            }
+	        };
+
+	        viewSelectionPanel = new ViewSelectionPanel(listListener, tableListener);
 			
 			GridBagConstraints gbc = new GridBagConstraints();
 
@@ -205,10 +245,20 @@ public class MainDownloadPanel extends JPanel {
 			gbc.gridy = 0;
 			gbc.insets = insets;
 			gbc.anchor = GridBagConstraints.LINE_END;
-			add(searchBar, gbc);			
+			add(searchBar, gbc);
+			
+			gbc.gridx++;
+			add(viewSelectionPanel, gbc);
 	
 		}
+		
+		public boolean isCategorized(){
+	        return categorizeCheckBox.isSelected();
+	    }
+		
 	}
+	
+	
 	
 	private static class PausableMatcher implements Matcher<DownloadItem> {
         @Override
