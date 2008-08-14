@@ -16,9 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.bushe.swing.event.annotation.AnnotationProcessor;
-import org.bushe.swing.event.annotation.EventTopicSubscriber;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.CapsulePainter;
@@ -78,10 +78,7 @@ public class ConversationPane extends JPanel {
         AnnotationProcessor.process(this);
     }
     
-    //FIXME: This should be listening to *ONLY* messages from this conversation.
-    //Need to add a new annotation type to lazily specify which topic to listen on.
-    @EventTopicSubscriber(topic="messages")
-    public void handleMessage(String topic, Message message) {
+    private void handleMessage(Message message) {
         messages.add(message);
         editor.setText(ChatDocumentBuilder.buildChatText(messages));
     }
@@ -91,9 +88,15 @@ public class ConversationPane extends JPanel {
         panel.add(new JXButton(tr("Library")), BorderLayout.NORTH);
         MessageReader reader = new MessageReader() {
             @Override
-            public void readMessage(String message) {
-                //FIXME: MessageEvent should "own" the topic and not require the publish caller to pass it in.
-                publishMessaging(friend, message, Type.Received);
+            public void readMessage(final String message) {
+                final Message msg = newMessage(friend, message, Type.Received);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleMessage(msg);
+                    }
+                });
+                new MessageReceivedEvent(msg).publish();
             }
         };
         final MessageWriter writer = friend.createChat(reader);
@@ -110,7 +113,7 @@ public class ConversationPane extends JPanel {
                         }
                     }
                 }, "send-message");
-                publishMessaging(friend, message, Type.Sent);
+                handleMessage(newMessage(friend, message, Type.Sent));
             }
         };
         ResizingInputPanel inputPanel = new ResizingInputPanel(writerWrapper);
@@ -118,9 +121,8 @@ public class ConversationPane extends JPanel {
         return panel;
     }
     
-    private void publishMessaging(Friend friend, String message, Type type) {
-        //FIXME: MessageEvent should "own" the topic and not require the publish caller to pass it in.
-        new MessageEvent(friend.getName(), message, type).publish("messages");
+    private Message newMessage(Friend friend, String message, Type type) {
+        return new MessageImpl(friend.getName(), message, type);
     }
     
     @SuppressWarnings("unused")

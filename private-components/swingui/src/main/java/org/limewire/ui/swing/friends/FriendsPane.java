@@ -75,16 +75,23 @@ public class FriendsPane extends JPanel {
             case available:
                 if(friend == null) {
                     friend = new FriendImpl(event.getUser(), presence);
-                    idToFriendMap.put(presence.getJID(), friend);
                     friends.add(friend);
+                    idToFriendMap.put(presence.getJID(), friend);
                 }
                 friend.setStatus(presence.getStatus());
                 friend.setMode(presence.getMode());
                 break;
             case unavailable:
-                friends.remove(idToFriendMap.remove(presence.getJID()));
+                if (friend != null) {
+                    friends.remove(idToFriendMap.remove(presence.getJID()));
+                } 
                 break;
         }
+    }
+    
+    @EventSubscriber
+    public void handleMessageReceived(MessageReceivedEvent event) {
+        //TODO
     }
     
     private static class FriendCellRenderer implements ListCellRenderer {

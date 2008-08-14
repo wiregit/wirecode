@@ -1,26 +1,24 @@
 package org.limewire.ui.swing.friends;
 
-class MockMessage implements Message {
-    private final String message, sender;
+class MessageImpl implements Message {
+    private final String friend;
+    private final String message;
     private final Type type;
 
-    public MockMessage(String sender, String message, Type type) {
+    public MessageImpl(String friend, String message, Type type) {
+        this.friend = friend;
         this.message = message;
-        this.sender = sender;
         this.type = type;
     }
 
-    @Override
     public String getMessageText() {
         return message;
     }
 
-    @Override
     public String getSenderName() {
-        return sender;
+        return friend;
     }
 
-    @Override
     public Type getType() {
         return type;
     }

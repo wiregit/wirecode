@@ -45,8 +45,11 @@ class MockFriend implements Friend {
         return id;
     }
 
+    MessageReader reader;
+    MessageWriter writer;
     @Override
     public MessageWriter createChat(MessageReader reader) {
-        return null;
+        this.reader = reader;
+        return writer;
     }
 }
