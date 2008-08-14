@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.connection;
 
-import org.limewire.util.LimeWireUtils;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A priority queue for messages. Subclasses override the add,

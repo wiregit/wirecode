@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.http;
 
-import org.limewire.util.LimeWireUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class adds type safety for constant HTTP header values.  If there's

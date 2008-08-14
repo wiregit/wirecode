@@ -29,7 +29,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LocaleUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.I18NConvert;
-import org.limewire.util.LimeWireUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
@@ -42,6 +41,7 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
 import com.limegroup.gnutella.util.MacOSXUtils;
 

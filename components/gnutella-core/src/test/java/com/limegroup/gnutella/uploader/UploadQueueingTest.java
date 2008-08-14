@@ -18,7 +18,6 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.ByteReader;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
-import org.limewire.util.LimeWireUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -56,6 +55,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.tigertree.HashTreeCacheImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
 /*

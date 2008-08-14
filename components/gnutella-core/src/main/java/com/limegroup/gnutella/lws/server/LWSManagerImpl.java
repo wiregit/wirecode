@@ -28,13 +28,13 @@ import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
-import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.util.EncodingUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**

@@ -16,7 +16,6 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.lifecycle.Service;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
-import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -27,6 +26,7 @@ import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;

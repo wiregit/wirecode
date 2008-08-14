@@ -1,4 +1,4 @@
-package org.limewire.util;
+package com.limegroup.gnutella.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,12 +6,14 @@ import java.io.IOException;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.SettingsFactory;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
+import org.limewire.util.SystemUtils;
+import org.limewire.util.VersionUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.util.EncodingUtils;
-import com.limegroup.gnutella.util.Portable;
-import com.limegroup.gnutella.util.PortableImpl;
 
 
 /**

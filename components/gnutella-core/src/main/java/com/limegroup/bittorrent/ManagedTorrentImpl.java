@@ -19,7 +19,9 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
+import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 
@@ -43,6 +45,7 @@ import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -189,6 +192,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 torrentDiskManager);
 
         swarmer = new SwarmerImpl(btCoordinator);
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(btCoordinator, LimeWireUtils.getHttpServer()));
     }
 
     /*

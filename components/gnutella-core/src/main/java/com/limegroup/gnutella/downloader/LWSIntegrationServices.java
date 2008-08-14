@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.downloader;
 
-import org.limewire.util.LimeWireUtils;
 
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.lws.server.LWSManager;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A class that initializes listeners to the passed in instance of

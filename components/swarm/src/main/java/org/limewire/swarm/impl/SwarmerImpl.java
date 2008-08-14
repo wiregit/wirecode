@@ -12,7 +12,6 @@ import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
-import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.util.Objects;
 
 public class SwarmerImpl implements Swarmer {
@@ -27,7 +26,6 @@ public class SwarmerImpl implements Swarmer {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
         this.sourceHandlers = Collections
                 .synchronizedMap(new HashMap<SwarmSourceType, SwarmSourceHandler>());
-        register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator));
     }
 
     public SwarmSourceHandler getSwarmSourceHandler(Class<SwarmSource> clazz) {

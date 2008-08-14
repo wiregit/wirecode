@@ -18,12 +18,12 @@ import org.limewire.setting.Setting;
 import org.limewire.setting.SettingsFactory;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.LimeWireUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.VersionUtils;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class encapsulates all of the data for an individual client machine

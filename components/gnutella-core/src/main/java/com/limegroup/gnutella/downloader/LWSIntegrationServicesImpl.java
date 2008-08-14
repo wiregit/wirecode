@@ -21,7 +21,6 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.settings.LWSSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.lifecycle.Service;
-import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -34,6 +33,7 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCallback;
 import com.limegroup.gnutella.lws.server.LWSUtil;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Tagged;
 
 

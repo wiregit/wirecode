@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.util.LimeWireUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 import org.limewire.util.XMLUtils;
@@ -18,6 +17,7 @@ import org.w3c.dom.NodeList;
 
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class UpdateCollectionImpl implements UpdateCollection {

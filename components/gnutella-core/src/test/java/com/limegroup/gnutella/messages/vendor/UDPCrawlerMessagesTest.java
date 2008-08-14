@@ -26,7 +26,6 @@ import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteUtils;
-import org.limewire.util.LimeWireUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -58,6 +57,7 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class UDPCrawlerMessagesTest extends LimeTestCase {
 

@@ -4,13 +4,13 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Dispatches messages to the MessageRouter.

@@ -9,9 +9,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.limewire.util.LimeWireUtils;
 
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Responds with an HTML page showing information. 

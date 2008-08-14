@@ -37,9 +37,7 @@ import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.http.listener.ResponseContentListener;
 import org.limewire.swarm.http.listener.SwarmHttpContentListener;
-import org.limewire.util.LimeWireUtils;
 import org.limewire.util.Objects;
-
 
 /**
  * The SwarmHttpSource handler is responsible for processing http source
@@ -89,8 +87,8 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         this.badSources = Collections.synchronizedList(new ArrayList<SwarmSource>());
         this.stats = new SwarmSourceStats();
     }
-
-    public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator) {
+    
+    public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator, String userAgent) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
         this.sources = Collections.synchronizedList(new ArrayList<SwarmSource>());
         this.badSources = Collections.synchronizedList(new ArrayList<SwarmSource>());
@@ -101,7 +99,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
                 CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
                 CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024).setBooleanParameter(
                 CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
-                CoreProtocolPNames.USER_AGENT, LimeWireUtils.getHttpServer());
+                CoreProtocolPNames.USER_AGENT, userAgent);
 
         this.ioReactor = new LimeConnectingIOReactor(params, NIODispatcher.instance()
                 .getScheduledExecutorService(), new SocketsManagerImpl());
