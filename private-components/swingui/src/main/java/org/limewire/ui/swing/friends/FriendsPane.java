@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.GradientPaint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.WeakHashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -24,6 +25,8 @@ import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.ui.swing.xmpp.PresenceUpdateEvent;
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -39,10 +42,12 @@ import ca.odell.glazedlists.swing.EventListModel;
  */
 public class FriendsPane extends JPanel {
     private EventList<Friend> friends;
+    private final WeakHashMap<String, FriendImpl> idToFriendMap;
     
     public FriendsPane(IconLibrary icons) {
         super(new BorderLayout());
         friends = new BasicEventList<Friend>();
+        idToFriendMap = new WeakHashMap<String, FriendImpl>();
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedObservables = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
         JList list = new JList(new EventListModel<Friend>(sortedObservables));
@@ -58,8 +63,23 @@ public class FriendsPane extends JPanel {
     }
     
     @EventSubscriber
-    public void handleFriendLogin(FriendLoginEvent event) {
-        friends.add(event.getFriend());
+    public void handlePresenceUpdate(PresenceUpdateEvent event) {
+        Presence presence = event.getPresence();
+        FriendImpl friend = idToFriendMap.get(presence.getJID());
+        switch(presence.getType()) {
+            case available:
+                if(friend == null) {
+                    friend = new FriendImpl(event.getUser(), presence);
+                    idToFriendMap.put(presence.getJID(), friend);
+                    friends.add(friend);
+                }
+                friend.setStatus(presence.getStatus());
+                friend.setMode(presence.getMode());
+                break;
+            case unavailable:
+                friends.remove(idToFriendMap.remove(presence.getJID()));
+                break;
+        }
     }
     
     private static class FriendCellRenderer implements ListCellRenderer {

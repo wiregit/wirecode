@@ -11,4 +11,8 @@ public abstract class AbstractEDTEvent {
     public void publish() {
         EventServiceLocator.getSwingEventService().publish(this);
     }
+    
+    public void publish(String topic) {
+        EventServiceLocator.getSwingEventService().publish(topic, this);
+    }
 }

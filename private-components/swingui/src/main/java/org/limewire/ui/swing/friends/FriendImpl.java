@@ -1,6 +1,10 @@
 package org.limewire.ui.swing.friends;
 
 import org.jdesktop.beans.AbstractBean;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
@@ -8,14 +12,21 @@ import org.limewire.xmpp.api.client.Presence.Mode;
  *
  */
 public class FriendImpl extends AbstractBean implements Friend {
-    private final String name;
+    private final User user;
+    private final Presence presence;
     private String status;
     private Mode mode;
     
-    public FriendImpl(String name, String status, Mode mode) {
-        this.name = name;
-        this.status = status;
-        this.mode = mode;
+    FriendImpl(User user, Presence presence) {
+        this.user = user;
+        this.presence = presence;
+        this.status = presence.getStatus();
+        this.mode = presence.getMode();
+    }
+    
+    @Override
+    public String getId() {
+        return user.getId();
     }
 
     @Override
@@ -23,7 +34,6 @@ public class FriendImpl extends AbstractBean implements Friend {
         return mode;
     }
     
-//    @Override
     public void setMode(Mode mode) {
         Mode oldMode = getMode();
         this.mode = mode;
@@ -32,7 +42,7 @@ public class FriendImpl extends AbstractBean implements Friend {
 
     @Override
     public String getName() {
-        return name;
+        return user.getName();
     }
     
     @Override
@@ -40,10 +50,14 @@ public class FriendImpl extends AbstractBean implements Friend {
         return status;
     }
     
-//    @Override
     public void setStatus(String status) {
         String oldStatus = getStatus();
         this.status = status;
         firePropertyChange("status", oldStatus, status);
+    }
+
+    @Override
+    public MessageWriter createChat(MessageReader reader) {
+        return presence.createChat(reader);
     }
 }

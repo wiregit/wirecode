@@ -2,13 +2,16 @@ package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 class MockFriend implements Friend {
-    private final String name, status;
+    private final String id, name, status;
     private final Mode state;
     
-    public MockFriend(String name, String status, Mode state) {
+    public MockFriend(String id, String name, String status, Mode state) {
+        this.id = id;
         this.name = name;
         this.state = state;
         this.status = status;
@@ -35,5 +38,15 @@ class MockFriend implements Friend {
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public MessageWriter createChat(MessageReader reader) {
+        return null;
     }
 }

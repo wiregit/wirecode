@@ -46,7 +46,7 @@ public class RosterListenerImpl implements RosterListener {
         }
     }
 
-    public void userAdded(User user) {
+    public void userAdded(final User user) {
         if(roster.get(user.getId()) == null) {
             roster.put(user.getId(), new ArrayList<Presence>());
         }
@@ -72,6 +72,8 @@ public class RosterListenerImpl implements RosterListener {
                     } else {
                         // TODO update UI
                     }
+                    //TODO: Should distinguish between Sharable/Lime and "regular" presence with 2 event types
+                    new PresenceUpdateEvent(user, presence).publish();
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     if(roster.get(id) == null) {
                         roster.put(id, new ArrayList<Presence>());
@@ -82,6 +84,7 @@ public class RosterListenerImpl implements RosterListener {
                     } else {
                         // TODO update UI
                     }
+                    new PresenceUpdateEvent(user, presence).publish();
                 } else {
                     // TODO update UI
                 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.limewire.ui.swing.xmpp.PresenceUpdateEvent;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
@@ -24,11 +25,12 @@ public class FriendsPaneHarness {
                 FriendsPane pane = new FriendsPane(new IconLibraryImpl());
                 frame.add(pane);
 
-                final ArrayList<FriendImpl> friends = new ArrayList<FriendImpl>();
+                final ArrayList<Duo> presences = new ArrayList<Duo>();
                 for (int i = 0; i < 10; i++) {
-                    FriendImpl friend = new FriendImpl("foo" + i, "Sort-in", randomMode());
-                    pane.handleFriendLogin(new FriendLoginEvent(friend));
-                    friends.add(friend);
+                    MockUser user = new MockUser("", "foo" + i);
+                    MockPresence presence = new MockPresence(randomMode(), "Sort-in", "jid" + i);
+                    new PresenceUpdateEvent(user, presence).publish();
+                    presences.add(new Duo(user, presence));
                 }
 
                 frame.setPreferredSize(new Dimension(470, 400));
@@ -40,8 +42,9 @@ public class FriendsPaneHarness {
                     @Override
                     public void run() {
                         while (true) {
-                            FriendImpl friend = friends.get((int) (Math.random() * 10));
-                            friend.setMode(randomMode());
+                            Duo duo = presences.get((int) (Math.random() * 10));
+                            duo.presence.setMode(randomMode());
+                            new PresenceUpdateEvent(duo.user, duo.presence).publish();
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException e) {
@@ -52,6 +55,16 @@ public class FriendsPaneHarness {
                 }).start();
             }
         });
+    }
+    
+    private static class Duo {
+        private MockUser user;
+        private MockPresence presence;
+        public Duo(MockUser user, MockPresence presence) {
+            super();
+            this.presence = presence;
+            this.user = user;
+        }
     }
 
     private static Mode randomMode() {

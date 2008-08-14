@@ -20,7 +20,7 @@ public class ConversationPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
 
-                ConversationPane pane = new ConversationPane(new MockFriend("Will Benedict", "Just listening to some jams", Mode.available),
+                ConversationPane pane = new ConversationPane(new MockFriend("foo@gmail.com", "Will Benedict", "Just listening to some jams", Mode.available),
                         new IconLibraryImpl());
                 frame.add(pane);
                 

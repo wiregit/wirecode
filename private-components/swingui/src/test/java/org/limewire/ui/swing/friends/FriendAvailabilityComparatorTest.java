@@ -20,7 +20,7 @@ public class FriendAvailabilityComparatorTest extends TestCase {
     }
     
     private void populateFriends(String name, Mode mode) {
-        friends.add(new MockFriend(name, "foo", mode));
+        friends.add(new MockFriend("", name, "foo", mode));
     }
 
     public void testModeAlphabeticalSorting() {

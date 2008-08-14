@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.limewire.ui.swing.xmpp.PresenceUpdateEvent;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
@@ -43,11 +44,15 @@ public class ChatPanelHarness {
         FormLayout layout = new FormLayout("p, 2dlu, p");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         
-        builder.append("Name");
+        builder.append("Id:");
+        final JTextField idField = new JTextField(20);
+        builder.append(idField);
+        builder.nextLine();
+        builder.append("Name:");
         final JTextField nameField = new JTextField(20);
         builder.append(nameField);
         builder.nextLine();
-        builder.append("Mood");
+        builder.append("Mood:");
         final JTextField moodField = new JTextField(20);
         builder.append(moodField);
         builder.nextLine();
@@ -55,7 +60,7 @@ public class ChatPanelHarness {
         addFriend.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new FriendLoginEvent(new FriendImpl(nameField.getText(), moodField.getText(), Mode.available)).publish();
+                new PresenceUpdateEvent(new MockUser(idField.getText(), nameField.getText()), new MockPresence(Mode.available, moodField.getText(), idField.getText())).publish();
             }
         });
         builder.append(addFriend, 3);

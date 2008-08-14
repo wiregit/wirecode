@@ -2,17 +2,23 @@ package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
 public interface Friend {
+    String getId();
+    
     String getName();
     
     String getStatus();
 
     Mode getMode();
+    
+    MessageWriter createChat(MessageReader reader);
 
     void addPropertyChangeListener(PropertyChangeListener listener);
     

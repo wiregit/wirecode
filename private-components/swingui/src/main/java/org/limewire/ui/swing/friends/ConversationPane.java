@@ -17,6 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
+import org.bushe.swing.event.annotation.AnnotationProcessor;
+import org.bushe.swing.event.annotation.EventTopicSubscriber;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.CapsulePainter;
@@ -24,6 +26,11 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.jdesktop.swingx.painter.CapsulePainter.Portion;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -64,21 +71,56 @@ public class ConversationPane extends JPanel {
         editor.setContentType("text/html");
         scroll.getViewport().add(editor);
         
-        add(footerPanel(), BorderLayout.SOUTH);
+        add(footerPanel(friend), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
+        
+        AnnotationProcessor.process(this);
     }
     
+    //FIXME: This should be listening to *ONLY* messages from this conversation.
+    //Need to add a new annotation type to lazily specify which topic to listen on.
+    @EventTopicSubscriber(topic="messages")
     public void handleMessage(String topic, Message message) {
         messages.add(message);
         editor.setText(ChatDocumentBuilder.buildChatText(messages));
     }
     
-    private JPanel footerPanel() {
+    private JPanel footerPanel(final Friend friend) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JXButton("Library"), BorderLayout.NORTH);
-        panel.add(new ResizingInputPanel(), BorderLayout.CENTER);
+        panel.add(new JXButton(tr("Library")), BorderLayout.NORTH);
+        MessageReader reader = new MessageReader() {
+            @Override
+            public void readMessage(String message) {
+                //FIXME: MessageEvent should "own" the topic and not require the publish caller to pass it in.
+                publishMessaging(friend, message, Type.Received);
+            }
+        };
+        final MessageWriter writer = friend.createChat(reader);
+        MessageWriter writerWrapper = new MessageWriter() {
+            @Override
+            public void writeMessage(final String message) throws XMPPException {
+                ThreadExecutor.startThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            writer.writeMessage(message);
+                        } catch (XMPPException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, "send-message");
+                publishMessaging(friend, message, Type.Sent);
+            }
+        };
+        ResizingInputPanel inputPanel = new ResizingInputPanel(writerWrapper);
+        panel.add(inputPanel, BorderLayout.CENTER);
         return panel;
+    }
+    
+    private void publishMessaging(Friend friend, String message, Type type) {
+        //FIXME: MessageEvent should "own" the topic and not require the publish caller to pass it in.
+        new MessageEvent(friend.getName(), message, type).publish("messages");
     }
     
     @SuppressWarnings("unused")
