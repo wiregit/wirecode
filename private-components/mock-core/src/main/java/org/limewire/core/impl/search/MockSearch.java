@@ -118,7 +118,7 @@ public class MockSearch implements Search {
                 msr.setProperty(SearchResult.PropertyKey.ARTIST_NAME,
                     "St. Louis Zoo");
                 msr.setProperty(SearchResult.PropertyKey.COMMENT,
-                    "Who knew they could do this?");
+                    "Who knew they could do that?");
                 msr.setProperty(SearchResult.PropertyKey.QUALITY,
                     "somewhat grainy");
                 msr.setProperty(SearchResult.PropertyKey.TRACK_NAME,

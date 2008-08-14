@@ -38,11 +38,10 @@ public class BaseResultPanel extends JXPanel {
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
-    private final JList resultsList;
-    private final JXTable resultsTable;
+    private JList resultsList;
+    private JXTable resultsTable;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
-    private final TableComparatorChooser tcc;
     
     private Scrollable visibileComponent;
     
@@ -65,24 +64,51 @@ public class BaseResultPanel extends JXPanel {
                 
         EventListModel<VisualSearchResult> eventListModel =
             new EventListModel<VisualSearchResult>(eventList);
+
+        // This enables rollover icons on the buttons to work.
+        // Note that this approach ... calling editCellAt
+        // based on mouse movements ... could be an issue
+        // if other cells in the table are truely editable.
+        configureList(eventListModel, eventList);
+        configureTable(eventList);
         
+        add(resultsList, ModeListener.Mode.LIST.name());
+        add(resultsTable, ModeListener.Mode.TABLE.name());
+        setMode(ModeListener.Mode.LIST);
+    }
+    
+    private void configureList(
+        EventListModel<VisualSearchResult> eventListModel,
+        EventList<VisualSearchResult> eventList) {
+
         resultsList = new JXList(eventListModel);
         resultsList.setCellRenderer(new SearchResultListCellRenderer());
+        resultsList.setFixedCellHeight(50);
         resultsList.setSelectionModel(
             new EventSelectionModel<VisualSearchResult>(eventList));
         resultsList.setSelectionMode(
             ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         resultsList.addMouseListener(new ResultDownloader());
-        
-        SortedList<VisualSearchResult> sortedResults =
-            new SortedList<VisualSearchResult>(
-                eventList, new ResultComparator());
-        EventTableModel<VisualSearchResult> tableModel =
-            new EventTableModel<VisualSearchResult>(
-                sortedResults, new ResultTableFormat());
-        resultsTable = new JXTable(tableModel);
-        
+
         // This enables rollover icons on the buttons to work.
+        // Note that this approach ... calling editCellAt
+        // based on mouse movements ... could be an issue
+        // if other cells in the table are truely editable.
+        resultsList.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = resultsList.locationToIndex(e.getPoint());
+                //resultsList.setSelectedIndex(row);
+            }
+        });
+    }
+
+    private void configureTable(EventList<VisualSearchResult> eventList) {
+        SortedList<VisualSearchResult> sortedResults = new SortedList<VisualSearchResult>(eventList, new ResultComparator());
+        EventTableModel<VisualSearchResult> tableModel = new EventTableModel<VisualSearchResult>(sortedResults, new ResultTableFormat());
+        resultsTable = new JXTable(tableModel);
+
+         // This enables rollover icons on the buttons to work.
         // Note that this approach ... calling editCellAt
         // based on mouse movements ... could be an issue
         // if other cells in the table are truely editable.
@@ -95,24 +121,19 @@ public class BaseResultPanel extends JXPanel {
                 resultsTable.editCellAt(row, col);
             }
         });
-        
+
         Highlighter highlighter = HighlighterFactory.createAlternateStriping();
-        resultsTable.setHighlighters(new Highlighter[] { highlighter });
-        
+        resultsTable.setHighlighters(new Highlighter[]{highlighter});
+
         boolean multiColumnSort = false;
-        tcc = new TableComparatorChooser<VisualSearchResult>(
-            resultsTable, sortedResults, multiColumnSort);
-        // Does tcc need to be used anywhere?
-        
+        TableComparatorChooser tcc =
+            new TableComparatorChooser<VisualSearchResult>(
+                resultsTable, sortedResults, multiColumnSort);
         TableColumnModel tcm = resultsTable.getColumnModel();
         TableColumn tc = tcm.getColumn(ACTION_COLUMN);
         ActionColumnTableCellEditor actce = new ActionColumnTableCellEditor();
         tc.setCellRenderer(actce);
         tc.setCellEditor(actce);
-        
-        add(resultsList, ModeListener.Mode.LIST.name());
-        add(resultsTable, ModeListener.Mode.TABLE.name());
-        setMode(ModeListener.Mode.LIST);
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {
@@ -131,7 +152,7 @@ public class BaseResultPanel extends JXPanel {
         default: throw new IllegalStateException("unsupported mode: " + mode);
         }
     }
-    
+
     private class ResultDownloader extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {

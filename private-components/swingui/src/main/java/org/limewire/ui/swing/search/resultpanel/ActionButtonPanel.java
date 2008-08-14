@@ -23,6 +23,8 @@ public class ActionButtonPanel extends JPanel {
     private static final int HGAP = 10;    
     private static final int VGAP = 0;    
 
+    private static final int DOWNLOAD = 0;    
+    private static final int MORE_INFO = 1;    
     private static final int MARK_AS_JUNK = 2;    
 
     // The icons displayed in the action column,
@@ -38,6 +40,8 @@ public class ActionButtonPanel extends JPanel {
     @Resource private Icon junkUpIcon;
 
     private Icon[][] icons;
+    private JButton downloadButton = new JButton();
+    private JButton infoButton = new JButton();
     private JToggleButton junkButton = new JToggleButton();
     private int height;
 
@@ -73,8 +77,9 @@ public class ActionButtonPanel extends JPanel {
             Icon overIcon = iconSet[1];
             Icon downIcon = iconSet[2];
 
-            AbstractButton button =
-                buttonIndex == MARK_AS_JUNK ? junkButton : new JButton();
+            AbstractButton button = getButton(buttonIndex);
+            if (button == null) continue; // should never happen
+
             button.setIcon(upIcon);
             button.setRolloverIcon(overIcon);
             button.setPressedIcon(downIcon);
@@ -95,6 +100,12 @@ public class ActionButtonPanel extends JPanel {
         }
     }
 
+    private AbstractButton getButton(int buttonIndex) {
+        return buttonIndex == DOWNLOAD ? downloadButton :
+            buttonIndex == MORE_INFO ? infoButton :
+            buttonIndex == MARK_AS_JUNK ? junkButton : null;
+    }
+
     /**
      * Gets the height of the tallest button icon.
      * @return the height
@@ -109,5 +120,40 @@ public class ActionButtonPanel extends JPanel {
      */
     public JToggleButton getJunkButton() {
         return junkButton;
+    }
+
+    /**
+     * Gets the rollover icon of the button at a given index.
+     * @param buttonIndex the button index
+     * @return the rollover icon
+     */
+    private Icon getRolloverIcon(int buttonIndex) {
+        return buttonIndex == DOWNLOAD ? downloadOverIcon :
+            buttonIndex == MORE_INFO ? infoOverIcon :
+            buttonIndex == MARK_AS_JUNK ? junkOverIcon : null;
+    }
+
+    /**
+     * Gets the up icon of the button at a given index.
+     * @param buttonIndex the button index
+     * @return the up icon
+     */
+    private Icon getUpIcon(int buttonIndex) {
+        return buttonIndex == DOWNLOAD ? downloadUpIcon :
+            buttonIndex == MORE_INFO ? infoUpIcon :
+            buttonIndex == MARK_AS_JUNK ? junkUpIcon : null;
+    }
+
+    /**
+     * Changes the "normal" icon of the specified button
+     * based on whether it should simulate a mouse rollover.
+     * @param buttonIndex the button index
+     * @param rollover true to simulate a rollover; false otherwise
+     */
+    public void setRollover(int buttonIndex, boolean rollover) {
+        AbstractButton button = getButton(buttonIndex);
+        Icon icon = rollover ?
+            getRolloverIcon(buttonIndex) : getUpIcon(buttonIndex);
+        button.setIcon(icon);
     }
 }
