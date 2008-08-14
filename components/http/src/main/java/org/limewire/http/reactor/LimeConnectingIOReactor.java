@@ -36,13 +36,13 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
     private final Executor ioExecutor;
     private final SocketsManager socketsManager;
     
-    private final SimpleBandwidthTracker up, down;
+    private final HttpBandwidthTracker up, down;
 
     // copied from DefaultClientIOEventDispatch
     private static final String NHTTP_CONN = "NHTTP_CONN";
     
     public LimeConnectingIOReactor(final HttpParams params, final Executor ioExecutor,
-            SocketsManager socketsManager, SimpleBandwidthTracker up, SimpleBandwidthTracker down) {
+            SocketsManager socketsManager, HttpBandwidthTracker up, HttpBandwidthTracker down) {
         if (params == null) {
             throw new IllegalArgumentException();
         }
@@ -56,7 +56,7 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
     
     public LimeConnectingIOReactor(final HttpParams params, final Executor ioExecutor,
             SocketsManager socketsManager) {
-        this(params, ioExecutor,socketsManager, new SimpleBandwidthTracker(), new SimpleBandwidthTracker());
+        this(params, ioExecutor,socketsManager, new HttpBandwidthTracker(), new HttpBandwidthTracker());
     }
     
     public void execute(IOEventDispatch eventDispatch) throws IOException {

@@ -3,7 +3,7 @@ package org.limewire.http.reactor;
 /**
  * A simple implementation of the BandwidthTracker interface
  */
-public class SimpleBandwidthTracker {
+public class HttpBandwidthTracker {
     private static final int DEFAULT_INTERVAL = 500;
 
     private final int _interval;
@@ -18,11 +18,11 @@ public class SimpleBandwidthTracker {
 
     private float _measuredBandwidth = -1f;
 
-    public SimpleBandwidthTracker() {
+    public HttpBandwidthTracker() {
         this(DEFAULT_INTERVAL);
     }
 
-    public SimpleBandwidthTracker(int interval) {
+    public HttpBandwidthTracker(int interval) {
         _interval = interval;
     }
 

@@ -41,7 +41,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     private volatile boolean pendingClose = false;
 
-    private final SimpleBandwidthTracker up, down;
+    private final HttpBandwidthTracker up, down;
 
     /**
      * Constructs a channel optionally pushing back a string that will be read
@@ -56,7 +56,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
      *        channel
      */
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method,
-            SimpleBandwidthTracker up, SimpleBandwidthTracker down) {
+            HttpBandwidthTracker up, HttpBandwidthTracker down) {
         if (session == null) {
             throw new IllegalArgumentException("session must not be null");
         }
@@ -74,8 +74,8 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
-        this(session, eventDispatch, method, new SimpleBandwidthTracker(),
-                new SimpleBandwidthTracker());
+        this(session, eventDispatch, method, new HttpBandwidthTracker(),
+                new HttpBandwidthTracker());
     }
 
     /**
