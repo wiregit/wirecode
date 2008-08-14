@@ -414,7 +414,7 @@ public class SwarmerImplTest extends BaseTestCase {
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
-    public static void assertDownload(String md5, File file, long fileSize)
+    private void assertDownload(String md5, File file, long fileSize)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
         long sleepTime = (long) ((fileSize * 0.0001) + 3000);
         Thread.sleep(sleepTime);

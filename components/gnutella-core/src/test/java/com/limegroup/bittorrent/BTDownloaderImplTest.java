@@ -2,10 +2,12 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import junit.framework.Assert;
 
-import org.limewire.swarm.http.SwarmerImplTest;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.http.util.FileServer;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -16,9 +18,6 @@ import com.limegroup.bittorrent.swarm.BTSwarmCoordinatorTest;
 import com.limegroup.gnutella.ActivityCallbackAdapter;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
-import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.http.util.FileServer;
-
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -97,7 +96,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         downloader.startDownload();
         finishDownload(downloader);
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
     }
 
     public void testMultipleFilePeer() throws Exception {
@@ -131,10 +130,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
             downloader.startDownload();
             finishDownload(downloader);
 
-            SwarmerImplTest
-                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
-            SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
-                    411090);
+            assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+            assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2, 411090);
         } finally {
             if (rootFile != null) {
                 FileUtils.deleteRecursive(rootFile);
@@ -163,7 +160,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         downloader.startDownload();
         finishDownload(downloader);
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
     }
 
     public void testMultiWebSeedSingleFileNoPeer() throws Exception {
@@ -188,7 +185,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         downloader.startDownload();
         finishDownload(downloader);
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
     }
 
     public void testSingleWebSeedMultipleFileNoPeer() throws Exception {
@@ -223,10 +220,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
             downloader.startDownload();
             finishDownload(downloader);
 
-            SwarmerImplTest
-                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
-            SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
-                    411090);
+            assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+            assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2, 411090);
         } finally {
             if (rootFile != null) {
                 FileUtils.deleteRecursive(rootFile);
@@ -265,10 +260,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
             downloader.startDownload();
             finishDownload(downloader);
 
-            SwarmerImplTest
-                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
-            SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2,
-                    411090);
+            assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+            assertDownload("db1dc452e77d30ce14acca6bac8c66bc", completeFile2, 411090);
         } finally {
             if (rootFile != null) {
                 FileUtils.deleteRecursive(rootFile);
@@ -302,8 +295,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
             downloader.startDownload();
             finishDownload(downloader);
 
-            SwarmerImplTest
-                    .assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
+            assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile1, 44425);
         } finally {
             if (rootFile != null) {
                 FileUtils.deleteRecursive(rootFile);
@@ -339,5 +331,26 @@ public class BTDownloaderImplTest extends LimeTestCase {
             }
             Thread.sleep(1000);
         }
+    }
+
+    /**
+     * Asserts that the given file has the correct size, and matches the given
+     * md5sum.
+     * 
+     * @param md5
+     * @param file
+     * @param fileSize
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
+    private void assertDownload(String md5, File file, long fileSize) throws InterruptedException,
+            NoSuchAlgorithmException, IOException {
+        long sleepTime = (long) ((fileSize * 0.0001) + 3000);
+        Thread.sleep(sleepTime);
+        Assert.assertTrue(file.exists());
+        Assert.assertEquals(fileSize, file.length());
+        String testmd5 = FileUtils.getMD5(file);
+        Assert.assertEquals(md5, testmd5);
     }
 }

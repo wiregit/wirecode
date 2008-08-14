@@ -3,6 +3,9 @@ package com.limegroup.bittorrent.swarm;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
+
+import junit.framework.Assert;
 
 import org.limewire.http.util.FileServer;
 import org.limewire.io.DiskException;
@@ -10,7 +13,6 @@ import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.http.SwarmHttpSourceHandler;
-import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
@@ -38,13 +40,13 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
      * A directory containing the torrent data for this unit test.
      */
     public static final File TORRENT_DIR = TestUtils
-    .getResourceFile("org/limewire/swarm/bittorrent/torrents");
+            .getResourceFile("org/limewire/swarm/bittorrent/torrents");
 
     /**
      * A directory containing the torrent data for this unit test.
      */
-    public static final File FILE_DIR =  TestUtils
-    .getResourceFile("org/limewire/swarm/bittorrent/public_html");
+    public static final File FILE_DIR = TestUtils
+            .getResourceFile("org/limewire/swarm/bittorrent/public_html");
 
     private FileServer fileServer = null;
 
@@ -88,7 +90,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
 
     }
 
@@ -116,8 +118,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
@@ -146,8 +148,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
@@ -177,8 +179,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        SwarmerImplTest.assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
@@ -208,7 +210,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         swarmer.addSource(new SwarmHttpSource(uri1, totalSize));
         swarmer.addSource(new SwarmHttpSource(uri2, totalSize));
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
 
     }
 
@@ -240,7 +242,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         swarmer.addSource(new SwarmHttpSource(uri2, totalSize));
         swarmer.addSource(new SwarmHttpSource(uri3, totalSize));
 
-        SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
 
     }
 
@@ -293,6 +295,27 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
                 "LimeTest/1.1"));
 
         return swarmer;
+    }
+
+    /**
+     * Asserts that the given file has the correct size, and matches the given
+     * md5sum.
+     * 
+     * @param md5
+     * @param file
+     * @param fileSize
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
+    private void assertDownload(String md5, File file, long fileSize) throws InterruptedException,
+            NoSuchAlgorithmException, IOException {
+        long sleepTime = (long) ((fileSize * 0.0001) + 3000);
+        Thread.sleep(sleepTime);
+        Assert.assertTrue(file.exists());
+        Assert.assertEquals(fileSize, file.length());
+        String testmd5 = FileUtils.getMD5(file);
+        Assert.assertEquals(md5, testmd5);
     }
 
     // TODO test better variety of torrent files.
