@@ -15,6 +15,7 @@ import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmSource;
+import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
@@ -305,6 +306,8 @@ public class SwarmerImplTest extends BaseTestCase {
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator,
+        "LimeTest/1.1"));
         swarmer.start();
 
         swarmer.addSource(swarmSource);
@@ -458,6 +461,8 @@ public class SwarmerImplTest extends BaseTestCase {
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator,
+        "LimeTest/1.1"));
         swarmer.getMeasuredBandwidth(true);
         swarmer.getMeasuredBandwidth(false);
 

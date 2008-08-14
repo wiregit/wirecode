@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.limewire.io.DiskException;
+import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
+import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.http.SwarmerImplTest;
 import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
@@ -27,6 +29,7 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.RandomGapStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.gnutella.util.FileServer;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class BTSwarmCoordinatorTest extends LimeTestCase {
     private static final int TEST_PORT = 8080;
@@ -208,7 +211,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
 
     }
-    
+
     public void testProblemTorrent() throws Exception {
 
         File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
@@ -240,7 +243,6 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         SwarmerImplTest.assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
 
     }
-    
 
     private File createFile(String fileName) {
         File torrentFile = new File(TORRENT_DIR + "/" + fileName);
@@ -287,6 +289,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(btCoordinator);
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(btCoordinator,
+                "LimeTest/1.1"));
 
         return swarmer;
     }
