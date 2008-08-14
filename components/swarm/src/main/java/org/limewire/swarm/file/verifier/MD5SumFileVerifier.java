@@ -53,9 +53,7 @@ public class MD5SumFileVerifier implements SwarmBlockVerifier {
         try {
             testMd5 = FileUtils.getMD5(swarmFile.getFile());
         } catch (Exception e) {
-            // TODO handle error properly.
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException(e);
         }
         return testMd5.equals(md5String);
     }
