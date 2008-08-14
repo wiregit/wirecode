@@ -81,7 +81,7 @@ public class PromotionMessageContainerTest extends BaseTestCase {
 
     public void testDateRangeStart() {
         PromotionMessageContainer message = new PromotionMessageContainer();
-        assertEquals(System.currentTimeMillis() / 1000, message.getValidStart().getTime() / 1000);
+        assertEquals(0, message.getValidStart().getTime());
         assertEquals(new Date(PromotionMessageContainer.MAX_DATE_IN_SECONDS * 1000), message
                 .getValidEnd());
 
@@ -97,7 +97,7 @@ public class PromotionMessageContainerTest extends BaseTestCase {
 
     public void testDateRangeEnd() {
         PromotionMessageContainer message = new PromotionMessageContainer();
-        assertEquals(System.currentTimeMillis() / 1000, message.getValidStart().getTime() / 1000);
+        assertEquals(0, message.getValidStart().getTime());
         assertEquals(new Date(PromotionMessageContainer.MAX_DATE_IN_SECONDS * 1000), message
                 .getValidEnd());
 
