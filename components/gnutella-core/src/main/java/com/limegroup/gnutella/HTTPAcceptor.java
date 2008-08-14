@@ -24,6 +24,7 @@ import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.statistic.Statistic;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,7 +32,6 @@ import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics.StatisticType;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Processes HTTP requests for Gnutella uploads.

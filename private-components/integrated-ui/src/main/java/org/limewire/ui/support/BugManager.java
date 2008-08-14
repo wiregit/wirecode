@@ -51,11 +51,11 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Interface for reporting bugs.

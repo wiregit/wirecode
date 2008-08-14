@@ -17,10 +17,10 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class handles accessing the servlet, sending it data about the client

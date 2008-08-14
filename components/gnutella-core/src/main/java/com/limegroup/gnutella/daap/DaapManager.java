@@ -29,6 +29,7 @@ import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -43,7 +44,6 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;

@@ -54,6 +54,7 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.util.Base32;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -118,7 +119,6 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 

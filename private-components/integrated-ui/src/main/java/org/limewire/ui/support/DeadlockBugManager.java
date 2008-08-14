@@ -1,11 +1,11 @@
 package org.limewire.ui.support;
 
 import org.limewire.core.settings.BugSettings;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class DeadlockBugManager {
 

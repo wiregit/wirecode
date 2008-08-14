@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
+import org.limewire.util.LimeWireUtils;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Injector;
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GuiCoreMediator;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;

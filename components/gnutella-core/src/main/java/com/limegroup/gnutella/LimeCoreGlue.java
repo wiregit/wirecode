@@ -9,13 +9,13 @@ import org.limewire.core.settings.LimeProps;
 import org.limewire.lifecycle.Service;
 import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class is the glue that holds LimeWire together.

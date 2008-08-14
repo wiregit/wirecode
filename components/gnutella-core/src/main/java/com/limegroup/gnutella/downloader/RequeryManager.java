@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.mojito.settings.LookupSettings;
 import org.limewire.nio.observer.Shutdownable;
+import org.limewire.util.LimeWireUtils;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  *  A manager for controlling how requeries are sent in downloads.

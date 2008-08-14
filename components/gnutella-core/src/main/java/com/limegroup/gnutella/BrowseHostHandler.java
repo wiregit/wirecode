@@ -30,6 +30,7 @@ import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Provider;
@@ -42,7 +43,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 

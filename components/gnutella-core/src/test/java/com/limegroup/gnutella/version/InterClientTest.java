@@ -9,6 +9,7 @@ import org.limewire.core.settings.UpdateSettings;
 import org.limewire.io.GGEP;
 import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -29,7 +30,6 @@ import com.limegroup.gnutella.messages.vendor.UpdateResponse;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Tests to make sure updates are sent, requested, etc...

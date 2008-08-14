@@ -40,6 +40,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.Acceptor;
@@ -100,7 +101,6 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**

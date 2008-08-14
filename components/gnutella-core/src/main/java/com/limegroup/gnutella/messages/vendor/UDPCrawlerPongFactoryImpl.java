@@ -10,6 +10,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -20,7 +21,6 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {

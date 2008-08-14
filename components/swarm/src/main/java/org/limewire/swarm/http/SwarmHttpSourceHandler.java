@@ -37,9 +37,9 @@ import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.http.listener.ResponseContentListener;
 import org.limewire.swarm.http.listener.SwarmHttpContentListener;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.Objects;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * The SwarmHttpSource handler is responsible for processing http source

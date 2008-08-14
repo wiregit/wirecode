@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
+import org.limewire.util.LimeWireUtils;
+
 
 /**
  *  Handle a pure HTTP request

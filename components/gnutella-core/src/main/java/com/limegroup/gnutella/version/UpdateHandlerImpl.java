@@ -38,6 +38,7 @@ import org.limewire.util.Base32;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -72,7 +73,6 @@ import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Manager for version updates.

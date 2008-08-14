@@ -1,11 +1,11 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 class ApplicationImpl implements Application {

@@ -12,10 +12,10 @@ import org.apache.http.params.HttpParams;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.promotion.AbstractPromotionBinderRequestor;
 import org.limewire.promotion.PromotionBinderFactory;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequestor {

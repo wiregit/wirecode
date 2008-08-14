@@ -6,8 +6,8 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.LimeWireUtils;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class contains the headers that all LimeWires pass in connection

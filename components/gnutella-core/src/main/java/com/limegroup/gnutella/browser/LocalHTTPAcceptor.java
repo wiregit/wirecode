@@ -16,11 +16,11 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.BasicHttpAcceptor;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
 public class LocalHTTPAcceptor extends BasicHttpAcceptor {

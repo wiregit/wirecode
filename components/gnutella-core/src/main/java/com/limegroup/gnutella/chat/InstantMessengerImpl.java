@@ -23,13 +23,13 @@ import org.limewire.nio.statemachine.IOState;
 import org.limewire.nio.statemachine.IOStateMachine;
 import org.limewire.nio.statemachine.IOStateObserver;
 import org.limewire.util.BufferUtils;
+import org.limewire.util.LimeWireUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.http.SimpleWriteHeaderState;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class implements a simple chat protocol that allows to exchange text

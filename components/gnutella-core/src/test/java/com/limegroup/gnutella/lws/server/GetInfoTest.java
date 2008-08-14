@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.limewire.util.LimeWireUtils;
+
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 import junit.framework.Test;
 import junit.textui.TestRunner;

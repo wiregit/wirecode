@@ -25,6 +25,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.LimeWireUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -38,7 +39,6 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Used for managing signed messages published by LimeWire, and changing settings

@@ -16,6 +16,7 @@ import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Provider;
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.URIUtils;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Keeps track of a torrent tracker's information.

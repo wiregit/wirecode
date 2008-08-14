@@ -18,6 +18,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.util.LimeWireUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -87,7 +88,6 @@ import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 
