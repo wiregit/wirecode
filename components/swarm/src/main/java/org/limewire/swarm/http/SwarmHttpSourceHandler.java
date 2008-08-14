@@ -76,13 +76,13 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     private final List<SwarmSource> badSources;
 
-    private final SwarmSourceStats stats;
+    private final SwarmStats stats;
     
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator, String userAgent) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
         this.sources = Collections.synchronizedList(new ArrayList<SwarmSource>());
         this.badSources = Collections.synchronizedList(new ArrayList<SwarmSource>());
-        this.stats = new SwarmSourceStats();
+        this.stats = new SwarmStats();
 
         HttpParams params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(

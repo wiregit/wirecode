@@ -3,7 +3,7 @@ package org.limewire.swarm.http;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SwarmSourceStats {
+public class SwarmStats {
 
     private final AtomicInteger numberOfRequests = new AtomicInteger(0);
 
