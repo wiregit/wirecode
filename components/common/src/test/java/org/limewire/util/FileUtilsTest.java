@@ -39,11 +39,11 @@ public final class FileUtilsTest extends BaseTestCase {
           new File("standard."+EXT),  
           new File("a.little.weird."+EXT), 
           new File(".ext."+EXT), 
-        };   
-        
-        for(int i=0; i<testFiles.length; i++)  {
-            assertEquals("unexpected extension extracted", 
-                EXT, FileUtils.getFileExtension(testFiles[i]));
+        };
+
+        for (File testFile : testFiles) {
+            assertEquals("unexpected extension extracted",
+                    EXT, FileUtils.getFileExtension(testFile));
         }
         
         // test files that should return null
@@ -52,11 +52,11 @@ public final class FileUtilsTest extends BaseTestCase {
           new File("."+EXT), 
           new File("noextension"), 
         };
-        
-        for(int i=0; i<nullFiles.length; i++)  {
-            assertNull("extension should be null", 
-                FileUtils.getFileExtension(nullFiles[i]));
-        };
+
+        for (File nullFile : nullFiles) {
+            assertNull("extension should be null",
+                    FileUtils.getFileExtension(nullFile));
+        }
     }
 
 	public void testGetFilesRecursive() throws Exception {

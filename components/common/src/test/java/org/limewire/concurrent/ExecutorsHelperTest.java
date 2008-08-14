@@ -171,7 +171,7 @@ public class ExecutorsHelperTest extends BaseTestCase {
                 try {   
                     if(!runLatch.await(10, TimeUnit.SECONDS))
                         fail("never got notified!");
-                } catch(InterruptedException ie) {}
+                } catch(InterruptedException ignore) {}
             }
             ranLatch.countDown();
            if(throwException)

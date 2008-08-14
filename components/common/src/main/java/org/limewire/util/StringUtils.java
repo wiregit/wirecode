@@ -55,7 +55,7 @@ public class StringUtils {
      *  StringUtils.contains(&quot;abcd&quot;, &quot;d*a&quot;) ==&gt; false
      *  </pre> 
      */
-    public static final boolean contains(String input, String pattern) {
+    public static boolean contains(String input, String pattern) {
         return contains(input, pattern, false);
     }
 
@@ -63,7 +63,7 @@ public class StringUtils {
      * Exactly like contains(input, pattern), but case is ignored if
      * ignoreCase==true.
      */
-    public static final boolean contains(String input, String pattern, boolean ignoreCase) {
+    public static boolean contains(String input, String pattern, boolean ignoreCase) {
         // More efficient algorithms are possible, e.g. a modified version of
         // the
         //Rabin-Karp algorithm, but they are unlikely to be faster with such
@@ -109,8 +109,8 @@ public class StringUtils {
     public static boolean containsCharacters(String input, char [] chars) {
         char [] inputChars = input.toCharArray();
         Arrays.sort(inputChars);
-        for(int i=0; i<chars.length; i++) {
-            if (Arrays.binarySearch(inputChars, chars[i]) >= 0)
+        for (char c : chars) {
+            if (Arrays.binarySearch(inputChars, c) >= 0)
                 return true;
         }
         return false;
@@ -123,7 +123,7 @@ public class StringUtils {
      *          -1 if no such i exists. If ignoreCase==false, case doesn't
      *          matter when comparing characters.
      */
-    private static final int subset(String little, int littleStart, int littleStop, String big,
+    private static int subset(String little, int littleStart, int littleStop, String big,
             int bigStart, boolean ignoreCase) {
         //Equivalent to
         // return big.indexOf(little.substring(littleStart, littleStop),
@@ -169,7 +169,7 @@ public class StringUtils {
      * Character.toLowerCase(c), Else returns c. Note that this is <b>not
      * internationalized</b>; but it is fast.
      */
-    public static final char toOtherCase(char c) {
+    public static char toOtherCase(char c) {
         int i = c; 
         final int A= 'A';   //65
         final int Z= 'Z';   //90
@@ -218,7 +218,7 @@ public class StringUtils {
         while (tokenizer.hasMoreTokens())
             tokens.add(tokenizer.nextToken());
 
-        return tokens.toArray(new String[0]);
+        return tokens.toArray(new String[tokens.size()]);
     }
 
     /**
@@ -270,7 +270,7 @@ public class StringUtils {
         if (gotDelimiter && !tokens.isEmpty())
             tokens.add("");
 
-        return tokens.toArray(new String[0]);
+        return tokens.toArray(new String[tokens.size()]);
     }
 
     /**

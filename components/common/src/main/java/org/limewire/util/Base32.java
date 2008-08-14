@@ -123,10 +123,9 @@ public class Base32 {
         System.out.println(" Original: "+args[0]);
         byte[] decoded = Base32.decode(args[0]);
         System.out.print  ("      Hex: ");
-        for(int i = 0; i < decoded.length ; i++) {
-            int b = decoded[i];
-            if (b<0) b+=256;
-            System.out.print((Integer.toHexString(b+256)).substring(1));
+        for (byte b : decoded) {
+            if (b < 0) b += 256;
+            System.out.print((Integer.toHexString(b + 256)).substring(1));
         }
         System.out.println();
         System.out.println("Reencoded: "+Base32.encode(decoded));

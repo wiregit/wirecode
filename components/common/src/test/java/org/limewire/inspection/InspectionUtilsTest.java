@@ -185,7 +185,7 @@ interface TestInterface {
     void setInspectableList(List l);
 }
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "FieldCanBeLocal", "UnusedDeclaration"})
 @Singleton
 class TestClass implements TestInterface{
     private static TestInterface reference1;
@@ -238,7 +238,7 @@ interface TestInterface2 {
     void setObjectReference(Object reference);
 }
 @Singleton
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "FieldCanBeLocal", "UnusedDeclaration"})
 class TestClass2 implements TestInterface2 {
     static TestInterface reference1;
     
@@ -283,7 +283,7 @@ class SyncList implements SyncListInterface{
 interface OutterI {}
 
 @Singleton
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedDeclaration"})
 class Outter implements OutterI {
     @InspectableContainer
     private class Inner {
@@ -304,7 +304,7 @@ class NotGuiced {
 
 interface Parent {}
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedDeclaration"})
 abstract class AbstractParent implements Parent {
     @InspectableContainer
     private class Inner {

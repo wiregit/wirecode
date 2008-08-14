@@ -687,9 +687,8 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            Iterator<Worker> it = workers.iterator();
-            while (it.hasNext()) {
-                Worker w = it.next();
+            for (Worker worker : workers) {
+                Worker w = worker;
                 Thread t = w.thread;
                 if (!t.isInterrupted() && w.tryLock()) {
                     try {
@@ -767,7 +766,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
         List<Runnable> taskList = new ArrayList<Runnable>();
         q.drainTo(taskList);
         if (!q.isEmpty()) {
-            for (Runnable r : q.toArray(new Runnable[0])) {
+            for (Runnable r : q.toArray(new Runnable[q.size()])) {
                 if (q.remove(r))
                     taskList.add(r);
             }
@@ -943,7 +942,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
                 if (r != null)
                     return r;
                 empty = true; // queue probably empty; recheck above
-            } catch (InterruptedException retry) {
+            } catch (InterruptedException ignore) {
             }
         }
     }
@@ -1347,7 +1346,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      */
     @Override
     protected void finalize() {
-        shutdown();
+        super.finalize();
     }
 
     /**
@@ -1641,6 +1640,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * However, this method may fail to remove tasks in
      * the presence of interference by other threads.
      */
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     @Override
     public void purge() {
         final BlockingQueue<Runnable> q = workQueue;

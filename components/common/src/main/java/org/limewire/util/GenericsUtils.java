@@ -68,11 +68,13 @@ public class GenericsUtils {
                     	if (key == null)
                     		errorReport.append("key is null ");
                     	else if (!k.isAssignableFrom(key.getClass()))
-                    			errorReport.append("key class not assignable "+key.getClass()+" to "+k);
+                            errorReport.append("key class not assignable ")
+                                    .append(key.getClass()).append(" to ").append(k);
                     	if (value == null)
-                    		errorReport.append("value is null for key "+key);
+                            errorReport.append("value is null for key ").append(key);
                     	else if (!v.isAssignableFrom(value.getClass()))
-                    		errorReport.append("value class not assignable "+value.getClass()+" to "+v);
+                            errorReport.append("value class not assignable ")
+                                    .append(value.getClass()).append(" to ").append(v);
                         throw new ClassCastException(errorReport.toString());
                     case REMOVE:
                         i.remove();

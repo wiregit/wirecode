@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Arrays;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -123,7 +124,7 @@ public class InspectionUtils {
             if (parameters.length != 1 || !lookup.isAssignableFrom(parameters[0]))
                 throw new InspectionException("wrong parameter count or type for constructor");
             constructors[0].setAccessible(true);
-            instance = constructors[0].newInstance(new Object[] { enclosingObj });
+            instance = constructors[0].newInstance(enclosingObj);
         }
         
         while (t.hasMoreTokens())
@@ -167,7 +168,7 @@ public class InspectionUtils {
             if (a instanceof InspectableForSize) {
                 Method m = o.getClass().getMethod("size", new Class[0]);
                 m.setAccessible(true);
-                return m.invoke(o, new Object[0]).toString();
+                return m.invoke(o).toString();
             }
         }
         throw new InspectionException();
@@ -191,8 +192,7 @@ public class InspectionUtils {
         // clear the list of annotations and add any we find
         if (annotations != null) {
             annotations.clear();
-            for (Annotation a : field.getAnnotations())
-                annotations.add(a);
+            annotations.addAll(Arrays.asList(field.getAnnotations()));
         }
         
         return field.get(instance);

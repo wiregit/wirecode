@@ -234,7 +234,7 @@ public class BEncoder {
     	else if (object instanceof byte[])
     		encodeByteArray((byte[])object);
         else if (object instanceof Boolean) 
-            encodeBoolean(((Boolean)object).booleanValue());
+            encodeBoolean((Boolean) object);
         else if (fail)
     		throw new IllegalArgumentException();
     }

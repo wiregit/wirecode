@@ -44,7 +44,7 @@ public class QuotedStringTokenizerTest extends BaseTestCase {
 		try {
 			String s = t.nextToken();
 			fail("Expected NoSuchElementException, got + '" + s + "'");
-		} catch (NoSuchElementException e) {
+		} catch (NoSuchElementException ignore) {
 		}
 	}
 

@@ -278,7 +278,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
                             methodThread.start();
                             try {
                                 methodThread.join(asynchronous.timeout() * 1000);
-                            } catch (InterruptedException e) {}
+                            } catch (InterruptedException ignore) {}
                             // TODO LOG
                         }
                     }, "ServiceRegistry-waiting-thread-" + service.getServiceName());

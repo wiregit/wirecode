@@ -140,18 +140,6 @@ public class MessageService {
         }
 
         // Inherit doc comment.
-        public void showError(String messageKey, String message) {
-            System.out.println("error key: " + messageKey + " extra message: " + message);
-        }
-
-        // Inherit doc comment.
-        public void showError(String messageKey,
-                              String message,
-                              Switch ignore) {
-            showError(messageKey, message);
-        }
-
-        // Inherit doc comment.
         public void showMessage(String messageKey) {
             System.out.println("message key: " + messageKey); 
         }
@@ -164,7 +152,7 @@ public class MessageService {
         public void showFormattedMessage(String messageKey, Object... args) {
             StringBuilder sb = new StringBuilder("message key: " + messageKey + " ");
             for(int i = 0; i < args.length; i++) {
-                sb.append("arg[" + i + "]: " + args[i]);
+                sb.append("arg[").append(i).append("]: ").append(args[i]);
                 if(i < args.length - 1)
                     sb.append(", ");
             }
@@ -178,7 +166,7 @@ public class MessageService {
         public void showFormattedError(String errorKey, Object... args) {
             StringBuilder sb = new StringBuilder("error key: " + errorKey + " ");
             for(int i = 0; i < args.length; i++) {
-                sb.append("arg[" + i + "]: " + args[i]);
+                sb.append("arg[").append(i).append("]: ").append(args[i]);
                 if(i < args.length - 1)
                     sb.append(", ");
             }

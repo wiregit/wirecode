@@ -123,7 +123,7 @@ public class RPNParser {
         String[] strings = new String[p.numOperands()];
         for (int i = strings.length-1; i>=0; i--)
             strings[i] = stack.pop();
-        stack.push(new Boolean(p.evaluate(strings)).toString());
+        stack.push(Boolean.toString(p.evaluate(strings)));
     }
     
     /**

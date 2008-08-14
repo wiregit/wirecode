@@ -257,8 +257,8 @@ public class CommonUtils {
                 StackTraceElement[] value = entry.getValue();
                 
                 buffer.append(key.getName()).append("\n");
-                for(int i = 0; i < value.length; i++) {
-                    buffer.append("    ").append(value[i]).append("\n");
+                for (StackTraceElement aValue : value) {
+                    buffer.append("    ").append(aValue).append("\n");
                 }
                 buffer.append("\n");
             }
@@ -416,18 +416,22 @@ public class CommonUtils {
     	        }
             }          
     	}
-        for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
-            name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
+        for (char aILLEGAL_CHARS_ANY_OS : ILLEGAL_CHARS_ANY_OS) {
+            name = name.replace(aILLEGAL_CHARS_ANY_OS, '_');
+        }
     	
         if ( OSUtils.isWindows() || OSUtils.isOS2() ) {
-            for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i++) 
-                name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
+            for (char aILLEGAL_CHARS_WINDOWS : ILLEGAL_CHARS_WINDOWS) {
+                name = name.replace(aILLEGAL_CHARS_WINDOWS, '_');
+            }
         } else if ( OSUtils.isLinux() || OSUtils.isSolaris() ) {
-            for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i++) 
-                name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
+            for (char aILLEGAL_CHARS_UNIX : ILLEGAL_CHARS_UNIX) {
+                name = name.replace(aILLEGAL_CHARS_UNIX, '_');
+            }
         } else if (OSUtils.isMacOSX()) {
-            for(int i = 0; i < ILLEGAL_CHARS_MACOS.length; i++)
-                name = name.replace(ILLEGAL_CHARS_MACOS[i], '_');
+            for (char aILLEGAL_CHARS_MACOS : ILLEGAL_CHARS_MACOS) {
+                name = name.replace(aILLEGAL_CHARS_MACOS, '_');
+            }
         }
         
         return name;
@@ -441,18 +445,22 @@ public class CommonUtils {
      * @return sanitized String
      */
     public static String santizeString(String name) {
-        for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
-            name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
+        for (char aILLEGAL_CHARS_ANY_OS : ILLEGAL_CHARS_ANY_OS) {
+            name = name.replace(aILLEGAL_CHARS_ANY_OS, '_');
+        }
         
         if ( OSUtils.isWindows() || OSUtils.isOS2() ) {
-            for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i++) 
-                name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
+            for (char aILLEGAL_CHARS_WINDOWS : ILLEGAL_CHARS_WINDOWS) {
+                name = name.replace(aILLEGAL_CHARS_WINDOWS, '_');
+            }
         } else if ( OSUtils.isLinux() || OSUtils.isSolaris() ) {
-            for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i++) 
-                name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
+            for (char aILLEGAL_CHARS_UNIX : ILLEGAL_CHARS_UNIX) {
+                name = name.replace(aILLEGAL_CHARS_UNIX, '_');
+            }
         } else if (OSUtils.isMacOSX()) {
-            for(int i = 0; i < ILLEGAL_CHARS_MACOS.length; i++)
-                name = name.replace(ILLEGAL_CHARS_MACOS[i], '_');
+            for (char aILLEGAL_CHARS_MACOS : ILLEGAL_CHARS_MACOS) {
+                name = name.replace(aILLEGAL_CHARS_MACOS, '_');
+            }
         }
         return name;
     }

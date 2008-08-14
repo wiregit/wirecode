@@ -383,13 +383,13 @@ public class ByteOrderTest extends BaseTestCase {
             fail("should've thrown");
         } catch (EOFException expected) {
         }
-        ;
+
         try {
             ByteUtils.beb2short(bais);
             fail("should've thrown");
         } catch (EOFException expected) {
         }
-        ;
+
         byte[] three = new byte[3];
         bais = new ByteArrayInputStream(three);
         try {
@@ -397,13 +397,13 @@ public class ByteOrderTest extends BaseTestCase {
             fail("should've thrown");
         } catch (EOFException expected) {
         }
-        ;
+
         try {
             ByteUtils.beb2int(bais);
             fail("should've thrown");
         } catch (EOFException expected) {
         }
-        ;
+
         byte []seven = new byte[7];
         bais = new ByteArrayInputStream(seven);
         try {
@@ -411,7 +411,7 @@ public class ByteOrderTest extends BaseTestCase {
             fail("should've thrown");
         } catch (EOFException expected) {
         }
-        ;
+
     }
 
     public void testLong2Bytes() {

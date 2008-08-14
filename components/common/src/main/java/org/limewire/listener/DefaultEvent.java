@@ -26,7 +26,7 @@ public class DefaultEvent<T, E> implements Event<T, E> {
         StringBuilder builder = new StringBuilder(getClass().getSimpleName());
         builder.append(": ");
         builder.append("source: ").append(source);
-        builder.append(", type: " + event);
+        builder.append(", type: ").append(event);
         return builder.toString();
     }
 }

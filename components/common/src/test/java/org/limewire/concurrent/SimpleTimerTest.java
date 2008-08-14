@@ -34,8 +34,8 @@ public class SimpleTimerTest extends BaseTestCase {
     public void testFirstGoesFirst() {
         SimpleTimer t=new SimpleTimer(false);  //not daemon: test thread dies
         sleep(T);    //make timer thread block
-        TimerTestTask a=new TimerTestTask("a");
-        TimerTestTask b=new TimerTestTask("b");
+        TimerTestTask a=new TimerTestTask();
+        TimerTestTask b=new TimerTestTask();
         long start=System.currentTimeMillis();
         t.scheduleWithFixedDelay(a, 2*T, 2*T, TimeUnit.MILLISECONDS);
         sleep(T);
@@ -48,7 +48,7 @@ public class SimpleTimerTest extends BaseTestCase {
         b.checkMatch(start+3*T, 3, 3*T);
 
         try {
-            t.scheduleWithFixedDelay(new TimerTestTask("c"), 0, T, TimeUnit.MILLISECONDS);
+            t.scheduleWithFixedDelay(new TimerTestTask(), 0, T, TimeUnit.MILLISECONDS);
             fail("illegalstateexception should have been thrown");
         } catch (IllegalStateException pass) { }
     }
@@ -56,8 +56,8 @@ public class SimpleTimerTest extends BaseTestCase {
     //Tests when the second item scheduled goes first
     public void testSecondGoesFirst() {
         SimpleTimer t=new SimpleTimer(false);  //not daemon: test thread dies
-        TimerTestTask b=new TimerTestTask("b2");
-        TimerTestTask a=new TimerTestTask("a2");
+        TimerTestTask b=new TimerTestTask();
+        TimerTestTask a=new TimerTestTask();
         long start=System.currentTimeMillis();
         t.scheduleWithFixedDelay(b, 3*T, 3*T, TimeUnit.MILLISECONDS);
         sleep(T);
@@ -76,15 +76,15 @@ public class SimpleTimerTest extends BaseTestCase {
         TimerTestTask[] tasks=new TimerTestTask[12];
         long start=System.currentTimeMillis();
         for (int i=0; i<tasks.length; i++) {
-            tasks[i]=new TimerTestTask("T"+i);
+            tasks[i]=new TimerTestTask();
             t.scheduleWithFixedDelay(tasks[i], 0, 4*T, TimeUnit.MILLISECONDS);
         }
 
         sleep(5*T);
         t.shutdown();
 
-        for (int i=0; i<tasks.length; i++) {
-            tasks[i].checkMatch(start, 2, 4*T);
+        for (TimerTestTask task : tasks) {
+            task.checkMatch(start, 2, 4 * T);
         }
     }
     
@@ -94,7 +94,7 @@ public class SimpleTimerTest extends BaseTestCase {
         try {
             SimpleTimer t = new SimpleTimer(false);
             ErrorService.setErrorCallback(now);
-            TimerTestTask a = new TimerTestTask("a3", true);
+            TimerTestTask a = new TimerTestTask(true);
             t.scheduleWithFixedDelay(a, T, 2*T, TimeUnit.MILLISECONDS);
             sleep(T+T/2);
             t.shutdown();
@@ -117,17 +117,17 @@ public class SimpleTimerTest extends BaseTestCase {
         private static long FUDGE_FACTOR=40;
         private boolean _throwException;
     
-        TimerTestTask(String name) {
-            this(name, false);
+        TimerTestTask() {
+            this(false);
         }
     
-        TimerTestTask(String name, boolean throwException) {
+        TimerTestTask(boolean throwException) {
             this._throwException=throwException;
         }
     
         public void run() {
             long now=System.currentTimeMillis();
-            _runs.add(new Long(now));
+            _runs.add(now);
             if (_throwException) 
                 throw new IndexOutOfBoundsException();
         }
@@ -145,7 +145,7 @@ public class SimpleTimerTest extends BaseTestCase {
         }
         
         long get(int i) {
-            return _runs.get(i).longValue();
+            return _runs.get(i);
         }
     }	    
 }

@@ -7,10 +7,6 @@ public class Providers {
     public static <T> Provider<T> of(T instance) {
         return new SimpleProvider<T>(instance);
     }
-    
-    public static <T> Provider<T> nullProvider(Class<? extends T> forTypeSafety) {
-        return new EmptyProvider<T>();
-    }
 
     /** A simple provider that always returns T. */
     private static class SimpleProvider<T> implements Provider<T> {
@@ -22,12 +18,6 @@ public class Providers {
 
         public T get() {
             return t;
-        }
-    }
-    
-    private static class EmptyProvider<T> implements Provider<T> {
-        public T get() {
-            return null;
         }
     }
 

@@ -101,7 +101,7 @@ public class SystemUtils {
             setFileWriteable(fileName);
     }
 
-    private static final native int setOpenFileLimit0(int max);
+    private static native int setOpenFileLimit0(int max);
 
 	/**
 	 * Gets the path to the Windows launcher .exe file that is us running right now.
@@ -109,7 +109,7 @@ public class SystemUtils {
 	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe".
 	 *         null on error.
 	 */
-    public static final String getRunningPath() {
+    public static String getRunningPath() {
     	if (OSUtils.isWindows() && isLoaded) {
     		String path = getRunningPathNative();
     		if (path.equals(""))
@@ -180,7 +180,7 @@ public class SystemUtils {
      * @param location A special folder identifier
      * @return         The path to that folder, or null on not supported
      */
-    public static final String getSpecialPath(SpecialLocations location) {
+    public static String getSpecialPath(SpecialLocations location) {
         if (OSUtils.isWindows()) {
             if (location == SpecialLocations.HOME) {
                 return CommonUtils.getUserHomeDir().getPath();
@@ -224,7 +224,7 @@ public class SystemUtils {
      * @param icon  The path to a .exe or .ico file on the disk
      * @return      False on error
      */
-    public static final boolean setWindowIcon(Component frame, File icon) {
+    public static boolean setWindowIcon(Component frame, File icon) {
     	if (OSUtils.isWindows() && isLoaded) {
     		String result = setWindowIconNative(frame, System.getProperty("sun.boot.library.path"), icon.getPath());
     	    return result.equals(""); // Returns blank on success, or information about an error
@@ -236,7 +236,7 @@ public class SystemUtils {
     /**
      * Sets a Component to be topmost.
      */
-    public static final boolean setWindowTopMost(Component frame) {
+    public static boolean setWindowTopMost(Component frame) {
         if(isLoaded && OSUtils.isWindows()) {
             String result = setWindowTopMostNative(frame, System.getProperty("sun.boot.library.path"));
             return result.equals("");
@@ -249,7 +249,7 @@ public class SystemUtils {
      * Flushes the icon cache on the OS, forcing any icons to be redrawn
      * with the current-most icon.
      */
-    public static final boolean flushIconCache() {
+    public static boolean flushIconCache() {
         if(isLoaded && OSUtils.isWindows()) {
             return flushIconCacheNative();
         }
@@ -265,7 +265,7 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The number value stored there, or 0 on error
      */
-    public static final int registryReadNumber(String root, String path, String name) throws IOException {
+    public static int registryReadNumber(String root, String path, String name) throws IOException {
     	if (OSUtils.isWindows() && isLoaded)
     		return registryReadNumberNative(root, path, name);
     	throw new IOException(" not supported ");
@@ -279,7 +279,7 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The text value stored there or blank on error
      */
-    public static final String registryReadText(String root, String path, String name) throws IOException {
+    public static String registryReadText(String root, String path, String name) throws IOException {
     	if (OSUtils.isWindows() && isLoaded)
     		return registryReadTextNative(root, path, name);
     	throw new IOException(" not supported ");
@@ -294,7 +294,7 @@ public class SystemUtils {
      * @param value The number value to set there
      * @return      False on error
      */
-    public static final boolean registryWriteNumber(String root, String path, String name, int value) {
+    public static boolean registryWriteNumber(String root, String path, String name, int value) {
     	if (OSUtils.isWindows() && isLoaded)
     		return registryWriteNumberNative(root, path, name, value);
     	else
@@ -310,7 +310,7 @@ public class SystemUtils {
      * @param value The text value to set there
      * @return      False on error
      */
-    public static final boolean registryWriteText(String root, String path, String name, String value) {
+    public static boolean registryWriteText(String root, String path, String name, String value) {
     	if (OSUtils.isWindows() && isLoaded)
     		return registryWriteTextNative(root, path, name, value);
     	else
@@ -324,7 +324,7 @@ public class SystemUtils {
      * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
      * @return     False on error
      */
-    public static final boolean registryDelete(String root, String path) {
+    public static boolean registryDelete(String root, String path) {
     	if (OSUtils.isWindows() && isLoaded)
     		return registryDeleteNative(root, path);
     	else
@@ -336,7 +336,7 @@ public class SystemUtils {
      * 
      * @return True if it does, false if it does not or there was an error
      */
-    public static final boolean isFirewallPresent() {
+    public static boolean isFirewallPresent() {
     	if (OSUtils.isWindows() && isLoaded)
     		return firewallPresentNative();
     	return false;
@@ -349,7 +349,7 @@ public class SystemUtils {
      *         False if the setting on the "General" tab is "Off (not recommended)".
      *         False on error.
      */
-    public static final boolean isFirewallEnabled() {
+    public static boolean isFirewallEnabled() {
     	if (OSUtils.isWindows() && isLoaded)
     	    return firewallEnabledNative();
     	return false;
@@ -362,7 +362,7 @@ public class SystemUtils {
      *         False if the box is not checked.
      *         False on error.
      */
-    public static final boolean isFirewallExceptionsNotAllowed() {
+    public static boolean isFirewallExceptionsNotAllowed() {
     	if (OSUtils.isWindows() && isLoaded)
     		return firewallExceptionsNotAllowedNative();
     	return false;
@@ -374,7 +374,7 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     True if it has a listing on the Exceptions list, false if not or on error
      */
-    public static final boolean isProgramListedOnFirewall(String path) {
+    public static boolean isProgramListedOnFirewall(String path) {
     	if (OSUtils.isWindows() && isLoaded)
     		return firewallIsProgramListedNative(path);
     	return false;
@@ -386,7 +386,7 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     True if it's listing's check box is checked, false if not or on error
      */
-    public static final boolean isProgramEnabledOnFirewall(String path) {
+    public static boolean isProgramEnabledOnFirewall(String path) {
     	if (OSUtils.isWindows() && isLoaded)
     		return firewallIsProgramEnabledNative(path);
     	return false;
@@ -399,7 +399,7 @@ public class SystemUtils {
      * @param name The name of the program, like "LimeWire", this is the text that will identify the item on the list
      * @return     False if error
      */
-    public static final boolean addProgramToFirewall(String path, String name) {
+    public static boolean addProgramToFirewall(String path, String name) {
     	if (OSUtils.isWindows() && isLoaded)
     		return firewallAddNative(path, name);
     	return false;
@@ -411,7 +411,7 @@ public class SystemUtils {
      * @param path The path to the program, like "C:\Program Files\LimeWire\LimeWire.exe"
      * @return     False if error.
      */
-    public static final boolean removeProgramFromFirewall(String path) {
+    public static boolean removeProgramFromFirewall(String path) {
     	if (OSUtils.isWindows() && isLoaded)
     		return firewallRemoveNative(path);
     	return false;
@@ -560,29 +560,29 @@ public class SystemUtils {
      * Call a method, and it will run platform-specific code to complete the task in the appropriate platform-specific way.
      */
 
-    private static final native String getRunningPathNative();
-    private static final native String getSpecialPathNative(String name);    
-    private static final native void openURLNative(String url);
-    private static final native void openFileNative(String path);
-    private static final native void openFileParamsNative(String path, String params);
-    private static final native boolean recycleNative(String path);
-    private static final native int setFileWriteable(String path);
-    private static final native long idleTime();
-    private static final native String setWindowIconNative(Component frame, String bin, String icon);
-    private static final native String setWindowTopMostNative(Component frame, String bin);
-    private static final native boolean flushIconCacheNative();
+    private static native String getRunningPathNative();
+    private static native String getSpecialPathNative(String name);
+    private static native void openURLNative(String url);
+    private static native void openFileNative(String path);
+    private static native void openFileParamsNative(String path, String params);
+    private static native boolean recycleNative(String path);
+    private static native int setFileWriteable(String path);
+    private static native long idleTime();
+    private static native String setWindowIconNative(Component frame, String bin, String icon);
+    private static native String setWindowTopMostNative(Component frame, String bin);
+    private static native boolean flushIconCacheNative();
 
-    private static final native int registryReadNumberNative(String root, String path, String name) throws IOException ;
-    private static final native String registryReadTextNative(String root, String path, String name) throws IOException;
-    private static final native boolean registryWriteNumberNative(String root, String path, String name, int value);
-    private static final native boolean registryWriteTextNative(String root, String path, String name, String value);
-    private static final native boolean registryDeleteNative(String root, String path);
+    private static native int registryReadNumberNative(String root, String path, String name) throws IOException ;
+    private static native String registryReadTextNative(String root, String path, String name) throws IOException;
+    private static native boolean registryWriteNumberNative(String root, String path, String name, int value);
+    private static native boolean registryWriteTextNative(String root, String path, String name, String value);
+    private static native boolean registryDeleteNative(String root, String path);
 
-    private static final native boolean firewallPresentNative();
-    private static final native boolean firewallEnabledNative();
-    private static final native boolean firewallExceptionsNotAllowedNative();
-    private static final native boolean firewallIsProgramListedNative(String path);
-    private static final native boolean firewallIsProgramEnabledNative(String path);
-    private static final native boolean firewallAddNative(String path, String name);
-    private static final native boolean firewallRemoveNative(String path);
+    private static native boolean firewallPresentNative();
+    private static native boolean firewallEnabledNative();
+    private static native boolean firewallExceptionsNotAllowedNative();
+    private static native boolean firewallIsProgramListedNative(String path);
+    private static native boolean firewallIsProgramEnabledNative(String path);
+    private static native boolean firewallAddNative(String path, String name);
+    private static native boolean firewallRemoveNative(String path);
 }

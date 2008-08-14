@@ -91,16 +91,16 @@ public class StringUtilsTest extends BaseTestCase {
 
     public void testContainsCase() {
         //Cases 
-        assertTrue(StringUtils.contains("aBcDd", "bCD", true) == true);
-        assertTrue(StringUtils.contains("aBcDd", "bCD", false) == false);
-        assertTrue(StringUtils.contains("....", "..", true) == true);
-        assertTrue(StringUtils.contains("....", "..", false) == true);
+        assertTrue(StringUtils.contains("aBcDd", "bCD", true));
+        assertFalse(StringUtils.contains("aBcDd", "bCD", false));
+        assertTrue(StringUtils.contains("....", "..", true));
+        assertTrue(StringUtils.contains("....", "..", false));
     }
 
     public void testContainsClip2() {
         //Clip2 compatibility      
-        assertTrue(StringUtils.contains("abcd", " ") == true);
-        assertTrue(StringUtils.contains("abcd", "    ") == true);
+        assertTrue(StringUtils.contains("abcd", " "));
+        assertTrue(StringUtils.contains("abcd", "    "));
     }
         
     public void testSplit() {

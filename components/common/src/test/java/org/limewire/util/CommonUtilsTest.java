@@ -239,10 +239,10 @@ public class CommonUtilsTest extends BaseTestCase {
     private void runCharTest(char[] illegalChars) throws Exception {
         String test = "test";
         String correctResult = "test_";
-        for(int i=0; i<illegalChars.length; i++) {
-            String curTest = CommonUtils.convertFileName(test + illegalChars[i]);
-            assertEquals("illegal char: "+illegalChars[i]+ " not replaced correctly",
-                         correctResult, curTest);
+        for (char illegalChar : illegalChars) {
+            String curTest = CommonUtils.convertFileName(test + illegalChar);
+            assertEquals("illegal char: " + illegalChar + " not replaced correctly",
+                    correctResult, curTest);
         }
     }
 }
