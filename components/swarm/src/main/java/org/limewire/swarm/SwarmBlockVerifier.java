@@ -17,5 +17,5 @@ public interface SwarmBlockVerifier {
     /**
      * Returns true if a range is verified, false otherwise.
      */
-    boolean verify(Range range, SwarmFileSystem swarmFile);
+    boolean verify(Range range, SwarmFileSystem swarmFile) throws VerificationException;
 }

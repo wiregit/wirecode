@@ -17,6 +17,7 @@ import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
+import org.limewire.swarm.VerificationException;
 import org.limewire.swarm.impl.AbstractSwarmCoordinator;
 import org.limewire.swarm.impl.LoggingSwarmCoordinatorListener;
 import org.limewire.util.Objects;
@@ -239,7 +240,13 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
         boolean complete = false;
         for (Range rangeToVerify : verifiableRanges) {
-            boolean verified = swarmBlockVerifier.verify(rangeToVerify, fileSystem);
+            boolean verified;
+            try {
+                verified = swarmBlockVerifier.verify(rangeToVerify, fileSystem);
+            } catch (VerificationException e) {
+                LOG.warn(e.getMessage(), e);
+                verified = false;
+            }
             synchronized (LOCK) {
                 assert writtenBlocks.contains(rangeToVerify);
                 writtenBlocks.delete(rangeToVerify);

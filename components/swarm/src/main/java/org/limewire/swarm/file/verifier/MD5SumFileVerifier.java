@@ -1,5 +1,7 @@
 package org.limewire.swarm.file.verifier;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +12,7 @@ import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
+import org.limewire.swarm.VerificationException;
 import org.limewire.util.FileUtils;
 
 /**
@@ -45,16 +48,21 @@ public class MD5SumFileVerifier implements SwarmBlockVerifier {
         return ret;
     }
 
-    public boolean verify(Range range, SwarmFileSystem swarmFileSystem) {
+    public boolean verify(Range range, SwarmFileSystem swarmFileSystem)
+            throws VerificationException {
         SwarmFile swarmFile = swarmFileSystem.getSwarmFile(range.getLow());
         String md5String = rangeMD5s.get(range);
 
         String testMd5;
+
         try {
             testMd5 = FileUtils.getMD5(swarmFile.getFile());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new VerificationException(e, range);
+        } catch (IOException e) {
+            throw new VerificationException(e, range);
         }
+
         return testMd5.equals(md5String);
     }
 
