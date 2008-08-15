@@ -28,7 +28,7 @@ public class ConversationPaneHarness {
                         //do nothing - simulates sending message on XMPP
                     }
                 };
-                MockFriend friend = new MockFriend("foo@gmail.com", "Will Benedict", "Just listening to some jams", Mode.available);
+                MockFriend friend = new MockFriend("Will Benedict", "Just listening to some jams", Mode.available);
                 friend.writer = writer;
                 ConversationPane pane = new ConversationPane(friend, new IconLibraryImpl());
                 frame.add(pane);

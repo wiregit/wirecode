@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -10,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.util.WeakHashMap;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -18,6 +19,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
@@ -35,12 +38,15 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventListModel;
-import net.miginfocom.swing.MigLayout;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
+@Singleton
 public class FriendsPane extends JPanel {
     
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
@@ -48,6 +54,7 @@ public class FriendsPane extends JPanel {
     private EventList<Friend> friends;
     private final WeakHashMap<String, FriendImpl> idToFriendMap;    
 
+    @Inject
     public FriendsPane(IconLibrary icons) {
         super(new BorderLayout());
         friends = new BasicEventList<Friend>();
@@ -107,12 +114,13 @@ public class FriendsPane extends JPanel {
                 boolean isSelected, boolean cellHasFocus) {
             JXPanel cell = new JXPanel(new MigLayout("insets 0 2 0 1", "3[]6[]push[]", "1[]1"));
             Friend friend = (Friend) value;
-            cell.add(new JLabel(getIcon(friend)));
+            cell.add(new JLabel(getIcon(friend, icons)));
             
             JLabel friendName = new JLabel();
+            friendName.setMaximumSize(new Dimension(85, 12));
             cell.add(friendName);
             
-            friendName.setText(safe(friend.getName(), friend.getId()));
+            friendName.setText(friend.getName());
             friendName.setFont(list.getFont());
 
             cell.add(new JLabel(icons.getEndChat()));
@@ -124,6 +132,7 @@ public class FriendsPane extends JPanel {
             if (isSelected) {
                 if (friend.getMode() == Mode.chat) {
                     RectanglePainter painter = new RectanglePainter();
+                    //light-blue gradient
                     painter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
                     painter.setBorderPaint(Color.WHITE);
                     painter.setBorderWidth(0f);
@@ -138,22 +147,6 @@ public class FriendsPane extends JPanel {
             cell.setBorder(EMPTY_BORDER);
             
             return cell;
-        }
-        
-        private String safe(String str, String str2) {
-            return (str == null || "".equals(str2)) ? str2 : str;
-        }
-        
-        private Icon getIcon(Friend friend) {
-            switch(friend.getMode()) {
-            case available:
-                return icons.getAvailable();
-            case chat:
-                return icons.getChatting();
-            case dnd:
-                return icons.getDoNotDisturb();
-            }
-            return icons.getAway();
         }
     }
 

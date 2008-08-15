@@ -25,11 +25,6 @@ public class FriendImpl extends AbstractBean implements Friend {
     }
     
     @Override
-    public String getId() {
-        return user.getId();
-    }
-
-    @Override
     public Mode getMode() {
         return mode;
     }
@@ -42,7 +37,11 @@ public class FriendImpl extends AbstractBean implements Friend {
 
     @Override
     public String getName() {
-        return user.getName();
+        return safe(user.getName(), user.getId());
+    }
+    
+    private String safe(String str, String str2) {
+        return (str == null || "".equals(str)) ? str2 : str;
     }
     
     @Override

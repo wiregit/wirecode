@@ -13,6 +13,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
+import org.limewire.ui.swing.friends.Displayable;
 import org.limewire.ui.swing.friends.LoginPanel;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 
@@ -38,7 +39,7 @@ public class FriendsPanel extends JXCollapsiblePane {
 
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
         mainPanel.add(loginPanel);
-        add(mainPanel, BorderLayout.CENTER);
+        add(mainPanel);
         setCollapsed(true);
         
         AnnotationProcessor.process(this);
@@ -51,6 +52,9 @@ public class FriendsPanel extends JXCollapsiblePane {
         }
         // toggle
         setCollapsed(!isCollapsed());
+        if (!isCollapsed()) {
+            ((Displayable)mainPanel.getComponent(0)).handleDisplay();
+        }
     }
     
     @EventSubscriber

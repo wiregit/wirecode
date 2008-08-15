@@ -27,7 +27,7 @@ public class ChatPanelHarness {
                     public ConversationPane create(Friend friend) {
                         return new ConversationPane(friend, icons);
                     }
-                }, icons));
+                }, icons, new FriendsPane(icons), new TopPanel(icons)));
                 
                 frame.pack();
                 frame.setVisible(true);

@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import java.awt.Dimension;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -27,13 +26,11 @@ public class FriendsPaneHarness {
 
                 final ArrayList<Duo> presences = new ArrayList<Duo>();
                 for (int i = 0; i < 10; i++) {
-                    MockUser user = new MockUser("", "foo" + i);
+                    MockUser user = new MockUser("", "foooooooooooooooo" + i);
                     MockPresence presence = new MockPresence(randomMode(), "Sort-in", "jid" + i);
                     new PresenceUpdateEvent(user, presence).publish();
                     presences.add(new Duo(user, presence));
                 }
-
-                frame.setPreferredSize(new Dimension(470, 400));
 
                 frame.pack();
                 frame.setVisible(true);

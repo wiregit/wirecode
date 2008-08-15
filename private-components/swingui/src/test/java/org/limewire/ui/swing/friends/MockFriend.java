@@ -7,11 +7,10 @@ import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 class MockFriend implements Friend {
-    private final String id, name, status;
+    private final String name, status;
     private final Mode state;
     
-    public MockFriend(String id, String name, String status, Mode state) {
-        this.id = id;
+    public MockFriend(String name, String status, Mode state) {
         this.name = name;
         this.state = state;
         this.status = status;
@@ -38,11 +37,6 @@ class MockFriend implements Friend {
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-    }
-
-    @Override
-    public String getId() {
-        return id;
     }
 
     MessageReader reader;

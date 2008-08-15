@@ -18,19 +18,20 @@ import com.google.inject.Singleton;
  *
  */
 @Singleton
-public class ChatPanel extends JXPanel {
+public class ChatPanel extends JXPanel implements Displayable {
     private final ConversationPaneFactory conversationFactory;
     private JPanel conversationPanel;
     
     @Inject
-    public ChatPanel(ConversationPaneFactory conversationFactory, IconLibrary icons) {
+    public ChatPanel(ConversationPaneFactory conversationFactory, IconLibrary icons, FriendsPane friendsPanel,
+            TopPanel topPanel) {
         super(new BorderLayout());
         this.conversationFactory = conversationFactory;
         
         //Dimensions according to the spec
         setPreferredSize(new Dimension(400, 235));
-        add(new FriendsPane(icons), BorderLayout.WEST);
-        add(new TopPanel(icons), BorderLayout.NORTH);
+        add(friendsPanel, BorderLayout.WEST);
+        add(topPanel, BorderLayout.NORTH);
         conversationPanel = new JPanel(new BorderLayout());
         conversationPanel.add(new JLabel("This is a placeholder"));
         add(conversationPanel, BorderLayout.CENTER);
@@ -44,5 +45,10 @@ public class ChatPanel extends JXPanel {
         conversationPanel.add(conversationFactory.create(event.getFriend()), BorderLayout.CENTER);
         //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
         conversationPanel.revalidate();
+    }
+
+    @Override
+    public void handleDisplay() {
+        // TODO Auto-generated method stub
     }
 }

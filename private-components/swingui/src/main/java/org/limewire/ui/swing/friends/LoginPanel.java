@@ -40,7 +40,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * TODO: Use xmpp API
  */
 @Singleton
-public class LoginPanel extends JPanel {
+public class LoginPanel extends JPanel implements Displayable {
     @Resource private Icon gmail;
     @Resource private Icon facebook;
 
@@ -78,6 +78,11 @@ public class LoginPanel extends JPanel {
         add(builder.getPanel());
     }
     
+    @Override
+    public void handleDisplay() {
+        userNameField.requestFocusInWindow();
+    }
+
     private JPanel topPanel() {
         FormLayout layout = new FormLayout("p, 4dlu, p:g", "p, 3dlu, p, p, p");
         PanelBuilder builder = new PanelBuilder(layout);
