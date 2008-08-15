@@ -74,5 +74,26 @@ public class RefreshTimerTest extends GUIBaseTestCase {
        refreshTimer.updateUptimeHistory(30, 10, 2);
        assertEquals(new String[] { "30" }, uptimeHistory.getValue());
     }
-   
+
+    /**
+     * Ensures array copying works for history length 1.
+     */
+    public void testHistoryLength1() {
+        RefreshTimer refreshTimer = new RefreshTimer();
+        
+        refreshTimer.updateUptimeHistory(10, 10, 1);
+        
+        refreshTimer = new RefreshTimer();
+        refreshTimer.updateUptimeHistory(20, 10, 1);
+    }
+    
+    public void testHistoryLengthChangedFrom1ToHigher() {
+        RefreshTimer refreshTimer = new RefreshTimer();
+        
+        refreshTimer.updateUptimeHistory(10, 10, 1);
+        
+        refreshTimer = new RefreshTimer();
+        refreshTimer.updateUptimeHistory(20, 10, 2);
+    }
+    
 }
