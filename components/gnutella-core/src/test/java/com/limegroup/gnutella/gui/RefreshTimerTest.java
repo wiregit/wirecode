@@ -36,10 +36,12 @@ public class RefreshTimerTest extends GUIBaseTestCase {
         assertEquals(new String[] { "20" }, uptimeHistory.getValue());
         
         // new first time update, should append
+        refreshTimer = new RefreshTimer();
         refreshTimer.updateUptimeHistory(10, 10, 2);
         assertEquals(new String[] { "20", "10" }, uptimeHistory.getValue());
         
         // new first time update should shift array
+        refreshTimer = new RefreshTimer();
         refreshTimer.updateUptimeHistory(10, 10, 2);
         assertEquals(new String[] { "10", "10" }, uptimeHistory.getValue());
         
@@ -48,6 +50,7 @@ public class RefreshTimerTest extends GUIBaseTestCase {
         assertEquals(new String[] { "10", "30" }, uptimeHistory.getValue());
         
         // go back to shorter history length
+        refreshTimer = new RefreshTimer();
         refreshTimer.updateUptimeHistory(10, 10, 1);
         assertEquals(new String[] { "10" }, uptimeHistory.getValue());
                 
@@ -59,4 +62,16 @@ public class RefreshTimerTest extends GUIBaseTestCase {
         assertEquals(new String[] { "30" }, uptimeHistory.getValue());
     }
 
+    public void testUpdateUptimeHistoryWithFirstUptimeGreaterThanInterval() {
+       RefreshTimer refreshTimer = new RefreshTimer();
+       StringArraySetting uptimeHistory = ApplicationSettings.LAST_N_UPTIMES;
+       assertEquals(new String[0], uptimeHistory.getValue());
+      
+       refreshTimer.updateUptimeHistory(20, 10, 2);
+       assertEquals(new String[] { "20" }, uptimeHistory.getValue());
+       
+       refreshTimer.updateUptimeHistory(30, 10, 2);
+       assertEquals(new String[] { "30" }, uptimeHistory.getValue());
+    }
+   
 }
