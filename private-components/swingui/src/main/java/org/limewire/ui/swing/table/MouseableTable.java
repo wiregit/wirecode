@@ -20,30 +20,13 @@ import org.limewire.ui.swing.util.GuiUtils;
 //TODO comment this beast
 public class MouseableTable extends JXTable {
     
-    //TODO: inject these
-    /**
-     * these consider the first element even (zero based)
-     */
-    @Resource
-    private Color evenColor = Color.WHITE;
-    @Resource
-    private Color evenForeground = Color.BLACK;
-    @Resource
-    private Color oddColor = Color.LIGHT_GRAY;
-    @Resource
-    private Color oddForeground = Color.BLACK;
-    @Resource
-    private Color menuRowColor = Color.BLUE.brighter();
-    @Resource
-    private Color menuRowForeground = Color.BLACK;    
-    @Resource
-    private Color selectionColor = Color.GREEN.brighter();
-    @Resource
-    private Color selectionForeground = Color.BLACK;
+
 	
 	private TablePopupHandler popupHandler;
 
 	private TableDoubleClickHandler doubleClickHandler;
+	
+	private TableColors colors = new TableColors();
 	
 	public MouseableTable(){
 		initialize();
@@ -55,8 +38,8 @@ public class MouseableTable extends JXTable {
 	}
 	
 	
-	public void setPopupHandler(TablePopupHandler popupHhandler){
-		this.popupHandler = popupHhandler;
+	public void setPopupHandler(TablePopupHandler popupHandler){
+		this.popupHandler = popupHandler;
 	}
 	
 	public void setDoubleClickHandler(TableDoubleClickHandler tableDoubleClickHandler){
@@ -65,16 +48,15 @@ public class MouseableTable extends JXTable {
 	
 	
 	protected void initialize(){	
-        GuiUtils.assignResources(this);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
 
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
 		setHighlighters(
-		        new ColorHighlighter(HighlightPredicate.EVEN, evenColor, evenForeground, selectionColor, selectionForeground),
-                new ColorHighlighter(HighlightPredicate.ODD, oddColor, oddForeground, selectionColor, selectionForeground),
-                new ColorHighlighter(new MenuHighlightPredicate(this), menuRowColor,  menuRowForeground, menuRowColor, menuRowForeground));
+		        new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
+                new ColorHighlighter(HighlightPredicate.ODD, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground),
+                new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 		
 		//so that mouseovers will work within table
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -208,5 +190,33 @@ public class MouseableTable extends JXTable {
 			return table.isMenuShowing(adapter.row);
 		}
 
+	}
+	
+	public static class TableColors {
+	    //TODO: inject these
+	    /**
+	     * these consider the first element even (zero based)
+	     */
+	    @Resource
+	    public Color evenColor;
+	    @Resource
+	    public Color evenForeground;
+	    @Resource
+	    public Color oddColor;
+	    @Resource
+	    public Color oddForeground;
+	    @Resource
+	    public Color menuRowColor;
+	    @Resource
+	    public Color menuRowForeground;    
+	    @Resource
+	    public Color selectionColor;
+	    @Resource
+	    public Color selectionForeground;
+	    
+	    public TableColors(){
+	        GuiUtils.assignResources(TableColors.this);
+	    }
+	    
 	}
 }

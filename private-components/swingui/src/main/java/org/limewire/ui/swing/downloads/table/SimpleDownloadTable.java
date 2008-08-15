@@ -3,12 +3,14 @@ package org.limewire.ui.swing.downloads.table;
 import java.awt.Component;
 import java.util.Comparator;
 
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.Category;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -24,6 +26,7 @@ public class SimpleDownloadTable extends MouseableTable {
         GuiUtils.assignResources(this);
         setColumnControlVisible(true);
         getColumnModel().getColumn(SimpleDownloadTableFormat.PERCENT).setCellRenderer(new PercentRenderer());
+        getColumnModel().getColumn(SimpleDownloadTableFormat.CATEGORY).setCellRenderer(new CategoryRenderer());
     }
 
 
@@ -138,6 +141,24 @@ public class SimpleDownloadTable extends MouseableTable {
                 return this;
             }
             throw new IllegalArgumentException("Value must be a number: "+ value.getClass());
+        }
+        
+    }
+    
+    private class CategoryRenderer extends JPanel implements TableCellRenderer {
+//TODO small icons
+        private CategoryIconLabel label = new CategoryIconLabel();
+        public CategoryRenderer(){
+            add(label);
+        }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value instanceof Category) {
+                label.setIcon((Category) value);
+                return this;
+            }
+            throw new IllegalArgumentException("Value must be a Category: " + value.getClass());
         }
         
     }

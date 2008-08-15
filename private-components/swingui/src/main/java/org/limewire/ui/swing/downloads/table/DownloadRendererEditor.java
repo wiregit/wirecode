@@ -62,7 +62,7 @@ public class DownloadRendererEditor extends JPanel implements
     private DownloadItem menuEditItem = null;
 		
 	private JPanel buttonPanel;
-	private JLabel iconLabel;
+	private CategoryIconLabel iconLabel;
 	private JLabel titleLabel;
 	private JLabel statusLabel;
 	private LimeProgressBar progressBar;
@@ -100,18 +100,7 @@ public class DownloadRendererEditor extends JPanel implements
     private final static String PROPERTIES_COMMAND = "properties";
     private final static String LINK_COMMAND = "link";
 
-	@Resource
-	private Icon audioIcon;
-	@Resource
-	private Icon imageIcon;
-	@Resource
-	private Icon videoIcon;
-    @Resource
-    private Icon documentIcon;
-    @Resource
-    private Icon programIcon;
-    @Resource
-    private Icon otherIcon;
+
     @Resource
     private Icon warningIcon;
     
@@ -148,7 +137,7 @@ public class DownloadRendererEditor extends JPanel implements
 	 */
 	public DownloadRendererEditor() {
 		GuiUtils.assignResources(this);
-		iconLabel = new JLabel();
+		iconLabel = new CategoryIconLabel();
 
 		titleLabel = new JLabel();
 		titleLabel.setFont(new Font("", Font.BOLD, 18));
@@ -456,27 +445,11 @@ public class DownloadRendererEditor extends JPanel implements
 	
 	private void updateComponent(DownloadRendererEditor editor, DownloadItem item){
 	    editor.titleLabel.setText(item.getTitle());
+	    
         if(item.getState() == DownloadState.ERROR || item.getState() == DownloadState.STALLED ){
             editor.iconLabel.setIcon(warningIcon);
         } else {
-            switch (item.getCategory()) {
-            case AUDIO:
-                editor.iconLabel.setIcon(audioIcon);
-                break;
-            case DOCUMENT:
-                editor.iconLabel.setIcon(documentIcon);
-                break;
-            case IMAGE:
-                editor.iconLabel.setIcon(imageIcon);
-                break;
-            case VIDEO:
-                editor.iconLabel.setIcon(videoIcon);
-            case PROGRAM:
-                editor.iconLabel.setIcon(programIcon);
-                break;
-            default:
-                editor.iconLabel.setIcon(otherIcon);
-            }
+            editor.iconLabel.setIcon(item.getCategory());           
         }
         
         long totalSize = item.getTotalSize();

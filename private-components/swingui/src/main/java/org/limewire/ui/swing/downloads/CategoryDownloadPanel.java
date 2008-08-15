@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +20,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
@@ -32,7 +30,8 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.table.MouseableTable.MenuHighlightPredicate;
+import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -43,16 +42,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 public class CategoryDownloadPanel extends JPanel {
 
-	
-	
-    @Resource
-    private Color oddColor;
-    @Resource
-    private Color oddForeground;
-    @Resource
-    private Color evenColor;
-    @Resource
-    private Color evenForeground;
+
 	private Highlighter evenTableHighlighter;
 	private Highlighter oddTableHighlighter;
 	private JPanel tablePanel = new JPanel(new VerticalLayout());
@@ -61,6 +51,8 @@ public class CategoryDownloadPanel extends JPanel {
 	private List<JPanel> titles = new ArrayList<JPanel>();
 	
 	private EventList<DownloadItem> list;
+	
+	private TableColors colors;
 	
 	public static CategoryDownloadPanel createCategoryDownloadPanel(EventList<DownloadItem> list){
 	    CategoryDownloadPanel panel = new CategoryDownloadPanel(list);
@@ -72,14 +64,21 @@ public class CategoryDownloadPanel extends JPanel {
 	 * Create the panel
 	 */
 	private CategoryDownloadPanel(EventList<DownloadItem> list) {
-	    GuiUtils.assignResources(this);
 	    this.list = list;
+	    
+	    colors = new TableColors();
+	    
+	    
 	  //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
-        evenTableHighlighter = new CompoundHighlighter(new ColorHighlighter(HighlightPredicate.EVEN, evenColor, evenForeground, evenColor, evenForeground),
-                new ColorHighlighter(HighlightPredicate.ODD, oddColor, oddForeground, oddColor, oddForeground));
+        evenTableHighlighter = new CompoundHighlighter(
+                new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
+                new ColorHighlighter(HighlightPredicate.ODD, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground) );//,
+        //new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
         //oddHighlighter reverses color scheme
-		oddTableHighlighter = new CompoundHighlighter(new ColorHighlighter(HighlightPredicate.EVEN, oddColor, oddForeground, oddColor, oddForeground) ,
-		        new ColorHighlighter(HighlightPredicate.ODD, evenColor, evenForeground, evenColor, evenForeground));
+		oddTableHighlighter = new CompoundHighlighter(
+                new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
+                new ColorHighlighter(HighlightPredicate.EVEN, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground) );//,
+                //new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 		setLayout(new BorderLayout());
 		add(new JScrollPane(tablePanel));
 		 		
@@ -203,10 +202,11 @@ public class CategoryDownloadPanel extends JPanel {
 					table.setHighlighters(oddTableHighlighter);
 				}
 				
-                // highlighter isn't working so this is handled in DownloadTable
-                // table.addMenuRowHighlighter();
-				
-				length += table.getRowCount();
+                 table.addHighlighter(new ColorHighlighter(new MenuHighlightPredicate(table),
+                        colors.menuRowColor, colors.menuRowForeground, colors.menuRowColor,
+                        colors.menuRowForeground));
+
+                length += table.getRowCount();
 			}
 			
 		}

@@ -20,9 +20,7 @@ public class DownloadTable extends MouseableTable {
     
 
 
-	public DownloadTable(EventList<DownloadItem> downloadItems) {
-		super();
-		
+	public DownloadTable(EventList<DownloadItem> downloadItems) {		
 		model = new DownloadTableModel(downloadItems);
 		setModel(model);
 		

@@ -55,6 +55,8 @@ public class MainDownloadPanel extends JPanel {
     protected static final String TABLE = "simpleDownloadTable";
 	
 	private final DownloadMediator downloadMediator;
+	
+	private DownloadSettingsPanel settingsPanel;
 
     private final Action pauseAction = new AbstractAction(I18n.tr("Pause All")) {
         @Override
@@ -76,6 +78,16 @@ public class MainDownloadPanel extends JPanel {
             downloadMediator.clearFinished();
         }
     };
+    
+    private final Action categorizeAction = new AbstractAction(I18n.tr("Categorize downloads")) {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setCategorized(settingsPanel.isCategorized());
+        }
+
+    };
+    
     private ViewSelectionPanel viewSelectionPanel;
     
 	/**
@@ -109,7 +121,7 @@ public class MainDownloadPanel extends JPanel {
         cardPanel.add(new JScrollPane(simpleTable), simpleTable.getName());
 		
 
-		final DownloadSettingsPanel settingsPanel = new DownloadSettingsPanel();
+		settingsPanel = new DownloadSettingsPanel();
 		settingsPanel.setBorder(new LineBorder(Color.BLACK, 1, false));
 		add(settingsPanel, BorderLayout.NORTH);
 		
@@ -159,18 +171,6 @@ public class MainDownloadPanel extends JPanel {
 		private final JTextField searchBar;
 		private final JLabel titleLabel;
 		
-
-		private final Action categorizeAction = new AbstractAction(I18n.tr("Categorize downloads")) {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setCategorized(isCategorized());
-			}
-
-		};
-			
-		
-
 		public DownloadSettingsPanel() {
 			super(new GridBagLayout());
 
@@ -191,7 +191,7 @@ public class MainDownloadPanel extends JPanel {
 	            public void itemStateChanged(ItemEvent e) {
 	                if (e.getStateChange() == ItemEvent.SELECTED) {
 	                    cardLayout.show(cardPanel, TABLE);
-	                    categorizeCheckBox.setEnabled(false);
+	                    categorizeAction.setEnabled(false);
 	                }
 	            }
 	        };
@@ -202,12 +202,14 @@ public class MainDownloadPanel extends JPanel {
 	                if (e.getStateChange() == ItemEvent.SELECTED) {
 	                    String whichList = isCategorized() ? CATEGORY : NO_CATEGORY;
 	                    cardLayout.show(cardPanel, whichList);
-                        categorizeCheckBox.setEnabled(true);
+	                    categorizeAction.setEnabled(true);
 	                }
 	            }
 	        };
 
 	        viewSelectionPanel = new ViewSelectionPanel(listListener, tableListener);
+	        
+	        categorizeAction.setEnabled(true);
 			
 			GridBagConstraints gbc = new GridBagConstraints();
 
