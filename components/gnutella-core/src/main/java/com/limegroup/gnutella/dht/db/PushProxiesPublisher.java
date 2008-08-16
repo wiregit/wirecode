@@ -111,7 +111,7 @@ public class PushProxiesPublisher implements DHTEventListener {
     /**
      * Returns value to publish or null if there is nothing to publish.
      * <p>
-     * Has the side effect of storing the updating the last published value.
+     * Has the side effect of storing and updating the last published value.
      * </p>
      */
     PushProxiesValue getValueToPublish() {
@@ -175,11 +175,10 @@ public class PushProxiesPublisher implements DHTEventListener {
         if (event.getType() == Type.CONNECTED) {
             LOG.debug("starting push proxy publishing");
             if (publishingFuture != null) {
-                throw new IllegalStateException("should not have happened");
+                publishingFuture.cancel(false);
             }
             long interval = DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue();
             long initialDelay = (long)(Math.random() * interval);
-            // TODO instead of a polling approach, an event when push proxies have changed and should be updated might be nice
             publishingFuture = backgroundExecutor.scheduleAtFixedRate(new PublishingRunnable(), initialDelay, interval, TimeUnit.MILLISECONDS);
         } else if (event.getType() == Type.STOPPED) {
             LOG.debug("stopping push proxy publishing");
