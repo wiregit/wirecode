@@ -180,4 +180,21 @@ public class FixedsizeForgetfulHashMapTest extends BaseTestCase {
         assertNotEquals("should not be equal", rt, rt2);
         assertNotEquals("hashes shouldn't be equal", rt.hashCode(), rt2.hashCode());
     }
+	
+	public void testFixedIsNotSurpassed() {
+	    FixedsizeForgetfulHashMap<Integer, Integer> map = new FixedsizeForgetfulHashMap<Integer, Integer>(1);
+	    map.put(1, 1);
+	    map.put(2, 2);
+	    assertEquals(1, map.size());
+	    assertNull(map.get(1));
+	    assertEquals(Integer.valueOf(2), map.get(2));
+	}
+	
+	public void testZeroConstructor() {
+	    try {
+	        new FixedsizeForgetfulHashMap<Integer, Integer>(0);
+	        fail("expected illegal argument exception for size 0");
+	    } catch (IllegalArgumentException iae) {
+	    }
+	}
 }
