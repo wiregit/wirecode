@@ -7,24 +7,27 @@ import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
-import org.limewire.xmpp.api.client.RosterListener;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.listener.EventListener;
 import org.jivesoftware.smack.util.StringUtils;
 
-import com.google.inject.Inject;
-
-public class RosterListenerMock implements RosterListener {
+public class RosterListenerMock implements EventListener<RosterEvent> {
     public HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
     IncomingChatListenerMock listener = new IncomingChatListenerMock();
-
-    @Inject
-    public void register(XMPPService xmppService) {
-        //xmppService.register(this);
+    
+    public void handleEvent(RosterEvent event) {
+        if(event.getType().equals(User.EventType.USER_ADDED)) {
+            userAdded(event.getSource());
+        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+            userDeleted(event.getSource().getId());
+        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
+            userUpdated(event.getSource());
+        }
     }
 
-    public void userAdded(User user) {
+    private void userAdded(User user) {
         System.out.println("user added: " + user.getId());            
         if(roster.get(user.getId()) == null) {
             roster.put(user.getId(), new ArrayList<Presence>());
@@ -84,6 +87,7 @@ public class RosterListenerMock implements RosterListener {
         return false;
     }
 
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     private void remove(String id, Presence p) {
         for(Presence presence : roster.get(id)) {
             if(presence.getJID().equals(p.getJID())) {
@@ -92,11 +96,11 @@ public class RosterListenerMock implements RosterListener {
         }
     }
 
-    public void userUpdated(User user) {
+    private void userUpdated(User user) {
         System.out.println("user updated: " + user.getId());
     }
 
-    public void userDeleted(String id) {
+    private void userDeleted(String id) {
         System.out.println("user deleted: " +id);
     }    
 }

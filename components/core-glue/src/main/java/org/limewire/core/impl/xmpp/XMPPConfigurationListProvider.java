@@ -15,7 +15,7 @@ class XMPPConfigurationListProvider extends ArrayList<XMPPConnectionConfiguratio
     @Inject
     XMPPConfigurationListProvider(Provider<Map<String, XMPPServerSettings.XMPPServerConfiguration>> serverConfigs,
                                   Provider<Map<String, XMPPUserSettings.XMPPUserConfiguration>> userConfigs/*,
-                                  RosterListener rosterListener,
+                                  EventListener<RosterEvent> rosterListener,
                                   XMPPErrorListener errorListener*/) {
         for(String serviceName : serverConfigs.get().keySet()) {
             XMPPServerSettings.XMPPServerConfiguration serverConfiguration = serverConfigs.get().get(serviceName);

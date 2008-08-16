@@ -5,7 +5,6 @@ import org.limewire.ui.swing.mainframe.LimeWireUiMainframeModule;
 import org.limewire.ui.swing.nav.LimeWireUiNavModule;
 import org.limewire.ui.swing.search.LimeWireUiSearchModule;
 import org.limewire.ui.swing.tray.LimeWireUiTrayModule;
-import org.limewire.ui.swing.xmpp.LimeWireUiXMPPModule;
 
 import com.google.inject.AbstractModule;
 
@@ -17,7 +16,6 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiNavModule());
         install(new LimeWireUiMainframeModule());
         install(new LimeWireUiTrayModule());
-        install(new LimeWireUiXMPPModule());
         install(new LimeWireUiFriendsModule());
     }
 

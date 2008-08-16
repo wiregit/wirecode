@@ -14,9 +14,8 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
-import org.limewire.xmpp.api.client.RosterListener;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.client.impl.LimePresenceImpl;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -26,7 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class AddressIQListener implements PacketListener, EventListener<AddressEvent>, RosterListener {
+public class AddressIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 
     private final XMPPConnection connection;
@@ -132,21 +131,25 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
         };
     }
     
-    public void handleEvent(AddressEvent event) {
-        if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
-            // TODO async?
-            LOG.debugf("new address to publish: {0}", event.getSource().toString());
-            synchronized (this) {
-                address = event.getSource();
-                for(String jid : subscribedJids) {
-                    if(getRequests.containsKey(jid)) {
-                        sendResult(getRequests.remove(jid));
-                    } else {
-                        sendAddress(address, jid);
+    public EventListener<AddressEvent> getAddressListener() {
+        return new EventListener<AddressEvent>() {
+            public void handleEvent(AddressEvent event) {
+                if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
+                    // TODO async?
+                    LOG.debugf("new address to publish: {0}", event.getSource().toString());
+                    synchronized (AddressIQListener.this) {
+                        address = event.getSource();
+                        for(String jid : subscribedJids) {
+                            if(getRequests.containsKey(jid)) {
+                                sendResult(getRequests.remove(jid));
+                            } else {
+                                sendAddress(address, jid);
+                            }
+                        }
                     }
                 }
             }
-        }
+        };
     }
     
     private void sendAddress(Address address, String jid) {
@@ -157,22 +160,32 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
         queryResult.setType(IQ.Type.SET);
         connection.sendPacket(queryResult);
     }
-
-    public void register(XMPPService xmppService) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    
+    public EventListener<RosterEvent> getRosterListener() {
+        return new EventListener<RosterEvent>() {
+            public void handleEvent(RosterEvent event) {
+                if(event.getType().equals(User.EventType.USER_ADDED)) {
+                    userAdded(event.getSource());
+                } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+                    userDeleted(event.getSource().getId());
+                } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
+                    userUpdated(event.getSource());
+                }
+            }
+        };
     }
 
-    public void userAdded(User user) {
+    private void userAdded(User user) {
         user.addPresenceListener(new PresenceListener() {
             public void presenceChanged(Presence presence) {
                 if(presence.getType().equals(Presence.Type.available)) {
                     if(presence instanceof LimePresence) {
-                        synchronized (this) {
+                        synchronized (AddressIQListener.this) {
                             limePresences.put(presence.getJID(), (LimePresenceImpl)presence);
                         }
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                    synchronized (this) {
+                    synchronized (AddressIQListener.this) {
                         subscribedJids.remove(presence.getJID());
                         limePresences.remove(presence.getJID());
                     }
@@ -181,7 +194,9 @@ public class AddressIQListener implements PacketListener, EventListener<AddressE
         });
     }
 
-    public void userUpdated(User user) {}
+    @SuppressWarnings({"UnusedDeclaration"})
+    private void userUpdated(User user) {}
 
-    public void userDeleted(String id) {}
+    @SuppressWarnings({"UnusedDeclaration"})
+    private void userDeleted(String id) {}
 }

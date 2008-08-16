@@ -1,22 +1,22 @@
-package org.limewire.ui.swing.xmpp;
+package org.limewire.ui.swing.friends;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Date;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.listener.RegisteringEventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.Address;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
-import org.limewire.xmpp.api.client.RosterListener;
+import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -25,13 +25,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class RosterListenerImpl implements RosterListener {
+public class RosterListenerImpl implements RegisteringEventListener<RosterEvent> {
 
     private final BrowseFactory browseFactory;
     //private final StatusPanel.BrowseAction browseAction;
-
-    private Map<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
-    private final IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
 
     @Inject
     public RosterListenerImpl(BrowseFactory browseFactory/*, StatusPanel.BrowseAction browseAction*/) {
@@ -46,20 +43,24 @@ public class RosterListenerImpl implements RosterListener {
         }
     }
 
-    public void userAdded(final User user) {
-        if(roster.get(user.getId()) == null) {
-            roster.put(user.getId(), new ArrayList<Presence>());
+    public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
+        rosterEventListenerSupport.addListener(this);
+    }
+    
+    public void handleEvent(RosterEvent event) {
+        if(event.getType().equals(User.EventType.USER_ADDED)) {
+            userAdded(event.getSource());
+        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+            userDeleted(event.getSource().getId());
+        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
+            userUpdated(event.getSource());
         }
-      //  final String name = user.getName();
+    }
+
+    public void userAdded(final User user) {
         user.addPresenceListener(new PresenceListener() {
             public void presenceChanged(final Presence presence) {
-                String id = parseBareAddress(presence.getJID());
                 if(presence.getType().equals(Presence.Type.available)) {
-                    if(roster.get(id) == null) {
-                        roster.put(id, new ArrayList<Presence>());
-                    }
-                    roster.get(id).add(presence);
-                    presence.setIncomingChatListener(listener);
                     if(presence instanceof LimePresence) {
                         // TODO update UI
                         Address address = ((LimePresence)presence).getAddress();
@@ -75,10 +76,6 @@ public class RosterListenerImpl implements RosterListener {
                     //TODO: Should distinguish between Sharable/Lime and "regular" presence with 2 event types
                     new PresenceUpdateEvent(user, presence).publish();
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                    if(roster.get(id) == null) {
-                        roster.put(id, new ArrayList<Presence>());
-                    }
-                    remove(id, presence);
                     if(presence instanceof LimePresence) {
                         // TODO update UI
                     } else {
@@ -92,44 +89,12 @@ public class RosterListenerImpl implements RosterListener {
         });
     }
 
-    private void remove(String id, Presence p) {
-        for(Presence presence : roster.get(id)) {
-            if(presence.getJID().equals(p.getJID())) {
-                roster.remove(presence);
-            }
-        }
-    }
-
     public void userUpdated(User user) {
         
     }
 
     public void userDeleted(String id) {
         
-    }
-    
-    /**
-     * Returns the XMPP address with any resource information removed. For example,
-     * for the address "matt@jivesoftware.com/Smack", "matt@jivesoftware.com" would
-     * be returned.
-     *
-     * @param xmppAddress the XMPP address.
-     * @return the bare XMPP address without resource information.
-     */
-    private static String parseBareAddress(String xmppAddress) {
-        if (xmppAddress == null) {
-            return null;
-        }
-        int slashIndex = xmppAddress.indexOf("/");
-        if (slashIndex < 0) {
-            return xmppAddress;
-        }
-        else if (slashIndex == 0) {
-            return "";
-        }
-        else {
-            return xmppAddress.substring(0, slashIndex);
-        }
     }
 
     private class FileMetaDataAdapter implements FileMetaData {

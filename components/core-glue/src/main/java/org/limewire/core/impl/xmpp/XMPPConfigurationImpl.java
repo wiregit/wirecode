@@ -1,19 +1,20 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.xmpp.api.client.RosterListener;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
+import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.listener.EventListener;
 
 public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
 
     private final XMPPServerSettings.XMPPServerConfiguration serverConfiguration;
     private final XMPPUserSettings.XMPPUserConfiguration userConfiguration;
-    private final RosterListener rosterListener;
+    private final EventListener<RosterEvent> rosterListener;
     private final XMPPErrorListener errorListener;
 
     public XMPPConfigurationImpl(XMPPServerSettings.XMPPServerConfiguration serverConfiguration,
                                  XMPPUserSettings.XMPPUserConfiguration userConfiguration,
-                                 RosterListener rosterListener,
+                                 EventListener<RosterEvent> rosterListener,
                                  XMPPErrorListener errorListener) {
         this.serverConfiguration = serverConfiguration;
         this.userConfiguration = userConfiguration;
@@ -61,7 +62,7 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
         userConfiguration.setAutoLogin(autoLogin);
     }
 
-    public RosterListener getRosterListener() {
+    public EventListener<RosterEvent> getRosterListener() {
         return rosterListener;
     }
 

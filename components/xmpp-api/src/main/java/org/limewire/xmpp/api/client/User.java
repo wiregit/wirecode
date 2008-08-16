@@ -4,6 +4,8 @@ package org.limewire.xmpp.api.client;
  * Represents a user ("buddy") in a persons roster
  */
 public interface User {
+    
+    public enum EventType {USER_ADDED, USER_UPDATED, USER_REMOVED}
 
     /**
      * @return the id of the user.  user-ids have the form <code>user@host.com</code>

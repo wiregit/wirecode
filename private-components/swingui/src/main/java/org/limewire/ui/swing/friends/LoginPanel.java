@@ -160,13 +160,19 @@ public class LoginPanel extends JPanel implements Displayable {
                         for(XMPPConnection connection : connections) {
                             if(connection.getConfiguration().getServiceName().equals("gmail.com")) {
                                 if(!connection.isLoggedIn()) {
-                                    connection.getConfiguration().setUsername(userNameField.getText());
+                                    String userName = userNameField.getText().trim();
+                                    // TODO handle empty String
+                                    if(!userName.endsWith("@gmail.com")) {
+                                        // TODO ignoreCase?
+                                        userName += "@gmail.com";
+                                    }
+                                    connection.getConfiguration().setUsername(userName);
                                     connection.getConfiguration().setPassword(new String(passwordField.getPassword()));
                                     connection.getConfiguration().setAutoLogin(rememberMeCheckbox.isSelected());
                                     try {
                                         connection.login();
                                         
-                                        new XMPPConnectionEstablishedEvent().publish();
+                                        new XMPPConnectionEstablishedEvent(userNameField.getText()).publish();
                                         
                                     } catch (XMPPException e1) {
                                         SwingUtilities.invokeLater(new Runnable() {

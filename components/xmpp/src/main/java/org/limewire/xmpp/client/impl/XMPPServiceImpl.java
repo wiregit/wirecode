@@ -19,6 +19,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.RosterEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,13 +35,16 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final CopyOnWriteArrayList<XMPPConnectionImpl> connections;
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
     private FileOfferHandler fileOfferHandler;
+    private final Provider<EventListener<RosterEvent>> rosterListener;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
+                    Provider<EventListener<RosterEvent>> rosterListener, 
                     AddressFactory addressFactory) {
         this.configurations = configurations;
+        this.rosterListener = rosterListener;
         this.addressFactory = addressFactory;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
     }
@@ -121,7 +125,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, fileOfferHandler, addressFactory);
+        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferHandler, addressFactory);
         connection.initialize();
         connections.add(connection);
     }

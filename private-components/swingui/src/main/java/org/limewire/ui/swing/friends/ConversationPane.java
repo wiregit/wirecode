@@ -16,9 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
 import org.bushe.swing.event.annotation.AnnotationProcessor;
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.CapsulePainter;
@@ -26,11 +26,7 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.jdesktop.swingx.painter.CapsulePainter.Portion;
-import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -46,7 +42,7 @@ public class ConversationPane extends JPanel {
     private IconLibrary icons;
 
     @AssistedInject
-    public ConversationPane(@Assisted Friend friend, IconLibrary icons) {
+    public ConversationPane(@Assisted MessageWriter writer, IconLibrary icons) {
         this.icons = icons;
         
         setLayout(new BorderLayout());
@@ -71,11 +67,16 @@ public class ConversationPane extends JPanel {
         editor.setContentType("text/html");
         scroll.getViewport().add(editor);
         
-        add(footerPanel(friend), BorderLayout.SOUTH);
+        add(footerPanel(writer), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
         
         AnnotationProcessor.process(this);
+    }
+    
+     @EventSubscriber
+    public void handleMessageReceived(MessageReceivedEvent event) {
+        handleMessage(event.getMessage());
     }
     
     private void handleMessage(Message message) {
@@ -83,46 +84,12 @@ public class ConversationPane extends JPanel {
         editor.setText(ChatDocumentBuilder.buildChatText(messages));
     }
     
-    private JPanel footerPanel(final Friend friend) {
+    private JPanel footerPanel(final MessageWriter writerWrapper) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JXButton(tr("Library")), BorderLayout.NORTH);
-        MessageReader reader = new MessageReader() {
-            @Override
-            public void readMessage(final String message) {
-                final Message msg = newMessage(friend, message, Type.Received);
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleMessage(msg);
-                    }
-                });
-                new MessageReceivedEvent(msg).publish();
-            }
-        };
-        final MessageWriter writer = friend.createChat(reader);
-        MessageWriter writerWrapper = new MessageWriter() {
-            @Override
-            public void writeMessage(final String message) throws XMPPException {
-                ThreadExecutor.startThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            writer.writeMessage(message);
-                        } catch (XMPPException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, "send-message");
-                handleMessage(newMessage(friend, message, Type.Sent));
-            }
-        };
         ResizingInputPanel inputPanel = new ResizingInputPanel(writerWrapper);
         panel.add(inputPanel, BorderLayout.CENTER);
         return panel;
-    }
-    
-    private Message newMessage(Friend friend, String message, Type type) {
-        return new MessageImpl(friend.getName(), message, type);
     }
     
     @SuppressWarnings("unused")

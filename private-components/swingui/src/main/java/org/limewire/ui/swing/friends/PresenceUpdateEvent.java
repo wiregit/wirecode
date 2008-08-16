@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.xmpp;
+package org.limewire.ui.swing.friends;
 
 import org.limewire.ui.swing.AbstractEDTEvent;
 import org.limewire.xmpp.api.client.Presence;

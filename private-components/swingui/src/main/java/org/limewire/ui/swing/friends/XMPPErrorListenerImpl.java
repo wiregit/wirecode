@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.xmpp;
+package org.limewire.ui.swing.friends;
 
 import com.google.inject.Singleton;
 import com.google.inject.Inject;

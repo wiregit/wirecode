@@ -67,16 +67,21 @@ class ChatDocumentBuilder {
         StringBuilder builder = new StringBuilder();
         builder.append(TOP);
         
+        Message previousMessage = null;
         for(Message message : messages) {
-            builder.append(ROUND_CONTAINER_TOP)
-                .append("<div class=\"")
-                .append(message.getType() == Type.Sent ? "me" : "them")
-                .append("\">")
-                .append(message.getSenderName())
-                .append(":</div><p>")
+            builder.append(ROUND_CONTAINER_TOP);
+                if(previousMessage == null || !previousMessage.getType().equals(message.getType())) {
+                    builder.append("<div class=\"")
+                    .append(message.getType() == Type.Sent ? "me" : "them")
+                    .append("\">")
+                    .append(message.getSenderName())
+                    .append(":</div>");
+                }
+                builder.append("<p>")
                 .append(message.getMessageText())
                 .append("</p>")
                 .append(ROUND_CONTAINER_BOTTOM);
+            previousMessage = message;
         }
         
         builder.append(BOTTOM);

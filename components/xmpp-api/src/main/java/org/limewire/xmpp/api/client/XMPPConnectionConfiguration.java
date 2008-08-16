@@ -1,5 +1,7 @@
 package org.limewire.xmpp.api.client;
 
+import org.limewire.listener.EventListener;
+
 /**
  * Allows the xmpp service user to provide configuration for xmpp login.
  */
@@ -14,6 +16,6 @@ public interface XMPPConnectionConfiguration {
     public String getServiceName();
     public boolean isAutoLogin();
     public void setAutoLogin(boolean autoLogin);
-    public RosterListener getRosterListener();
+    public EventListener<RosterEvent> getRosterListener();
     public XMPPErrorListener getErrorListener();
 }

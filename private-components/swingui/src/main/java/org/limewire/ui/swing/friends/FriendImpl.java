@@ -4,8 +4,8 @@ import org.jdesktop.beans.AbstractBean;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.User;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -21,7 +21,7 @@ public class FriendImpl extends AbstractBean implements Friend {
         this.user = user;
         this.presence = presence;
         this.status = presence.getStatus();
-        this.mode = presence.getMode();
+        this.mode = presence.getMode();        
     }
     
     @Override

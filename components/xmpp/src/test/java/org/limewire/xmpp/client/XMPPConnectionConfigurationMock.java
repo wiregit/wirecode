@@ -1,10 +1,11 @@
 package org.limewire.xmpp.client;
 
-import org.limewire.xmpp.api.client.RosterListener;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.listener.EventListener;
 
 public class XMPPConnectionConfigurationMock implements XMPPConnectionConfiguration {
     private String userName;
@@ -12,9 +13,9 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     private final String host;
     private final int port;
     private final String serviceName;
-    private final RosterListener rosterListener;
+    private final EventListener<RosterEvent> rosterListener;
 
-    public XMPPConnectionConfigurationMock(String userName, String pw, String host, int port, String serviceName, RosterListener rosterListener) {
+    public XMPPConnectionConfigurationMock(String userName, String pw, String host, int port, String serviceName, EventListener<RosterEvent> rosterListener) {
         this.userName = userName;
         this.pw = pw;
         this.host = host;
@@ -63,7 +64,7 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
         
     }
 
-    public RosterListener getRosterListener() {
+    public EventListener<RosterEvent> getRosterListener() {
         return rosterListener;
     }
 
