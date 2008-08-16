@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.limewire.ui.swing.xmpp.PresenceUpdateEvent;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
