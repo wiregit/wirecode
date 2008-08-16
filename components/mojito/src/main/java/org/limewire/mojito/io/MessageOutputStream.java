@@ -247,8 +247,11 @@ public class MessageOutputStream extends DataOutputStream {
      * Writes the given String to the OutputStream. This is different
      * from writeUTF(String) which writes the String in the so called
      * Modified-UTF format!
+     * 
+     * <code>null</code> and "" are handled the same and
+     * only the length of zero is written out for them.
      */
-    private void writeDHTString(String str) throws IOException {
+    void writeDHTString(String str) throws IOException {
         if (str == null) {
             writeShort(0);
         } else {

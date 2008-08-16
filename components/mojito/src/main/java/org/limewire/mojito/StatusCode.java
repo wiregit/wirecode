@@ -83,7 +83,15 @@ public class StatusCode implements Serializable, Comparable<StatusCode> {
         return code + ": " + description;
     }
     
+    /**
+     * Returns a canonical version of status code.
+     *
+     * @param description must not be null
+     */
     public static StatusCode valueOf(int code, String description) {
+        if (description == null) {
+            throw new NullPointerException("description must not be null, code: " + code);
+        }
         Integer key = Integer.valueOf(code & 0xFFFF);
         StatusCode statusCode = null;
         synchronized (CODES) {
