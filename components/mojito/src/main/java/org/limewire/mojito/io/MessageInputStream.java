@@ -303,12 +303,14 @@ public class MessageInputStream extends DataInputStream {
     
     /**
      * Reads a String from the InputStream. See 
-     * MessageOutputStrea.writeDHTString()
+     * MessageOutputStrea.writeDHTString().
+     * 
+     * @returns empty string if the length of the string is 0
      */
     private String readDHTString() throws IOException {
         int length = readUnsignedShort();
         if (length == 0) {
-            return null;
+            return "";
         }
         
         byte[] b = new byte[length];
