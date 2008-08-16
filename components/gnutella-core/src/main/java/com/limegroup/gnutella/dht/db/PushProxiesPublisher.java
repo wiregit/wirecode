@@ -182,8 +182,9 @@ public class PushProxiesPublisher implements DHTEventListener {
     public synchronized void handleDHTEvent(DHTEvent event) {
         if (event.getType() == Type.CONNECTED) {
             LOG.debug("starting push proxy publishing");
+            // order of events is not reliable, be defensive and cancel existing task
             if (publishingFuture != null) {
-                throw new IllegalStateException("should not have happened");
+                publishingFuture.cancel(false);
             }
             long interval = DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue();
             long initialDelay = (long)(Math.random() * interval);
