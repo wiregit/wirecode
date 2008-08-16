@@ -102,6 +102,12 @@ public class DefaultHttpExecutor implements HttpExecutor {
             ioe.initCause(e);
             return !listener.requestFailed(method, null, ioe);
         }
+		catch (IllegalStateException ise) {
+		    // bug in httpclient lib, LWC-1637, do not forward port
+		    IOException ioe = new IOException();
+            ioe.initCause(ise);
+            return !listener.requestFailed(method, null, ioe);
+		}
 
         return !listener.requestComplete(method, response);
 	}

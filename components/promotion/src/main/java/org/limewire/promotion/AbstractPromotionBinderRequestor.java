@@ -84,6 +84,9 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
             error(e);
         } catch (IOException e) {
             error(e);
+        } catch (IllegalStateException ise) {
+            // bug in httpclient lib, LWC-1637, do not forward port
+            error(ise);
         }
         return null;
     }
