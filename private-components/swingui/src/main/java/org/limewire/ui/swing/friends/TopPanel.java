@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -13,9 +13,9 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXButton;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 
 import com.google.inject.Inject;
@@ -55,7 +55,7 @@ public class TopPanel extends JPanel {
         closeChat.setBorderPainted(false);
         add(closeChat);
         
-        AnnotationProcessor.process(this);
+        EventAnnotationProcessor.subscribe(this);
     }
     
     @EventSubscriber

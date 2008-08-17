@@ -22,12 +22,15 @@ import javax.swing.border.Border;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
@@ -51,6 +54,7 @@ public class FriendsPane extends JPanel {
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
     
     private EventList<Friend> friends;
+    private String myID;
     private final WeakHashMap<String, FriendImpl> idToFriendMap;    
 
     @Inject
@@ -69,7 +73,7 @@ public class FriendsPane extends JPanel {
         
         list.addMouseListener(new LaunchChatListener());
         
-        AnnotationProcessor.process(this);
+        EventAnnotationProcessor.subscribe(this);
     }
     
     @EventSubscriber
@@ -80,7 +84,15 @@ public class FriendsPane extends JPanel {
         switch(presence.getType()) {
             case available:
                 if(friend == null) {
-                    friend = new FriendImpl(event.getUser(), presence);
+                    final FriendImpl newFriend = new FriendImpl(event.getUser(), presence);
+                    presence.setIncomingChatListener(new IncomingChatListener() {
+                        public MessageReader incomingChat(MessageWriter writer) {
+                            MessageWriter writerWrapper = new MessageWriterImpl(myID, newFriend, writer);
+                            new ConversationStartedEvent(newFriend, writerWrapper).publish();
+                            return new MessageReaderImpl(newFriend);
+                        }
+                    });
+                    friend = newFriend;
                     friends.add(friend);
                     idToFriendMap.put(presence.getJID(), friend);
                 }
@@ -98,6 +110,10 @@ public class FriendsPane extends JPanel {
     @EventSubscriber
     public void handleMessageReceived(MessageReceivedEvent event) {
         //TODO
+    }
+    
+    public void setLoggedInID(String id) {
+        this.myID = id;
     }
     
     private class FriendCellRenderer implements ListCellRenderer {
@@ -149,14 +165,16 @@ public class FriendsPane extends JPanel {
         }
     }
 
-    private static class LaunchChatListener extends MouseAdapter {
+    private class LaunchChatListener extends MouseAdapter {
 
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
                 JList list = (JList)e.getSource();
                 Friend friend = (Friend)list.getSelectedValue();
-                new ConversationStartedEvent(friend).publish();
+                MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
+                MessageWriter writerWrapper = new MessageWriterImpl(myID, friend, writer);
+                new ConversationStartedEvent(friend, writerWrapper).publish();
              }
         }
     }

@@ -1,14 +1,20 @@
 package org.limewire.ui.swing.friends;
 
 class MessageImpl implements Message {
-    private final String friend;
+    private final Friend friend;
+    private final String senderName;
     private final String message;
     private final Type type;
 
-    public MessageImpl(String friend, String message, Type type) {
+    public MessageImpl(String senderName, Friend friend, String message, Type type) {
         this.friend = friend;
+        this.senderName = senderName;
         this.message = message;
         this.type = type;
+    }
+    
+    public Friend getFriend() {
+        return friend;
     }
 
     public String getMessageText() {
@@ -16,7 +22,7 @@ class MessageImpl implements Message {
     }
 
     public String getSenderName() {
-        return friend;
+        return senderName;
     }
 
     public Type getType() {

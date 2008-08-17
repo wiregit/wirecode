@@ -9,6 +9,8 @@ public interface Message {
     
     String getSenderName();
     
+    Friend getFriend();
+    
     String getMessageText();
     
     Type getType();

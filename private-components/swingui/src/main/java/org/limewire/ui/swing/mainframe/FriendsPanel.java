@@ -8,9 +8,9 @@ import java.awt.Rectangle;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.Displayable;
@@ -42,7 +42,7 @@ public class FriendsPanel extends JXCollapsiblePane {
         add(mainPanel);
         setCollapsed(true);
         
-        AnnotationProcessor.process(this);
+        EventAnnotationProcessor.subscribe(this);
     }
 
     @EventSubscriber
@@ -61,6 +61,7 @@ public class FriendsPanel extends JXCollapsiblePane {
     public void handleConnectionEstablished(XMPPConnectionEstablishedEvent event) {
         mainPanel.remove(loginPanel);
         mainPanel.add(chatPanel);
+        chatPanel.setLoggedInID(event.getID());
         resetBounds();
     }
     

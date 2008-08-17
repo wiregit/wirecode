@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.friends;
 
 import java.net.URL;
-import java.util.List;
+import java.util.ArrayList;
 
 import org.limewire.ui.swing.friends.Message.Type;
 
@@ -63,28 +63,36 @@ class ChatDocumentBuilder {
         return resource != null ? resource.toExternalForm() : "";
     }
     
-    public static String buildChatText(List<Message> messages) {
+    public static String buildChatText(ArrayList<Message> messages) {
         StringBuilder builder = new StringBuilder();
         builder.append(TOP);
         
-        Message previousMessage = null;
-        for(Message message : messages) {
-            builder.append(ROUND_CONTAINER_TOP);
-                if(previousMessage == null || !previousMessage.getType().equals(message.getType())) {
-                    builder.append("<div class=\"")
-                    .append(message.getType() == Type.Sent ? "me" : "them")
-                    .append("\">")
-                    .append(message.getSenderName())
-                    .append(":</div>");
-                }
-                builder.append("<p>")
-                .append(message.getMessageText())
-                .append("</p>")
-                .append(ROUND_CONTAINER_BOTTOM);
-            previousMessage = message;
+        for(int i = 0; i < messages.size(); i++) {
+            Message message = messages.get(i);
+            if(!isPreviousFromSameSender(message, messages, i)) {
+                builder.append(ROUND_CONTAINER_TOP);
+                builder.append("<div class=\"")
+                .append(message.getType() == Type.Sent ? "me" : "them")
+                .append("\">")
+                .append(message.getSenderName())
+                .append(":</div>");
+            }
+            builder.append("<p>")
+            .append(message.getMessageText())
+            .append("</p>");
+            
+            builder.append(isNextFromSameSender(message, messages, i) ? "" : ROUND_CONTAINER_BOTTOM);
         }
         
         builder.append(BOTTOM);
         return builder.toString();
+    }
+    
+    private static boolean isPreviousFromSameSender(Message message, ArrayList<Message> messages, int index) {
+        return index > 0 && message.getType() == messages.get(index - 1).getType();
+    }
+    
+    private static boolean isNextFromSameSender(Message message, ArrayList<Message> messages, int index) {
+        return index + 1 < messages.size() && message.getType() == messages.get(index + 1).getType();
     }
 }

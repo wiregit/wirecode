@@ -12,4 +12,9 @@ public class MessageReceivedEvent extends AbstractEDTEvent {
     public Message getMessage() {
         return message;
     }
+    
+    @Override
+    public void publish() {
+        super.publish(message.getFriend().getName());
+    }
 }

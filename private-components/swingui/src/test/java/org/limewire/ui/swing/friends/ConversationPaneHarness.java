@@ -5,7 +5,7 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -22,20 +22,22 @@ public class ConversationPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
 
+                final MockFriend friend = new MockFriend("Will Benedict", "Just listening to some jams", Mode.available);
                 MessageWriter writer = new MessageWriter() {
                     @Override
                     public void writeMessage(String message) throws XMPPException {
-                        //do nothing - simulates sending message on XMPP
+                        new MessageReceivedEvent(new MessageImpl("me", friend, message, Type.Sent)).publish();
                     }
                 };
-                MockFriend friend = new MockFriend("Will Benedict", "Just listening to some jams", Mode.available);
                 friend.writer = writer;
-                ConversationPane pane = new ConversationPane(friend, new IconLibraryImpl());
+                ConversationPane pane = new ConversationPane(writer, friend.getName(), new IconLibraryImpl());
                 frame.add(pane);
                 
-                MessageReader reader = friend.reader;
                 for(int i = 0; i < 10; i++) {
-                    reader.readMessage("This is a message This is a message This is a message This is a message This is a message This is a message ");
+                    new MessageReceivedEvent(
+                            new MessageImpl(friend.getName(), friend, 
+                                    "This is a message This is a message This is a message This is a message This is a message This is a message ",
+                                    Type.Received)).publish();
                 }
 
                 frame.setPreferredSize(new Dimension(470, 400));
