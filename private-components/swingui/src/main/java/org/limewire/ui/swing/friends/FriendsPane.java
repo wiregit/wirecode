@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -18,21 +20,16 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
-import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.Presence.Mode;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -40,7 +37,9 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventListModel;
-import net.miginfocom.swing.MigLayout;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -52,8 +51,7 @@ public class FriendsPane extends JPanel {
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
     
     private EventList<Friend> friends;
-    private final WeakHashMap<String, FriendImpl> idToFriendMap;
-    private String myID;
+    private final WeakHashMap<String, FriendImpl> idToFriendMap;    
 
     @Inject
     public FriendsPane(IconLibrary icons) {
@@ -81,18 +79,10 @@ public class FriendsPane extends JPanel {
         FriendImpl friend = idToFriendMap.get(presence.getJID());
         switch(presence.getType()) {
             case available:
-                if(friend == null) {                    
-                    final FriendImpl newFriend = new FriendImpl(event.getUser(), presence);
-                    presence.setIncomingChatListener(new IncomingChatListener() {
-                        public MessageReader incomingChat(MessageWriter writer) {
-                            MessageWriter writerWrapper = new MessageWriterImpl(myID, writer);
-                            new ConversationStartedEvent(newFriend, writerWrapper).publish();
-                            return new MessageReaderImpl(newFriend);
-                        }
-                    });
-                    friends.add(newFriend);
-                    idToFriendMap.put(presence.getJID(), newFriend);
-                    friend = newFriend;
+                if(friend == null) {
+                    friend = new FriendImpl(event.getUser(), presence);
+                    friends.add(friend);
+                    idToFriendMap.put(presence.getJID(), friend);
                 }
                 friend.setStatus(presence.getStatus());
                 friend.setMode(presence.getMode());
@@ -109,11 +99,7 @@ public class FriendsPane extends JPanel {
     public void handleMessageReceived(MessageReceivedEvent event) {
         //TODO
     }
-
-    public void setLoggedInID(String id) {
-        this.myID = id;
-    }
-
+    
     private class FriendCellRenderer implements ListCellRenderer {
         private final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
         private final IconLibrary icons;
@@ -163,16 +149,14 @@ public class FriendsPane extends JPanel {
         }
     }
 
-    private class LaunchChatListener extends MouseAdapter {
+    private static class LaunchChatListener extends MouseAdapter {
 
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
                 JList list = (JList)e.getSource();
                 Friend friend = (Friend)list.getSelectedValue();
-                MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
-                MessageWriter writerWrapper = new MessageWriterImpl(myID, writer);
-                new ConversationStartedEvent(friend, writerWrapper).publish();
+                new ConversationStartedEvent(friend).publish();
              }
         }
     }

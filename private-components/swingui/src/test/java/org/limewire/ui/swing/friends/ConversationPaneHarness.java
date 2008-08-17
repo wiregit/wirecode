@@ -30,7 +30,7 @@ public class ConversationPaneHarness {
                 };
                 MockFriend friend = new MockFriend("Will Benedict", "Just listening to some jams", Mode.available);
                 friend.writer = writer;
-                ConversationPane pane = new ConversationPane(writer, new IconLibraryImpl());
+                ConversationPane pane = new ConversationPane(friend, new IconLibraryImpl());
                 frame.add(pane);
                 
                 MessageReader reader = friend.reader;

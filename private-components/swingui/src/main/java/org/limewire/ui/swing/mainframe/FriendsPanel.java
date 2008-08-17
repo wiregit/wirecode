@@ -60,7 +60,6 @@ public class FriendsPanel extends JXCollapsiblePane {
     @EventSubscriber
     public void handleConnectionEstablished(XMPPConnectionEstablishedEvent event) {
         mainPanel.remove(loginPanel);
-        chatPanel.setLoggedInID(event.getID());
         mainPanel.add(chatPanel);
         resetBounds();
     }

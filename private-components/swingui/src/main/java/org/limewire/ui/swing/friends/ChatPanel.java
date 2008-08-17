@@ -20,7 +20,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class ChatPanel extends JXPanel implements Displayable {
     private final ConversationPaneFactory conversationFactory;
-    private final FriendsPane friendsPanel;
     private JPanel conversationPanel;
     
     @Inject
@@ -28,7 +27,6 @@ public class ChatPanel extends JXPanel implements Displayable {
             TopPanel topPanel) {
         super(new BorderLayout());
         this.conversationFactory = conversationFactory;
-        this.friendsPanel = friendsPanel;
 
         //Dimensions according to the spec
         setPreferredSize(new Dimension(400, 235));
@@ -44,7 +42,7 @@ public class ChatPanel extends JXPanel implements Displayable {
     @EventSubscriber
     public void handleAddConversation(ConversationStartedEvent event) {
         conversationPanel.removeAll();
-        conversationPanel.add(conversationFactory.create(event.getWriter()), BorderLayout.CENTER);
+        conversationPanel.add(conversationFactory.create(event.getFriend()), BorderLayout.CENTER);
         //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
         conversationPanel.revalidate();
     }
@@ -52,9 +50,5 @@ public class ChatPanel extends JXPanel implements Displayable {
     @Override
     public void handleDisplay() {
         // TODO Auto-generated method stub
-    }
-
-    public void setLoggedInID(String id) {
-        friendsPanel.setLoggedInID(id);    
     }
 }
