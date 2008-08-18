@@ -290,7 +290,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
             throw new InvalidDataException(e);
         }
         _trackers = memento.getTrackers();
-        _webSeeds = memento.getWebSeeds();
+        setWebSeeds(memento.getWebSeeds());
         Float ratio = memento.getRatio();
         diskManagerData = memento.getFolderData();
 
@@ -327,7 +327,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
             throw new ValueException("bad tracker: " + data.getAnnounce());
         }
 
-        _webSeeds = data.getWebSeeds();
+        setWebSeeds(data.getWebSeeds());
 
         isPrivate = data.isPrivate();
 
@@ -504,6 +504,20 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      */
     public boolean hasWebSeeds() {
         return getWebSeeds().length > 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.limegroup.bittorrent.BTMetaInfo#setWebSeeds(java.net.URI[])
+     */
+    public void setWebSeeds(URI[] uris) {
+        if (uris == null) {
+            this._webSeeds = new URI[0];
+        } else {
+            this._webSeeds = uris;
+        }
+
     }
 
 }
