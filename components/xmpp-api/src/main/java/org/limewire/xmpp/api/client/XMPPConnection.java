@@ -1,8 +1,5 @@
 package org.limewire.xmpp.api.client;
 
-import org.limewire.listener.EventListener;
-
-
 public interface XMPPConnection {
     public XMPPConnectionConfiguration getConfiguration();
 
@@ -18,7 +15,6 @@ public interface XMPPConnection {
      */
     public void logout();
     public boolean isLoggedIn();
-    public void addRosterListener(EventListener<RosterEvent> rosterListener);
 
     /**
      * Sets a new <code>&lt;presence&gt;</code> mode (i.e., status)

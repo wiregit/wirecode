@@ -26,7 +26,7 @@ public class FileTransferIQListener implements PacketListener {
             if(iq.getType().equals(IQ.Type.GET)) {
                 handleGet(iq);
             } else if(iq.getType().equals(IQ.Type.RESULT)) {
-                handleResult(iq);
+                //handleResult(iq);
             } else if(iq.getType().equals(IQ.Type.SET)) {
                 //handleSet(iq);
             } else if(iq.getType().equals(IQ.Type.ERROR)) {
@@ -41,10 +41,6 @@ public class FileTransferIQListener implements PacketListener {
             LOG.error(e.getMessage(), e);
             //sendError(packet);
         }
-    }
-
-    private void handleResult(FileTransferIQ libraryIQ) {
-        
     }
 
     private void handleGet(FileTransferIQ packet) throws IOException, XmlPullParserException {

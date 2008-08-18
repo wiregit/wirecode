@@ -87,11 +87,10 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
         return false;
     }
 
-    @SuppressWarnings({"SuspiciousMethodCalls"})
     private void remove(String id, Presence p) {
         for(Presence presence : roster.get(id)) {
             if(presence.getJID().equals(p.getJID())) {
-                roster.remove(presence);
+                roster.get(id).remove(presence);
             }
         }
     }

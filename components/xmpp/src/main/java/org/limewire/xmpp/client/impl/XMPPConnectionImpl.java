@@ -64,10 +64,6 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         this.rosterListeners.addListener(rosterListener);
         this.users = new TreeMap<String, UserImpl>(String.CASE_INSENSITIVE_ORDER);
     }
-    
-    public void addRosterListener(EventListener<RosterEvent> rosterListener) {
-        rosterListeners.addListener(rosterListener);
-    }
 
     public void setMode(Presence.Mode mode) {
         connection.sendPacket(getPresenceForMode(mode));
@@ -259,7 +255,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 discoverInfo = serviceDiscoveryManager.discoverInfo(presence.getFrom());
             } catch (org.jivesoftware.smack.XMPPException exception) {
                 discoverInfo = new DiscoverInfo();
-                LOG.error(exception.getMessage(), exception);
+                if(exception.getXMPPError() != null && exception.getXMPPError().getCode() != 501) {
+                    LOG.info(exception.getMessage(), exception);
+                }
             }
             
             if (discoverInfo.containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
