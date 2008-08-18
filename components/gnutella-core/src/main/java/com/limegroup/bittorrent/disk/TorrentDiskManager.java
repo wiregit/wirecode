@@ -78,10 +78,11 @@ public interface TorrentDiskManager {
 	
 	/**
 	 * Returns up to 16k of a btInterval selected using the given piece strategy. 
+	 * If not pieceStrategy is included a default strategy will be selected.
 	 * 
 	 * @param bs the <tt>BitField</tt> of available ranges to choose from
 	 * @param exclude the set of ranges that the connection is already about to request
-	 * @param pieceStrategy the piece strategy to select the intervals with.
+	 * @param pieceStrategy the piece strategy to select the intervals with. Can be null.
 	 * @return a BTInterval that should be requested next.
 	 */
 	public BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy);
