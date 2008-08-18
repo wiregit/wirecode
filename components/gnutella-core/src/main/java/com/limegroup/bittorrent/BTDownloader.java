@@ -12,10 +12,4 @@ public interface BTDownloader extends CoreDownloader {
      * Initializes the downloader with the given meta information. 
      */
     public void initBtMetaInfo(BTMetaInfo btMetaInfo);
-
-    /**
-     * Returns the torrentContext for this downloader.
-     */
-    public TorrentContext getTorrentContext();
-
 }

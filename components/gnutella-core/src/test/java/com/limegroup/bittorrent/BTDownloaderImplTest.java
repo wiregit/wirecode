@@ -81,7 +81,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public void testSingleFilePeer() throws Exception {
         File torrentFile = createFile("test-peer-dl-single-file.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
@@ -102,7 +102,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public void testMultipleFilePeer() throws Exception {
         File torrentFile = createFile("test-peer-dl-multiple-file.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
@@ -142,7 +142,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public void testSingleWebSeedSingleFileNoPeer() throws Exception {
         File torrentFile = createFile("test-single-webseed-single-file-no-peer.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
@@ -166,7 +166,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public void testMultiWebSeedSingleFileNoPeer() throws Exception {
         File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
@@ -191,7 +191,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public void testSingleWebSeedMultipleFileNoPeer() throws Exception {
         File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
@@ -232,7 +232,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     public void testMultiWebSeedMultipleFileNoPeer() throws Exception {
         File torrentFile = createFile("test-multiple-webseed-multiple-file-no-peer.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
@@ -275,7 +275,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         File torrentFile = createFile("test-single-webseed-single-file-peer.torrent");
 
-        BTDownloader downloader = createBTDownloader(torrentFile);
+        BTDownloaderImpl downloader = createBTDownloader(torrentFile);
         TorrentContext torrentContext = downloader.getTorrentContext();
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
 
@@ -309,7 +309,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         return torrentFile;
     }
 
-    private BTDownloader createBTDownloader(File torrentFile) throws IOException {
+    private BTDownloaderImpl createBTDownloader(File torrentFile) throws IOException {
         Assert.assertTrue(torrentFile.exists());
         final BTMetaInfo metaInfo = BTSwarmCoordinatorTest.createMetaInfo(torrentFile);
         Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(
@@ -317,7 +317,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);
-        BTDownloader downloader = coreDownloaderFactory.createBTDownloader(metaInfo);
+        BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory.createBTDownloader(metaInfo);
         downloader.initBtMetaInfo(metaInfo);
         return downloader;
     }
