@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-11 11:30-0400\n"
+"POT-Creation-Date: 2008-08-18 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -262,7 +262,7 @@ msgstr ""
 msgid "Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/NetworkManagerImpl.java:125
+#: core/com/limegroup/gnutella/NetworkManagerImpl.java:126
 msgid "Network Management"
 msgstr ""
 
@@ -4816,11 +4816,11 @@ msgstr ""
 msgid "Always Ask What to do"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:23
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:22
 msgid "Capabilities"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:25
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:24
 msgid ""
 "If your computer has a fast internet connection, LimeWire may act as an "
 "\"Ultrapeer\" and/or connect to the Mojito DHT.  LimeWire can also use a "
@@ -4828,15 +4828,15 @@ msgid ""
 "You can disable these if needed."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:39
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:38
 msgid "Disable Ultrapeer Capabilities:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:41
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:40
 msgid "Disable Mojito DHT Capabilities:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:45
+#: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:44
 msgid "Disable TLS Capabilities:"
 msgstr ""
 
