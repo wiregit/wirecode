@@ -91,6 +91,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
         for(Presence presence : roster.get(id)) {
             if(presence.getJID().equals(p.getJID())) {
                 roster.get(id).remove(presence);
+                break;
             }
         }
     }
