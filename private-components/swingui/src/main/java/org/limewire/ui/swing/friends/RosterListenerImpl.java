@@ -86,7 +86,7 @@ public class RosterListenerImpl implements RegisteringEventListener<RosterEvent>
     }
 
     public void userUpdated(User user) {
-        
+        // TODO fire UserUpdateEvent    
     }
 
     public void userDeleted(String id) {

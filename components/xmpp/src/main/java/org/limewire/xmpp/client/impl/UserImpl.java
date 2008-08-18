@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jivesoftware.smack.RosterEntry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
@@ -15,13 +16,13 @@ public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
 
     private final String id;
-    private final String name;
+    private String name;
     private final ConcurrentHashMap<String, Presence> presences;
     private final CopyOnWriteArrayList<PresenceListener> presenceListeners;
 
-    UserImpl(String id, String name) {
+    UserImpl(String id, RosterEntry rosterEntry) {
         this.id = id;
-        this.name = name;
+        this.name = rosterEntry.getName();
         this.presences = new ConcurrentHashMap<String, Presence>(); 
         this.presenceListeners = new CopyOnWriteArrayList<PresenceListener>();
     }
@@ -31,7 +32,15 @@ public class UserImpl implements User {
     }
 
     public String getName() {
-        return name;
+        synchronized (this) {
+            return name;
+        }
+    }
+    
+    void setRosterEntry(RosterEntry rosterEntry) {
+        synchronized (this) {
+            this.name = rosterEntry.getName();
+        }
     }
 
     public ConcurrentMap<String, Presence> getPresences() {

@@ -164,7 +164,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 Roster roster = connection.getRoster();
                 for(String id : addedIds) {             
                     RosterEntry rosterEntry = roster.getEntry(id);
-                    UserImpl user = new UserImpl(id, rosterEntry.getName());
+                    UserImpl user = new UserImpl(id, rosterEntry);
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " added");
                     }
@@ -180,11 +180,17 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 for(String id : updatedIds) {
                     Roster roster = connection.getRoster();
                     RosterEntry rosterEntry = roster.getEntry(id);
-                    UserImpl user = new UserImpl(id, rosterEntry.getName());
+                    UserImpl user = users.get(id);
+                    if(user == null) {
+                        // should never happen ?
+                        user = new UserImpl(id, rosterEntry);
+                        users.put(id, user);
+                    } else {
+                        user.setRosterEntry(rosterEntry);
+                    }
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " updated");
-                    }
-                    users.put(id, user);
+                    }                    
                     rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_UPDATED));
                 }
                 users.notifyAll();
