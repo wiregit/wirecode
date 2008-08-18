@@ -20,6 +20,7 @@ import org.limewire.io.InvalidDataException;
 import com.limegroup.bittorrent.disk.BlockRangeMap;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
@@ -177,13 +178,14 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * 
      * @see com.limegroup.bittorrent.BTMetaInfo#verify(byte[], int)
      */
-    public boolean verify(byte[] sha1, int pieceNum) {
-        byte[] hash = _hashes.get(pieceNum);
+    public boolean verify(byte[] sha1, int pieceIndex) {
+        testValidPiece(pieceIndex);
+        byte[] hash = _hashes.get(pieceIndex);
         if (hash == VERIFIED_HASH)
             return true;
         boolean ok = Arrays.equals(sha1, hash);
         if (ok)
-            _hashes.set(pieceNum, VERIFIED_HASH);
+            _hashes.set(pieceIndex, VERIFIED_HASH);
         return ok;
     }
 
@@ -426,6 +428,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * @see com.limegroup.bittorrent.BTMetaInfo#getPiece(int)
      */
     public BTInterval getPiece(int pieceIndex) {
+        testValidPiece(pieceIndex);
         BTInterval piece = new BTInterval(0, getPieceSize(pieceIndex) - 1, pieceIndex);
         return piece;
     }
@@ -436,6 +439,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * @see com.limegroup.bittorrent.BTMetaInfo#getPieceSize(int)
      */
     public int getPieceSize(int pieceIndex) {
+        testValidPiece(pieceIndex);
         BTMetaInfo info = context.getMetaInfo();
         if (pieceIndex == info.getNumBlocks() - 1) {
             int ret = (int) (context.getFileSystem().getTotalSize() % info.getPieceLength());
@@ -445,6 +449,17 @@ public class BTMetaInfoImpl implements BTMetaInfo {
         return info.getPieceLength();
     }
 
+    /**
+     * Helper method to test whether the given piece index is valid.
+     */
+    private void testValidPiece(int pieceIndex) {
+        if (pieceIndex < 0 || pieceIndex >= getNumBlocks()) {
+            throw new IllegalArgumentException("Invalid Piece Index: " + pieceIndex
+                    + " valid values: [0" + "-" + (getNumBlocks() - 1) + "]");
+        }
+
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -452,6 +467,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * com.limegroup.bittorrent.disk.BlockRangeMap)
      */
     public boolean isCompleteBlock(int pieceIndex, BlockRangeMap toCheck) {
+        testValidPiece(pieceIndex);
         IntervalSet set = toCheck.get(pieceIndex);
         if (set == null)
             return false;
@@ -467,8 +483,20 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * @see com.limegroup.bittorrent.BTMetaInfo#getPieceAt(long)
      */
     public BTInterval getPieceAt(long torrentbyte) {
+        testTorrentByte(torrentbyte);
         int pieceIndex = (int) (torrentbyte / _pieceLength);
         return getPiece(pieceIndex);
+    }
+
+    /**
+     * Helper method to test whether the given torrent byte is valid.
+     */
+    private void testTorrentByte(long torrentbyte) {
+        long totalSize = fileSystem.getTotalSize();
+        if (torrentbyte < 0 || torrentbyte >= totalSize) {
+            throw new IllegalArgumentException("Invalid Byte Index: " + torrentbyte
+                    + " valid values: [0" + "-" + (totalSize - 1) + "]");
+        }
     }
 
     /*

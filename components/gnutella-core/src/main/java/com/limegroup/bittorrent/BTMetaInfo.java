@@ -37,10 +37,10 @@ public interface BTMetaInfo {
      * Verifies whether the given hash matches the expect hash of a Piece
      * 
      * @param sha1 the hash that was computed
-     * @param pieceNum the Piece for which the hash was computed
+     * @param pieceIndex the Piece for which the hash was computed
      * @return true if they match.
      */
-    public abstract boolean verify(byte[] sha1, int pieceNum);
+    public abstract boolean verify(byte[] sha1, int pieceIndex);
 
     /**
      * @return info hash
@@ -106,6 +106,7 @@ public interface BTMetaInfo {
      * Returns a BTInterval object representing the given piece.
      * 
      * @param pieceIndex - zero based piece index.
+     * @throws IllegalArgumentException when given pieceIndex not within [0-numPieces-1]
      */
     public abstract BTInterval getPiece(int pieceIndex);
 
@@ -114,20 +115,24 @@ public interface BTMetaInfo {
      * size, except for potentially the last one.
      * 
      * @param pieceIndex
-     * @return
+     * @throws IllegalArgumentException when given pieceIndex not within [0-numPieces-1]
      */
     public abstract int getPieceSize(int pieceIndex);
 
     /**
      * Helper method to check if the given piece is complete.
-     * @param pieceNum zero based piece index
+     * @param pieceIndex zero based piece index
      * @param toCheck block range map holding completed pieces.
+     * 
+     *  @throws IllegalArgumentException when given pieceIndex not within [0-numPieces-1]
      */
-    public abstract boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck);
+    public abstract boolean isCompleteBlock(int pieceIndex, BlockRangeMap toCheck);
 
     /**
      * Returns the BTInterval that is stored at the given byte offset.
      * @param byteLocation
+     * 
+     * @throws IllegalArgumentException when given byte range not within [0-totalSize-1]
      */
     public abstract BTInterval getPieceAt(long byteLocation);
 
