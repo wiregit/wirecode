@@ -181,11 +181,11 @@ public class BTDataImpl implements BTData {
                 if (uris.size() > 0) {
                     webSeeds = new URI[uris.size()];
                     for (byte[] uri : uris) {
-                        addURI(webSeedsArray, new String(uri));
+                        addURI(webSeedsArray, StringUtils.getASCIIString(uri));
                     }
                 }
             } else if (tmp instanceof byte[]) {
-                String uri = new String((byte[]) tmp);
+                String uri =  StringUtils.getASCIIString((byte[])tmp);
                 addURI(webSeedsArray, uri);
             }
         }
