@@ -129,7 +129,7 @@ public class FileManagerTestCase extends LimeTestCase {
         return createNewNamedTestFile(size, "FileManager_unit_test", _sharedDir);
     }
 
-        protected QueryRequest get_qr(String xml) {
+    protected QueryRequest get_qr(String xml) {
         return queryRequestFactory.createQuery("", xml);
     }
 
@@ -202,6 +202,22 @@ public class FileManagerTestCase extends LimeTestCase {
         FileManagerTestUtils.waitForLoad(fman, 10000);
     }
 
+    protected boolean responsesContain(LimeXMLDocument... doc) {
+        for (LimeXMLDocument myDoc : doc) {
+            boolean cuurentDocExistsInResponses = false;
+            for (Response response : responses) {
+                LimeXMLDocument respDoc = response.getDocument();
+                if ((respDoc != null) &&
+                    (myDoc.getXMLString().equals(respDoc.getXMLString()))) {
+                    cuurentDocExistsInResponses = true;
+                }
+            }
+            if (!cuurentDocExistsInResponses) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////
     // classes and methods related to adding files to file manager

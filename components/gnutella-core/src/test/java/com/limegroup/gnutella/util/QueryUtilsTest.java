@@ -91,7 +91,7 @@ public class QueryUtilsTest extends BaseTestCase {
         valid.add("long");
         valid.add("live");
         
-        assertEquals(valid, QueryUtils.keywords("Phish is dead! :( Long-live Phish. :)"));
+        assertEquals(valid, QueryUtils.extractKeywordsFromFileName("Phish is dead! :( Long-live Phish. :)"));
         
         
         valid.clear();
@@ -102,16 +102,16 @@ public class QueryUtilsTest extends BaseTestCase {
         valid.add("jumped");
         valid.add("over");
         valid.add("fence");
-        assertEquals(valid, QueryUtils.keywords("THE 12 foot quick\\brown]\nfox[jumped [] # over-the _brown*fence_"));
+        assertEquals(valid, QueryUtils.extractKeywordsFromFileName("THE 12 foot quick\\brown]\nfox[jumped [] # over-the _brown*fence_"));
         
         valid.clear();
         valid.add("sam");
         valid.add("born");
-        assertEquals(valid, QueryUtils.keywords("sam, 2.1.81. born."));
+        assertEquals(valid, QueryUtils.extractKeywordsFromFileName("sam, 2.1.81. born."));
         
         valid.clear();
         valid.add("file");
-        assertEquals(valid, QueryUtils.keywords("a file.extension"));
+        assertEquals(valid, QueryUtils.extractKeywordsFromFileName("a file.extension"));
 
         // test for allowNumers == true
         valid.clear();
@@ -121,7 +121,7 @@ public class QueryUtilsTest extends BaseTestCase {
         valid.add("pg");
         // everything behind the last dot is removed by rip extension
         valid.add("3");
-        assertEquals(valid, QueryUtils.keywords("11 test pg-13 3.1415947", true));
+        assertEquals(valid, QueryUtils.extractKeywords("11 test pg-13 3.1415947", true));
     }
     
 

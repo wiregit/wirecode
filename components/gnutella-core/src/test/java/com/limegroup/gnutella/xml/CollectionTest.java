@@ -177,7 +177,7 @@ public class CollectionTest extends LimeTestCase {
         List<NameValue<String>> nameVals = new ArrayList<NameValue<String>>();
         nameVals.add(new NameValue<String>(TITLE_KEY, "tfie"));
         LimeXMLDocument searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        List results = collection.getMatchingReplies(searchDoc);
+        Set<LimeXMLDocument> results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                      1, results.size());
                      
@@ -186,7 +186,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals = new ArrayList<NameValue<String>>();
         nameVals.add(new NameValue<String>(ARTIST_KEY, "tfie"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                      0, results.size());
 
@@ -196,7 +196,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.add(new NameValue<String>(ALBUM_KEY, "susheel"));
         nameVals.add(new NameValue<String>(TITLE_KEY, "o"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                          1, results.size());
 
@@ -206,7 +206,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.add(new NameValue<String>(ALBUM_KEY, "ignored"));
         nameVals.add(new NameValue<String>(ARTIST_KEY, "afield"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                      1, results.size());
 
@@ -215,7 +215,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.add(new NameValue<String>(TITLE_KEY, "othertf"));
         nameVals.add(new NameValue<String>(ARTIST_KEY, "otherafi"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results", 
                           1, results.size()); 
 
@@ -224,7 +224,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.add(new NameValue<String>(TITLE_KEY, "othert"));
         nameVals.add(new NameValue<String>(ARTIST_KEY, "othra"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                           0, results.size());
 
@@ -233,7 +233,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.add(new NameValue<String>(ALBUM_KEY, "swi"));
         nameVals.add(new NameValue<String>(TRACK_KEY, "ferb"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                         0, results.size());
 
@@ -241,7 +241,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.clear();
         nameVals.add(new NameValue<String>(TRACK_KEY, "ferb"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                          0,  results.size());
                          
@@ -249,7 +249,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.clear();
         nameVals.add(new NameValue<String>(BITRATE_KEY, "64"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                         2, results.size());
                         
@@ -257,7 +257,7 @@ public class CollectionTest extends LimeTestCase {
         nameVals.clear();
         nameVals.add(new NameValue<String>(BITRATE_KEY, "6"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
-        results = collection.getMatchingReplies(searchDoc);
+        results = collection.getMatchingDocuments(searchDoc);
         assertEquals("Not the correct amount of results",
                         0, results.size());
     }
@@ -344,11 +344,11 @@ public class CollectionTest extends LimeTestCase {
         LimeXMLDocument newDocQ2 = limeXMLDocumentFactory.createLimeXMLDocument(buildXMLString(dir3));
 
         //make sure we get matches that we expect
-        l = collection.getMatchingReplies(newDocQ);
-        assertEquals("should of found two matches", 2, l.size());
-        
-        l = collection.getMatchingReplies(newDocQ2);
-        assertEquals("should of found only one match", 1, l.size());
+        Set<LimeXMLDocument> matchingReplies = collection.getMatchingDocuments(newDocQ);
+        assertEquals("should of found two matches", 2, matchingReplies.size());
+
+        matchingReplies = collection.getMatchingDocuments(newDocQ2);
+        assertEquals("should of found only one match", 1, matchingReplies.size());
         
         //make sure we get the same xml string...
         assertEquals("didn't get expected xml string",
@@ -368,8 +368,8 @@ public class CollectionTest extends LimeTestCase {
         //remove 
         collection.removeDoc(files[1]);
         
-        l = collection.getMatchingReplies(newDocQ2);
-        assertEquals("should not of found a match", 0, l.size());
+        matchingReplies = collection.getMatchingDocuments(newDocQ2);
+        assertEquals("should not of found a match", 0, matchingReplies.size());
         
         //make sure the keywords got deleted as well
         l = collection.getKeyWords();

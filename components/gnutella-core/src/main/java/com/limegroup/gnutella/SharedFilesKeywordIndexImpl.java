@@ -13,6 +13,7 @@ import org.limewire.collection.Function;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
+import org.limewire.collection.IdentityHashSet;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inspection.InspectableForSize;
@@ -94,7 +95,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
 
     private Set<Response> queryMetaData(QueryRequest request) {
-        List<LimeXMLDocument> documents = Collections.emptyList();
+        Set<LimeXMLDocument> documents = Collections.emptySet();
         LimeXMLDocument doc = request.getRichQuery();
         if (doc != null) {
             documents = queryMetaDataWithRequestXml(doc);
@@ -472,13 +473,13 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * Returns an array of Responses that correspond to documents that have a
      * match given query document.
      */
-    private List<LimeXMLDocument> queryMetaDataWithRequestXml(LimeXMLDocument queryDoc) {
+    private Set<LimeXMLDocument> queryMetaDataWithRequestXml(LimeXMLDocument queryDoc) {
         String schema = queryDoc.getSchemaURI();
         LimeXMLReplyCollection replyCol = schemaReplyCollectionMapper.get().getReplyCollection(schema);
         if (replyCol == null)// no matching reply collection for schema
-            return Collections.emptyList();
+            return Collections.emptySet();
 
-        return replyCol.getMatchingReplies(queryDoc);
+        return replyCol.getMatchingDocuments(queryDoc);
     }
 
     /**
@@ -491,13 +492,13 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * which metadata is searched.
      * @return
      */
-    private List<LimeXMLDocument> queryMetaDataWithPlaintext(QueryRequest request) {
+    private Set<LimeXMLDocument> queryMetaDataWithPlaintext(QueryRequest request) {
         
         Collection<LimeXMLReplyCollection> schemas = getReplyCollections(request);
         
-        List<LimeXMLDocument> documents = new ArrayList<LimeXMLDocument>();
+        Set<LimeXMLDocument> documents = new IdentityHashSet<LimeXMLDocument>();
     	for (LimeXMLReplyCollection schemaCol : schemas) {
-    		documents.addAll(schemaCol.getMatchingReplies(request.getQuery()));
+    		documents.addAll(schemaCol.getMatchingDocuments(request.getQuery()));
     	}
     	return documents;
     }
@@ -534,7 +535,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         return "";
     }
 
-    private Set<Response> createResponses(List<LimeXMLDocument> documents) {
+    private Set<Response> createResponses(Set<LimeXMLDocument> documents) {
     	Set<Response> responses = new HashSet<Response>(documents.size());
 
     	for (LimeXMLDocument currDoc : documents) {

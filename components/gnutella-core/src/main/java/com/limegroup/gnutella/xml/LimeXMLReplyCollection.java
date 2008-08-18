@@ -32,6 +32,7 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -347,14 +348,21 @@ public class LimeXMLReplyCollection {
                     trie = new StringTrie<List<LimeXMLDocument>>(true); //ignore case.
                     trieMap.put(name, trie);
                 }
-                List<LimeXMLDocument> allDocs = trie.get(value);
-                // if no list of docs for this value created, create & insert.
-                if( allDocs == null ) {
-                    allDocs = new LinkedList<LimeXMLDocument>();
-                    trie.add(value, allDocs);
+
+                // extract document metadata attribute into keywords
+                // and index document into trie based on every one of its keywords
+                Set<String> valuesKeywords = QueryUtils.extractKeywords(value, true);
+
+                for (String keyword : valuesKeywords) {
+                    List<LimeXMLDocument> allDocs = trie.get(keyword);
+
+                    // if no list of docs for this keyword created, create & insert.
+                    if (allDocs == null) {
+                        allDocs = new LinkedList<LimeXMLDocument>();
+                        trie.add(keyword, allDocs);
+                    }
+                    allDocs.add(doc);
                 }
-                //Add the value to the list of docs
-                allDocs.add(doc);
             }
         }
     }
@@ -373,14 +381,23 @@ public class LimeXMLReplyCollection {
                     continue;
                     
                 final String value = I18NConvert.instance().getNorm(entry.getValue());
-                List<LimeXMLDocument> allDocs = trie.get(value);
-                // if no list, ignore.
-                if( allDocs == null )
-                    continue;
-                allDocs.remove(doc);
-                // if we emptied the doc, remove from trie...
-                if( allDocs.size() == 0 )
-                    trie.remove(value);
+
+                // extract keywords from the metadata attribute value
+                // and remove the LimeXMLDocument from the index for each keyword
+                Set<String> keywords = QueryUtils.extractKeywords(value, true);
+
+                for (String keyword : keywords) {
+                    List<LimeXMLDocument> allDocs = trie.get(keyword);
+                    // if no list, ignore.
+                    if (allDocs == null) {
+                        continue;
+                    }
+                    allDocs.remove(doc);
+                    // if we emptied the doc, remove from trie...
+                    if (allDocs.size() == 0) {
+                        trie.remove(keyword);
+                    }
+                }
             }
         }
     }
@@ -450,7 +467,7 @@ public class LimeXMLReplyCollection {
      * 4) Returns an empty list if nothing matched or
      *    a list of the matching documents.
      */    
-    public List<LimeXMLDocument> getMatchingReplies(LimeXMLDocument query) {
+    public Set<LimeXMLDocument> getMatchingDocuments(LimeXMLDocument query) {
         // First get a list of anything that could possibly match.
         // This uses a set so we don't add the same doc twice ...
         Set<LimeXMLDocument> matching = null;
@@ -467,70 +484,102 @@ public class LimeXMLReplyCollection {
 
                 // Get the value of that field being queried for.    
                 final String value = entry.getValue();
-                // Get our shared XML docs that match this value.
-                // This query is from the network, and is therefore already
-                // normalized -- SHOULD NOT NORMALIZE AGAIN!!
-                Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(value);
-                // If some matches and 'matching' not allocated yet,
-                // allocate a new Set for storing matches
-                if(iter.hasNext()) {
-                    if (matching == null)
+
+                Set<LimeXMLDocument> repliesForMetadata = getMatchingRepliesForMetadataField(trie, value);
+
+                if (!repliesForMetadata.isEmpty()) {
+
+                    if (matching == null) {
                         matching = new IdentityHashSet<LimeXMLDocument>();
-                    // Iterate through each set of matches the Trie found
-                    // and add those matching-lists to our set of matches.
-                    // Note that the trie.getPrefixedBy returned
-                    // an Iterator of Lists -- this is because the Trie
-                    // does prefix matching, so there are many Lists of XML
-                    // docs that could match.
-                    while(iter.hasNext())
-                        matching.addAll(iter.next());
+                    }
+                    matching.addAll(repliesForMetadata);
                 }
             }
         }
         
         // no matches?... exit.
-        if( matching == null || matching.size() == 0)
-            return Collections.emptyList();
-        
+        if( matching == null || matching.size() == 0) {
+            return Collections.emptySet();
+        }
+
+
         // Now filter that list using the real XML matching tool...
-        List<LimeXMLDocument> actualMatches = null;
+        Set<LimeXMLDocument> actualMatches = null;
+
         for(LimeXMLDocument currReplyDoc : matching) {
             if (LimeXMLUtils.match(currReplyDoc, query, false)) {
-                if( actualMatches == null ) // delayed allocation of the list..
-                    actualMatches = new LinkedList<LimeXMLDocument>();
+                if( actualMatches == null ) {
+                    actualMatches = new IdentityHashSet<LimeXMLDocument>();
+                }
                 actualMatches.add(currReplyDoc);
             }
         }
         
         // No actual matches?... exit.
         if( actualMatches == null || actualMatches.size() == 0 )
-            return Collections.emptyList();
+            return Collections.emptySet();
 
         return actualMatches;
     }
 
-    public List<LimeXMLDocument> getMatchingReplies(String query) {
-    	 List<LimeXMLDocument> matching = null;
-         synchronized(mainMap) {
-        	 for (StringTrie<List<LimeXMLDocument>> trie: trieMap.values()) {
-                 Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(query);
-
-                 if(iter.hasNext()) {
-                     if (matching == null)
-                         matching = new ArrayList<LimeXMLDocument>();
-
-                     while(iter.hasNext())
-                         matching.addAll(iter.next());
-                 }
-             }
-         }
-         if (matching != null) {
-        	 return matching;
-         } else {
-        	 return Collections.emptyList();
-         }
+    public Set<LimeXMLDocument> getMatchingDocuments(String query) {
+        Set<LimeXMLDocument> totalMatches = new IdentityHashSet<LimeXMLDocument>();
+        synchronized(mainMap) {
+            for (String attrName : trieMap.keySet()) {
+                StringTrie<List<LimeXMLDocument>> trie = trieMap.get(attrName);
+                totalMatches.addAll(getMatchingRepliesForMetadataField(trie, query));
+            }
+        }
+        return totalMatches;
     }
-    
+
+    /**
+     * Extract keywords from query string, search
+     * the StringTrie for each keyword, and
+     * intersect the results when done.
+     *
+     * @param trie the StringTrie that matches keywords to list of results
+     * @param query the query string to use for the search
+     * @return LimeXMLDocuments
+     */
+    private static Set<LimeXMLDocument>
+                    getMatchingRepliesForMetadataField(StringTrie<List<LimeXMLDocument>> trie, String query) {
+        Set<LimeXMLDocument> matches = null;
+        Set<String> keywords = QueryUtils.extractKeywords(query, true);
+
+        for (String keyword : keywords) {
+
+            Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(keyword);
+
+            // if any keyword within the query gives us empty results
+            // there are no matches for this metadata attribute value
+            if (!(iter.hasNext())) {
+                return Collections.emptySet();
+            }
+
+            // first, add all lime xml doc matches from all Lists in Iterator
+            List<LimeXMLDocument> allMatchedDocsForKeyword = new ArrayList<LimeXMLDocument>();
+            while (iter.hasNext()) {
+                allMatchedDocsForKeyword.addAll(iter.next());
+            }
+
+            // matches contains all common lime xml docs that match
+            // all keywords in the query
+            if (matches == null) {
+                matches = new IdentityHashSet<LimeXMLDocument>();
+                matches.addAll(allMatchedDocsForKeyword);
+            } else {
+                matches.retainAll(allMatchedDocsForKeyword);
+            }
+
+            // if no docs in common, there is no chance of a match
+            if (matches.size() == 0) {
+                return Collections.emptySet();        
+            }
+        }
+        return matches;
+    }
+
     /**
      * Replaces the document in the map with a newer LimeXMLDocument.
      * @return the older document, which is being replaced. Can be null.

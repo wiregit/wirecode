@@ -57,6 +57,10 @@ public class FileManagerTestUtils {
             + "></audio></audios>";
     }
 
+    public static String buildDocumentXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><documents xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/document.xsd\">" +
+                "<document " + keyname + " /></documents>";    
+    }
 
     /**
      * Helper function to create a new temporary file of the given size,

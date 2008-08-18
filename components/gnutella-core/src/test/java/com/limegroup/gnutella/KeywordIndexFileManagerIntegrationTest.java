@@ -28,16 +28,32 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
     }
 
     /**
-     * Test plaintext searching to ensure that shared files' metadata is searched
+     * Test plaintext searching to ensure that shared files' metadata is searched.
+     *
+     * This tests the following scenarios with 1 contrived audio file and its
+     * corresponding metadata:
+     *
+     * 1. Exact match of metadata field
+     * 2. Prefix match of metadata field
+     * 3. Prefix match of metadata field with varying case
+     * 4. All keywords in search are in at least 1 field of metadata
+     * 5. All keywords in search are NOT found in any metadata NOR file name - should not match
+     * 6. Metadata field text + additional text should not match (negative test)
+     * 7. Exact or Prefix match of filename should still show up as result (regression)
+     * 8. Search term that matches both file name and metadata
+     *    should return only 1 result
+     * 9. Removing file from file manager results in both exact matches
+     *    and prefix matches failing (negative test)
+     * 10. Exact or Prefix match of filename should still show up as result (regression)
      *
      */
-    public void testMetadataResultsForPlaintextQuery() throws Exception {
+    public void testMetadataResultsForPlaintextQuerySingleFile() throws Exception {
         waitForLoad();
 
         // test a query where the filename is meaningless but XML matches.
         File f1 = createNewNamedTestFile(10, "meaningless");
         LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(FileManagerTestUtils.buildAudioXMLString(
-                "artist=\"Sammy B\" album=\"Jazz in A minor\" genre=\"mean\" "));
+                "artist=\"Sammy B\" album=\"Jazz in A minor\" genre=\"mean Median Standard Deviation\" "));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(f1, l1);
@@ -74,19 +90,27 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertEquals(1, responses.length);
         assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
 
-        // not matching: prefix
-        responses = keywordIndex.query(queryRequestFactory.createQuery("sammm"));
-        assertEquals(0, responses.length);
+        // matching: all of the search term's keywords are contained
+        // in at least 1 metadata field
+        responses = keywordIndex.query(queryRequestFactory.createQuery("median standard deviation"));
+        assertEquals(1, responses.length);
+        assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
 
-        // not matching: correct part but in string
-        responses = keywordIndex.query(queryRequestFactory.createQuery("in"));
+        responses = keywordIndex.query(queryRequestFactory.createQuery("A Minor"));
+        assertEquals(1, responses.length);
+        assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
+        
+        // not matching: none of the metadata fields nor file name
+        // match all keywords in search term
+        responses = keywordIndex.query(queryRequestFactory.createQuery("variance median deviation"));
         assertEquals(0, responses.length);
 
         // not matching: String contains full metadata but has additional text
         responses = keywordIndex.query(queryRequestFactory.createQuery("Sammy B XYZ"));
         assertEquals(0, responses.length);
 
-        responses = keywordIndex.query(queryRequestFactory.createQuery("minor"));
+        // not matching: Search contains prefix but also contains additional text
+        responses = keywordIndex.query(queryRequestFactory.createQuery("sammm"));
         assertEquals(0, responses.length);
 
         // search something that is in just the file name prefix
@@ -118,6 +142,130 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
 
         // prefixes
         responses = keywordIndex.query(queryRequestFactory.createQuery("Sam"));
+        assertEquals(0, responses.length);
+    }
+
+
+    /**
+     * Test plaintext searching with multiple files indexed.  The files are in
+     * multiple media types.
+     *
+     * The following scenarios are tested:
+     *
+     * 1. All keywords in search match 1 file name (should return 1 match)
+     *    Search term "four six" matches "eight four six.mp3"
+     * 2. All keywords in search match, but not for the same file. (should return 0 matches)
+     *    Search term "seven nine", files "eight four six.txt", "seven.txt" and "nine.avi"
+     * 3. Search with keyword that matches in different metadata fields of different files (matches)
+     * 4. Every keyword in search matches in a metadata field, but not for the same file. (No matches)
+     * 5. Every keyword in search matches for a file, but not in same metadata field. (No matches)
+     * 6. Every keyword in search matches in same metadata field name but for different files (No matches)
+     * 7. Removing file from file manager results in both exact matches
+     *    and prefix matches (file name or metadata) NO LONGER MATCHING for the file that was removed
+     *
+     */
+    public void testPlaintextQueryMultipleFilesMultipleMediaTypes() throws Exception {
+        waitForLoad();
+
+        File eightFourSixFile = createNewNamedTestFile(10, "eight four six.mp3");
+        LimeXMLDocument eightFourSixXml = limeXMLDocumentFactory.createLimeXMLDocument(
+            FileManagerTestUtils.buildAudioXMLString("artist=\"sixty seven\" album=\"zero one\" genre=\"five nine\" "));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+        l1.add(eightFourSixXml);
+        addIfShared(eightFourSixFile, l1);
+
+        File f2 = createNewNamedTestFile(10, "seven.txt");
+        LimeXMLDocument seven = limeXMLDocumentFactory.createLimeXMLDocument(
+            FileManagerTestUtils.buildDocumentXMLString("title=\"front page stuff\" author=\"special writer\" " +
+                        "topic=\"interesting stuff\""));
+        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
+        l2.add(seven);
+        addIfShared(f2, l2);
+
+        File f3 = createNewNamedTestFile(10, "nine.avi");
+        LimeXMLDocument nine = limeXMLDocumentFactory.createLimeXMLDocument(
+            FileManagerTestUtils.buildVideoXMLString("director=\"one interesting tree\" title=\"Eight Four David\""));
+        List<LimeXMLDocument> l3 = new ArrayList<LimeXMLDocument>();
+        l3.add(nine);
+        addIfShared(f3, l3);
+        
+        File algebraFile = createNewNamedTestFile(10, "class time.txt");
+        LimeXMLDocument algebraXml = limeXMLDocumentFactory.createLimeXMLDocument(
+                FileManagerTestUtils.buildDocumentXMLString("title=\"plus minus\" " +
+                        "author=\"equals\" " + "topic=\"matrix eigenvalue\""));
+        List<LimeXMLDocument> l4 = new ArrayList<LimeXMLDocument>();
+        l4.add(algebraXml);
+        addIfShared(algebraFile, l4);
+
+        
+        // all keywords in search term match file name
+        responses = keywordIndex.query(queryRequestFactory.createQuery("four six"));
+        assertEquals(1, responses.length);
+        assertEquals(eightFourSixXml.getXMLString(), responses[0].getDocument().getXMLString());
+
+        // Every keyword in search matches, but not for the same file.
+        responses = keywordIndex.query(queryRequestFactory.createQuery("seven nine"));
+        assertEquals(0, responses.length);
+
+        // search with keyword that matches in different metadata fields of different files
+        responses = keywordIndex.query(queryRequestFactory.createQuery("interesting"));
+        assertEquals(2, responses.length);
+        assertTrue(responsesContain(seven, nine));
+
+        // Every keyword in search matches in a metadata field, but not for the same file.
+        responses = keywordIndex.query(queryRequestFactory.createQuery("plus special writer"));
+        assertEquals(0, responses.length);
+
+        // Every keyword in search matches for same file, but not in same metadata field
+        responses = keywordIndex.query(queryRequestFactory.createQuery("interesting front page stuff"));
+        assertEquals(0, responses.length);
+
+        // Every keyword in search matches in same metadata field name but for different files (No matches)
+        responses = keywordIndex.query(queryRequestFactory.createQuery("front plus minus"));
+        assertEquals(0, responses.length);
+
+        // search keyword matches prefix of metadata or file name
+        // for multiple files. All files that matched are returned.
+        responses = keywordIndex.query(queryRequestFactory.createQuery("eig"));
+        assertEquals(3, responses.length);
+        assertTrue(responsesContain(algebraXml, nine, eightFourSixXml));
+
+        // remove a file for which "eig" matches in the metadata
+        fman.removeFile(algebraFile);
+
+        // perform same query as before, and while the other files should still match,
+        // the removed file should no longer match
+        responses = keywordIndex.query(queryRequestFactory.createQuery("eig"));
+        assertEquals(2, responses.length);
+        assertTrue(responsesContain(eightFourSixXml, nine));
+        assertFalse(responsesContain(algebraXml));
+    }
+
+    /**
+     * Tests metadata keyword searching.
+     *
+     * 1. If a file's metadata has an attribute "title='one six eight'", a metadata search
+     *    for "title='six eight'" should succeed because it matches all keywords for that attribute.
+     *
+     * 2. Given a file with metadata of "title='one six eight'", a metadata search
+     *    for "title='six eight ten'" should fail because although 2 keywords match that attribute,
+     *    1 keyword does not match.
+     */
+    public void testMetaQueryKeywordMatching() throws Exception {
+        waitForLoad();
+
+        File eightFourSixFile = createNewNamedTestFile(10, "eight four six.mp3");
+        LimeXMLDocument eightFourSixXml = limeXMLDocumentFactory.createLimeXMLDocument(
+            FileManagerTestUtils.buildAudioXMLString("artist=\"sixty seven\" album=\"zero one\" genre=\"five nine sixty\" "));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+        l1.add(eightFourSixXml);
+        addIfShared(eightFourSixFile, l1);
+
+        responses = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildAudioXMLString("genre=\"nine\"")));
+        assertEquals(1, responses.length);
+        assertTrue(responsesContain(eightFourSixXml));
+
+        responses = keywordIndex.query(queryRequestFactory.createQuery("", FileManagerTestUtils.buildAudioXMLString("genre=\"five nine one\"")));
         assertEquals(0, responses.length);
     }
 

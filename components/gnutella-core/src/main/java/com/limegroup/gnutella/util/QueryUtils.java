@@ -23,7 +23,12 @@ public class QueryUtils {
      */
     public static final String DELIMITERS = " -._+/*()\\,";
     
-    private static final char[] DELIMITERS_CHARACTERS; 
+    private static final char[] DELIMITERS_CHARACTERS;
+
+    /**
+     * default set of delimiter characters AND illegal characters
+     */
+    private static final String DELIMITERS_AND_ILLEGAL;
     
     static {
         // must be lower-case
@@ -31,6 +36,9 @@ public class QueryUtils {
         char[] characters = DELIMITERS.toCharArray();
         Arrays.sort(characters);
         DELIMITERS_CHARACTERS = characters;
+        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
+        StringBuilder sb = new StringBuilder(DELIMITERS.length() + illegal.length);
+        DELIMITERS_AND_ILLEGAL = sb.append(illegal).append(DELIMITERS).toString();
     }
     
 
@@ -38,23 +46,17 @@ public class QueryUtils {
      * Gets the keywords in this filename, seperated by delimiters & illegal
      * characters.
      *
-     * @param fileName
+     * @param str String to extract keywords from
      * @param allowNumbers whether number keywords are retained and returned
      * in the result set
      * @return
      */
-    public static final Set<String> keywords(String fileName, boolean allowNumbers) {
-        //Remove extension
-        fileName = QueryUtils.ripExtension(fileName);
+    public static final Set<String> extractKeywords(String str, boolean allowNumbers) {
     	
         //Separate by whitespace and _, etc.
         Set<String> ret=new LinkedHashSet<String>();
-        String delim = QueryUtils.DELIMITERS;
-        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
-        StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
-        sb.append(illegal).append(delim);
     
-        StringTokenizer st = new StringTokenizer(fileName, sb.toString());
+        StringTokenizer st = new StringTokenizer(str, DELIMITERS_AND_ILLEGAL);
         while (st.hasMoreTokens()) {
             String currToken = st.nextToken().toLowerCase();
             if(!allowNumbers) {
@@ -71,12 +73,12 @@ public class QueryUtils {
 
     /**
      * Convenience wrapper for 
-     * {@link #keywords(String, boolean) keywords(String, false)}.
+     * {@link #extractKeywords(String, boolean) keywords(String, false)}.
      * @param fileName
      * @return
      */
-    public static final Set<String> keywords(String fileName) {
-    	return keywords(fileName, false);
+    static final Set<String> extractKeywordsFromFileName(String fileName) {
+    	return extractKeywords(ripExtension(fileName), false);
     }
 
     /**
@@ -124,7 +126,7 @@ public class QueryUtils {
         int maxLen = SearchSettings.MAX_QUERY_LENGTH.getValue();
     
         //Get the set of keywords within the name.
-        Set<String> keywords = keywords(name, allowNumbers);
+        Set<String> keywords = extractKeywords(ripExtension(name), allowNumbers);
     
         if (keywords.isEmpty()) { // no suitable non-number words
             retString = removeIllegalChars(name);
