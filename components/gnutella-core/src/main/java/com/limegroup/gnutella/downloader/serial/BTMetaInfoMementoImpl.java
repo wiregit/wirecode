@@ -94,6 +94,8 @@ public class BTMetaInfoMementoImpl implements BTMetaInfoMemento, Serializable {
         if (webSeeds != null) {
             List<URI> uris = Arrays.asList(webSeeds);
             serialObjects.put("url-list", uris);
+        } else {
+            serialObjects.put("url-list", new URI[0]);
         }
     }
 }
