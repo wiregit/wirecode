@@ -189,9 +189,7 @@ public class BTDataImpl implements BTData {
                 addURI(webSeedsArray, uri);
             }
         }
-        if (webSeedsArray.size() > 0) {
-            webSeeds = webSeedsArray.toArray(new URI[webSeedsArray.size()]);
-        }
+        webSeeds = webSeedsArray.toArray(new URI[webSeedsArray.size()]);
         return webSeeds;
     }
 

@@ -96,13 +96,6 @@ public interface BTMetaInfo {
     public abstract boolean isMultiFileTorrent();
 
     /**
-     * Setter method for the webseed addresses.
-     * 
-     * @param uris - webseed addresses
-     */
-    public abstract void setWebSeeds(URI[] uris);
-
-    /**
      * Returns a BTInterval object representing the given piece.
      * 
      * @param pieceIndex - zero based piece index.

@@ -96,7 +96,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * The ratio from previous sessions
      */
     private final float historicRatio;
-    
+
     /**
      * Whether this torrent has the private flag set
      */
@@ -361,7 +361,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
         boolean hostOk = false;
         hostOk = check.getHost() != null; // validity will be checked upon
         // request
-        
+
         if (!hostOk)
             throw new ValueException("invalid host");
     }
@@ -423,15 +423,6 @@ public class BTMetaInfoImpl implements BTMetaInfo {
     /*
      * (non-Javadoc)
      * 
-     * @see com.limegroup.bittorrent.BTMetaInfo#setWebSeeds(java.net.URI[])
-     */
-    public void setWebSeeds(URI[] uris) {
-        this._webSeeds = uris;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.limegroup.bittorrent.BTMetaInfo#getPiece(int)
      */
     public BTInterval getPiece(int pieceIndex) {
@@ -456,7 +447,9 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 
     /*
      * (non-Javadoc)
-     * @see com.limegroup.bittorrent.BTMetaInfo#isCompleteBlock(int, com.limegroup.bittorrent.disk.BlockRangeMap)
+     * 
+     * @see com.limegroup.bittorrent.BTMetaInfo#isCompleteBlock(int,
+     * com.limegroup.bittorrent.disk.BlockRangeMap)
      */
     public boolean isCompleteBlock(int pieceIndex, BlockRangeMap toCheck) {
         IntervalSet set = toCheck.get(pieceIndex);
@@ -470,6 +463,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.limegroup.bittorrent.BTMetaInfo#getPieceAt(long)
      */
     public BTInterval getPieceAt(long torrentbyte) {
@@ -490,10 +484,13 @@ public class BTMetaInfoImpl implements BTMetaInfo {
         return high;
     }
 
-   /*
-    * (non-Javadoc)
-    * @see com.limegroup.bittorrent.BTMetaInfo#getLowByte(com.limegroup.bittorrent.BTInterval)
-    */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.limegroup.bittorrent.BTMetaInfo#getLowByte(com.limegroup.bittorrent
+     * .BTInterval)
+     */
     public long getLowByte(BTInterval piece) {
         long pieceNum = piece.getBlockId();
         long low = piece.getLow() + pieceNum * getPieceLength();
@@ -502,10 +499,11 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.limegroup.bittorrent.BTMetaInfo#hasWebSeeds()
      */
     public boolean hasWebSeeds() {
-        return getWebSeeds() != null && getWebSeeds().length > 0;
+        return getWebSeeds().length > 0;
     }
 
 }
