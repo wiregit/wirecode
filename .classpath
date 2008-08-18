@@ -57,7 +57,8 @@
 	<classpathentry kind="src" output="components/xmpp-api/build/classes" path="components/xmpp-api/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
-	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
+    <classpathentry kind="lib" path="lib/jars/commons-math-1.2.jar"/>
+    <classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>
 	<classpathentry kind="lib" path="lib/jars/daap.jar"/>
 	<classpathentry kind="lib" path="lib/jars/foxtrot.jar"/>
