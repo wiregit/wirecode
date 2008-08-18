@@ -70,10 +70,10 @@ public interface BTMetaInfo {
      * @return array of <tt>URL</tt> storing the addresses of the trackers
      */
     public abstract URI[] getTrackers();
-    
+
     /**
      * 
-     * @return array of <tt>URL</tt> storing the addresses of the webseeds, null if no such addresses exist.
+     * @return array of <tt>URL</tt> storing the addresses of the webseeds.
      */
     public abstract URI[] getWebSeeds();
 
@@ -90,33 +90,64 @@ public interface BTMetaInfo {
      */
     public abstract BTMetaInfoMemento toMemento();
 
+    /**
+     * Returns true if this is a multi file torrent download.
+     */
     public abstract boolean isMultiFileTorrent();
 
-    public abstract void setWebSeeds(URI[] uris);
-    
-    public abstract BTInterval getPiece(int pieceIndex);
-    
-    public abstract int getPieceSize(int pieceIndex);
-    
-    public abstract boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck);
-
-    public abstract BTInterval getPieceAt(long i);
-    
-    
     /**
-     * Gets the highByte of the given BTInterval
-     * @param piece
+     * Setter method for the webseed addresses.
+     * 
+     * @param uris - webseed addresses
+     */
+    public abstract void setWebSeeds(URI[] uris);
+
+    /**
+     * Returns a BTInterval object representing the given piece.
+     * 
+     * @param pieceIndex - zero based piece index.
+     */
+    public abstract BTInterval getPiece(int pieceIndex);
+
+    /**
+     * Returns the piece size of the given piece. All pieces have pieceLength
+     * size, except for potentially the last one.
+     * 
+     * @param pieceIndex
      * @return
      */
+    public abstract int getPieceSize(int pieceIndex);
+
+    /**
+     * Helper method to check if the given piece is complete.
+     * @param pieceNum zero based piece index
+     * @param toCheck block range map holding completed pieces.
+     */
+    public abstract boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck);
+
+    /**
+     * Returns the BTInterval that is stored at the given byte offset.
+     * @param byteLocation
+     */
+    public abstract BTInterval getPieceAt(long byteLocation);
+
+    /**
+     * Gets the highByte of the given BTInterval
+     * 
+     * @param piece
+     */
     public long getHighByte(BTInterval btInterval);
-    
+
     /**
      * Gets the lowByte of the given BTInterval
+     * 
      * @param piece
-     * @return
      */
     public long getLowByte(BTInterval btInterval);
 
+    /**
+     * Returns true if this torrent has webseed addresses.
+     */
     public abstract boolean hasWebSeeds();
 
 }

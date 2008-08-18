@@ -777,7 +777,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         if (!shouldAdd)
             return false;
 
-        linkManager.addLink(btc);
+        linkManager.addConnection(btc);
         _peers.remove(btc.getEndpoint());
         if (LOG.isDebugEnabled())
             LOG.debug("added connection " + btc.toString());
@@ -1202,12 +1202,20 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         return isComplete() && linkManager.hasInterested() && !linkManager.hasUnchoked();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.ManagedTorrent#getLinkManager()
+     */
     public BTLinkManager getLinkManager() {
         return linkManager;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.ManagedTorrent#getSwarmer()
+     */
     public Swarmer getSwarmer() {
         return swarmer;
     }
-
+    
 }

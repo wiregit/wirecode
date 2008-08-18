@@ -66,15 +66,22 @@ public interface TorrentDiskManager {
 	 */
 	public boolean isComplete();
 
+	/**
+	 * Returns an array of BTIntervals selected using the given piece strategy.
+	 * 
+     * @param bs the <tt>BitField</tt> of available ranges to choose from
+     * @param exclude the set of ranges that the connection is already about to request
+     * @param pieceStrategy the piece strategy to select the intervals with.
+     * @return a BTInterval that should be requested next.
+	 */
 	List<BTInterval> lease(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy);
 	
 	/**
-	 * returns a random available range that has preferably not yet been
-	 * requested
+	 * Returns up to 16k of a btInterval selected using the given piece strategy. 
 	 * 
 	 * @param bs the <tt>BitField</tt> of available ranges to choose from
-	 * @param exclude the set of ranges that the connection is already about to
-	 * request
+	 * @param exclude the set of ranges that the connection is already about to request
+	 * @param pieceStrategy the piece strategy to select the intervals with.
 	 * @return a BTInterval that should be requested next.
 	 */
 	public BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude, PieceStrategy pieceStrategy);
@@ -139,10 +146,10 @@ public interface TorrentDiskManager {
     public long getLastVerifiedOffset();
 
     /**
+     * Shrinks a lease from the old intrval to the new one.
      * 
-     * @param oldInterval
-     * @param newInterval
-     * @return
+     * @param oldInterval old interval to shrink
+     * @param newInterval new interval to maintain leased
      */
     public void renewLease(List<BTInterval> oldInterval, List<BTInterval> newInterval);
 

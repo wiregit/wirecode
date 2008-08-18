@@ -60,9 +60,9 @@ public class BTLinkManager implements Shutdownable,
 		return _connections.size();
 	}
 	
-	public synchronized void addLink(BTConnection link) {
-		_connections.add(link);
-		endpoints.add(link.getEndpoint());
+	public synchronized void addConnection(BTConnection connection) {
+		_connections.add(connection);
+		endpoints.add(connection.getEndpoint());
 	}
 	
 	public synchronized void removeLink(BTLink link) {

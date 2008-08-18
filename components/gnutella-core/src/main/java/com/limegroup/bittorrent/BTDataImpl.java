@@ -13,7 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+
 import org.limewire.http.URIUtils;
+import org.limewire.logging.LogFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BEncoder;
 import org.limewire.util.CommonUtils;
@@ -31,6 +34,8 @@ import com.limegroup.gnutella.security.SHA1;
  * preferred over ASCII versions, wherever possible.
  */
 public class BTDataImpl implements BTData {
+    
+    private static final Log LOG = LogFactory.getLog(BTDataImpl.class);
     
     /** The URL of the tracker. */
     // TODO: add support for UDP & multiple trackers.
@@ -160,6 +165,11 @@ public class BTDataImpl implements BTData {
         }
     }
 
+    /**
+     * Parses the webseed addresses from the torrent file. The web seed addresses
+     * should be in a parameter "url-list". url-list can either be a list or 
+     * a single webseed address.
+     */
     @SuppressWarnings("unchecked")
     private URI[] parseWebSeeds(Map<?, ?> torrentFileMap) {
         List<URI> webSeedsArray = new ArrayList<URI>();
@@ -190,7 +200,7 @@ public class BTDataImpl implements BTData {
             URI uri = URIUtils.toURI(uriString);
             uris.add(uri);
         } catch (URISyntaxException e) {
-            // TODO warning message
+            LOG.warn("Error parsing uri: " + uriString, e);
         }
     }
 
@@ -360,8 +370,12 @@ public class BTDataImpl implements BTData {
         pieces = null;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.BTData#getWebSeeds()
+     */
     public URI[] getWebSeeds() {
         return webSeeds;
     }
-
+    
 }

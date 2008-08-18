@@ -395,7 +395,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
 	 */
 	public void open(final DiskManagerListener torrent) throws IOException {
-		//TODO refactor to be able to add multipl listeners
+		//TODO refactor to be able to add multiple listeners
 		this.listener = torrent;
 		storedException = null;
 		
@@ -741,21 +741,27 @@ class VerifyingFolder implements TorrentDiskManager {
         return ret;
     }
     
-    /**
-     * @return number of bytes written
-     */
+   /*
+    * (non-Javadoc)
+    * @see com.limegroup.bittorrent.disk.TorrentDiskManager#getBlockSize()
+    */
     public synchronized long getBlockSize() {
         long written = getVerifiedBlockSize();
         return written + partialBlocks.byteSize();
     }
 
-    /**
-     * @return number of bytes corrupted
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#getNumCorruptedBytes()
      */
     public synchronized long getNumCorruptedBytes() {
         return _corruptedBytes;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#toMemento()
+     */
     public BTDiskManagerMemento toMemento() {
         BTDiskManagerMemento memento = new BTDiskManagerMementoImpl();
         synchronized(this) {
@@ -801,8 +807,9 @@ class VerifyingFolder implements TorrentDiskManager {
         return (new AndView(verified, theirMissing)).cardinality();
     }
     
-    /**
-     * @return true if the remote host has any pieces we miss
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#containsAnyWeMiss(org.limewire.collection.BitField)
      */
     public synchronized boolean containsAnyWeMiss(BitField other) {
         // if we are complete we miss nothing
@@ -812,11 +819,19 @@ class VerifyingFolder implements TorrentDiskManager {
         BitField interesting = new AndView(other,missing);
         return interesting.nextSetBit(0) > -1;
     }
-    
+
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#getLastVerifiedOffset()
+     */
     public long getLastVerifiedOffset() {
         return lastVerifiedOffset;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#renewLease(java.util.List, java.util.List)
+     */
     public void renewLease(List<BTInterval> oldIntervals, List<BTInterval> newIntervals) {
         synchronized (VerifyingFolder.this) {
             for (BTInterval btInterval : oldIntervals) {

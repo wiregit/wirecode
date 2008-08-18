@@ -2,6 +2,8 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 
+import org.limewire.util.Objects;
+
 /**
  * Holds the length and the path of a file.
  */
@@ -9,6 +11,8 @@ public class TorrentFile extends File {
 	private static final long serialVersionUID = 4051327846800962608L;
 
 	private final long length;
+	
+	private final String torrentPath;
 
 	/** 
 	 * The indices of the first and last blocks 
@@ -17,12 +21,11 @@ public class TorrentFile extends File {
 	private int begin, end;
 	
 	private long startByte, endByte;
-	
-	private String torrentPath = null;
 
-	TorrentFile(long length, String path) {
+	TorrentFile(long length, String path, String torrentPath) {
 		super(path);
 		this.length = length;
+		this.torrentPath = Objects.nonNull(torrentPath, "torrentPath");
 		begin = -1; //these need to be initialized.
 		end = -1; 
 	}
@@ -32,48 +35,68 @@ public class TorrentFile extends File {
 		return length;
 	}
 	
+	/**
+	 * Sets the beginning piece index for this torrent file.
+	 */
 	public void setBeginPiece(int begin) {
 		this.begin = begin;
 	}
 	
+	/**
+	 * Gets the beginning piece index for this torrent file.
+	 */
 	public int getBeginPiece() {
 		return begin;
 	}
 	
+	/**
+	 * Sets the end piece index for this torrent file.
+	 */
 	public void setEndPiece(int end) {
 		this.end = end;
 	}
 	
+	/**
+	 * Gets the end piece index for this torrent file.
+	 * @return
+	 */
 	public int getEndPiece() {
 		return end;
 	}
 
+	/**
+	 * Gets the start byte of the file in the torrent fileSystem.
+	 */
     public long getStartByte() {
         return startByte;
     }
 
+    /**
+     * Sets the start byte of the file in the torrent fileSystem.
+     */
     public void setStartByte(long startByte) {
         this.startByte = startByte;
     }
 
+    /**
+     * Gets the end byte of the file in the torrent fileSystem.
+     */
     public long getEndByte() {
         return endByte;
     }
 
+    /**
+    * Sets the end byte of the file in the torrent fileSystem.
+    */
     public void setEndByte(long endByte) {
         this.endByte = endByte;
     }
 
+    /**
+     * Returns the path to the torrent in the torrent file system.
+     */
     public String getTorrentPath() {
         return torrentPath;
     }
 
-    public void setTorrentPath(String torrentPath) {
-        this.torrentPath = torrentPath;
-    }
-    
-    
-
-	
-	
 }

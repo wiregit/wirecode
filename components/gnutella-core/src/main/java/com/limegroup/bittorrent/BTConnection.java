@@ -916,6 +916,10 @@ PieceSendListener, PieceReadListener {
 		choke();
 	}
 
+	/**
+	 * Returns true if the connected client is known to have the given piece.
+	 * @param pieceIndex zero based index of torrent piece
+	 */
     public boolean hasPiece(int pieceIndex) {
         return _available.get(pieceIndex);
     }

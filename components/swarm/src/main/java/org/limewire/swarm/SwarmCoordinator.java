@@ -58,7 +58,7 @@ public interface SwarmCoordinator {
      * 
      * @param length
      */
-    SwarmWriteJob createWriteJob(Range rangem, SwarmWriteJobControl callback);
+    SwarmWriteJob createWriteJob(Range range, SwarmWriteJobControl callback);
 
     /**
      * Marks a range as pending a write. The range is still not leasable, but
@@ -120,7 +120,6 @@ public interface SwarmCoordinator {
 
     /**
      * Returns true if all the pieces have been written to disk.
-     * @return
      */
     boolean isComplete();
 
@@ -137,7 +136,6 @@ public interface SwarmCoordinator {
     /**
      * Returns the swarmFile to be written at the start of the given Range.
      * @param range
-     * @return
      */
     SwarmFile getSwarmFile(Range range);
 

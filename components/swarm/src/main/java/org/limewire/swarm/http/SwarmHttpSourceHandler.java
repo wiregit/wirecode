@@ -56,7 +56,7 @@ import org.limewire.util.Objects;
  * marked as finished, and the connection to it will be closed.
  * 
  * Additionally the swarmSource can be checked to see if it is finished by use
- * of the isFinished() flag. This can be used to override teh default behavior,
+ * of the isFinished() flag. This can be used to override the default behavior,
  * which is to download until there are no more bytes to lease.
  * 
  */

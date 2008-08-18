@@ -67,10 +67,10 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     public IntervalSet() {
         intervals = new ArrayList<Range>();
     }
-    
+
     /**
      * Creates an interval set with the given base range.
-     * @param interval - range to create teh interval set with.
+     * @param interval - range to create the interval set with.
      */
     public IntervalSet(Range interval) {
         this();

@@ -54,6 +54,8 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
      * @param eventDispatch the IO event dispatcher that 
      * @param method if != null, the content will be pushed back into the
      *        channel
+     * @param up  bandwidth tracker tracking upstream bandwidth
+     * @param down bandwidth tracker tracking downstream bandwidth
      */
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method,
             HttpBandwidthTracker up, HttpBandwidthTracker down) {

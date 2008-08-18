@@ -107,11 +107,16 @@ public class TorrentFileSystem {
         if(data.getFiles() != null) {
             List<BTData.BTFileData> files = data.getFiles();
             List<TorrentFile> torrents = new ArrayList<TorrentFile>(files.size());
+            long position = 0;
             for(BTData.BTFileData file : files) {
-                
-            	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath());
-            	String torrentPath = _name + file.getPath();
-            	f.setTorrentPath(torrentPath);
+                String torrentPath = _name + file.getPath();
+            	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath(), torrentPath);
+            	f.setBeginPiece((int) (position / pieceLength));
+                f.setStartByte(position);
+                position += f.length();
+                f.setEndPiece((int) (position / pieceLength));
+                f.setEndByte(position-1);
+
             	if (!FileUtils.isReallyInParentPath(_completeFile, f))
             		throw new SaveLocationException(LocationCode.SECURITY_VIOLATION, f);
                 torrents.add(f);
@@ -120,16 +125,6 @@ public class TorrentFileSystem {
 			if (files.size() == 0)
 				throw new ValueException("bad metainfo, no files!");
 			
-			// add the beginning and ending chunks for each file.
-			long position = 0;
-			for (TorrentFile file : torrents) {
-				file.setBeginPiece((int) (position / pieceLength));
-				file.setStartByte(position);
-				position += file.length();
-				file.setEndPiece((int) (position / pieceLength));
-				file.setEndByte(position-1);
-			}
-			
 			_files = torrents;
             
             // add folders, for easier conflict checking later on
@@ -137,9 +132,8 @@ public class TorrentFileSystem {
                 _folders.add(new File(_completeFile, folderPath));
 			_folders.add(_completeFile);
 		} else {
-            TorrentFile f = new TorrentFile(data.getLength(), _completeFile.getAbsolutePath());
-            String torrentPath = data.getName();
-            f.setTorrentPath(torrentPath);
+		    String torrentPath = data.getName();
+            TorrentFile f = new TorrentFile(data.getLength(), _completeFile.getAbsolutePath(), torrentPath);
             f.setBeginPiece(0);
             f.setStartByte(0);
             f.setEndPiece(numHashes);
@@ -267,12 +261,11 @@ public class TorrentFileSystem {
 		for (int i = 0; i < l.size(); i++) {
 			TorrentFile current = l.get(i);
 			TorrentFile updated = new TorrentFile(current.length(), newPath
-					+ current.getPath().substring(offset));
+					+ current.getPath().substring(offset), current.getTorrentPath());
 			updated.setBeginPiece(current.getBeginPiece());
 			updated.setEndPiece(current.getEndPiece());
 			updated.setStartByte(current.getStartByte());
 			updated.setEndByte(current.getEndByte());
-			updated.setTorrentPath(current.getTorrentPath());
 			l.set(i,updated);
 		}
 	}

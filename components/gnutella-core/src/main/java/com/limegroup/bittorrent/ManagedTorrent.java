@@ -119,7 +119,13 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      */
     boolean isSuspended();    
     
+    /**
+     * Returns the BTLinkManager for this torrent instance.
+     */
     BTLinkManager getLinkManager();
     
+    /**
+     * Returns the swarmer for this torrent instance.
+     */
     Swarmer getSwarmer();
 }

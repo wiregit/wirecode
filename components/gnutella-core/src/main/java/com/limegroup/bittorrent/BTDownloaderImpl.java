@@ -529,7 +529,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.BTDownloader#getTorrentContext()
+     */
     public TorrentContext getTorrentContext() {
         return torrentContext;
     }
+
 }

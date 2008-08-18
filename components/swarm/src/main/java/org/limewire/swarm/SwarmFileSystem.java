@@ -55,7 +55,7 @@ public interface SwarmFileSystem {
     void initialize() throws IOException;
 
     /**
-     * Retunrs the complete size of this filesystem. All files contained within.
+     * Returns the complete size of this filesystem. All files contained within.
      * 
      * @return
      */
@@ -69,9 +69,17 @@ public interface SwarmFileSystem {
      */
     SwarmFile getSwarmFile(long position);
 
-    
-    List<SwarmFile> getSwarmFiles(Range range);
-    
+    /**
+     * Returns the SwarmFiles represented by this file system.
+     * @return
+     */
     List<SwarmFile> getSwarmFiles();
+
+    /**
+     * Returns the SwarmFiles which are a part of the given range.
+     * @param range range to get the files from.
+     * @return
+     */
+    List<SwarmFile> getSwarmFiles(Range range);
 
 }

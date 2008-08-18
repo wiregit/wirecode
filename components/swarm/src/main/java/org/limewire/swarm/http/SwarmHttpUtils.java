@@ -3,6 +3,7 @@ package org.limewire.swarm.http;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -11,9 +12,12 @@ import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
+import org.limewire.logging.LogFactory;
 
 public class SwarmHttpUtils {
 
+    private static final Log LOG = LogFactory.getLog(SwarmHttpUtils.class);
+    
     private SwarmHttpUtils() {
     }
 
@@ -25,6 +29,7 @@ public class SwarmHttpUtils {
         try {
             ioctrl.shutdown();
         } catch (IOException ignored) {
+            LOG.warn("Error shutting down IOControl.", ignored);
         }
     }
 

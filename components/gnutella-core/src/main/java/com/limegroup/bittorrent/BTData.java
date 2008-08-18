@@ -34,6 +34,9 @@ public interface BTData {
      */
     public String getAnnounce();
     
+    /**
+     * Returns a list of potential webseed addresses.
+     */
     public URI[] getWebSeeds();
 
     /**
