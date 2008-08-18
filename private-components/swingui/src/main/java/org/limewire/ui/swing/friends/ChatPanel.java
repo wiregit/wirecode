@@ -9,7 +9,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.jdesktop.swingx.JXPanel;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 
 import com.google.inject.Inject;
@@ -20,7 +21,8 @@ import com.google.inject.Singleton;
  *
  */
 @Singleton
-public class ChatPanel extends JXPanel implements Displayable {
+public class ChatPanel extends JPanel implements Displayable {
+    private static final Log LOG = LogFactory.getLog(ChatPanel.class);
     private final ConversationPaneFactory conversationFactory;
     private final JPanel conversationPanel;
     private final FriendsPane friendsPanel;
@@ -47,15 +49,21 @@ public class ChatPanel extends JXPanel implements Displayable {
     
     @EventSubscriber
     public void handleAddConversation(ConversationStartedEvent event) {
+        LOG.debugf("ConversationStartedEvent with friend: {0}", event.getFriend().getName());
         ConversationPane chatPane = chats.get(event.getFriend().getName());
         if (chatPane == null) {
-            chatPane = conversationFactory.create(event.getWriter(), event.getFriend().getName());
+            chatPane = conversationFactory.create(event.getWriter(), "chat-" + event.getFriend().getName());
             chats.put(event.getFriend().getName(), chatPane);
         }
-        conversationPanel.removeAll();
-        conversationPanel.add(chatPane, BorderLayout.CENTER);
-        //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
-        conversationPanel.revalidate();
+        
+        if (conversationPanel.getComponent(0) != chatPane) {
+            conversationPanel.removeAll();
+            conversationPanel.add(chatPane, BorderLayout.CENTER);
+            //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
+            conversationPanel.revalidate();
+        }
+        event.unlock();
+        LOG.debug("unlocked");
     }
 
     @Override

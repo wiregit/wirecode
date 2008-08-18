@@ -11,6 +11,8 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.address.Address;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
@@ -24,6 +26,7 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class RosterListenerImpl implements RegisteringEventListener<RosterEvent> {
+    private static final Log LOG = LogFactory.getLog(RosterListenerImpl.class);
 
     private final BrowseFactory browseFactory;
     //private final StatusPanel.BrowseAction browseAction;
@@ -52,6 +55,7 @@ public class RosterListenerImpl implements RegisteringEventListener<RosterEvent>
     public void userAdded(final User user) {
         user.addPresenceListener(new PresenceListener() {
             public void presenceChanged(final Presence presence) {
+                LOG.debugf("presenceChanged(). Presence jid: {0} presence-type: {1}", presence.getJID(), presence.getMode());
                 if(presence.getType().equals(Presence.Type.available)) {
                     if(presence instanceof LimePresence) {
                         // TODO update UI

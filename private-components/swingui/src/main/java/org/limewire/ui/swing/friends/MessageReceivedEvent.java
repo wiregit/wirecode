@@ -1,8 +1,12 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.AbstractEDTEvent;
 
 public class MessageReceivedEvent extends AbstractEDTEvent {
+    public static final String TOPIC_PREFIX = "chat-";
+    private static final Log LOG = LogFactory.getLog(MessageReceivedEvent.class);
     private final Message message;
 
     public MessageReceivedEvent(Message message) {
@@ -15,6 +19,7 @@ public class MessageReceivedEvent extends AbstractEDTEvent {
     
     @Override
     public void publish() {
-        super.publish(message.getFriend().getName());
+        LOG.debugf("Publishing message: Type: {0} From: {1} Text: {2}", message.getType(), message.getSenderName(), message.getMessageText());
+        super.publish(TOPIC_PREFIX + message.getFriend().getName());
     }
 }

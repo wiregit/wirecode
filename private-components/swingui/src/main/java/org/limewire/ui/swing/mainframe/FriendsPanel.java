@@ -3,10 +3,10 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Panel;
 import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
@@ -28,14 +28,18 @@ import com.google.inject.Singleton;
 public class FriendsPanel extends JXCollapsiblePane {
     private final LoginPanel loginPanel;
     private final ChatPanel chatPanel;
-    private final JPanel mainPanel;
+    //Heavy-weight component so that it can appear above other heavy-weight components
+    private final Panel mainPanel;
     
     @Inject
     public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel) {
         super(Direction.UP, new BorderLayout());
         this.chatPanel = chatPanel;
         this.loginPanel = loginPanel;
-        this.mainPanel = new JPanel();
+        this.mainPanel = new Panel();
+        
+        mainPanel.setVisible(false);
+        mainPanel.setBackground(getBackground());
 
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
         mainPanel.add(loginPanel);
@@ -52,6 +56,7 @@ public class FriendsPanel extends JXCollapsiblePane {
         }
         // toggle
         setCollapsed(!isCollapsed());
+        mainPanel.setVisible(!isCollapsed());
         if (!isCollapsed()) {
             ((Displayable)mainPanel.getComponent(0)).handleDisplay();
         }

@@ -23,6 +23,8 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.jdesktop.swingx.painter.CapsulePainter.Portion;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -35,6 +37,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * 
  */
 public class ConversationPane extends JPanel {
+    private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private ArrayList<Message> messages = new ArrayList<Message>();
     private JEditorPane editor;
@@ -77,6 +80,7 @@ public class ConversationPane extends JPanel {
     
     @RuntimeTopicEventSubscriber
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
+        LOG.debugf("Message: from {0} text: {1}", event.getMessage().getSenderName(), event.getMessage().getMessageText());
         handleMessage(event.getMessage());
     }
     

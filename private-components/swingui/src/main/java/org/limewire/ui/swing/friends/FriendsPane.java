@@ -23,6 +23,7 @@ import javax.swing.border.Border;
 import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.bushe.swing.event.annotation.EventTopicPatternSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.logging.Log;
@@ -79,7 +80,7 @@ public class FriendsPane extends JPanel {
     @EventSubscriber
     public void handlePresenceUpdate(PresenceUpdateEvent event) {
         LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
-        Presence presence = event.getPresence();
+        final Presence presence = event.getPresence();
         FriendImpl friend = idToFriendMap.get(presence.getJID());
         switch(presence.getType()) {
             case available:
@@ -87,8 +88,12 @@ public class FriendsPane extends JPanel {
                     final FriendImpl newFriend = new FriendImpl(event.getUser(), presence);
                     presence.setIncomingChatListener(new IncomingChatListener() {
                         public MessageReader incomingChat(MessageWriter writer) {
+                            LOG.debugf("incomingChat started from: {0}", presence.getJID());
                             MessageWriter writerWrapper = new MessageWriterImpl(myID, newFriend, writer);
-                            new ConversationStartedEvent(newFriend, writerWrapper).publish();
+                            ConversationStartedEvent event = new ConversationStartedEvent(newFriend, writerWrapper);
+                            event.publish();
+                            //Hang out until a responder has processed this event
+                            event.await();
                             return new MessageReaderImpl(newFriend);
                         }
                     });
@@ -107,9 +112,9 @@ public class FriendsPane extends JPanel {
         }
     }
     
-    @EventSubscriber
-    public void handleMessageReceived(MessageReceivedEvent event) {
-        //TODO
+    @EventTopicPatternSubscriber(topicPattern=MessageReceivedEvent.TOPIC_PREFIX + ".*")
+    public void handleMessageReceived(String topic, MessageReceivedEvent event) {
+        LOG.debugf("Message: from {0} text: {1}", event.getMessage().getSenderName(), event.getMessage().getMessageText());
     }
     
     public void setLoggedInID(String id) {
