@@ -111,6 +111,11 @@ public interface SwarmCoordinator {
      * be notified once all ranges are verified.
      */
     void addListener(SwarmCoordinatorListener swarmListener);
+    
+    /**
+     * Removes a listener from this swarm coordinator.
+     */
+    void removeListener(SwarmCoordinatorListener swarmListener);
 
     /**
      * Shuts down any resources opened by this coordinator.

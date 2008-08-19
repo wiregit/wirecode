@@ -27,5 +27,7 @@ public interface SwarmSource {
     void finished(SwarmSourceHandler swarmSourceHandler);
     
     void addListener(SwarmSourceListener listener);
+    
+    void removeListener(SwarmSourceListener listener);
 
 }

@@ -51,4 +51,8 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
         listeners.add(listener);
     }
 
+    public void removeListener(SwarmSourceListener listener) {
+        listeners.remove(listener);
+    }
+
 }

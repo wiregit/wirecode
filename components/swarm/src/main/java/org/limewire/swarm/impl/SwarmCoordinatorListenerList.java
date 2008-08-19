@@ -9,8 +9,6 @@ import org.limewire.swarm.SwarmFileSystem;
 
 /**
  * Wrapper class to help fire various events to the SwarmCoordinatorListeners
- * 
- * 
  */
 public class SwarmCoordinatorListenerList {
 
@@ -32,7 +30,6 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the downloadCompleted event to the attached listeners.
-     * @param swarmFilesystem
      */
     public void downloadCompleted(SwarmFileSystem swarmFilesystem) {
         for (SwarmCoordinatorListener listener : listeners) {
@@ -42,7 +39,6 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the blockLeased event to the attached Listeners.
-     * @param block
      */
     public void blockLeased(Range block) {
         for (SwarmCoordinatorListener listener : listeners) {
@@ -52,7 +48,6 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the blockUnleased event to the attached Listeners.
-     * @param block
      */
     public void blockUnleased(Range block) {
         for (SwarmCoordinatorListener listener : listeners) {
@@ -62,7 +57,6 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the blockPending event to the attached Listeners.
-     * @param block
      */
     public void blockPending(Range block) {
         for (SwarmCoordinatorListener listener : listeners) {
@@ -72,7 +66,6 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the blockUnpending event to the attached Listeners.
-     * @param block
      */
     public void blockUnpending(Range block) {
         for (SwarmCoordinatorListener listener : listeners) {
@@ -82,7 +75,6 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the blockWritten event to the attached Listeners.
-     * @param block
      */
     public void blockWritten(Range block) {
         for (SwarmCoordinatorListener listener : listeners) {
@@ -92,7 +84,6 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the blockVerificationFailed event to the attached Listeners.
-     * @param block
      */
     public void blockVerificationFailed(Range failedRange) {
         for (SwarmCoordinatorListener listener : listeners) {
@@ -102,19 +93,25 @@ public class SwarmCoordinatorListenerList {
 
     /**
      * Fires the blockVerified event to the attached Listeners.
-     * @param block
      */
     public void blockVerified(Range block) {
         for (SwarmCoordinatorListener listener : listeners) {
             listener.blockVerified(swarmCoordinator, block);
         }
     }
-    
+
     /**
-     * Added listener to the list of listeners listening to events on the swarm Coordinator
-     * @param swarmListener
+     * Added listener to the list of listeners listening to events on the swarm
+     * Coordinator
      */
     public void add(SwarmCoordinatorListener swarmListener) {
         listeners.add(swarmListener);
+    }
+
+    /**
+     * Removes listener from this list.
+     */
+    public void remove(SwarmCoordinatorListener swarmListener) {
+        listeners.remove(swarmListener);
     }
 }

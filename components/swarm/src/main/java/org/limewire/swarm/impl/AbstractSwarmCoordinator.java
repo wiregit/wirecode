@@ -17,17 +17,29 @@ public abstract class AbstractSwarmCoordinator implements SwarmCoordinator {
         listeners = new SwarmCoordinatorListenerList(this);
     }
 
-    /**
-     * Adds a Listener to this Coordinator.
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.limewire.swarm.SwarmCoordinator#addListener(org.limewire.swarm.
+     * SwarmCoordinatorListener)
      */
     public void addListener(SwarmCoordinatorListener swarmListener) {
         listeners.add(swarmListener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.limewire.swarm.SwarmCoordinator#removeListener(org.limewire.swarm
+     * .SwarmCoordinatorListener)
+     */
+    public void removeListener(SwarmCoordinatorListener swarmListener) {
+       listeners.remove(swarmListener);
+    }
+
     /**
      * Returns the listeners for this coordinator.
-     * 
-     * @return
      */
     protected SwarmCoordinatorListenerList listeners() {
         return listeners;
