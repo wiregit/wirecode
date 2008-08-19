@@ -4,10 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-import junit.framework.Assert;
-
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.http.util.FileServer;
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -310,7 +309,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
     }
 
     private BTDownloaderImpl createBTDownloader(File torrentFile) throws IOException {
-        Assert.assertTrue(torrentFile.exists());
+        AssertComparisons.assertTrue(torrentFile.exists());
         final BTMetaInfo metaInfo = BTSwarmCoordinatorTest.createMetaInfo(torrentFile);
         Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(
                 ActivityCallbackAdapter.class));
@@ -327,7 +326,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
         int index = 0;
         while (!downloader.isCompleted()) {
             if (index++ > maxIterations) {
-                Assert.fail("Failure downloading the file. Taking too long.");
+                AssertComparisons.fail("Failure downloading the file. Taking too long.");
             }
             Thread.sleep(1000);
         }
@@ -348,9 +347,9 @@ public class BTDownloaderImplTest extends LimeTestCase {
             NoSuchAlgorithmException, IOException {
         long sleepTime = (long) ((fileSize * 0.0001) + 3000);
         Thread.sleep(sleepTime);
-        Assert.assertTrue(file.exists());
-        Assert.assertEquals(fileSize, file.length());
+        AssertComparisons.assertTrue(file.exists());
+        AssertComparisons.assertEquals(fileSize, file.length());
         String testmd5 = FileUtils.getMD5(file);
-        Assert.assertEquals(md5, testmd5);
+        AssertComparisons.assertEquals(md5, testmd5);
     }
 }
