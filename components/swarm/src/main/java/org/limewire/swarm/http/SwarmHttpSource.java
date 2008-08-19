@@ -29,7 +29,6 @@ public class SwarmHttpSource extends AbstractSwarmSource {
         this.availableRanges.add(range);
         addListener(new ReconnectingSwarmSourceListener());
         addListener(new LoggingSwarmSourceListener());
-        //addListener(new EchoSwarmSourceListener());
         id = uri.toString() + "-" + range.toString();
     }
 
@@ -37,10 +36,18 @@ public class SwarmHttpSource extends AbstractSwarmSource {
         this(uri, Range.createRange(0, fileSize - 1));
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSource#getAddress()
+     */
     public SocketAddress getAddress() {
         return socketAddress;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSource#getPath()
+     */
     public String getPath() {
         return path;
     }
@@ -51,10 +58,18 @@ public class SwarmHttpSource extends AbstractSwarmSource {
                 + System.identityHashCode(this);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSource#getAvailableRanges()
+     */
     public IntervalSet getAvailableRanges() {
         return availableRanges;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSource#getType()
+     */
     public SwarmSourceType getType() {
         return SwarmSourceType.HTTP;
     }

@@ -52,13 +52,20 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
         this.maxBufferSize = maxBufferSize;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmWriteJob#cancel()
+     */
     public void cancel() {
         // nothing to cancel, we will be relying on the torrent disk manager to
         // do the actual writing
         // This job will just be used to aggregate the data we need
-
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmWriteJob#write(org.limewire.swarm.SwarmContent)
+     */
     public long write(SwarmContent content) throws IOException {
         synchronized (writeLock) {
 
