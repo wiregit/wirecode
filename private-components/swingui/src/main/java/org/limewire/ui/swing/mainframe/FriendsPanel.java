@@ -7,6 +7,7 @@ import java.awt.Panel;
 import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
@@ -41,7 +42,9 @@ public class FriendsPanel extends JXCollapsiblePane {
         mainPanel.setVisible(false);
         mainPanel.setBackground(getBackground());
 
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        Border lineBorder = BorderFactory.createLineBorder(Color.BLACK);
+        chatPanel.setBorder(lineBorder);
+        loginPanel.setBorder(lineBorder);
         mainPanel.add(loginPanel);
         add(mainPanel);
         setCollapsed(true);
