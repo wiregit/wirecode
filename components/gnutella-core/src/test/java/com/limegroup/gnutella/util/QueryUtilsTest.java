@@ -121,7 +121,7 @@ public class QueryUtilsTest extends BaseTestCase {
         valid.add("pg");
         // everything behind the last dot is removed by rip extension
         valid.add("3");
-        assertEquals(valid, QueryUtils.extractKeywords("11 test pg-13 3.1415947", true));
+        assertEquals(valid, QueryUtils.extractKeywords(QueryUtils.ripExtension("11 test pg-13 3.1415947"), true));
     }
     
 
