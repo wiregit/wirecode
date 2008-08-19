@@ -12,7 +12,9 @@ import org.limewire.swarm.impl.AbstractSwarmSource;
 import org.limewire.swarm.impl.LoggingSwarmSourceListener;
 import org.limewire.swarm.impl.ReconnectingSwarmSourceListener;
 
-
+/**
+ * Representation of a swarm source that can be downloaded from over http.
+ */
 public class SwarmHttpSource extends AbstractSwarmSource {
 
     private final SocketAddress socketAddress;

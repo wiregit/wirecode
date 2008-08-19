@@ -6,6 +6,11 @@ import java.nio.ByteBuffer;
 import org.apache.http.nio.ContentDecoder;
 import org.limewire.swarm.SwarmContent;
 
+/**
+ * Wrapper for the httpclient ContentDecoder. Converts to SwarmContent
+ * interface.
+ * 
+ */
 public class SwarmHttpContentImpl implements SwarmContent {
     private final ContentDecoder contentDecoder;
 
