@@ -4,9 +4,11 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.SwingWorker;
+
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
 import org.limewire.core.api.library.FileItem;
@@ -18,25 +20,29 @@ import org.limewire.ui.swing.util.ImageScaler;
  * put into the property field of that FileItem so thumbnails are only 
  * created once. 
  */
-public class ImageLoader extends SwingWorker<ImageIcon, Object> {
+public class ImageLoader extends SwingWorker<Icon, Object> {
     
     private final JList list;
     private final FileItem fileItem;
+    private final Icon errorIcon;
     
-    public ImageLoader(JList list, FileItem fileItem) {
+    public ImageLoader(JList list, FileItem fileItem, Icon errorIcon) {
         this.list = list;
         this.fileItem = fileItem;
+        this.errorIcon = errorIcon;
     }
 
     @Override
-    protected ImageIcon doInBackground() throws Exception {
+    protected Icon doInBackground() throws Exception {
         BufferedImage image = null;
         try { 
             image = GraphicsUtilities.loadCompatibleImage(fileItem.getFile().toURI().toURL());
         } catch (MalformedURLException e) {
-            return null;
+            fileItem.setProperty("Image", errorIcon);
+            return errorIcon;
         } catch (Exception e) {
-            return null;
+            fileItem.setProperty("Image", errorIcon);
+            return errorIcon;
         } 
         
         // if the image is larger than our viewport, resize the image before saving
@@ -45,8 +51,10 @@ public class ImageLoader extends SwingWorker<ImageIcon, Object> {
             image = ImageScaler.getRatioPreservedScaledImage(image, ImageFileItem.WIDTH, 
                   ImageFileItem.HEIGHT, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false);
         } 
-        if(image == null)
-            return null;
+        if(image == null) {
+            fileItem.setProperty("Image", errorIcon);
+            return errorIcon;
+        }
         ImageIcon imageIcon = new ImageIcon(image);
         fileItem.setProperty("Image", imageIcon);
         return imageIcon;
@@ -55,7 +63,7 @@ public class ImageLoader extends SwingWorker<ImageIcon, Object> {
     @Override
     protected void done() {
         try {
-            list.repaint();
+            list.revalidate();
         } catch(Exception ignore) {
             
         }

@@ -129,6 +129,11 @@
       		<groupId>org.limewire</groupId>
       		<artifactId>miglayout</artifactId>
       		<version>1.0</version>
-        </dependency>		    	
+        </dependency>		 
+       	<dependency>
+			<groupId>org.limewire</groupId>
+			<artifactId>jxlayer</artifactId>
+			<version>3.0</version>
+		</dependency>   	
 	</dependencies>
 </project>

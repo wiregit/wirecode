@@ -1,22 +1,32 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.dnd.DropTarget;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
+import org.jdesktop.jxlayer.JXLayer;
+import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageList;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
+import org.limewire.ui.swing.sharing.components.UnshareButton;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -30,32 +40,37 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
 
     private Icon panelIcon = null;
     
-    @Resource
-    private Icon cancelIcon;
-    
     private final ImageList imageList;
     
-    private final JButton unShareButton;
+    private final UnshareButton unShareButton;
     
-    public SharingFancyListPanel(String name, EventList<FileItem> eventList, DropTarget dropTarget) {
-        GuiUtils.assignResources(this); 
-        
+    private final UnshareButton layerButton;
+    
+    public SharingFancyListPanel(String name, EventList<FileItem> eventList, DropTarget dropTarget, FileList fileList) {       
         setBackground(Color.WHITE);
         
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
         JLabel unShareButtonLabel = new JLabel("Unshare All");
-        unShareButton = new JButton(cancelIcon);
+        unShareButton = new UnshareButton(null);
         unShareButton.setEnabled(false);
     
         // black seperator
         Line line = new Line(Color.BLACK, 3);
         
+        final JPopupMenu menu = new JPopupMenu();
+        menu.add(new JMenuItem("Item"));
+        
         imageList = new ImageList(eventList);
         imageList.setDropTarget(dropTarget);  
         
+        layerButton = new UnshareButton(new SharingRemoveListAction(fileList,imageList));
+        layerButton.setSize(60, 30);
+        layerButton.setVisible(false);
+        new MouseReaction(imageList, layerButton);
+        
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remainign space
-        setLayout(new MigLayout("insets 10 20 0 10",     //layout contraints
+        setLayout(new MigLayout("insets 10 25 0 10",     //layout contraints
                 "[] [] ",                       // column constraints
                 "[::30] [] [grow]" ));    // row contraints
         
@@ -66,8 +81,11 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");
         
+        JXLayer<JComponent> l = new JXLayer<JComponent>(new JScrollPane(imageList), new  AbstractLayerUI<JComponent>());
+        l.getGlassPane().setLayout(null);
+        l.getGlassPane().add(layerButton);
         //third row
-        add(new JScrollPane(imageList), "span 2, grow");
+        add(l, "span 2, grow");
 
         eventList.addListEventListener(this);
     }
@@ -89,6 +107,62 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
                 }
             });
         }
+    }
+    
+    public class MouseReaction implements MouseListener, MouseMotionListener {
+
+        private ImageList imageList;
+        private JButton ushareButton;
+        
+        public MouseReaction(ImageList imageList, JButton unShareButton) {
+            this.imageList = imageList;
+            this.ushareButton = unShareButton;
+            
+            imageList.addMouseListener(this);
+            imageList.addMouseMotionListener(this);
+        }
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+//            imageList.clearSelection();
+//            ushareButton.setVisible(false);
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            ushareButton.setVisible(true);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) { 
+            if(!ushareButton.getBounds().contains(e.getPoint())) {
+                imageList.clearSelection();
+                ushareButton.setVisible(false);
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            int index = imageList.locationToIndex(e.getPoint());
+            imageList.setSelectedIndex(index);
+            
+            Rectangle bounds = imageList.getCellBounds(index, index);
+            ushareButton.setLocation(bounds.x + bounds.width - ushareButton.getWidth()-25, 
+                   bounds.y + 25);
+        }
+        
     }
 
 }

@@ -52,11 +52,11 @@ public class SharingFancyPanel extends JPanel {
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.DOCUMENT)));
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.OTHER)));
         
-        musicTable = new SharingFancyTablePanel(music, list.get(0), new SharingFancyAudioTableFormat(), drop.getDropTarget());
-        videoTable = new SharingFancyTablePanel(video, list.get(1), new SharingFancyDefaultTableFormat(),false, drop.getDropTarget());
-        imageList = new SharingFancyListPanel(image, list.get(2), drop.getDropTarget());
-        documentTable = new SharingFancyTablePanel(doc, list.get(3), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget());
-        otherTable = new SharingFancyTablePanel(other, list.get(4), new SharingFancyDefaultTableFormat(), drop.getDropTarget());
+        musicTable = new SharingFancyTablePanel(music, list.get(0), new SharingFancyAudioTableFormat(), drop.getDropTarget(), originalList);
+        videoTable = new SharingFancyTablePanel(video, list.get(1), new SharingFancyDefaultTableFormat(),false, drop.getDropTarget(), originalList);
+        imageList = new SharingFancyListPanel(image, list.get(2), drop.getDropTarget(), originalList);
+        documentTable = new SharingFancyTablePanel(doc, list.get(3), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget(), originalList);
+        otherTable = new SharingFancyTablePanel(other, list.get(4), new SharingFancyDefaultTableFormat(), drop.getDropTarget(), originalList);
         
         
         SharingShortcutPanel shortcuts = new SharingShortcutPanel(

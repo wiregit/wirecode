@@ -97,7 +97,7 @@ public class BaseResultPanel extends JXPanel {
         resultsList.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                int row = resultsList.locationToIndex(e.getPoint());
+//                int row = resultsList.locationToIndex(e.getPoint());
                 //resultsList.setSelectedIndex(row);
             }
         });

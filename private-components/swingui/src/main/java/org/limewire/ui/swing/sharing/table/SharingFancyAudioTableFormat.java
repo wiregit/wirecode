@@ -9,7 +9,7 @@ import ca.odell.glazedlists.gui.TableFormat;
  */
 public class SharingFancyAudioTableFormat implements TableFormat<FileItem> {
 
-    public static final String[] columnLabels = new String[] {"Artist", "Song", "Album"};
+    public static final String[] columnLabels = new String[] {"Artist", "Song", "Album",""};
     
     @Override
     public int getColumnCount() {
@@ -29,6 +29,7 @@ public class SharingFancyAudioTableFormat implements TableFormat<FileItem> {
         if(column == 0) return baseObject.getName();
         else if(column == 1) return baseObject.getSize();
         else if(column == 2) return baseObject.getCreationTime();
+        else if(column == 3) return baseObject;
         
         throw new IllegalStateException("Unknown column:" + column);
     }

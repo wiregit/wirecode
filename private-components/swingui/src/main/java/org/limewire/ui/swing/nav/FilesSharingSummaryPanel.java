@@ -30,9 +30,12 @@ import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.sharing.BuddySharePanel;
+import org.limewire.ui.swing.sharing.GenericSharingPanel;
 import org.limewire.ui.swing.sharing.GnutellaSharePanel;
 import org.limewire.ui.swing.sharing.IndividualSharePanel;
 import org.limewire.ui.swing.sharing.ShareDropTarget;
+import org.limewire.ui.swing.sharing.SharingBuddyEmptyPanel;
+import org.limewire.ui.swing.sharing.SharingEmptyPanel;
 import org.limewire.ui.swing.sharing.SharingNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -177,7 +180,7 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     }
         
     //TODO: call this from guice?
-    public void addDefaultNavigableItems(GnutellaSharePanel gnutellaShare, BuddySharePanel buddyShare, 
+    public void addDefaultNavigableItems(GenericSharingPanel gnutellaShare, BuddySharePanel buddyShare, 
             IndividualSharePanel individualShare) {
         NavItem item = addSharingItem(GnutellaSharePanel.NAME, gnutellaShare);
         gnutellaButton.addActionListener(new SharingButtonAction(item, gnutellaButton));
@@ -236,8 +239,10 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             owner.removePropertyChangeListener(this);
-            addDefaultNavigableItems(new GnutellaSharePanel(libraryManager.getGnutellaList()), 
-                    new BuddySharePanel(libraryManager.getAllBuddyList()), 
+            addDefaultNavigableItems(new GnutellaSharePanel(libraryManager.getGnutellaList(), 
+                    new SharingEmptyPanel("LimeWire Network", null)), 
+                    new BuddySharePanel(libraryManager.getAllBuddyList(),
+                            new SharingBuddyEmptyPanel("All Friends", null)), 
                             new IndividualSharePanel());
         }
     }

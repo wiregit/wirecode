@@ -45,7 +45,7 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
     /**
      * Height for the rows
      */
-    private int height;
+    protected int height;
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
@@ -65,6 +65,9 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
     public void addActions(List<Action> actions) {
         for(Action action : actions) {
             JButton button = new JButton(action);
+            button.setBorder(null);
+            button.setFocusable(false);
+            button.setBorderPainted(false);
             
             if(button.getIcon() != null)
                 height = Math.max(height, button.getHeight());

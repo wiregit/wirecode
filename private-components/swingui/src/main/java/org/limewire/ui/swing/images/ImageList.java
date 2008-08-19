@@ -27,6 +27,9 @@ public class ImageList extends JXList {
     @Resource
     private Icon loadIcon;
    
+    @Resource
+    private Icon errorIcon;
+    
     public ImageList(EventList<FileItem> eventList) { 
         super(new EventListModel<FileItem>(eventList)); 
 
@@ -37,10 +40,13 @@ public class ImageList extends JXList {
         //this must be set to negative 1 to get horizontal line wrap
         setVisibleRowCount(-1);
         setCellRenderer(new ImageCellRenderer());
+        setFixedCellHeight(190);
+        setFixedCellWidth(190);
+        setRolloverEnabled(true);
     }
     
     private class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
-
+        
         public ImageCellRenderer() {
             super(4);
             setOpaque(true);
@@ -51,14 +57,15 @@ public class ImageList extends JXList {
         public Component getListCellRendererComponent(JList list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
 
-             FileItem item = (FileItem)value;
-             ImageIcon imageIcon = (ImageIcon) item.getProperty("Image");
-             if(imageIcon != null) {
-                 setIcon(imageIcon);
-             } else {
-                 setIcon(loadIcon);
-                 (new ImageLoader(list, item)).execute();
-             }
+            FileItem item = (FileItem)value;
+            ImageIcon imageIcon = (ImageIcon) item.getProperty("Image");
+            if(imageIcon != null) {
+                setIcon(imageIcon);
+            } else {
+                setIcon(loadIcon);
+                item.setProperty("Image", loadIcon);
+                (new ImageLoader(list, item, errorIcon)).execute();
+            }
             
             this.setBackground(isSelected ? Color.BLUE : Color.WHITE);
             this.setForeground(isSelected ? Color.WHITE : Color.WHITE );

@@ -7,11 +7,12 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.table.StripedJXTable;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingTable extends StripedJXTable {
 
-    public SharingTable(EventList<FileItem> sharedItems) {
-        super(new SharingTableModel(sharedItems));
+    public SharingTable(EventList<FileItem> sharedItems, TableFormat<FileItem> tableFormat) {
+        super(new SharingTableModel(sharedItems, tableFormat));
         
         setColumnControlVisible(true);
         setShowHorizontalLines(false);

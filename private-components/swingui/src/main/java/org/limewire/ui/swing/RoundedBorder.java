@@ -1,10 +1,10 @@
 package org.limewire.ui.swing;
 
-import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+
 import javax.swing.border.AbstractBorder;
 
 /**

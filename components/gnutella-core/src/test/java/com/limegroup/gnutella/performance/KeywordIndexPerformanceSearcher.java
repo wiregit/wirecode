@@ -1,34 +1,33 @@
 package com.limegroup.gnutella.performance;
 
-import java.io.File;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.List;
-import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.SharedFilesKeywordIndex;
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.FileList;
-import com.limegroup.gnutella.FileEventListener;
-import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.google.inject.Injector;
-
-import org.limewire.core.settings.SharingSettings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.SharingSettings;
+
+import com.google.inject.Injector;
+import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.FileEventListener;
+import com.limegroup.gnutella.FileList;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.SharedFilesKeywordIndex;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * Class to measure latency searching on shared files
