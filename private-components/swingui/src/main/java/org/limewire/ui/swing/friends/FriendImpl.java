@@ -4,18 +4,20 @@ import org.jdesktop.beans.AbstractBean;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
 public class FriendImpl extends AbstractBean implements Friend {
+    private boolean chatting;
     private final User user;
     private final Presence presence;
     private String status;
     private Mode mode;
+    private long chatStartTime;
     
     FriendImpl(User user, Presence presence) {
         this.user = user;
@@ -26,10 +28,11 @@ public class FriendImpl extends AbstractBean implements Friend {
     
     @Override
     public Mode getMode() {
-        return mode;
+        //This is a hack because Mode.chat is never set by gtalk.  :-(
+        return isChatting() ? Mode.chat : mode;
     }
     
-    public void setMode(Mode mode) {
+    void setMode(Mode mode) {
         Mode oldMode = getMode();
         this.mode = mode;
         firePropertyChange("mode", oldMode, mode);
@@ -49,14 +52,43 @@ public class FriendImpl extends AbstractBean implements Friend {
         return status;
     }
     
-    public void setStatus(String status) {
+    void setStatus(String status) {
         String oldStatus = getStatus();
         this.status = status;
         firePropertyChange("status", oldStatus, status);
     }
 
     @Override
+    public boolean isChatting() {
+        return chatting;
+    }
+
+    void setChatting(boolean chatting) {
+        boolean oldChatting = isChatting();
+        this.chatting = chatting;
+        firePropertyChange("chatting", oldChatting, chatting);
+    }
+
+    @Override
     public MessageWriter createChat(MessageReader reader) {
         return presence.createChat(reader);
+    }
+
+    @Override
+    public void startChat() {
+        if (isChatting() == false) {
+            chatStartTime = System.currentTimeMillis();
+            setChatting(true);
+        }
+    }
+
+    @Override
+    public void stopChat() {
+        setChatting(false);
+    }
+
+    @Override
+    public long getChatStartTime() {
+        return chatStartTime;
     }
 }

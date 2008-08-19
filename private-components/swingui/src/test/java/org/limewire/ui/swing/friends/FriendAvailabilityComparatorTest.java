@@ -19,8 +19,10 @@ public class FriendAvailabilityComparatorTest extends TestCase {
         friends = new ArrayList<Friend>();
     }
     
-    private void populateFriends(String name, Mode mode) {
-        friends.add(new MockFriend(name, "foo", mode));
+    private MockFriend populateFriends(String name, Mode mode) {
+        MockFriend friend = new MockFriend(name, "foo", mode);
+        friends.add(friend);
+        return friend;
     }
 
     public void testModeAlphabeticalSorting() {
@@ -42,6 +44,10 @@ public class FriendAvailabilityComparatorTest extends TestCase {
                                         "a_xa", "b_xa",
                                         "a_dnd", "b_dnd"};
         
+        assertOrder(sorted);
+    }
+
+    private void assertOrder(String[] sorted) {
         for(int i = 0; i < sorted.length; i++) {
             assertEquals(sorted[i], friends.get(i).getName());
         }
@@ -55,19 +61,16 @@ public class FriendAvailabilityComparatorTest extends TestCase {
         
         Collections.sort(friends, new FriendAvailabilityComparator());
         
-        String[] sorted = new String[] {"a_chat", null, "a_xa", null};
-        
-        for(int i = 0; i < sorted.length; i++) {
-            assertEquals(sorted[i], friends.get(i).getName());
-        }
+        assertOrder(new String[] {"a_chat", null, "a_xa", null});
     }
     
-//    public void testOrderSortingForChatStatus() {
-//        friends.add(new MockFriend("b_chat", "foo", Mode.chat));
-//        friends.add(new MockFriend("a_chat", "foo", Mode.chat));
-//        
-//        Collections.sort(friends, new FriendAvailabilityComparator());
-//
-//        
-//    }
+    public void testOrderSortingForChatStatus() {
+        populateFriends("b_chat", Mode.chat).chatStartTime = 3l;
+        populateFriends("a_chat", Mode.chat).chatStartTime = 1l;
+        populateFriends("h_chat", Mode.chat).chatStartTime = 2l;
+        
+        Collections.sort(friends, new FriendAvailabilityComparator());
+
+        assertOrder(new String[] {"a_chat", "h_chat", "b_chat"});
+    }
 }

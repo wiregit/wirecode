@@ -46,4 +46,26 @@ class MockFriend implements Friend {
         this.reader = reader;
         return writer;
     }
+
+    long chatStartTime;
+    @Override
+    public long getChatStartTime() {
+        return chatStartTime;
+    }
+
+    boolean chatting;
+    @Override
+    public boolean isChatting() {
+        return chatting || chatStartTime > 0l;
+    }
+
+    @Override
+    public void startChat() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void stopChat() {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -56,7 +56,7 @@ public class FriendsPane extends JPanel {
     
     private EventList<Friend> friends;
     private String myID;
-    private final WeakHashMap<String, FriendImpl> idToFriendMap;    
+    private final WeakHashMap<String, FriendImpl> idToFriendMap;
 
     @Inject
     public FriendsPane(IconLibrary icons) {
@@ -133,6 +133,7 @@ public class FriendsPane extends JPanel {
         public Component getListCellRendererComponent(JList list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
             JXPanel cell = new JXPanel(new MigLayout("insets 0 2 0 1", "3[]6[]push[]", "1[]1"));
+            
             Friend friend = (Friend) value;
             cell.add(new JLabel(getIcon(friend, icons)));
             
@@ -142,8 +143,12 @@ public class FriendsPane extends JPanel {
             
             friendName.setText(friend.getName());
             friendName.setFont(list.getFont());
-
-            cell.add(new JLabel(icons.getEndChat()));
+            
+            //FIXME:  This isn't exactly the right behavior. end chat icon should only 
+            //appear on hover during a chat.
+            if (friend.isChatting() && cellHasFocus) {
+                cell.add(new JLabel(icons.getEndChat()));
+            }
             
             cell.setComponentOrientation(list.getComponentOrientation());
             
@@ -171,7 +176,7 @@ public class FriendsPane extends JPanel {
     }
 
     private class LaunchChatListener extends MouseAdapter {
-
+        
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {

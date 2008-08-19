@@ -16,6 +16,14 @@ public interface Friend {
 
     Mode getMode();
     
+    boolean isChatting();
+    
+    void startChat();
+    
+    void stopChat();
+    
+    long getChatStartTime();
+    
     MessageWriter createChat(MessageReader reader);
 
     void addPropertyChangeListener(PropertyChangeListener listener);

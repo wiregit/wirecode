@@ -17,6 +17,16 @@ class FriendAvailabilityComparator implements Comparator<Friend> {
     
     @Override
     public int compare(Friend a, Friend b) {
+        boolean a_chatting = a.isChatting();
+        boolean b_chatting = b.isChatting();
+        if(a_chatting && b_chatting == false) {
+            return -1;
+        } else if (b_chatting && a_chatting == false) {
+            return 1;
+        } else if (a_chatting && b_chatting) {
+            return new Long(a.getChatStartTime()).compareTo(new Long(b.getChatStartTime()));
+        }
+        
         int a_mode_index = order(a);
         int b_mode_index = order(b);
         if (a_mode_index > b_mode_index) {
