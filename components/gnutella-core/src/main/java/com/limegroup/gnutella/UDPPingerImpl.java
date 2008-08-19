@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -237,8 +238,18 @@ public class UDPPingerImpl implements UDPPinger {
          */
         void validateHosts() {
             for(IpPort host : hosts) {
-                if(!NetworkUtils.isValidIpPort(host))
-                    throw new IllegalArgumentException("invalid host: " + host);
+                InetAddress address = host.getInetAddress();
+                // null check should not be necessary, just here in bugfix branch
+                if (address != null) {
+                    // avoids address resolution for validity check, see issue LWC-1636
+                    if (!NetworkUtils.isValidAddressAndPort(address.getAddress(), host.getPort())) {
+                        throw new IllegalArgumentException("invalid host: " + host);
+                    }
+                } else {
+                    if (!NetworkUtils.isValidIpPort(host)) {
+                        throw new IllegalArgumentException("invalid host: " + host);
+                    }
+                }
             }
         }
     }
