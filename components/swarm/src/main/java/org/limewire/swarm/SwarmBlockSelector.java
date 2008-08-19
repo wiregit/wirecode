@@ -13,18 +13,18 @@ public interface SwarmBlockSelector {
      * For efficiency reasons attempts will be made to align the start and end of intervals
      * to block boundaries.  However, there are no guarantees on alignment.
      * 
-     * @param candidateBytes a representation of the set of 
-     *      bytes that are candidates for downloading.  These are the
-     *      bytes of the file that a given for download from a given server, minus
-     *      the set of bytes that we already have (or have assigned)
-     * @param neededBytes a representation of the set of bytes
+     * @param availableRanges a representation of the set of 
+     *      ranges that are candidates for downloading.  These are the
+     *      ranges of the file that a given for download from a given server, minus
+     *      the set of ranges that we already have (or have assigned)
+     * @param neededRanges a representation of the set of ranges
      *      of the file that have not yet been leased, verified, etc.
-     * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
-     *      be ignored.  The returned Interval will in no case span a blockSize boundary.
+     * @param blockSize the maximum size of the returned Range. Any values less than 1 will
+     *      be ignored.  The returned Range will in no case span a blockSize boundary.
      *      Any values less than 1 will generate IllegalArgumentExceptions.
-     * @return the Interval that should be assigned next, which does not span a blockSize boundary
+     * @return the Range that should be assigned next, which does not span a blockSize boundary
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    Range selectAssignment(IntervalSet availableRanges, IntervalSet neededBytes, long blockSize);
+    Range selectAssignment(IntervalSet availableRanges, IntervalSet neededRanges, long blockSize);
 
 }
