@@ -237,7 +237,7 @@ public class UDPPingerImpl implements UDPPinger {
          */
         void validateHosts() {
             for(IpPort host : hosts) {
-                if(!NetworkUtils.isValidIpPort(host))
+                if(!NetworkUtils.isValidAddressAndPort(host.getInetAddress().getAddress(), host.getPort()))
                     throw new IllegalArgumentException("invalid host: " + host);
             }
         }
