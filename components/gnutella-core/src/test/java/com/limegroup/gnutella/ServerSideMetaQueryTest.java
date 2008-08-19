@@ -70,7 +70,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // now move them to the share dir
         FileUtils.copy(mp3, new File(_sharedDir, "meta image.png"));
         mp3 = 
-        TestUtils.getResourceFile("com/limegroup/gnutella/MediaTypeTest.java");
+        TestUtils.getResourceFile("com/limegroup/gnutella/HostCatcherTest.java"); 
         // now move them to the share dir
         FileUtils.copy(mp3, new File(_sharedDir, "meta program txt.bin"));
     }
