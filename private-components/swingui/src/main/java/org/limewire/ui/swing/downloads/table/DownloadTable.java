@@ -1,8 +1,5 @@
 package org.limewire.ui.swing.downloads.table;
 
-import java.awt.Component;
-import java.awt.Point;
-
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -12,14 +9,12 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import ca.odell.glazedlists.EventList;
 
 public class DownloadTable extends MouseableTable {
-
     
     private DownloadRendererEditor editor;
     
     private DownloadTableModel model;
     
-
-
+//TODO: rename DownloadTable & pull out common base class for this class and SimpleDownloadTable
 	public DownloadTable(EventList<DownloadItem> downloadItems) {		
 		model = new DownloadTableModel(downloadItems);
 		setModel(model);
@@ -35,20 +30,7 @@ public class DownloadTable extends MouseableTable {
 		
 		setRowHeight(renderer.getPreferredSize().height);
 
-        TablePopupHandler popupHandler = new TablePopupHandler() {
-            private int popupRow = -1;
-
-            @Override
-            public boolean isPopupShowing(int row) {
-                return editor.isMenuVisible() && row == popupRow;
-            }
-
-            @Override
-            public void maybeShowPopup(Component component, int x, int y) {
-                editor.showPopupMenu(component, x, y);
-                popupRow = rowAtPoint(new Point(x, y));
-            }
-        };
+        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(downloadItems), this);
 
         setPopupHandler(popupHandler);
 
@@ -66,7 +48,7 @@ public class DownloadTable extends MouseableTable {
     }
 	
 	
-	private DownloadItem getDownloadItem(int row){
+	public DownloadItem getDownloadItem(int row){
 	    return model.getDownloadItem(convertRowIndexToModel(row));
 	}
 

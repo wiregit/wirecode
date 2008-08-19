@@ -170,7 +170,7 @@ public class CategoryDownloadPanel extends JPanel {
 	}
 	
     private class MultiTableSelectionListener implements ListSelectionListener {
-
+//TODO - this isn't quite working properly
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			if (e.getValueIsAdjusting()) // Ignore.

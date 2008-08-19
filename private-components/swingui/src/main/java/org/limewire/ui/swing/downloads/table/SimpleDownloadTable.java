@@ -1,33 +1,61 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EventObject;
+import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.Category;
-import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
-public class SimpleDownloadTable extends MouseableTable {
+public class SimpleDownloadTable extends DownloadTable {
 
     public SimpleDownloadTable(EventList<DownloadItem> downloadItems) {
-        super(new DownloadTableModel(downloadItems));
-        ((DownloadTableModel)getModel()).setTableFormat(new SimpleDownloadTableFormat());
-        GuiUtils.assignResources(this);
+        super(downloadItems);
+        ((DownloadTableModel)getModel()).setTableFormat(new SimpleDownloadTableFormat());      
         setColumnControlVisible(true);
         getColumnModel().getColumn(SimpleDownloadTableFormat.PERCENT).setCellRenderer(new PercentRenderer());
         getColumnModel().getColumn(SimpleDownloadTableFormat.CATEGORY).setCellRenderer(new CategoryRenderer());
+        getColumnModel().getColumn(SimpleDownloadTableFormat.CURRENT_SIZE).setCellRenderer(new SizeRenderer());
+        getColumnModel().getColumn(SimpleDownloadTableFormat.TOTAL_SIZE).setCellRenderer(new SizeRenderer());
+        getColumnModel().getColumn(SimpleDownloadTableFormat.DOWNLOAD_SPEED).setCellRenderer(new SpeedRenderer());
+        getColumnModel().getColumn(SimpleDownloadTableFormat.ACTIONS).setCellRenderer(new ButtonRendererEditor(null));
+        getColumnModel().getColumn(SimpleDownloadTableFormat.ACTIONS).setCellEditor(new ButtonRendererEditor(new DownloadActionHandler(downloadItems)));
+        setShowGrid(true, true);      
+        setRowHeight(new PercentRenderer().getPreferredSize().height);
     }
+    
+    private boolean initialized = false;
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        if (!initialized) {
+            initialized = true;
+            packAll();
+        }
+    }
+    
+    
 
 
     
@@ -112,9 +140,9 @@ public class SimpleDownloadTable extends MouseableTable {
             case PERCENT:
                 return Integer.class;
             case CURRENT_SIZE:
-                return Integer.class;
+                return Long.class;
             case TOTAL_SIZE:
-                return Integer.class;
+                return Long.class;
             case DOWNLOAD_SPEED:
                 return Float.class;
             case ACTIONS:
@@ -127,17 +155,18 @@ public class SimpleDownloadTable extends MouseableTable {
 
     }
     
-    private class PercentRenderer extends JProgressBar implements TableCellRenderer{
-        
+    private class PercentRenderer extends JPanel implements TableCellRenderer{
+        JProgressBar progressBar;
         public PercentRenderer(){
-            super(0, 100);
+            progressBar = new JProgressBar(0, 100);
+            add(progressBar);
         }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
             if(value instanceof Number){
-                setValue(((Number)value).intValue());
+                progressBar.setValue(((Number)value).intValue());
                 return this;
             }
             throw new IllegalArgumentException("Value must be a number: "+ value.getClass());
@@ -145,9 +174,8 @@ public class SimpleDownloadTable extends MouseableTable {
         
     }
     
-    private class CategoryRenderer extends JPanel implements TableCellRenderer {
-//TODO small icons
-        private CategoryIconLabel label = new CategoryIconLabel();
+    private class CategoryRenderer extends JPanel implements TableCellRenderer {        
+        private CategoryIconLabel label = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
         public CategoryRenderer(){
             add(label);
         }
@@ -159,6 +187,136 @@ public class SimpleDownloadTable extends MouseableTable {
                 return this;
             }
             throw new IllegalArgumentException("Value must be a Category: " + value.getClass());
+        }
+        
+    }
+    
+    private class SpeedRenderer extends JLabel implements TableCellRenderer {
+        
+        public SpeedRenderer(){
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            setText(GuiUtils.rate2speed((Float)value));
+            return this;
+        }
+        
+    }
+    
+    
+    private class SizeRenderer extends JLabel implements TableCellRenderer {
+        
+        public SizeRenderer(){
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            setText(GuiUtils.toUnitbytes((Long)value));
+            return this;
+        }
+        
+    }
+    
+    private class ButtonRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
+        private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
+        private DownloadItem editItem;
+        private DownloadActionHandler downloadActionHandler;
+        private DownloadButtonPanel buttonPanel;
+
+        /**
+         * @param downloadActionHandler can be null for renderer since the
+         *        renderer will not receive events.
+         */
+        public ButtonRendererEditor(final DownloadActionHandler downloadActionHandler) {
+            super(new BorderLayout());
+            this.downloadActionHandler = downloadActionHandler;
+            
+            ActionListener listener = downloadActionHandler == null ? null : new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleAction(e);
+                }
+            };
+            
+            buttonPanel = new DownloadButtonPanel(listener);
+            buttonPanel.setOpaque(false);
+            add(buttonPanel);
+        }
+        
+        private void handleAction(ActionEvent e){
+            downloadActionHandler.performAction(e.getActionCommand(), editItem);
+            cancelCellEditing();
+        }
+        
+               
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            buttonPanel.updateButtons(((DownloadItem)value).getState());
+            return this;
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            editItem = (DownloadItem) value;
+            buttonPanel.updateButtons(editItem.getState());
+            return this;
+        }
+        @Override
+        public final void addCellEditorListener(CellEditorListener lis) {
+            synchronized (listeners) {
+                if (!listeners.contains(lis))
+                    listeners.add(lis);
+            }
+        }
+
+        @Override
+        public final void cancelCellEditing() {
+            synchronized (listeners) {
+                for (int i = 0, N = listeners.size(); i < N; i++) {
+                    listeners.get(i).editingCanceled(new ChangeEvent(this));
+                }
+            }
+        }
+
+        @Override
+        public final Object getCellEditorValue() {
+            return null;
+        }
+
+        @Override
+        public boolean isCellEditable(EventObject e) {
+            return true;
+        }
+
+        @Override
+        public final void removeCellEditorListener(CellEditorListener lis) {
+            synchronized (listeners) {
+                if (listeners.contains(lis))
+                    listeners.remove(lis);
+            }
+        }
+
+        @Override
+        public final boolean shouldSelectCell(EventObject e) {
+            return true;
+        }
+
+        @Override
+        public final boolean stopCellEditing() {
+            synchronized (listeners) {
+                for (int i = 0, N = listeners.size(); i < N; i++) {
+                    listeners.get(i).editingStopped(new ChangeEvent(this));
+                }
+            }
+            return true;
         }
         
     }

@@ -8,22 +8,60 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.util.GuiUtils;
 
 public class CategoryIconLabel extends JLabel {
+    
+    public static enum Size{LARGE, SMALL};
 
-    @Resource
+    
     private Icon audioIcon;
-    @Resource
     private Icon imageIcon;
-    @Resource
     private Icon videoIcon;
-    @Resource
     private Icon documentIcon;
-    @Resource
     private Icon programIcon;
-    @Resource
     private Icon otherIcon;
     
-    public CategoryIconLabel(){
+    @Resource
+    private Icon smallAudioIcon;
+    @Resource
+    private Icon smallImageIcon;
+    @Resource
+    private Icon smallVideoIcon;
+    @Resource
+    private Icon smallDocumentIcon;
+    @Resource
+    private Icon smallProgramIcon;
+    @Resource
+    private Icon smallOtherIcon;
+    
+    @Resource
+    private Icon largeAudioIcon;
+    @Resource
+    private Icon largeImageIcon;
+    @Resource
+    private Icon largeVideoIcon;
+    @Resource
+    private Icon largeDocumentIcon;
+    @Resource
+    private Icon largeProgramIcon;
+    @Resource
+    private Icon largeOtherIcon;
+    
+    public CategoryIconLabel(Size size){
         GuiUtils.assignResources(this);
+        if(size == Size.LARGE){
+            audioIcon = largeAudioIcon;
+            imageIcon = largeImageIcon;
+            videoIcon = largeVideoIcon;
+            documentIcon = largeDocumentIcon;
+            programIcon = largeProgramIcon;
+            otherIcon = largeOtherIcon;
+        } else {
+            audioIcon = smallAudioIcon;
+            imageIcon = smallImageIcon;
+            videoIcon = smallVideoIcon;
+            documentIcon = smallDocumentIcon;
+            programIcon = smallProgramIcon;
+            otherIcon = smallOtherIcon;
+        }
     }
     
     public void setIcon(DownloadItem.Category category){
