@@ -16,9 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.VerticalLayout;
@@ -127,7 +124,7 @@ public class CategoryDownloadPanel extends JPanel {
 		
 		final DownloadTable table = new FancyDownloadTable(filterList);
 		tables.add(table);
-		table.getSelectionModel().addListSelectionListener(new MultiTableSelectionListener());
+		table.addMouseListener(new MultiTableMouseListener());
 	
 		collapsePane.add(table, BorderLayout.CENTER);
 
@@ -170,24 +167,22 @@ public class CategoryDownloadPanel extends JPanel {
 		};
 	}
 	
-    private class MultiTableSelectionListener implements ListSelectionListener {
-//TODO - this isn't quite working properly
-		@Override
-		public void valueChanged(ListSelectionEvent e) {
-			if (e.getValueIsAdjusting()) // Ignore.
-				return;
-
-			if (e.getFirstIndex() != -1) { // Something is selected!
-				ListSelectionModel sourceSelectionModel = (ListSelectionModel) e.getSource();
-
-				for (JTable table : tables) {
-					if (table.getSelectionModel() != sourceSelectionModel) {
-						table.clearSelection();
-					}
-				}
-			}
-		}
-	}
+    /**
+     * deselects other tables when a table is selected
+     */
+    private class MultiTableMouseListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (!e.isPopupTrigger()) {
+                JTable selectedTable = (JTable) e.getComponent();
+                for (JTable table : tables) {
+                    if (table != selectedTable) {
+                        table.clearSelection();
+                    }
+                }
+            }
+        }
+    }
     
 
     private void updateStriping() {
