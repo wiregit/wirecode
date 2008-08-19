@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.performance;
 
 /**
- * Used to store config options for {@link KeywordIndexPerformanceTest}
+ * Used to store config options for {@link KeywordIndexTestPerformance}
  *
  */
 public class KeywordIndexPerformanceConfig {

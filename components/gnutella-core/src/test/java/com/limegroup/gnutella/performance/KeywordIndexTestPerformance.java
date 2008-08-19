@@ -6,15 +6,15 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Performance test to measure latency of queries of shared files
  */
-public class KeywordIndexPerformanceTest {
+public class KeywordIndexTestPerformance {
 
-    private static final Log LOG = LogFactory.getLog(KeywordIndexPerformanceTest.class);
+    private static final Log LOG = LogFactory.getLog(KeywordIndexTestPerformance.class);
 
     private KeywordIndexPerformanceSearcher searcher;
     private KeywordIndexPerformanceAnalyzer analyzer;
 
 
-    public KeywordIndexPerformanceTest(KeywordIndexPerformanceConfig config) {
+    public KeywordIndexTestPerformance(KeywordIndexPerformanceConfig config) {
         this.searcher = new KeywordIndexPerformanceSearcher(config.getSearchConfig());
         this.analyzer = new KeywordIndexPerformanceAnalyzer(config.getAnalyzeConfig());
     }
@@ -22,7 +22,7 @@ public class KeywordIndexPerformanceTest {
     public static void main(String[] args) {
         KeywordIndexPerformanceConfig config = parseArgs(args);
         try {
-            KeywordIndexPerformanceTest tester = new KeywordIndexPerformanceTest(config);
+            KeywordIndexTestPerformance tester = new KeywordIndexTestPerformance(config);
             tester.execute();
         } catch (KeywordIndexPerformanceException e) {
             LOG.error("Encountered error during performance test: " +
