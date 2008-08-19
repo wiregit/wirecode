@@ -57,7 +57,10 @@ public final class NetworkUtils {
         return isValidAddress(addr) && isValidPort(port);
     }
     
-    /** Determines if the given IpPort is valid. */
+    /** 
+     * Determines if the given IpPort is valid. Does resolve address again
+     * by name to do so.
+     */
     public static boolean isValidIpPort(IpPort ipport) {
         return isValidAddress(ipport.getAddress()) && isValidPort(ipport.getPort());
     }
