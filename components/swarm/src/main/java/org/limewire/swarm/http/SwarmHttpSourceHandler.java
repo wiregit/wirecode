@@ -1,10 +1,7 @@
 package org.limewire.swarm.http;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -72,16 +69,10 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     private final SwarmCoordinator swarmCoordinator;
 
-    private final List<SwarmSource> sources;
-
-    private final List<SwarmSource> badSources;
-
     private final SwarmStats stats;
-    
+
     public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator, String userAgent) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
-        this.sources = Collections.synchronizedList(new ArrayList<SwarmSource>());
-        this.badSources = Collections.synchronizedList(new ArrayList<SwarmSource>());
         this.stats = new SwarmStats();
 
         HttpParams params = new BasicHttpParams();
@@ -103,6 +94,12 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @seeorg.limewire.swarm.SwarmSourceHandler#addSource(org.limewire.swarm.
+     * SwarmSource)
+     */
     public void addSource(SwarmSource source) {
         LOG.trace("Adding source: " + source);
         stats.incrementNumberOfSources();
@@ -115,14 +112,20 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
                 sessionRequestCallback);
     }
 
-    public List<SwarmSource> getSources() {
-        return new ArrayList<SwarmSource>(sources);
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.limewire.swarm.SwarmSourceHandler#isComplete()
+     */
     public boolean isComplete() {
         return swarmCoordinator.isComplete();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.limewire.swarm.SwarmSourceHandler#shutdown()
+     */
     public void shutdown() throws IOException {
         LOG.trace("Shutting down: " + this);
         started.set(false);
@@ -130,22 +133,55 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         ioReactor.shutdown();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.limewire.swarm.SwarmSourceHandler#start()
+     */
     public void start() throws IOException {
         LOG.trace("Starting: " + this);
         started.set(true);
         ioReactor.execute(eventDispatch);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.limewire.swarm.SwarmSourceHandler#isActive()
+     */
     public boolean isActive() {
         return started.get();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.limewire.swarm.SwarmSourceHandler#getMeasuredBandwidth(boolean)
+     */
+    public float getMeasuredBandwidth(boolean downstream) {
+        return ioReactor.getMeasuredBandwidth(downstream);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.http.nio.protocol.NHttpRequestExecutionHandler#initalizeContext
+     * (org.apache.http.protocol.HttpContext, java.lang.Object)
+     */
     public void initalizeContext(HttpContext context, Object attachment) {
         LOG.trace("initalizeContext: " + this);
         HttpSourceAttachment info = (HttpSourceAttachment) attachment;
         context.setAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE, info.getSource());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.http.nio.protocol.NHttpRequestExecutionHandler#finalizeContext
+     * (org.apache.http.protocol.HttpContext)
+     */
     public void finalizeContext(HttpContext context) {
         LOG.trace("finalizeContext: " + this);
         SwarmSource source = getSwarmSource(context);
@@ -153,6 +189,13 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         closeContentListener(context);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.http.nio.protocol.NHttpRequestExecutionHandler#handleResponse
+     * (org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext)
+     */
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
         LOG.trace("handleResponse: " + this);
         stats.incrementNumberOfResponses();
@@ -171,6 +214,13 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.http.nio.protocol.NHttpRequestExecutionHandler#responseEntity
+     * (org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext)
+     */
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
             throws IOException {
         LOG.trace(this);
@@ -193,6 +243,13 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.apache.http.nio.protocol.NHttpRequestExecutionHandler#submitRequest
+     * (org.apache.http.protocol.HttpContext)
+     */
     public HttpRequest submitRequest(HttpContext context) {
         LOG.trace(this);
 
@@ -223,12 +280,18 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         }
     }
 
+    /**
+     * Returns the swarmSource from the HttpContext
+     */
     private SwarmSource getSwarmSource(HttpContext context) {
         SwarmSource swarmSource = (SwarmSource) context
                 .getAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE);
         return swarmSource;
     }
 
+    /**
+     * Builds the next request.
+     */
     private HttpRequest buildRequest(HttpContext context) {
         HttpRequest request = null;
         SwarmSource source = getSwarmSource(context);
@@ -248,10 +311,6 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
                     + (requestParameters.getHigh())));
         }
         return request;
-    }
-
-    public float getMeasuredBandwidth(boolean downstream) {
-        return ioReactor.getMeasuredBandwidth(downstream);
     }
 
     private void closeContentListener(HttpContext context) {
@@ -308,6 +367,9 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         return requestParameters;
     }
 
+    /**
+     * Class representing the request parameters for a piece download.
+     */
     private class RequestParameters {
         private final SwarmFile swarmFile;
 
@@ -355,6 +417,9 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         }
     }
 
+    /**
+     * Callback to delegate connection issues back to the swarmsource listeners.
+     */
     private class SwarmHttpSessionRequestCallback implements SessionRequestCallback {
         private final SwarmSource source;
 
@@ -363,34 +428,20 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         }
 
         public void cancelled(SessionRequest request) {
-            sources.remove(source);
             source.connectFailed(SwarmHttpSourceHandler.this);
         };
 
         public void completed(SessionRequest request) {
-            sources.add(source);
             source.connected(SwarmHttpSourceHandler.this);
         };
 
         public void failed(SessionRequest request) {
-            sources.remove(source);
-            badSources.add(source);// TODO
             source.connectFailed(SwarmHttpSourceHandler.this);
         };
 
         public void timeout(SessionRequest request) {
-            sources.remove(source);
-            badSources.add(source);// TODO
             source.connectFailed(SwarmHttpSourceHandler.this);
         };
 
-    }
-
-    public boolean hasSource(SwarmSource source) {
-        return sources.contains(source);
-    }
-
-    public boolean isBadSource(SwarmSource source) {
-        return badSources.contains(source);
     }
 }

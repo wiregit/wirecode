@@ -6,14 +6,13 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmBlockSelector;
 
+/**
+ * This selection strategy downloads the data in order.
+ */
 public class ContiguousSelectionStrategy implements SwarmBlockSelector {
 
-    public ContiguousSelectionStrategy() {
-
-    }
-
-    public Range selectAssignment(IntervalSet candidateBytes, IntervalSet neededBytes, long blockSize)
-            throws NoSuchElementException {
+    public Range selectAssignment(IntervalSet candidateBytes, IntervalSet neededBytes,
+            long blockSize) throws NoSuchElementException {
 
         // Input validation
         if (blockSize < 1)

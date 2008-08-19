@@ -32,10 +32,18 @@ public class SwarmerImpl implements Swarmer {
         return sourceHandlers.get(clazz);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.Swarmer#register(org.limewire.swarm.SwarmSourceType, org.limewire.swarm.SwarmSourceHandler)
+     */
     public void register(SwarmSourceType type, SwarmSourceHandler sourceHandler) {
         sourceHandlers.put(type, sourceHandler);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.Swarmer#addSource(org.limewire.swarm.SwarmSource)
+     */
     public void addSource(SwarmSource source) {
         SwarmSourceType type = source.getType();
 
@@ -52,6 +60,10 @@ public class SwarmerImpl implements Swarmer {
 
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.Swarmer#start()
+     */
     public void start() {
         for (SwarmSourceHandler handler : sourceHandlers.values()) {
             try {
@@ -62,6 +74,10 @@ public class SwarmerImpl implements Swarmer {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.Swarmer#shutdown()
+     */
     public void shutdown() {
         for (SwarmSourceHandler handler : sourceHandlers.values()) {
             try {
@@ -77,6 +93,10 @@ public class SwarmerImpl implements Swarmer {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.Swarmer#getMeasuredBandwidth(boolean)
+     */
     public float getMeasuredBandwidth(boolean downstream) {
         float bandwidth = 0;
         for (SwarmSourceHandler handler : sourceHandlers.values()) {
@@ -85,26 +105,12 @@ public class SwarmerImpl implements Swarmer {
         return bandwidth;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.Swarmer#hasHandler(org.limewire.swarm.SwarmSourceType)
+     */
     public boolean hasHandler(SwarmSourceType type) {
         return sourceHandlers.containsKey(type);
-    }
-
-    public boolean hasSource(SwarmSource source) {
-        for (SwarmSourceHandler handler : sourceHandlers.values()) {
-            if (handler.hasSource(source)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isBadSource(SwarmSource source) {
-        for (SwarmSourceHandler handler : sourceHandlers.values()) {
-            if (handler.isBadSource(source)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

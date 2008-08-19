@@ -7,6 +7,9 @@ import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmFileSystem;
 
+/**
+ * This class is used for testing, it passes all ranges given as verified.
+ */
 public class VerifyPassFileVerifier implements SwarmBlockVerifier {
 
     public List<Range> scanForVerifiableRanges(IntervalSet writtenBlocks, long completeSize) {

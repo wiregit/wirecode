@@ -7,6 +7,11 @@ import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmFileSystem;
 
+/**
+ * This class is only used to simulate pieces failing. It is currently set to
+ * fail 10 percent of the time.
+ * 
+ */
 public class RandomFailFileVerifier implements SwarmBlockVerifier {
 
     private static final double PERCENTAGE_FAIL = 0.10;

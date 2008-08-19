@@ -16,7 +16,7 @@ public interface SwarmWriteJob {
     long write(SwarmContent content) throws IOException;
 
     /**
-     * Cancels this job.
+     * Cancels this write job and any pending scheduled tasks.
      */
     void cancel();
 
