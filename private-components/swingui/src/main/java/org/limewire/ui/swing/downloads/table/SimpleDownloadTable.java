@@ -28,6 +28,10 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
+/**
+ * Conventional table view of downloads. SimpleDownloadTable inherits popup and double
+ * click handling from DownloadTable.
+ */
 public class SimpleDownloadTable extends DownloadTable {
 
     public SimpleDownloadTable(EventList<DownloadItem> downloadItems) {
@@ -46,6 +50,7 @@ public class SimpleDownloadTable extends DownloadTable {
     }
     
     private boolean initialized = false;
+    //overridden to pack columns
     @Override
     public void paint(Graphics g) {
         super.paint(g);
@@ -155,7 +160,7 @@ public class SimpleDownloadTable extends DownloadTable {
 
     }
     
-    private class PercentRenderer extends JPanel implements TableCellRenderer{
+    private static class PercentRenderer extends JPanel implements TableCellRenderer{
         JProgressBar progressBar;
         public PercentRenderer(){
             progressBar = new JProgressBar(0, 100);
@@ -174,7 +179,7 @@ public class SimpleDownloadTable extends DownloadTable {
         
     }
     
-    private class CategoryRenderer extends JPanel implements TableCellRenderer {        
+    private static class CategoryRenderer extends JPanel implements TableCellRenderer {        
         private CategoryIconLabel label = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
         public CategoryRenderer(){
             add(label);
@@ -191,7 +196,7 @@ public class SimpleDownloadTable extends DownloadTable {
         
     }
     
-    private class SpeedRenderer extends JLabel implements TableCellRenderer {
+    private static class SpeedRenderer extends JLabel implements TableCellRenderer {
         
         public SpeedRenderer(){
             setOpaque(true);
@@ -207,7 +212,7 @@ public class SimpleDownloadTable extends DownloadTable {
     }
     
     
-    private class SizeRenderer extends JLabel implements TableCellRenderer {
+    private static class SizeRenderer extends JLabel implements TableCellRenderer {
         
         public SizeRenderer(){
             setOpaque(true);
@@ -222,7 +227,7 @@ public class SimpleDownloadTable extends DownloadTable {
         
     }
     
-    private class ButtonRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
+    private static class ButtonRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
         private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
         private DownloadItem editItem;
         private DownloadActionHandler downloadActionHandler;

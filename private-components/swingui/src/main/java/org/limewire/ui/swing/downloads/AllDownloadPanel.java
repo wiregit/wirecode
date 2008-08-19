@@ -7,7 +7,7 @@ import javax.swing.JScrollPane;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.ui.swing.downloads.table.DownloadTable;
+import org.limewire.ui.swing.downloads.table.FancyDownloadTable;
 
 import ca.odell.glazedlists.EventList;
 
@@ -26,7 +26,7 @@ public class AllDownloadPanel extends JPanel {
 	public AllDownloadPanel(EventList<DownloadItem> list) {
 		super(new BorderLayout());
 
-		table = new DownloadTable(list);
+		table = new FancyDownloadTable(list);
 		table.setTableHeader(null);
 		add(new JScrollPane(table), BorderLayout.CENTER);
 	}

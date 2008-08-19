@@ -8,27 +8,17 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 
-public class DownloadTable extends MouseableTable {
-    
-    private DownloadRendererEditor editor;
+/**
+ * Table showing DownloadItems. Provides popup menus and double click handling.
+ * No renderers or editors are set by default.
+ */
+public class DownloadTable extends MouseableTable {   
     
     private DownloadTableModel model;
-    
-//TODO: rename DownloadTable & pull out common base class for this class and SimpleDownloadTable
+
 	public DownloadTable(EventList<DownloadItem> downloadItems) {		
 		model = new DownloadTableModel(downloadItems);
 		setModel(model);
-		
-		setShowGrid(false, false);
-
-		editor = new DownloadRendererEditor();
-        editor.initializeEditor(downloadItems);
-        getColumnModel().getColumn(0).setCellEditor(editor);
-        
-		DownloadRendererEditor renderer = new DownloadRendererEditor();		
-		getColumnModel().getColumn(0).setCellRenderer(renderer);
-		
-		setRowHeight(renderer.getPreferredSize().height);
 
         TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(downloadItems), this);
 
