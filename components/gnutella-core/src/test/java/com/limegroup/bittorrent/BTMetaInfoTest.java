@@ -3,8 +3,6 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.net.URI;
 
-import junit.framework.Assert;
-
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
