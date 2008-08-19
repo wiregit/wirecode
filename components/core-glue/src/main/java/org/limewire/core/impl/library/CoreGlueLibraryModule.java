@@ -8,6 +8,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(LibraryManager.class).to(LibraryManagerImpl.class);
+        bind(LibraryRosterListener.class);
     }
 
 }
