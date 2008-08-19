@@ -102,7 +102,7 @@ public class FileManagerImpl implements FileManager, Service {
      */
     protected List<FileDesc> files;
     
-    private int numFiles;
+    protected int numFiles;
     
     /**
      * An index that maps a <tt>File</tt> on disk to the 

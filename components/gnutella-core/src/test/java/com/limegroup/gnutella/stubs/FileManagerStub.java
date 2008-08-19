@@ -144,6 +144,7 @@ public class FileManagerStub extends FileManagerImpl {
     
     public void setFiles(Map<File,FileDesc> map) {
         fileToFileDescMap = map;
+        numFiles += map.size();
     }
     
     public void setFileDesc(List<FileDesc> files) {

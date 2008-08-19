@@ -10,6 +10,8 @@ import com.limegroup.gnutella.SharedFileListImpl;
 
 public class FileListStub extends SharedFileListImpl {
 
+    private FileDescStub fdStub = new FileDescStub();
+    private FileDescStub defaultStub = new FileDescStub("other.txt");
     
     public FileListStub(String name, FileManager fileManager, Set<File> individual, Set<File> files) {
         super(name, fileManager, individual, files);
@@ -27,6 +29,20 @@ public class FileListStub extends SharedFileListImpl {
             fileDescs.add(fd);
             numBytes += fd.getFile().length();
             individualFiles.add(fd.getFile());
+        }
     }
+    
+    @Override
+    public boolean contains(FileDesc fileDesc) {
+        if(fileDesc == null)
+            return false;
+        
+        if(fileDescs.contains(fileDesc))
+            return true;
+        else if(fileDesc.getFile().equals(fdStub.getFile()) ||
+                fileDesc.getFile().equals(defaultStub.getFile()))
+            return true;
+        else 
+            return false;
     }
 }
