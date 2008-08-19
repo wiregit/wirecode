@@ -250,7 +250,10 @@ public class RouteTableImpl implements RouteTable {
             if (isOkayToAdd(bucket, node)) {
                 addContactToBucket(bucket, node);
             } else {
+                // only cache node if the bucket can't be split
+                if (!canSplit(bucket)) {
                 addContactToBucketCache(bucket, node);
+            }
             }
         } else if (split(bucket)) {
             add(node); // re-try to add
@@ -440,12 +443,9 @@ public class RouteTableImpl implements RouteTable {
     }
     
     /**
-     * This method splits the given Bucket into two new Buckets.
-     * There are a few conditions in which cases we do split and
-     * in which cases we don't.
+     * Returns true if the bucket can be split.
      */
-    protected synchronized boolean split(Bucket bucket) {
-        
+    private boolean canSplit(Bucket bucket) {
         // Three conditions for splitting:
         // 1. Bucket contains the local Node
         // 2. New node part of the smallest subtree to the local node
@@ -456,6 +456,19 @@ public class RouteTableImpl implements RouteTable {
         if (containsLocalNode
                 || bucket.isInSmallestSubtree()
                 || !bucket.isTooDeep()) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * This method splits the given Bucket into two new Buckets.
+     * There are a few conditions in which cases we do split and
+     * in which cases we don't.
+     */
+    protected synchronized boolean split(Bucket bucket) {
+        
+       if (canSplit(bucket)) {
             
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Splitting bucket: " + bucket);

@@ -911,11 +911,11 @@ public class RouteTableTest extends MojitoTestCase {
         }
         
         // The bucket should contain the local Node and one
-        // of the 192.168.1.x Nodes. The rest is in the replacement
-        // cache
-        assertEquals(k, routeTable2.size());
+        // of the 192.168.1.x Nodes. The rest are NOT in the replacement
+        // cache since the bucket is splitable
+        assertEquals(2, routeTable2.size());
         assertEquals(2, routeTable2.getActiveContacts().size());
-        assertEquals(18, routeTable2.getCachedContacts().size());
+        assertEquals(0, routeTable2.getCachedContacts().size());
         
         // Allow 50% to be from the same Network
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.5f);
@@ -929,11 +929,11 @@ public class RouteTableTest extends MojitoTestCase {
             routeTable3.add(node);
         }
         
-        // 50% of them should be in the Bucket and the rest in the
-        // replacement cache
-        assertEquals(k, routeTable3.size());
+        // 50% of them should be in the Bucket and the rest NOT in the
+        // replacement cache since the bucket is splitable
+        assertEquals(k/2+1, routeTable3.size());
         assertEquals(k/2+1, routeTable3.getActiveContacts().size());
-        assertEquals(k/2-1, routeTable3.getCachedContacts().size());
+        assertEquals(0, routeTable3.getCachedContacts().size());
         
         // Add a Contact from a different Class C Network
         // and it should be added
@@ -947,9 +947,9 @@ public class RouteTableTest extends MojitoTestCase {
                 Contact.DEFAULT_FLAG);
         
         routeTable3.add(node);
-        assertEquals(k+1, routeTable3.size());
-        assertEquals(k/2+2, routeTable3.getActiveContacts().size());
-        assertEquals(k/2-1, routeTable3.getCachedContacts().size());
+        assertEquals(k/2+1+1, routeTable3.size());
+        assertEquals(k/2+1+1, routeTable3.getActiveContacts().size());
+        assertEquals(0, routeTable3.getCachedContacts().size());
         
         Bucket bucket = routeTable3.getBucket(node.getNodeID());
         assertNotNull(bucket);
