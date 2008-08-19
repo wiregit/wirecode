@@ -13,6 +13,7 @@ import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.util.BufferUtils;
+import org.limewire.util.StringUtils;
 
 /**
  * A read/write channel implementation that forwards all requests received from
@@ -69,7 +70,8 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         this.session = session;
         this.eventDispatch = eventDispatch;
         if (method != null) {
-            this.methodBuffer = ByteBuffer.wrap(method.getBytes());
+            byte[] asciiBytes = StringUtils.toAsciiBytes(method);
+            this.methodBuffer = ByteBuffer.wrap(asciiBytes);
         }
         this.up = up;
         this.down = down;
