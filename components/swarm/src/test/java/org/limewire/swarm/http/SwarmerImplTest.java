@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
@@ -26,6 +25,7 @@ import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
 import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -314,16 +314,16 @@ public class SwarmerImplTest extends BaseTestCase {
 
         Thread.sleep(3000);
 
-        Assert.assertTrue(file1.exists());
-        Assert.assertEquals(fileSize1, file1.length());
+        AssertComparisons.assertTrue(file1.exists());
+        AssertComparisons.assertEquals(fileSize1, file1.length());
         String testmd5 = FileUtils.getMD5(file1);
 
-        Assert.assertEquals(md51, testmd5);
+        AssertComparisons.assertEquals(md51, testmd5);
 
-        Assert.assertTrue(file2.exists());
-        Assert.assertEquals(fileSize2, file2.length());
+        AssertComparisons.assertTrue(file2.exists());
+        AssertComparisons.assertEquals(fileSize2, file2.length());
         testmd5 = FileUtils.getMD5(file2);
-        Assert.assertEquals(md52, testmd5);
+        AssertComparisons.assertEquals(md52, testmd5);
     }
 
     /**
@@ -418,10 +418,10 @@ public class SwarmerImplTest extends BaseTestCase {
             throws InterruptedException, NoSuchAlgorithmException, IOException {
         long sleepTime = (long) ((fileSize * 0.0001) + 3000);
         Thread.sleep(sleepTime);
-        Assert.assertTrue(file.exists());
-        Assert.assertEquals(fileSize, file.length());
+        AssertComparisons.assertTrue(file.exists());
+        AssertComparisons.assertEquals(fileSize, file.length());
         String testmd5 = FileUtils.getMD5(file);
-        Assert.assertEquals(md5, testmd5);
+        AssertComparisons.assertEquals(md5, testmd5);
     }
 
     /**

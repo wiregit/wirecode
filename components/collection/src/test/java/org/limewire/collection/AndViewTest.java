@@ -1,7 +1,6 @@
 package org.limewire.collection;
 
-import junit.framework.Assert;
-
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
 public class AndViewTest extends BaseTestCase {
@@ -30,20 +29,20 @@ public class AndViewTest extends BaseTestCase {
         BitField bitField2 = new BitFieldSet(bitSet2, 4);
 
         AndView andView = new AndView(bitField1, bitField2);
-        Assert.assertEquals(true, andView.get(0));
-        Assert.assertEquals(false, andView.get(1));
-        Assert.assertEquals(false, andView.get(2));
-        Assert.assertEquals(false, andView.get(3));
+        AssertComparisons.assertEquals(true, andView.get(0));
+        AssertComparisons.assertEquals(false, andView.get(1));
+        AssertComparisons.assertEquals(false, andView.get(2));
+        AssertComparisons.assertEquals(false, andView.get(3));
         
-        Assert.assertEquals(0, andView.nextSetBit(0));
-        Assert.assertEquals(-1, andView.nextSetBit(1));
-        Assert.assertEquals(-1, andView.nextSetBit(2));
-        Assert.assertEquals(-1, andView.nextSetBit(3));
+        AssertComparisons.assertEquals(0, andView.nextSetBit(0));
+        AssertComparisons.assertEquals(-1, andView.nextSetBit(1));
+        AssertComparisons.assertEquals(-1, andView.nextSetBit(2));
+        AssertComparisons.assertEquals(-1, andView.nextSetBit(3));
         
-        Assert.assertEquals(1, andView.nextClearBit(0));
-        Assert.assertEquals(1, andView.nextClearBit(1));
-        Assert.assertEquals(2, andView.nextClearBit(2));
-        Assert.assertEquals(3, andView.nextClearBit(3));
+        AssertComparisons.assertEquals(1, andView.nextClearBit(0));
+        AssertComparisons.assertEquals(1, andView.nextClearBit(1));
+        AssertComparisons.assertEquals(2, andView.nextClearBit(2));
+        AssertComparisons.assertEquals(3, andView.nextClearBit(3));
     }
   
 }

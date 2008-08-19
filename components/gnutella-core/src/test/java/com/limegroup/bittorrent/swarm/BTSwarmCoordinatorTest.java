@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 
-import junit.framework.Assert;
-
 import org.limewire.http.util.FileServer;
 import org.limewire.io.DiskException;
 import org.limewire.swarm.SwarmSourceType;
@@ -15,6 +13,7 @@ import org.limewire.swarm.http.SwarmHttpSource;
 import org.limewire.swarm.http.SwarmHttpSourceHandler;
 import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -312,10 +311,10 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
             NoSuchAlgorithmException, IOException {
         long sleepTime = (long) ((fileSize * 0.0001) + 3000);
         Thread.sleep(sleepTime);
-        Assert.assertTrue(file.exists());
-        Assert.assertEquals(fileSize, file.length());
+        AssertComparisons.assertTrue(file.exists());
+        AssertComparisons.assertEquals(fileSize, file.length());
         String testmd5 = FileUtils.getMD5(file);
-        Assert.assertEquals(md5, testmd5);
+        AssertComparisons.assertEquals(md5, testmd5);
     }
 
     // TODO test better variety of torrent files.

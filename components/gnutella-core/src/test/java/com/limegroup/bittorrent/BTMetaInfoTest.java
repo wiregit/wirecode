@@ -1,9 +1,11 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.net.URI;
 
 import junit.framework.Assert;
 
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -26,15 +28,15 @@ public class BTMetaInfoTest extends LimeTestCase {
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
 
-        Assert.assertEquals(44425, metaInfo.getFileSystem().getTotalSize());
-        Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
-        Assert.assertEquals(262144, metaInfo.getPieceLength());
-        Assert.assertEquals((int) Math.ceil((double) metaInfo.getFileSystem().getTotalSize()
+        AssertComparisons.assertEquals(44425, metaInfo.getFileSystem().getTotalSize());
+        AssertComparisons.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
+        AssertComparisons.assertEquals(262144, metaInfo.getPieceLength());
+        AssertComparisons.assertEquals((int) Math.ceil((double) metaInfo.getFileSystem().getTotalSize()
                 / metaInfo.getPieceLength()), metaInfo.getNumBlocks());
-        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+        AssertComparisons.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
                 .toString());
-        Assert.assertEquals(false, metaInfo.isPrivate());
-        Assert.assertNull(metaInfo.getWebSeeds());
+        AssertComparisons.assertEquals(false, metaInfo.isPrivate());
+        AssertComparisons.assertEquals(new URI[0],metaInfo.getWebSeeds());
     }
 
     public void testSingleWebSeedSingleFile() throws Exception {
@@ -42,15 +44,15 @@ public class BTMetaInfoTest extends LimeTestCase {
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
-        Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
-        Assert.assertEquals(1, metaInfo.getNumBlocks());
-        Assert.assertEquals(262144, metaInfo.getPieceLength());
-        Assert.assertEquals("http://localhost/~pvertenten/tracker/announce.php", metaInfo
+        AssertComparisons.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
+        AssertComparisons.assertEquals(1, metaInfo.getNumBlocks());
+        AssertComparisons.assertEquals(262144, metaInfo.getPieceLength());
+        AssertComparisons.assertEquals("http://localhost/~pvertenten/tracker/announce.php", metaInfo
                 .getTrackers()[0].toString());
-        Assert.assertEquals(false, metaInfo.isPrivate());
-        Assert.assertNotNull(metaInfo.getWebSeeds());
-        Assert.assertEquals(1, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo
+        AssertComparisons.assertEquals(false, metaInfo.isPrivate());
+        AssertComparisons.assertNotNull(metaInfo.getWebSeeds());
+        AssertComparisons.assertEquals(1, metaInfo.getWebSeeds().length);
+        AssertComparisons.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo
                 .getWebSeeds()[0].toString());
     }
 
@@ -59,17 +61,17 @@ public class BTMetaInfoTest extends LimeTestCase {
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
-        Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
-        Assert.assertEquals(2, metaInfo.getNumBlocks());
-        Assert.assertEquals(32768, metaInfo.getPieceLength());
-        Assert.assertEquals("http://localhost:3456/tracker/announce", metaInfo.getTrackers()[0]
+        AssertComparisons.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
+        AssertComparisons.assertEquals(2, metaInfo.getNumBlocks());
+        AssertComparisons.assertEquals(32768, metaInfo.getPieceLength());
+        AssertComparisons.assertEquals("http://localhost:3456/tracker/announce", metaInfo.getTrackers()[0]
                 .toString());
-        Assert.assertEquals(true, metaInfo.isPrivate());
-        Assert.assertNotNull(metaInfo.getWebSeeds());
-        Assert.assertEquals(3, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
-        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
-        Assert.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo
+        AssertComparisons.assertEquals(true, metaInfo.isPrivate());
+        AssertComparisons.assertNotNull(metaInfo.getWebSeeds());
+        AssertComparisons.assertEquals(3, metaInfo.getWebSeeds().length);
+        AssertComparisons.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
+        AssertComparisons.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
+        AssertComparisons.assertEquals("http://localhost:8080/pub/gnutella_protocol_0.4.pdf", metaInfo
                 .getWebSeeds()[2].toString());
     }
 
@@ -78,16 +80,16 @@ public class BTMetaInfoTest extends LimeTestCase {
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
-        Assert.assertEquals("test", metaInfo.getName());
+        AssertComparisons.assertEquals("test", metaInfo.getName());
 
-        Assert.assertEquals(2, metaInfo.getNumBlocks());
-        Assert.assertEquals(262144, metaInfo.getPieceLength());
-        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+        AssertComparisons.assertEquals(2, metaInfo.getNumBlocks());
+        AssertComparisons.assertEquals(262144, metaInfo.getPieceLength());
+        AssertComparisons.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
                 .toString());
-        Assert.assertEquals(true, metaInfo.isPrivate());
-        Assert.assertNotNull(metaInfo.getWebSeeds());
-        Assert.assertEquals(1, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[0].toString());
+        AssertComparisons.assertEquals(true, metaInfo.isPrivate());
+        AssertComparisons.assertNotNull(metaInfo.getWebSeeds());
+        AssertComparisons.assertEquals(1, metaInfo.getWebSeeds().length);
+        AssertComparisons.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[0].toString());
     }
 
     public void testMultipleWebSeedMultipleFile() throws Exception {
@@ -95,16 +97,16 @@ public class BTMetaInfoTest extends LimeTestCase {
         byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
-        Assert.assertEquals("test", metaInfo.getName());
-        Assert.assertEquals(2, metaInfo.getNumBlocks());
-        Assert.assertEquals(262144, metaInfo.getPieceLength());
-        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+        AssertComparisons.assertEquals("test", metaInfo.getName());
+        AssertComparisons.assertEquals(2, metaInfo.getNumBlocks());
+        AssertComparisons.assertEquals(262144, metaInfo.getPieceLength());
+        AssertComparisons.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
                 .toString());
-        Assert.assertEquals(true, metaInfo.isPrivate());
-        Assert.assertNotNull(metaInfo.getWebSeeds());
-        Assert.assertEquals(2, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
-        Assert.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
+        AssertComparisons.assertEquals(true, metaInfo.isPrivate());
+        AssertComparisons.assertNotNull(metaInfo.getWebSeeds());
+        AssertComparisons.assertEquals(2, metaInfo.getWebSeeds().length);
+        AssertComparisons.assertEquals("http://localhost:8080/pub/", metaInfo.getWebSeeds()[0].toString());
+        AssertComparisons.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
     }
 
     /**
