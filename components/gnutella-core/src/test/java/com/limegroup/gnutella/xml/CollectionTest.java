@@ -352,7 +352,7 @@ public class CollectionTest extends LimeTestCase {
         
         //make sure we get the same xml string...
         assertEquals("didn't get expected xml string",
-                     newDoc2.getXMLString(), ((LimeXMLDocument)l.iterator().next()).getXMLString());
+                     newDoc2.getXMLString(), matchingReplies.iterator().next().getXMLString());
 
 
         //check we get the right docs back from getDocForHash
