@@ -166,11 +166,6 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
                 "BTSwarmCoordinator.getAmountVerified() is not implemented.");
     }
 
-    public Range lease() {
-        // not the job of the BTSwarmCoordinator
-        throw new UnsupportedOperationException("BTSwarmCoordinator.lease() is not implemented.");
-    }
-
     public void unpending(Range range) {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(

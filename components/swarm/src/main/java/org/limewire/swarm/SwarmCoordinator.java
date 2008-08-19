@@ -9,12 +9,6 @@ import org.limewire.collection.Range;
 public interface SwarmCoordinator {
 
     /**
-     * Leases all available data. If no data is available for leasing, this
-     * returns null.
-     */
-    Range lease();
-
-    /**
      * Leases just a portion of data, only allowing ranges in availableRanges.
      * If no data is available for leasing, this returns null.
      */

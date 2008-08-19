@@ -90,10 +90,6 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         addListener(new LoggingSwarmCoordinatorListener());
     }
 
-    public Range lease() {
-        return lease(null, fileSystem.getCompleteSize(), blockSelector);
-    }
-
     public Range leasePortion(IntervalSet availableRanges) {
         return lease(availableRanges, blockSize, blockSelector);
     }
