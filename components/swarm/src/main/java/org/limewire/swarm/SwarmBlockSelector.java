@@ -25,6 +25,6 @@ public interface SwarmBlockSelector {
      * @return the Interval that should be assigned next, which does not span a blockSize boundary
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    Range pickAssignment(IntervalSet availableRanges, IntervalSet neededBytes, long blockSize);
+    Range selectAssignment(IntervalSet availableRanges, IntervalSet neededBytes, long blockSize);
 
 }

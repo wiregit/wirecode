@@ -123,7 +123,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         // Pick a range, add it to leased, and exit.
         Range chosen;
         try {
-            chosen = swarmSelector.pickAssignment(availableRanges, neededBytes, blockSize);
+            chosen = swarmSelector.selectAssignment(availableRanges, neededBytes, blockSize);
         } catch (NoSuchElementException nsee) {
             return null;
         }

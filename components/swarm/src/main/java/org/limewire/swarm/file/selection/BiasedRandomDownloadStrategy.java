@@ -57,7 +57,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
     }
     
     @Override
-    public synchronized Range pickAssignment(IntervalSet candidateBytes,
+    public synchronized Range selectAssignment(IntervalSet candidateBytes,
             IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {
         long lowerBound = neededBytes.getFirst().getLow();
@@ -78,7 +78,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         // nextFloat() returns a float on [0.0 1.0)
         if (getIdleTime() >= MIN_IDLE_MILLISECONDS // If the user is idle, always use random strategy
                 || pseudoRandom.nextFloat() >= getBiasProbability(lowerBound, completedSize)) {
-            return super.pickAssignment(candidateBytes, neededBytes, blockSize);
+            return super.selectAssignment(candidateBytes, neededBytes, blockSize);
         }
         
         Range candidate = candidateBytes.getFirst();

@@ -12,7 +12,7 @@ public class ContiguousSelectionStrategy implements SwarmBlockSelector {
 
     }
 
-    public Range pickAssignment(IntervalSet candidateBytes, IntervalSet neededBytes, long blockSize)
+    public Range selectAssignment(IntervalSet candidateBytes, IntervalSet neededBytes, long blockSize)
             throws NoSuchElementException {
 
         // Input validation

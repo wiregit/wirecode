@@ -68,7 +68,7 @@ public class RandomDownloadStrategy implements SwarmBlockSelector {
      * @return the Interval that should be assigned next, with a size of at most blockSize bytes
      * @throws NoSuchElementException if passed an empty IntervalSet
      */
-    public Range pickAssignment(IntervalSet candidateBytes,
+    public Range selectAssignment(IntervalSet candidateBytes,
             IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {
         long lowerBound = neededBytes.getFirst().getLow();
