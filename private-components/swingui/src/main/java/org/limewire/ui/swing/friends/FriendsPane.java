@@ -30,6 +30,7 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -138,12 +139,10 @@ public class FriendsPane extends JPanel {
             Friend friend = (Friend) value;
             cell.add(new JLabel(getIcon(friend, icons)));
             
-            JLabel friendName = new JLabel();
+            JLabel friendName = new JLabel(friend.getName());
+            FontUtils.changeSize(friendName, -2.8f);
             friendName.setMaximumSize(new Dimension(85, 12));
             cell.add(friendName);
-            
-            friendName.setText(friend.getName());
-            friendName.setFont(list.getFont());
             
             Border border = EMPTY_BORDER;
             
