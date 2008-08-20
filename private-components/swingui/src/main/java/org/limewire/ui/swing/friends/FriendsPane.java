@@ -7,8 +7,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.WeakHashMap;
 
 import javax.swing.BorderFactory;
@@ -39,9 +43,12 @@ import org.limewire.xmpp.api.client.Presence.Mode;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.EventListModel;
 
 import com.google.inject.Inject;
@@ -67,7 +74,7 @@ public class FriendsPane extends JPanel {
         idToFriendMap = new WeakHashMap<String, FriendImpl>();
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
-        JList list = new JList(new EventListModel<Friend>(sortedFriends));
+        JList list = newSearchableJList(sortedFriends);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setCellRenderer(new FriendCellRenderer(icons));
         JScrollPane scroll = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -77,6 +84,44 @@ public class FriendsPane extends JPanel {
         list.addMouseListener(new LaunchChatListener());
         
         EventAnnotationProcessor.subscribe(this);
+    }
+    
+    private JList newSearchableJList(EventList<Friend> friendsList) {
+        TextFilterator<Friend> friendFilterator = new TextFilterator<Friend>() {
+            @Override
+            public void getFilterStrings(List<String> baseList, Friend element) {
+                baseList.add(element.getName());
+            }
+        };
+        
+        final TextMatcherEditor<Friend> editor = new TextMatcherEditor<Friend>(friendFilterator);
+        final FilterList<Friend> filter = new FilterList<Friend>(friendsList, editor);
+        
+        final JList list = new JList(new EventListModel<Friend>(friendsList)); 
+        
+        list.addKeyListener(new KeyAdapter() {
+            ArrayList<String> keysPressed = new ArrayList<String>();
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int keyCode = e.getKeyCode();
+                if (keyCode == KeyEvent.VK_DELETE) {
+                    keysPressed.clear();
+                } else if (keyCode == KeyEvent.VK_BACK_SPACE && keysPressed.size() > 0) { 
+                    keysPressed.remove(keysPressed.size() - 1);
+                } else {
+                    keysPressed.add(Character.toString(e.getKeyChar()));
+                }
+                
+                editor.setFilterText(keysPressed.toArray(new String[0]));
+                
+                if (filter.size() > 0) {
+                    Friend firstFriend = filter.get(0);
+                    list.setSelectedValue(firstFriend, true);
+                }
+            }
+        });
+        
+        return list;
     }
     
     @EventSubscriber
