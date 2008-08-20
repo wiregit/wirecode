@@ -42,7 +42,10 @@ public class RouteTableImplTest extends MojitoTestCase {
             
             // fill the local bucket with two nodes from the same class c network
             routeTable.add(createNode(KUID.createRandomID(), "192.168.0.1", 555));
+            // this one should not be cached
             routeTable.add(createNode(KUID.createRandomID(), "192.168.0.2", 666));
+            assertEquals(2, routeTable.getBucket(localNodeId).size());
+            assertEquals(0, routeTable.getBucket(localNodeId).getCacheSize());
             
             // fill the local bucked with replication_parameter - 2 other nodes, local node is already in there
             // last one should trigger the split
