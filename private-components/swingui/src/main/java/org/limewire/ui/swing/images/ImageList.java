@@ -46,12 +46,10 @@ public class ImageList extends JXList {
     }
     
     private class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
-        ImageExecutor imageExecutor;
         public ImageCellRenderer() {
             super(4);
             setOpaque(true);
             setBorder(new EmptyBorder(20,20,20,20));
-            imageExecutor = new ImageExecutor();
         }
         
         @Override
