@@ -25,6 +25,7 @@ import net.miginfocom.swing.MigLayout;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.bushe.swing.event.annotation.EventTopicPatternSubscriber;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -64,8 +65,8 @@ public class FriendsPane extends JPanel {
         friends = new BasicEventList<Friend>();
         idToFriendMap = new WeakHashMap<String, FriendImpl>();
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
-        SortedList<Friend> sortedObservables = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
-        JList list = new JList(new EventListModel<Friend>(sortedObservables));
+        SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
+        JList list = new JList(new EventListModel<Friend>(sortedFriends));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setCellRenderer(new FriendCellRenderer(icons));
         JScrollPane scroll = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -144,10 +145,20 @@ public class FriendsPane extends JPanel {
             friendName.setText(friend.getName());
             friendName.setFont(list.getFont());
             
-            //FIXME:  This isn't exactly the right behavior. end chat icon should only 
-            //appear on hover during a chat.
-            if (friend.isChatting() && cellHasFocus) {
-                cell.add(new JLabel(icons.getEndChat()));
+            Border border = EMPTY_BORDER;
+            
+            if (friend.isChatting()) {
+                //FIXME:  This isn't exactly the right behavior. end chat icon should only 
+                //appear on hover during a chat.
+                if (cellHasFocus) {
+                    cell.add(new JLabel(icons.getEndChat()));
+                }
+
+                Friend nextFriend = (Friend) list.getModel().getElementAt(index + 1);
+                if (!nextFriend.isChatting()) {
+                    //Light-grey
+                    border = new DropShadowBorder(new Color(194, 194, 194), 1, 1.0f, 1, false, false, true, false);
+                }
             }
             
             cell.setComponentOrientation(list.getComponentOrientation());
@@ -169,7 +180,7 @@ public class FriendsPane extends JPanel {
                 cell.setBackground(list.getBackground());
                 cell.setForeground(list.getForeground());
             }
-            cell.setBorder(EMPTY_BORDER);
+            cell.setBorder(border);
             
             return cell;
         }
