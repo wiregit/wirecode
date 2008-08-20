@@ -138,23 +138,23 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
             prd = _pushedHosts.remove(serventID);
         }
         if (prd != null) {
-            final BrowseHostHandler.PushRequestDetails finalPRD = prd;
+            final BrowseHostHandler browseHostHandler = prd.getBrowseHostHandler();
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
-                        finalPRD.getBrowseHostHandler().browseHost(socket);
+                        browseHostHandler.browseHost(socket);
                     } catch (IOException e) {
                         LOG.debug("error while push transfer", e);
-                        finalPRD.getBrowseHostHandler().failed();
+                        browseHostHandler.failed();
                     } catch (HttpException e) {
                         LOG.debug("error while push transfer", e);
-                        finalPRD.getBrowseHostHandler().failed();
+                        browseHostHandler.failed();
                     } catch (URISyntaxException e) {
                         LOG.debug("error while push transfer", e);
-                        finalPRD.getBrowseHostHandler().failed();
+                        browseHostHandler.failed();
                     } catch (InterruptedException e) {
                         LOG.debug("error while push transfer", e);
-                        finalPRD.getBrowseHostHandler().failed();
+                        browseHostHandler.failed();
                     }
                 }
             }, "BrowseHost");
