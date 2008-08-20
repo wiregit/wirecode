@@ -34,8 +34,6 @@ import org.limewire.ui.swing.sharing.GenericSharingPanel;
 import org.limewire.ui.swing.sharing.GnutellaSharePanel;
 import org.limewire.ui.swing.sharing.IndividualSharePanel;
 import org.limewire.ui.swing.sharing.ShareDropTarget;
-import org.limewire.ui.swing.sharing.SharingBuddyEmptyPanel;
-import org.limewire.ui.swing.sharing.SharingEmptyPanel;
 import org.limewire.ui.swing.sharing.SharingNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -61,7 +59,8 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     private Navigator navigator;
         
     @Inject
-    FilesSharingSummaryPanel(LibraryManager libraryManager) {
+    FilesSharingSummaryPanel(LibraryManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
+            BuddySharePanel buddySharePanel, IndividualSharePanel individualSharePanel) {
         GuiUtils.assignResources(this);
         
         libraryManager.addLibraryLisListener(new LibraryListListener() {
@@ -121,7 +120,7 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         gbc.gridheight = GridBagConstraints.REMAINDER;
         add(individualButton, gbc);
      
-        addPropertyChangeListener(new StartupListener(this,libraryManager));
+        addPropertyChangeListener(new StartupListener(this, libraryManager, gnutellaSharePanel, buddySharePanel, individualSharePanel));
     }
     
     @Inject void setNavigator(Navigator navigator) {
@@ -230,20 +229,25 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     private class StartupListener implements PropertyChangeListener {
         JComponent owner;
         LibraryManager libraryManager;
+        GnutellaSharePanel gnutellaSharePanel;
+        BuddySharePanel buddySharePanel;
+        IndividualSharePanel individualSharePanel;
             
-        public StartupListener(JComponent owner, LibraryManager libraryManager) {
+        public StartupListener(JComponent owner, LibraryManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
+                BuddySharePanel buddySharePanel, IndividualSharePanel individualSharePanel) {
             this.owner = owner;
             this.libraryManager = libraryManager;
+            this.gnutellaSharePanel = gnutellaSharePanel;
+            this.buddySharePanel = buddySharePanel;
+            this.individualSharePanel = individualSharePanel;
         }
         
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             owner.removePropertyChangeListener(this);
-            addDefaultNavigableItems(new GnutellaSharePanel(libraryManager.getGnutellaList(), 
-                    new SharingEmptyPanel("LimeWire Network", null)), 
-                    new BuddySharePanel(libraryManager.getAllBuddyList(),
-                            new SharingBuddyEmptyPanel("All Friends", null)), 
-                            new IndividualSharePanel());
+            addDefaultNavigableItems(gnutellaSharePanel, 
+                            buddySharePanel, 
+                            individualSharePanel);
         }
     }
     

@@ -66,12 +66,14 @@ public class MockFileItem implements FileItem {
     }
 
     @Override
-    public Object getProperty(String key) {
+    public Object getProperty(Keys key) {
+        // TODO Auto-generated method stub
         return null;
     }
-    
+
     @Override
-    public void setProperty(String key, Object object) {
+    public void setProperty(Keys key, Object object) {
+        // TODO Auto-generated method stub
         
     }
 }

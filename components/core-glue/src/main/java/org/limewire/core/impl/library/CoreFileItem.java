@@ -1,6 +1,7 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public class CoreFileItem implements FileItem {
     private final int numHits;
     private final int numUploads;
     private final Category category;
-    private final Map<String,Object> map;
+    private final Map<Keys,Object> map;
     
     public CoreFileItem(FileDesc fileDesc) { 
         this.file = fileDesc.getFile();
@@ -31,7 +32,9 @@ public class CoreFileItem implements FileItem {
         this.numHits = fileDesc.getHitCount();
         this.numUploads = fileDesc.getCompletedUploads();
         this.category = getCategory(fileDesc.getFile());
-        this.map = new HashMap<String,Object>();
+        this.map = Collections.synchronizedMap(new HashMap<Keys,Object>());
+        
+//        setLimeXMLDocuments(fileDesc.getLimeXMLDocuments());
     }
     
     @Override
@@ -90,14 +93,20 @@ public class CoreFileItem implements FileItem {
         }
         return Category.OTHER;   
     }
+    
+//    private void setLimeXMLDocument(LimeXMLDocument document) {
+//        if(document == null)
+//            return;
+//        document.get
+//    }
 
     @Override
-    public Object getProperty(String key) {
+    public Object getProperty(Keys key) {
         return map.get(key);
     }
     
     @Override
-    public void setProperty(String key, Object value) {
+    public void setProperty(Keys key, Object value) {
         map.put(key, value);
     }
 

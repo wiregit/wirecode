@@ -15,17 +15,22 @@ import javax.swing.table.TableColumn;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
+@Singleton
 public class BuddySharePanel extends GenericSharingPanel {
     public static final String NAME = "All Friends";
     
@@ -46,11 +51,11 @@ public class BuddySharePanel extends GenericSharingPanel {
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
 
-    
-    public BuddySharePanel(FileList fileList, SharingBuddyEmptyPanel emptyPanel) {        
+    @Inject
+    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
         GuiUtils.assignResources(this); 
         
-        this.fileList = fileList;
+        this.fileList = libraryManager.getAllBuddyList();
         this.fileList.getModel().addListEventListener(new ListEventListener<FileItem>(){
             @Override
             public void listChanged(ListEvent<FileItem> listChanges) {

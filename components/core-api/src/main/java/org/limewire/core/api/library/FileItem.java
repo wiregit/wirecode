@@ -12,6 +12,10 @@ public interface FileItem {
         VIDEO, AUDIO, DOCUMENT, IMAGE, PROGRAM, OTHER
     };
     
+    public static enum Keys {
+        IMAGE, TEMP_IMAGE,TITLE, AUTHOR, ALBUM
+    }
+    
     File getFile();
     
     String getName();
@@ -31,8 +35,8 @@ public interface FileItem {
     /**
      * Returns xml data about this fileItem
      */
-    Object getProperty(String key);
+    Object getProperty(Keys key);
     
-    void setProperty(String key, Object object);
+    void setProperty(Keys key, Object object);
     
 }

@@ -14,29 +14,24 @@ import org.limewire.ui.swing.util.GuiUtils;
 import com.google.inject.Singleton;
 
 @Singleton
-public class SharingEmptyPanel extends JPanel {
+public class SharingSomeBuddyEmptyPanel extends JPanel {
 
     @Resource
-    Icon gnutellaIcon;
+    Icon someIcon;
     
     private JLabel title;
-    private JLabel text;
     
-    public SharingEmptyPanel() {
+    public  SharingSomeBuddyEmptyPanel() {
         
         GuiUtils.assignResources(this); 
         
         setBackground(Color.WHITE);
-        
-        title = new JLabel(gnutellaIcon);
-        title.setText("You are not sharing anything with the LimeWire Network");
-        
-        text = new JLabel();
-        text.setText("To share with the LimeWire Network, drag files here");
+    
+        title = new JLabel(someIcon);
+        title.setText("Share files with Specific Friends by dragging from your library to their name");
         
         setLayout(new MigLayout("", "[grow]", "[][]"));
         
         add(title, "center, gaptop 120, wrap 70");
-        add(text, "center, top, wrap");
     }
 }

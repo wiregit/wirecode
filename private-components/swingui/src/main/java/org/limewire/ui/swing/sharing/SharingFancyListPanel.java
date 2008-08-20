@@ -156,11 +156,13 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         @Override
         public void mouseMoved(MouseEvent e) {
             int index = imageList.locationToIndex(e.getPoint());
-            imageList.setSelectedIndex(index);
-            
-            Rectangle bounds = imageList.getCellBounds(index, index);
-            ushareButton.setLocation(bounds.x + bounds.width - ushareButton.getWidth()-25, 
-                   bounds.y + 25);
+            if( index > -1) {
+                imageList.setSelectedIndex(index);
+                
+                Rectangle bounds = imageList.getCellBounds(index, index);
+                ushareButton.setLocation(bounds.x + bounds.width - ushareButton.getWidth()-25, 
+                       bounds.y + 25);
+            }
         }
         
     }
