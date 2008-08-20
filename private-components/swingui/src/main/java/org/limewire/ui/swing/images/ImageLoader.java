@@ -38,10 +38,10 @@ public class ImageLoader extends SwingWorker<Icon, Object> {
         try { 
             image = GraphicsUtilities.loadCompatibleImage(fileItem.getFile().toURI().toURL());
         } catch (MalformedURLException e) {
-            fileItem.setProperty("Image", errorIcon);
+            fileItem.setProperty(FileItem.Keys.IMAGE, errorIcon);
             return errorIcon;
         } catch (Exception e) {
-            fileItem.setProperty("Image", errorIcon);
+            fileItem.setProperty(FileItem.Keys.IMAGE, errorIcon);
             return errorIcon;
         } 
         
@@ -52,11 +52,11 @@ public class ImageLoader extends SwingWorker<Icon, Object> {
                   ImageFileItem.HEIGHT, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false);
         } 
         if(image == null) {
-            fileItem.setProperty("Image", errorIcon);
+            fileItem.setProperty(FileItem.Keys.IMAGE, errorIcon);
             return errorIcon;
         }
         ImageIcon imageIcon = new ImageIcon(image);
-        fileItem.setProperty("Image", imageIcon);
+        fileItem.setProperty(FileItem.Keys.IMAGE, imageIcon);
         return imageIcon;
     }
     

@@ -28,10 +28,10 @@ public class ImageList extends JXList {
     private Icon loadIcon;
    
     @Resource
-    private Icon errorIcon;
+    private Icon errorIcon; 
     
-    public ImageList(EventList<FileItem> eventList) { 
-        super(new EventListModel<FileItem>(eventList)); 
+    public ImageList(EventList<FileItem> eventList) {
+        super(new EventListModel<FileItem>(eventList));
 
         GuiUtils.assignResources(this); 
         
@@ -46,11 +46,12 @@ public class ImageList extends JXList {
     }
     
     private class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
-        
+        ImageExecutor imageExecutor;
         public ImageCellRenderer() {
             super(4);
             setOpaque(true);
             setBorder(new EmptyBorder(20,20,20,20));
+            imageExecutor = new ImageExecutor();
         }
         
         @Override
@@ -58,12 +59,12 @@ public class ImageList extends JXList {
                 boolean isSelected, boolean cellHasFocus) {
 
             FileItem item = (FileItem)value;
-            ImageIcon imageIcon = (ImageIcon) item.getProperty("Image");
+            ImageIcon imageIcon = (ImageIcon) item.getProperty(FileItem.Keys.IMAGE);
             if(imageIcon != null) {
                 setIcon(imageIcon);
             } else {
                 setIcon(loadIcon);
-                item.setProperty("Image", loadIcon);
+                item.setProperty(FileItem.Keys.IMAGE, loadIcon);
                 (new ImageLoader(list, item, errorIcon)).execute();
             }
             
