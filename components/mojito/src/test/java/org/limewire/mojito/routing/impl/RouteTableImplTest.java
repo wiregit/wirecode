@@ -27,26 +27,41 @@ public class RouteTableImplTest extends MojitoTestCase {
      * be split. If it can be split it should be split and no contacts should
      * be cached. This is true, since the the bucket's ability to split is an
      * invariant and will never change.
+     * 
+     * An assertion error will be thrown in {@link BucketNode#split()} otherwise
      */
     public void testAddWillNotCacheContactsInSplittableBucket() {
-        RouteTableSettings.MAX_CACHE_SIZE.setValue(1);
-        RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.001f);
-        RouteTableSettings.DEPTH_LIMIT.setValue(2);
+        try {
+            RouteTableSettings.MAX_CACHE_SIZE.setValue(1);
+            RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(0.001f);
+            RouteTableSettings.DEPTH_LIMIT.setValue(2);
         
         
-        KUID localNodeId = KUID.createRandomID();
-        RouteTableImpl routeTable = new RouteTableImpl(localNodeId);
-        
-        // fill the local bucket with two nodes from the same class c network
-        routeTable.add(createNode(KUID.createRandomID(), "192.168.0.1", 555));
-        routeTable.add(createNode(KUID.createRandomID(), "192.168.0.2", 666));
-        
-        // fill the local bucked with replication_parameter - 1 other nodes, local node is already in there
-        // last one should trigger the split
-        for (int i = 0; i < KademliaSettings.REPLICATION_PARAMETER.getValue() - 1; i++) {
-            // use different class c networks
-            String address = MessageFormat.format("129.168.{0}.1", i);
-            routeTable.add(createNode(KUID.createRandomID(), address, i + 1));
+            KUID localNodeId = KUID.createRandomID();
+            RouteTableImpl routeTable = new RouteTableImpl(localNodeId);
+            
+            // fill the local bucket with two nodes from the same class c network
+            routeTable.add(createNode(KUID.createRandomID(), "192.168.0.1", 555));
+            routeTable.add(createNode(KUID.createRandomID(), "192.168.0.2", 666));
+            
+            // fill the local bucked with replication_parameter - 2 other nodes, local node is already in there
+            // last one should trigger the split
+            boolean wasActiveFull = false;
+            for (int i = 0; i < KademliaSettings.REPLICATION_PARAMETER.getValue() - 2; i++) {
+                // use different class c networks
+                String address = MessageFormat.format("129.168.{0}.1", i);
+                try {
+                    routeTable.add(createNode(KUID.createRandomID(), address, i + 1));
+                    wasActiveFull |= routeTable.getBucket(localNodeId).isActiveFull();
+                } catch (AssertionError ae) {
+                    fail("precondition was not met", ae);
+                }
+            }
+            assertTrue("bucket was never split", wasActiveFull);
+        } finally {
+            RouteTableSettings.MAX_CACHE_SIZE.revertToDefault();
+            RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.revertToDefault();
+            RouteTableSettings.DEPTH_LIMIT.revertToDefault();
         }
     }
 
