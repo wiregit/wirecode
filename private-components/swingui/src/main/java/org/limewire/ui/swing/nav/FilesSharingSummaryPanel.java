@@ -5,9 +5,6 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.plaf.metal.MetalToggleButtonUI;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryListEventType;
@@ -32,9 +31,8 @@ import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.sharing.BuddySharePanel;
 import org.limewire.ui.swing.sharing.GenericSharingPanel;
 import org.limewire.ui.swing.sharing.GnutellaSharePanel;
-import org.limewire.ui.swing.sharing.IndividualSharePanel;
-import org.limewire.ui.swing.sharing.ShareDropTarget;
 import org.limewire.ui.swing.sharing.SharingNavigator;
+import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -47,11 +45,9 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     private final JLabel title = new JLabel();
     private final JToggleButton gnutellaButton = new JToggleButton();
     private final JToggleButton buddyButton = new JToggleButton();
-    private final JToggleButton individualButton = new JToggleButton();
-    
+  
     @Resource private Icon gnutellaIcon;    
-    @Resource private Icon buddiesIcon;    
-    @Resource private Icon individualBuddiesIcon;    
+    @Resource private Icon buddiesIcon;     
     @Resource private Font iconOverlayFont;
     @Resource private Color iconOverlayColor;
     @Resource private Color highLightColor;
@@ -60,7 +56,7 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         
     @Inject
     FilesSharingSummaryPanel(LibraryManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
-            BuddySharePanel buddySharePanel, IndividualSharePanel individualSharePanel) {
+            BuddySharePanel buddySharePanel) {
         GuiUtils.assignResources(this);
         
         libraryManager.addLibraryLisListener(new LibraryListListener() {
@@ -72,7 +68,6 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
                     SwingUtils.invokeLater(new Runnable() {
                         public void run() {
                             gnutellaButton.repaint();
-                            individualButton.repaint();
                             buddyButton.repaint();
                         }
                     });
@@ -93,34 +88,15 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         
 		buddyButton.setName("FilesSharingSummaryPanel.buddies");
 		buddyButton.setIcon(new NumberIcon(libraryManager.getAllBuddyList().getModel(), buddiesIcon));
-		buddyButton.setUI(new HighlightToggleButtonUI(highLightColor));
-
-		individualButton.setName("FilesSharingSummaryPanel.some");
-		individualButton.setIcon(new NumberIcon(libraryManager.getUniqueLists(), individualBuddiesIcon));
-        individualButton.setUI(new HighlightToggleButtonUI(highLightColor));        
+		buddyButton.setUI(new HighlightToggleButtonUI(highLightColor));   
 		
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0, 0, 5, 0);
-        add(title, gbc);
-        
+		setLayout(new MigLayout("insets 0 0 0 0", "", ""));
 
-        gbc.gridheight = GridBagConstraints.REMAINDER;
-        gbc.gridwidth = 1;
-        add(gnutellaButton, gbc);
-        
-        gbc.gridheight = GridBagConstraints.RELATIVE;
-        add(buddyButton, gbc);
-        
-        gbc.gridheight = GridBagConstraints.REMAINDER;
-        add(individualButton, gbc);
+        add(title, "span, gapbottom 10, wrap");
+        add(gnutellaButton);
+        add(buddyButton);
      
-        addPropertyChangeListener(new StartupListener(this, libraryManager, gnutellaSharePanel, buddySharePanel, individualSharePanel));
+        addPropertyChangeListener(new StartupListener(this, libraryManager, gnutellaSharePanel, buddySharePanel));
     }
     
     @Inject void setNavigator(Navigator navigator) {
@@ -179,16 +155,12 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     }
         
     //TODO: call this from guice?
-    public void addDefaultNavigableItems(GenericSharingPanel gnutellaShare, BuddySharePanel buddyShare, 
-            IndividualSharePanel individualShare) {
+    public void addDefaultNavigableItems(GenericSharingPanel gnutellaShare, BuddySharePanel buddyShare) {
         NavItem item = addSharingItem(GnutellaSharePanel.NAME, gnutellaShare);
         gnutellaButton.addActionListener(new SharingButtonAction(item, gnutellaButton));
         
         item = addSharingItem(BuddySharePanel.NAME, buddyShare);
         buddyButton.addActionListener(new SharingButtonAction(item, buddyButton));
-        
-        item = addSharingItem(IndividualSharePanel.NAME, individualShare);
-        individualButton.addActionListener(new SharingButtonAction(item, individualButton));
     }
 
     @Override
@@ -231,23 +203,20 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         LibraryManager libraryManager;
         GnutellaSharePanel gnutellaSharePanel;
         BuddySharePanel buddySharePanel;
-        IndividualSharePanel individualSharePanel;
             
         public StartupListener(JComponent owner, LibraryManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
-                BuddySharePanel buddySharePanel, IndividualSharePanel individualSharePanel) {
+                BuddySharePanel buddySharePanel) {
             this.owner = owner;
             this.libraryManager = libraryManager;
             this.gnutellaSharePanel = gnutellaSharePanel;
             this.buddySharePanel = buddySharePanel;
-            this.individualSharePanel = individualSharePanel;
         }
         
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             owner.removePropertyChangeListener(this);
             addDefaultNavigableItems(gnutellaSharePanel, 
-                            buddySharePanel, 
-                            individualSharePanel);
+                            buddySharePanel);
         }
     }
     

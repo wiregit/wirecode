@@ -5,7 +5,7 @@ import java.awt.Component;
 
 import javax.swing.JTable;
 
-import org.limewire.ui.swing.sharing.SharingFancyTablePanel.TableMouseListener;
+import org.limewire.ui.swing.sharing.fancy.SharingFancyTablePanel.TableMouseListener;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 
 public class SharingFancyMultiButtonTableCellRendererEditor extends MultiButtonTableCellRendererEditor {

@@ -2,8 +2,6 @@ package org.limewire.core.api.library;
 
 import java.util.Map;
 
-import ca.odell.glazedlists.EventList;
-
 public interface LibraryManager {
     
     void addLibraryLisListener(LibraryListListener libraryListener);
@@ -16,7 +14,7 @@ public interface LibraryManager {
     
     FileList getAllBuddyList();
 
-    Map<String, EventList<FileItem>> getUniqueLists();
+    Map<String, FileList> getUniqueLists();
     
     void addBuddy(String name);
     

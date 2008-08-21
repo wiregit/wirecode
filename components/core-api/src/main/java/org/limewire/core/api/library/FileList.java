@@ -11,4 +11,6 @@ public interface FileList {
     public void addFile(File file);
     
     public void removeFile(File file);
+    
+    public String getName();
 }

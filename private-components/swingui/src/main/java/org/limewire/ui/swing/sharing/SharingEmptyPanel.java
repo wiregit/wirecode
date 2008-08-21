@@ -32,7 +32,7 @@ public class SharingEmptyPanel extends JPanel {
         title.setText("You are not sharing anything with the LimeWire Network");
         
         text = new JLabel();
-        text.setText("To share with the LimeWire Network, drag files here");
+        text.setText("To share with the LimeWire Network, go to My Library");
         
         setLayout(new MigLayout("", "[grow]", "[][]"));
         

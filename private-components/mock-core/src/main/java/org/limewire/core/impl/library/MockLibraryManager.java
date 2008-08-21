@@ -1,15 +1,12 @@
 package org.limewire.core.impl.library;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.FileItem.Category;
-
-import ca.odell.glazedlists.EventList;
 
 
 public class MockLibraryManager implements LibraryManager {
@@ -18,13 +15,18 @@ public class MockLibraryManager implements LibraryManager {
     private FileListAdapter gnutellaList;
     private FileListAdapter buddyList;
     
+    private Map<String, FileList> buddyMap;
+    
     public MockLibraryManager() {
-        allFileList = new FileListAdapter();
-        gnutellaList = new FileListAdapter();
-        buddyList = new FileListAdapter();
+        allFileList = new FileListAdapter("My Library");
+        gnutellaList = new FileListAdapter("Gnutella List");
+        buddyList = new FileListAdapter("Buddy List");
+        
+        buddyMap = new HashMap<String, FileList>();
 
         initializeMockGnutellaData();
         initializeMockBuddyData();
+        initializeBuddys();
     }
     
     private void initializeMockGnutellaData(){
@@ -39,6 +41,20 @@ public class MockLibraryManager implements LibraryManager {
         item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
+        
+        Thread t = new Thread(new Runnable(){
+            public void run(){
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                MockFileItem item = new MockFileItem("Lazy load.png", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
+                gnutellaList.addFileItem(item);
+                allFileList.addFileItem(item);
+            }
+        });
+        t.start();
     }
     
     private void initializeMockBuddyData(){
@@ -53,6 +69,14 @@ public class MockLibraryManager implements LibraryManager {
         item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.OTHER);
         buddyList.addFileItem(item);
         allFileList.addFileItem(item);
+    }
+    
+    private void initializeBuddys() {
+        buddyMap.put("Sean", new FileListAdapter("Sean"));
+        buddyMap.put("Bob", new FileListAdapter("Bob"));
+        buddyMap.put("Johanna", new FileListAdapter("Johanna"));
+        buddyMap.put("Mark", new FileListAdapter("Mark"));
+        buddyMap.put("Rob", new FileListAdapter("Rob"));
     }
     
     @Override
@@ -78,8 +102,8 @@ public class MockLibraryManager implements LibraryManager {
     }
 
     @Override
-    public Map<String, EventList<FileItem>> getUniqueLists() {
-        return Collections.emptyMap();
+    public Map<String, FileList> getUniqueLists() {
+        return buddyMap;
     }
 
     @Override

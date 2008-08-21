@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.sharing;
+package org.limewire.ui.swing.sharing.dragdrop;
 
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;

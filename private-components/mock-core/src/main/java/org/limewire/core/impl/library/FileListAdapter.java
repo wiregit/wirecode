@@ -13,7 +13,12 @@ import ca.odell.glazedlists.GlazedLists;
 public class FileListAdapter implements FileList {
 
     private final EventList<FileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<FileItem>());
-
+    private final String name;
+    
+    public FileListAdapter(String name) {
+        this.name = name;
+    }
+    
     @Override
     public EventList<FileItem> getModel() {
         return eventList;
@@ -35,6 +40,11 @@ public class FileListAdapter implements FileList {
     
     public void removeFileItem(FileItem item) {
         eventList.remove(item);
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
 }

@@ -18,6 +18,8 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
+import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
+import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
@@ -63,7 +65,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         this.fileList.getModel().addListEventListener(new ListEventListener<FileItem>(){
             @Override
             public void listChanged(ListEvent<FileItem> listChanges) {
-                final int size = listChanges.getSourceList().size();
+                final int size = listChanges.getSourceList().size(); System.out.println("size " + size);
                 SwingUtilities.invokeLater(new Runnable(){
                     public void run() {
                         if( size == 0) {

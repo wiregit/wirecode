@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.sharing;
+package org.limewire.ui.swing.sharing.fancy;
 
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -15,6 +15,8 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FileItem.Category;
+import org.limewire.ui.swing.sharing.SharingShortcutPanel;
+import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.table.SharingFancyAudioTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingFancyDefaultTableFormat;
 

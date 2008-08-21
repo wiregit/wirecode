@@ -89,7 +89,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     }
 
     @Override
-    public Map<String, EventList<FileItem>> getUniqueLists() {
+    public Map<String, FileList> getUniqueLists() {
         return Collections.emptyMap();
     }
     
@@ -220,6 +220,11 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
             FileItem old = lookup.remove(fileDesc.getFile());
             eventList.remove(old);
         }
+
+        @Override
+        public String getName() {
+            return "Gnutella List";
+        }
         
     }
     
@@ -235,6 +240,12 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         public void removeFile(File file) {
             // TODO Auto-generated method stub
             
+        }
+
+        @Override
+        public String getName() {
+            // TODO Auto-generated method stub
+            return null;
         }
         
     }
@@ -273,6 +284,11 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
                 eventList.clear();
                 break;
             }
+        }
+
+        @Override
+        public String getName() {
+            return "My Library";
         }
     }
     

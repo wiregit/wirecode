@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.sharing;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,25 +9,37 @@ import javax.swing.DropMode;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
+import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
+import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
+import org.limewire.ui.swing.sharing.friends.BuddyItem;
+import org.limewire.ui.swing.sharing.friends.BuddyNameTable;
+import org.limewire.ui.swing.sharing.friends.BuddyTableFormat;
+import org.limewire.ui.swing.sharing.friends.MockBuddyItem;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 @Singleton
 public class BuddySharePanel extends GenericSharingPanel {
@@ -43,56 +54,48 @@ public class BuddySharePanel extends GenericSharingPanel {
        
     private final FileList fileList;
     
-    private CardLayout overviewCardLayout;
+//    private CardLayout overviewCardLayout;
     private CardLayout viewCardLayout;
     
-    private JPanel nonEmptyPanel;
+//    private JPanel nonEmptyPanel;
+    
+    private BuddyNameTable buddyTable;
 
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
 
+    EventList<BuddyItem> eventList;
+    
     @Inject
     public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
         GuiUtils.assignResources(this); 
         
         this.fileList = libraryManager.getAllBuddyList();
-        this.fileList.getModel().addListEventListener(new ListEventListener<FileItem>(){
-            @Override
-            public void listChanged(ListEvent<FileItem> listChanges) {
-                if(listChanges.getSourceList().size() == 0) {
-                    overviewCardLayout.show(BuddySharePanel.this,EMPTY);
-                } else {
-                    overviewCardLayout.show(BuddySharePanel.this,NONEMPTY);
-                }
-            }
-        });
-        
-        overviewCardLayout = new CardLayout();
-        this.setLayout(overviewCardLayout);
 
-        createTablesPanels();
-    
-        add(emptyPanel, EMPTY);
-        add(nonEmptyPanel, NONEMPTY);
-        overviewCardLayout.show(this,EMPTY);
-    }
-
-    
-    private void createTablesPanels() {
         viewCardLayout = new CardLayout();
-        nonEmptyPanel = new JPanel();
-        nonEmptyPanel.setLayout(new BorderLayout());
-        
         JPanel cardPanel = new JPanel();
         cardPanel.setLayout(viewCardLayout);
+        cardPanel.add(emptyPanel, EMPTY);
+
+
+        eventList = GlazedLists.threadSafeList(new BasicEventList<BuddyItem>());
+        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat());
+        buddyTable.getSelectionModel().addListSelectionListener(new BuddySelectionListener(buddyTable));
         
         SharingHeaderPanel headerPanel = createHeader(cardPanel);
-
+               
+        createBuddy();
         createCenterCards(headerPanel, cardPanel);
 
-
-        nonEmptyPanel.add(headerPanel, BorderLayout.NORTH);
-        nonEmptyPanel.add(cardPanel);
+        viewCardLayout.show(cardPanel, EMPTY);
+        
+        
+        setLayout(new MigLayout("insets 0 0 0 0", "[150!]0[grow]","[grow]"));
+        
+        add(headerPanel, "dock north");
+        add(new JScrollPane(buddyTable), "grow");
+        add(cardPanel, "grow");
+        
     }
     
     private SharingHeaderPanel createHeader(JPanel cardPanel) {
@@ -142,5 +145,75 @@ public class BuddySharePanel extends GenericSharingPanel {
         List<Action> list = new ArrayList<Action>();
         list.add(new SharingRemoveTableAction(fileList, table, cancelIcon));
         return list;
+    }
+    
+    private void createBuddy() {
+        BuddyItem item = new MockBuddyItem("Anthony", true, 122);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Mike", true, 78);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Jim", true, 58);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Lisa", true, 2);     
+        eventList.add(item);
+    
+        item = new MockBuddyItem("Stephanie", true, 87);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("George", true, 357);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("John", true, 44);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Luke", true, 58);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Rob", true, 41);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Jen", true, 6516);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Julie", true, 516);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Terry", true, 84);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Zack", true, 6);     
+        eventList.add(item);
+        
+        
+        
+        item = new MockBuddyItem("Jack", false, 0);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("Liza", false, 0);     
+        eventList.add(item);
+        
+        item = new MockBuddyItem("William", false, 0);     
+        eventList.add(item);
+        
+    }
+    
+    private class BuddySelectionListener implements ListSelectionListener {
+
+        JTable table;
+        
+        public BuddySelectionListener(JTable table) {
+            this.table = table;
+        }
+        
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            if(!e.getValueIsAdjusting()) {
+                int index = table.getSelectedRow();
+            }
+        }
+        
     }
 }

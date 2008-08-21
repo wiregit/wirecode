@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.sharing;
+package org.limewire.ui.swing.sharing.fancy;
 
 import java.awt.Color;
 import java.awt.Component;
