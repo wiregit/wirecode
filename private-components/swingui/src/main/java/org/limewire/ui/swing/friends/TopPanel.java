@@ -8,13 +8,14 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 
@@ -44,15 +45,17 @@ public class TopPanel extends JPanel {
         FontUtils.changeSize(friendStatusLabel, -1.8f);
         add(friendStatusLabel);
         
-        JXButton options = new JXButton(tr("Options"));
-        FontUtils.changeSize(options, -2.8f);
+        JMenu options = new JMenu(tr("Options"));
+        FontUtils.changeSize(options, -3.0f);
         options.setForeground(getForeground());
         options.setBackground(getBackground());
         options.setBorderPainted(false);
+        options.add(new SignoutAction());
         add(options);
         
-        JXButton closeChat = new JXButton(new CloseAction(icons.getCloseChat()));
+        JButton closeChat = new JButton(new CloseAction(icons.getCloseChat()));
         closeChat.setBorderPainted(false);
+        closeChat.setForeground(getForeground());
         add(closeChat);
         
         EventAnnotationProcessor.subscribe(this);
@@ -74,6 +77,17 @@ public class TopPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             new DisplayFriendsEvent().publish();
+        }
+    }
+    
+    private static class SignoutAction extends AbstractAction {
+        public SignoutAction() {
+            super(tr("Sign Out"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            
         }
     }
 }
