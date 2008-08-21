@@ -15,6 +15,8 @@ public class ConversationStartedEvent extends AbstractEDTEvent {
     ConversationStartedEvent(Friend friend, MessageWriter writer) {
         this.friend = friend;
         this.writer = writer;
+        
+        friend.startChat();
     }
     
     public Friend getFriend() {
