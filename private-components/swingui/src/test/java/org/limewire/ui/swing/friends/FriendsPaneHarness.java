@@ -24,9 +24,12 @@ public class FriendsPaneHarness {
                 frame.add(pane);
 
                 final ArrayList<Duo> presences = new ArrayList<Duo>();
-                for (int i = 0; i < 10; i++) {
-                    MockUser user = new MockUser("", "foooooooooooooooo" + i);
-                    MockPresence presence = new MockPresence(randomMode(), "Sort-in", "jid" + i);
+                String[] names = new String[] { "lmfiney", "kristim", "lare77", "marioaquino", "natenff", 
+                        "moe", "larry", "curly", "shemp", "curly-joe"};
+                int i = 0;
+                for(String name : names) {
+                    MockUser user = new MockUser("", name);
+                    MockPresence presence = new MockPresence(randomMode(), "Sort-in", "jid" + i++);
                     new PresenceUpdateEvent(user, presence).publish();
                     presences.add(new Duo(user, presence));
                 }
@@ -38,11 +41,11 @@ public class FriendsPaneHarness {
                     @Override
                     public void run() {
                         while (true) {
-                            Duo duo = presences.get((int) (Math.random() * 10));
+                            Duo duo = presences.get(get1to10());
                             duo.presence.setMode(randomMode());
                             new PresenceUpdateEvent(duo.user, duo.presence).publish();
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(10000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -64,8 +67,11 @@ public class FriendsPaneHarness {
     }
 
     private static Mode randomMode() {
-        int val = (int) (Math.random() * 10);
-        Mode mode = modes[val / 2];
+        Mode mode = modes[get1to10() / 2];
         return mode == null ? modes[0] : mode;
+    }
+
+    private static int get1to10() {
+        return (int) (Math.random() * 10);
     }
 }

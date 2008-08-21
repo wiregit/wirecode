@@ -114,10 +114,23 @@ public class FriendsPane extends JPanel {
                 
                 editor.setFilterText(keysPressed.toArray(new String[0]));
                 
+                if (LOG.isDebugEnabled()) {
+                    LOG.debugf("FriendsPane keyPressed(): {0} {1} ", KeyEvent.getKeyText(e.getKeyCode()), getKeyPressed());
+                }
+                    
+                
                 if (filter.size() > 0) {
                     Friend firstFriend = filter.get(0);
                     list.setSelectedValue(firstFriend, true);
                 }
+            }
+            
+            private String getKeyPressed() {
+                StringBuilder builder = new StringBuilder();
+                for(String s : keysPressed) {
+                    builder.append(s);
+                }
+                return builder.toString();
             }
         });
         
