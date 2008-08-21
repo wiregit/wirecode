@@ -17,19 +17,18 @@ import org.limewire.util.StringUtils;
 
 /**
  * A read/write channel implementation that forwards all requests received from
- * LimeWire's NIO layer to HttpCore's {@link IOEventDispatch}. 
+ * LimeWire's NIO layer to HttpCore's {@link IOEventDispatch}.
  */
-public class HttpChannel implements ByteChannel, ChannelReadObserver,
-        ChannelWriter {
+public class HttpChannel implements ByteChannel, ChannelReadObserver, ChannelWriter {
 
     private static final Log LOG = LogFactory.getLog(HttpChannel.class);
-    
+
     private final HttpIOSession session;
 
     private final IOEventDispatch eventDispatch;
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-    
+
     private InterestReadableByteChannel readSource;
 
     private volatile InterestWritableByteChannel writeSource;
@@ -48,14 +47,14 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
      * Constructs a channel optionally pushing back a string that will be read
      * first. LimeWire's acceptor eats the first word of a connection to
      * determine the type. If a non-null value is passed as <code>method</code>
-     * this word can be pushed back into the channel and will be the first
-     * data returned by {@link #read(ByteBuffer)}.
+     * this word can be pushed back into the channel and will be the first data
+     * returned by {@link #read(ByteBuffer)}.
      * 
      * @param session the IO session
-     * @param eventDispatch the IO event dispatcher that 
+     * @param eventDispatch the IO event dispatcher that
      * @param method if != null, the content will be pushed back into the
      *        channel
-     * @param up  bandwidth tracker tracking upstream bandwidth
+     * @param up bandwidth tracker tracking upstream bandwidth
      * @param down bandwidth tracker tracking downstream bandwidth
      */
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method,
@@ -78,33 +77,32 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
-        this(session, eventDispatch, method, new HttpBandwidthTracker(),
-                new HttpBandwidthTracker());
+        this(session, eventDispatch, method, new HttpBandwidthTracker(), new HttpBandwidthTracker());
     }
 
     /**
      * Constructs a channel that does not push back a method.
      * 
-     * @see  #HttpChannel(HttpIOSession, IOEventDispatch)
+     * @see #HttpChannel(HttpIOSession, IOEventDispatch)
      */
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch) {
         this(session, eventDispatch, null);
     }
-    
+
     public int read(ByteBuffer buffer) throws IOException {
         if (methodBuffer != null) {
             int read = BufferUtils.transfer(methodBuffer, buffer, false);
             if (methodBuffer.hasRemaining()) {
-                down.count(read);
+                downCount(read);
                 return read;
             }
             methodBuffer = null;
             read = read + readSource.read(buffer);
-            down.count(read);
+            downCount(read);
             return read;
         }
         int read = readSource.read(buffer);
-        down.count(read);
+        downCount(read);
         return read;
     }
 
@@ -118,7 +116,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
             if (!source.hasBufferedOutput()) {
                 session.shutdown();
             } else {
-                pendingClose = true;        
+                pendingClose = true;
                 requestWrite(true);
             }
         } else {
@@ -132,17 +130,18 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     public int write(ByteBuffer buffer) throws IOException {
         int written = writeSource.write(buffer);
-        up.count(written);
+        upCount(written);
         return written;
     }
 
     public void handleRead() throws IOException {
         if (!readInterest) {
-            LOG.error("Unexpected call to HttpChannel.handleRead(), turning read interest back off");
+            LOG
+                    .error("Unexpected call to HttpChannel.handleRead(), turning read interest back off");
             readSource.interestRead(false);
             return;
         }
-        
+
         eventDispatch.inputReady(session);
     }
 
@@ -158,7 +157,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
             session.getIoExecutor().execute(new Runnable() {
                 public void run() {
                     eventDispatch.disconnected(session);
-                }               
+                }
             });
         }
     }
@@ -192,7 +191,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
             }
             return false;
         }
-        
+
         if (!writeInterest) {
             // HttpIOSession turns off read interest before switching channels
             // using AbstractNBSocket#setWriteObserver(), do not delegate to
@@ -201,7 +200,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         }
 
         eventDispatch.outputReady(session);
-        
+
         return session.hasBufferedOutput();
     }
 
@@ -219,19 +218,32 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
         if (pendingClose) {
             status = true;
         }
-        
+
         this.writeInterest = status;
         if (writeSource != null) {
             writeSource.interestWrite(this, status);
         }
     }
-    
+
     public boolean isWriteInterest() {
         return writeInterest;
     }
-    
+
     public boolean isReadInterest() {
         return readInterest;
     }
+    
+    private void downCount(int read) {
+        if (read > 0) {
+            down.count(read);
+        }
+    }
+    
+    private void upCount(int written) {
+        if (written > 0) {
+            up.count(written);
+        }
+    }
+
 
 }
