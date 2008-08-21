@@ -21,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 
@@ -195,7 +196,9 @@ public class FriendsPane extends JPanel {
             JXPanel cell = new JXPanel(new MigLayout("insets 0 2 0 1", "3[]6[]push[]", "1[]1"));
             
             Friend friend = (Friend) value;
-            cell.add(new JLabel(getIcon(friend, icons)));
+            
+            JLabel friendIcon = new JLabel(getIcon(friend, icons));
+            cell.add(friendIcon);
             
             JLabel friendName = new JLabel(friend.getName());
             FontUtils.changeSize(friendName, -2.8f);
@@ -205,16 +208,22 @@ public class FriendsPane extends JPanel {
             Border border = EMPTY_BORDER;
             
             if (friend.isChatting()) {
+                //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally  
+                friendIcon.setIcon(icons.getChatting());
+                
                 //FIXME:  This isn't exactly the right behavior. end chat icon should only 
                 //appear on hover during a chat.
                 if (cellHasFocus) {
                     cell.add(new JLabel(icons.getEndChat()));
                 }
 
-                Friend nextFriend = (Friend) list.getModel().getElementAt(index + 1);
-                if (!nextFriend.isChatting()) {
-                    //Light-grey
-                    border = new DropShadowBorder(new Color(194, 194, 194), 1, 1.0f, 1, false, false, true, false);
+                ListModel model = list.getModel();
+                if (model.getSize() > (index + 1)) {
+                    Friend nextFriend = (Friend) model.getElementAt(index + 1);
+                    if (!nextFriend.isChatting()) {
+                        //Light-grey
+                        border = new DropShadowBorder(new Color(194, 194, 194), 1, 1.0f, 1, false, false, true, false);
+                    }
                 }
             }
             
