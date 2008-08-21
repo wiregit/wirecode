@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
@@ -64,8 +65,13 @@ public class LoginPanel extends JPanel implements Displayable {
     private void initComponents() {
         userNameField = new JTextField(18);
         passwordField = new JPasswordField(18);
+        
+        SignInAction signinAction = new SignInAction();
+        passwordField.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "signin");
+        passwordField.getActionMap().put("signin", signinAction);
+        
         rememberMeCheckbox = new JCheckBox(tr("Remember me"));
-        signInButton = new JButton(new SignInAction());
+        signInButton = new JButton(signinAction);
 
         FormLayout layout = new FormLayout("7dlu, p, 7dlu", "7dlu, p, 10dlu, p, 7dlu");
         PanelBuilder builder = new PanelBuilder(layout);
