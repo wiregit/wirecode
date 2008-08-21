@@ -28,8 +28,7 @@ public class FriendImpl extends AbstractBean implements Friend {
     
     @Override
     public Mode getMode() {
-        //This is a hack because Mode.chat is never set by gtalk.  :-(
-        return isChatting() ? Mode.chat : mode;
+        return mode;
     }
     
     void setMode(Mode mode) {
