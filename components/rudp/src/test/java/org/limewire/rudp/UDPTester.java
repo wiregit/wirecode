@@ -96,7 +96,7 @@ public class UDPTester {
     }
 
     public static void echoServer(String host, int port) throws IOException {
-        Socket usock = udpSelectorProvider.openSocketChannel().socket();
+        Socket usock = udpSelectorProvider.openAcceptorSocketChannel().socket();
         usock.connect(new InetSocketAddress(host, port));
         usock.setSoTimeout(TIMEOUT);
         

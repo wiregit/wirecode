@@ -76,6 +76,11 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
         _data2 = BufferUtils.getEmptyBuffer();
     }
 
+    protected RUDPMessageImpl(byte connectionID, OpCode opcode, long sequenceNumber,
+            byte[] data) {
+        this(connectionID, opcode, sequenceNumber, data, data.length);
+    }
+    
     /** Constructs an RUDPMessage with a byte[] of data. */
     protected RUDPMessageImpl(byte connectionID, OpCode opcode, long sequenceNumber,
                               byte[] data, int datalength ) {

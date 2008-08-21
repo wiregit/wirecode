@@ -3,6 +3,7 @@ package com.limegroup.gnutella.rudp.messages;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 
 import com.limegroup.gnutella.messages.Message;
@@ -27,7 +28,7 @@ public class LimeRUDPMessageHelper {
     }
     
     public static Message getSyn(int id) {
-        return (Message)new LimeRUDPMessageFactory(new DefaultMessageFactory()).createSynMessage((byte)35, (byte)id);
+        return (Message)new LimeRUDPMessageFactory(new DefaultMessageFactory()).createSynMessage((byte)35, (byte)id, Role.UNDEFINED);
     }
     
     

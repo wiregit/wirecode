@@ -16,4 +16,9 @@ class LimeSynMessageImpl extends AbstractLimeRUDPMessage<SynMessage> implements 
         return delegate.getSenderConnectionID();
     }
 
+    @Override
+    public Role getRole() {
+        return delegate.getRole();
+    }
+
 }

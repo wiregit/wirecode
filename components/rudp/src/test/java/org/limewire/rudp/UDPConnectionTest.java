@@ -16,8 +16,11 @@ import junit.framework.Test;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.NBSocket;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.messages.RUDPMessageFactory;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.util.BaseTestCase;
 
@@ -34,6 +37,8 @@ public final class UDPConnectionTest extends BaseTestCase {
 
     private volatile AbstractNBSocket uconn1;
     private volatile AbstractNBSocket uconn2;
+
+    private RUDPContext context;
     
 	/*
 	 * Constructs the test.
@@ -57,9 +62,10 @@ public final class UDPConnectionTest extends BaseTestCase {
     public void setUp() throws Exception {
         RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
-        udpSelectorProvider = new UDPSelectorProvider(new DefaultRUDPContext(
+        context = new DefaultRUDPContext(
                 factory, NIODispatcher.instance().getTransportListener(),
-                stubService, new DefaultRUDPSettings()));
+                stubService, new DefaultRUDPSettings());
+        udpSelectorProvider = new UDPSelectorProvider(context);
         udpMultiplexor = udpSelectorProvider.openSelector();
         stubService.setUDPMultiplexor(udpMultiplexor);
         NIODispatcher.instance().registerSelector(udpMultiplexor,
@@ -100,7 +106,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             @Override
             public void run() {
                 try {
-                    uconn2 = udpSelectorProvider.openSocketChannel().socket();
+                    uconn2 = udpSelectorProvider.openAcceptorSocketChannel().socket();
                     uconn2.connect(new InetSocketAddress("127.0.0.1", 6348));
                     UStandalone.echoServer(uconn2, NUM_BYTES);
                 } catch (IOException ioe) {
@@ -139,7 +145,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             @Override
             public void run() {
                 try {
-                    uconn2 = udpSelectorProvider.openSocketChannel().socket();
+                    uconn2 = udpSelectorProvider.openAcceptorSocketChannel().socket();
                     uconn2.connect(new InetSocketAddress("127.0.0.1", 6348));
                     UStandalone.echoServerBlock(uconn2, NUM_BLOCKS);
                 } catch (IOException ioe) {
@@ -207,7 +213,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             t.start();
 
             // start the second connection
-            uconn2 = udpSelectorProvider.openSocketChannel().socket();
+            uconn2 = udpSelectorProvider.openAcceptorSocketChannel().socket();
             uconn2.connect(new InetSocketAddress("127.0.0.1", 6346), 5000);
             uconn2.setSoTimeout(TIMEOUT);
             OutputStream ostream = uconn2.getOutputStream();
@@ -422,7 +428,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             @Override
             public void run() {
                 try {
-                    uconn1 = udpSelectorProvider.openSocketChannel().socket();
+                    uconn1 = udpSelectorProvider.openAcceptorSocketChannel().socket();
                     uconn1.connect(new InetSocketAddress("127.0.0.1", 6348), 2000);
                     uconn1.setSoTimeout(TIMEOUT);
                     UStandalone.echoServer(uconn1, NUM_BYTES);                   
@@ -456,6 +462,10 @@ public final class UDPConnectionTest extends BaseTestCase {
      */
     public void testTwoConnectionsFromOneSide() throws Exception {
         final int NUM_BYTES = 10 * 1000;
+        
+        // clear out routes from setUp()
+        stubService.clearReceivers();
+        
         // Add some routes to the UDPServiceStub
         stubService.addReceiver(6346, 6348, 0, 0);
         stubService.addReceiver(6348, 6346, 0, 0);
@@ -468,7 +478,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Server extends ManagedThread {
             @Override
             public void run() {
-                Socket socket = udpSelectorProvider.openSocketChannel().socket();
+                Socket socket = udpSelectorProvider.openAcceptorSocketChannel().socket();
                 try {
                     socket.connect(new InetSocketAddress("127.0.0.1", 6348), 2000);
                     socket.setSoTimeout(TIMEOUT);
@@ -535,6 +545,10 @@ public final class UDPConnectionTest extends BaseTestCase {
      */
     public void testTwoConnectionsFromBothSides() throws Exception {
         final int NUM_BYTES = 10 * 1000;
+
+        // clear out routes from setUp()
+        stubService.clearReceivers();
+
         // Add some routes to the UDPServiceStub
         stubService.addReceiver(6346, 6348, 0, 0);
         stubService.addReceiver(6348, 6346, 0, 0);
@@ -554,7 +568,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             
             @Override
             public void run() {
-                Socket socket = udpSelectorProvider.openSocketChannel().socket();
+                Socket socket = udpSelectorProvider.openAcceptorSocketChannel().socket();
                 try {
                     socket.connect(new InetSocketAddress("127.0.0.1", port), 2000);
                     socket.setSoTimeout(TIMEOUT);
@@ -626,6 +640,99 @@ public final class UDPConnectionTest extends BaseTestCase {
     }
 
     /**
+     * Ensures that the new acceptor code still accepts old syn messages coming
+     * in, this is achieved by creating the UDPSocketChannel manually and specifying
+     * its role as {@link Role#UNDEFINED}.
+     */
+    public void testVersion1AcceptorAcceptsOldRequestors() throws Exception {
+        final CountDownLatch connectLatch = new CountDownLatch(2);
+        
+        // clear default routes
+        stubService.clearReceivers();
+        
+        // Add routes to the UDPServiceStub
+        stubService.addReceiver(6346, 6348, 0, 0);
+        stubService.addReceiver(6348, 6346, 0, 0);
+        
+        NBSocket acceptorSocket = udpSelectorProvider.openAcceptorSocketChannel().socket();
+        acceptorSocket.connect(new InetSocketAddress("127.0.0.1", 6348), 2000, new ConnectObserver() {
+            @Override
+            public void handleConnect(Socket socket) throws IOException {
+                connectLatch.countDown();
+            }
+            @Override
+            public void handleIOException(IOException iox) {
+            }
+            @Override
+            public void shutdown() {
+            }
+        });
+        
+        NBSocket requestorSocket = new UDPSocketChannel(udpSelectorProvider, context, Role.UNDEFINED).socket();
+        requestorSocket.connect(new InetSocketAddress("127.0.0.1", 6346), 2000, new ConnectObserver() {
+            @Override
+            public void handleConnect(Socket socket) throws IOException {
+                connectLatch.countDown();
+            }
+            @Override
+            public void handleIOException(IOException iox) {
+            }
+            @Override
+            public void shutdown() {
+            }
+        });
+        
+        assertTrue(connectLatch.await(2000, TimeUnit.MILLISECONDS));
+    }
+    
+    /**
+     * Ensures that the new requestor code still accepts old syn messages coming
+     * in, this is achieved by creating the UDPSocketChannel manually and specifying
+     * its role as {@link Role#UNDEFINED}. This is not truly an old syn message
+     * but it's role, but it's close enough.
+     */
+    public void testVersion1RequestorConnectsToOldAcceptors() throws Exception {
+        final CountDownLatch connectLatch = new CountDownLatch(2);
+        
+        // clear default routes
+        stubService.clearReceivers();
+        
+        // Add routes to the UDPServiceStub
+        stubService.addReceiver(6346, 6348, 0, 0);
+        stubService.addReceiver(6348, 6346, 0, 0);
+        
+        NBSocket acceptorSocket = udpSelectorProvider.openSocketChannel().socket();
+        acceptorSocket.connect(new InetSocketAddress("127.0.0.1", 6348), 2000, new ConnectObserver() {
+            @Override
+            public void handleConnect(Socket socket) throws IOException {
+                connectLatch.countDown();
+            }
+            @Override
+            public void handleIOException(IOException iox) {
+            }
+            @Override
+            public void shutdown() {
+            }
+        });
+        
+        NBSocket requestorSocket = new UDPSocketChannel(udpSelectorProvider, context, Role.UNDEFINED).socket();
+        requestorSocket.connect(new InetSocketAddress("127.0.0.1", 6346), 2000, new ConnectObserver() {
+            @Override
+            public void handleConnect(Socket socket) throws IOException {
+                connectLatch.countDown();
+            }
+            @Override
+            public void handleIOException(IOException iox) {
+            }
+            @Override
+            public void shutdown() {
+            }
+        });
+        
+        assertTrue(connectLatch.await(2000, TimeUnit.MILLISECONDS));
+    }
+    
+    /**
      * Test that data can be written, echoed and read through flaky
      * UDPConnections.
      * 
@@ -651,7 +758,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             @Override
             public void run() {
                 try {
-                    uconn1 = udpSelectorProvider.openSocketChannel().socket();
+                    uconn1 = udpSelectorProvider.openAcceptorSocketChannel().socket();
                     uconn1.connect(new InetSocketAddress("127.0.0.1", 6348), 2000);
                     uconn1.setSoTimeout(TIMEOUT);
                     UStandalone.echoServer(uconn1, NUM_BYTES);                   
@@ -704,7 +811,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             @Override
             public void run() {
                 try {
-                    uconn2 = udpSelectorProvider.openSocketChannel().socket();
+                    uconn2 = udpSelectorProvider.openAcceptorSocketChannel().socket();
                     uconn2.connect(new InetSocketAddress("127.0.0.1", 6348), 2000);
                     uconn2.setSoTimeout(TIMEOUT);
                     UStandalone.echoServer(uconn2, NUM_BYTES);
@@ -757,7 +864,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             @Override
             public void run() {
                 try {
-                    uconn2 = udpSelectorProvider.openSocketChannel().socket();
+                    uconn2 = udpSelectorProvider.openAcceptorSocketChannel().socket();
                     uconn2.connect(new InetSocketAddress("127.0.0.1", 6348), 10000);
                     uconn2.setSoTimeout(TIMEOUT);
                     UStandalone.echoServer(uconn2, NUM_BYTES);
@@ -804,7 +911,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             Thread t = new ManagedThread(new Runnable() {
                 public void run() {
                     try {
-                        uconn2 = udpSelectorProvider.openSocketChannel().socket();
+                        uconn2 = udpSelectorProvider.openAcceptorSocketChannel().socket();
                         uconn2.connect(new InetSocketAddress("127.0.0.1", 6348), 2000);
                     } catch (IOException e) {
                         fail("Error establishing UDP connection to port 6348", e);

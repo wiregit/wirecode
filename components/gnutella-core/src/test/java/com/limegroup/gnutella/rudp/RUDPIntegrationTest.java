@@ -17,6 +17,7 @@ import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPConnectionProcessor;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.rudp.messages.RUDPMessage;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -188,7 +189,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
         private volatile boolean isConnecting;
         
         StubUDPConnectionProcessor(RUDPContext context) {
-            super(null, context);
+            super(null, context, Role.UNDEFINED);
         }
         
         @Override

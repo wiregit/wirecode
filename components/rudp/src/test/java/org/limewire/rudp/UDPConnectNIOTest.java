@@ -70,7 +70,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     
     
     private StubConnectObserver setupConnection() throws Exception {
-        AbstractNBSocket conn = udpSelectorProvider.openSocketChannel().socket();
+        AbstractNBSocket conn = udpSelectorProvider.openAcceptorSocketChannel().socket();
         StubConnectObserver stub = new StubConnectObserver();
         conn.connect(new InetSocketAddress("127.0.0.1", PORT_2), 5000, stub);
         return stub;

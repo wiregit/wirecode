@@ -14,6 +14,7 @@ import junit.framework.Test;
 import org.limewire.nio.observer.TransportListener;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.util.BaseTestCase;
 
@@ -159,7 +160,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
         assertEquals(0, selector.selectNow());
         
         key.interestOps(SelectionKey.OP_CONNECT);
-        SynMessage syn = new DefaultMessageFactory().createSynMessage((byte)1);
+        SynMessage syn = new DefaultMessageFactory().createSynMessage((byte)1, Role.UNDEFINED);
         UDPMultiplexor plexor = (UDPMultiplexor) selector;
         
         StubProcessor processor = (StubProcessor)channel.getProcessor();
@@ -182,7 +183,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
         private StubProcessor stubProcessor = new StubProcessor(this);
         InetSocketAddress addr;
         StubUDPSocketChannel() {
-            super((SelectorProvider)null, context);
+            super((SelectorProvider)null, context, Role.UNDEFINED);
         }
         
         @Override
@@ -212,7 +213,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
 
         RUDPMessage msg;
         StubProcessor(UDPSocketChannel channel) {
-            super(channel, context);
+            super(channel, context, Role.UNDEFINED);
         }
         
         @Override

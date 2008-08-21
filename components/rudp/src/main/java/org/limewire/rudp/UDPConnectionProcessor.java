@@ -16,6 +16,7 @@ import org.limewire.rudp.messages.FinMessage;
 import org.limewire.rudp.messages.KeepAliveMessage;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.service.ErrorService;
 
 /** 
@@ -250,11 +251,17 @@ public class UDPConnectionProcessor {
    
     /** The context containing various aspects required for RUDP. */
     private final RUDPContext _context;
+
+    private final Role role;
    
-    /** Creates a new unconnected UDPConnectionProcessor. */
-    protected UDPConnectionProcessor(UDPSocketChannel channel, RUDPContext context) {
+    /** Creates a new unconnected UDPConnectionProcessor. 
+     * @param role defines the role it plays in the communication, either 
+     * requestor or acceptor 
+     */
+    protected UDPConnectionProcessor(UDPSocketChannel channel, RUDPContext context, Role role) {
         // Init default state
         _context                 = context;
+        this.role = role;
         _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
         _connectionState         = PRECONNECT_STATE;
         _lastSendTime            = 0l;
@@ -944,9 +951,9 @@ public class UDPConnectionProcessor {
                 // Build SYN message with my connectionID in it
                 SynMessage synMsg;
                 if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT)
-                    synMsg = _context.getMessageFactory().createSynMessage(_myConnectionID, _theirConnectionID);
+                    synMsg = _context.getMessageFactory().createSynMessage(_myConnectionID, _theirConnectionID, role);
                 else
-                    synMsg = _context.getMessageFactory().createSynMessage(_myConnectionID);
+                    synMsg = _context.getMessageFactory().createSynMessage(_myConnectionID, role);
     
                 LOG.debug("Sending SYN: " + synMsg);
                 // Send a SYN packet with our connectionID

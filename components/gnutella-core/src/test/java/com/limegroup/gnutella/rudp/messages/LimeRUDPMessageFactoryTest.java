@@ -11,6 +11,7 @@ import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.RUDPMessage.OpCode;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.util.BaseTestCase;
 
@@ -44,8 +45,8 @@ public class LimeRUDPMessageFactoryTest extends BaseTestCase {
         checkMessage(f.createDataMessage((byte)1, 1, null), LimeDataMessageImpl.class);
         checkMessage(f.createFinMessage((byte)1, 1, (byte)1), LimeFinMessageImpl.class);
         checkMessage(f.createKeepAliveMessage((byte)1, 1, 1), LimeKeepAliveMessageImpl.class);
-        checkMessage(f.createSynMessage((byte)1), LimeSynMessageImpl.class);
-        checkMessage(f.createSynMessage((byte)1, (byte)1), LimeSynMessageImpl.class);
+        checkMessage(f.createSynMessage((byte)1, Role.REQUESTOR), LimeSynMessageImpl.class);
+        checkMessage(f.createSynMessage((byte)1, (byte)1, Role.ACCEPTOR), LimeSynMessageImpl.class);
     }
     
     public void testCreateNetworkMessages() throws Exception {

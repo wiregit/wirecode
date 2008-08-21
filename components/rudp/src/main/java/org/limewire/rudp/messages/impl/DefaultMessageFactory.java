@@ -13,6 +13,7 @@ import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.RUDPMessage.OpCode;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 
@@ -81,7 +82,7 @@ public class DefaultMessageFactory implements RUDPMessageFactory {
 
         switch (opcode) {
             case OP_SYN:
-                return new SynMessageImpl(connectionID, sequenceNumber, data1, data2);
+                return createSynMessage(connectionID, sequenceNumber, data1, data2);
             case OP_ACK:
                 return new AckMessageImpl(connectionID, sequenceNumber, data1, data2);
             case OP_KEEPALIVE:
@@ -111,11 +112,20 @@ public class DefaultMessageFactory implements RUDPMessageFactory {
         return new KeepAliveMessageImpl(connectionID, windowStart, windowSpace);
     }
     
-    public SynMessage createSynMessage(byte connectionID) {
-        return new SynMessageImpl(connectionID);
+    public SynMessage createSynMessage(byte connectionID, Role role) {
+        return new SynMessageImpl(connectionID, role);
     }
     
-    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID) {
-        return new SynMessageImpl(connectionID, theirConnectionID);
+    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID, Role role) {
+        return new SynMessageImpl(connectionID, theirConnectionID, role);
+    }
+    
+    /**
+     * Creates syn message from data read from the network, stubbed out here, so the factory
+     * can be subclassed to test old message versions. 
+     */
+    protected SynMessage createSynMessage(byte connectionID, long sequenceNumber, ByteBuffer data1,
+            ByteBuffer data2) throws MessageFormatException {
+        return new SynMessageImpl(connectionID, sequenceNumber, data1, data2);
     }
 }

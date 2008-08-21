@@ -10,6 +10,7 @@ import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.SynMessage;
+import org.limewire.rudp.messages.SynMessage.Role;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -73,13 +74,13 @@ class LimeRUDPMessageFactory implements RUDPMessageFactory {
                 delegate.createKeepAliveMessage(connectionID, windowStart, windowSpace));
     }
 
-    public SynMessage createSynMessage(byte connectionID) {
+    public SynMessage createSynMessage(byte connectionID, Role role) {
         return new LimeSynMessageImpl(
-                delegate.createSynMessage(connectionID));
+                delegate.createSynMessage(connectionID, role));
     }
 
-    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID) {
+    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID, Role role) {
         return new LimeSynMessageImpl(
-                delegate.createSynMessage(connectionID, theirConnectionID));
+                delegate.createSynMessage(connectionID, theirConnectionID, role));
     }
 }

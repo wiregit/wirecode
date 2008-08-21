@@ -10,7 +10,7 @@ public interface RUDPMessage {
     public static final byte F_RUDP_MESSAGE = (byte)0x41;
     
     // The version number of the protocol to allow for future improvements
-    public static final short PROTOCOL_VERSION_NUMBER = 0;
+    public static final short PROTOCOL_VERSION_NUMBER = 1;
     
     /** Used to specify a message type (either SYN, ACK, KEEPALIVE, DATA or 
      * FIN).

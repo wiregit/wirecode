@@ -11,6 +11,7 @@ import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.RUDPMessage.OpCode;
+import org.limewire.rudp.messages.SynMessage.Role;
 
 public class StubRUDPMessageFactory implements RUDPMessageFactory {
     
@@ -58,11 +59,13 @@ public class StubRUDPMessageFactory implements RUDPMessageFactory {
         return null;
     }
 
-    public SynMessage createSynMessage(byte connectionID) {
+    @Override
+    public SynMessage createSynMessage(byte connectionID, Role role) {
         return new StubSynMessage();
     }
 
-    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID) {
+    @Override
+    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID, Role role) {
         return new StubSynMessage();
     }
 

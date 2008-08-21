@@ -12,6 +12,7 @@ import org.limewire.rudp.messages.FinMessage;
 import org.limewire.rudp.messages.KeepAliveMessage;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 
 import com.limegroup.gnutella.messages.Message;
@@ -41,8 +42,8 @@ public class LimeRUDPMessageParserTest extends LimeTestCase {
         doReadWriteTest(parser, factory.createDataMessage((byte)1, 1, buffer(503)), DataMessage.class);
         doReadWriteTest(parser, factory.createFinMessage((byte)1, 1, (byte)1), FinMessage.class);
         doReadWriteTest(parser, factory.createKeepAliveMessage((byte)1, 1, 1), KeepAliveMessage.class);
-        doReadWriteTest(parser, factory.createSynMessage((byte)1), SynMessage.class);
-        doReadWriteTest(parser, factory.createSynMessage((byte)1, (byte)1), SynMessage.class);
+        doReadWriteTest(parser, factory.createSynMessage((byte)1, Role.UNDEFINED), SynMessage.class);
+        doReadWriteTest(parser, factory.createSynMessage((byte)1, (byte)1, Role.UNDEFINED), SynMessage.class);
     }
     
     private void doReadWriteTest(MessageParser p, RUDPMessage m, Class expected) throws Exception {

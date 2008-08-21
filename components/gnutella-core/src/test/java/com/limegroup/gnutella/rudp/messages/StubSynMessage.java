@@ -14,4 +14,9 @@ public class StubSynMessage extends StubRUDPMessage implements SynMessage {
         return 0;
     }
 
+    @Override
+    public Role getRole() {
+        return Role.UNDEFINED;
+    }
+
 }

@@ -6,6 +6,8 @@ import java.nio.channels.Pipe;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
+import org.limewire.rudp.messages.SynMessage.Role;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -42,14 +44,17 @@ public class UDPSelectorProvider extends SelectorProvider {
         return plexor;
     }
 
-    @Override
-    public ServerSocketChannel openServerSocketChannel() throws IOException {
-        throw new IOException("not supported");
+    /**
+     * Opens an acceptor socket channel after a request has been received
+     * that another party is trying to connect to this instance. 
+     */
+    public AbstractNBSocketChannel openAcceptorSocketChannel() {
+        return new UDPSocketChannel(this, context, Role.ACCEPTOR);
     }
 
     @Override
     public AbstractNBSocketChannel openSocketChannel() {
-        return new UDPSocketChannel(this, context);
+        return new UDPSocketChannel(this, context, Role.REQUESTOR);
     }
     
     public Class<UDPSocketChannel> getUDPSocketChannelClass() {
@@ -58,5 +63,13 @@ public class UDPSelectorProvider extends SelectorProvider {
     
     public RUDPContext getContext() {
         return context;
+    }
+
+    @Override
+    public ServerSocketChannel openServerSocketChannel() throws IOException {
+        if (true) {
+            throw new UnsupportedOperationException("not implemented");
+        }
+        return null;
     }
 }

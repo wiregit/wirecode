@@ -2,6 +2,8 @@ package org.limewire.rudp.messages;
 
 import java.nio.ByteBuffer;
 
+import org.limewire.rudp.messages.SynMessage.Role;
+
 /**
  * Creates every kind of <code>RUDPMessage</code>.
  */
@@ -23,8 +25,8 @@ public interface RUDPMessageFactory {
     public KeepAliveMessage createKeepAliveMessage(byte connectionID, long windowStart, int windowSpace);
     
     /** Creates a new SynMessage with just their connection id. */
-    public SynMessage createSynMessage(byte connectionID);
+    public SynMessage createSynMessage(byte connectionID, Role role);
     
     /** Creates a new SynMessage with their & our connection id. */
-    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID);
+    public SynMessage createSynMessage(byte connectionID, byte theirConnectionID, Role role);
 }

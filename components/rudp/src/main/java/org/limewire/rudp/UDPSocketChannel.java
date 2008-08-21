@@ -18,6 +18,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.SynMessage;
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.util.BufferUtils;
 
 
@@ -64,11 +65,14 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
     
     /** Whether or not we've propogated the shutdown to other writers. */
     private boolean shutdown = false;
+
+    private final Role role;
     
-    UDPSocketChannel(SelectorProvider provider, RUDPContext context) {
+    UDPSocketChannel(SelectorProvider provider, RUDPContext context, Role role) {
         super(provider);
         this.context = context;
-        this.processor = new UDPConnectionProcessor(this, context);
+        this.role = role;
+        this.processor = new UDPConnectionProcessor(this, context, role);
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList<ByteBuffer>(5);
         this.socket = new UDPConnection(context, this);
@@ -81,8 +85,9 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
     }
     
     // for testing.
-    UDPSocketChannel(UDPConnectionProcessor processor) {
+    UDPSocketChannel(UDPConnectionProcessor processor, Role role) {
         super(null);
+        this.role = role;
         this.context = new DefaultRUDPContext();
         this.processor = processor;
         this.readData = processor.getReadWindow();
@@ -99,14 +104,16 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
     public boolean isForMe(InetSocketAddress address, SynMessage message) {
         if(!getRemoteSocketAddress().equals(address)) {
             return false;
-        } else {
-            byte savedConnectionID = getProcessor().getTheirConnectionID();
-            if(savedConnectionID == UDPMultiplexor.UNASSIGNED_SLOT || savedConnectionID == message.getSenderConnectionID()) {
-                return true;
-            } else {
-                return false;
-            }
+        } 
+        if (!role.canConnectTo(message.getRole())) {
+            return false;
         }
+        byte theirConnectionId = processor.getTheirConnectionID();
+        if (theirConnectionId != UDPMultiplexor.UNASSIGNED_SLOT 
+                && theirConnectionId != message.getSenderConnectionID()) {
+            return false;
+        }
+        return true;
     }
     
     UDPConnectionProcessor getProcessor() {

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.util.BaseTestCase;
 
 
@@ -29,7 +30,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(8, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         ByteBuffer buffer = ByteBuffer.allocate(1000);        
         assertEquals(0, channel.read(buffer));
@@ -51,7 +52,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(8, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         ByteBuffer buffer = ByteBuffer.allocate(1000);        
         assertEquals(0, channel.read(buffer));
@@ -76,7 +77,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(8, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         ByteBuffer buffer = ByteBuffer.allocate(1000);        
         assertEquals(0, channel.read(buffer));
@@ -101,7 +102,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(8, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         ByteBuffer buffer = ByteBuffer.allocate(1000);        
         assertEquals(0, channel.read(buffer));
@@ -131,7 +132,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(8, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         ByteBuffer buffer = ByteBuffer.allocate(1000);        
         assertEquals(0, channel.read(buffer));
@@ -157,7 +158,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(4, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         ByteBuffer buffer = ByteBuffer.allocate(1000);        
         assertEquals(0, channel.read(buffer));
 
@@ -193,7 +194,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(4, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         ByteBuffer buffer = ByteBuffer.allocate(0);        
         assertEquals(0, channel.read(buffer));
         byte[] data1 = new byte[101];
@@ -215,7 +216,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
     
     public void testWrite() throws Exception {
         StubProcessor stub = new StubProcessor();
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         byte[] data = new byte[100];
         Random rnd = new Random();
@@ -238,7 +239,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
     
     public void testWritesCoalesced() throws Exception {
         StubProcessor stub = new StubProcessor();
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         byte[] data = new byte[100];
         Random rnd = new Random();
@@ -269,7 +270,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
     
     public void testWriteStopsAtChunkLimit() throws Exception {
         StubProcessor stub = new StubProcessor();
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         assertEquals(0, stub.getChunkLimit());
         
         byte[] data = new byte[1000];
@@ -305,7 +306,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
     
     public void testWriteUpToChunkLimit() throws Exception {
         StubProcessor stub = new StubProcessor();
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         stub.setChunkLimit(7); // writes up to limit + 1
         
         byte[] data = new byte[512 * 8 + 400];
@@ -343,7 +344,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
     
     public void testWriteWakesupEvents() throws Exception {
         StubProcessor stub = new StubProcessor();
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         byte[] data = new byte[100];
         Random rnd = new Random();
@@ -394,7 +395,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
     
     public void testWriteClosed() throws Exception {
         StubProcessor stub = new StubProcessor();
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         ByteBuffer buffer = ByteBuffer.allocate(0);
         
         assertEquals(0, channel.write(buffer));
@@ -420,7 +421,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         DataWindow window = new DataWindow(8, 1);
         stub.setReadWindow(window);
         
-        UDPSocketChannel channel = new UDPSocketChannel(stub);
+        UDPSocketChannel channel = new UDPSocketChannel(stub, Role.UNDEFINED);
         
         assertFalse(channel.hasBufferedOutput());
         channel.write(ByteBuffer.allocate(1000));
@@ -461,7 +462,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         }
         
         StubProcessor() {
-            super(null, new DefaultRUDPContext());
+            super(null, new DefaultRUDPContext(), Role.UNDEFINED);
         }
 
         @Override
