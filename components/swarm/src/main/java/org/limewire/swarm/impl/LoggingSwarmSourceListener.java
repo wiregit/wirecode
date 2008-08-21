@@ -11,26 +11,44 @@ public class LoggingSwarmSourceListener implements SwarmSourceListener {
 
     private static final Log LOG = LogFactory.getLog(LoggingSwarmSourceListener.class);
 
-    public LoggingSwarmSourceListener() {
-    }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connected(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         LOG.trace("connected: " + source);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connectFailed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         LOG.trace("connetionFailed: " + source);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connectionClosed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         LOG.trace("connectionClosed: " + source);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#responseProcessed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource, org.limewire.swarm.SwarmStatus)
+     */
     public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         LOG.trace("responseProcessed: " + source + " status: " + status);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#finished(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         LOG.trace("finished: " + source);
     }

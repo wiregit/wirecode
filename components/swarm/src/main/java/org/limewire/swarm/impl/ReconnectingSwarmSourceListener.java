@@ -13,22 +13,32 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
 
     private SwarmStatus connectionStatus = null;
 
-    public ReconnectingSwarmSourceListener() {
 
-    }
-
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connected(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         LOG.trace("connected: " + source);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connectFailed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         LOG.trace("connectFailed: " + source);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connectionClosed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         connectionClosed(swarmSourceHandler, source, connectionStatus);
     }
 
+    
     private void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         // TODO we can be smarter about reconnecting
@@ -54,12 +64,20 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#responseProcessed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource, org.limewire.swarm.SwarmStatus)
+     */
     public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         connectionStatus = status;
         LOG.trace("responseProcessed: " + source + " status: " + status);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#finished(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         connectionStatus = new FinishedSwarmStatus();
         LOG.trace("finished: " + source);

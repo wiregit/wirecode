@@ -9,6 +9,9 @@ import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceHandler;
 import org.limewire.swarm.SwarmStatus;
 
+/**
+ * Acts as a delegate for dispatching events received in the SwarmSource to all added listeners.
+ */
 public class SwarmSourceListenerList implements SwarmSourceListener {
     private final List<SwarmSourceListener> listeners;
 
@@ -16,30 +19,50 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
         this.listeners = Collections.synchronizedList(new ArrayList<SwarmSourceListener>());
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connectFailed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connectFailed(swarmSourceHandler, source);
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connected(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connected(swarmSourceHandler, source);
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#connectionClosed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connectionClosed(swarmSourceHandler, source);
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#finished(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
+     */
     public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.finished(swarmSourceHandler, source);
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.swarm.SwarmSourceListener#responseProcessed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource, org.limewire.swarm.SwarmStatus)
+     */
     public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         for (SwarmSourceListener listener : listeners) {
@@ -47,10 +70,16 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
         }
     }
 
+    /**
+     * Adds a listener to this list for event updates.
+     */
     public void addListener(SwarmSourceListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes a listener from the event updates of this list.
+     */
     public void removeListener(SwarmSourceListener listener) {
         listeners.remove(listener);
     }
