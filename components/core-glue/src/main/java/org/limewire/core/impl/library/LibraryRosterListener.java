@@ -5,6 +5,8 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.address.Address;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
@@ -17,6 +19,8 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class LibraryRosterListener implements RegisteringEventListener<RosterEvent> {
+    public static final Log LOG = LogFactory.getLog(LibraryRosterListener.class);
+    
     private final BrowseFactory browseFactory;
 
     @Inject
@@ -45,9 +49,10 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                 if(presence.getType().equals(Presence.Type.available)) {
                     if(presence instanceof LimePresence) {
                         Address address = ((LimePresence)presence).getAddress();
+                        LOG.debugf("browsing {0} ...", presence.getJID());
                         browseFactory.createBrowse(address).start(new BrowseListener() {
                             public void handleBrowseResult(SearchResult searchResult) {
-                                //new BrowseResultEvent(user, presence).publish();
+                                LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                             }
                         });
                     }
