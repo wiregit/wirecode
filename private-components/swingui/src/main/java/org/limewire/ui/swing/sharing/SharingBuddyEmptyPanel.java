@@ -11,17 +11,21 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.FileItem;
+import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Singleton;
 
 @Singleton
-public class SharingBuddyEmptyPanel extends JPanel {
+public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
 
     @Resource
     Icon buddyIcon;
     
-    private JLabel title;
+    private JLabel titleLabel;
     private JLabel text;
     
     private SharingCheckBox musicCheckBox;
@@ -30,28 +34,35 @@ public class SharingBuddyEmptyPanel extends JPanel {
     
     private JButton shareButton;
     
+    private final String title = "You are not sharing anything with ";
+    private final String buttonText = "Shared with ";
+    
+    private final String textPart1 = "To share with ";
+    private final String textPart2 = ", drag files here, or use the shortcuts below to share files";
+    
     public SharingBuddyEmptyPanel() {
         
         GuiUtils.assignResources(this); 
         
         setBackground(Color.WHITE);
         
-        title = new JLabel(buddyIcon);
-        title.setText("You are not sharing anything with All Friends");
+        titleLabel = new JLabel(buddyIcon);
         
         text = new JLabel();
-        text.setText("To share with All Friends, drag files here, or use the shortcuts below to share files");
+
         
         musicCheckBox = new SharingCheckBox("All my music");
         videoCheckBox = new SharingCheckBox("All my video");
         imageCheckBox = new SharingCheckBox("All my images");
         
-        shareButton = new JButton("Shared with all my friends");
+        shareButton = new JButton();
         shareButton.setFocusable(false);
+        
+        setText("");
         
         setLayout(new MigLayout("", "[grow]", ""));
         
-        add(title, "center, gaptop 120, wrap 70");
+        add(titleLabel, "center, gaptop 120, wrap 70");
         add(text, "center, top, wrap");
         
         add(musicCheckBox, "sizegroupx1, center, gaptop 30, wrap");
@@ -59,6 +70,12 @@ public class SharingBuddyEmptyPanel extends JPanel {
         add(imageCheckBox, "sizegroupx1, center, wrap 30");
         add(shareButton, "center, wrap");
 
+    }
+    
+    private void setText(String buddyName) {
+        text.setText(textPart1 + buddyName + textPart2);
+        shareButton.setText(buttonText + buddyName);
+        titleLabel.setText( title + buddyName);
     }
     
     private class SharingCheckBox extends JCheckBox {
@@ -69,5 +86,15 @@ public class SharingBuddyEmptyPanel extends JPanel {
             setFocusable(false);
             setOpaque(false);
         }
+    }
+    
+    @Override
+    public void setBuddyName(String name) {
+        setText(name);
+    }
+
+    @Override
+    public void setEventList(EventList<FileItem> model) {
+
     }
 }

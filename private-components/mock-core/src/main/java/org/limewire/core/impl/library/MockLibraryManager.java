@@ -73,10 +73,19 @@ public class MockLibraryManager implements LibraryManager {
     
     private void initializeBuddys() {
         buddyMap.put("Sean", new FileListAdapter("Sean"));
+        initializeBuddy(buddyMap.get("Sean"));
         buddyMap.put("Bob", new FileListAdapter("Bob"));
         buddyMap.put("Johanna", new FileListAdapter("Johanna"));
         buddyMap.put("Mark", new FileListAdapter("Mark"));
+        initializeBuddy(buddyMap.get("Mark"));
         buddyMap.put("Rob", new FileListAdapter("Rob"));
+        initializeBuddy(buddyMap.get("Rob"));
+    }
+    
+    private void initializeBuddy(FileList fileList) {
+        FileListAdapter files = (FileListAdapter) fileList;
+        files.addFileItem(allFileList.getModel().get(0));
+        files.addFileItem(allFileList.getModel().get(2));
     }
     
     @Override

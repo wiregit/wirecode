@@ -9,8 +9,12 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.search.FilteredTextField;
+import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import ca.odell.glazedlists.EventList;
 
 /**
  * This displays the header on all the sharing panels. It includes the filter
@@ -19,21 +23,24 @@ import org.limewire.ui.swing.util.GuiUtils;
  * TODO: This is very similar to SortAndFilterPanel. Once final designs are
  * ironed out these two classes should be merged and subclassed.
  */
-public class SharingHeaderPanel extends JXPanel {
+public class SharingHeaderPanel extends JXPanel implements BuddyUpdate {
 
     private static final int FILTER_WIDTH = 10;
+    
+    private final String staticText;
     
     private JLabel descriptionLabel;
     private JTextField filterBox;
     private ViewSelectionPanel viewSelectionPanel;
     
-    public SharingHeaderPanel(Icon icon, String text, ViewSelectionPanel viewPanel) {
+    public SharingHeaderPanel(Icon icon, String staticText, String name, ViewSelectionPanel viewPanel) {
         GuiUtils.assignResources(this);
         
         setBackground(Color.LIGHT_GRAY);
     
+        this.staticText = staticText;
         this.viewSelectionPanel = viewPanel;
-        createComponents(icon, text);
+        createComponents(icon, staticText + name);
         layoutComponents();
     }
     
@@ -52,5 +59,15 @@ public class SharingHeaderPanel extends JXPanel {
         add(descriptionLabel, "push");
         add(filterBox);
         add(viewSelectionPanel);
+    }
+    
+    @Override
+    public void setBuddyName(String name) {
+        descriptionLabel.setText(staticText + name);
+    }
+
+    @Override
+    public void setEventList(EventList<FileItem> model) {
+
     }
 }

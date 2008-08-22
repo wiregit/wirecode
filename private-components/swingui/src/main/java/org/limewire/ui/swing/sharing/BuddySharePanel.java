@@ -3,6 +3,7 @@ package org.limewire.ui.swing.sharing;
 import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.DropMode;
@@ -24,9 +25,9 @@ import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
+import org.limewire.ui.swing.sharing.friends.BuddyItemImpl;
 import org.limewire.ui.swing.sharing.friends.BuddyNameTable;
 import org.limewire.ui.swing.sharing.friends.BuddyTableFormat;
-import org.limewire.ui.swing.sharing.friends.MockBuddyItem;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
@@ -54,11 +55,8 @@ public class BuddySharePanel extends GenericSharingPanel {
        
     private final FileList fileList;
     
-//    private CardLayout overviewCardLayout;
     private CardLayout viewCardLayout;
-    
-//    private JPanel nonEmptyPanel;
-    
+
     private BuddyNameTable buddyTable;
 
     MultiButtonTableCellRendererEditor editor;
@@ -66,28 +64,33 @@ public class BuddySharePanel extends GenericSharingPanel {
 
     EventList<BuddyItem> eventList;
     
+    private Map<String, FileList> buddyLists;
+    
     @Inject
     public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
         GuiUtils.assignResources(this); 
         
         this.fileList = libraryManager.getAllBuddyList();
+        buddyLists = libraryManager.getUniqueLists();
 
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
         cardPanel.setLayout(viewCardLayout);
         cardPanel.add(emptyPanel, EMPTY);
 
-
         eventList = GlazedLists.threadSafeList(new BasicEventList<BuddyItem>());
         buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat());
-        buddyTable.getSelectionModel().addListSelectionListener(new BuddySelectionListener(buddyTable));
+
         
         SharingHeaderPanel headerPanel = createHeader(cardPanel);
                
-        createBuddy();
+        loadBuddies();
         createCenterCards(headerPanel, cardPanel);
 
         viewCardLayout.show(cardPanel, EMPTY);
+        
+        BuddySelectionListener buddySelectionListener = new BuddySelectionListener(buddyTable, headerPanel, emptyPanel);
+        buddyTable.getSelectionModel().addListSelectionListener(buddySelectionListener);
         
         
         setLayout(new MigLayout("insets 0 0 0 0", "[150!]0[grow]","[grow]"));
@@ -98,11 +101,17 @@ public class BuddySharePanel extends GenericSharingPanel {
         
     }
     
+    private void loadBuddies() {
+        for(String name : buddyLists.keySet()) {
+            eventList.add(new BuddyItemImpl(name, buddyLists.get(name).getModel()));
+        }
+    }
+    
     private SharingHeaderPanel createHeader(JPanel cardPanel) {
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, LIST), 
                 new ItemAction(cardPanel, viewCardLayout, TABLE));
         
-        SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the LimeWire Network", viewSelectionPanel);
+        SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with ", "", viewSelectionPanel);
         return headerPanel;
     }
     
@@ -147,71 +156,25 @@ public class BuddySharePanel extends GenericSharingPanel {
         return list;
     }
     
-    private void createBuddy() {
-        BuddyItem item = new MockBuddyItem("Anthony", true, 122);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Mike", true, 78);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Jim", true, 58);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Lisa", true, 2);     
-        eventList.add(item);
-    
-        item = new MockBuddyItem("Stephanie", true, 87);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("George", true, 357);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("John", true, 44);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Luke", true, 58);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Rob", true, 41);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Jen", true, 6516);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Julie", true, 516);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Terry", true, 84);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Zack", true, 6);     
-        eventList.add(item);
-        
-        
-        
-        item = new MockBuddyItem("Jack", false, 0);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("Liza", false, 0);     
-        eventList.add(item);
-        
-        item = new MockBuddyItem("William", false, 0);     
-        eventList.add(item);
-        
-    }
-    
     private class BuddySelectionListener implements ListSelectionListener {
 
-        JTable table;
+        private JTable table;
+        private SharingHeaderPanel headerPanel;
+        private SharingBuddyEmptyPanel emptyPanel;
         
-        public BuddySelectionListener(JTable table) {
+        public BuddySelectionListener(JTable table, SharingHeaderPanel headerPanel, SharingBuddyEmptyPanel emptyPanel) {
             this.table = table;
+            this.headerPanel = headerPanel;
+            this.emptyPanel = emptyPanel;
         }
         
         @Override
         public void valueChanged(ListSelectionEvent e) {
             if(!e.getValueIsAdjusting()) {
                 int index = table.getSelectedRow();
+                BuddyItem buddyItem = (BuddyItem) table.getModel().getValueAt(index, 0);
+                headerPanel.setBuddyName(buddyItem.getName());
+                emptyPanel.setBuddyName(buddyItem.getName());
             }
         }
         

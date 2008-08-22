@@ -110,7 +110,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, LIST), 
                 new ItemAction(cardPanel, viewCardLayout, TABLE));
         
-        SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the LimeWire Network", viewSelectionPanel);
+        SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the ", "LimeWire Network", viewSelectionPanel);
         return headerPanel;
     }
     

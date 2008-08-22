@@ -28,54 +28,54 @@ public class TestBuddyTable extends JPanel {
     }
     
     private void createBuddy() {
-        BuddyItem item = new MockBuddyItem("Anthony", true, 122);     
+        BuddyItem item = new MockBuddyItem("Anthony", 122);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Mike", true, 78);     
+        item = new MockBuddyItem("Mike", 78);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Jim", true, 58);     
+        item = new MockBuddyItem("Jim", 58);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Lisa", true, 2);     
+        item = new MockBuddyItem("Lisa", 2);     
         eventList.add(item);
     
-        item = new MockBuddyItem("Stephanie", true, 87);     
+        item = new MockBuddyItem("Stephanie", 87);     
         eventList.add(item);
         
-        item = new MockBuddyItem("George", true, 357);     
+        item = new MockBuddyItem("George", 357);     
         eventList.add(item);
         
-        item = new MockBuddyItem("John", true, 44);     
+        item = new MockBuddyItem("John", 44);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Luke", true, 58);     
+        item = new MockBuddyItem("Luke", 58);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Rob", true, 41);     
+        item = new MockBuddyItem("Rob", 41);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Jen", true, 6516);     
+        item = new MockBuddyItem("Jen", 6516);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Julie", true, 516);     
+        item = new MockBuddyItem("Julie", 516);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Terry", true, 84);     
+        item = new MockBuddyItem("Terry", 84);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Zack", true, 6);     
+        item = new MockBuddyItem("Zack", 6);     
         eventList.add(item);
         
         
         
-        item = new MockBuddyItem("Jack", false, 0);     
+        item = new MockBuddyItem("Jack", 0);     
         eventList.add(item);
         
-        item = new MockBuddyItem("Liza", false, 0);     
+        item = new MockBuddyItem("Liza", 0);     
         eventList.add(item);
         
-        item = new MockBuddyItem("William", false, 0);     
+        item = new MockBuddyItem("William", 0);     
         eventList.add(item);
         
     }
