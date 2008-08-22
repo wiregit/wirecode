@@ -129,7 +129,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     
     private SelectableChannel createUDPSocketChannel(UDPConnectionProcessor stub) throws Exception {
         Class clazz = Class.forName("org.limewire.rudp.UDPSocketChannel");
-        return (SelectableChannel)PrivilegedAccessor.invokeConstructor(clazz, new Object[] { stub }, new Class[] { UDPConnectionProcessor.class });
+        return (SelectableChannel)PrivilegedAccessor.invokeConstructor(clazz, new Object[] { stub, Role.UNDEFINED }, new Class[] { UDPConnectionProcessor.class, Role.class });
     }
     
     private void checkMessage(MessageObserver handler, Message m) throws Exception {
