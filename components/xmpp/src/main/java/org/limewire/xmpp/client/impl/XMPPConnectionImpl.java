@@ -301,6 +301,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
 //    }
 
     public void handleEvent(AddressEvent event) {
+        LOG.debugf("handling address event: {0}", event.getSource().toString());
         synchronized (this) {
             if(addressIQListener != null) {
                 addressIQListener.getAddressListener().handleEvent(event);    

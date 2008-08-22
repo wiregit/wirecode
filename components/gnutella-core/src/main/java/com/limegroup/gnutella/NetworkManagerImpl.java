@@ -71,7 +71,7 @@ public class NetworkManagerImpl implements NetworkManager {
     private volatile String tlsDisabledReason;
     
     private final EventListenerList<AddressEvent> listeners =
-        new EventListenerList<AddressEvent>();
+        new EventListenerList<AddressEvent>(getClass());
     
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,

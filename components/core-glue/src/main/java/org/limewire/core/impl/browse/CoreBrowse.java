@@ -89,7 +89,7 @@ public class CoreBrowse implements Browse {
         }
 
         searchServices.doAsynchronousBrowseHost(
-                                    host, new GUID(browseGuid), new GUID(clientGuid), proxies,
+                                    host, new GUID(browseGuid), clientGuid != null ? new GUID(clientGuid) : null, proxies,
                                     canDoFWT);
     }
 

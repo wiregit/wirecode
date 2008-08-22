@@ -5,21 +5,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
-import org.limewire.xmpp.api.client.RosterEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -38,6 +38,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<EventListener<RosterEvent>> rosterListener;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
+    private AddressEvent lastEvent;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
@@ -125,14 +126,23 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferHandler, addressFactory);
-        connection.initialize();
-        connections.add(connection);
+        synchronized (this) {
+            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferHandler, addressFactory);
+            connection.initialize();
+            connections.add(connection);
+            if(lastEvent != null) {
+                connection.handleEvent(lastEvent);
+            }
+        }
     }
 
     public void handleEvent(AddressEvent event) {
-        for(XMPPConnectionImpl connection : connections) {
-            connection.handleEvent(event);
+        LOG.debugf("handling address event: {0}", event.getSource().toString());
+        synchronized (this) {
+            for(XMPPConnectionImpl connection : connections) {
+                connection.handleEvent(event);
+            }
+            lastEvent = event;
         }
     }
 }
