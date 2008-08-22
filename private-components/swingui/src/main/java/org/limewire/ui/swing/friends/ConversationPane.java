@@ -109,9 +109,9 @@ public class ConversationPane extends JPanel implements Displayable {
     
     @Override
     public void handleDisplay() {
+        editor.repaint();
         inputPanel.handleDisplay();
     }
-    
 
     @SuppressWarnings("unused")
     private JPanel wrap(JPanel panel, boolean isHeader) {
