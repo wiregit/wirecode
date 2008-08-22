@@ -43,6 +43,7 @@ public class ConversationPane extends JPanel {
     private JEditorPane editor;
     private IconLibrary icons;
     private final String conversationName;
+    private final Color BACKGROUND_COLOR = Color.WHITE;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted String conversationName, IconLibrary icons) {
@@ -50,13 +51,14 @@ public class ConversationPane extends JPanel {
         this.conversationName = conversationName;
         
         setLayout(new BorderLayout());
-
+        
         JScrollPane scroll = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setOpaque(false);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         
         //Needed to add margin to the left side of the scrolling chat pane
         JPanel chatWrapper = new JPanel(new GridBagLayout());
+        chatWrapper.setBackground(BACKGROUND_COLOR);
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(0, 8, 0, 0);
         constraints.weightx = 1.0;
@@ -85,16 +87,19 @@ public class ConversationPane extends JPanel {
     }
     
     public String getTopicName() {
-        return conversationName;
+        return MessageReceivedEvent.buildTopic(conversationName);
     }
     
     private void handleMessage(Message message) {
         messages.add(message);
-        editor.setText(ChatDocumentBuilder.buildChatText(messages));
+        String chatDoc = ChatDocumentBuilder.buildChatText(messages);
+        LOG.debugf("Chat doc: {0}", chatDoc);
+        editor.setText(chatDoc);
     }
     
     private JPanel footerPanel(MessageWriter writer) {
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
         panel.add(new JXButton(tr("Library")), BorderLayout.NORTH);
         ResizingInputPanel inputPanel = new ResizingInputPanel(writer);
         panel.add(inputPanel, BorderLayout.CENTER);
