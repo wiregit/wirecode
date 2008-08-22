@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
@@ -18,35 +17,24 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.limewire.ui.swing.table.MouseableTable;
 
 /**
  * This class is a subclass of JTable that adds features from Glazed Lists.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ConfigurableTable<E> extends JXTable {
+public class ConfigurableTable<E> extends MouseableTable {
 
     private EventList<E> eventList;
     private EventTableModel<E> tableModel;
     private JMenuItem disabledMenuItem;
     private JPopupMenu headerPopup;
-    private TableCellEditor editor;
     private TableFormat<E> tableFormat;
 
     public ConfigurableTable() {
-		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        setCellSelectionEnabled(false);
-		setRowSelectionAllowed(true);
-
-        // Display table rows with alternating background colors.
-        setHighlighters(HighlighterFactory.createSimpleStriping());
-
         // Configure so resizing a column resizes the table, not other columns.
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -77,33 +65,6 @@ public class ConfigurableTable<E> extends JXTable {
         for (int i = 0; i < tcm.getColumnCount(); i++) {
             tcm.getColumn(i).setPreferredWidth(100);
         }
-
-        // This enables rollover icons on the buttons to work.
-        // Note that this approach ... calling editCellAt
-        // based on mouse movements ... could be an issue
-        // if other cells in the table are truely editable.
-        addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                int row = rowAtPoint(e.getPoint());
-                int col = columnAtPoint(e.getPoint());
-
-                /*
-                // If we were previously editing another cell, cancel it.
-                if (editor != null) editor.cancelCellEditing();
-
-                editor = getCellEditor();
-                if (editor != null) {
-                    System.out.println(
-                        "editor is a " + editor.getClass().getName());
-                    // force update of editor colors
-                    prepareEditor(editor, row, col);
-                    repaint();
-                }
-                */
-                editCellAt(row, col);
-            }
-        });
     }
 
     /**
@@ -183,26 +144,6 @@ public class ConfigurableTable<E> extends JXTable {
     }
 
     /**
-     * Get rid of default editor color so that editors are
-     * colored by highlighters and selection color is shown.
-     */
-    /*
-    @Override
-    public Component prepareEditor(
-        TableCellEditor editor, int row, int column) {
-
-        Component comp = super.prepareEditor(editor, row, column);
-        ComponentAdapter adapter = getComponentAdapter(row, column);
-        
-        if (compoundHighlighter != null) {
-            comp = compoundHighlighter.highlight(comp, adapter);
-        }
-        
-        return comp;
-    }
-    */
-    
-    /**
      * Sets the objects whose data should be displayed in this table.
      * @param objects the objects
      */
@@ -235,10 +176,4 @@ public class ConfigurableTable<E> extends JXTable {
 
         makeHeaderPopup();
     }
-    
-    @Override
-    public boolean isCellEditable(int row, int col){
-        return getColumnModel().getColumn(col).getCellEditor() != null;
-    }
-    
 }
