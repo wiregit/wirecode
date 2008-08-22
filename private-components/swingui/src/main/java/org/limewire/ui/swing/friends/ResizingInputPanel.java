@@ -14,7 +14,7 @@ import javax.swing.event.DocumentListener;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 
-class ResizingInputPanel extends JPanel {
+class ResizingInputPanel extends JPanel implements Displayable {
     private JTextArea text;
     private MessageWriter writer;
 
@@ -35,13 +35,21 @@ class ResizingInputPanel extends JPanel {
         add(scrollPane);
     }
     
+    @Override
+    public void handleDisplay() {
+        text.requestFocusInWindow();
+    }
+
     private class SendMessage extends AbstractAction {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                writer.writeMessage(text.getText());
-                text.setText("");
+                String message = text.getText();
+                if (message.trim().length() > 0) {
+                    writer.writeMessage(message);
+                    text.setText("");
+                }
             } catch (XMPPException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();

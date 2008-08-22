@@ -63,6 +63,9 @@ public class ChatPanel extends JPanel implements Displayable {
             //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
             conversationPanel.revalidate();
         }
+        
+        chatPane.handleDisplay();
+        
         event.unlock();
         LOG.debug("unlocked");
     }

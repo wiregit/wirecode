@@ -36,7 +36,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * @author Mario Aquino, Object Computing, Inc.
  * 
  */
-public class ConversationPane extends JPanel {
+public class ConversationPane extends JPanel implements Displayable {
     private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private ArrayList<Message> messages = new ArrayList<Message>();
@@ -44,6 +44,7 @@ public class ConversationPane extends JPanel {
     private IconLibrary icons;
     private final String conversationName;
     private final Color BACKGROUND_COLOR = Color.WHITE;
+    private ResizingInputPanel inputPanel;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted String conversationName, IconLibrary icons) {
@@ -101,11 +102,17 @@ public class ConversationPane extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
         panel.add(new JXButton(tr("Library")), BorderLayout.NORTH);
-        ResizingInputPanel inputPanel = new ResizingInputPanel(writer);
+        inputPanel = new ResizingInputPanel(writer);
         panel.add(inputPanel, BorderLayout.CENTER);
         return panel;
     }
     
+    @Override
+    public void handleDisplay() {
+        inputPanel.handleDisplay();
+    }
+    
+
     @SuppressWarnings("unused")
     private JPanel wrap(JPanel panel, boolean isHeader) {
         JPanel wrapper = new JPanel(new GridBagLayout());
