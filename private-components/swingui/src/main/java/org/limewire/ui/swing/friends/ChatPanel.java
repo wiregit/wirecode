@@ -53,8 +53,7 @@ public class ChatPanel extends JPanel implements Displayable {
         LOG.debugf("ConversationStartedEvent with friend: {0}", friend.getName());
         ConversationPane chatPane = chats.get(friend.getName());
         if (chatPane == null) {
-            //FIXME: That this method has to "know" how to construct the topic using MessageReceivedEvent is a smell  
-            chatPane = conversationFactory.create(event.getWriter(), MessageReceivedEvent.TOPIC_PREFIX + friend.getName());
+            chatPane = conversationFactory.create(event.getWriter(), friend.getName());
             chats.put(friend.getName(), chatPane);
         }
         

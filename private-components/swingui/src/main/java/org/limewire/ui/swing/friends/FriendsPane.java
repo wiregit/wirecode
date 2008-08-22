@@ -28,13 +28,13 @@ import javax.swing.border.Border;
 import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.bushe.swing.event.annotation.EventTopicPatternSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
@@ -63,6 +63,7 @@ import com.google.inject.Singleton;
 public class FriendsPane extends JPanel {
     
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
+    private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     
     private EventList<Friend> friends;
     private String myID;
@@ -173,9 +174,13 @@ public class FriendsPane extends JPanel {
         }
     }
     
-    @EventTopicPatternSubscriber(topicPattern=MessageReceivedEvent.TOPIC_PREFIX + ".*")
+    @RuntimeTopicPatternEventSubscriber
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         LOG.debugf("Message: from {0} text: {1}", event.getMessage().getSenderName(), event.getMessage().getMessageText());
+    }
+    
+    public String getTopicPatternName() {
+        return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
     }
     
     public void setLoggedInID(String id) {

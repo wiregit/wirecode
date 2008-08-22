@@ -5,7 +5,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.AbstractEDTEvent;
 
 public class MessageReceivedEvent extends AbstractEDTEvent {
-    public static final String TOPIC_PREFIX = "chat-";
+    private static final String TOPIC_PREFIX = "chat-";
     private static final Log LOG = LogFactory.getLog(MessageReceivedEvent.class);
     private final Message message;
 
@@ -17,9 +17,13 @@ public class MessageReceivedEvent extends AbstractEDTEvent {
         return message;
     }
     
+    public static String buildTopic(String conversationName) {
+        return TOPIC_PREFIX + conversationName;
+    }
+    
     @Override
     public void publish() {
         LOG.debugf("Publishing message: Type: {0} From: {1} Text: {2}", message.getType(), message.getSenderName(), message.getMessageText());
-        super.publish(TOPIC_PREFIX + message.getFriend().getName());
+        super.publish(buildTopic(message.getFriend().getName()));
     }
 }
