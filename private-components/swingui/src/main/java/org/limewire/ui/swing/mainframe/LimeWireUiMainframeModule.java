@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.mainframe;
 
+import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.nav.NavigableTarget;
 import org.limewire.ui.swing.nav.NavigableTree;
@@ -15,7 +16,6 @@ public class LimeWireUiMainframeModule extends AbstractModule {
         bind(NavigableTarget.class).to(MainPanel.class);
         bind(NavigableTree.class).to(NavTree.class);
         bind(SearchNavigator.class).to(TopPanel.class);
+        bind(FriendsCountUpdater.class).to(StatusPanel.class);
     }
-    
-
 }

@@ -14,16 +14,22 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
+import org.limewire.ui.swing.friends.FriendsCountUpdater;
+import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class StatusPanel extends JPanel {
+public class StatusPanel extends JPanel implements FriendsCountUpdater {
+    private JButton friendsButton;
 
     @Inject
     public StatusPanel(final TrayNotifier trayNotifier, final IconManager iconManager) {
@@ -60,13 +66,31 @@ class StatusPanel extends JPanel {
                 }
             }
         }));
-        add(new JButton(new FriendsAction("Friends")));
+        friendsButton = new JButton(new FriendsAction("Sign in"));
+        add(friendsButton);
         setBackground(Color.GRAY);
         setMinimumSize(new Dimension(0, 20));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
         setPreferredSize(new Dimension(1024, 20));
+        
+        EventAnnotationProcessor.subscribe(this);
     }
     
+    @EventSubscriber
+    public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
+        friendsButton.setText("Friends");
+    }
+    
+    @Override
+    public void setFriendsCount(final int count) {
+        SwingUtils.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                friendsButton.setText("Friends (" + count + ")");        
+            }
+        });
+    }
+
     private class FriendsAction extends AbstractAction {
         public FriendsAction(String title) {
             super(title);

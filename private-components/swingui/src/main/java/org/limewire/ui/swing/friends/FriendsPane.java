@@ -68,12 +68,14 @@ public class FriendsPane extends JPanel {
     private EventList<Friend> friends;
     private String myID;
     private final WeakHashMap<String, FriendImpl> idToFriendMap;
+    private final FriendsCountUpdater friendsCountUpdater;
 
     @Inject
-    public FriendsPane(IconLibrary icons) {
+    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater) {
         super(new BorderLayout());
         friends = new BasicEventList<Friend>();
         idToFriendMap = new WeakHashMap<String, FriendImpl>();
+        this.friendsCountUpdater = friendsCountUpdater;
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
         JList list = newSearchableJList(sortedFriends);
@@ -172,6 +174,7 @@ public class FriendsPane extends JPanel {
                 } 
                 break;
         }
+        friendsCountUpdater.setFriendsCount(friends.size());
     }
     
     @RuntimeTopicPatternEventSubscriber

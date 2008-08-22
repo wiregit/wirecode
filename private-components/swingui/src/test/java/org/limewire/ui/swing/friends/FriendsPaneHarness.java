@@ -20,7 +20,7 @@ public class FriendsPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
 
-                FriendsPane pane = new FriendsPane(new IconLibraryImpl());
+                FriendsPane pane = new FriendsPane(new IconLibraryImpl(), new MockFriendsCountUpdater());
                 frame.add(pane);
 
                 final ArrayList<Duo> presences = new ArrayList<Duo>();
