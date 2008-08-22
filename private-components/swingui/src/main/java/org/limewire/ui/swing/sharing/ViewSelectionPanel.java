@@ -11,6 +11,10 @@ import javax.swing.JToggleButton;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
 
+/**
+ * Shows two toggle buttons. Designed to toggle between two different views.
+ * Each toggle button should have an ItemListener which gets passed in on construction time.
+ */
 public class ViewSelectionPanel extends JPanel {
 
     @Resource private Icon listViewPressedIcon;
@@ -18,43 +22,39 @@ public class ViewSelectionPanel extends JPanel {
     @Resource private Icon tableViewPressedIcon;
     @Resource private Icon tableViewUnpressedIcon;
     
-    private final JToggleButton listViewToggleButton;
-    private final JToggleButton tableViewToggleButton;
+    private final SelectionButton listViewToggleButton;
+    private final SelectionButton tableViewToggleButton;
     
     public ViewSelectionPanel(ItemListener list, ItemListener table) {
         
-        listViewToggleButton = new JToggleButton();
-        tableViewToggleButton = new JToggleButton();
-        
         GuiUtils.assignResources(this);
         
-        configureViewButtons(list, table);
+        listViewToggleButton = new SelectionButton(listViewUnpressedIcon, listViewPressedIcon, true, "List View", list);
+        tableViewToggleButton = new SelectionButton(tableViewUnpressedIcon, tableViewPressedIcon, false, "Table View", table);
+        
+        ButtonGroup viewGroup = new ButtonGroup();
+        viewGroup.add(listViewToggleButton);
+        viewGroup.add(tableViewToggleButton);
         
         add(listViewToggleButton);
         add(tableViewToggleButton);
     }
     
-    private void configureViewButtons(ItemListener list, ItemListener table) {
-        Insets insets = new Insets(0, 0, 0, 0);
+    /**
+     * Toggle button for View Selection
+     */
+    private final class SelectionButton extends JToggleButton {
+        private final Insets insets = new Insets(0, 0, 0, 0);
         
-        listViewToggleButton.setIcon(listViewUnpressedIcon);
-        listViewToggleButton.setPressedIcon(listViewPressedIcon);
-        listViewToggleButton.setSelected(true);
-        listViewToggleButton.setMargin(insets);
-        listViewToggleButton.setToolTipText("List View");
-        listViewToggleButton.addItemListener(list);
-        
-        tableViewToggleButton.setIcon(tableViewUnpressedIcon);
-        tableViewToggleButton.setPressedIcon(tableViewPressedIcon);
-        tableViewToggleButton.setMargin(insets);
-        tableViewToggleButton.setToolTipText("Table View");
-        tableViewToggleButton.addItemListener(table);
-        tableViewToggleButton.setSelected(true);
-        
-        ButtonGroup viewGroup = new ButtonGroup();
-        viewGroup.add(listViewToggleButton);
-        viewGroup.add(tableViewToggleButton);
+        public SelectionButton(Icon unSelected, Icon selected, boolean isSelected, String toolTip, ItemListener listener) {
+            setIcon(unSelected);
+            setSelectedIcon(selected);
+            setSelected(isSelected);
+            setFocusable(false);
+            setMargin(insets);
+            setToolTipText(toolTip);
+            addItemListener(listener);
+        }
     }
-    
     
 }
