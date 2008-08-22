@@ -235,4 +235,10 @@ public class ConfigurableTable<E> extends JXTable {
 
         makeHeaderPopup();
     }
+    
+    @Override
+    public boolean isCellEditable(int row, int col){
+        return getColumnModel().getColumn(col).getCellEditor() != null;
+    }
+    
 }
