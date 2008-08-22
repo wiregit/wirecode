@@ -200,7 +200,8 @@ public class RangeHeaderInterceptorTest extends TestCase {
         assertEquals(0, range.getStartOffset(100));
         assertEquals(0, range.getEndOffset(100));
         assertEquals(-1, range.getStartOffset(0));
-
+        assertEquals(0, range.getStartOffset(1));
+        assertEquals(0, range.getEndOffset(1));
     }
     
 }

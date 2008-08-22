@@ -1150,6 +1150,9 @@ public class HTTPDownloader implements BandwidthTracker {
             int dash=str.lastIndexOf("-");     //skip past "Content-range"
             numBeforeDash=Long.parseLong(str.substring(start, dash));
             numBeforeSlash=Long.parseLong(str.substring(dash+1, slash));
+            if (numBeforeDash < 0 || numBeforeSlash < 0) {
+                throw new ProblemReadingHeaderException("Invalide range, low: " + numBeforeDash + ", high: " + numBeforeSlash);
+            }
 
             if(numBeforeSlash < numBeforeDash)
                 throw new ProblemReadingHeaderException(
@@ -1170,7 +1173,6 @@ public class HTTPDownloader implements BandwidthTracker {
         } catch (NumberFormatException e) {
             throw new ProblemReadingHeaderException(str);
         }
-
         // In order to be backwards compatible with
         // LimeWire 0.5, which sent broken headers like:
         // Content-range: bytes=1-67818707/67818707
@@ -1186,7 +1188,14 @@ public class HTTPDownloader implements BandwidthTracker {
         
         if(LOG.isDebugEnabled())
             LOG.debug(_rfd + " Content-Range like #-#/#, " + str);
-        return Range.createRange(numBeforeDash, numBeforeSlash);
+        try {
+            return Range.createRange(numBeforeDash, numBeforeSlash);
+        } catch (IllegalArgumentException iae) {
+            // rethrow with tracking the input string, that caused the illegal range offsets to be parsed, see LWC-1660
+            IllegalArgumentException iaeWithReason = new IllegalArgumentException("invalid range for range header: " + str);
+            iaeWithReason.initCause(iae);
+            throw iaeWithReason;
+        }
     }
 
     /**

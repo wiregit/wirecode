@@ -359,6 +359,17 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         // sizes (they send exclusive instead of inclusive values).
         assertEquals(Range.createRange(0, 9), parseContentRange(dl, "Content-range:bytes 1-10/10"));
 
+        // fixing 0-10/10 to 0-9/10
+        assertEquals(Range.createRange(0, 9), parseContentRange(dl, "Content-range:bytes 0-10/10"));
+        
+        assertEquals(Range.createRange(0, 0), parseContentRange(dl, "Content-range:bytes 0-0/1"));
+        
+        try {
+            parseContentRange(dl, "Content-range:bytes -1-9/10");
+            fail("Should have thrown exception");
+        } catch (ProblemReadingHeaderException ignored) {
+        }
+        
         Range iv = null;
         try {
             iv = parseContentRange(dl, "Content-range:bytes 1 10 10");
