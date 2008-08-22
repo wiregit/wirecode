@@ -45,7 +45,7 @@ public class GeocoderTest extends BaseTestCase {
         // Build the String
         final String SEPARATOR = "\t";
         final String NEWLINE = "\n";
-        String testString = "";
+        String testString = SEPARATOR + NEWLINE;
         for (Map.Entry<String,String> en : props.entrySet()) {
             testString += en.getKey() + SEPARATOR + en.getValue() + NEWLINE;
         }        
