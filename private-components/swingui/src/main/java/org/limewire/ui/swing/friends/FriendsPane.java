@@ -261,9 +261,14 @@ public class FriendsPane extends JPanel {
         
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() == 2) {
-                JList list = (JList)e.getSource();
-                Friend friend = (Friend)list.getSelectedValue();
+            JList list = (JList)e.getSource();
+            Friend friend = (Friend)list.getSelectedValue();
+            
+            if (friend == null) {
+                return;
+            }
+            
+            if (e.getClickCount() == 2 || friend.isChatting()) {
                 MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
                 MessageWriter writerWrapper = new MessageWriterImpl(myID, friend, writer);
                 new ConversationStartedEvent(friend, writerWrapper).publish();
