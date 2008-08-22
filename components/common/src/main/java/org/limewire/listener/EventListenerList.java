@@ -27,7 +27,7 @@ public class EventListenerList<E> implements ListenerSupport<E> {
     /** Adds the listener. */
     public void addListener(EventListener<E> listener) {
         if(log != null) {
-            log.debugf("adding listener " + listener);
+            log.debugf("adding listener {0}", listener);
         }
         listenerList.add(Objects.nonNull(listener, "listener"));
     }
@@ -35,7 +35,7 @@ public class EventListenerList<E> implements ListenerSupport<E> {
     /** Returns true if the listener was removed. */
     public boolean removeListener(EventListener<E> listener) {
         if(log != null) {
-            log.debugf("removing listener " + listener);
+            log.debugf("removing listener {0}", listener);
         }
         return listenerList.remove(Objects.nonNull(listener, "listener"));
     }
@@ -44,7 +44,7 @@ public class EventListenerList<E> implements ListenerSupport<E> {
     public void broadcast(E event) {
         Objects.nonNull(event, "event");
         if(log != null) {
-            log.debugf("broadcasting event " + event);
+            log.debugf("broadcasting event {0}", event);
         }
         for(EventListener<E> listener : listenerList) {
             listener.handleEvent(event);
