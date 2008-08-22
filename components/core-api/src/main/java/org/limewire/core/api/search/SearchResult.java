@@ -8,7 +8,26 @@ import org.limewire.core.api.endpoint.RemoteHost;
 public interface SearchResult {
 
     enum PropertyKey {
-        ALBUM_TITLE, ARTIST_NAME, COMMENT, QUALITY, TRACK_NAME, TRACK_TIME
+        ALBUM_TITLE,
+        ARTIST_NAME,
+        AUTHOR,
+        BITRATE, // ex. 128, 160, 192, 224, 320
+        COMMENTS,
+        DATE_CREATED,
+        GENRE,
+        HEIGHT,
+        LENGTH,
+        NAME,
+        OWNER,
+        QUALITY,
+        RATING,
+        RELEVANCE,
+        SAMPLE_RATE, // ex. 44,100 Hz
+        // get size from VisualSearchResult.getSize()
+        TRACK_NUMBER,
+        // get type from VisualSearchResult.getFileExtension()
+        WIDTH,
+        YEAR
     }
 
     String getUrn();

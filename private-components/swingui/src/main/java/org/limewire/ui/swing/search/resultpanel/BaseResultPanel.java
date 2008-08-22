@@ -4,19 +4,13 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.Scrollable;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.Highlighter;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
@@ -26,20 +20,19 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
-import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TableComparatorChooser;
+import javax.swing.JScrollPane;
+import javax.swing.table.TableColumn;
+import org.limewire.ui.swing.ConfigurableTable;
 
 public class BaseResultPanel extends JXPanel {
     
-    private static final int ACTION_COLUMN = 4;
-    
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
+    private ConfigurableTable resultsTable;
     private JList resultsList;
-    private JXTable resultsTable;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -47,6 +40,7 @@ public class BaseResultPanel extends JXPanel {
     
     BaseResultPanel(String title,
             EventList<VisualSearchResult> eventList,
+            AdvancedTableFormat<VisualSearchResult> tableFormat,
             SearchResultDownloader searchResultDownloader, Search search) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
@@ -54,26 +48,16 @@ public class BaseResultPanel extends JXPanel {
         
         setLayout(layout);
                 
-        // TODO: RMV The latest screen mockups do not include this title!
-        /*
-        JLabel titleLabel = new JLabel(title);
-        FontUtils.changeSize(titleLabel, 5);
-        FontUtils.changeStyle(titleLabel, Font.BOLD);
-        add(titleLabel, BorderLayout.NORTH);
-        */
-                
         EventListModel<VisualSearchResult> eventListModel =
             new EventListModel<VisualSearchResult>(eventList);
 
-        // This enables rollover icons on the buttons to work.
-        // Note that this approach ... calling editCellAt
-        // based on mouse movements ... could be an issue
-        // if other cells in the table are truely editable.
         configureList(eventListModel, eventList);
-        configureTable(eventList);
+        configureTable(eventList, tableFormat);
         
-        add(resultsList, ModeListener.Mode.LIST.name());
-        add(resultsTable, ModeListener.Mode.TABLE.name());
+        // TODO: RMV I think these JScrollPanes are fighting with the ones
+        // TODO: RMV that Sam added outside that include Sponsored Results.
+        add(new JScrollPane(resultsList), ModeListener.Mode.LIST.name());
+        add(new JScrollPane(resultsTable), ModeListener.Mode.TABLE.name());
         setMode(ModeListener.Mode.LIST);
     }
     
@@ -89,51 +73,32 @@ public class BaseResultPanel extends JXPanel {
         resultsList.setSelectionMode(
             ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         resultsList.addMouseListener(new ResultDownloader());
-
-        // This enables rollover icons on the buttons to work.
-        // Note that this approach ... calling editCellAt
-        // based on mouse movements ... could be an issue
-        // if other cells in the table are truely editable.
-        resultsList.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-//                int row = resultsList.locationToIndex(e.getPoint());
-                //resultsList.setSelectedIndex(row);
-            }
-        });
     }
 
-    private void configureTable(EventList<VisualSearchResult> eventList) {
-        SortedList<VisualSearchResult> sortedResults = new SortedList<VisualSearchResult>(eventList, new ResultComparator());
-        EventTableModel<VisualSearchResult> tableModel = new EventTableModel<VisualSearchResult>(sortedResults, new ResultTableFormat());
-        resultsTable = new JXTable(tableModel);
+    private void configureTable(EventList<VisualSearchResult> eventList,
+        AdvancedTableFormat<VisualSearchResult> tableFormat) {
+        resultsTable = new ConfigurableTable<VisualSearchResult>();
 
-         // This enables rollover icons on the buttons to work.
-        // Note that this approach ... calling editCellAt
-        // based on mouse movements ... could be an issue
-        // if other cells in the table are truely editable.
-        resultsTable.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                int col = resultsTable.columnAtPoint(e.getPoint());
-                if (col != ACTION_COLUMN) return;
-                int row = resultsTable.rowAtPoint(e.getPoint());
-                resultsTable.editCellAt(row, col);
+        resultsTable.setEventList(eventList);
+        resultsTable.setTableFormat(tableFormat);
+
+        ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
+        resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);
+        resultsTable.setDefaultEditor(VisualSearchResult.class, editor);
+
+        // Find the column that will disply the action buttons.
+        /*
+        int columnCount = tableFormat.getColumnCount();
+        for (int i = 0; i < columnCount; i++) {
+            Class type = tableFormat.getColumnClass(i);
+            if (type == VisualSearchResult.class) {
+                System.out.println("VisualSearchResult column is " + i);
+                TableColumn column =
+                    resultsTable.getColumnModel().getColumn(i);
+                column.setCellEditor(editor);
             }
-        });
-
-        Highlighter highlighter = HighlighterFactory.createAlternateStriping();
-        resultsTable.setHighlighters(new Highlighter[]{highlighter});
-
-        boolean multiColumnSort = false;
-        TableComparatorChooser tcc =
-            new TableComparatorChooser<VisualSearchResult>(
-                resultsTable, sortedResults, multiColumnSort);
-        TableColumnModel tcm = resultsTable.getColumnModel();
-        TableColumn tc = tcm.getColumn(ACTION_COLUMN);
-        ActionColumnTableCellEditor actce = new ActionColumnTableCellEditor();
-        tc.setCellRenderer(actce);
-        tc.setCellEditor(actce);
+        }
+        */
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {

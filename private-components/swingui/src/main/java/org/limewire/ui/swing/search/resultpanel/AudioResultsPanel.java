@@ -15,7 +15,7 @@ public class AudioResultsPanel extends BaseResultPanel {
         @Assisted EventList<VisualSearchResult> eventList,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search) {
-        super("Audio from Everyone", eventList, 
+        super("Audio from Everyone", eventList, new MusicTableFormat(),
             searchResultDownloader, search);
     }
 }

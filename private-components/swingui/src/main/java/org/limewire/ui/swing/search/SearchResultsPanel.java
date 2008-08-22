@@ -87,6 +87,8 @@ public class SearchResultsPanel extends JPanel {
             public void categorySelected(SearchCategory searchCategory) {
                 resultsContainer.showCategory(searchCategory);
                 syncColumnHeader();
+                // TODO: RMV Somehow need to call setTableFormat
+                // TODO: RMV on resultsTable in BaseResultPanel.
             }
         };
         
@@ -112,7 +114,7 @@ public class SearchResultsPanel extends JPanel {
     
     private void syncColumnHeader() {
         Component resultHeader = resultsContainer.getScrollPaneHeader();
-        if(resultHeader == null) {
+        if (resultHeader == null) {
             // If no headers, use nothing special.
             scrollPane.setColumnHeaderView(null);
             sponsoredResultsPanel.setTitleVisible(true);

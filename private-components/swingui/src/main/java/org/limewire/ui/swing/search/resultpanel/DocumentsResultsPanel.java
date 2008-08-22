@@ -15,7 +15,7 @@ public class DocumentsResultsPanel extends BaseResultPanel {
         @Assisted EventList<VisualSearchResult> eventList,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search) {
-        super("Documents from Everyone", eventList, 
+        super("Documents from Everyone", eventList, new DocumentTableFormat(), 
             searchResultDownloader, search);
     }
 }

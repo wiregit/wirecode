@@ -38,31 +38,6 @@ implements TableCellEditor, TableCellRenderer {
     public Object getCellEditorValue() {
         return null;
     }
-
-    @Override
-    public Component getTableCellEditorComponent(
-        JTable table, Object value, boolean isSelected,
-        int row, int column) {
-        
-        panel = getPanel(table);
-        vsr = (VisualSearchResult) value;
-        internalSelect = true;
-        JToggleButton junkButton = panel.getJunkButton();
-        junkButton.getModel().setPressed(isJunk(vsr));
-        internalSelect = false;
-        return panel;
-    }
-
-    @Override
-    public Component getTableCellRendererComponent(
-        JTable table, Object value, boolean isSelected,
-        boolean hasFocus, int row, int column) {
-        
-        Component component = getTableCellEditorComponent(
-            table, value, isSelected, row, column);
-        
-        return component;
-    }
     
     private ActionButtonPanel getPanel(final JTable table) {
         if (panel != null) return panel;
@@ -96,6 +71,31 @@ implements TableCellEditor, TableCellRenderer {
         });
         
         return panel;
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(
+        JTable table, Object value, boolean isSelected,
+        int row, int column) {
+        
+        panel = getPanel(table);
+        vsr = (VisualSearchResult) value;
+        internalSelect = true;
+        JToggleButton junkButton = panel.getJunkButton();
+        junkButton.getModel().setPressed(isJunk(vsr));
+        internalSelect = false;
+        return panel;
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(
+        JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+        
+        Component component = getTableCellEditorComponent(
+            table, value, isSelected, row, column);
+        
+        return component;
     }
     
     @Override

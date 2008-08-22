@@ -15,7 +15,7 @@ public class ImagesResultsPanel extends BaseResultPanel {
         @Assisted EventList<VisualSearchResult> eventList,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search) {
-        super("Images from Everyone", eventList, 
+        super("Images from Everyone", eventList, new ImageTableFormat(),
             searchResultDownloader, search);
     }
 }

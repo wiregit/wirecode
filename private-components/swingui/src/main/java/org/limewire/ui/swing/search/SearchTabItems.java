@@ -36,11 +36,16 @@ class SearchTabItems {
         this.listener = listener;
         
         this.searchActionMaps = new ArrayList<TabActionMap>();
-        searchActionMaps.add(newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
-        searchActionMaps.add(newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
-        searchActionMaps.add(newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
-        searchActionMaps.add(newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGES)));
-        searchActionMaps.add(newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENTS)));
+        searchActionMaps.add(
+            newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
+        searchActionMaps.add(
+            newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
+        searchActionMaps.add(
+            newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
+        searchActionMaps.add(
+            newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGES)));
+        searchActionMaps.add(
+            newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENTS)));
 
         for (TabActionMap map : searchActionMaps) {
             SearchTabAction action = (SearchTabAction)map.getMainAction();
@@ -65,9 +70,11 @@ class SearchTabItems {
     }
     
     public Collection<Map.Entry<SearchCategory, Action>> getResultCountActions() {
-        Map<SearchCategory, Action> counts = new EnumMap<SearchCategory, Action>(SearchCategory.class);
-        for(TabActionMap map : searchActionMaps) {
-            SearchCategory category = ((SearchTabAction)map.getMainAction()).getCategory();
+        Map<SearchCategory, Action> counts =
+            new EnumMap<SearchCategory, Action>(SearchCategory.class);
+        for (TabActionMap map : searchActionMaps) {
+            SearchCategory category =
+                ((SearchTabAction) map.getMainAction()).getCategory();
             counts.put(category, map.getMoreTextAction());
         }
         return counts.entrySet();

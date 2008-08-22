@@ -15,7 +15,7 @@ public class VideoResultsPanel extends BaseResultPanel {
         @Assisted EventList<VisualSearchResult> eventList,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search) {
-        super("Video from Everyone", eventList, 
+        super("Video from Everyone", eventList, new VideoTableFormat(),
             searchResultDownloader, search);
     }
 }

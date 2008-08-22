@@ -64,15 +64,15 @@ public class SearchResultListCellRenderer extends DefaultListCellRenderer {
         String heading = "";
         heading += properties.get(SearchResult.PropertyKey.ARTIST_NAME);
         heading += " - ";
-        heading += properties.get(SearchResult.PropertyKey.TRACK_NAME);
+        heading += properties.get(SearchResult.PropertyKey.NAME);
         headingLabel.setText(heading);
 
-        Object comment = properties.get(SearchResult.PropertyKey.COMMENT);
+        Object comment = properties.get(SearchResult.PropertyKey.COMMENTS);
         String subheading = "";
         if (comment != null) subheading += comment + " - ";
         subheading += properties.get(SearchResult.PropertyKey.QUALITY);
         subheading += " - ";
-        subheading += properties.get(SearchResult.PropertyKey.TRACK_TIME);
+        subheading += properties.get(SearchResult.PropertyKey.LENGTH);
         subheadingLabel.setText(subheading);
 
         //int sourceCount = vsr.getSources().size();
