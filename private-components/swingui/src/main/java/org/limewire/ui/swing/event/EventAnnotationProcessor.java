@@ -9,8 +9,9 @@ import org.bushe.swing.event.EventService;
 import org.bushe.swing.event.EventServiceExistsException;
 import org.bushe.swing.event.EventServiceLocator;
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.bushe.swing.event.annotation.EventTopicSubscriber;
 import org.bushe.swing.event.annotation.EventTopicPatternSubscriber;
+import org.bushe.swing.event.annotation.EventTopicSubscriber;
+import org.bushe.swing.event.annotation.ProxyTopicPatternSubscriber;
 import org.bushe.swing.event.annotation.ProxyTopicSubscriber;
 import org.bushe.swing.event.annotation.ReferenceStrength;
 
@@ -29,6 +30,11 @@ public class EventAnnotationProcessor {
             Method method = methods[i];
             if (method.isAnnotationPresent(RuntimeTopicEventSubscriber.class)) {
                 RuntimeTopicEventSubscriber annotation = method.getAnnotation(RuntimeTopicEventSubscriber.class);
+                if (annotation != null) {
+                    process(annotation, subscriber, method);
+                }
+            } else if (method.isAnnotationPresent(RuntimeTopicPatternEventSubscriber.class)) {
+                RuntimeTopicPatternEventSubscriber annotation = method.getAnnotation(RuntimeTopicPatternEventSubscriber.class);
                 if (annotation != null) {
                     process(annotation, subscriber, method);
                 }
@@ -56,7 +62,7 @@ public class EventAnnotationProcessor {
 
             @Override
             public String topic() {
-                String t = getTopic(annotation, subscriber, method);
+                String t = getTopic(annotation.methodName(), subscriber, method);
                 return t;
             }
 
@@ -68,20 +74,56 @@ public class EventAnnotationProcessor {
         process(eventTopicSubscriber, subscriber, method);
     }
 
-    private static String getTopic(RuntimeTopicEventSubscriber annotation, Object subscriber, Method method) {
+    private static void process(final RuntimeTopicPatternEventSubscriber annotation, final Object subscriber, final Method method) {
+        EventTopicPatternSubscriber eventTopicSubscriber = new EventTopicPatternSubscriber() {
+            @Override
+            public Class<? extends EventService> autoCreateEventServiceClass() {
+                return annotation.autoCreateEventServiceClass();
+            }
+            
+            @Override
+            public String eventServiceName() {
+                return annotation.eventServiceName();
+            }
+            
+            @Override
+            public ReferenceStrength referenceStrength() {
+                return ReferenceStrength.WEAK;
+            }
+            
+            @Override
+            public boolean exact() {
+                return annotation.exact();
+            }
+
+            @Override
+            public String topicPattern() {
+                String t = getTopic(annotation.methodName(), subscriber, method);
+                return t;
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return annotation.annotationType();
+            }
+        };
+        process(eventTopicSubscriber, subscriber, method);
+    }
+
+    private static String getTopic(String methodName, Object subscriber, Method method) {
         try {
             //TODO: Confirm that subscriber class has this method
-            Method runtimeEvalMethod = subscriber.getClass().getMethod(annotation.methodName(), new Class[0]);
+            Method runtimeEvalMethod = subscriber.getClass().getMethod(methodName, new Class[0]);
             return runtimeEvalMethod.invoke(subscriber, new Object[0]).toString();
         } catch (SecurityException e) {
-            throw new RuntimeException("Could not retrieve method for subscription. Method: " + annotation.methodName(), e);
+            throw new RuntimeException("Could not retrieve method for subscription. Method: " + methodName, e);
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Could not retrieve method for subscription. Method: " + annotation.methodName(), e);
+            throw new RuntimeException("Could not retrieve method for subscription. Method: " + methodName, e);
         } catch (InvocationTargetException e) {
             e.getTargetException().printStackTrace();
-            throw new RuntimeException("Could not invoke method for subscription. Method: " + annotation.methodName(), e);
+            throw new RuntimeException("Could not invoke method for subscription. Method: " + methodName, e);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not invoke method for subscription. Method: " + annotation.methodName(), e);
+            throw new RuntimeException("Could not invoke method for subscription. Method: " + methodName, e);
         }
     }
     
@@ -97,6 +139,22 @@ public class EventAnnotationProcessor {
 
         ProxyTopicSubscriber subscriber = new ProxyTopicSubscriber(obj, method, topicAnnotation.referenceStrength(), eventService, topic);
 
+        eventService.subscribeStrongly(topic, subscriber);
+    }
+
+    private static void process(EventTopicPatternSubscriber topicPatternAnnotation, Object obj, Method method) {
+        String topic = topicPatternAnnotation.topicPattern();
+        if (topic == null) {
+            throw new IllegalArgumentException("TopicPattern cannot be null for EventTopicPatternSubscriber annotation");
+        }
+        
+        Class<? extends EventService> eventServiceClass = topicPatternAnnotation.autoCreateEventServiceClass();
+        String eventServiceName = topicPatternAnnotation.eventServiceName();
+        EventService eventService = getEventServiceFromAnnotation(eventServiceName, eventServiceClass);
+        
+        ProxyTopicPatternSubscriber subscriber = new ProxyTopicPatternSubscriber(obj, method, topicPatternAnnotation.referenceStrength(),
+                eventService, topic, Pattern.compile(topic));
+        
         eventService.subscribeStrongly(topic, subscriber);
     }
 
@@ -136,8 +194,18 @@ public class EventAnnotationProcessor {
             RuntimeTopicEventSubscriber dynamicTopicSubscriber = method
                     .getAnnotation(RuntimeTopicEventSubscriber.class);
             if (dynamicTopicSubscriber != null) {
-                EventService eventService = EventServiceLocator.getEventService(dynamicTopicSubscriber.eventServiceName());
-                eventService.unsubscribe(getTopic(dynamicTopicSubscriber, subscriber, method), subscriber);
+                EventService eventService = EventServiceLocator
+                        .getEventService(dynamicTopicSubscriber.eventServiceName());
+                eventService.unsubscribe(getTopic(dynamicTopicSubscriber.methodName(), subscriber,
+                        method), subscriber);
+            }
+            RuntimeTopicPatternEventSubscriber dynamicTopicPatternSubscriber = method
+                    .getAnnotation(RuntimeTopicPatternEventSubscriber.class);
+            if (dynamicTopicPatternSubscriber != null) {
+                EventService eventService = EventServiceLocator
+                        .getEventService(dynamicTopicPatternSubscriber.eventServiceName());
+                eventService.unsubscribe(getTopic(dynamicTopicPatternSubscriber.methodName(),
+                        subscriber, method), subscriber);
             }
            EventSubscriber classAnnotation = method.getAnnotation(EventSubscriber.class);
            if (classAnnotation != null) {
