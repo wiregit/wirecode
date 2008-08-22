@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -93,6 +94,7 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new FriendsPanelResizer(friendsPanel));
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(new PlayerPanel(), JLayeredPane.PALETTE_LAYER);
         add(layeredPane, gbc);
         
         // Line below the left & main panel

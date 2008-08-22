@@ -146,9 +146,9 @@ public class MouseableTable extends JXTable {
     @Override
     public Component prepareEditor(TableCellEditor editor, int row, int column) {
         Component comp = super.prepareEditor(editor, row, column);
-        ComponentAdapter adapter = getComponentAdapter(row, column);
         
         if (compoundHighlighter != null) {
+            ComponentAdapter adapter = getComponentAdapter(row, column);
             comp = compoundHighlighter.highlight(comp, adapter);
         }
         
@@ -167,7 +167,9 @@ public class MouseableTable extends JXTable {
     
     @Override
     public boolean isCellEditable(int row, int col){
-    	return getColumnModel().getColumn(col).getCellEditor() != null;
+        boolean hasClassEditor = false;//getDefaultEditor(getValueAt(row, col).getClass()) != null;
+    	boolean hasColumnEditor = getColumnModel().getColumn(col).getCellEditor() != null;
+    	return hasClassEditor || hasColumnEditor;
     }
     
 
