@@ -8,8 +8,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
@@ -28,11 +28,25 @@ class ResizingInputPanel extends JPanel implements Displayable {
         text.setLineWrap(true);
         text.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "sendMessage");
         text.getActionMap().put("sendMessage", new SendMessage());
-        text.getDocument().addDocumentListener(new TextAreaResizer());
 
-        JScrollPane scrollPane = new JScrollPane(text, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        final JScrollPane scrollPane = new JScrollPane(text, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getViewport().addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (text.getText().length() > 0 && scrollPane.getVerticalScrollBar().isVisible()) {
+                    resizeTextBox(3);
+                }
+            }
+        });
         add(scrollPane);
+    }
+    
+    private void resizeTextBox(int rowCount) {
+        if (text.getRows() != rowCount) {
+            text.setRows(rowCount);
+            revalidate();
+        }
     }
     
     @Override
@@ -49,28 +63,12 @@ class ResizingInputPanel extends JPanel implements Displayable {
                 if (message.trim().length() > 0) {
                     writer.writeMessage(message);
                     text.setText("");
+                    resizeTextBox(2);
                 }
             } catch (XMPPException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
-        }
-    }
-
-    private class TextAreaResizer implements DocumentListener {
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-            // TODO Handle resize behavior for input box
-        }
-
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            // TODO Handle resize behavior for input box
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            // TODO Handle resize behavior for input box
         }
     }
 }
