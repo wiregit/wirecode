@@ -271,7 +271,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
     private void handleVerifiedPieces() {
         List<SwarmFile> swarmFiles = fileSystem.getSwarmFiles();
         for (SwarmFile swarmFile : swarmFiles) {
-            Range fileRange = Range.createRange(swarmFile.getStartByte(), swarmFile.getEndByte());
+            Range fileRange = Range.createRange(swarmFile.getStartBytePosition(), swarmFile.getEndBytePosition());
             if (verifiedBlocks.contains(fileRange)) {
                 try {
                     fileSystem.closeSwarmFile(swarmFile);

@@ -73,7 +73,7 @@ public class SwarmFileImpl implements SwarmFile {
      * 
      * @see org.limewire.swarm.file.SwarmFile#getStartByte()
      */
-    public long getStartByte() {
+    public long getStartBytePosition() {
         return startByte;
     }
 
@@ -92,8 +92,8 @@ public class SwarmFileImpl implements SwarmFile {
      * 
      * @see org.limewire.swarm.file.SwarmFile#getEndByte()
      */
-    public long getEndByte() {
-        long endByte = getFileSize() > 0 ? getStartByte() + getFileSize() - 1 : 0;
+    public long getEndBytePosition() {
+        long endByte = getFileSize() > 0 ? getStartBytePosition() + getFileSize() - 1 : 0;
         return endByte;
     }
 }

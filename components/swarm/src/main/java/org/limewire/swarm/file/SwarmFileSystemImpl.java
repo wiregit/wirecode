@@ -37,8 +37,8 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
 
     public SwarmFile getSwarmFile(long position) {
         for (SwarmFile swarmFile : swarmFiles) {
-            long startByte = swarmFile.getStartByte();
-            long endByte = swarmFile.getEndByte();
+            long startByte = swarmFile.getStartBytePosition();
+            long endByte = swarmFile.getEndBytePosition();
             if (startByte <= position && endByte >= position) {
                 return swarmFile;
             }
@@ -64,7 +64,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
 
         while (byteBuffer.position() < byteBuffer.limit()) {
             SwarmFile swarmFile = getSwarmFile(currentPosition);
-            long writeStart = currentPosition - swarmFile.getStartByte();
+            long writeStart = currentPosition - swarmFile.getStartBytePosition();
             long wrote = getFileHandle(swarmFile).write(byteBuffer, writeStart);
             currentPosition += wrote;
             wroteTotal += wrote;
@@ -185,8 +185,8 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         long rangeEnd = range.getHigh();
 
         for (SwarmFile swarmFile : swarmFiles) {
-            long startByte = swarmFile.getStartByte();
-            long endByte = swarmFile.getEndByte();
+            long startByte = swarmFile.getStartBytePosition();
+            long endByte = swarmFile.getEndBytePosition();
             if (startByte <= rangeEnd && endByte >= rangeStart) {
                 filesRet.add(swarmFile);
             }
