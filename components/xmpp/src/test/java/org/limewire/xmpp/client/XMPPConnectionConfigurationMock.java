@@ -71,7 +71,7 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     public XMPPErrorListener getErrorListener() {
         return new XMPPErrorListener() {
             public void register(XMPPService xmppService) {
-                
+                xmppService.setXmppErrorListener(this);
             }
 
             public void error(XMPPException exception) {

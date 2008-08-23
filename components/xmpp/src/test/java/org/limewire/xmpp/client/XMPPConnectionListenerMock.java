@@ -3,6 +3,10 @@ package org.limewire.xmpp.client;
 import org.limewire.xmpp.api.client.XMPPConnectionListener;
 import org.limewire.xmpp.api.client.XMPPService;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+@Singleton
 public class XMPPConnectionListenerMock implements XMPPConnectionListener {
 
     @Override
@@ -10,8 +14,8 @@ public class XMPPConnectionListenerMock implements XMPPConnectionListener {
         // TODO Auto-generated method stub
     }
 
-    @Override
+    @Inject
     public void register(XMPPService xmppService) {
-        // TODO Auto-generated method stub
+        xmppService.setConnectionListener(this);
     }
 }
