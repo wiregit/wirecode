@@ -8,4 +8,6 @@ public interface XMPPService {
     //public void register(RosterListener rosterListener);
     public void setXmppErrorListener(XMPPErrorListener errorListener);
     public void setFileOfferHandler(FileOfferHandler offerHandler);
+    public void setConnectionListener(XMPPConnectionListener connectionListener);
+    public XMPPConnectionListener getConnectionListener();
 }

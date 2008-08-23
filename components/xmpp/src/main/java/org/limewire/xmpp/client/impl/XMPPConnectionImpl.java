@@ -24,10 +24,11 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
@@ -41,6 +42,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     
     private final XMPPConnectionConfiguration configuration;
     private final FileOfferHandler fileOfferHandler;
+    private final XMPPService service;
     private final AddressFactory addressFactory;
     private volatile org.jivesoftware.smack.XMPPConnection connection;
     
@@ -53,9 +55,11 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventListener<RosterEvent> rosterListener,
                        FileOfferHandler fileOfferHandler,
+                       XMPPService service,
                        AddressFactory addressFactory) {
         this.configuration = configuration;
         this.fileOfferHandler = fileOfferHandler;
+        this.service = service;
         this.addressFactory = addressFactory;
         this.rosterListeners = new EventListenerList<RosterEvent>();
         if(configuration.getRosterListener() != null) {
@@ -90,6 +94,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
             LOG.info("logging in " + configuration.getUsername() + "...");
             connection.login(configuration.getUsername(), configuration.getPassword(), "limewire");
             LOG.info("logged in.");
+            service.getConnectionListener().connected(configuration.getUsername());
         } catch (org.jivesoftware.smack.XMPPException e) {
             throw new XMPPException(e);
         }

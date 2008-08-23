@@ -17,6 +17,7 @@ import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPConnectionListener;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -38,6 +39,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<EventListener<RosterEvent>> rosterListener;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
+    private XMPPConnectionListener connectionListener;
     private AddressEvent lastEvent;
 
     @Inject
@@ -69,6 +71,15 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     public void setXmppErrorListener(XMPPErrorListener errorListener) {
         this.errorListener = errorListener;
+    }
+    
+    public void setConnectionListener(XMPPConnectionListener connectionListener) {
+        this.connectionListener = connectionListener;
+    }
+
+    @Override
+    public XMPPConnectionListener getConnectionListener() {
+        return connectionListener;
     }
 
     public void setFileOfferHandler(FileOfferHandler offerHandler) {
@@ -127,7 +138,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
         synchronized (this) {
-            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferHandler, addressFactory);
+            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferHandler, this, addressFactory);
             connection.initialize();
             connections.add(connection);
             if(lastEvent != null) {

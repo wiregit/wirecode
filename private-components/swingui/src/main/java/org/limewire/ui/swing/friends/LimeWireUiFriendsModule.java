@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.xmpp.api.client.XMPPConnectionListener;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.FileOfferHandler;
 
@@ -21,5 +22,6 @@ public class LimeWireUiFriendsModule extends AbstractModule {
         bind(FriendsPaneRosterListener.class);
         bind(XMPPErrorListener.class).to(XMPPErrorListenerImpl.class);
         bind(FileOfferHandler.class).to(FileOfferHandlerImpl.class);
+        bind(XMPPConnectionListener.class).to(XMPPConnectionListenerImpl.class);
     }
 }

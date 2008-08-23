@@ -25,6 +25,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 
@@ -53,6 +54,7 @@ public class LoginPanel extends JPanel implements Displayable {
     private JTextField userNameField;
     private JPanel topPanel;
     private final XMPPService xmppService;
+    private static final String GMAIL_SERVICE_NAME = "gmail.com";
 
     @Inject
     public LoginPanel(XMPPService xmppService) {
@@ -82,6 +84,17 @@ public class LoginPanel extends JPanel implements Displayable {
         builder.add(topPanel, cc.xy(2, 2));
         builder.add(getDetailsPanel(), cc.xy(2, 4));
         add(builder.getPanel());
+        
+        populateInputs();
+    }
+    
+    private void populateInputs() {
+        XMPPConnectionConfiguration config = getConfig(GMAIL_SERVICE_NAME);
+        if (config.isAutoLogin()) {
+            userNameField.setText(config.getUsername());
+            passwordField.setText(config.getPassword());
+        }
+        rememberMeCheckbox.setSelected(config.isAutoLogin());
     }
     
     @Override
@@ -153,6 +166,18 @@ public class LoginPanel extends JPanel implements Displayable {
         return detailsPanelBuilder.getPanel();
     }
     
+    private XMPPConnectionConfiguration getConfig(String serviceName) {
+        XMPPConnectionConfiguration config = null;
+        List<XMPPConnection> connections = xmppService.getConnections();
+        for(XMPPConnection connection : connections) {
+            XMPPConnectionConfiguration configuration = connection.getConfiguration();
+            if(configuration.getServiceName().equals(serviceName)) {
+                config = configuration;
+            }
+        }
+        return config;
+    }
+    
     class SignInAction extends AbstractAction {
         public SignInAction() {
             super(tr("Sign in"));
@@ -164,7 +189,9 @@ public class LoginPanel extends JPanel implements Displayable {
                     synchronized (LoginPanel.this) {
                         List<XMPPConnection> connections = xmppService.getConnections();
                         for(XMPPConnection connection : connections) {
-                            if(connection.getConfiguration().getServiceName().equals("gmail.com")) {
+                            XMPPConnectionConfiguration configuration = connection.getConfiguration();
+                            //FIXME: Update to distinguish for Facebook service name (whenever Facebook enables XMPP service)
+                            if(configuration.getServiceName().equals(GMAIL_SERVICE_NAME)) {
                                 if(!connection.isLoggedIn()) {
                                     String userName = userNameField.getText().trim();
                                     // TODO handle empty String
@@ -172,14 +199,11 @@ public class LoginPanel extends JPanel implements Displayable {
                                         // TODO ignoreCase?
                                         userName += "@gmail.com";
                                     }
-                                    connection.getConfiguration().setUsername(userName);
-                                    connection.getConfiguration().setPassword(new String(passwordField.getPassword()));
-                                    connection.getConfiguration().setAutoLogin(rememberMeCheckbox.isSelected());
+                                    configuration.setUsername(userName);
+                                    configuration.setPassword(new String(passwordField.getPassword()));
+                                    configuration.setAutoLogin(rememberMeCheckbox.isSelected());
                                     try {
                                         connection.login();
-                                        
-                                        new XMPPConnectionEstablishedEvent(userNameField.getText()).publish();
-                                        
                                     } catch (XMPPException e1) {
                                         SwingUtilities.invokeLater(new Runnable() {
                                             @Override
