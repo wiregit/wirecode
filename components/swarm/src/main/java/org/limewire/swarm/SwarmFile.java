@@ -23,19 +23,16 @@ public interface SwarmFile {
     public abstract long getFileSize();
 
     /**
-     * The start byte for this file, in whatever file system it is represented
+     * Returns the position of start byte for this file, in whatever file system it is represented
      * by.
-     * 
-     * @return
      */
-    public abstract long getStartByte();
+    public abstract long getStartBytePosition();
 
     /**
-     * The end byte for this file, in whatever file system it is represented by.
-     * 
-     * @return
+     * The position of the end byte for this file, in whatever file system it is represented by.
+     * This is inclusive, the byte at this position belongs to this file.
      */
-    public abstract long getEndByte();
+    public abstract long getEndBytePosition();
 
     /**
      * Returns the base path for this file. Can be used for remote and local

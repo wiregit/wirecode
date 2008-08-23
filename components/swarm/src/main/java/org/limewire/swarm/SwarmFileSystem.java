@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.limewire.collection.Range;
-
 /**
  * Represents a collection of files on top the local file system. Maps between
  * the actual underlying filesystem and the view provided here.
@@ -51,15 +49,8 @@ public interface SwarmFileSystem {
     SwarmFile getSwarmFile(long position);
 
     /**
-     * Returns the SwarmFiles represented by this file system.
+     * Returns all the swarm files represented by this file system.
      */
     List<SwarmFile> getSwarmFiles();
-
-    /**
-     * Returns the SwarmFiles which are a part of the given range.
-     * 
-     * @param range range to get the files from.
-     */
-    List<SwarmFile> getSwarmFiles(Range range);
 
 }

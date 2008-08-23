@@ -24,17 +24,17 @@ public interface SwarmSourceHandler {
     void shutdown() throws IOException;
 
     /**
-     * Returns whether or not this handler is active.
+     * Returns whether has been started and not shutdown yet.
      */
     boolean isActive();
 
     /**
-     * Returns whether or not this handler is complete.
+     * Returns whether all necessary data has been downloaded.
      */
     boolean isComplete();
 
     /**
-     * Returns the aggregate measures bandwidth from its handler.
+     * Returns the measured bandwidth for its downloads.
      * 
      * @param downstream if true return downstream bandwidth, otherwise upstream
      */

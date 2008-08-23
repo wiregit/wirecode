@@ -2,10 +2,9 @@ package org.limewire.swarm;
 
 /**
  * SwarmSource objects have a getType method which will return one of the
- * following enumerations. This allows the swarmer to register a source type
- * with a source handler.
+ * following enumerations. This allows implementations of {@link SwarmSourceHandler}
+ * to register with a {@link Swarmer}.
  */
-
 public enum SwarmSourceType {
     HTTP();
 }
