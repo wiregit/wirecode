@@ -1,5 +1,6 @@
 package org.limewire.ui.swing;
 
+import org.bushe.swing.event.EventService;
 import org.bushe.swing.event.EventServiceLocator;
 
 /**
@@ -7,12 +8,24 @@ import org.bushe.swing.event.EventServiceLocator;
  * 
  */
 public abstract class AbstractEDTEvent {
-
+    private static EventService eventService;
+    
+    public static void setEventService(EventService service) {
+        eventService = service;
+    }
+    
     public void publish() {
-        EventServiceLocator.getSwingEventService().publish(this);
+        getEventService().publish(this);
+    }
+
+    private static EventService getEventService() {
+        if (eventService == null) {
+            eventService = EventServiceLocator.getSwingEventService();
+        }
+        return eventService;
     }
     
     public void publish(String topic) {
-        EventServiceLocator.getSwingEventService().publish(topic, this);
+        getEventService().publish(topic, this);
     }
 }
