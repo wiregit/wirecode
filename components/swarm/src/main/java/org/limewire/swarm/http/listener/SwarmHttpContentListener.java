@@ -90,7 +90,6 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     }
 
     public void initialize(HttpResponse response) throws IOException {
-        LOG.trace("");
         if (finished) {
             String message = "Already finished";
             LOG.warn(message);
@@ -98,7 +97,7 @@ public class SwarmHttpContentListener implements ResponseContentListener {
         }
 
         Range actualRange = SwarmHttpUtils.parseContentRange(response);
-        long startByte = swarmFile.getStartByte();
+        long startByte = swarmFile.getStartBytePosition();
 
         actualRange = Range.createRange(startByte + actualRange.getLow(), startByte
                 + actualRange.getHigh());
@@ -106,7 +105,6 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     }
 
     private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
-        LOG.trace("");
         if (actualRange == null || leaseRange == null) {
             throw new IOException("No actual or expected range?");
         }

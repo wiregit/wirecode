@@ -349,7 +349,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
         }
 
         SwarmFile swarmFile = swarmCoordinator.getSwarmFile(leaseRange);
-        long fileEndByte = swarmFile.getEndByte();
+        long fileEndByte = swarmFile.getEndBytePosition();
 
         if (leaseRange.getHigh() > fileEndByte) {
             Range oldRange = leaseRange;
@@ -357,8 +357,8 @@ public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestE
             leaseRange = swarmCoordinator.renewLease(oldRange, leaseRange);
         }
 
-        long downloadRangeStart = leaseRange.getLow() - swarmFile.getStartByte();
-        long downloadRangeEnd = leaseRange.getHigh() - swarmFile.getStartByte();
+        long downloadRangeStart = leaseRange.getLow() - swarmFile.getStartBytePosition();
+        long downloadRangeEnd = leaseRange.getHigh() - swarmFile.getStartBytePosition();
 
         Range downloadRange = Range.createRange(downloadRangeStart, downloadRangeEnd);
 
