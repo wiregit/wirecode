@@ -14,7 +14,7 @@ public class BTSwarmFile implements SwarmFile {
         this.torrentFile = torrentFile;
     }
 
-    public long getEndByte() {
+    public long getEndBytePosition() {
         return torrentFile.getEndByte();
     }
 
@@ -30,7 +30,7 @@ public class BTSwarmFile implements SwarmFile {
         return torrentFile.getTorrentPath();
     }
 
-    public long getStartByte() {
+    public long getStartBytePosition() {
         return torrentFile.getStartByte();
     }
 
