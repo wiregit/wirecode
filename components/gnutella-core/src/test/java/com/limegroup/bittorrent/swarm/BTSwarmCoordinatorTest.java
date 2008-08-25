@@ -6,7 +6,6 @@ import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 
 import org.limewire.http.util.FileServer;
-import org.limewire.io.DiskException;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
@@ -24,7 +23,7 @@ import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
-import com.limegroup.bittorrent.disk.DiskManagerListener;
+import com.limegroup.bittorrent.disk.LoggingDiskListener;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.handshaking.piecestrategy.LargestGapStartPieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
@@ -33,6 +32,7 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class BTSwarmCoordinatorTest extends LimeTestCase {
+
     private static final int TEST_PORT = 8080;
 
     /**
@@ -58,15 +58,12 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
         Thread.sleep(1000);
-        super.setUp();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        System.out.println("===================================");
         fileServer.stop();
         fileServer.destroy();
-        super.tearDown();
     }
 
     public void testSingleFileTorret() throws Exception {
@@ -266,24 +263,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         TorrentDiskManager torrentDiskManager = torrentContext.getDiskManager();
-        torrentDiskManager.open(new DiskManagerListener() {
-
-            public void chunkVerified(int id) {
-                System.out.println("chunkVerified: " + id);
-
-            }
-
-            public void diskExceptionHappened(DiskException e) {
-                System.out.println("diskExceptionHappened: " + e.getMessage());
-
-            }
-
-            public void verificationComplete() {
-                System.out.println("verificationComplete");
-
-            }
-
-        });
+        torrentDiskManager.open(new LoggingDiskListener());
 
         final BTSwarmCoordinator btCoordinator = new BTSwarmCoordinator(torrentContext
                 .getMetaInfo(), torrentFileSystem, torrentDiskManager, pieceStrategy);
