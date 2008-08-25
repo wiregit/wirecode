@@ -4,6 +4,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -96,7 +97,8 @@ public class ConfigurableTable<E> extends MouseableTable {
         headerPopup = new JPopupMenu();
         int margin = 5;
         headerPopup.setBorder(
-            BorderFactory.createEmptyBorder(margin, margin, margin, margin));
+            //BorderFactory.createEmptyBorder(margin, margin, margin, margin));
+            BorderFactory.createLineBorder(Color.BLACK, 1));
 
         // Create a checkbox menu item for each column heading.
         for (String headerName : headerSet) {
@@ -162,6 +164,15 @@ public class ConfigurableTable<E> extends MouseableTable {
     }
 
     /**
+     * Sets the width of a given column.
+     * @param columnIndex the column index
+     * @param width the width
+     */
+    public void setColumnWidth(int columnIndex, int width) {
+        getColumnModel().getColumn(columnIndex).setPreferredWidth(width);
+    }
+
+    /**
      * Set the object that controls the columns displayed in this table.
      * @param tableFormat the TableFormat
      */
@@ -175,5 +186,17 @@ public class ConfigurableTable<E> extends MouseableTable {
         setModel(tableModel);
 
         makeHeaderPopup();
+    }
+
+    /**
+     * This is overridden to prevent a java.lang.IllegalStateException
+     * that occurs because a reverse mapping function must be specified
+     * to support this operation.
+     * @param aValue the new value
+     * @param row the row
+     * @param column the column
+     */
+    @Override
+    public void setValueAt(Object aValue, int row, int column) {
     }
 }

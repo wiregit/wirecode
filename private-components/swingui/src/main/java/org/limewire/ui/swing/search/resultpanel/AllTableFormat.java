@@ -8,7 +8,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  * objects representing any kind of media.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class AllTableFormat extends ResultsTableFormat {
+public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     public AllTableFormat() {
         columnNames = new String[] {
@@ -16,9 +16,10 @@ public class AllTableFormat extends ResultsTableFormat {
             "Relevance", "People with File", "Owner"
         };
 
-        vsrIndex = 4;
+        actionColumnIndex = 4;
     }
 
+    @Override
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 

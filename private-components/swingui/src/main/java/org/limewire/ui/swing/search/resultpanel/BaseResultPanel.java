@@ -5,11 +5,8 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JList;
-import javax.swing.ListModel;
 import javax.swing.Scrollable;
 
-import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
@@ -19,20 +16,16 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ListSelection;
-import ca.odell.glazedlists.gui.AdvancedTableFormat;
-import ca.odell.glazedlists.swing.EventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 import javax.swing.JScrollPane;
-import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import org.limewire.ui.swing.ConfigurableTable;
 
 public class BaseResultPanel extends JXPanel {
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
+    private ConfigurableTable resultsList;
     private ConfigurableTable resultsTable;
-    private JList resultsList;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -40,7 +33,7 @@ public class BaseResultPanel extends JXPanel {
     
     BaseResultPanel(String title,
             EventList<VisualSearchResult> eventList,
-            AdvancedTableFormat<VisualSearchResult> tableFormat,
+            ResultsTableFormat<VisualSearchResult> tableFormat,
             SearchResultDownloader searchResultDownloader, Search search) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
@@ -48,10 +41,7 @@ public class BaseResultPanel extends JXPanel {
         
         setLayout(layout);
                 
-        EventListModel<VisualSearchResult> eventListModel =
-            new EventListModel<VisualSearchResult>(eventList);
-
-        configureList(eventListModel, eventList);
+        configureList(eventList);
         configureTable(eventList, tableFormat);
         
         // TODO: RMV I think these JScrollPanes are fighting with the ones
@@ -61,51 +51,35 @@ public class BaseResultPanel extends JXPanel {
         setMode(ModeListener.Mode.LIST);
     }
     
-    private void configureList(
-        EventListModel<VisualSearchResult> eventListModel,
-        EventList<VisualSearchResult> eventList) {
+    private void configureList(EventList<VisualSearchResult> eventList) {
+        // We're using a JTable with one column instead of JList
+        // because that will allow us to display buttons with rollover icons.
+        resultsList = new ConfigurableTable();
 
-        resultsList = new JXList(eventListModel);
-        resultsList.setCellRenderer(new SearchResultListCellRenderer());
-        resultsList.setFixedCellHeight(50);
-        resultsList.setSelectionModel(
-            new EventSelectionModel<VisualSearchResult>(eventList));
-        resultsList.setSelectionMode(
-            ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
-        resultsList.addMouseListener(new ResultDownloader());
+        resultsList.setEventList(eventList);
+        resultsList.setTableFormat(new ListViewTableFormat());
+
+        SearchResultTableCellEditor editor = new SearchResultTableCellEditor();
+        resultsList.setDefaultRenderer(VisualSearchResult.class, editor);
+        resultsList.setDefaultEditor(VisualSearchResult.class, editor);
+
+        resultsList.setRowHeight(50);
+        resultsList.setColumnWidth(0, 700);
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,
-        AdvancedTableFormat<VisualSearchResult> tableFormat) {
-        resultsTable = new ConfigurableTable<VisualSearchResult>(){
-            // hack - gets rid of java.lang.IllegalStateException: A reverse mapping
-            // function must be specified to support this List operation
-            @Override
-            public void setValueAt(Object aValue, int row, int column) {
-            }
-        };
+        ResultsTableFormat<VisualSearchResult> tableFormat) {
+        resultsTable = new ConfigurableTable<VisualSearchResult>();
 
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
 
         ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
-        ActionColumnTableCellEditor renderer = new ActionColumnTableCellEditor();
-        resultsTable.setDefaultRenderer(VisualSearchResult.class, renderer);
+        resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);
         resultsTable.setDefaultEditor(VisualSearchResult.class, editor);
 
-        // Find the column that will disply the action buttons.
-        /*
-        int columnCount = tableFormat.getColumnCount();
-        for (int i = 0; i < columnCount; i++) {
-            Class type = tableFormat.getColumnClass(i);
-            if (type == VisualSearchResult.class) {
-                System.out.println("VisualSearchResult column is " + i);
-                TableColumn column =
-                    resultsTable.getColumnModel().getColumn(i);
-                column.setCellEditor(editor);
-            }
-        }
-        */
+        resultsTable.setColumnWidth(
+            tableFormat.getActionButtonColumnIndex(), 100);
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {
@@ -129,11 +103,10 @@ public class BaseResultPanel extends JXPanel {
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
-                int index = resultsList.locationToIndex(e.getPoint());
-                ListModel dlm = resultsList.getModel();
+                int row = resultsList.rowAtPoint(e.getPoint());
+                TableModel tm = resultsList.getModel();
                 VisualSearchResult item =
-                    (VisualSearchResult) dlm.getElementAt(index);
-                resultsList.ensureIndexIsVisible(index);
+                    (VisualSearchResult) tm.getValueAt(row, 0);
                 
                 try {
                     // TODO: Need to go through some of the rigor that 

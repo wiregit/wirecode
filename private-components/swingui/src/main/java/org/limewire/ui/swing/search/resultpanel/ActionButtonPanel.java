@@ -6,7 +6,6 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -61,7 +60,6 @@ public class ActionButtonPanel extends JPanel {
         calculateHeight();
 
         setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
-        add(new JTextField(2));
         createButtons();
     }
 

@@ -8,7 +8,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  * video descriptions.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class VideoTableFormat extends ResultsTableFormat {
+public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     public VideoTableFormat() {
         columnNames = new String[] {
@@ -17,9 +17,10 @@ public class VideoTableFormat extends ResultsTableFormat {
         "Comments", "Height", "Width", "Bitrate"
         };
 
-        vsrIndex = 5;
+        actionColumnIndex = 5;
     }
 
+    @Override
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 

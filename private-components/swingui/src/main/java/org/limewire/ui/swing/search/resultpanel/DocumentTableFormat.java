@@ -8,7 +8,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  * document descriptions.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class DocumentTableFormat extends ResultsTableFormat {
+public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     public DocumentTableFormat() {
         columnNames = new String[] {
@@ -16,9 +16,10 @@ public class DocumentTableFormat extends ResultsTableFormat {
             "Actions", "Relevance", "People with File", "Owner", "Author"
         };
 
-        vsrIndex = 5;
+        actionColumnIndex = 5;
     }
 
+    @Override
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 

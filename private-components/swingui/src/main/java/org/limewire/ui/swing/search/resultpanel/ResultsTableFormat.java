@@ -11,13 +11,20 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  * that describe the various table views of search results.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public abstract class ResultsTableFormat
-implements AdvancedTableFormat<VisualSearchResult>,
-    WritableTableFormat<VisualSearchResult> {
+public abstract class ResultsTableFormat<E>
+implements AdvancedTableFormat<E>, WritableTableFormat<E> {
 
     protected String[] columnNames;
     protected VisualSearchResult vsr;
-    protected int vsrIndex;
+    protected int actionColumnIndex;
+
+    /**
+     * Gets the index for the column that contains the three "action" buttons.
+     * @return
+     */
+    public int getActionButtonColumnIndex() {
+        return actionColumnIndex;
+    }
 
     public int getColumnCount() {
         return columnNames.length;
@@ -33,7 +40,7 @@ implements AdvancedTableFormat<VisualSearchResult>,
     }
 
     public Class getColumnClass(int index) {
-        return index == vsrIndex ? VisualSearchResult.class : String.class;
+        return index == actionColumnIndex ? VisualSearchResult.class : String.class;
     }
 
     public Comparator getColumnComparator(int index) {
@@ -41,7 +48,7 @@ implements AdvancedTableFormat<VisualSearchResult>,
     }
 
     public boolean isEditable(VisualSearchResult vsr, int index) {
-        return index == vsrIndex;
+        return index == actionColumnIndex;
     }
 
     public VisualSearchResult setColumnValue(

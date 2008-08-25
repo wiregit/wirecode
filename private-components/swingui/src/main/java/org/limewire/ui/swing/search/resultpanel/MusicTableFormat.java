@@ -8,7 +8,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  * music track descriptions.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class MusicTableFormat extends ResultsTableFormat {
+public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     public MusicTableFormat() {
         columnNames = new String[] {
@@ -17,7 +17,7 @@ public class MusicTableFormat extends ResultsTableFormat {
             "People with File", "Owner", "Type", "Sample Rate"
         };
 
-        vsrIndex = 5;
+        actionColumnIndex = 5;
     }
 
     public Object getColumnValue(VisualSearchResult vsr, int index) {
