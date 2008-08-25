@@ -30,6 +30,7 @@ public class SharingShortcutPanel extends JPanel {
             final NumberedHyperLinkButton button = new NumberedHyperLinkButton(names[i], actions[i]);
             button.setForegroundColor(Color.BLUE);
             button.setMouseOverColor(Color.GREEN);
+            button.setDisplayNumber(0);
             models.get(i).addListEventListener(new ListEventListener<FileItem>(){
                 @Override
                 public void listChanged(ListEvent<FileItem> listChanges) {

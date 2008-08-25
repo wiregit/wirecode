@@ -30,12 +30,14 @@ public class SharingFancyPanel extends JPanel {
     private static final String video = "Videos";
     private static final String image = "Images";
     private static final String doc = "Documents";
+    private static final String program = "Program";
     private static final String other = "Other";
     
     private SharingFancyTablePanel musicTable;
     private SharingFancyTablePanel videoTable;
     private SharingFancyListPanel imageList;
     private SharingFancyTablePanel documentTable;
+    private SharingFancyTablePanel programTable;
     private SharingFancyTablePanel otherTable;
     //TODO: what to do about programs??
     
@@ -52,21 +54,24 @@ public class SharingFancyPanel extends JPanel {
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.VIDEO)));
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.IMAGE)));
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.DOCUMENT)));
+        list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.PROGRAM)));
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.OTHER)));
         
         musicTable = new SharingFancyTablePanel(music, list.get(0), new SharingFancyAudioTableFormat(), drop.getDropTarget(), originalList);
         videoTable = new SharingFancyTablePanel(video, list.get(1), new SharingFancyDefaultTableFormat(),false, drop.getDropTarget(), originalList);
         imageList = new SharingFancyListPanel(image, list.get(2), drop.getDropTarget(), originalList);
         documentTable = new SharingFancyTablePanel(doc, list.get(3), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget(), originalList);
-        otherTable = new SharingFancyTablePanel(other, list.get(4), new SharingFancyDefaultTableFormat(), drop.getDropTarget(), originalList);
+        programTable = new SharingFancyTablePanel(program, list.get(4), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget(), originalList);
+        otherTable = new SharingFancyTablePanel(other, list.get(5), new SharingFancyDefaultTableFormat(), drop.getDropTarget(), originalList);
         
         
         SharingShortcutPanel shortcuts = new SharingShortcutPanel(
-                new String[]{music, video, image, doc, other},
+                new String[]{music, video, image, doc, program, other},
                 new Action[]{new BookmarkJumpAction(this, musicTable),
                              new BookmarkJumpAction(this, videoTable),
                              new BookmarkJumpAction(this, imageList),
                              new BookmarkJumpAction(this, documentTable),
+                             new BookmarkJumpAction(this, programTable),
                              new BookmarkJumpAction(this, otherTable)},
                 list);
 
@@ -78,6 +83,7 @@ public class SharingFancyPanel extends JPanel {
        add(videoTable);
        add(imageList);
        add(documentTable);
+       add(programTable);
        add(otherTable);
 
        this.setDropTarget(drop.getDropTarget());

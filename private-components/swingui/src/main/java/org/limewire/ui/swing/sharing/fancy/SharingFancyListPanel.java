@@ -109,6 +109,8 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         add(l, "span 2, grow");
 
         eventList.addListEventListener(this);
+        
+        setVisible(false);
     }
     
     @Override
@@ -118,6 +120,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
                 @Override
                 public void run() {
                     unShareButton.setEnabled(false);
+                    SharingFancyListPanel.this.setVisible(false);
                 }
             });
         } else {
@@ -125,6 +128,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
                 @Override
                 public void run() {
                     unShareButton.setEnabled(true);
+                    SharingFancyListPanel.this.setVisible(true);
                 }
             });
         }

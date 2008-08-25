@@ -96,6 +96,8 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         add(table, "span 2, grow");
 
         eventList.addListEventListener(this);
+        
+        setVisible(false);
     }
     
     private SharingFancyTable createTable(EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, DropTarget dropTarget) {
@@ -129,8 +131,10 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
             public void run() {
                 if( size == 0 ) {
                     unShareButton.setEnabled(false);
+                    SharingFancyTablePanel.this.setVisible(false);
                 } else {
                     unShareButton.setEnabled(true);
+                    SharingFancyTablePanel.this.setVisible(true);
                 }
             }
         });
