@@ -71,7 +71,8 @@ public class ResultsContainer extends JXPanel {
 
     public void synchronizeResultCount(SearchCategory key, final Action action) {
         // Adds itself as a listener to the list & keeps the action in sync.
-        new SourceCountMaintainer(panelMap.get(key.name()).getResultsEventList(), action);
+        new SourceCountMaintainer(
+            panelMap.get(key.name()).getResultsEventList(), action);
     }
     
     /**
@@ -90,8 +91,10 @@ public class ResultsContainer extends JXPanel {
         
     }
     
-    private EventList<VisualSearchResult> filter(final ResultType category, EventList<VisualSearchResult> list) {
-        return new FilterList<VisualSearchResult>(list, new Matcher<VisualSearchResult>() {
+    private EventList<VisualSearchResult> filter(
+        final ResultType category, EventList<VisualSearchResult> list) {
+        return new FilterList<VisualSearchResult>(
+            list, new Matcher<VisualSearchResult>() {
             @Override
             public boolean matches(VisualSearchResult item) {
                 return item.getCategory() == category;
@@ -102,5 +105,4 @@ public class ResultsContainer extends JXPanel {
     public Component getScrollPaneHeader() {
         return currentPanel.getScrollPaneHeader();
     }
-    
 }

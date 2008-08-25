@@ -87,14 +87,12 @@ public class SearchResultsPanel extends JPanel {
             public void categorySelected(SearchCategory searchCategory) {
                 resultsContainer.showCategory(searchCategory);
                 syncColumnHeader();
-                // TODO: RMV Somehow need to call setTableFormat
-                // TODO: RMV on resultsTable in BaseResultPanel.
             }
         };
         
         this.searchTab =
             new SearchTabItems(searchInfo.getSearchCategory(), listener);
-        for(Map.Entry<SearchCategory, Action> entry : searchTab.getResultCountActions()) {
+        for (Map.Entry<SearchCategory, Action> entry : searchTab.getResultCountActions()) {
             resultsContainer.synchronizeResultCount(entry.getKey(), entry.getValue());
         }
         

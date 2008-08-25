@@ -11,25 +11,28 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-public class SourceCountMaintainer implements ListEventListener<VisualSearchResult> {
+public class SourceCountMaintainer
+implements ListEventListener<VisualSearchResult> {
     
     private final EventList<VisualSearchResult> source;
     private final Action countAction;
     private final List<Integer> countList;
     private int totalCount = 0;
     
-    public SourceCountMaintainer(EventList<VisualSearchResult> resultsEventList, Action action) {
+    public SourceCountMaintainer(
+        EventList<VisualSearchResult> resultsEventList, Action action) {
         this.source = resultsEventList;
         this.countAction = action;
         this.countList = new ArrayList<Integer>();
         
         // Do the initial sync
-        for(VisualSearchResult result : resultsEventList) {
+        for (VisualSearchResult result : resultsEventList) {
             int size = result.getSources().size();
             countList.add(size);
             totalCount += size;
         }
-        countAction.putValue(Action.NAME, totalCount == 0 ? null : String.valueOf(totalCount));
+        countAction.putValue(Action.NAME,
+            totalCount == 0 ? null : String.valueOf(totalCount));
         // Then add future listeners.
         source.addListEventListener(this);
     }
@@ -40,11 +43,12 @@ public class SourceCountMaintainer implements ListEventListener<VisualSearchResu
 
     @Override
     public void listChanged(ListEvent<VisualSearchResult> listChanges) {
-        if(!listChanges.isReordering()) {                
-            while(listChanges.next()) {
+        if (!listChanges.isReordering()) {                
+            while (listChanges.next()) {
                 int changeIndex = listChanges.getIndex();
                 int changeType = listChanges.getType();
                 int newSources;
+                
                 switch(changeType) {
                 case ListEvent.INSERT:
                     newSources = source.get(changeIndex).getSources().size();
@@ -59,16 +63,19 @@ public class SourceCountMaintainer implements ListEventListener<VisualSearchResu
                     totalCount += newSources;
                     totalCount -= countList.set(changeIndex, newSources);
                     break;
-                default: throw new IllegalStateException("invalid type: " + changeType);
+                default:
+                    throw new IllegalStateException(
+                        "invalid type: " + changeType);
                 }
             }
-            countAction.putValue(Action.NAME, totalCount == 0 ? null : String.valueOf(totalCount));
+
+            countAction.putValue(Action.NAME,
+                totalCount == 0 ? null : String.valueOf(totalCount));
         } else {
             countList.clear();
-            for(VisualSearchResult result : source) {
+            for (VisualSearchResult result : source) {
                 countList.add(result.getSources().size());
             }
         }
     }
-
 }
