@@ -9,6 +9,8 @@ import org.limewire.ui.swing.friends.Message.Type;
  *
  */
 class ChatDocumentBuilder {
+    private static final String LINE_BREAK = "<br/>";
+
     static String TOP = 
         "<html>" +
             "<head>" +
@@ -47,7 +49,7 @@ class ChatDocumentBuilder {
             }
             builder.append(processContent(message));
             
-            builder.append("<br/>").append(isNextFromSameSender(message, messages, i) ? "" : "<br/>");
+            builder.append(LINE_BREAK).append(isNextFromSameSender(message, messages, i) ? "" : LINE_BREAK);
         }
         
         builder.append(BOTTOM);

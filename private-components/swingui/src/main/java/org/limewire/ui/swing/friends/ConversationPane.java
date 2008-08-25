@@ -9,13 +9,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.text.DefaultEditorKit;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
@@ -74,6 +79,7 @@ public class ConversationPane extends JPanel implements Displayable {
         editor.setEditable(false);
         editor.setContentType("text/html");
         editor.addHyperlinkListener(new HyperlinkListener());
+        addPopupMenus();
         
         scroll.getViewport().add(editor);
         
@@ -82,6 +88,20 @@ public class ConversationPane extends JPanel implements Displayable {
         setBackground(DEFAULT_BACKGROUND);
         
         EventAnnotationProcessor.subscribe(this);
+    }
+    
+    private void addPopupMenus() {
+        JPopupMenu menu = new JPopupMenu();
+        addMenuItem(menu, "Copy", new DefaultEditorKit.CopyAction());
+        addMenuItem(menu, "Copy All", new CopyAllAction());
+        editor.addMouseListener(new PopupListener(menu));
+    }
+
+    private void addMenuItem(JPopupMenu menu, String name, Action action) {
+        JMenuItem item = new JMenuItem(tr(name));
+        action.putValue(Action.NAME, tr(name));
+        item.addActionListener(action);
+        menu.add(item);
     }
     
     @RuntimeTopicEventSubscriber
@@ -213,7 +233,9 @@ public class ConversationPane extends JPanel implements Displayable {
 
         @Override
         public void hyperlinkUpdate(HyperlinkEvent e) {
-            // TODO Auto-generated method stub
+            if (EventType.ACTIVATED == e.getEventType()) {
+                LOG.debugf("Hyperlink clicked: {0}", e.getURL());
+            }
         }
     }
 }
