@@ -188,7 +188,7 @@ public class FancyTab extends JXPanel {
                     if (evt.getPropertyName().equals(Action.NAME)) {
                         if (evt.getNewValue() != null) {
                             String newValue = (String) evt.getNewValue();
-System.out.println("FancyTab.createAdditionalText: newValue = " + newValue);
+//System.out.println("FancyTab.createAdditionalText: newValue = " + newValue);
                             label.setText("(" + newValue + ")");
                             label.setVisible(true);
                         } else {
