@@ -63,7 +63,6 @@ public class SwarmerImplTest extends BaseTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        System.out.println("===================================");
         fileServer.stop();
         fileServer.destroy();
         super.tearDown();
