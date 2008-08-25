@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.event.HyperlinkEvent;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
@@ -72,6 +73,8 @@ public class ConversationPane extends JPanel implements Displayable {
         editor = new JEditorPane();
         editor.setEditable(false);
         editor.setContentType("text/html");
+        editor.addHyperlinkListener(new HyperlinkListener());
+        
         scroll.getViewport().add(editor);
         
         add(footerPanel(writer), BorderLayout.SOUTH);
@@ -204,5 +207,13 @@ public class ConversationPane extends JPanel implements Displayable {
         
         panel.setBackgroundPainter(panelPainter);
         return panel;
+    }
+    
+    private class HyperlinkListener implements javax.swing.event.HyperlinkListener {
+
+        @Override
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+            // TODO Auto-generated method stub
+        }
     }
 }

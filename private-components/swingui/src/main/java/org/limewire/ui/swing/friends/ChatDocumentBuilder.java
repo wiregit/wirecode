@@ -9,7 +9,7 @@ import org.limewire.ui.swing.friends.Message.Type;
  *
  */
 class ChatDocumentBuilder {
-    private static String TOP = 
+    static String TOP = 
         "<html>" +
             "<head>" +
                 "<style>" +
@@ -28,7 +28,7 @@ class ChatDocumentBuilder {
             "</head>" +
             "<body>";
     
-    private static String BOTTOM = 
+    static String BOTTOM = 
         "</body>" +
         "</html>";
     
@@ -45,13 +45,21 @@ class ChatDocumentBuilder {
                 .append(message.getSenderName())
                 .append(":</div>");
             }
-            builder.append(message.getMessageText());
+            builder.append(processContent(message));
             
             builder.append("<br/>").append(isNextFromSameSender(message, messages, i) ? "" : "<br/>");
         }
         
         builder.append(BOTTOM);
         return builder.toString();
+    }
+
+    private static String processContent(Message message) {
+        String messageText = message.getMessageText();
+        
+        messageText = messageText.replace("<", "&lt;").replace(">", "&gt;");
+        
+        return URLWrapper.wrap(messageText);
     }
     
     private static boolean isPreviousFromSameSender(Message message, ArrayList<Message> messages, int index) {
