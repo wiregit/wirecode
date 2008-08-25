@@ -20,7 +20,6 @@ import org.limewire.io.InvalidDataException;
 import com.limegroup.bittorrent.disk.BlockRangeMap;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;

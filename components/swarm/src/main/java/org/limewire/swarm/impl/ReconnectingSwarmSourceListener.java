@@ -3,7 +3,7 @@ package org.limewire.swarm.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.SwarmSourceDownloader;
 import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmStatus;
 
@@ -18,7 +18,7 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#connected(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void connected(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         LOG.trace("connected: " + source);
     }
 
@@ -26,7 +26,7 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#connectFailed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void connectFailed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         LOG.trace("connectFailed: " + source);
     }
 
@@ -34,12 +34,12 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#connectionClosed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void connectionClosed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         connectionClosed(swarmSourceHandler, source, connectionStatus);
     }
 
     
-    private void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
+    private void connectionClosed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         // TODO we can be smarter about reconnecting
         // check the explicit error and try reconnecting
@@ -68,7 +68,7 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#responseProcessed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource, org.limewire.swarm.SwarmStatus)
      */
-    public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
+    public void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         connectionStatus = status;
         LOG.trace("responseProcessed: " + source + " status: " + status);
@@ -78,7 +78,7 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#finished(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void finished(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         connectionStatus = new FinishedSwarmStatus();
         LOG.trace("finished: " + source);
     }

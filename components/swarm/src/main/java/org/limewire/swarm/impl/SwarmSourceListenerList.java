@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceListener;
-import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.SwarmSourceDownloader;
 import org.limewire.swarm.SwarmStatus;
 
 /**
@@ -23,7 +23,7 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#connectFailed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void connectFailed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connectFailed(swarmSourceHandler, source);
         }
@@ -33,7 +33,7 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#connected(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void connected(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connected(swarmSourceHandler, source);
         }
@@ -43,7 +43,7 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#connectionClosed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void connectionClosed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connectionClosed(swarmSourceHandler, source);
         }
@@ -53,7 +53,7 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#finished(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
      */
-    public void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source) {
+    public void finished(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.finished(swarmSourceHandler, source);
         }
@@ -63,7 +63,7 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
      * (non-Javadoc)
      * @see org.limewire.swarm.SwarmSourceListener#responseProcessed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource, org.limewire.swarm.SwarmStatus)
      */
-    public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
+    public void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         for (SwarmSourceListener listener : listeners) {
             listener.responseProcessed(swarmSourceHandler, source, status);

@@ -6,17 +6,17 @@ package org.limewire.swarm;
 public interface SwarmStatus {
 
     /**
-     * True is the status is good to continue.
+     * Returns true if the status is good to continue.
      */
     public boolean isOk();
 
     /**
-     * True if there has been an error.
+     * Returns true if there has been an error.
      */
     public boolean isError();
 
     /**
-     * True if we are finished downloading from this source.
+     * Returns true if we are finished downloading from this source.
      */
     public boolean isFinished();
 }

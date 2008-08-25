@@ -1,6 +1,7 @@
 package org.limewire.collection;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
@@ -9,6 +10,10 @@ public class NorViewTest extends BaseTestCase {
     public NorViewTest(String name) {
         super(name);
     }
+    
+    public static Test suite() { 
+        return buildTestSuite(NorViewTest.class); 
+    } 
 
     /**
      * 

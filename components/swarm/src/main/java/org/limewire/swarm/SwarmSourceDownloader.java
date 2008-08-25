@@ -4,9 +4,8 @@ import java.io.IOException;
 
 /**
  * Handles downloading from the given swarm source.
- * 
  */
-public interface SwarmSourceHandler {
+public interface SwarmSourceDownloader {
 
     /**
      * Adds a source for download.

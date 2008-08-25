@@ -13,7 +13,7 @@ public interface SwarmSourceListener {
      *        using this source.
      * @param source The source that the notification is generated for.
      */
-    void connectFailed(SwarmSourceHandler swarmSourceHandler, SwarmSource source);
+    void connectFailed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source);
 
     /**
      * Notification of a connection passing.
@@ -22,7 +22,7 @@ public interface SwarmSourceListener {
      *        using this source.
      * @param source The source that the notification is generated for.
      */
-    void connected(SwarmSourceHandler swarmSourceHandler, SwarmSource source);
+    void connected(SwarmSourceDownloader swarmSourceHandler, SwarmSource source);
 
     /**
      * Notification of a connection closure.
@@ -31,7 +31,7 @@ public interface SwarmSourceListener {
      *        using this source.
      * @param source The source that the notification is generated for.
      */
-    void connectionClosed(SwarmSourceHandler swarmSourceHandler, SwarmSource source);
+    void connectionClosed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source);
 
     /**
      * Notification of a response being processed.
@@ -40,7 +40,7 @@ public interface SwarmSourceListener {
      *        using this source.
      * @param source The source that the notification is generated for.
      */
-    void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmSource source,
+    void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source,
             SwarmStatus status);
 
     /**
@@ -50,6 +50,6 @@ public interface SwarmSourceListener {
      *        using this source.
      * @param source The source that the notification is generated for.
      */
-    void finished(SwarmSourceHandler swarmSourceHandler, SwarmSource source);
+    void finished(SwarmSourceDownloader swarmSourceHandler, SwarmSource source);
 
 }

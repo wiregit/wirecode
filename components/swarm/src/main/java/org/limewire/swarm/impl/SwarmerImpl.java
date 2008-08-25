@@ -9,7 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.SwarmSourceDownloader;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
 import org.limewire.util.Objects;
@@ -18,17 +18,17 @@ public class SwarmerImpl implements Swarmer {
 
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
 
-    private final Map<SwarmSourceType, SwarmSourceHandler> sourceHandlers;
+    private final Map<SwarmSourceType, SwarmSourceDownloader> sourceHandlers;
 
     private final SwarmCoordinator swarmCoordinator;
 
     public SwarmerImpl(SwarmCoordinator swarmCoordinator) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
         this.sourceHandlers = Collections
-                .synchronizedMap(new HashMap<SwarmSourceType, SwarmSourceHandler>());
+                .synchronizedMap(new HashMap<SwarmSourceType, SwarmSourceDownloader>());
     }
 
-    public SwarmSourceHandler getSwarmSourceHandler(Class<SwarmSource> clazz) {
+    public SwarmSourceDownloader getSwarmSourceHandler(Class<SwarmSource> clazz) {
         return sourceHandlers.get(clazz);
     }
 
@@ -36,7 +36,7 @@ public class SwarmerImpl implements Swarmer {
      * (non-Javadoc)
      * @see org.limewire.swarm.Swarmer#register(org.limewire.swarm.SwarmSourceType, org.limewire.swarm.SwarmSourceHandler)
      */
-    public void register(SwarmSourceType type, SwarmSourceHandler sourceHandler) {
+    public void register(SwarmSourceType type, SwarmSourceDownloader sourceHandler) {
         sourceHandlers.put(type, sourceHandler);
     }
 
@@ -52,7 +52,7 @@ public class SwarmerImpl implements Swarmer {
                     + type);
         }
 
-        SwarmSourceHandler sourceHandler = sourceHandlers.get(type);
+        SwarmSourceDownloader sourceHandler = sourceHandlers.get(type);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Adding source: " + source);
         }
@@ -65,7 +65,7 @@ public class SwarmerImpl implements Swarmer {
      * @see org.limewire.swarm.Swarmer#start()
      */
     public void start() {
-        for (SwarmSourceHandler handler : sourceHandlers.values()) {
+        for (SwarmSourceDownloader handler : sourceHandlers.values()) {
             try {
                 handler.start();
             } catch (IOException iox) {
@@ -79,7 +79,7 @@ public class SwarmerImpl implements Swarmer {
      * @see org.limewire.swarm.Swarmer#shutdown()
      */
     public void shutdown() {
-        for (SwarmSourceHandler handler : sourceHandlers.values()) {
+        for (SwarmSourceDownloader handler : sourceHandlers.values()) {
             try {
                 handler.shutdown();
             } catch (IOException iox) {
@@ -99,7 +99,7 @@ public class SwarmerImpl implements Swarmer {
      */
     public float getMeasuredBandwidth(boolean downstream) {
         float bandwidth = 0;
-        for (SwarmSourceHandler handler : sourceHandlers.values()) {
+        for (SwarmSourceDownloader handler : sourceHandlers.values()) {
             bandwidth += handler.getMeasuredBandwidth(downstream);
         }
         return bandwidth;

@@ -621,7 +621,7 @@ class VerifyingFolder implements TorrentDiskManager {
         }
         LOG.debug("couldn't find unassigned, looking for already requested");
 
-        EndGamePieceStrategy endGameStrategy = new EndGamePieceStrategy(context.getMetaInfo(), exclude, true,
+        EndGamePieceStrategy endGameStrategy = new EndGamePieceStrategy(context.getMetaInfo(), exclude,
                 partialBlocks, pendingRanges, requestedRanges);
         nextPieces = endGameStrategy.getNextPieces(bs, missing);
 

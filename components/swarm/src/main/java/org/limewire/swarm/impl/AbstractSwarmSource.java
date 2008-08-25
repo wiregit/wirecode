@@ -1,7 +1,7 @@
 package org.limewire.swarm.impl;
 
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.SwarmSourceDownloader;
 import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmStatus;
 
@@ -39,7 +39,7 @@ public abstract class AbstractSwarmSource implements SwarmSource {
      * @see org.limewire.swarm.SwarmSource#connected(org.limewire.swarm.
      * SwarmSourceHandler)
      */
-    public void connected(SwarmSourceHandler swarmSourceHandler) {
+    public void connected(SwarmSourceDownloader swarmSourceHandler) {
         listenerList.connected(swarmSourceHandler, this);
     }
 
@@ -49,7 +49,7 @@ public abstract class AbstractSwarmSource implements SwarmSource {
      * @see org.limewire.swarm.SwarmSource#connectFailed(org.limewire.swarm.
      * SwarmSourceHandler)
      */
-    public void connectFailed(SwarmSourceHandler swarmSourceHandler) {
+    public void connectFailed(SwarmSourceDownloader swarmSourceHandler) {
         listenerList.connectFailed(swarmSourceHandler, this);
     }
 
@@ -59,7 +59,7 @@ public abstract class AbstractSwarmSource implements SwarmSource {
      * @see org.limewire.swarm.SwarmSource#connectionClosed(org.limewire.swarm.
      * SwarmSourceHandler)
      */
-    public void connectionClosed(SwarmSourceHandler swarmSourceHandler) {
+    public void connectionClosed(SwarmSourceDownloader swarmSourceHandler) {
         listenerList.connectionClosed(swarmSourceHandler, this);
     }
 
@@ -70,7 +70,7 @@ public abstract class AbstractSwarmSource implements SwarmSource {
      * org.limewire.swarm.SwarmSource#finished(org.limewire.swarm.SwarmSourceHandler
      * )
      */
-    public void finished(SwarmSourceHandler swarmSourceHandler) {
+    public void finished(SwarmSourceDownloader swarmSourceHandler) {
         listenerList.finished(swarmSourceHandler, this);
     }
 
@@ -80,7 +80,7 @@ public abstract class AbstractSwarmSource implements SwarmSource {
      * @see org.limewire.swarm.SwarmSource#responseProcessed(org.limewire.swarm.
      * SwarmSourceHandler, org.limewire.swarm.SwarmStatus)
      */
-    public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmStatus status) {
+    public void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmStatus status) {
         listenerList.responseProcessed(swarmSourceHandler, this, status);
     }
 

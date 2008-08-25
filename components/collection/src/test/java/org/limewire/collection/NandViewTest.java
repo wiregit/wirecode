@@ -1,6 +1,7 @@
 package org.limewire.collection;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
@@ -9,7 +10,11 @@ public class NandViewTest extends BaseTestCase {
     public NandViewTest(String name) {
         super(name);
     }
-
+    
+    public static Test suite() { 
+        return buildTestSuite(NandViewTest.class); 
+    } 
+     
     /**
      * 
      * <pre>

@@ -6,6 +6,15 @@ import org.limewire.collection.IntervalSet;
 
 /**
  * Represents a source to download from.
+ * 
+ * Contains address and path information that is used by a {@link SwarmSourceDownloader}
+ * to download {@link #getAvailableRanges() available ranges} from the source.
+ * 
+ * {@link SwarmSourceListener} can register to be notified of any events concerning
+ * this source.
+ * 
+ * {@link SwarmSourceDownloader} are supposed to fire those events on the source
+ * by calling the respective methods.
  */
 public interface SwarmSource {
 
@@ -15,12 +24,12 @@ public interface SwarmSource {
     SocketAddress getAddress();
 
     /**
-     * Returns the path to the download source.
+     * Returns the path on the server to the download source.
      */
     String getPath();
 
     /**
-     * Returns the available ranges the source has to download from.
+     * Returns the available ranges the source offers.
      */
     IntervalSet getAvailableRanges();
 
@@ -30,7 +39,8 @@ public interface SwarmSource {
     SwarmSourceType getType();
 
     /**
-     * Returns true if we are finished with this swarmSource.
+     * Returns true if we are finished with this swarm source, i.e. if
+     * all its available ranges have been downloaded.
      */
     public boolean isFinished();
 
@@ -45,28 +55,29 @@ public interface SwarmSource {
     void removeListener(SwarmSourceListener listener);
 
     /**
-     * Fires connectFailed event to registerd Listeners.
+     * Fires connectFailed event to registerd listeners.
      */
-    void connectFailed(SwarmSourceHandler swarmSourceHandler);
+    void connectFailed(SwarmSourceDownloader swarmSourceHandler);
 
     /**
-     * Fires connected event to registerd Listeners.
+     * Fires connected event to registerd listeners. Supposed to be called
+     * by the {@link SwarmSourceDownloader} when it is connected to the source.
      */
-    void connected(SwarmSourceHandler swarmSourceHandler);
+    void connected(SwarmSourceDownloader swarmSourceHandler);
 
     /**
      * Fires connectionClosed event to registerd Listeners.
      */
-    void connectionClosed(SwarmSourceHandler swarmSourceHandler);
+    void connectionClosed(SwarmSourceDownloader swarmSourceHandler);
 
     /**
      * Fires responseProcessed event to registerd Listeners.
      */
-    void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmStatus status);
+    void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmStatus status);
 
     /**
      * Fires finished event to registerd Listeners.
      */
-    void finished(SwarmSourceHandler swarmSourceHandler);
+    void finished(SwarmSourceDownloader swarmSourceHandler);
 
 }

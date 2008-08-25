@@ -3,7 +3,7 @@ package com.limegroup.bittorrent.swarm;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.SwarmSourceDownloader;
 import org.limewire.swarm.SwarmStatus;
 import org.limewire.swarm.http.SwarmHttpSource;
 
@@ -19,7 +19,7 @@ public class BTSwarmHttpSource extends SwarmHttpSource {
     }
 
     @Override
-    public void responseProcessed(SwarmSourceHandler swarmSourceHandler, SwarmStatus status) {
+    public void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmStatus status) {
         responsesProcessed.addAndGet(1);
         super.responseProcessed(swarmSourceHandler, status);
     }

@@ -6,13 +6,13 @@ package org.limewire.swarm;
  * 
  * There is no order between calls to {@link #addSource(SwarmSource)} and 
  * {@link #start()} or {@link #shutdown()}.
- * {@link #register(SwarmSourceType, SwarmSourceHandler)} must be called before
+ * {@link #register(SwarmSourceType, SwarmSourceDownloader)} must be called before
  * anything else.
  */
 public interface Swarmer {
     /**
      * Adds the given source to the swarm and delegates it the responsible
-     * {@link SwarmSourceHandler}.
+     * {@link SwarmSourceDownloader}.
      * 
      * @throws NullPointerException if there is no register swarm handler for the
      *         given swarm source
@@ -23,7 +23,7 @@ public interface Swarmer {
      * Registers a swarmSourceHandler to the given swarmSourceType. Needs to be
      * called before any sources are added to the swarmer.
      */
-    void register(SwarmSourceType type, SwarmSourceHandler sourceHandler);
+    void register(SwarmSourceType type, SwarmSourceDownloader sourceHandler);
 
     /**
      * Starts the swarmer and its handlers.

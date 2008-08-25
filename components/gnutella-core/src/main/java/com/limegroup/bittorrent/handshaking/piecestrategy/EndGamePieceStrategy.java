@@ -32,7 +32,7 @@ public class EndGamePieceStrategy implements PieceStrategy {
 
     private final BlockRangeMap requestedRanges;
 
-    public EndGamePieceStrategy(BTMetaInfo btMetaInfo, Set<BTInterval> exclude, boolean endgame,
+    public EndGamePieceStrategy(BTMetaInfo btMetaInfo, Set<BTInterval> exclude,
             BlockRangeMap partialBlocks, BlockRangeMap pendingRanges, BlockRangeMap requestedRanges) {
         this.btMetaInfo = btMetaInfo;
         this.exclude = exclude;
@@ -42,24 +42,24 @@ public class EndGamePieceStrategy implements PieceStrategy {
     }
 
     public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
-        List<BTInterval> nextPieces = new ArrayList<BTInterval>();
         BTInterval nextPiece = assignEndgame(availableBlocks, exclude);
         if (nextPiece != null) {
-            nextPieces.add(nextPiece);
+            return Collections.singletonList(nextPiece);
+        } else {
+            return Collections.emptyList();
         }
-        return nextPieces;
     }
 
     /**
      * Picks an interval that is already requested by another connection. This
      * is referred to as "Endgame mode" and is done when there are no other
      * pieces to request.
+     * 
+     * @return null if no interval is found
      */
-    private BTInterval assignEndgame(BitField bs, Set<BTInterval> exclude) {
+    private BTInterval assignEndgame(BitField availableBlocks, Set<BTInterval> exclude) {
 
-        BTInterval ret = null;
-
-        /**
+        /*
          * A view of the blocks the requested and partial blocks.
          */
         Iterable<Integer> requestedAndPartial = new MultiIterable<Integer>(partialBlocks.keySet(),
@@ -68,7 +68,7 @@ public class EndGamePieceStrategy implements PieceStrategy {
         // prepare a list of partial or requested blocks the remote host has
         Collection<Integer> available = null;
         for (int requested : requestedAndPartial) {
-            if (!bs.get(requested) || btMetaInfo.isCompleteBlock(requested, partialBlocks)) {
+            if (!availableBlocks.get(requested) || btMetaInfo.isCompleteBlock(requested, partialBlocks)) {
                 continue;
             }
 
@@ -90,6 +90,7 @@ public class EndGamePieceStrategy implements PieceStrategy {
         Collections.shuffle((List<Integer>) available);
 
         // go through and find a block that we can request something from.
+        BTInterval ret = null;
         for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext() && ret == null;) {
             int block = iterator.next();
 

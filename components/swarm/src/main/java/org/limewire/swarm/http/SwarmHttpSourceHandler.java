@@ -31,7 +31,7 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceHandler;
+import org.limewire.swarm.SwarmSourceDownloader;
 import org.limewire.swarm.http.listener.ResponseContentListener;
 import org.limewire.swarm.http.listener.SwarmHttpContentListener;
 import org.limewire.util.Objects;
@@ -57,7 +57,7 @@ import org.limewire.util.Objects;
  * which is to download until there are no more bytes to lease.
  * 
  */
-public class SwarmHttpSourceHandler implements SwarmSourceHandler, NHttpRequestExecutionHandler {
+public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpRequestExecutionHandler {
 
     private static final Log LOG = LogFactory.getLog(SwarmHttpSourceHandler.class);
 
