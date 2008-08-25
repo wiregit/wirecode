@@ -65,7 +65,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         this.fileList.getModel().addListEventListener(new ListEventListener<FileItem>(){
             @Override
             public void listChanged(ListEvent<FileItem> listChanges) {
-                final int size = listChanges.getSourceList().size(); System.out.println("size " + size);
+                final int size = listChanges.getSourceList().size();
                 SwingUtilities.invokeLater(new Runnable(){
                     public void run() {
                         if( size == 0) {

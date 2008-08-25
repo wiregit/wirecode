@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -67,6 +68,22 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         layerButton = new UnshareButton(new SharingRemoveListAction(fileList,imageList));
         layerButton.setSize(60, 30);
         layerButton.setVisible(false);
+        layerButton.addMouseListener(new MouseListener(){
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                e.getComponent().setVisible(false);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {}
+            @Override
+            public void mouseExited(MouseEvent e) {}
+            @Override
+            public void mousePressed(MouseEvent e) {}
+            @Override
+            public void mouseReleased(MouseEvent e) {}
+        });
         new MouseReaction(imageList, layerButton);
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remainign space
@@ -81,7 +98,9 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");
         
-        JXLayer<JComponent> l = new JXLayer<JComponent>(new JScrollPane(imageList), new  AbstractLayerUI<JComponent>());
+        JScrollPane scrollPane = new JScrollPane(imageList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        JXLayer<JComponent> l = new JXLayer<JComponent>(scrollPane, new  AbstractLayerUI<JComponent>());
         l.getGlassPane().setLayout(null);
         l.getGlassPane().add(layerButton);
         //third row
@@ -123,14 +142,9 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         }
         
         @Override
-        public void mouseClicked(MouseEvent e) {
-//            imageList.clearSelection();
-//            ushareButton.setVisible(false);
-        }
-
-        @Override
         public void mouseEntered(MouseEvent e) {
-            ushareButton.setVisible(true);
+            if(imageList.getModel().getSize() > 0)
+                ushareButton.setVisible(true);
         }
 
         @Override
@@ -142,16 +156,13 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
-        }
-
+        public void mouseClicked(MouseEvent e) {}
         @Override
-        public void mouseReleased(MouseEvent e) {
-        }
-
+        public void mousePressed(MouseEvent e) {}
         @Override
-        public void mouseDragged(MouseEvent e) {
-        }
+        public void mouseReleased(MouseEvent e) {}
+        @Override
+        public void mouseDragged(MouseEvent e) {}
 
         @Override
         public void mouseMoved(MouseEvent e) {
