@@ -110,7 +110,6 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
                     if (pieceIndex + 1 == pieces.size()) {
                         return read;
                     }
-                    System.out.println("next peice time");
                     this.pieceLow = pieces.get(++pieceIndex).getLow();
                     this.piecePosition = this.pieceLow;
                 }
