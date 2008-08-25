@@ -54,6 +54,7 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.SwarmWriteJob#cancel()
      */
     public void cancel() {
@@ -64,7 +65,9 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
 
     /*
      * (non-Javadoc)
-     * @see org.limewire.swarm.SwarmWriteJob#write(org.limewire.swarm.SwarmContent)
+     * 
+     * @see
+     * org.limewire.swarm.SwarmWriteJob#write(org.limewire.swarm.SwarmContent)
      */
     public long write(SwarmContent content) throws IOException {
         synchronized (writeLock) {
@@ -84,6 +87,10 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
             }
 
             long read = content.read(byteBuffer);
+            if (read == -1) {
+                throw new IOException("End of stream reached before expected.");
+            }
+            
             piecePosition += read;
             callback.resume();
 
