@@ -161,6 +161,10 @@ public final class Initializer {
         SwingUtils.invokeLater(new Runnable() {
             public void run() {
                 String name = UIManager.getSystemLookAndFeelClassName();
+                if(OSUtils.isLinux()) {
+                    name = UIManager.getCrossPlatformLookAndFeelClassName();
+                }
+           
                 try {
                     UIManager.setLookAndFeel(name);
                 } catch(Throwable ignored) {}
