@@ -54,9 +54,7 @@ public class PartialPieceStrategy implements PieceStrategy {
      * This method will try to assign any partially completed pieces that are
      * not currently requested.
      * 
-     * @param bs
-     * @param exclude
-     * @return
+     * @param exclude can be null
      */
     private BTInterval assignPartialPieces(BitField bs, Set<BTInterval> exclude) {
 

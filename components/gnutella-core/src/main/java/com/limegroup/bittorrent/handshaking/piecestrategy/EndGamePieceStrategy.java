@@ -55,6 +55,8 @@ public class EndGamePieceStrategy implements PieceStrategy {
      * is referred to as "Endgame mode" and is done when there are no other
      * pieces to request.
      * 
+     * @param exclude can be null
+     * 
      * @return null if no interval is found
      */
     private BTInterval assignEndgame(BitField availableBlocks, Set<BTInterval> exclude) {
