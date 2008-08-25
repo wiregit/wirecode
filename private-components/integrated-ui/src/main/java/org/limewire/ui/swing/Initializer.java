@@ -161,7 +161,10 @@ public final class Initializer {
         SwingUtils.invokeLater(new Runnable() {
             public void run() {
                 String name = UIManager.getSystemLookAndFeelClassName();
+                
                 if(OSUtils.isLinux()) {
+                    //mozswing on linux is not compatible with the gtklook and feel in jvms less than 1.7
+                    //forcing cross platform look and feel for linux.
                     name = UIManager.getCrossPlatformLookAndFeelClassName();
                 }
            
