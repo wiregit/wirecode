@@ -77,13 +77,20 @@ public class BaseResultPanel extends JXPanel {
 
     private void configureTable(EventList<VisualSearchResult> eventList,
         AdvancedTableFormat<VisualSearchResult> tableFormat) {
-        resultsTable = new ConfigurableTable<VisualSearchResult>();
+        resultsTable = new ConfigurableTable<VisualSearchResult>(){
+            // hack - gets rid of java.lang.IllegalStateException: A reverse mapping
+            // function must be specified to support this List operation
+            @Override
+            public void setValueAt(Object aValue, int row, int column) {
+            }
+        };
 
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
 
         ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
-        resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);
+        ActionColumnTableCellEditor renderer = new ActionColumnTableCellEditor();
+        resultsTable.setDefaultRenderer(VisualSearchResult.class, renderer);
         resultsTable.setDefaultEditor(VisualSearchResult.class, editor);
 
         // Find the column that will disply the action buttons.

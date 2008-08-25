@@ -38,6 +38,7 @@ public class SimpleDownloadTable extends DownloadTable {
         super(downloadItems);
         ((DownloadTableModel)getModel()).setTableFormat(new SimpleDownloadTableFormat());      
         setColumnControlVisible(true);
+        setDefaultRenderer(DownloadItem.class, new ButtonRendererEditor(new DownloadActionHandler(downloadItems)));
         getColumnModel().getColumn(SimpleDownloadTableFormat.PERCENT).setCellRenderer(new PercentRenderer());
         getColumnModel().getColumn(SimpleDownloadTableFormat.CATEGORY).setCellRenderer(new CategoryRenderer());
         getColumnModel().getColumn(SimpleDownloadTableFormat.CURRENT_SIZE).setCellRenderer(new SizeRenderer());

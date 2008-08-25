@@ -17,6 +17,9 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.swing.EventTableModel;
+
 //TODO comment this beast
 public class MouseableTable extends JXTable {
     
@@ -64,7 +67,9 @@ public class MouseableTable extends JXTable {
 			public void mouseMoved(MouseEvent e) {
                 int col = columnAtPoint(e.getPoint());
                 int row = rowAtPoint(e.getPoint());
-                editCellAt(row, col);
+                if (isCellEditable(row, col)) {
+                    editCellAt(row, col);
+                }
             }
 
 		});
@@ -167,9 +172,7 @@ public class MouseableTable extends JXTable {
     
     @Override
     public boolean isCellEditable(int row, int col){
-        boolean hasClassEditor = false;//getDefaultEditor(getValueAt(row, col).getClass()) != null;
-    	boolean hasColumnEditor = getColumnModel().getColumn(col).getCellEditor() != null;
-    	return hasClassEditor || hasColumnEditor;
+    	return getColumnModel().getColumn(col).getCellEditor() != null;
     }
     
 
@@ -221,4 +224,21 @@ public class MouseableTable extends JXTable {
 	    }
 	    
 	}
+	
+	
+    //TODO: remove this and set all editors on columns, not classes
+    @Override
+    public void setDefaultEditor(Class clazz, TableCellEditor editor) {
+        if(getModel() instanceof EventTableModel &&
+                ((EventTableModel) getModel()).getTableFormat() instanceof AdvancedTableFormat) {
+            AdvancedTableFormat format = (AdvancedTableFormat) ((EventTableModel) getModel()).getTableFormat();
+            for (int i = 0; i < getModel().getColumnCount(); i++) {
+                if (format.getColumnClass(i) == clazz) {
+                    getColumnModel().getColumn(i).setCellEditor(editor);
+                }
+            }
+        } else {
+            super.setDefaultEditor(clazz, editor);
+        }
+    }
 }
