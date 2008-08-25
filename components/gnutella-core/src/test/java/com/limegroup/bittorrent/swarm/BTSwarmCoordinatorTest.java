@@ -68,7 +68,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     public void testSingleFileTorret() throws Exception {
 
-        File torrentFile = createFile("test-single-webseed-single-file-no-peer.torrent");
+        File torrentFile = getFile("test-single-webseed-single-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -92,7 +92,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     public void testMultiFileTorret() throws Exception {
 
-        File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
+        File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -121,7 +121,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     public void testMultiFileTorret2() throws Exception {
 
-        File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
+        File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -151,7 +151,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     public void testMultiFileTorret3() throws Exception {
 
-        File torrentFile = createFile("test-single-webseed-multiple-file-no-peer.torrent");
+        File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -182,7 +182,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     public void testVuzeCreatedTorrent() throws Exception {
 
-        File torrentFile = createFile("test_vuze_getright.torrent");
+        File torrentFile = getFile("test_vuze_getright.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -212,7 +212,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     public void testProblemTorrent() throws Exception {
 
-        File torrentFile = createFile("test-multiple-webseed-single-file-no-peer.torrent");
+        File torrentFile = getFile("test-multiple-webseed-single-file-no-peer.torrent");
 
         final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
@@ -242,7 +242,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     }
 
-    private File createFile(String fileName) {
+    private File getFile(String fileName) {
         File torrentFile = new File(TORRENT_DIR.getAbsoluteFile() + "/" + fileName);
         return torrentFile;
     }
