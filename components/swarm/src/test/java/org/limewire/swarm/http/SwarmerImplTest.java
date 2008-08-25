@@ -98,9 +98,6 @@ public class SwarmerImplTest extends BaseTestCase {
                                     .createRange(lowByte, highByte)));
                     assertDownload(md5, file, fileSize);
 
-                    System.out.println("downstream " + swarmer.getMeasuredBandwidth(true));
-                    System.out.println("upstream " + swarmer.getMeasuredBandwidth(false));
-
                 } finally {
                     file.delete();
                 }
@@ -451,7 +448,6 @@ public class SwarmerImplTest extends BaseTestCase {
      */
     private Swarmer createSwarmer(File file, String path, long fileSize,
             SwarmBlockVerifier swarmFileVerifier) throws InterruptedException, IOException {
-        System.out.println("-----------------------------------");
         file.delete();
 
         SwarmCoordinator swarmCoordinator = createSwarmCoordinator(file, path, fileSize,
