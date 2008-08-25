@@ -90,10 +90,6 @@ public class LoginPanel extends JPanel implements Displayable {
     
     private void populateInputs() {
         XMPPConnectionConfiguration config = getConfig(GMAIL_SERVICE_NAME);
-        //FIXME: Temporary guard 
-        if (config == null) {
-            return;
-        }
         if (config.isAutoLogin()) {
             userNameField.setText(config.getUsername());
             passwordField.setText(config.getPassword());

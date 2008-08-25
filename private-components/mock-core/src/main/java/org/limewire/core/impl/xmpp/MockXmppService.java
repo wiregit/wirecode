@@ -1,6 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.limewire.xmpp.api.client.FileOfferHandler;
@@ -10,17 +10,19 @@ import org.limewire.xmpp.api.client.XMPPConnectionListener;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPService;
 
-class MockXmppService implements XMPPService {
+import com.google.inject.Inject;
 
-    @Override
+class MockXmppService implements XMPPService {
+    private XMPPConnection connection;
+
+    @Inject
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        // TODO Auto-generated method stub
-        
+        connection = new MockXMPPConnection(configuration);
     }
 
     @Override
     public List<XMPPConnection> getConnections() {
-        return Collections.emptyList();
+        return Arrays.asList(connection);
     }
 
     @Override

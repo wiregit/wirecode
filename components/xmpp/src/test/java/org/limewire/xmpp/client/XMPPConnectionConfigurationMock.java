@@ -24,6 +24,10 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
         this.rosterListener = rosterListener;
     }
     
+    public XMPPConnectionConfigurationMock() {
+        this("foo", "bar", "gmail.com", 5555, "gmail.com", new RosterListenerMock());
+    }
+    
     public boolean isDebugEnabled() {
         return true;
     }
