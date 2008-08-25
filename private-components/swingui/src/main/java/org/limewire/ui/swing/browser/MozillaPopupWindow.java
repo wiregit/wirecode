@@ -14,10 +14,12 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.SystemUtils;
+import org.mozilla.browser.IMozillaWindow;
+import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.impl.ChromeAdapter;
 
-class MozillaPopupWindow extends MozillaWindow {
+class MozillaPopupWindow extends MozillaPanel {
 
     @Resource
     private Icon limeIcon;
@@ -26,9 +28,10 @@ class MozillaPopupWindow extends MozillaWindow {
     private String limeFrameIconLocation;
     
     private File icoFile;
+   
     
     MozillaPopupWindow(boolean attachNewBrowserOnCreation) {
-        super(attachNewBrowserOnCreation, null, null);
+        super(null, attachNewBrowserOnCreation, null, null);
         GuiUtils.assignResources(this);
         icoFile = new File(URI.create(ClassLoader.getSystemResource(limeFrameIconLocation).getFile()).getPath()).getAbsoluteFile();
         initialize();
@@ -41,7 +44,7 @@ class MozillaPopupWindow extends MozillaWindow {
     }
     
     private void initialize() {
-        setIconImage(((ImageIcon)limeIcon).getImage());
+        //getContainerWindow().setIconImage(((ImageIcon)limeIcon).getImage());
         JToolBar toolbar = getToolbar();
         toolbar.add(new AbstractAction("Out") {
             // TODO: Add a picture.

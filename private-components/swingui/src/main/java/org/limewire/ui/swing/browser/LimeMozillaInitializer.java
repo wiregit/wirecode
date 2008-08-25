@@ -17,15 +17,16 @@ import org.mozilla.browser.IMozillaWindow;
 import org.mozilla.browser.IMozillaWindowFactory;
 import org.mozilla.browser.MozillaConfig;
 import org.mozilla.browser.MozillaInitialization;
+import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.impl.WindowCreator;
 
-
 public class LimeMozillaInitializer {
-    
+
     private static final Log LOG = LogFactory.getLog(LimeMozillaInitializer.class);
-    
-    private LimeMozillaInitializer() {}
-    
+
+    private LimeMozillaInitializer() {
+    }
+
     public static void initialize() {
         File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
         // Check to see if the correct version of XUL exists.
@@ -45,11 +46,11 @@ public class LimeMozillaInitializer {
                 IOUtils.close(in);
             }
         }
-    
+
         String newLibraryPath = System.getProperty("java.library.path") + File.pathSeparator
                 + xulInstallPath.getAbsolutePath();
         System.setProperty("java.library.path", newLibraryPath);
-        
+
         MozillaConfig.setXULRunnerHome(xulInstallPath);
         File profileDir = new File(CommonUtils.getUserSettingsDir(), "/mozilla-profile");
         profileDir.mkdirs();
@@ -57,22 +58,25 @@ public class LimeMozillaInitializer {
         WindowCreator.setWindowFactory(new IMozillaWindowFactory() {
             @Override
             public IMozillaWindow create(boolean attachNewBrowserOnCreation) {
-                return new MozillaPopupWindow(attachNewBrowserOnCreation);
+                MozillaPopupWindow popupWindow = new MozillaPopupWindow(attachNewBrowserOnCreation);
+                MozillaWindow window = new MozillaWindow(popupWindow);
+                popupWindow.setContainerWindow(window);
+                return window;
             }
         });
         MozillaInitialization.initialize();
-        
-        if(LOG.isDebugEnabled())
+
+        if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
     }
-    
+
     private static String getResourceName() {
-        if(OSUtils.isWindows()) {
-            return "xulrunner_windows.zip";
-        } else if(OSUtils.isMacOSX()) {
-            return "xulrunner_osx.zip";
-        } else if(OSUtils.isLinux()) {
-            return "xulrunner_linux.zip";
+        if (OSUtils.isWindows()) {
+            return "xulrunner-win32.zip";
+        } else if (OSUtils.isMacOSX()) {
+            return "xulrunner_macosx-universal.zip";
+        } else if (OSUtils.isLinux()) {
+            return "xulrunner-linux.zip";
         } else {
             throw new IllegalStateException("no resource for OS: " + OSUtils.getOS());
         }

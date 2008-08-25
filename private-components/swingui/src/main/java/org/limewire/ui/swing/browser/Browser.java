@@ -10,43 +10,41 @@ import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.ChromeAdapter;
 import org.mozilla.interfaces.nsIBaseWindow;
 
-
 /**
  * Extension to Mozilla's browser that adds the correct listeners.
  */
 public class Browser extends MozillaPanel {
-    
+
     public Browser() {
         super();
     }
 
     public Browser(boolean attachNewBrowserOnCreation, VisibilityMode toolbarVisMode,
             VisibilityMode statusbarVisMode) {
-        super(attachNewBrowserOnCreation, toolbarVisMode, statusbarVisMode);
+        super(null, attachNewBrowserOnCreation, toolbarVisMode, statusbarVisMode);
     }
 
     public Browser(VisibilityMode toolbarVisMode, VisibilityMode statusbarVisMode) {
         super(toolbarVisMode, statusbarVisMode);
     }
-    
+
     @Override
     public void onSetTitle(String title) {
         // Don't set it!
     }
-    
-  
-    //overridden to remove LimeDomListener
+
+    // overridden to remove LimeDomListener
     @Override
     public void onDetachBrowser() {
-        if(getChromeAdapter() != null) {
+        if (getChromeAdapter() != null) {
             BrowserUtils.removeDomListener(getChromeAdapter());
         }
         super.onDetachBrowser();
     }
-    
-    //overridden for browser initialization that can not be done earlier
+
+    // overridden for browser initialization that can not be done earlier
     @Override
-    public void onAttachBrowser(final ChromeAdapter chromeAdapter, ChromeAdapter parentChromeAdapter){
+    public void onAttachBrowser(final ChromeAdapter chromeAdapter, ChromeAdapter parentChromeAdapter) {
         super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
         BrowserUtils.addDomListener(chromeAdapter);
         SwingUtils.invokeLater(new Runnable() {
@@ -57,7 +55,7 @@ public class Browser extends MozillaPanel {
             }
         });
     }
-    
+
     private class VisibilityListener extends ComponentAdapter {
         @Override
         public void componentHidden(ComponentEvent e) {
@@ -70,9 +68,10 @@ public class Browser extends MozillaPanel {
         }
 
     }
-    
+
     private void setBrowserVisibility(final boolean isVisible) {
-        // Mozilla is not threadsafe so most mozilla methods must be called on the
+        // Mozilla is not threadsafe so most mozilla methods must be called on
+        // the
         // mozilla thread. This is asynchronous so as not to tie up the EDT.
         MozillaExecutor.mozAsyncExec(new Runnable() {
             public void run() {
@@ -86,7 +85,5 @@ public class Browser extends MozillaPanel {
         });
 
     }
-  
-}
-   
 
+}
