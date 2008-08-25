@@ -26,7 +26,7 @@ import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
-import org.limewire.ui.swing.sharing.components.UnshareButton;
+import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
 import org.limewire.ui.swing.sharing.table.SharingFancyMultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.sharing.table.SharingFancyTable;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
@@ -46,7 +46,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     
     private SharingFancyTable table;
     
-    private final UnshareButton unShareButton;
+    private final ConfirmationUnshareButton unShareButton;
     
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
@@ -69,7 +69,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
         JLabel unShareButtonLabel = new JLabel("Unshare All");
-        unShareButton = new UnshareButton(new SharingRemoveAllAction(fileList, eventList));
+        unShareButton = new ConfirmationUnshareButton(new SharingRemoveAllAction(fileList, eventList));
         unShareButton.setEnabled(false);
 
         // black seperator

@@ -18,6 +18,7 @@ public class SharingRemoveAllAction extends AbstractAction {
     private EventList<FileItem> eventList;
     
     public SharingRemoveAllAction(FileList fileList, EventList<FileItem> eventList) {
+        super("Yes");
         this.fileList = fileList;
         this.eventList = eventList;
     }
