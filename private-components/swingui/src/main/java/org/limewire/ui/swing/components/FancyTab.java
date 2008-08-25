@@ -82,7 +82,7 @@ public class FancyTab extends JXPanel {
         this.removeButton = createRemoveButton();
         this.busyLabel = createBusyLabel();
 
-        if(group != null) {
+        if (group != null) {
             group.add(mainButton);
         }
 
@@ -98,7 +98,7 @@ public class FancyTab extends JXPanel {
         setToolTipText(getTitle());
         
         HighlightListener highlightListener = new HighlightListener();
-        if(props.isRemovable()) {
+        if (props.isRemovable()) {
             removeButton.addMouseListener(highlightListener);
             removeButton.setVisible(true);
         }
@@ -115,14 +115,16 @@ public class FancyTab extends JXPanel {
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
         
-        layout.setAutoCreateGaps(true);
+        // Commented out by RMV to match search results spec.
+        //layout.setAutoCreateGaps(true);
         
         layout.setHorizontalGroup(layout.createSequentialGroup()
             .addGap(5)
             .addComponent(busyLabel)
             .addPreferredGap(ComponentPlacement.RELATED)
             .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-            .addPreferredGap(ComponentPlacement.RELATED)
+            // Commented out by RMV to match search results spec.
+            //.addPreferredGap(ComponentPlacement.RELATED)
             .addComponent(additionalText)
             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(removeButton)
@@ -147,7 +149,7 @@ public class FancyTab extends JXPanel {
         final JXBusyLabel busy = new JXBusyLabel(new Dimension(16, 16));
         busy.setVisible(false);
         
-        if(tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) ==
+        if (tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) ==
             Boolean.TRUE) {
             busy.setBusy(true);
             busy.setVisible(true);
@@ -156,7 +158,7 @@ public class FancyTab extends JXPanel {
         tabActions.getMainAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
+                if (evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
                     boolean on = evt.getNewValue() == Boolean.TRUE;
                     busy.setBusy(on);
                     busy.setVisible(on);
@@ -170,12 +172,12 @@ public class FancyTab extends JXPanel {
         final JLabel label = new JLabel();
         label.setVisible(false);
         
-        if(tabActions.getMoreTextAction() != null) {
+        if (tabActions.getMoreTextAction() != null) {
             label.setOpaque(false);
             label.setFont(mainButton.getFont());
             
             String name = (String)tabActions.getMoreTextAction().getValue(Action.NAME);
-            if(name != null) {
+            if (name != null) {
                 label.setText("(" + name + ")");
                 label.setVisible(true);
             }
@@ -183,9 +185,11 @@ public class FancyTab extends JXPanel {
             tabActions.getMoreTextAction().addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    if(evt.getPropertyName().equals(Action.NAME)) {
-                        if(evt.getNewValue() != null) {
-                            label.setText("(" + (String)evt.getNewValue() + ")");
+                    if (evt.getPropertyName().equals(Action.NAME)) {
+                        if (evt.getNewValue() != null) {
+                            String newValue = (String) evt.getNewValue();
+System.out.println("FancyTab.createAdditionalText: newValue = " + newValue);
+                            label.setText("(" + newValue + ")");
                             label.setVisible(true);
                         } else {
                             label.setVisible(false);
@@ -213,9 +217,9 @@ public class FancyTab extends JXPanel {
         button.setActionCommand(TabActionMap.REMOVE_COMMAND);
         button.setHideActionText(true);
         button.setVisible(false);
-        if(removeButton != null) {
+        if (removeButton != null) {
             for(ActionListener listener : removeButton.getActionListeners()) {
-                if(listener == tabActions.getRemoveAction()) {
+                if (listener == tabActions.getRemoveAction()) {
                     // Ignore the remove action -- it's added implicitly.
                     continue;
                 }
@@ -293,7 +297,7 @@ public class FancyTab extends JXPanel {
     }
     
     private void changeState(TabState tabState) {
-        if(currentState != tabState) {
+        if (currentState != tabState) {
             this.currentState = tabState;
             switch(tabState) {
             case SELECTED:
@@ -325,17 +329,17 @@ public class FancyTab extends JXPanel {
     }
     
     private void showPopup(MouseEvent event) {
-        if(props.isRemovable() || !tabActions.getRightClickActions().isEmpty()) {
+        if (props.isRemovable() || !tabActions.getRightClickActions().isEmpty()) {
             JPopupMenu menu = new JPopupMenu();
             for(Action action : tabActions.getRightClickActions()) {
                 menu.add(action);
             }
             
-            if(menu.getComponentCount() != 0 && props.isRemovable()) {
+            if (menu.getComponentCount() != 0 && props.isRemovable()) {
                 menu.addSeparator();
             }
             
-            if(props.isRemovable()) {
+            if (props.isRemovable()) {
                 menu.add(new AbstractAction(props.getCloseOneText()) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -370,25 +374,25 @@ public class FancyTab extends JXPanel {
         
         @Override
         public void mouseClicked(MouseEvent e) {
-            if(props.isRemovable() && SwingUtilities.isMiddleMouseButton(e)) {
+            if (props.isRemovable() && SwingUtilities.isMiddleMouseButton(e)) {
                 remove();
-            } else if(!(e.getSource() instanceof AbstractButton) && SwingUtilities.isLeftMouseButton(e)) {
+            } else if (!(e.getSource() instanceof AbstractButton) && SwingUtilities.isLeftMouseButton(e)) {
                 select();
-            } else if(e.isPopupTrigger()) {
+            } else if (e.isPopupTrigger()) {
                 showPopup(e);
             }
         }
         
         @Override
         public void mousePressed(MouseEvent e) {
-            if(e.isPopupTrigger()) {
+            if (e.isPopupTrigger()) {
                 showPopup(e);
             }
         }
         
         @Override
         public void mouseReleased(MouseEvent e) {
-            if(e.isPopupTrigger()) {
+            if (e.isPopupTrigger()) {
                 showPopup(e);
             }
         }
@@ -415,7 +419,7 @@ public class FancyTab extends JXPanel {
 
             fireStateChanged();
 
-            if(!isPressed() && isArmed()) {
+            if (!isPressed() && isArmed()) {
                 int modifiers = 0;
                 AWTEvent currentEvent = EventQueue.getCurrentEvent();
                 if (currentEvent instanceof InputEvent) {
