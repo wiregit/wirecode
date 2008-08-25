@@ -77,6 +77,10 @@ public class BTDownloaderImplTest extends LimeTestCase {
         super.tearDown();
     }
 
+    /**
+     * This test tries to download a single file torrent from a tracker/peer
+     * setup on the www.limewire.org server.
+     */
     public void testSingleFilePeer() throws Exception {
         File torrentFile = createFile("test-peer-dl-single-file.torrent");
 
@@ -98,6 +102,10 @@ public class BTDownloaderImplTest extends LimeTestCase {
         assertDownload("8055d620ba0c507c1af957b43648c99f", completeFile, 44425);
     }
 
+    /**
+     * This test tries to download a multi file torrent from a tracker/peer
+     * setup on the www.limewire.org server.
+     */
     public void testMultipleFilePeer() throws Exception {
         File torrentFile = createFile("test-peer-dl-multiple-file.torrent");
 
@@ -316,7 +324,8 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);
-        BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory.createBTDownloader(metaInfo);
+        BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
+                .createBTDownloader(metaInfo);
         downloader.initBtMetaInfo(metaInfo);
         return downloader;
     }
