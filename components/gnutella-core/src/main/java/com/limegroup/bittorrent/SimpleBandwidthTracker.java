@@ -29,7 +29,7 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 		_interval = interval;
 	}
 
-	public synchronized void count(int added) {
+	public synchronized void count(long added) {
 		startCounting(-1);
 		_amount += added;
 	}
