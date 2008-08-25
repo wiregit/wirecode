@@ -23,8 +23,6 @@ import ca.odell.glazedlists.swing.EventTableModel;
 //TODO comment this beast
 public class MouseableTable extends JXTable {
     
-
-	
 	private TablePopupHandler popupHandler;
 
 	private TableDoubleClickHandler doubleClickHandler;
@@ -35,11 +33,10 @@ public class MouseableTable extends JXTable {
 		initialize();
 	}
 	
-	public MouseableTable(TableModel model){
+	public MouseableTable(TableModel model) {
 		super(model);
 		initialize();
 	}
-	
 	
 	public void setPopupHandler(TablePopupHandler popupHandler){
 		this.popupHandler = popupHandler;
@@ -48,7 +45,6 @@ public class MouseableTable extends JXTable {
 	public void setDoubleClickHandler(TableDoubleClickHandler tableDoubleClickHandler){
 		this.doubleClickHandler = tableDoubleClickHandler;
 	}
-	
 	
 	protected void initialize(){	
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -71,9 +67,7 @@ public class MouseableTable extends JXTable {
                     editCellAt(row, col);
                 }
             }
-
 		});
-
 		
 		addMouseListener(new MouseAdapter() {
 			@Override
@@ -117,7 +111,7 @@ public class MouseableTable extends JXTable {
 				}
 			}
 			
-			  @Override
+			@Override
             public void mouseReleased(MouseEvent e) {
                 maybeShowPopup(e);
             }
@@ -174,7 +168,6 @@ public class MouseableTable extends JXTable {
     public boolean isCellEditable(int row, int col){
     	return getColumnModel().getColumn(col).getCellEditor() != null;
     }
-    
 
 	/**
 	 * Does this row have a popup menu showing?
@@ -194,7 +187,6 @@ public class MouseableTable extends JXTable {
 
 			return table.isMenuShowing(adapter.row);
 		}
-
 	}
 	
 	public static class TableColors {
@@ -222,14 +214,12 @@ public class MouseableTable extends JXTable {
 	    public TableColors(){
 	        GuiUtils.assignResources(TableColors.this);
 	    }
-	    
 	}
-	
 	
     //TODO: remove this and set all editors on columns, not classes
     @Override
     public void setDefaultEditor(Class clazz, TableCellEditor editor) {
-        if(getModel() instanceof EventTableModel &&
+        if (getModel() instanceof EventTableModel &&
                 ((EventTableModel) getModel()).getTableFormat() instanceof AdvancedTableFormat) {
             AdvancedTableFormat format = (AdvancedTableFormat) ((EventTableModel) getModel()).getTableFormat();
             for (int i = 0; i < getModel().getColumnCount(); i++) {
