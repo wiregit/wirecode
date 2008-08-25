@@ -26,6 +26,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageList;
+import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
 import org.limewire.ui.swing.sharing.components.UnshareButton;
 
@@ -53,7 +54,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
         JLabel unShareButtonLabel = new JLabel("Unshare All");
-        unShareButton = new UnshareButton(null);
+        unShareButton = new UnshareButton(new SharingRemoveAllAction(fileList, eventList));
         unShareButton.setEnabled(false);
     
         // black seperator

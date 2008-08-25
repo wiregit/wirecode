@@ -24,6 +24,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.components.UnshareButton;
 import org.limewire.ui.swing.sharing.table.SharingFancyMultiButtonTableCellRendererEditor;
@@ -68,7 +69,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
         JLabel unShareButtonLabel = new JLabel("Unshare All");
-        unShareButton = new UnshareButton(null);
+        unShareButton = new UnshareButton(new SharingRemoveAllAction(fileList, eventList));
         unShareButton.setEnabled(false);
 
         // black seperator
@@ -112,7 +113,6 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
             renderer.addActions(createActions());
             
             TableColumn tc = table.getColumn("");
-//            tc.setHeaderRenderer(new EmptyTableHeaderRenderer());
             tc.setPreferredWidth(25);
             tc.setMaxWidth(25);
             tc.setResizable(false);
