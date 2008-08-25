@@ -350,55 +350,6 @@ public class SwarmerImplTest extends BaseTestCase {
         });
     }
 
-    // public void testSimpleSmallFileSwarm2() throws Exception {
-    // runTest(new TestRun() {
-    // public void run() throws Exception {
-    // File file = createTestFile("testSimpleSmallFileSwarm2.pdf");
-    // try {
-    // String md5 = "4eb024f612ab7391d90dcf294807ad4b";
-    //
-    // URI uri1 = new URI("http://localhost:" + TEST_PORT + "/pub2/");
-    // int lowByte = 0;
-    // int highByte = 10252982 - 1;
-    // long fileSize = highByte + 1;
-    // Range range = Range.createRange(lowByte, highByte);
-    // Swarmer swarmer = createSwarmer(file, "LimeWireLinux.deb", fileSize,
-    // new MD5SumFileVerifier(range, md5));
-    // swarmer.addSource(new SwarmHttpSource(uri1, range));
-    // Thread.sleep(20000);
-    // assertDownload(md5, file, fileSize);
-    // } finally {
-    // file.delete();
-    // }
-    // }
-    // });
-    // }
-
-    // public void testMediumFileSwarm() throws Exception {
-    // runTest(new TestRun() {
-    // public void run() throws Exception {
-    // File file = createTestFile("testMediumFileSwarm.pdf");
-    // try {
-    // String md5 = "9efd0799bec290d89745f3b479e3fec8";
-    //
-    // URI uri1 = new URI(
-    // "http://ftp.belnet.be/packages/damnsmalllinux/current/dsl-4.4.3-initrd.iso"
-    // );
-    // int lowByte = 0;
-    // int highByte = 10252982 - 1;
-    // long fileSize = 100000000;
-    // Range range = Range.createRange(lowByte, highByte);
-    // Swarmer swarmer = createSwarmer(file, "dsl-4.4.3-initrd.iso", fileSize,
-    // new MD5SumFileVerifier(range, md5));
-    // swarmer.addSource(new SwarmHttpSource(uri1, range));
-    // assertDownload(md5, file, fileSize);
-    // } finally {
-    // file.delete();
-    // }
-    // }
-    // });
-    // }
-
     /**
      * Asserts that the given file has the correct size, and matches the given
      * md5sum.
