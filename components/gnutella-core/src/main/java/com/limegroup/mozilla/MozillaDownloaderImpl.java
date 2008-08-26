@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
+import org.limewire.ui.swing.browser.MozillaDownloadProgressListener;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownload;
 import org.mozilla.interfaces.nsIDownloadManager;
@@ -19,20 +20,19 @@ import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
-public class MozillaDownloaderImpl extends AbstractCoreDownloader  {
+public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
     private long downloadId;
 
-   // private MozillaDownloadProgressListener data = new MozillaDownloadProgressListener();
+    private final MozillaDownloadProgressListener listener;
 
-    public MozillaDownloaderImpl(SaveLocationManager saveLocationManager) {
+    public MozillaDownloaderImpl(SaveLocationManager saveLocationManager,
+            MozillaDownloadProgressListener listener) {
         super(saveLocationManager);
-    }
-
-    public void initMozillaDownload(long downloadId) {
-        this.downloadId = downloadId;
+        this.listener = listener;
+        this.downloadId = listener.getDownloadId();
     }
 
     @Override
@@ -365,7 +365,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader  {
 
     @Override
     public void startDownload() {
-       //this is done automatically by mozilla.
+        // this is done automatically by mozilla.
     }
 
     @Override
