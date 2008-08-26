@@ -40,6 +40,7 @@ public class SwarmHttpSource extends AbstractSwarmSource {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.SwarmSource#getAddress()
      */
     public SocketAddress getAddress() {
@@ -48,6 +49,7 @@ public class SwarmHttpSource extends AbstractSwarmSource {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.SwarmSource#getPath()
      */
     public String getPath() {
@@ -62,6 +64,7 @@ public class SwarmHttpSource extends AbstractSwarmSource {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.SwarmSource#getAvailableRanges()
      */
     public IntervalSet getAvailableRanges() {
@@ -70,6 +73,7 @@ public class SwarmHttpSource extends AbstractSwarmSource {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.SwarmSource#getType()
      */
     public SwarmSourceType getType() {
@@ -81,7 +85,12 @@ public class SwarmHttpSource extends AbstractSwarmSource {
         if (!(obj instanceof SwarmHttpSource)) {
             return false;
         }
+
         SwarmHttpSource source = (SwarmHttpSource) obj;
+        if (getType() != source.getType()) {
+            return false;
+        }
+        
         return id.equals(source.id);
     }
 

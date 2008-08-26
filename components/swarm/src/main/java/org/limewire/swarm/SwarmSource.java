@@ -79,5 +79,16 @@ public interface SwarmSource {
      * Fires finished event to registerd Listeners.
      */
     void finished(SwarmSourceDownloader swarmSourceHandler);
+    
+    
+    /**
+     * The SwarmSource implementation should override the default equals implementation.
+     */
+    public boolean equals(Object obj);
+    
+    /**
+     * The SwarmSource implementation should override the default hashcode implementation.
+     */
+    public int hashCode();
 
 }
