@@ -31,6 +31,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.MessageWriter;
 
 import com.google.inject.assistedinject.Assisted;
@@ -233,6 +234,7 @@ public class ConversationPane extends JPanel implements Displayable {
         public void hyperlinkUpdate(HyperlinkEvent e) {
             if (EventType.ACTIVATED == e.getEventType()) {
                 LOG.debugf("Hyperlink clicked: {0}", e.getURL());
+                NativeLaunchUtils.openURL(e.getURL().toString());
             }
         }
     }
