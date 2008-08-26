@@ -1,8 +1,8 @@
-package org.limewire.ui.swing.friends;
+package org.limewire.ui.swing.action;
 
 import javax.swing.text.JTextComponent;
 
-abstract class AbstractSelectionRequiredTextAction extends AbstractTextAction {
+public abstract class AbstractSelectionRequiredTextAction extends AbstractTextAction {
     private final JTextComponent component;
     
     public AbstractSelectionRequiredTextAction(String name, JTextComponent component, String... actions) {

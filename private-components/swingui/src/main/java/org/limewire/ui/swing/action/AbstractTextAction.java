@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.friends;
+package org.limewire.ui.swing.action;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
@@ -8,7 +8,7 @@ import javax.swing.Action;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 
-abstract class AbstractTextAction extends TextAction {
+public abstract class AbstractTextAction extends TextAction {
     private final String[] actions;
 
     public AbstractTextAction(String name, String... actions) {

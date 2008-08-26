@@ -1,8 +1,8 @@
-package org.limewire.ui.swing.friends;
+package org.limewire.ui.swing.action;
 
 import javax.swing.text.DefaultEditorKit;
 
-class CopyAllAction extends AbstractTextAction {
+public class CopyAllAction extends AbstractTextAction {
     
     public CopyAllAction() {
         super("Copy All", 

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.friends;
+package org.limewire.ui.swing.action;
 
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
@@ -11,7 +11,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
 
-class PopupUtil {
+public class PopupUtil {
 
     public static JPopupMenu addPopupMenus(JTextComponent component, Action... actions) {
         JPopupMenu menu = new JPopupMenu();

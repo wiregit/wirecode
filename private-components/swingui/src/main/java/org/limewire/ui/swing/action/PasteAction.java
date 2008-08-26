@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.friends;
+package org.limewire.ui.swing.action;
 
 import javax.swing.text.DefaultEditorKit;
 

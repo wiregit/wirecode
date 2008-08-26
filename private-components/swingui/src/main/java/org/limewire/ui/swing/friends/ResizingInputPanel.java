@@ -12,6 +12,12 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.limewire.ui.swing.action.CopyAction;
+import org.limewire.ui.swing.action.CutAction;
+import org.limewire.ui.swing.action.DeleteAction;
+import org.limewire.ui.swing.action.PasteAction;
+import org.limewire.ui.swing.action.PopupUtil;
+import org.limewire.ui.swing.action.SelectAllAction;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 
