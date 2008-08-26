@@ -16,64 +16,76 @@ import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.xpcom.Mozilla;
 
+import com.limegroup.gnutella.DownloadManager;
+
 class MozillaDownloadManager implements nsIDownloadProgressListener {
-	public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
-	private Map<Long, MozillaDownloadProgressListener> listeners = new WeakHashMap<Long, MozillaDownloadProgressListener>();
+    public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
-	private nsIDownloadManager getDownloadManager() {
-		nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(
-				NS_IDOWNLOADMANAGER_CID, nsIDownloadManager.class);
-		return downloadManager;
-	}
+    private final Map<Long, MozillaDownloadProgressListener> listeners;
 
-	@Override
-	public void onDownloadStateChange(short state, nsIDownload download) {
-		boolean added = addListener(download.getId(), state);
-	}
+    private final DownloadManager downloadManager;
 
-	public synchronized boolean addListener(long id, short state) {
-		MozillaDownloadProgressListener listener = listeners.get(id);
-		if (listener == null) {
-			listener = new MozillaDownloadProgressListener(id, state);
-			listeners.put(id, listener);
-			getDownloadManager().addListener(listener);
-			return true;
-		}
-		return false;
-	}
+    public MozillaDownloadManager(DownloadManager downloadManager) {
+        this.listeners = new WeakHashMap<Long, MozillaDownloadProgressListener>();
+        this.downloadManager = downloadManager;
+    }
 
-	@Override
-	public void onProgressChange(nsIWebProgress webProgress,
-			nsIRequest request, long curSelfProgress, long maxSelfProgress,
-			long curTotalProgress, long maxTotalProgress, nsIDownload download) {
-	}
+    private nsIDownloadManager getDownloadManager() {
+        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(NS_IDOWNLOADMANAGER_CID,
+                nsIDownloadManager.class);
+        return downloadManager;
+    }
 
-	@Override
-	public void onSecurityChange(nsIWebProgress webProgress,
-			nsIRequest request, long state, nsIDownload download) {
-		// don't care about this event.
-	}
+    @Override
+    public void onDownloadStateChange(short state, nsIDownload download) {
+        boolean added = addListener(download, state);
+    }
 
-	@Override
-	public void onStateChange(nsIWebProgress webProgress, nsIRequest request,
-			long stateFlags, long status, nsIDownload download) {
-		// no longer used by mozilla api
-	}
+    private synchronized boolean addListener(nsIDownload download, short state) {
+        MozillaDownloadProgressListener listener = listeners.get(download.getId());
+        if (listener == null) {
+            listener = new MozillaDownloadProgressListener(download, state);
+            listeners.put(download.getId(), listener);
+            getDownloadManager().addListener(listener);
+            downloadManager.downloadFromMozilla(listener);
+            
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public void setDocument(nsIDOMDocument document) {
-		// no mozilla window to use
-	}
+    @Override
+    public void onProgressChange(nsIWebProgress webProgress, nsIRequest request,
+            long curSelfProgress, long maxSelfProgress, long curTotalProgress,
+            long maxTotalProgress, nsIDownload download) {
+    }
 
-	@Override
-	public nsIDOMDocument getDocument() {
-		// no mozilla window to use
-		return null;
-	}
+    @Override
+    public void onSecurityChange(nsIWebProgress webProgress, nsIRequest request, long state,
+            nsIDownload download) {
+        // don't care about this event.
+    }
 
-	@Override
-	public nsISupports queryInterface(String uuid) {
-		return Mozilla.queryInterface(this, uuid);
-	}
+    @Override
+    public void onStateChange(nsIWebProgress webProgress, nsIRequest request, long stateFlags,
+            long status, nsIDownload download) {
+        // no longer used by mozilla api
+    }
+
+    @Override
+    public void setDocument(nsIDOMDocument document) {
+        // no mozilla window to use
+    }
+
+    @Override
+    public nsIDOMDocument getDocument() {
+        // no mozilla window to use
+        return null;
+    }
+
+    @Override
+    public nsISupports queryInterface(String uuid) {
+        return Mozilla.queryInterface(this, uuid);
+    }
 
 }

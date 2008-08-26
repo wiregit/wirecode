@@ -22,6 +22,8 @@ import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
 import org.mozilla.interfaces.nsIDownloadManager;
 
+import com.limegroup.gnutella.LimeWireCore;
+
 public class LimeMozillaInitializer {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaInitializer.class);
@@ -29,7 +31,7 @@ public class LimeMozillaInitializer {
     private LimeMozillaInitializer() {
     }
 
-    public static void initialize() {
+    public static void initialize(LimeWireCore limeWireCore) {
         File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
         // Check to see if the correct version of XUL exists.
         File xulFile = new File(xulInstallPath, "xul-v2.0b2-do-not-remove");
@@ -71,7 +73,7 @@ public class LimeMozillaInitializer {
         //override mozilla components
         nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(
                 "@mozilla.org/download-manager;1", nsIDownloadManager.class);
-        downloadManager.addListener(new MozillaDownloadManager());
+        downloadManager.addListener(new MozillaDownloadManager(limeWireCore.getDownloadManager()));
         
         if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());

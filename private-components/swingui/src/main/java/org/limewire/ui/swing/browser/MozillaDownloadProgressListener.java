@@ -11,7 +11,11 @@ import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.xpcom.Mozilla;
 
+import com.google.inject.internal.base.Objects;
+
 public class MozillaDownloadProgressListener implements nsIDownloadProgressListener {
+    private final nsIDownload download;
+    
     private final long downloadId;
 
     private final AtomicInteger state;
@@ -22,8 +26,9 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
 
     private final AtomicLong lastUpdateTime;
 
-    public MozillaDownloadProgressListener(long downloadId, short state) {
-        this.downloadId = downloadId;
+    public MozillaDownloadProgressListener(nsIDownload download, short state) {
+        this.download = Objects.nonNull(download, "download");
+        this.downloadId = download.getId();
         this.state = new AtomicInteger(state);
         this.selfProgress = new AtomicLong();
         this.totalProgress = new AtomicLong();

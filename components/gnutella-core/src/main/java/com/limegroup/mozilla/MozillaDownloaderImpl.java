@@ -1,6 +1,7 @@
 package com.limegroup.mozilla;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
@@ -12,13 +13,14 @@ import org.mozilla.interfaces.nsIDownloadManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.NoOpSaveLocationManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
+import com.limegroup.gnutella.downloader.serial.MozillaDownloadMementoImpl;
 
 public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
@@ -28,9 +30,8 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     private final MozillaDownloadProgressListener listener;
 
-    public MozillaDownloaderImpl(SaveLocationManager saveLocationManager,
-            MozillaDownloadProgressListener listener) {
-        super(saveLocationManager);
+    public MozillaDownloaderImpl(MozillaDownloadProgressListener listener) {
+        super(new NoOpSaveLocationManager());
         this.listener = listener;
         this.downloadId = listener.getDownloadId();
     }
@@ -92,7 +93,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     private long getAmountDownloaded() {
         nsIDownload download = getDownload();
-        long amount = download.getPercentComplete() * download.getAmountTransferred();
+        long amount = download.getAmountTransferred();
         return amount;
     }
 
@@ -336,7 +337,11 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public void finish() {
-        getDownloadManager().cancelDownload(downloadId);
+        try {
+            getDownloadManager().cancelDownload(downloadId);
+        } catch (Exception ignored) {
+            // yum
+        }
         getDownloadManager().removeDownload(downloadId);
     }
 
@@ -388,13 +393,11 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     protected DownloadMemento createMemento() {
-        // TODO Auto-generated method stub
-        return null;
+        return new MozillaDownloadMementoImpl();
     }
 
     @Override
     public void initFromMemento(DownloadMemento memento) throws InvalidDataException {
-        // TODO Auto-generated method stub
-
+        // nothing we do not want to init from memento
     }
 }

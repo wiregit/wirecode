@@ -125,7 +125,7 @@ public final class Initializer {
         
         // Initialize early UI components, display the setup manager (if necessary),
         // and ensure the save directory is valid.
-        initializeEarlyUI();
+        initializeEarlyUI(limeWireCore);
 //        startSetupManager(setupManager);
         validateSaveDirectory();
         
@@ -380,8 +380,9 @@ public final class Initializer {
         }
     }
     
-    /** Initializes any early UI tasks, such as HTML loading & the Bug Manager. */
-    private void initializeEarlyUI() {
+    /** Initializes any early UI tasks, such as HTML loading & the Bug Manager. 
+     * @param limeWireCore */
+    private void initializeEarlyUI(LimeWireCore limeWireCore) {
         // Load up the HTML engine.
         splashRef.get().setStatusText(I18n.tr("Loading HTML Engine..."));
         stopwatch.resetAndLog("update splash for HTML engine");
@@ -405,7 +406,7 @@ public final class Initializer {
         // program
         if (OSUtils.isWindows() || OSUtils.isMacOSX() || OSUtils.isLinux()) {
             try {
-                LimeMozillaInitializer.initialize();
+                LimeMozillaInitializer.initialize(limeWireCore);
             } catch (Exception e) {
                 LOG.error("Mozilla initialization failed");
             }
