@@ -11,7 +11,7 @@ public class BTSwarmHttpSource extends SwarmHttpSource {
 
     // private static final int MAX_RESPONSES = 10;
 
-    private AtomicInteger responsesProcessed;
+    private final AtomicInteger responsesProcessed;
 
     public BTSwarmHttpSource(URI uri, long fileSize) {
         super(uri, fileSize);
