@@ -55,7 +55,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public ResultType getResultType() {
         String extension = getFileExtension();
-        if(extension != null) {
+        if (extension != null) {
             MediaType type = MediaType.getMediaTypeForExtension(extension);
             if (type == MediaType.getAudioMediaType()) {
                 return ResultType.AUDIO;
@@ -68,7 +68,7 @@ public class RemoteFileDescAdapter implements SearchResult {
             }
         }
         
-        return ResultType.UNKNOWN;
+        return ResultType.OTHER;
     }
 
     @Override
@@ -117,7 +117,6 @@ public class RemoteFileDescAdapter implements SearchResult {
             public int size() {
                 return 1 + locs.size();
             }
-
         };
     }
 }

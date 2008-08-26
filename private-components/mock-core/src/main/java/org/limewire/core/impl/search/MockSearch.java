@@ -71,7 +71,7 @@ public class MockSearch implements Search {
                 String name = "When Everyone has a Sweet Party";
                 msr.setDescription(name);
                 msr.setExtension("tmp");
-                msr.setResultType(ResultType.UNKNOWN);
+                msr.setResultType(ResultType.OTHER);
                 msr.setSize(1L);
                 msr.addSource("phoebe");
                 msr.setUrn("www.partytime.com");

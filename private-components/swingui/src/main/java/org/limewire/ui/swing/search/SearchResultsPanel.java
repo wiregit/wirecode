@@ -23,6 +23,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import javax.swing.BorderFactory;
 
 /**
  * This class displays search results in a panel.
@@ -92,11 +93,17 @@ public class SearchResultsPanel extends JPanel {
         
         this.searchTab =
             new SearchTabItems(searchInfo.getSearchCategory(), listener);
+        this.searchTab.setEventList(visualSearchResults);
+
         for (Map.Entry<SearchCategory, Action> entry : searchTab.getResultCountActions()) {
-            resultsContainer.synchronizeResultCount(entry.getKey(), entry.getValue());
+            resultsContainer.synchronizeResultCount(
+                entry.getKey(), entry.getValue());
         }
         
         layoutComponents();
+
+        //setBorder(BorderFactory.createTitledBorder(
+        //    BorderFactory.createLineBorder(Color.RED, 1), "SearchResultsPanel"));
     }
     
     public void addSponsoredResults(List<SponsoredResult> sponsoredResults){
@@ -116,7 +123,7 @@ public class SearchResultsPanel extends JPanel {
             // If no headers, use nothing special.
             scrollPane.setColumnHeaderView(null);
             sponsoredResultsPanel.setTitleVisible(true);
-        } else if(!sponsoredResultsPanel.isVisible()) {
+        } else if (!sponsoredResultsPanel.isVisible()) {
             // If sponsored results aren't visible, just use the actual header.
             scrollPane.setColumnHeaderView(resultHeader);
         } else {
@@ -138,7 +145,8 @@ public class SearchResultsPanel extends JPanel {
                 "[][grow]");
         
         setLayout(layout);
-        add(searchTab.getSearchTab(), "push, growy");
+        //add(searchTab.getSearchTab(), "push, growy");
+        add(searchTab, "push, growy");
         add(sortAndFilterPanel, "wrap, align right");
         add(scrollPane, "span, grow");
         

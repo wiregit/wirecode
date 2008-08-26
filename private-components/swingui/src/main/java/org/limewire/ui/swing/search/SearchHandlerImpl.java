@@ -30,7 +30,7 @@ class SearchHandlerImpl implements SearchHandler {
     }
 
     @Override
-    public void doSearch(final SearchInfo info) {        
+    public Search doSearch(final SearchInfo info) {        
         Search search = searchFactory.createSearch(new SearchDetails() {
             @Override
             public SearchCategory getSearchCategory() {
@@ -90,5 +90,7 @@ class SearchHandlerImpl implements SearchHandler {
         });
         
         search.start();
+
+        return search;
     }
 }

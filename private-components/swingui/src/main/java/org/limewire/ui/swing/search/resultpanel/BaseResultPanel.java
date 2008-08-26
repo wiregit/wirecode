@@ -24,8 +24,8 @@ public class BaseResultPanel extends JXPanel {
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
-    private ConfigurableTable resultsList;
-    private ConfigurableTable resultsTable;
+    private ConfigurableTable<VisualSearchResult> resultsList;
+    private ConfigurableTable<VisualSearchResult> resultsTable;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -49,12 +49,15 @@ public class BaseResultPanel extends JXPanel {
         add(new JScrollPane(resultsList), ModeListener.Mode.LIST.name());
         add(new JScrollPane(resultsTable), ModeListener.Mode.TABLE.name());
         setMode(ModeListener.Mode.LIST);
+
+        //setBorder(BorderFactory.createTitledBorder(
+        //    BorderFactory.createLineBorder(Color.RED, 1), "BaseResultPanel"));
     }
     
     private void configureList(EventList<VisualSearchResult> eventList) {
         // We're using a JTable with one column instead of JList
         // because that will allow us to display buttons with rollover icons.
-        resultsList = new ConfigurableTable();
+        resultsList = new ConfigurableTable<VisualSearchResult>(false);
 
         resultsList.setEventList(eventList);
         resultsList.setTableFormat(new ListViewTableFormat());
@@ -69,7 +72,7 @@ public class BaseResultPanel extends JXPanel {
 
     private void configureTable(EventList<VisualSearchResult> eventList,
         ResultsTableFormat<VisualSearchResult> tableFormat) {
-        resultsTable = new ConfigurableTable<VisualSearchResult>();
+        resultsTable = new ConfigurableTable<VisualSearchResult>(true);
 
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);

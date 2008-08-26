@@ -37,9 +37,7 @@ public class DownloadTable extends MouseableTable {
         setDoubleClickHandler(clickHandler);
     }
 	
-	
 	public DownloadItem getDownloadItem(int row){
 	    return model.getDownloadItem(convertRowIndexToModel(row));
 	}
-
 }

@@ -61,11 +61,8 @@ public class SimpleDownloadTable extends DownloadTable {
         }
     }
     
-    
-
-
-    
-    private static class SimpleDownloadTableFormat implements AdvancedTableFormat<DownloadItem>, WritableTableFormat<DownloadItem> {
+    private static class SimpleDownloadTableFormat
+    implements AdvancedTableFormat<DownloadItem>, WritableTableFormat<DownloadItem> {
         private String[] columns = new String[] {"Category", "Title", "State", "Percent", 
                 "Current Size", "Total Size", "DownloadSpeed", "Actions"};
         private static final int CATEGORY = 0;
@@ -209,9 +206,7 @@ public class SimpleDownloadTable extends DownloadTable {
             setText(GuiUtils.rate2speed((Float)value));
             return this;
         }
-        
     }
-    
     
     private static class SizeRenderer extends JLabel implements TableCellRenderer {
         
@@ -258,8 +253,6 @@ public class SimpleDownloadTable extends DownloadTable {
             downloadActionHandler.performAction(e.getActionCommand(), editItem);
             cancelCellEditing();
         }
-        
-               
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
@@ -275,6 +268,7 @@ public class SimpleDownloadTable extends DownloadTable {
             buttonPanel.updateButtons(editItem.getState());
             return this;
         }
+
         @Override
         public final void addCellEditorListener(CellEditorListener lis) {
             synchronized (listeners) {
@@ -324,7 +318,5 @@ public class SimpleDownloadTable extends DownloadTable {
             }
             return true;
         }
-        
     }
-
 }

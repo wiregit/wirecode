@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,14 +55,15 @@ import org.limewire.ui.swing.util.I18n;
 @Singleton
 class TopPanel extends JPanel implements SearchNavigator {
     
-    //private final SearchBar searchBar;
-    private final TextFieldWithEnterButton textField;
     private final FancyTabList searchList;
     private final Navigator navigator;
+    private final TextFieldWithEnterButton textField;
     
     @Resource private Icon enterUpIcon;
     @Resource private Icon enterOverIcon;
     @Resource private Icon enterDownIcon;
+
+    private List<SearchListener> listeners = new ArrayList<SearchListener>();
     
     @Inject
     public TopPanel(final SearchHandler searchHandler, Navigator navigator) {
@@ -88,14 +90,16 @@ class TopPanel extends JPanel implements SearchNavigator {
                 boolean isSelected, boolean cellHasFocus) {
                 
                 if (value != null) {
-                    switch((SearchCategory)value) {
+                    switch((SearchCategory) value) {
                     case ALL: value = I18n.tr("All"); break;
                     case AUDIO: value = I18n.tr("Music"); break;
                     case DOCUMENTS: value = I18n.tr("Documents"); break;
                     case IMAGES: value = I18n.tr("Images"); break;
                     case VIDEO: value = I18n.tr("Videos"); break;
+                    case OTHER: value = I18n.tr("Other"); break;
                     default:
-                        throw new IllegalArgumentException("invalid category: " + value);
+                        throw new IllegalArgumentException(
+                            "invalid category: " + value);
                     }
                 }
                 
@@ -107,10 +111,14 @@ class TopPanel extends JPanel implements SearchNavigator {
         textField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                searchHandler.doSearch(
+                Search search = searchHandler.doSearch(
                     new DefaultSearchInfo(
                         textField.getText(),
                         (SearchCategory) combo.getSelectedItem()));
+
+                for (SearchListener listener : listeners) {
+                    search.addSearchListener(listener);
+                }
             }
         });
         
@@ -146,13 +154,24 @@ class TopPanel extends JPanel implements SearchNavigator {
         searchList.setMaxTabs(3);
         searchList.setName("TopPanel.SearchList");
         add(searchList, gbc);
-    }
+
+        //setBorder(BorderFactory.createTitledBorder(
+        //    BorderFactory.createLineBorder(Color.RED, 1), "TopPanel"));
+    };
     
+    /**
+     * Adds a listener that will be notified as each search result comes in.
+     * @param listener the SearchListener
+     */
+    public void addSearchListener(SearchListener listener) {
+        listeners.add(listener);
+    }
+
     @Override
     public boolean requestFocusInWindow() {
         return textField.requestFocusInWindow();
     }
-    
+
     @Override
     public SearchNavItem addSearch(
         String title, JComponent searchPanel, final Search search) {

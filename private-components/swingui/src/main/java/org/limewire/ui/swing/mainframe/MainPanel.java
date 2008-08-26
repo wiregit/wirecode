@@ -14,7 +14,8 @@ import com.google.inject.Singleton;
 @Singleton
 class MainPanel extends JPanel implements NavigableTarget {
 
-    private final Map<String, JComponent> keyToComponents = new HashMap<String, JComponent>();
+    private final Map<String, JComponent> keyToComponents =
+        new HashMap<String, JComponent>();
     private final CardLayout cardLayout;
 
     public MainPanel() {

@@ -61,12 +61,17 @@ public class ResultsContainer extends JXPanel {
             imagesFactory.create(filter(ResultType.IMAGE, visualSearchResults), search));
         panelMap.put(SearchCategory.DOCUMENTS.name(),
             documentsFactory.create(filter(ResultType.DOCUMENT, visualSearchResults), search));
+        panelMap.put(SearchCategory.OTHER.name(),
+            documentsFactory.create(filter(ResultType.OTHER, visualSearchResults), search));
         
         setLayout(cardLayout);
         
-        for(Map.Entry<String, BaseResultPanel> entry : panelMap.entrySet()) {
+        for (Map.Entry<String, BaseResultPanel> entry : panelMap.entrySet()) {
             add(entry.getValue(), entry.getKey());
         }
+
+        //setBorder(BorderFactory.createTitledBorder(
+        //    BorderFactory.createLineBorder(Color.RED, 1), "ResultsContainer"));
     }
 
     public void synchronizeResultCount(SearchCategory key, final Action action) {

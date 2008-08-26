@@ -2,6 +2,6 @@ package org.limewire.core.api.search;
 
 public enum SearchCategory {
     
-    ALL, AUDIO, VIDEO, IMAGES, DOCUMENTS
+    ALL, AUDIO, VIDEO, IMAGES, DOCUMENTS, OTHER
 
 }

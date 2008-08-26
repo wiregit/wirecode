@@ -34,32 +34,40 @@ public class ConfigurableTable<E> extends MouseableTable {
     private JMenuItem disabledMenuItem;
     private JPopupMenu headerPopup;
     private TableFormat<E> tableFormat;
+    private boolean showHeaders;
 
-    public ConfigurableTable() {
+    public ConfigurableTable(boolean showHeaders) {
+        this.showHeaders = showHeaders;
+
         // Configure so resizing a column resizes the table, not other columns.
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        // Set up table headers to have a context menu
-        // that configures which columns are visible.
-        final JTableHeader header = getTableHeader();
-        header.setToolTipText("Right-click to select columns to display");
-        header.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // Only honor right-clicks.
-                // TODO: Why doesn't the following line work?
-                //if (!e.isPopupTrigger()) return;
-                if (e.getButton() != 3) return;
-
-                // If a header popup menu was created ...
-                if (headerPopup != null) {
-                    // Display the header popup menu where the user clicked.
-                    headerPopup.show(
-                        ConfigurableTable.this,
-                        e.getX(), e.getY() - header.getHeight());
+        if (showHeaders) {
+            // Set up table headers to have a context menu
+            // that configures which columns are visible.
+            final JTableHeader header = getTableHeader();
+            header.setToolTipText("Right-click to select columns to display");
+            header.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    // Only honor right-clicks.
+                    // TODO: Why doesn't the following line work?
+                    //if (!e.isPopupTrigger()) return;
+                    if (e.getButton() != 3) return;
+                    
+                    // If a header popup menu was created ...
+                    if (headerPopup != null) {
+                        // Display the header popup menu where the user clicked.
+                        headerPopup.show(
+                            ConfigurableTable.this,
+                            e.getX(), e.getY() - header.getHeight());
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            // Remove the table header.
+            setTableHeader(null);
+        }
 
         // Size all the columns.
         TableColumnModel tcm = getColumnModel();
@@ -185,7 +193,7 @@ public class ConfigurableTable<E> extends MouseableTable {
         tableModel = new EventTableModel<E>(eventList, tableFormat);
         setModel(tableModel);
 
-        makeHeaderPopup();
+        if (showHeaders) makeHeaderPopup();
     }
 
     /**
