@@ -91,9 +91,9 @@ public class URIUtils {
         int port = uri.getPort();
         if (port == -1) {
             String scheme = uri.getScheme();
-            if ("http".equals(scheme)) {
+            if ("http".equalsIgnoreCase(scheme)) {
                 port = 80;
-            } else if ("https".equals(scheme)) {
+            } else if ("https".equalsIgnoreCase(scheme)) {
                 port = 443;
             }
         }
