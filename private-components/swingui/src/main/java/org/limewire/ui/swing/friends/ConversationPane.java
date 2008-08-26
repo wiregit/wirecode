@@ -9,12 +9,10 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.HyperlinkEvent;
@@ -78,7 +76,8 @@ public class ConversationPane extends JPanel implements Displayable {
         editor.setEditable(false);
         editor.setContentType("text/html");
         editor.addHyperlinkListener(new HyperlinkListener());
-        addPopupMenus();
+        
+        PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
         
         scroll.getViewport().add(editor);
         
@@ -87,20 +86,6 @@ public class ConversationPane extends JPanel implements Displayable {
         setBackground(DEFAULT_BACKGROUND);
         
         EventAnnotationProcessor.subscribe(this);
-    }
-    
-    private void addPopupMenus() {
-        JPopupMenu menu = new JPopupMenu();
-        addMenuItem(menu, "Copy", new CopyAction(editor));
-        addMenuItem(menu, "Copy All", new CopyAllAction());
-        PopupListener popupListener = new PopupListener(menu);
-        editor.addMouseListener(popupListener);
-        menu.addPopupMenuListener(popupListener);
-    }
-
-    private void addMenuItem(JPopupMenu menu, String name, Action action) {
-        action.putValue(Action.NAME, tr(name));
-        menu.add(action);
     }
     
     @RuntimeTopicEventSubscriber

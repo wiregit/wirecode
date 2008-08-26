@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
@@ -28,6 +29,11 @@ class ResizingInputPanel extends JPanel implements Displayable {
         text.setLineWrap(true);
         text.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "sendMessage");
         text.getActionMap().put("sendMessage", new SendMessage());
+        
+        JPopupMenu popup = PopupUtil.addPopupMenus(text, new CutAction(text), new CopyAction(text), 
+                new PasteAction(), new DeleteAction(text));
+        popup.addSeparator();
+        popup.add(new SelectAllAction());
 
         final JScrollPane scrollPane = new JScrollPane(text, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
