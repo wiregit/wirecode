@@ -13,14 +13,12 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
-import javax.swing.text.DefaultEditorKit;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
@@ -92,16 +90,16 @@ public class ConversationPane extends JPanel implements Displayable {
     
     private void addPopupMenus() {
         JPopupMenu menu = new JPopupMenu();
-        addMenuItem(menu, "Copy", new DefaultEditorKit.CopyAction());
+        addMenuItem(menu, "Copy", new CopyAction(editor));
         addMenuItem(menu, "Copy All", new CopyAllAction());
-        editor.addMouseListener(new PopupListener(menu));
+        PopupListener popupListener = new PopupListener(menu);
+        editor.addMouseListener(popupListener);
+        menu.addPopupMenuListener(popupListener);
     }
 
     private void addMenuItem(JPopupMenu menu, String name, Action action) {
-        JMenuItem item = new JMenuItem(tr(name));
         action.putValue(Action.NAME, tr(name));
-        item.addActionListener(action);
-        menu.add(item);
+        menu.add(action);
     }
     
     @RuntimeTopicEventSubscriber
