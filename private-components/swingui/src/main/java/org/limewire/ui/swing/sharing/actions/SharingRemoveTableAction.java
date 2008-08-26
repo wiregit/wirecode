@@ -7,7 +7,6 @@ import javax.swing.Icon;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 
 /**
@@ -16,13 +15,11 @@ import org.limewire.ui.swing.sharing.table.SharingTableModel;
  */
 public class SharingRemoveTableAction extends AbstractAction {
 
-    private FileList fileList;
     private JXTable table;
     
-    public SharingRemoveTableAction(FileList fileList, JXTable table, Icon icon) {
+    public SharingRemoveTableAction(JXTable table, Icon icon) {
         super("", icon);
         
-        this.fileList = fileList;
         this.table = table;
     }
     
@@ -34,7 +31,7 @@ public class SharingRemoveTableAction extends AbstractAction {
         if(index > -1) {
             SharingTableModel model = (SharingTableModel) table.getModel();
             FileItem item = model.getFileItem(index);
-            fileList.removeFile(item.getFile());
+            model.getFileList().removeFile(item.getFile());
         }
     }
 }

@@ -37,7 +37,7 @@ public class SharingShortcutPanel extends JPanel {
                     final int size = listChanges.getSourceList().size();
                     SwingUtilities.invokeLater(new Runnable(){
                         public void run() {
-                            button.setDisplayNumber(size);
+                            button.setDisplayNumber(size);                                
                         }
                     });
                 }

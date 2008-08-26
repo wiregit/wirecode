@@ -4,6 +4,7 @@ import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.table.StripedJXTable;
 
 import ca.odell.glazedlists.EventList;
@@ -11,8 +12,8 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingTable extends StripedJXTable {
 
-    public SharingTable(EventList<FileItem> sharedItems, TableFormat<FileItem> tableFormat) {
-        super(new SharingTableModel(sharedItems, tableFormat));
+    public SharingTable(EventList<FileItem> sharedItems, FileList fileList, TableFormat<FileItem> tableFormat) {
+        super(new SharingTableModel(sharedItems, fileList, tableFormat));
         
         setColumnControlVisible(true);
         setShowHorizontalLines(false);

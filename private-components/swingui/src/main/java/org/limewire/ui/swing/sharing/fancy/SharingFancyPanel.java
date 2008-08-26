@@ -89,6 +89,23 @@ public class SharingFancyPanel extends JPanel {
        this.setDropTarget(drop.getDropTarget());
     }
     
+    public void setModel(EventList<FileItem> eventList, FileList fileList) {
+        List<EventList<FileItem>> list = new ArrayList<EventList<FileItem>>();
+        list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.AUDIO)));
+        list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.VIDEO)));
+        list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.IMAGE)));
+        list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.DOCUMENT)));
+        list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.PROGRAM)));
+        list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.OTHER)));
+        
+        musicTable.setModel(list.get(0), fileList);
+        videoTable.setModel(list.get(1), fileList);
+        imageList.setModel(list.get(2), fileList);
+        documentTable.setModel(list.get(3), fileList);
+        programTable.setModel(list.get(4), fileList);
+        otherTable.setModel(list.get(5), fileList);
+    }
+     
     /**
      * Filter based on a category. Only displays FileItems of 
      * one category type.

@@ -26,6 +26,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageList;
+import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
@@ -64,10 +65,10 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         final JPopupMenu menu = new JPopupMenu();
         menu.add(new JMenuItem("Item"));
         
-        imageList = new ImageList(eventList);
+        imageList = new ImageList(eventList, fileList);
         imageList.setDropTarget(dropTarget);  
         
-        layerButton = new UnshareButton(new SharingRemoveListAction(fileList,imageList));
+        layerButton = new UnshareButton(new SharingRemoveListAction(imageList));
         layerButton.setSize(60, 30);
         layerButton.setVisible(false);
         layerButton.addMouseListener(new MouseListener(){
@@ -113,25 +114,33 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         setVisible(false);
     }
     
+    public void setModel(EventList<FileItem> eventList, FileList fileList) {
+        imageList.setModel(new ImageListModel(eventList, fileList));
+        
+        int size = eventList.size();
+        if( size == 0 ) {
+            unShareButton.setEnabled(false);
+            SharingFancyListPanel.this.setVisible(false);
+        } else {
+            unShareButton.setEnabled(true);
+            SharingFancyListPanel.this.setVisible(true);
+        }
+    }
+    
     @Override
     public void listChanged(ListEvent<FileItem> listChanges) {
-        if(listChanges.getSourceList().size() == 0 ) {
-            SwingUtilities.invokeLater(new Runnable(){
-                @Override
-                public void run() {
+        final int size = listChanges.getSourceList().size();
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                if(size == 0 ) {
                     unShareButton.setEnabled(false);
                     SharingFancyListPanel.this.setVisible(false);
-                }
-            });
-        } else {
-            SwingUtilities.invokeLater(new Runnable(){
-                @Override
-                public void run() {
+                } else {
                     unShareButton.setEnabled(true);
                     SharingFancyListPanel.this.setVisible(true);
                 }
-            });
-        }
+            }
+        });
     }
     
     public class MouseReaction implements MouseListener, MouseMotionListener {

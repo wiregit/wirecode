@@ -4,14 +4,15 @@ import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingFancyTable extends JXTable {
 
-    public SharingFancyTable(EventList<FileItem> sharedItems, TableFormat<FileItem> tableFormat) {
-        super(new SharingTableModel(sharedItems, tableFormat));
+    public SharingFancyTable(EventList<FileItem> sharedItems, FileList fileList, TableFormat<FileItem> tableFormat) {
+        super(new SharingTableModel(sharedItems, fileList, tableFormat));
         
         setColumnControlVisible(false);
         setShowGrid(false, false);
@@ -27,5 +28,9 @@ public class SharingFancyTable extends JXTable {
         if(getColumnModel().getColumn(column).getCellEditor() != null)
             return true;
         return false;        
+    }
+
+    public void setModel(EventList<FileItem> sharedItems, FileList fileList, TableFormat<FileItem> tableFormat) {
+        super.setModel(new SharingTableModel(sharedItems, fileList, tableFormat));
     }
 }

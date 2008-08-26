@@ -48,17 +48,15 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     private final FileList fileList;
     
     private CardLayout overviewCardLayout;
-    private CardLayout viewCardLayout;
+    private CardLayout tableCardLayout;
     
     private JPanel nonEmptyPanel;
 
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
-
-    final JPanel panel;
     
     @Inject
-    public GnutellaSharePanel(LibraryManager libraryManager, SharingEmptyPanel emptyPanel) {      panel = this;  
+    public GnutellaSharePanel(LibraryManager libraryManager, SharingEmptyPanel emptyPanel) {
         GuiUtils.assignResources(this); 
         
         this.fileList = libraryManager.getGnutellaList();
@@ -69,9 +67,9 @@ public class GnutellaSharePanel extends GenericSharingPanel {
                 SwingUtilities.invokeLater(new Runnable(){
                     public void run() {
                         if( size == 0) {
-                            overviewCardLayout.show(panel,EMPTY);
+                            overviewCardLayout.show(GnutellaSharePanel.this,EMPTY);
                         } else {
-                            overviewCardLayout.show(panel,NONEMPTY);
+                            overviewCardLayout.show(GnutellaSharePanel.this,NONEMPTY);
                         }     
                     }
                 });
@@ -90,25 +88,24 @@ public class GnutellaSharePanel extends GenericSharingPanel {
 
     
     private void createTablesPanels() {
-        viewCardLayout = new CardLayout();
+        tableCardLayout = new CardLayout();
         nonEmptyPanel = new JPanel();
         nonEmptyPanel.setLayout(new BorderLayout());
         
         JPanel cardPanel = new JPanel();
-        cardPanel.setLayout(viewCardLayout);
+        cardPanel.setLayout(tableCardLayout);
         
         SharingHeaderPanel headerPanel = createHeader(cardPanel);
 
         createCenterCards(headerPanel, cardPanel);
-
 
         nonEmptyPanel.add(headerPanel, BorderLayout.NORTH);
         nonEmptyPanel.add(cardPanel);
     }
     
     private SharingHeaderPanel createHeader(JPanel cardPanel) {
-        viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, LIST), 
-                new ItemAction(cardPanel, viewCardLayout, TABLE));
+        viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, tableCardLayout, ViewSelectionPanel.LIST_SELECTED), 
+                new ItemAction(cardPanel, tableCardLayout, ViewSelectionPanel.TABLE_SELECTED));
         
         SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the ", "LimeWire Network", viewSelectionPanel);
         return headerPanel;
@@ -119,21 +116,19 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
                 new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         
-
         createTable(filteredList);
         
         JScrollPane scrollPane = new JScrollPane();
         SharingFancyPanel sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList);
         scrollPane.setViewportView(sharingFancyPanel);
         
-        cardPanel.add(new JScrollPane(table),TABLE);
-        cardPanel.add(scrollPane, LIST);
-        viewCardLayout.show(cardPanel, LIST);
-        
+        cardPanel.add(new JScrollPane(table),ViewSelectionPanel.TABLE_SELECTED);
+        cardPanel.add(scrollPane, ViewSelectionPanel.LIST_SELECTED);
+        tableCardLayout.show(cardPanel, ViewSelectionPanel.LIST_SELECTED);
     }
     
     private void createTable(FilterList<FileItem> filteredList) {
-        table = new SharingTable(filteredList, new SharingTableFormat());
+        table = new SharingTable(filteredList, fileList, new SharingTableFormat());
         table.setTransferHandler(new SharingTransferHandler(fileList));
         table.setDropMode(DropMode.ON);
         
@@ -151,9 +146,8 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     
     private List<Action> createActions() {
         List<Action> list = new ArrayList<Action>();
-        list.add(new SharingRemoveTableAction(fileList, table, cancelIcon ));
+        list.add(new SharingRemoveTableAction(table, cancelIcon ));
         return list;
     }
-    
 
 }

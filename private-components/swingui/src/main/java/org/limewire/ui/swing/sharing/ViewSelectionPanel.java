@@ -17,6 +17,10 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class ViewSelectionPanel extends JPanel {
 
+    public static String LIST_SELECTED = "LIST";
+    public static String TABLE_SELECTED = "TABLE";
+    public static String DISABLED = "DISABLED";
+    
     @Resource private Icon listViewPressedIcon;
     @Resource private Icon listViewUnpressedIcon;
     @Resource private Icon tableViewPressedIcon;
@@ -38,6 +42,23 @@ public class ViewSelectionPanel extends JPanel {
         
         add(listViewToggleButton);
         add(tableViewToggleButton);
+    }
+    
+    @Override
+    public void setEnabled(boolean value) {
+        listViewToggleButton.setEnabled(value);
+        tableViewToggleButton.setEnabled(value);
+    }
+    
+    public String getSelectedButton() {
+        if(!listViewToggleButton.isEnabled())
+            return DISABLED;
+        
+        if(listViewToggleButton.isSelected()) {
+            return LIST_SELECTED;
+        } else {
+            return TABLE_SELECTED;
+        }
     }
     
     /**

@@ -13,10 +13,10 @@ import javax.swing.border.EmptyBorder;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.swing.EventListModel;
 
 /**
  *	Draws a list of images. Images are displayed in a horizontal left
@@ -30,8 +30,8 @@ public class ImageList extends JXList {
     @Resource
     private Icon errorIcon; 
     
-    public ImageList(EventList<FileItem> eventList) {
-        super(new EventListModel<FileItem>(eventList));
+    public ImageList(EventList<FileItem> eventList, FileList fileList) {
+        super(new ImageListModel(eventList, fileList));
 
         GuiUtils.assignResources(this); 
         

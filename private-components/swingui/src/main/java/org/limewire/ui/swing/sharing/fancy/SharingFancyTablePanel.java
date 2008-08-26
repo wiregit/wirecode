@@ -46,12 +46,14 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     
     private SharingFancyTable table;
     
-    private final ConfirmationUnshareButton unShareButton;
+    private final TableFormat<FileItem> tableFormat;
+    
+    private final ConfirmationUnshareButton unShareAllButton;
     
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
     
-    private final FileList fileList;
+    private EventList<FileItem> currentEventList;
     
     public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, DropTarget dropTarget, FileList fileList) {
         this(name, eventList, tableFormat, true, dropTarget, fileList);
@@ -59,8 +61,9 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     
     public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, 
             boolean paintTableHeader, DropTarget dropTarget, FileList fileList) {
-
-        this.fileList = fileList;
+        
+        this.tableFormat = tableFormat;
+        this.currentEventList = eventList;
         
         GuiUtils.assignResources(this); 
         
@@ -69,14 +72,14 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
         JLabel unShareButtonLabel = new JLabel("Unshare All");
-        unShareButton = new ConfirmationUnshareButton(new SharingRemoveAllAction(fileList, eventList));
-        unShareButton.setEnabled(false);
+        unShareAllButton = new ConfirmationUnshareButton(new SharingRemoveAllAction(fileList, eventList));
+        unShareAllButton.setEnabled(false);
 
         // black seperator
         Line line = new Line(Color.BLACK, 3);
         
         // create the table
-        table = createTable(eventList, tableFormat, dropTarget);
+        table = createTable(eventList, fileList, tableFormat, dropTarget);
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remainign space
         setLayout(new MigLayout("insets 10 25 0 10",     //layout contraints
@@ -85,7 +88,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         
         add(headerLabel, "push");       // first row
         add(unShareButtonLabel, "split 2");
-        add(unShareButton, "wrap");
+        add(unShareAllButton, "wrap");
         
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");
@@ -100,9 +103,9 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         setVisible(false);
     }
     
-    private SharingFancyTable createTable(EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, DropTarget dropTarget) {
+    private SharingFancyTable createTable(EventList<FileItem> eventList, FileList fileList, TableFormat<FileItem> tableFormat, DropTarget dropTarget) {
         if( table == null) {
-            table = new SharingFancyTable(eventList, tableFormat);
+            table = new SharingFancyTable(eventList, fileList, tableFormat);
             table.setDropTarget(dropTarget);
             table.setSortable(false);
             
@@ -123,6 +126,23 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         }
         return table;
     }
+    
+    public void setModel(EventList<FileItem> eventList, FileList fileList) {
+        currentEventList.removeListEventListener(this);
+        currentEventList = eventList;
+        currentEventList.addListEventListener(this);
+        
+        table.setModel(eventList, fileList, tableFormat);
+
+        int size = eventList.size();
+        if( size == 0 ) {
+            unShareAllButton.setEnabled(false);
+            SharingFancyTablePanel.this.setVisible(false);
+        } else {
+            unShareAllButton.setEnabled(true);
+            SharingFancyTablePanel.this.setVisible(true);
+        }
+    }
 
     @Override
     public void listChanged(ListEvent<FileItem> listChanges) {
@@ -130,15 +150,14 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
                 if( size == 0 ) {
-                    unShareButton.setEnabled(false);
+                    unShareAllButton.setEnabled(false);
                     SharingFancyTablePanel.this.setVisible(false);
                 } else {
-                    unShareButton.setEnabled(true);
+                    unShareAllButton.setEnabled(true);
                     SharingFancyTablePanel.this.setVisible(true);
                 }
             }
         });
-
     }
     
     public class TableMouseListener implements MouseListener, MouseMotionListener {
@@ -222,7 +241,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     
     private List<Action> createActions() {
         List<Action> list = new ArrayList<Action>();
-        list.add(new SharingRemoveTableAction(fileList, table, cancelIcon));
+        list.add(new SharingRemoveTableAction(table, cancelIcon));
         return list;
     }
 
