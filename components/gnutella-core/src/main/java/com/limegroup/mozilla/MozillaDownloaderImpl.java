@@ -1,7 +1,6 @@
 package com.limegroup.mozilla;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
@@ -29,6 +28,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     private long downloadId;
 
     private final MozillaDownloadProgressListener listener;
+   
 
     public MozillaDownloaderImpl(MozillaDownloadProgressListener listener) {
         super(new NoOpSaveLocationManager());
@@ -375,20 +375,17 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public float getAverageBandwidth() {
-        // TODO Auto-generated method stub
-        return 0;
+        return listener.getAverageBandwidth();
     }
 
     @Override
     public float getMeasuredBandwidth() throws InsufficientDataException {
-        // TODO Auto-generated method stub
-        return 0;
+        return listener.getMeasuredBandwidth();
     }
 
     @Override
     public void measureBandwidth() {
-        // TODO Auto-generated method stub
-
+        listener.measureBandwidth();
     }
 
     @Override

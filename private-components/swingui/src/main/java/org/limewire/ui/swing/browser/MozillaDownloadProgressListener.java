@@ -12,10 +12,12 @@ import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.xpcom.Mozilla;
 
 import com.google.inject.internal.base.Objects;
+import com.limegroup.bittorrent.SimpleBandwidthTracker;
+import com.limegroup.gnutella.InsufficientDataException;
 
 public class MozillaDownloadProgressListener implements nsIDownloadProgressListener {
     private final nsIDownload download;
-    
+
     private final long downloadId;
 
     private final AtomicInteger state;
@@ -24,7 +26,7 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
 
     private final AtomicLong totalProgress;
 
-    private final AtomicLong lastUpdateTime;
+    private final SimpleBandwidthTracker down;
 
     public MozillaDownloadProgressListener(nsIDownload download, short state) {
         this.download = Objects.nonNull(download, "download");
@@ -32,7 +34,7 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
         this.state = new AtomicInteger(state);
         this.selfProgress = new AtomicLong();
         this.totalProgress = new AtomicLong();
-        this.lastUpdateTime = new AtomicLong(System.currentTimeMillis());
+        this.down = new SimpleBandwidthTracker();
         System.out.println("starting state: " + state);
     }
 
@@ -54,9 +56,11 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
             // this is my download
 
             long diff = curTotalProgress - totalProgress.longValue();
+            down.count(diff);
 
             selfProgress.set(curSelfProgress);
             totalProgress.set(curTotalProgress);
+            System.out.println("diff: " + diff);
             System.out.println("curSelfProgress: " + selfProgress);
             System.out.println("curTotalProgress: " + totalProgress);
         }
@@ -92,5 +96,21 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
 
     public long getDownloadId() {
         return downloadId;
+    }
+
+    public float getAverageBandwidth() {
+        return down.getAverageBandwidth();
+    }
+
+    public float getMeasuredBandwidth() {
+        try {
+            return down.getMeasuredBandwidth();
+        } catch (InsufficientDataException e) {
+            return 0;
+        }
+    }
+
+    public void measureBandwidth() {
+        down.measureBandwidth();
     }
 }

@@ -20,8 +20,11 @@ import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
+import org.mozilla.interfaces.nsIComponentRegistrar;
 import org.mozilla.interfaces.nsIDownloadManager;
+import org.mozilla.xpcom.Mozilla;
 
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.LimeWireCore;
 
 public class LimeMozillaInitializer {
@@ -70,13 +73,22 @@ public class LimeMozillaInitializer {
         });
         MozillaInitialization.initialize();
 
-        //override mozilla components
-        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(
-                "@mozilla.org/download-manager;1", nsIDownloadManager.class);
-        downloadManager.addListener(new MozillaDownloadManager(limeWireCore.getDownloadManager()));
-        
+        overrideMozillaComponents(limeWireCore);
+
         if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
+    }
+
+    private static void overrideMozillaComponents(LimeWireCore limeWireCore) {
+        nsIComponentRegistrar cr = Mozilla.getInstance().getComponentRegistrar();
+        register(new NsIDownloadManagerUIImpl());// removes download list screen
+
+        nsIDownloadManager nsidownloadManager = XPCOMUtils.getServiceProxy(
+                "@mozilla.org/download-manager;1", nsIDownloadManager.class);
+        nsidownloadManager.cleanUp();
+
+        DownloadManager downloadManager = limeWireCore.getDownloadManager();
+        nsidownloadManager.addListener(new MozillaDownloadManager(downloadManager));
     }
 
     private static String getResourceName() {
@@ -89,6 +101,11 @@ public class LimeMozillaInitializer {
         } else {
             throw new IllegalStateException("no resource for OS: " + OSUtils.getOS());
         }
+    }
+
+    private static void register(NsISelfReferencingFactory factory) {
+        nsIComponentRegistrar cr = Mozilla.getInstance().getComponentRegistrar();
+        cr.registerFactory(factory.getIID(), factory.getComponentName(), factory.getCID(), factory);
     }
 
 }
