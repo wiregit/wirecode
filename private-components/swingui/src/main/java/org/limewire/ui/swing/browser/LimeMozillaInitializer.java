@@ -18,7 +18,9 @@ import org.mozilla.browser.IMozillaWindowFactory;
 import org.mozilla.browser.MozillaConfig;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaWindow;
+import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
+import org.mozilla.interfaces.nsIDownloadManager;
 
 public class LimeMozillaInitializer {
 
@@ -66,6 +68,11 @@ public class LimeMozillaInitializer {
         });
         MozillaInitialization.initialize();
 
+        //override mozilla components
+        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(
+                "@mozilla.org/download-manager;1", nsIDownloadManager.class);
+        downloadManager.addListener(new MozillaDownloadManager());
+        
         if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
     }
