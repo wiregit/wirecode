@@ -23,7 +23,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import javax.swing.BorderFactory;
+import org.limewire.ui.swing.components.FancyTab;
 
 /**
  * This class displays search results in a panel.
@@ -88,6 +88,7 @@ public class SearchResultsPanel extends JPanel {
             public void categorySelected(SearchCategory searchCategory) {
                 resultsContainer.showCategory(searchCategory);
                 syncColumnHeader();
+                syncSortBy();
             }
         };
         
@@ -136,6 +137,27 @@ public class SearchResultsPanel extends JPanel {
             scrollPane.setColumnHeaderView(headerPanel);
             sponsoredResultsPanel.setTitleVisible(false);
         }
+    }
+
+    private void syncSortBy() {
+        SearchCategory category = SearchCategory.ALL; // the default
+
+        if (searchTab != null) {
+            FancyTab tab = searchTab.getSelectedTab();
+            
+            if (tab != null) {
+                String title = tab.getTitle();
+                category =
+                    "All".equals(title) ? SearchCategory.ALL :
+                    "Music".equals(title) ? SearchCategory.AUDIO :
+                    "Videos".equals(title) ? SearchCategory.VIDEO :
+                    "Images".equals(title) ? SearchCategory.IMAGES :
+                    "Documents".equals(title) ? SearchCategory.DOCUMENTS :
+                    SearchCategory.OTHER;
+            }
+        }
+
+        sortAndFilterPanel.setSearchCategory(category);
     }
     
     private void layoutComponents() {

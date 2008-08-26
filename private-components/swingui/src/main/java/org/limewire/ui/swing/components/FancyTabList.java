@@ -139,7 +139,7 @@ public class FancyTabList extends JXPanel {
     /**
      * Returns the currently selected tab.
      */
-    private FancyTab getSelectedTab() {
+    public FancyTab getSelectedTab() {
         for (FancyTab tab : tabs) {
             if (tab.isSelected()) {
                 return tab;

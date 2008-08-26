@@ -25,6 +25,7 @@ import javax.swing.JToggleButton;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -45,8 +46,7 @@ class SortAndFilterPanel extends JXPanel {
     @Resource private Icon tableViewPressedIcon;
     @Resource private Icon tableViewUnpressedIcon;
 
-    private final JComboBox sortBox = new JComboBox(new String[] {
-        "Sources", "Relevance", "Size", "File Extension" });
+    private final JComboBox sortBox = new JComboBox();
     
     private final JLabel sortLabel = new JLabel("Sort by:");
     private final JTextField filterBox = new FilteredTextField(FILTER_WIDTH);
@@ -62,6 +62,8 @@ class SortAndFilterPanel extends JXPanel {
         // TODO: RMV Are the following lines needed?
         // FontUtils.changeSize(sortLabel, 1);
         // FontUtils.changeStyle(sortLabel, Font.BOLD);
+
+        setSearchCategory(SearchCategory.ALL);
         
         configureViewButtons();
         
@@ -202,6 +204,57 @@ class SortAndFilterPanel extends JXPanel {
             listViewToggleButton.setSelected(false);
             tableViewToggleButton.setSelected(true);
         }
+    }
+
+    public void setSearchCategory(SearchCategory category) {
+        sortBox.removeAllItems();
+        String[] items = null;
+
+        switch (category) {
+            case ALL:
+                items = new String[] {
+                    "Relevance", "Name", "File Type",
+                    "Size (high to low)", "Size (low to high)"
+                };
+                break;
+            case AUDIO:
+                items = new String[] {
+                    "Relevance", "Name", "Artist", "Album", "Length",
+                    "Quality (high to low)"
+                };
+                break;
+            case VIDEO:
+                items = new String[] {
+                    "Relevance", "Title", "Type", "Length", "Year",
+                    "Quality (high to low)"
+                };
+                break;
+            case IMAGES:
+                items = new String[] {
+                    "Relevance", "Name", "Type", "Date created (more recent)"
+                };
+                break;
+            case DOCUMENTS:
+                items = new String[] {
+                    "Relevance", "Name", "Title", "Type",
+                    "Size (low to high)", "Date created (more recent)"
+                };
+                break;
+            default:
+                items = new String[] {
+                    "Relevance", "Name", "File type",
+                    "Size (high to low)", "Size (low to high)"
+                };
+                break;
+        }
+
+        for (String item : items) {
+            sortBox.addItem(item);
+        }
+
+        // TODO: RMV How can you determine if the user is signed on?
+        //if (signedOn())
+            sortBox.addItem("Friend (a-z)");
     }
     
     private static class VisualSearchResultTextFilterator

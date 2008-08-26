@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import javax.swing.BorderFactory;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
