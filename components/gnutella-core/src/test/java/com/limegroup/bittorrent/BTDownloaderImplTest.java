@@ -63,7 +63,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
-        Thread.sleep(1000);
         super.setUp();
     }
 
@@ -344,13 +343,6 @@ public class BTDownloaderImplTest extends LimeTestCase {
     /**
      * Asserts that the given file has the correct size, and matches the given
      * md5sum.
-     * 
-     * @param md5
-     * @param file
-     * @param fileSize
-     * @throws InterruptedException
-     * @throws NoSuchAlgorithmException
-     * @throws IOException
      */
     private void assertDownload(String md5, File file, long fileSize) throws InterruptedException,
             NoSuchAlgorithmException, IOException {

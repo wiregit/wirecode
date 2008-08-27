@@ -57,7 +57,6 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     protected void setUp() throws Exception {
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
-        Thread.sleep(1000);
     }
 
     @Override

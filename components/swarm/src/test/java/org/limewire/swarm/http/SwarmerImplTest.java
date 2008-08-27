@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Test;
 
@@ -57,7 +58,6 @@ public class SwarmerImplTest extends BaseTestCase {
     protected void setUp() throws Exception {
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
-        Thread.sleep(1000);
         super.setUp();
     }
 
