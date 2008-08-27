@@ -8,7 +8,6 @@ import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -228,24 +227,6 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         EventAnnotationProcessor.subscribe(this);
 
         player.addAudioPlayerListener(new PlayerListener());
-        
-        new Thread() {
-            public void run() {
-                // try {
-                // Thread.sleep(30000);
-                // } catch (InterruptedException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
-                AudioSource source = new AudioSource(
-                        new File(
-                                "C:\\Documents and Settings\\mturkel\\My Documents\\LimeWire\\Shared\\2-Long_Gone_and_Nowhere_full-The_Long_Nines.mp3"));
-                PlayerPanel.this.player.loadSong(source);
-                PlayerPanel.this.player.setVolume(.5);
-                PlayerPanel.this.player.playSong();
-            }
-        }.start();
-        
     }
     
     @EventSubscriber
