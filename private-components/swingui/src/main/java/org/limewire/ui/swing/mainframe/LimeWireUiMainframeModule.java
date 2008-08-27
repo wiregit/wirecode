@@ -4,6 +4,8 @@ import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.nav.NavigableTarget;
 import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.player.AudioPlayer;
+import org.limewire.ui.swing.player.LimeWirePlayer;
 import org.limewire.ui.swing.search.SearchNavigator;
 
 import com.google.inject.AbstractModule;
@@ -17,5 +19,6 @@ public class LimeWireUiMainframeModule extends AbstractModule {
         bind(NavigableTree.class).to(NavTree.class);
         bind(SearchNavigator.class).to(TopPanel.class);
         bind(FriendsCountUpdater.class).to(StatusPanel.class);
+        bind(AudioPlayer.class).to(LimeWirePlayer.class);
     }
 }

@@ -67,11 +67,9 @@ public class SongProgressBarUI extends MediaSliderUI {
      */
     @Override
     public void paintTrack(Graphics g) {
-        System.out.println("paintTrack");
     	// if all the images aren't loaded, fall back to default painting
         if( ((SongProgressBar)slider).getProgressImage() == null) {
             super.paintTrack(g);
-            System.out.println("null!");
             return;
         }
         try {
@@ -105,12 +103,10 @@ public class SongProgressBarUI extends MediaSliderUI {
             // if the images for the track can't be found, have super paint 
             //  default
             super.paintTrack(g);
-            System.out.println("return");
             return;
         }
-System.out.println("horizontal?");
+
         if (slider.getOrientation() == JSlider.HORIZONTAL) {
-            System.out.println("horizontal");
             Rectangle trackBounds = contentRect;
 
             int cy = (trackBounds.height - trackImageCache.getHeight()) / 2;
@@ -137,7 +133,6 @@ System.out.println("horizontal?");
             // paint the string in the background
             if (songSlider.isStringPainted()
                     && songSlider.getString().length() > 0) {
-                System.out.println("here we are");
                 FontMetrics metrics = g.getFontMetrics(slider.getFont());
 
                 int fontHeight = metrics.getHeight();

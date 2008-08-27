@@ -19,6 +19,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import org.limewire.ui.swing.player.AudioPlayer;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -33,8 +34,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
     private JButton friendsButton;
 
     @Inject
-    public StatusPanel(final TrayNotifier trayNotifier,
-        final IconManager iconManager) {
+    public StatusPanel(final TrayNotifier trayNotifier, final IconManager iconManager, AudioPlayer player) {
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         add(new JLabel("status"));
@@ -70,8 +70,10 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
                 }
             }
         }));
+        MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
+        miniPlayerPanel.setVisible(false);
+        add(miniPlayerPanel);
 
-        add(new MiniPlayerPanel());
         friendsButton = new JButton(new FriendsAction("Sign in"));
         add(friendsButton);
         setBackground(Color.GRAY);

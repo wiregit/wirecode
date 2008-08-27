@@ -11,6 +11,7 @@ import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
+import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
@@ -26,7 +27,7 @@ import com.google.inject.Singleton;
  * TODO: Add Javadocs
  */
 @Singleton
-public class FriendsPanel extends JXCollapsiblePane {
+public class FriendsPanel extends JXCollapsiblePane implements Resizable{
     private final LoginPanel loginPanel;
     private final ChatPanel chatPanel;
     //Heavy-weight component so that it can appear above other heavy-weight components
@@ -81,6 +82,7 @@ public class FriendsPanel extends JXCollapsiblePane {
         setBounds(parentBounds.width - w, parentBounds.height - h, w, h);
     }
 
+    @Override
     public void resize() {
         if (!isCollapsed()) {
             resetBounds();

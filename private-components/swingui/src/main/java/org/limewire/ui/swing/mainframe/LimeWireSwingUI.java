@@ -12,7 +12,9 @@ import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.player.AudioPlayer;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -35,7 +37,7 @@ public class LimeWireSwingUI extends JPanel {
 	@Inject
     public LimeWireSwingUI(TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler,
-            FriendsPanel friendsPanel, TrayNotifier trayNotifier) {
+            FriendsPanel friendsPanel, TrayNotifier trayNotifier, AudioPlayer player) {
     	GuiUtils.assignResources(this);
     	        
     	this.trayNotifier = trayNotifier;
@@ -91,10 +93,12 @@ public class LimeWireSwingUI extends JPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.addComponentListener(new MainPanelResizer(mainPanel));
-        layeredPane.addComponentListener(new FriendsPanelResizer(friendsPanel));
+        layeredPane.addComponentListener(new PanelResizer(friendsPanel));
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
-        layeredPane.add(new PlayerPanel(), JLayeredPane.PALETTE_LAYER);
+        PlayerPanel playerPanel = new PlayerPanel(player);
+        layeredPane.add(playerPanel, JLayeredPane.PALETTE_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(playerPanel));
         add(layeredPane, gbc);
         
         // Line below the left & main panel
@@ -143,10 +147,10 @@ public class LimeWireSwingUI extends JPanel {
         }
     }
     
-    private class FriendsPanelResizer extends ComponentAdapter {
-        private final FriendsPanel target;
+    private class PanelResizer extends ComponentAdapter {
+        private final Resizable target;
         
-        public FriendsPanelResizer(FriendsPanel target) {
+        public PanelResizer(Resizable target) {
             this.target = target;
         }
         
