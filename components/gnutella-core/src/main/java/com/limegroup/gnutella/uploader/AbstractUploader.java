@@ -364,8 +364,13 @@ public abstract class AbstractUploader implements Uploader {
 
     /**
      * Returns the file size returned by {@link #getFileSize()}.
+     * 
+     * @param fileSize must be greater than 0
      */
     public void setFileSize(long fileSize) {
+        if (fileSize <= 0) {
+            throw new IllegalArgumentException("illegal file size: " + fileSize);
+        }
         this.fileSize = fileSize;
     }
 
