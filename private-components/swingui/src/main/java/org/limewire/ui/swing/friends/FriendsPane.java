@@ -1,24 +1,29 @@
 package org.limewire.ui.swing.friends;
 
 import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
@@ -33,6 +38,8 @@ import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.action.PopupDecider;
+import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.util.FontUtils;
@@ -79,6 +86,9 @@ public class FriendsPane extends JPanel {
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
         JList list = newSearchableJList(sortedFriends);
+        
+        addPopupMenus(list);
+        
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setCellRenderer(new FriendCellRenderer(icons));
         JScrollPane scroll = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -88,6 +98,44 @@ public class FriendsPane extends JPanel {
         list.addMouseListener(new LaunchChatListener());
         
         EventAnnotationProcessor.subscribe(this);
+    }
+
+    private void addPopupMenus(JList list) {
+        FriendContext context = new FriendContext();
+        ViewLibrary viewLibrary = new ViewLibrary(context);
+        ViewSharedFiles viewSharedFiles = new ViewSharedFiles(context);
+        JPopupMenu nonChattingPopup = PopupUtil.addPopupMenus(list, new FriendPopupDecider(false, context), new OpenChat(context));
+        nonChattingPopup.addSeparator();
+        nonChattingPopup.add(viewLibrary);
+        nonChattingPopup.add(viewSharedFiles);
+        nonChattingPopup.addSeparator();
+        nonChattingPopup.add(new RemoveBuddy(context));
+        
+        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(list, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
+        chattingPopup.addSeparator();
+        chattingPopup.add(new CloseChat(context));
+    }
+    
+    private static class FriendPopupDecider implements PopupDecider {
+        private final boolean expected;
+        private final FriendContext context;
+        
+        public FriendPopupDecider(boolean expected, FriendContext context) {
+            this.expected = expected;
+            this.context = context; 
+        }
+
+        @Override
+        public boolean shouldDisplay(MouseEvent e) {
+            JList list = (JList) e.getComponent();
+            int index = list.locationToIndex(e.getPoint());
+            if (index < 0) {
+                return false;
+            }
+            Friend friend = (Friend) list.getModel().getElementAt(index);
+            context.setFriend(friend);
+            return friend.isChatting() == expected;
+        }
     }
     
     private JList newSearchableJList(EventList<Friend> friendsList) {
@@ -190,6 +238,12 @@ public class FriendsPane extends JPanel {
         this.myID = id;
     }
     
+    private void fireConversationStarted(Friend friend) {
+        MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
+        MessageWriter writerWrapper = new MessageWriterImpl(myID, friend, writer);
+        new ConversationStartedEvent(friend, writerWrapper).publish();
+    }
+
     private class FriendCellRenderer implements ListCellRenderer {
         private final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
         private final IconLibrary icons;
@@ -272,10 +326,88 @@ public class FriendsPane extends JPanel {
             }
             
             if (e.getClickCount() == 2 || friend.isChatting()) {
-                MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
-                MessageWriter writerWrapper = new MessageWriterImpl(myID, friend, writer);
-                new ConversationStartedEvent(friend, writerWrapper).publish();
+                fireConversationStarted(friend);
              }
+        }
+    }
+    
+    private class FriendContext {
+        private WeakReference<Friend> weakFriend;
+        
+        public Friend getFriend() {
+            return weakFriend.get();
+        }
+        
+        public void setFriend(Friend friend) {
+            weakFriend = new WeakReference<Friend>(friend);
+        }
+        
+    }
+    
+    private abstract class AbstractContextAction extends AbstractAction {
+        protected final FriendContext context;
+        
+        public AbstractContextAction(String name, FriendContext context) {
+            super(tr(name));
+            this.context = context;
+        }
+    }
+    
+    private class OpenChat extends AbstractContextAction {
+        public OpenChat(FriendContext context) {
+            super("Open Chat", context);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Friend friend = context.getFriend();
+            if (friend != null) {
+                fireConversationStarted(friend);
+            }
+        }
+    }
+    
+    private class ViewLibrary extends AbstractContextAction {
+        public ViewLibrary(FriendContext context) {
+            super("View Library", context);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            
+        }
+    }
+    
+    private class ViewSharedFiles extends AbstractContextAction {
+        public ViewSharedFiles(FriendContext context) {
+            super("View Files I'm sharing with them ({0})", context);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            
+        }
+    }
+    
+    private class RemoveBuddy extends AbstractContextAction {
+        public RemoveBuddy(FriendContext context) {
+            super("Remove buddy from list", context);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            
+        }
+    }
+    
+    private class CloseChat extends AbstractContextAction {
+        public CloseChat(FriendContext context) {
+            super("Close chat (closes the current chat window)", context);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            
         }
     }
 }
