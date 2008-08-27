@@ -78,7 +78,8 @@ public class BaseResultPanel extends JXPanel {
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
 
-        resultsList.setDefaultRenderer(Icon.class, new IconTableCellRenderer());
+        resultsTable.setDefaultRenderer(
+            Icon.class, new IconTableCellRenderer());
 
         ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
         resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);

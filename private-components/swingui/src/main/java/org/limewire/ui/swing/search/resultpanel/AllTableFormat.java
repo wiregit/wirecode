@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import com.google.inject.Inject;
 import javax.swing.Icon;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.util.MediaType;
 
 /**
  * This class specifies the content of a table that contains
@@ -12,7 +14,12 @@ import org.limewire.ui.swing.util.IconManager;
  */
 public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    public AllTableFormat() {
+    private IconManager iconManager;
+
+    @Inject
+    public AllTableFormat(IconManager iconManager) {
+        this.iconManager = iconManager;
+
         columnNames = new String[] {
             "Icon", "Name", "Type", "Size", "Actions",
             "Relevance", "People with File", "Owner"
@@ -25,17 +32,28 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 
+        Icon icon = null;
         String fileExtension = vsr.getFileExtension();
+        String type = null;
         
-        //IconManager im = injector.getInstance(IconManager.class);
-        //IconManager im = IconManager.instance();
-        Icon icon = null; //im.getIconForExtension(fileExtension);
+        if (index == 0) {
+            icon = iconManager.getIconForExtension(fileExtension);
+            if (icon == null) {
+                System.out.println(
+                    "AllTableFormat.getColumnValue: no icon for extension " +
+                    fileExtension);
+            }
+        } else if (index == 2) {
+            MediaType mediaType =
+                mediaType = MediaType.getMediaTypeForExtension(fileExtension);
+            type = mediaType == null ? fileExtension : mediaType.toString();
+            // TODO: RMV improve type text
+        }
 
         switch (index) {
-            // TODO: RMV How can you get the icon for a given file type?
-            case 0: return icon;
+            case 0: return icon == null ? "none" : icon;
             case 1: return get(PropertyKey.NAME);
-            case 2: return fileExtension;
+            case 2: return type;
             case 3: return vsr.getSize();
             case 4: return vsr;
             case 5: return get(PropertyKey.RELEVANCE);

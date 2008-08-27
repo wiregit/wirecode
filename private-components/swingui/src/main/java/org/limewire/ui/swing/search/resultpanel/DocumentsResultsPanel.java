@@ -13,9 +13,12 @@ public class DocumentsResultsPanel extends BaseResultPanel {
         
     @AssistedInject public DocumentsResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
+        DocumentTableFormat tableFormat,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search) {
-        super("Documents from Everyone", eventList, new DocumentTableFormat(), 
+        super("Documents from Everyone", eventList,
+            //new DocumentTableFormat(), 
+            tableFormat,
             searchResultDownloader, search);
     }
 }

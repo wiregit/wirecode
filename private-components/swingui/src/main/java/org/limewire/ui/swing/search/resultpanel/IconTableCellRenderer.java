@@ -18,8 +18,10 @@ public class IconTableCellRenderer implements TableCellRenderer {
         JTable table, Object value,
         boolean isSelected, boolean hasFocus,
         int row, int column) {
-        Icon icon = (Icon) value;
-        label.setIcon(icon);
+
+        System.out.println(
+            "IconTableCellRenderer.getTableCellRendererComponent: value = " + value);
+        label.setIcon((Icon) value);
         return label;
     }
 }

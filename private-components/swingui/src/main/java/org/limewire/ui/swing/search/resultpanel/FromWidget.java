@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.awt.Color;
+import java.awt.Component;
 import org.limewire.ui.swing.FancyPopupMenu;
 import org.limewire.ui.swing.RoundedBorder;
 import java.awt.FlowLayout;
@@ -47,6 +49,7 @@ public class FromWidget extends JPanel {
         createHeaderLabel();
         createMenus();
         layoutComponents();
+        setOpaque(false);
     }
 
     private void createHeaderLabel() {
@@ -141,6 +144,14 @@ public class FromWidget extends JPanel {
 
         gbc.insets.top = 0;
         add(headerPanel, gbc);
+    }
+
+    @Override
+    public void setBackground(Color color) {
+        super.setBackground(color);
+        for (Component component : getComponents()) {
+            component.setBackground(color);
+        }
     }
 
     public void setPeople(String[] people) {

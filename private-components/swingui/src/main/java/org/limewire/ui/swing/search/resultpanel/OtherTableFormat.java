@@ -1,7 +1,10 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import com.google.inject.Inject;
+import javax.swing.Icon;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.IconManager;
 
 /**
  * This class specifies the content of a table that contains
@@ -10,7 +13,11 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    public OtherTableFormat() {
+    private IconManager iconManager;
+
+    @Inject
+    public OtherTableFormat(IconManager iconManager) {
+        this.iconManager = iconManager;
         columnNames = new String[] {
         "Icon", "Name", "Type", "Size", "Actions",
         "Relevance", "People with File", "Number of Files"
@@ -23,14 +30,13 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 
-        String type = vsr.getFileExtension();
-        // TODO: RMV How can this obtain an icon for the media type?
-        //Icon icon = getIcon(type);
+        String fileExtension = vsr.getFileExtension();
+        Icon icon = iconManager.getIconForExtension(fileExtension);
 
         switch (index) {
-            case 0: return "icon?"; // icon;
+            case 0: return icon;
             case 1: return get(PropertyKey.NAME);
-            case 2: return type;
+            case 2: return fileExtension; // TODO: RMV improve
             case 3: return vsr.getSize();
             case 4: return vsr;
             case 5: return get(PropertyKey.RELEVANCE);

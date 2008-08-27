@@ -82,6 +82,12 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.QUALITY, "good quality");
                 handleSearchResult(msr);
 
+                // Add some copies of this result with different names.
+                for (int i = 2; i <= 5; i++) {
+                    msr.setDescription(name + i);
+                    handleSearchResult(msr);
+                }
+
                 // Create a search result that will be categorized as "Music".
                 msr = new MockSearchResult();
                 name = "The Night Won't Last Long";

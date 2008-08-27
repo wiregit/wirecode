@@ -23,10 +23,12 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
+        
+        String fileExtension = vsr.getFileExtension();
 
         switch (index) {
             case 0: return get(PropertyKey.NAME);
-            case 1: return vsr.getFileExtension();
+            case 1: return fileExtension; // TODO: RMV improve
             case 2: return get(PropertyKey.LENGTH);
             case 3: return get(PropertyKey.YEAR);
             case 4: return get(PropertyKey.QUALITY);

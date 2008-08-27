@@ -13,9 +13,11 @@ public class AllResultsPanel extends BaseResultPanel {
         
     @AssistedInject public AllResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
+        AllTableFormat tableFormat,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search) {
-        super("All Results from Everyone", eventList, new AllTableFormat(),
+        super("All Results from Everyone", eventList,
+            tableFormat,
             searchResultDownloader, search);
     }
 }

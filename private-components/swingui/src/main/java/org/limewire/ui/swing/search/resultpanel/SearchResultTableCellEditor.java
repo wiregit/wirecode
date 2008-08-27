@@ -2,7 +2,6 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ implements TableCellEditor, TableCellRenderer {
 
     @Resource private Icon downloadIcon;
 
-    //private JLabel fromLabel = new JLabel();
     private FromWidget fromWidget = new FromWidget();
     private JLabel headingLabel = new JLabel();
     private JLabel similarLabel = new JLabel();
@@ -76,40 +74,50 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private Component makeCenterPanel() {
-        JPanel centerPanel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout()) {
+            @Override
+            public void setBackground(Color color) {
+                super.setBackground(color);
+                for (Component component : getComponents()) {
+                    component.setBackground(color);
+                }
+            }
+        };
+
+        panel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridy = 0;
-        //centerPanel.add(fromLabel, gbc);
-        centerPanel.add(fromWidget, gbc);
+        panel.add(fromWidget, gbc);
 
         // TODO: RMV Uncomment this after debugging.
         //if (similarCount > 0) {
             gbc.gridy++;
-            centerPanel.add(similarLabel, gbc);
+            panel.add(similarLabel, gbc);
         //}
 
-        return centerPanel;
+        return panel;
     }
 
     private Component makeLeftPanel() {
-        JPanel leftPanel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
         JLabel label = new JLabel(downloadIcon);
-        leftPanel.add(label, gbc);
+        panel.add(label, gbc);
 
         gbc.gridx++;
-        leftPanel.add(headingLabel, gbc);
+        panel.add(headingLabel, gbc);
 
         gbc.gridy++;
-        leftPanel.add(subheadingLabel, gbc);
+        panel.add(subheadingLabel, gbc);
 
-        return leftPanel;
+        return panel;
     }
 
     private void makePanel() {
@@ -129,8 +137,9 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private Component makeRightPanel() {
-        JPanel rightPanel = new ActionButtonPanel();
-        return rightPanel;
+        JPanel panel = new ActionButtonPanel();
+        panel.setOpaque(false);
+        return panel;
     }
 
     private void setBackground(boolean isSelected) {

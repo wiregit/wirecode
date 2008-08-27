@@ -23,9 +23,11 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 
+        String fileExtension = vsr.getFileExtension();
+
         switch (index) {
             case 0: return get(PropertyKey.NAME);
-            case 1: return vsr.getFileExtension();
+            case 1: return fileExtension; // TODO: RMV improve
             case 2: return get(PropertyKey.DATE_CREATED);
             case 3: return vsr;
             case 4: return get(PropertyKey.RELEVANCE);
