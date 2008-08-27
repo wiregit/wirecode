@@ -12,11 +12,14 @@ import javax.swing.table.TableCellRenderer;
  */
 public class IconTableCellRenderer implements TableCellRenderer {
 
+    private JLabel label = new JLabel();
+
     public Component getTableCellRendererComponent(
         JTable table, Object value,
         boolean isSelected, boolean hasFocus,
         int row, int column) {
         Icon icon = (Icon) value;
-        return new JLabel(icon);
+        label.setIcon(icon);
+        return label;
     }
 }
