@@ -80,7 +80,15 @@ public class LimeMozillaInitializer {
     }
 
     private static void overrideMozillaComponents(LimeWireCore limeWireCore) {
-        nsIComponentRegistrar cr = Mozilla.getInstance().getComponentRegistrar();
+        addDownloadListener(limeWireCore);
+        replaceDownloadManager(limeWireCore);
+    }
+
+    private static void replaceDownloadManager(LimeWireCore limeWireCore) {
+        register(new MozillaDownloadManager(limeWireCore.getDownloadManager()));
+    }
+
+    private static void addDownloadListener(LimeWireCore limeWireCore) {
         register(new NsIDownloadManagerUIImpl());// removes download list screen
 
         nsIDownloadManager nsidownloadManager = XPCOMUtils.getServiceProxy(
@@ -88,7 +96,7 @@ public class LimeMozillaInitializer {
         nsidownloadManager.cleanUp();
 
         DownloadManager downloadManager = limeWireCore.getDownloadManager();
-        nsidownloadManager.addListener(new MozillaDownloadManager(downloadManager));
+        nsidownloadManager.addListener(new MozillaDownloadManagerListener(downloadManager));
     }
 
     private static String getResourceName() {
