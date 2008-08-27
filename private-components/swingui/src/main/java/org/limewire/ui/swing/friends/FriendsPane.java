@@ -22,6 +22,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -36,8 +37,11 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.action.ItemNotifyable;
 import org.limewire.ui.swing.action.PopupDecider;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -76,13 +80,15 @@ public class FriendsPane extends JPanel {
     private String myID;
     private final WeakHashMap<String, FriendImpl> idToFriendMap;
     private final FriendsCountUpdater friendsCountUpdater;
+    private final LibraryManager libraryManager;
 
     @Inject
-    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater) {
+    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager) {
         super(new BorderLayout());
         friends = new BasicEventList<Friend>();
         idToFriendMap = new WeakHashMap<String, FriendImpl>();
         this.friendsCountUpdater = friendsCountUpdater;
+        this.libraryManager = libraryManager;
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
         JList list = newSearchableJList(sortedFriends);
@@ -335,13 +341,12 @@ public class FriendsPane extends JPanel {
         private WeakReference<Friend> weakFriend;
         
         public Friend getFriend() {
-            return weakFriend.get();
+            return weakFriend == null ? null : weakFriend.get();
         }
         
         public void setFriend(Friend friend) {
             weakFriend = new WeakReference<Friend>(friend);
         }
-        
     }
     
     private abstract class AbstractContextAction extends AbstractAction {
@@ -378,14 +383,54 @@ public class FriendsPane extends JPanel {
         }
     }
     
-    private class ViewSharedFiles extends AbstractContextAction {
+    private class ViewSharedFiles extends AbstractContextAction implements ItemNotifyable {
         public ViewSharedFiles(FriendContext context) {
-            super("View Files I'm sharing with them ({0})", context);
+            super("", context);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             
+        }
+        
+        @Override
+        public boolean isEnabled() {
+            Friend friend = context.getFriend();
+            
+            if (friend == null) {
+                return false;
+            }
+            
+            return getSharedFileCount(friend) > 0;
+        }
+
+        @Override
+        public void notifyItem(JMenuItem item) {
+            Friend friend = context.getFriend();
+            
+            if (friend == null) {
+                return;
+            }
+            
+            int sharedFileCount = getSharedFileCount(friend);
+            item.setText(buildString(tr("View Files I'm sharing with them")," (", sharedFileCount, ")"));
+            if (sharedFileCount == 0) {
+                item.setToolTipText(buildString(friend.getName(), " ", tr("isn't using LimeWire. Tell them about it to see their Library")));
+            }
+        }
+
+        private int getSharedFileCount(Friend friend) {
+            FileList sharedFileList = libraryManager.getBuddy(friend.getName());
+            int sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
+            return sharedFileCount;
+        }
+        
+        private String buildString(Object... arguments) {
+            StringBuilder bldr = new StringBuilder();
+            for(Object arg : arguments) {
+                bldr.append(arg);
+            }
+            return bldr.toString();
         }
     }
     

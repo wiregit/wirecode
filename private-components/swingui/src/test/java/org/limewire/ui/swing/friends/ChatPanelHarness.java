@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
@@ -27,7 +28,7 @@ public class ChatPanelHarness {
                     public ConversationPane create(MessageWriter writer, String conversationName) {
                         return new ConversationPane(writer, conversationName, icons);
                     }
-                }, icons, new FriendsPane(icons, new MockFriendsCountUpdater()), new TopPanel(icons)));
+                }, icons, new FriendsPane(icons, new MockFriendsCountUpdater(), new MockLibraryManager()), new TopPanel(icons)));
                 
                 frame.pack();
                 frame.setVisible(true);

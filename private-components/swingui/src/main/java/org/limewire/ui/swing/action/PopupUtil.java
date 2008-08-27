@@ -87,8 +87,14 @@ public class PopupUtil {
             for(Component comp : popup.getComponents()) {
                 if (comp instanceof JMenuItem) {
                     JMenuItem item = (JMenuItem)comp;
-                    if (item.getAction() != null) {
-                        item.setEnabled(item.getAction().isEnabled());
+                    Action action = item.getAction();
+                    if (action != null) {
+                        item.setEnabled(action.isEnabled());
+                    }
+                    //This is a hack to let the action modify aspects about the item before display
+                    if (action instanceof ItemNotifyable) {
+                        ItemNotifyable notifyable =  (ItemNotifyable)action;
+                        notifyable.notifyItem(item);
                     }
                 }
             }
