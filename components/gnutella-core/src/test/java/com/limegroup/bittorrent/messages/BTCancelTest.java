@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
@@ -13,6 +14,10 @@ public class BTCancelTest extends BaseTestCase {
 
     public BTCancelTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(BTCancelTest.class);
     }
 
     public void testBTCancel() {

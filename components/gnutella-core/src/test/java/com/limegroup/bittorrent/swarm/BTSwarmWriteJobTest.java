@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.swarm.SwarmContent;
@@ -18,6 +20,11 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
 
     public BTSwarmWriteJobTest(String name) {
         super(name);
+    }
+    
+    
+    public static Test suite() {
+        return buildTestSuite(BTSwarmWriteJobTest.class);
     }
 
     public void testWrite1PartialPieces() throws Exception {

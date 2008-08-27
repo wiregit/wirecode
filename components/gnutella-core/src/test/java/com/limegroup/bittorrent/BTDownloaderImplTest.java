@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
+import junit.framework.Test;
+
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.http.util.FileServer;
 import org.limewire.util.AssertComparisons;
@@ -51,6 +53,10 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
     public BTDownloaderImplTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(BTDownloaderImplTest.class);
     }
 
     @Override

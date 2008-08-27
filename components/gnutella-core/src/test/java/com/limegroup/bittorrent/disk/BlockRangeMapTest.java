@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent.disk;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.limewire.collection.BitField;
 import org.limewire.collection.IntervalSet;
@@ -12,6 +13,10 @@ public class BlockRangeMapTest extends BaseTestCase {
 
     public BlockRangeMapTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(BlockRangeMapTest.class);
     }
 
     public void testBasic() {

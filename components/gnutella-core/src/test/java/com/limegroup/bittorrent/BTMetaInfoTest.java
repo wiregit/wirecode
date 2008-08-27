@@ -3,6 +3,8 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.net.URI;
 
+import junit.framework.Test;
+
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -19,6 +21,11 @@ public class BTMetaInfoTest extends LimeTestCase {
     public BTMetaInfoTest(String name) {
         super(name);
     }
+    
+    public static Test suite() {
+        return buildTestSuite(BTMetaInfoTest.class);
+    }
+    
 
     public void testBasics() throws Exception {
         File file = getFile("test-basics.torrent");

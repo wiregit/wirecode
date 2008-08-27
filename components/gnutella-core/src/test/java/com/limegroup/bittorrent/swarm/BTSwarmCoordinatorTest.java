@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 
+import junit.framework.Test;
+
 import org.limewire.http.util.FileServer;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
@@ -51,6 +53,10 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     public BTSwarmCoordinatorTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(BTSwarmCoordinatorTest.class);
     }
 
     @Override

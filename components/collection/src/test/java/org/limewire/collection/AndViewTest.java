@@ -1,5 +1,7 @@
 package org.limewire.collection;
 
+import junit.framework.Test;
+
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
@@ -7,6 +9,10 @@ public class AndViewTest extends BaseTestCase {
 
     public AndViewTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(AndViewTest.class);
     }
 
     /**

@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.messages;
 import java.nio.ByteBuffer;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
@@ -10,6 +11,10 @@ public class BTChokeTest extends BaseTestCase {
 
     public BTChokeTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(BTChokeTest.class);
     }
 
     public void testBTChoke() {

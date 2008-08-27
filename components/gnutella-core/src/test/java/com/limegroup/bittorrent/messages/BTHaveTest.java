@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
@@ -11,6 +12,11 @@ public class BTHaveTest extends BaseTestCase {
 
     public BTHaveTest(String name) {
         super(name);
+    }
+    
+    
+    public static Test suite() {
+        return buildTestSuite(BTHaveTest.class);
     }
 
     public void testBTHave() {

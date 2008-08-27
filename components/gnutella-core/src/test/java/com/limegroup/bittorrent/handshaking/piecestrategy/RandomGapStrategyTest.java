@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -18,6 +19,10 @@ public class RandomGapStrategyTest extends BaseTestCase {
 
     public RandomGapStrategyTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(RandomGapStrategyTest.class);
     }
     
     public void testGetNextPieces() {

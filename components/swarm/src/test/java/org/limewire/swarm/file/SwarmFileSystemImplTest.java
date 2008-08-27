@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -17,6 +18,11 @@ public class SwarmFileSystemImplTest extends BaseTestCase {
         super(name);
         this.TEST_DIR = new File(System.getProperty("java.io.tmpdir") + "/limetests/");
     }
+    
+    public static Test suite() {
+        return buildTestSuite(SwarmFileSystemImplTest.class);
+    }
+    
 
     @Override
     protected void tearDown() throws Exception {
