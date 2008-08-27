@@ -19,10 +19,10 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.limewire.util.FileUtils;
-import org.limewire.util.GenericsUtils;
-import org.limewire.util.GenericsUtils.ScanMode;
-import org.tritonus.share.sampled.TAudioFormat;
-import org.tritonus.share.sampled.file.TAudioFileFormat;
+//import org.limewire.util.GenericsUtils;
+//import org.limewire.util.GenericsUtils.ScanMode;
+//import org.tritonus.share.sampled.TAudioFormat;
+//import org.tritonus.share.sampled.file.TAudioFileFormat;
 
 /**
  * <p>
@@ -341,15 +341,15 @@ public class LimeAudioFormat {
         } else
             return properties;
 
-        if (audioFileFormat instanceof TAudioFileFormat) {
-            // Tritonus SPI compliant audio file format.
-            properties = GenericsUtils.scanForMap(
-                    ((TAudioFileFormat) audioFileFormat).properties(),
-                    String.class, Object.class, ScanMode.REMOVE);
-            // Clone the Map because it is not mutable.
-            Map<String, Object> newMap = new HashMap<String, Object>(properties);
-            properties = newMap;
-        } 
+//        if (audioFileFormat instanceof TAudioFileFormat) {
+//            // Tritonus SPI compliant audio file format.
+//            properties = GenericsUtils.scanForMap(
+//                    ((TAudioFileFormat) audioFileFormat).properties(),
+//                    String.class, Object.class, ScanMode.REMOVE);
+//            // Clone the Map because it is not mutable.
+//            Map<String, Object> newMap = new HashMap<String, Object>(properties);
+//            properties = newMap;
+//        } 
         // Add JavaSound properties.
         if (audioFileFormat.getByteLength() > 0)
             properties.put(AUDIO_LENGTH_BYTES, audioFileFormat.getByteLength());
@@ -371,13 +371,13 @@ public class LimeAudioFormat {
                     .getSampleSizeInBits());
         if (audioFormat.getChannels() > 0)
             properties.put(AUDIO_CHANNELS, audioFormat.getChannels());
-        if (audioFormat instanceof TAudioFormat) {
-            // Tritonus SPI compliant audio format.
-            Map<String, Object> addproperties = GenericsUtils.scanForMap(
-                    ((TAudioFormat) audioFormat).properties(), String.class,
-                    Object.class, ScanMode.REMOVE);
-            properties.putAll(addproperties);
-        }
+//        if (audioFormat instanceof TAudioFormat) {
+//            // Tritonus SPI compliant audio format.
+//            Map<String, Object> addproperties = GenericsUtils.scanForMap(
+//                    ((TAudioFormat) audioFormat).properties(), String.class,
+//                    Object.class, ScanMode.REMOVE);
+//            properties.putAll(addproperties);
+//        }
         return properties;
     }
     
