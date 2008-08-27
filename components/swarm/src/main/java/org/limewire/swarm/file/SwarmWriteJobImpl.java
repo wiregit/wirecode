@@ -6,9 +6,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmCoordinator;
@@ -90,7 +90,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
             content.read(networkUnblockingBuffer);
             networkUnblockingBuffer.flip();
             written = networkUnblockingBuffer.limit();
-            LOG.trace("Going to write: " + written + " bytes.");
+            LOG.tracef("Going to write: {0} bytes.", written);
             scheduledJob = jobScheduler.submit(new Callable<Void>() {
                 public Void call() throws Exception {
                     writeData(range, networkUnblockingBuffer);
@@ -135,7 +135,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
 
                     totalWritten += bytesWritten;
                 } while (buffer.hasRemaining());
-                LOG.trace("wrote: " + totalWritten + " bytes");
+                LOG.tracef("wrote: {0} bytes", totalWritten);
             } finally {
                 byteBufferCache.release(buffer);
                 callback.resume();

@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceDownloader;
@@ -34,7 +34,10 @@ public class SwarmerImpl implements Swarmer {
 
     /*
      * (non-Javadoc)
-     * @see org.limewire.swarm.Swarmer#register(org.limewire.swarm.SwarmSourceType, org.limewire.swarm.SwarmSourceHandler)
+     * 
+     * @see
+     * org.limewire.swarm.Swarmer#register(org.limewire.swarm.SwarmSourceType,
+     * org.limewire.swarm.SwarmSourceHandler)
      */
     public void register(SwarmSourceType type, SwarmSourceDownloader sourceHandler) {
         sourceHandlers.put(type, sourceHandler);
@@ -42,6 +45,7 @@ public class SwarmerImpl implements Swarmer {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.Swarmer#addSource(org.limewire.swarm.SwarmSource)
      */
     public void addSource(SwarmSource source) {
@@ -54,7 +58,7 @@ public class SwarmerImpl implements Swarmer {
 
         SwarmSourceDownloader sourceHandler = sourceHandlers.get(type);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Adding source: " + source);
+            LOG.debugf("Adding source: {0}", source);
         }
         sourceHandler.addSource(source);
 
@@ -62,6 +66,7 @@ public class SwarmerImpl implements Swarmer {
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.Swarmer#start()
      */
     public void start() {
@@ -69,13 +74,14 @@ public class SwarmerImpl implements Swarmer {
             try {
                 handler.start();
             } catch (IOException iox) {
-                LOG.warn("Unable to start swarm source handler: " + handler);
+                LOG.warnf("Unable to start swarm source handler: {0}", handler);
             }
         }
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.Swarmer#shutdown()
      */
     public void shutdown() {
@@ -83,18 +89,19 @@ public class SwarmerImpl implements Swarmer {
             try {
                 handler.shutdown();
             } catch (IOException iox) {
-                LOG.warn("Unable to shutdown swarm source handler: " + handler);
+                LOG.warnf("Unable to shutdown swarm source handler: {0}", handler);
             }
         }
         try {
             swarmCoordinator.finish();
         } catch (IOException iox) {
-            LOG.warn("Unable to shutdown swarm coordinator: " + swarmCoordinator);
+            LOG.warnf("Unable to shutdown swarm coordinator: {0}", swarmCoordinator);
         }
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.Swarmer#getMeasuredBandwidth(boolean)
      */
     public float getMeasuredBandwidth(boolean downstream) {
@@ -107,7 +114,9 @@ public class SwarmerImpl implements Swarmer {
 
     /*
      * (non-Javadoc)
-     * @see org.limewire.swarm.Swarmer#hasHandler(org.limewire.swarm.SwarmSourceType)
+     * 
+     * @see
+     * org.limewire.swarm.Swarmer#hasHandler(org.limewire.swarm.SwarmSourceType)
      */
     public boolean hasHandler(SwarmSourceType type) {
         return sourceHandlers.containsKey(type);

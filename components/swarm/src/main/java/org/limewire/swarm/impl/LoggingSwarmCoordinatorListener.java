@@ -18,42 +18,74 @@ public final class LoggingSwarmCoordinatorListener implements SwarmCoordinatorLi
     private static final Log LOG = LogFactory.getLog(LoggingSwarmCoordinatorListener.class);
 
     public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
-        LOG.debug("block leased: " + block.toString() + "/" + block.getLength());
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("block leased: " + block.toString() + "/" + block.getLength());
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 
     public void blockVerificationFailed(SwarmCoordinator swarmCoordinator, Range block) {
-        LOG.debug("block verification failed: " + block.toString() + "/" + block.getLength());
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("block verification failed: " + block.toString() + "/" + block.getLength());
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 
     public void blockVerified(SwarmCoordinator swarmCoordinator, Range block) {
-        LOG.debug("block verified: " + block.toString() + "/" + block.getLength());
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("block verified: " + block.toString() + "/" + block.getLength());
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 
     public void blockWritten(SwarmCoordinator swarmCoordinator, Range block) {
-        LOG.debug("block written: " + block.toString() + "/" + block.getLength());
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("block written: " + block.toString() + "/" + block.getLength());
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 
     public void blockUnleased(SwarmCoordinator swarmCoordinator, Range block) {
-        LOG.debug("block unleased: " + block.toString() + "/" + block.getLength());
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("block unleased: " + block.toString() + "/" + block.getLength());
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 
     public void downloadCompleted(SwarmCoordinator swarmCoordinator, SwarmFileSystem swarmDownload) {
-        LOG.debug("download complete");
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("download complete");
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 
     public void blockPending(SwarmCoordinator swarmCoordinator, Range block) {
-        LOG.debug("block pending: " + block.toString() + "/" + block.getLength());
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("block pending: " + block.toString() + "/" + block.getLength());
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 
     public void blockUnpending(SwarmCoordinator swarmCoordinator, Range block) {
-        LOG.debug("block unpending: " + block.toString() + "/" + block.getLength());
-        LOG.trace(swarmCoordinator.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("block unpending: " + block.toString() + "/" + block.getLength());
+        }
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(swarmCoordinator.toString());
+        }
     }
 }

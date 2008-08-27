@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
@@ -26,6 +24,8 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.http.reactor.LimeConnectingIOReactor;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.SwarmCoordinator;
@@ -101,12 +101,12 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
      * SwarmSource)
      */
     public void addSource(SwarmSource source) {
-        LOG.trace("Adding source: " + source);
+        LOG.tracef("Adding source: {0}", source);
         stats.incrementNumberOfSources();
 
         SessionRequestCallback sessionRequestCallback = new SwarmHttpSessionRequestCallback(source);
 
-        LOG.trace("Connecting source to ioReactor: " + source);
+        LOG.tracef("Connecting source to ioReactor: {0}", source);
 
         ioReactor.connect(source.getAddress(), null, new HttpSourceAttachment(source),
                 sessionRequestCallback);
@@ -127,9 +127,9 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
      * @see org.limewire.swarm.SwarmSourceHandler#shutdown()
      */
     public void shutdown() throws IOException {
-        LOG.trace("Shutting down: " + this);
+        LOG.tracef("Shutting down: {0}", this);
         started.set(false);
-        LOG.trace("Shutting ioReactor: " + ioReactor);
+        LOG.tracef("Shutting ioReactor: {0}", ioReactor);
         ioReactor.shutdown();
     }
 
@@ -139,7 +139,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
      * @see org.limewire.swarm.SwarmSourceHandler#start()
      */
     public void start() throws IOException {
-        LOG.trace("Starting: " + this);
+        LOG.tracef("Starting: {0}", this);
         started.set(true);
         ioReactor.execute(eventDispatch);
     }
@@ -170,7 +170,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
      * (org.apache.http.protocol.HttpContext, java.lang.Object)
      */
     public void initalizeContext(HttpContext context, Object attachment) {
-        LOG.trace("initalizeContext: " + this);
+        LOG.tracef("initalizeContext: {0}", this);
         HttpSourceAttachment info = (HttpSourceAttachment) attachment;
         context.setAttribute(SwarmHttpExecutionContext.HTTP_SWARM_SOURCE, info.getSource());
     }
@@ -183,7 +183,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
      * (org.apache.http.protocol.HttpContext)
      */
     public void finalizeContext(HttpContext context) {
-        LOG.trace("finalizeContext: " + this);
+        LOG.tracef("finalizeContext: {0}", this);
         SwarmSource source = getSwarmSource(context);
         source.connectionClosed(SwarmHttpSourceHandler.this);
         closeContentListener(context);
@@ -197,14 +197,16 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
      * (org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext)
      */
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
-        LOG.trace("handleResponse: " + this);
+        LOG.tracef("handleResponse: {0}", this);
         stats.incrementNumberOfResponses();
         if (isActive()) {
             SwarmSource source = getSwarmSource(context);
             source.responseProcessed(SwarmHttpSourceHandler.this, new SwarmHttpSourceStatus(
                     response.getStatusLine()));
 
-            LOG.trace(SwarmHttpUtils.logReponse("response", response));
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(SwarmHttpUtils.logReponse("response", response));
+            }
 
             int code = response.getStatusLine().getStatusCode();
             if (!(code >= 200 && code < 300)) {
@@ -257,17 +259,22 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
             SwarmSource swarmSource = getSwarmSource(context);
             HttpRequest request = null;
             if (swarmSource.isFinished() || isComplete()) {
-                LOG.trace("swarmSource.isFinished(): " + swarmSource.isFinished()
-                        + " isComplete(): " + isComplete());
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("swarmSource.isFinished(): " + swarmSource.isFinished()
+                            + " isComplete(): " + isComplete());
+                }
             } else {
                 request = buildRequest(context);
-                LOG.trace(SwarmHttpUtils.logRequest("submitRequest", request));
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(SwarmHttpUtils.logRequest("submitRequest", request));
+                }
             }
 
             if (request == null) {
-
-                LOG.debug("No more data to request for this swarm source: " + swarmSource
-                        + " finishing all listeners then closing connection from context.");
+                LOG
+                        .debugf(
+                                "No more data to request for this swarm source: {0} finishing all listeners then closing connection from context.",
+                                swarmSource);
                 closeConnection(context);
             } else {
                 stats.incrementNumberOfRequests();
@@ -314,7 +321,9 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
     }
 
     private void closeContentListener(HttpContext context) {
-        LOG.trace("closing content listener: " + this, new Exception("debugging stack trace"));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("closing content listener: " + this, new Exception("debugging stack trace"));
+        }
         ResponseContentListener contentListener = (ResponseContentListener) context
                 .getAttribute(SwarmHttpExecutionContext.SWARM_RESPONSE_LISTENER);
         if (contentListener != null) {
@@ -324,14 +333,18 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
     }
 
     private void closeConnection(HttpContext context) {
-        LOG.trace("closing connection: " + this, new Exception("debugging stack trace"));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("closing connection: " + this, new Exception("debugging stack trace"));
+        }
         closeContentListener(context);
         closeSwarmSource(context);
         SwarmHttpUtils.closeConnectionFromContext(context);
     }
 
     private void closeSwarmSource(HttpContext context) {
-        LOG.trace("closing swarmSource: " + this, new Exception("debugging stack trace"));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("closing swarmSource: " + this, new Exception("debugging stack trace"));
+        }
         SwarmSource swarmSource = getSwarmSource(context);
         if (swarmSource != null) {
             swarmSource.finished(SwarmHttpSourceHandler.this);
