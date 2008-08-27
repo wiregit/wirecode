@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import org.limewire.i18n.I18nMarker;
 
-
 /**
  * A generic type of media, i.e., "video" or "audio".
  * Many different file formats can be of the same media type.
@@ -60,7 +59,6 @@ public class MediaType implements Serializable {
         }
     };
        
-
     /**
      * Type for 'documents'
      */
@@ -221,7 +219,7 @@ public class MediaType implements Serializable {
         this.schema = schema;
         this.descriptionKey = descriptionKey;
         this.isDefault = true;
-        if(extensions == null) {
+        if (extensions == null) {
             this.exts = Collections.emptySet();
         } else {
             Set<String> set = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
@@ -253,6 +251,7 @@ public class MediaType implements Serializable {
      * Returns this' media-type (a MIME content-type category)
      * (previously returned a description key)
      */
+    @Override
     public String toString() {
         return schema;
     }
@@ -307,8 +306,8 @@ public class MediaType implements Serializable {
      * Retrieves the media type for the specified extension.
      */
     public static MediaType getMediaTypeForExtension(String ext) {
-        for(int i = ALL_MEDIA_TYPES.length; --i >= 0;)
-            if(ALL_MEDIA_TYPES[i].exts.contains(ext))
+        for (int i = ALL_MEDIA_TYPES.length; --i >= 0;)
+            if (ALL_MEDIA_TYPES[i].exts.contains(ext))
                 return ALL_MEDIA_TYPES[i];
         return null;
     }
@@ -332,6 +331,16 @@ public class MediaType implements Serializable {
             && isDefault == type.isDefault;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 41*hash + (schema != null ? schema.hashCode() : 0);
+        hash = 41*hash + (descriptionKey != null ? descriptionKey.hashCode() : 0);
+        hash = 41*hash + (exts != null ? exts.hashCode() : 0);
+        hash = 41*hash + (isDefault ? 1 : 0);
+        return hash;
     }
         
     /*

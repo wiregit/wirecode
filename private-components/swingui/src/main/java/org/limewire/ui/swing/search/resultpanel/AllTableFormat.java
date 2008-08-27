@@ -28,6 +28,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
         //Icon icon = getIcon(type);
 
         switch (index) {
+            // TODO: RMV How can you get the icon for a given file type?
             case 0: return "icon?"; // icon;
             case 1: return get(PropertyKey.NAME);
             case 2: return type;
