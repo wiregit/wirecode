@@ -33,7 +33,9 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
     private JButton friendsButton;
 
     @Inject
-    public StatusPanel(final TrayNotifier trayNotifier, final IconManager iconManager) {
+    public StatusPanel(final TrayNotifier trayNotifier,
+        final IconManager iconManager) {
+
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         add(new JLabel("status"));
         add(Box.createHorizontalGlue());
@@ -43,6 +45,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
                 throw new RuntimeException("Test Error");
             }
         }));
+
         add(new JButton(new AbstractAction("Tray Test") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -67,6 +70,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
                 }
             }
         }));
+
         add(new MiniPlayerPanel());
         friendsButton = new JButton(new FriendsAction("Sign in"));
         add(friendsButton);

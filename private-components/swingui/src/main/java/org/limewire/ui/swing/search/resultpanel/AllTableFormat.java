@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import javax.swing.Icon;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.IconManager;
 
 /**
  * This class specifies the content of a table that contains
@@ -23,15 +25,17 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 
-        String type = vsr.getFileExtension();
-        // TODO: RMV How can this obtain an icon for the media type?
-        //Icon icon = getIcon(type);
+        String fileExtension = vsr.getFileExtension();
+        
+        //IconManager im = injector.getInstance(IconManager.class);
+        //IconManager im = IconManager.instance();
+        Icon icon = null; //im.getIconForExtension(fileExtension);
 
         switch (index) {
             // TODO: RMV How can you get the icon for a given file type?
-            case 0: return "icon?"; // icon;
+            case 0: return icon;
             case 1: return get(PropertyKey.NAME);
-            case 2: return type;
+            case 2: return fileExtension;
             case 3: return vsr.getSize();
             case 4: return vsr;
             case 5: return get(PropertyKey.RELEVANCE);

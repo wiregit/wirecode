@@ -65,11 +65,11 @@ public class AppFrame extends SingleFrameApplication {
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 
-        Injector injector = createInjector();
+        Injector localInjector = createInjector();
 
         getMainFrame().setJMenuBar(new LimeMenuBar());
 
-        LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
+        LimeWireSwingUI ui = localInjector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
         

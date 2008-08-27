@@ -16,6 +16,7 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
+import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 import org.limewire.ui.swing.ConfigurableTable;
@@ -76,6 +77,8 @@ public class BaseResultPanel extends JXPanel {
 
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
+
+        resultsList.setDefaultRenderer(Icon.class, new IconTableCellRenderer());
 
         ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
         resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);

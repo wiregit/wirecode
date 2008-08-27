@@ -11,7 +11,6 @@ import org.limewire.util.OSUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-
 /**
  * Manages finding native icons for files and file types.
  */
@@ -23,17 +22,18 @@ public class IconManager {
     
     @Inject
     IconManager() {
-        // Always begin with the basic controller, whose
-        // contruction can never block.
+        // Always begin with the basic controller,
+        // whose contruction can never block.
         fileController = new BasicFileIconController();
         
         // Then, in a new thread, try to change it to a controller
         // that can block.
-        if(OSUtils.isMacOSX() || OSUtils.isWindows()) {
+        if (OSUtils.isMacOSX() || OSUtils.isWindows()) {
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
-                    final FileIconController newController = new NativeFileIconController();
-                    if(newController.isValid()) {
+                    final FileIconController newController =
+                        new NativeFileIconController();
+                    if (newController.isValid()) {
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
                                 fileController = newController;
@@ -77,7 +77,7 @@ public class IconManager {
      * Returns true if the current controller is already valid.
      */
     private void validate() {
-        if(!fileController.isValid())
+        if (!fileController.isValid())
             fileController = new BasicFileIconController();
     }
 }
