@@ -90,7 +90,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     }
 
-    public void testMultiFileTorret() throws Exception {
+    public void testMultiFileTorretDefaultPieceStrategy() throws Exception {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
@@ -119,7 +119,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     }
 
-    public void testMultiFileTorret2() throws Exception {
+    public void testMultiFileTorretRandomGapStrategy() throws Exception {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
@@ -149,7 +149,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     }
 
-    public void testMultiFileTorret3() throws Exception {
+    public void testMultiFileTorretLargestGapStartPieceStrategy() throws Exception {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
