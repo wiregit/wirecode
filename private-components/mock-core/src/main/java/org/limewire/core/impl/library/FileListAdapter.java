@@ -47,4 +47,9 @@ public class FileListAdapter implements FileList {
         return name;
     }
 
+    @Override
+    public int size() {
+        return eventList.size();
+    }
+
 }

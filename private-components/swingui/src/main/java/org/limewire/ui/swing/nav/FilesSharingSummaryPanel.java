@@ -24,6 +24,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
@@ -82,12 +83,12 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         
         //TODO: NumberIcons
         gnutellaButton.setName("FilesSharingSummaryPanel.all");
-        gnutellaButton.setIcon(new NumberIcon(libraryManager.getGnutellaList().getModel(), gnutellaIcon));
+        gnutellaButton.setIcon(new NumberIcon(libraryManager.getGnutellaList(), gnutellaIcon));
         gnutellaButton.setUI(new HighlightToggleButtonUI(highLightColor));
         new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaList());
         
 		buddyButton.setName("FilesSharingSummaryPanel.buddies");
-		buddyButton.setIcon(new NumberIcon(libraryManager.getAllBuddyList().getModel(), buddiesIcon));
+		buddyButton.setIcon(new NumberIcon(libraryManager.getUniqueLists(), buddiesIcon));
 		buddyButton.setUI(new HighlightToggleButtonUI(highLightColor));   
 		
 		setLayout(new MigLayout("insets 0 0 0 0", "", ""));
@@ -104,17 +105,17 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     }
     
     private class NumberIcon implements Icon {
-        private final EventList<FileItem> fileList;
-        private final Map<String, EventList<FileItem>> fileLists;
+        private final FileList fileList;
+        private final Map<String, FileList> fileLists;
         private final Icon delegateIcon;
         
-        public NumberIcon(EventList<FileItem> fileList, Icon icon) {
+        public NumberIcon(FileList fileList, Icon icon) {
             this.fileList = fileList;
             this.delegateIcon = icon;
             this.fileLists = null;
         }
         
-        public NumberIcon(Map<String, EventList<FileItem>> fileLists, Icon icon) {
+        public NumberIcon(Map<String, FileList> fileLists, Icon icon) {
             this.fileList = null;
             this.delegateIcon = icon;
             this.fileLists = fileLists;
@@ -145,7 +146,7 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
                 return fileList.size();
             } else {
                 long x = 0;
-                for(EventList<FileItem> list : fileLists.values()) {
+                for(FileList list : fileLists.values()) {
                     x += list.size();
                 }
                 return x;

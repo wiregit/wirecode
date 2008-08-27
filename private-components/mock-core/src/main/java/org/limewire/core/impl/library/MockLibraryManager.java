@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.library.BuddyShareListListener;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
@@ -114,10 +115,10 @@ public class MockLibraryManager implements LibraryManager {
         return allFileList;
     }
     
-    @Override
-    public FileList getAllBuddyList() {
-        return buddyList;
-    }
+//    @Override
+//    public FileList getAllBuddyList() {
+//        return buddyList;
+//    }
     
     @Override
     public FileList getGnutellaList() {
@@ -127,6 +128,11 @@ public class MockLibraryManager implements LibraryManager {
     @Override
     public Map<String, FileList> getUniqueLists() {
         return buddyMap;
+    }
+    
+    @Override
+    public FileList getBuddy(String name) {
+        return null;
     }
 
     @Override
@@ -143,6 +149,23 @@ public class MockLibraryManager implements LibraryManager {
 
     @Override
     public void removeBuddy(String name) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public boolean containsBuddy(String name) {
+        return false;
+    }
+
+    @Override
+    public void addBuddyShareListListener(BuddyShareListListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeBuddyShareListListener(BuddyShareListListener listener) {
         // TODO Auto-generated method stub
         
     }

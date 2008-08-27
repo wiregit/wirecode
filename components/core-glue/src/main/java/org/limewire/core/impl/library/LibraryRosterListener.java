@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
@@ -21,11 +22,13 @@ import com.google.inject.Singleton;
 public class LibraryRosterListener implements RegisteringEventListener<RosterEvent> {
     public static final Log LOG = LogFactory.getLog(LibraryRosterListener.class);
     
+    private final LibraryManager libraryManager;
     private final BrowseFactory browseFactory;
 
     @Inject
-    public LibraryRosterListener(BrowseFactory browseFactory) {
+    public LibraryRosterListener(BrowseFactory browseFactory, LibraryManager libraryManager) {
         this.browseFactory = browseFactory;
+        this.libraryManager = libraryManager;
     }
 
     @Inject
@@ -46,7 +49,7 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
     public void userAdded(final User user) {
         user.addPresenceListener(new PresenceListener() {
             public void presenceChanged(final Presence presence) {
-                if(presence.getType().equals(Presence.Type.available)) {
+                if(presence.getType().equals(Presence.Type.available)) {                    
                     if(presence instanceof LimePresence) {
                         Address address = ((LimePresence)presence).getAddress();
                         LOG.debugf("browsing {0} ...", presence.getJID());
@@ -61,6 +64,15 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                 }
             }
         });
+
+        Thread t = new Thread(new Runnable(){
+            public void run() {
+                if(!libraryManager.containsBuddy(user.getId())) {
+                    libraryManager.addBuddy(user.getId());
+                }
+            }
+        }); t.start();
+
     }
 
     private void userUpdated(User source) {

@@ -12,11 +12,15 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
 import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -34,13 +38,16 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
     
     private JButton shareButton;
     
+    private SharingAddAllAction addAllAction;
+    
     private final String title = "You are not sharing anything with ";
     private final String buttonText = "Shared with ";
     
     private final String textPart1 = "To share with ";
     private final String textPart2 = ", drag files here, or use the shortcuts below to share files";
     
-    public SharingBuddyEmptyPanel() {
+    @Inject
+    public SharingBuddyEmptyPanel(LibraryManager libraryManager) {
         
         GuiUtils.assignResources(this); 
         
@@ -50,12 +57,13 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
         
         text = new JLabel();
 
-        
         musicCheckBox = new SharingCheckBox("All my music");
         videoCheckBox = new SharingCheckBox("All my video");
         imageCheckBox = new SharingCheckBox("All my images");
         
-        shareButton = new JButton();
+        addAllAction = new SharingAddAllAction(musicCheckBox, videoCheckBox, imageCheckBox);
+        addAllAction.setLibrary(libraryManager.getLibraryList());
+        shareButton = new JButton(addAllAction);
         shareButton.setFocusable(false);
         
         setText("");
@@ -95,6 +103,11 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
 
     @Override
     public void setEventList(EventList<FileItem> model) {
-
+//        addAllAction.setUserLibrary(model);
     }
+    
+    public void setUserFileList(FileList fileList) {
+        addAllAction.setUserLibrary(fileList);
+    }
+    
 }

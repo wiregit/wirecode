@@ -13,4 +13,6 @@ public interface FileList {
     public void removeFile(File file);
     
     public String getName();
+    
+    public int size();
 }

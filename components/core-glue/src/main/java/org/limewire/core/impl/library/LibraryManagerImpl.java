@@ -1,13 +1,13 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.library.BuddyShareListListener;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
@@ -31,10 +31,12 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     
     private final FileManager fileManager;
     private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
+    private final List<BuddyShareListListener> buddyListeners = new CopyOnWriteArrayList<BuddyShareListListener>();
     
     private LibraryFileList libraryFileList;
     private GnutellaFileList gnutellaFileList;
-    private BuddyFileList buddyFileList;
+    private Map<String,FileList> buddyFileLists;
+//    private BuddyFileList buddyFileList;
     
     @Inject
     LibraryManagerImpl(FileManager fileManager) {
@@ -42,17 +44,10 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
-        buddyFileList = new BuddyFileList();
+        buddyFileLists = new HashMap<String, FileList>();
+//        buddyFileList = new BuddyFileList(fileManager, "All Buddys");
         
-//        registerListeners();
     }
-    
-//    private void registerListeners() {
-//        fileManager.addFileEventListener(this);
-//        
-//        fileManager.getSharedFileList().addFileListListener(new FileListener(gnutellaList));
-//        fileManager.getBuddyFileList().addFileListListener(new FileListener(buddyList));
-//    }
 
     @Override
     public void addLibraryLisListener(LibraryListListener libraryListener) {
@@ -83,24 +78,59 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         return gnutellaFileList;
     }
     
-    @Override
-    public FileList getAllBuddyList() {
-        return buddyFileList;
-    }
+//    @Override
+//    public FileList getAllBuddyList() {
+//        return gnutellaFileList;
+////        return null;
+//    }
 
     @Override
     public Map<String, FileList> getUniqueLists() {
-        return Collections.emptyMap();
+//        Map<String, com.limegroup.gnutella.FileList> buddies = fileManager.getAllBuddyLists();
+//        return Collections.emptyMap();
+        return buddyFileLists;
+    }
+    
+    @Override
+    public FileList getBuddy(String name) {
+        if(buddyFileLists.containsKey(name))
+            return buddyFileLists.get(name);
+        
+        BuddyFileList newBuddyList = new BuddyFileList(fileManager, name);
+        buddyFileLists.put(name, newBuddyList);
+        return newBuddyList;
     }
     
     @Override
     public void addBuddy(String name) {
         fileManager.addBuddyFileList(name);
+        for(BuddyShareListListener listener : buddyListeners) {
+            listener.handleBuddyShareEvent(BuddyShareListListener.BuddyShareEvent.ADD, name);
+        }
     }
 
     @Override
     public void removeBuddy(String name) {
         fileManager.removeBuddyFileList(name);
+        for(BuddyShareListListener listener : buddyListeners) {
+            listener.handleBuddyShareEvent(BuddyShareListListener.BuddyShareEvent.REMOVE, name);
+        }
+    }
+    
+    @Override
+    public boolean containsBuddy(String name) {
+        return fileManager.containsBuddyFileList(name);
+    }
+    
+
+    @Override
+    public void addBuddyShareListListener(BuddyShareListListener listener) {
+        buddyListeners.add(listener);
+    }
+
+    @Override
+    public void removeBuddyShareListListener(BuddyShareListListener listener) {
+        buddyListeners.remove(listener);
     }
     
 
@@ -225,29 +255,55 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         public String getName() {
             return "Gnutella List";
         }
-        
     }
     
-    private class BuddyFileList extends FileListImpl {
+    private class BuddyFileList extends FileListImpl implements FileListListener{
 
+        private FileManager fileManager;
+        private String name;
+        
+        BuddyFileList(FileManager fileManager, String name) {
+            this.fileManager = fileManager;
+            this.name = name;
+            
+            this.fileManager.getBuddyFileList(name).addFileListListener(this);
+        }
+        
         @Override
         public void addFile(File file) {
-            // TODO Auto-generated method stub
-            
+            fileManager.addBuddyFile(name, file);
         }
 
         @Override
         public void removeFile(File file) {
-            // TODO Auto-generated method stub
-            
+            fileManager.getBuddyFileList(name).remove(fileManager.getFileDesc(file));
         }
 
         @Override
         public String getName() {
-            // TODO Auto-generated method stub
-            return null;
+            return name;
         }
-        
+
+        @Override
+        public void addEvent(FileDesc fileDesc) {
+            FileItem newItem = new CoreFileItem(fileDesc);  
+            eventList.add(newItem);
+        }
+
+        @Override
+        public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
+            FileItem oldItem = new CoreFileItem(oldDesc);
+            FileItem newItem = new CoreFileItem(newDesc);  
+
+            eventList.remove(oldItem);
+            eventList.add(newItem);
+        }
+
+        @Override
+        public void removeEvent(FileDesc fileDesc) {
+            FileItem newItem = new CoreFileItem(fileDesc);  
+            eventList.remove(newItem);
+        }
     }
     
     private class LibraryFileList extends FileListImpl implements FileEventListener {
@@ -306,6 +362,11 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         
         void remove(File file) {
             
+        }
+        
+        @Override
+        public int size() {
+            return eventList.size();
         }
     }
 }

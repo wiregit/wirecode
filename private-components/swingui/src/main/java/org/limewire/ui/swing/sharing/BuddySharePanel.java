@@ -2,6 +2,7 @@ package org.limewire.ui.swing.sharing;
 
 import java.awt.CardLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import javax.swing.table.TableColumn;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.BuddyShareListListener;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -46,7 +48,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class BuddySharePanel extends GenericSharingPanel {
+public class BuddySharePanel extends GenericSharingPanel implements BuddyShareListListener {
     public static final String NAME = "All Friends";
     
     @Resource
@@ -70,12 +72,20 @@ public class BuddySharePanel extends GenericSharingPanel {
     
     private Map<String, FileList> buddyLists;
     
+    private LibraryManager libraryManager;
+    
     @Inject
     public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
         GuiUtils.assignResources(this); 
         
-        this.fileList = libraryManager.getAllBuddyList();
-        buddyLists = libraryManager.getUniqueLists();
+        this.libraryManager = libraryManager;
+
+        libraryManager.addBuddy("All");
+        this.fileList = libraryManager.getBuddy("All");
+//        this.fileList = libraryManager.getAllBuddyList();
+//        buddyLists = libraryManager.getUniqueLists();
+        buddyLists = new HashMap<String,FileList>();
+        this.libraryManager.addBuddyShareListListener(this);
 
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
@@ -120,7 +130,6 @@ public class BuddySharePanel extends GenericSharingPanel {
     }
     
     private void createCenterCards(SharingHeaderPanel headerPanel, JPanel cardPanel) {
-
         FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
                 new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         
@@ -160,6 +169,18 @@ public class BuddySharePanel extends GenericSharingPanel {
         return list;
     }
     
+
+    @Override
+    public void handleBuddyShareEvent(BuddyShareEvent event, String name) {
+        if(event == BuddyShareEvent.ADD) {
+            FileList fileList = libraryManager.getBuddy(name);
+            buddyLists.put(name, fileList);
+            eventList.add(new BuddyItemImpl(name, fileList.getModel()));
+        } else {
+            
+        }
+    }
+    
     private class BuddySelectionListener implements ListSelectionListener, ListEventListener<FileItem> {
 
         private JTable buddy;
@@ -184,8 +205,10 @@ public class BuddySharePanel extends GenericSharingPanel {
                 BuddyItem buddyItem = (BuddyItem) buddy.getModel().getValueAt(index, 0);
                 headerPanel.setBuddyName(buddyItem.getName());
                 emptyPanel.setBuddyName(buddyItem.getName());
+
   
                 FileList fileList = buddyLists.get(buddyItem.getName());
+                emptyPanel.setUserFileList(fileList);
                 table.setModel(new SharingTableModel(fileList.getModel(), fileList, new SharingTableFormat()));
                 TableColumn tc = table.getColumn(6);
                 tc.setCellEditor(editor);
@@ -207,15 +230,15 @@ public class BuddySharePanel extends GenericSharingPanel {
         }
 
         @Override
-        public void listChanged(ListEvent<FileItem> listChanges) {
+        public void listChanged(ListEvent<FileItem> listChanges) { System.out.println("list changed");
             if(listChanges.getSourceList().size() > 0) {
                 viewSelectionPanel.setEnabled(true);
+                buddy.revalidate();
             } else {
                 viewSelectionPanel.setEnabled(false);
             }
         }
         
-    }
-    
+    }   
 
 }

@@ -37,7 +37,7 @@ public class BuddyNameTable extends JXTable {
     private static class BuddyComparator implements Comparator<BuddyItem> {
 
         @Override
-        public int compare(BuddyItem o1, BuddyItem o2) {
+        public int compare(BuddyItem o1, BuddyItem o2) { System.out.println("comparing " + o1.getName() +":"+ o1.size() + "  " + o2.getName() + ":" + o2.size());
             if(o1.size() > 0 && o2.size() > 0) { 
                 return o1.getName().compareTo(o2.getName());
             } else if(o1.size() > 0 && o2.size() <= 0) {
