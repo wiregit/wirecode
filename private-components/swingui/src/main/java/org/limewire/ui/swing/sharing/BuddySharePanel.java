@@ -40,6 +40,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -92,7 +93,8 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         cardPanel.setLayout(viewCardLayout);
         cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
 
-        eventList = GlazedLists.threadSafeList(new BasicEventList<BuddyItem>());
+        ObservableElementList.Connector<BuddyItem> buddyConnector = GlazedLists.beanConnector(BuddyItem.class);
+        eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
         buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat());
 
         
@@ -199,33 +201,35 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         }
         
         @Override
-        public void valueChanged(ListSelectionEvent e) {
+        public void valueChanged(ListSelectionEvent e) { 
             if(!e.getValueIsAdjusting()) {
                 int index = buddy.getSelectedRow();
-                BuddyItem buddyItem = (BuddyItem) buddy.getModel().getValueAt(index, 0);
-                headerPanel.setBuddyName(buddyItem.getName());
-                emptyPanel.setBuddyName(buddyItem.getName());
-
-  
-                FileList fileList = buddyLists.get(buddyItem.getName());
-                emptyPanel.setUserFileList(fileList);
-                table.setModel(new SharingTableModel(fileList.getModel(), fileList, new SharingTableFormat()));
-                TableColumn tc = table.getColumn(6);
-                tc.setCellEditor(editor);
-                tc.setCellRenderer(renderer);
-                sharingFancyPanel.setModel(fileList.getModel(), fileList);
-                                
-                if(currentList != null)
-                    currentList.removeListEventListener(this);
-                currentList = fileList.getModel();
-                currentList.addListEventListener(this);
-                
-                if(currentList.size() > 0) {
-                    viewSelectionPanel.setEnabled(true);
-                } else {
-                    viewSelectionPanel.setEnabled(false);
+                if( index >= 0) {
+                    BuddyItem buddyItem = (BuddyItem) buddy.getModel().getValueAt(index, 0);
+                    headerPanel.setBuddyName(buddyItem.getName());
+                    emptyPanel.setBuddyName(buddyItem.getName());
+    
+      
+                    FileList fileList = buddyLists.get(buddyItem.getName());
+                    emptyPanel.setUserFileList(fileList);
+                    table.setModel(new SharingTableModel(fileList.getModel(), fileList, new SharingTableFormat()));
+                    TableColumn tc = table.getColumn(6);
+                    tc.setCellEditor(editor);
+                    tc.setCellRenderer(renderer);
+                    sharingFancyPanel.setModel(fileList.getModel(), fileList);
+                                    
+                    if(currentList != null)
+                        currentList.removeListEventListener(this);
+                    currentList = fileList.getModel();
+                    currentList.addListEventListener(this);
+                    
+                    if(currentList.size() > 0) {
+                        viewSelectionPanel.setEnabled(true);
+                    } else {
+                        viewSelectionPanel.setEnabled(false);
+                    }
+                    viewCardLayout.show(cardPanel, viewSelectionPanel.getSelectedButton());
                 }
-                viewCardLayout.show(cardPanel, viewSelectionPanel.getSelectedButton());
             }
         }
 
@@ -233,7 +237,6 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         public void listChanged(ListEvent<FileItem> listChanges) { System.out.println("list changed");
             if(listChanges.getSourceList().size() > 0) {
                 viewSelectionPanel.setEnabled(true);
-                buddy.revalidate();
             } else {
                 viewSelectionPanel.setEnabled(false);
             }

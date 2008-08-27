@@ -14,15 +14,14 @@ import javax.swing.JScrollPane;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
-import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.SharingShortcutPanel;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
+import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.sharing.table.SharingFancyAudioTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingFancyDefaultTableFormat;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.matchers.Matcher;
 
 public class SharingFancyPanel extends JPanel {
 
@@ -104,26 +103,6 @@ public class SharingFancyPanel extends JPanel {
         documentTable.setModel(list.get(3), fileList);
         programTable.setModel(list.get(4), fileList);
         otherTable.setModel(list.get(5), fileList);
-    }
-     
-    /**
-     * Filter based on a category. Only displays FileItems of 
-     * one category type.
-     */
-    private class CategoryFilter implements Matcher<FileItem>{
-        private Category category;
-        
-        public CategoryFilter(Category category) {
-            this.category = category;
-        }
-
-        @Override
-        public boolean matches(FileItem item) {
-            if(item == null) return false;
-            if(category == null) return true;
-            
-            return item.getCategory().equals(category);
-        }
     }
     
     /**

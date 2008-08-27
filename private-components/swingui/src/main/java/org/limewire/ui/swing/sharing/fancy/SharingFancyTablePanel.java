@@ -50,6 +50,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     
     private final ConfirmationUnshareButton unShareAllButton;
     
+    FancyCellRenderer fancyRenderer;
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
     
@@ -110,21 +111,27 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
             table.setSortable(false);
             
             TableMouseListener tableMouseListener = new TableMouseListener(table);
-            table.setDefaultRenderer(Object.class, new FancyCellRenderer(tableMouseListener));
+            fancyRenderer = new FancyCellRenderer(tableMouseListener);
             
             editor = new SharingFancyMultiButtonTableCellRendererEditor(20, tableMouseListener);
             editor.addActions(createActions());
             renderer = new SharingFancyMultiButtonTableCellRendererEditor(20, tableMouseListener);
             renderer.addActions(createActions());
             
-            TableColumn tc = table.getColumn("");
-            tc.setPreferredWidth(25);
-            tc.setMaxWidth(25);
-            tc.setResizable(false);
-            tc.setCellEditor(editor);
-            tc.setCellRenderer(renderer);
+            setRenderers();
         }
         return table;
+    }
+    
+    private void setRenderers() {
+        table.setDefaultRenderer(Object.class, fancyRenderer);
+        
+        TableColumn tc = table.getColumn("");
+        tc.setPreferredWidth(25);
+        tc.setMaxWidth(25);
+        tc.setResizable(false);
+        tc.setCellEditor(editor);
+        tc.setCellRenderer(renderer);
     }
     
     public void setModel(EventList<FileItem> eventList, FileList fileList) {
@@ -133,6 +140,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         currentEventList.addListEventListener(this);
         
         table.setModel(eventList, fileList, tableFormat);
+        setRenderers();
 
         int size = eventList.size();
         if( size == 0 ) {

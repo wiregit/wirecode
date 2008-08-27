@@ -7,6 +7,9 @@ import javax.swing.JCheckBox;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.ui.swing.sharing.table.CategoryFilter;
+
+import ca.odell.glazedlists.FilterList;
 
 public class SharingAddAllAction extends AbstractAction {
 
@@ -30,15 +33,39 @@ public class SharingAddAllAction extends AbstractAction {
     public void setUserLibrary(FileList userList) {
         this.userList = userList;
     }
+
+    private void reset() {
+        musicBox.setSelected(false);
+        videoBox.setSelected(false);
+        imageBox.setSelected(false);
+    }
     
     @Override
     public void actionPerformed(ActionEvent e) {
         if(myLibraryList == null || userList == null)
             return;
         
-        for(FileItem item : myLibraryList.getModel()) { System.out.println("adding " + item.getName());
-            userList.addFile(item.getFile());
+        FileList currentList = userList;
+        
+        if(musicBox.isSelected()) {
+            FilterList<FileItem> audio = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
+            for(FileItem item : audio) {
+                currentList.addFile(item.getFile());
+            }
         }
-    }
+        if(videoBox.isSelected()) {
+            FilterList<FileItem> video = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.VIDEO));
+            for(FileItem item : video) {
+                currentList.addFile(item.getFile());
+            }
+        }
+        if(imageBox.isSelected()) {
+            FilterList<FileItem> image = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.IMAGE));
+            for(FileItem item : image) {
+                currentList.addFile(item.getFile());
+            }
+        }
 
+        reset();
+    }
 }

@@ -23,7 +23,6 @@ import javax.swing.plaf.metal.MetalToggleButtonUI;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
@@ -36,8 +35,6 @@ import org.limewire.ui.swing.sharing.SharingNavigator;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
-
-import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 
