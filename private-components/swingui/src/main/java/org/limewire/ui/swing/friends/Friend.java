@@ -22,6 +22,8 @@ public interface Friend {
     
     void setActiveConversation(boolean active);
     
+    boolean isSignedInToLimewire();
+    
     void startChat();
     
     void stopChat();

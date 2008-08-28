@@ -392,6 +392,12 @@ public class FriendsPane extends JPanel {
         }
         
         @Override
+        public boolean isEnabled() {
+            Friend friend = context.getFriend();
+            return friend != null && friend.isSignedInToLimewire();
+        }
+
+        @Override
         public void actionPerformed(ActionEvent e) {
             
         }
@@ -406,7 +412,7 @@ public class FriendsPane extends JPanel {
         public void actionPerformed(ActionEvent e) {
             
         }
-        
+
         @Override
         public boolean isEnabled() {
             Friend friend = context.getFriend();
@@ -415,7 +421,7 @@ public class FriendsPane extends JPanel {
                 return false;
             }
             
-            return getSharedFileCount(friend) > 0;
+            return getSharedFileCount(friend) > 0 && friend.isSignedInToLimewire();
         }
 
         @Override

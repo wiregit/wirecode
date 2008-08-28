@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends;
 
 import org.jdesktop.beans.AbstractBean;
+import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
@@ -102,5 +103,10 @@ public class FriendImpl extends AbstractBean implements Friend {
         boolean oldActiveConversation = activeConversation;
         activeConversation = active;
         firePropertyChange("activeConversation", oldActiveConversation, activeConversation);
+    }
+
+    @Override
+    public boolean isSignedInToLimewire() {
+        return presence instanceof LimePresence;
     }
 }

@@ -79,4 +79,9 @@ class MockFriend implements Friend {
     public void setActiveConversation(boolean active) {
         this.activeConversation = active;
     }
+
+    @Override
+    public boolean isSignedInToLimewire() {
+        return false;
+    }
 }
