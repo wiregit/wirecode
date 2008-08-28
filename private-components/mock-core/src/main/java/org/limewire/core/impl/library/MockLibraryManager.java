@@ -132,7 +132,7 @@ public class MockLibraryManager implements LibraryManager {
     
     @Override
     public FileList getBuddy(String name) {
-        return null;
+        return new FileListAdapter(name);
     }
 
     @Override
