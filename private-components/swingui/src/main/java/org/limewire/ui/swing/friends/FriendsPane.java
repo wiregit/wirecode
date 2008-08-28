@@ -140,6 +140,9 @@ public class FriendsPane extends JPanel {
             if (index < 0) {
                 return false;
             }
+            //Popup selects the item (as per spec)
+            list.setSelectedIndex(index);
+            
             Friend friend = (Friend) list.getModel().getElementAt(index);
             context.setFriend(friend);
             return friend.isChatting() == expected;
