@@ -159,7 +159,7 @@ public class MozillaDownloadManager extends NsISelfReferencingFactory implements
 
     @Override
     public nsILocalFile getUserDownloadsDirectory() {
-        return new NoOpNSILocalFile(new File("/home/pvertenten/Desktop/testmoz"));
+        return new NoOpNSILocalFile(new File(System.getProperty("java.io.tmpdir")));
     }
 
     @Override
