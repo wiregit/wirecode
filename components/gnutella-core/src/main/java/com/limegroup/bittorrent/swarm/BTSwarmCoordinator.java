@@ -54,19 +54,23 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         this.requested = Collections.synchronizedSet(new HashSet<BTInterval>());
     }
 
+    @Override
     public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobControl callback) {
         List<BTInterval> pieces = createBTInterval(range);
         return new BTSwarmWriteJob(pieces, torrentDiskManager, callback);
     }
 
+    @Override
     public void finish() throws IOException {
         // do nothing let the managed_torrent manage closing things
     }
 
+    @Override
     public long getAmountLost() {
         return torrentDiskManager.getNumCorruptedBytes();
     }
 
+    @Override
     public SwarmFile getSwarmFile(Range range) {
         long position = range.getLow();
         List<TorrentFile> torrentFiles = torrentFileSystem.getFiles();
@@ -80,10 +84,12 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         return null;
     }
 
+    @Override
     public boolean isComplete() {
         return torrentDiskManager.isComplete();
     }
 
+    @Override
     public Range leasePortion(IntervalSet availableRanges) {
         int numPieces = btMetaInfo.getNumBlocks();
 
@@ -107,6 +113,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         return lease;
     }
 
+    @Override
     public Range renewLease(Range oldLease, Range newLease) {
         List<BTInterval> oldInterval = createBTInterval(oldLease);
         List<BTInterval> newInterval = createBTInterval(newLease);
@@ -116,6 +123,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         return newLease;
     }
 
+    @Override
     public void unlease(Range range) {
         List<BTInterval> pieces = createBTInterval(range);
         for (BTInterval btInterval : pieces) {
@@ -161,46 +169,54 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         return btIntervals;
     }
 
+    @Override
     public long getAmountVerified() {
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.getAmountVerified() is not implemented.");
     }
-
+    
+    @Override
     public void unpending(Range range) {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.unpending(Range) is not implemented.");
     }
 
+    @Override
     public Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector) {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector) is not implemented.");
     }
 
+    @Override
     public void pending(Range range) {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.pending(Range range) is not implemented.");
     }
 
+    @Override
     public void verify() {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException("BTSwarmCoordinator.verify() is not implemented.");
     }
 
+    @Override
     public void reverify() {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException("BTSwarmCoordinator.reverify() is not implemented.");
 
     }
 
+    @Override
     public long write(Range range, ByteBuffer content) throws IOException {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.write(Range, ByteBuffer) is not implemented.");
     }
 
+    @Override
     public void wrote(Range range) {
         // not the job of the BTSwarmCoordinator
         throw new UnsupportedOperationException(
