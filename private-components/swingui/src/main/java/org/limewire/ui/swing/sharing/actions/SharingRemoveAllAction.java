@@ -23,6 +23,14 @@ public class SharingRemoveAllAction extends AbstractAction {
         this.eventList = eventList;
     }
     
+    public void setFileList(FileList newFileList) {
+        this.fileList = newFileList;
+    }
+    
+    public void setEventList(EventList<FileItem> eventList) {
+        this.eventList = eventList;
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         //TODO: this needs to be moved off the swing thread

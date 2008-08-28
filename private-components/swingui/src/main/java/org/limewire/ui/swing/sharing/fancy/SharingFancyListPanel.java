@@ -50,13 +50,18 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
     
     private final UnshareButton layerButton;
     
+    private SharingRemoveAllAction removeAction;
+    private EventList<FileItem> currentEventList;
+    
     public SharingFancyListPanel(String name, EventList<FileItem> eventList, DropTarget dropTarget, FileList fileList) {       
         setBackground(Color.WHITE);
         
+        this.currentEventList = eventList;
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
         JLabel unShareButtonLabel = new JLabel("Unshare All");
-        unShareButton = new ConfirmationUnshareButton(new SharingRemoveAllAction(fileList, eventList));
+        removeAction = new SharingRemoveAllAction(fileList, eventList);
+        unShareButton = new ConfirmationUnshareButton(removeAction);
         unShareButton.setEnabled(false);
     
         // black seperator
@@ -115,7 +120,12 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
     }
     
     public void setModel(EventList<FileItem> eventList, FileList fileList) {
+        currentEventList.removeListEventListener(this);
+        currentEventList = eventList;
+        currentEventList.addListEventListener(this);
         imageList.setModel(new ImageListModel(eventList, fileList));
+        removeAction.setEventList(eventList);
+        removeAction.setFileList(fileList);
         
         int size = eventList.size();
         if( size == 0 ) {

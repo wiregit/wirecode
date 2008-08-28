@@ -54,6 +54,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     MultiButtonTableCellRendererEditor editor;
     MultiButtonTableCellRendererEditor renderer;
     
+    private SharingRemoveAllAction removeAction;
     private EventList<FileItem> currentEventList;
     
     public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, DropTarget dropTarget, FileList fileList) {
@@ -73,7 +74,8 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
         JLabel unShareButtonLabel = new JLabel("Unshare All");
-        unShareAllButton = new ConfirmationUnshareButton(new SharingRemoveAllAction(fileList, eventList));
+        removeAction = new SharingRemoveAllAction(fileList, eventList);
+        unShareAllButton = new ConfirmationUnshareButton(removeAction);
         unShareAllButton.setEnabled(false);
 
         // black seperator
@@ -138,6 +140,8 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         currentEventList.removeListEventListener(this);
         currentEventList = eventList;
         currentEventList.addListEventListener(this);
+        removeAction.setEventList(eventList);
+        removeAction.setFileList(fileList);
         
         table.setModel(eventList, fileList, tableFormat);
         setRenderers();
