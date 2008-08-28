@@ -9,8 +9,6 @@
 	
     <import file="../build-macros.xml"/>
     <import file="../../components/core-api/build.xml"/>
-    <import file="../../components/player-api/build.xml"/>
-    <import file="../../components/player/build.xml"/>
     
     <target name="initialize" depends="lw-core-api.initialize" unless="initialized.mock-core">
         <do.setup-private-properties component="mock-core">
@@ -26,13 +24,13 @@
 	    <do.clean component="mock-core"/>
 	</target>
     
-    <target name="compile" depends="initialize, lw-core-api.compile, lw-player-api.compile, lw-player.compile">
+    <target name="compile" depends="initialize, lw-core-api.compile">
     	<!--<do.compile component="mock-core"/>-->
     	<do.compile-src component="mock-core"/>
     	<mkdir dir="${build.limewire.components.mock-core.tests}"/>
     </target>
 	
-	<target name="compile-src" depends="initialize, lw-core-api.compile-src, lw-player-api.compile-src, lw-player.compile-src">
+	<target name="compile-src" depends="initialize, lw-core-api.compile-src">
 	    <do.compile-src component="mock-core"/>
 	</target>
     
