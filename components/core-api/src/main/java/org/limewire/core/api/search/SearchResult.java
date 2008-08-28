@@ -33,6 +33,8 @@ public interface SearchResult {
     String getUrn();
 
     Map<PropertyKey, Object> getProperties();
+
+    Object getProperty(PropertyKey key);
     
     ResultType getResultType();
     
@@ -43,5 +45,4 @@ public interface SearchResult {
     String getFileExtension();
     
     List<RemoteHost> getSources();
-
 }

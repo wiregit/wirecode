@@ -16,6 +16,8 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
@@ -63,12 +65,12 @@ public class BaseResultPanel extends JXPanel {
         resultsList.setEventList(eventList);
         resultsList.setTableFormat(new ListViewTableFormat());
 
-        SearchResultTableCellEditor editor = new SearchResultTableCellEditor();
+        ListViewTableCellEditor editor = new ListViewTableCellEditor();
         resultsList.setDefaultRenderer(VisualSearchResult.class, editor);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
-        resultsList.setRowHeight(50);
-        resultsList.setColumnWidth(0, 700);
+        resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
+        resultsList.setColumnWidth(0, ListViewTableCellEditor.WIDTH);
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,
@@ -78,6 +80,8 @@ public class BaseResultPanel extends JXPanel {
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
 
+        resultsTable.setDefaultRenderer(
+            Calendar.class, new CalendarTableCellRenderer());
         resultsTable.setDefaultRenderer(
             Icon.class, new IconTableCellRenderer());
 

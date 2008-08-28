@@ -230,6 +230,7 @@ class TopPanel extends JPanel implements SearchNavigator {
             super(item.getName());
             this.item = item;
             this.search = search;
+
             // Make sure this syncs up with any changes in selection.
             addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
@@ -251,29 +252,28 @@ class TopPanel extends JPanel implements SearchNavigator {
                 remove();
             }
         }
+
+        @Override
+        public void handleSearchResult(SearchResult searchResult) {
+            // TODO: RMV Should this method do anything?
+            //System.out.println(
+            //    "TopPanel.SearchAction.handleSearchResult: searchResult = "
+            //    + searchResult);
+        }
         
-        public void select() {
-            item.select();
-            textField.setText(item.getName());
-            navigator.addNavListener(new NavSelectionListener() {
-                @Override
-                public void navItemSelected(
-                    NavCategory category, NavItem navItem) {
-                    if (navItem != item) {
-                        navigator.removeNavListener(this);
-                        putValue(Action.SELECTED_KEY, false);
-                    }
-                }
-            });
+        @Override
+        public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {
+            // do nothing
+        }
+        
+        void killBusy() {
+            busyTimer.stop();
+            putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);
         }
         
         public void remove() {
             item.remove();
             search.stop();
-        }
-        
-        @Override
-        public void handleSearchResult(SearchResult searchResult) {
         }
         
         @Override
@@ -294,12 +294,6 @@ class TopPanel extends JPanel implements SearchNavigator {
             });
         }
         
-        void killBusy() {
-            busyTimer.stop();
-            putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);
-        }
-        
-        
         @Override
         public void searchStopped() {
             SwingUtilities.invokeLater(new Runnable() {
@@ -310,9 +304,19 @@ class TopPanel extends JPanel implements SearchNavigator {
             });
         }
 
-        @Override
-        public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {
-            // do nothing
+        public void select() {
+            item.select();
+            textField.setText(item.getName());
+            navigator.addNavListener(new NavSelectionListener() {
+                @Override
+                public void navItemSelected(
+                    NavCategory category, NavItem navItem) {
+                    if (navItem != item) {
+                        navigator.removeNavListener(this);
+                        putValue(Action.SELECTED_KEY, false);
+                    }
+                }
+            });
         }
     }
 }

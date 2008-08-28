@@ -4,6 +4,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import javax.swing.Action;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
@@ -90,8 +92,9 @@ implements ListEventListener<VisualSearchResult> {
         setTabsVisible(false);
         getTab("All").setVisible(true);
 
-        //setBorder(BorderFactory.createTitledBorder(
-        //    BorderFactory.createLineBorder(Color.RED, 1), "SearchTabItems"));
+        Font font = getFont().deriveFont(14.0f);
+        font.deriveFont(Font.BOLD); // TODO: RMV This doesn't work!
+        setTextFont(font);
     }
     
     public Collection<Map.Entry<SearchCategory, Action>> getResultCountActions() {
@@ -109,6 +112,8 @@ implements ListEventListener<VisualSearchResult> {
         // Get the most recent search result.
         EventList list = event.getSourceList();
         VisualSearchResult vsr = (VisualSearchResult) list.get(list.size() - 1);
+
+        String name = (String) vsr.getProperty(SearchResult.PropertyKey.NAME);
 
         // Determine its media type.
         String extension = vsr.getFileExtension();

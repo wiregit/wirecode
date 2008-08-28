@@ -16,6 +16,8 @@ public interface VisualSearchResult {
 
     Map<Object, Object> getProperties();
 
+    Object getProperty(Object key);
+
     Collection<RemoteHost> getSources();
     
     ResultType getCategory();

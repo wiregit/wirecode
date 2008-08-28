@@ -14,6 +14,8 @@ import org.limewire.util.MediaType;
  */
 public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
+    private static final int ICON_INDEX = 0;
+
     private IconManager iconManager;
 
     @Inject
@@ -29,6 +31,11 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     }
 
     @Override
+    public Class getColumnClass(int index) {
+        return index == ICON_INDEX ? Icon.class : super.getColumnClass(index);
+    }
+
+    @Override
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 
@@ -38,11 +45,11 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
         
         if (index == 0) {
             icon = iconManager.getIconForExtension(fileExtension);
-            if (icon == null) {
-                System.out.println(
-                    "AllTableFormat.getColumnValue: no icon for extension " +
-                    fileExtension);
-            }
+            //if (icon == null) {
+            //    System.out.println(
+            //        "AllTableFormat.getColumnValue: no icon for extension " +
+            //        fileExtension);
+            //}
         } else if (index == 2) {
             MediaType mediaType =
                 mediaType = MediaType.getMediaTypeForExtension(fileExtension);
@@ -52,11 +59,11 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         switch (index) {
             case 0: return icon == null ? "none" : icon;
-            case 1: return get(PropertyKey.NAME);
+            case 1: return getProperty(PropertyKey.NAME);
             case 2: return type;
             case 3: return vsr.getSize();
             case 4: return vsr;
-            case 5: return get(PropertyKey.RELEVANCE);
+            case 5: return getProperty(PropertyKey.RELEVANCE);
             case 6: return ""; // people with file
             case 7: return ""; // owner
             default: return null;

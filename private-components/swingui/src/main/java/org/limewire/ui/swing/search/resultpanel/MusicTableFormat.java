@@ -24,20 +24,20 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
         this.vsr = vsr;
 
         switch (index) {
-            case 0: return get(PropertyKey.NAME);
-            case 1: return get(PropertyKey.ARTIST_NAME);
-            case 2: return get(PropertyKey.ALBUM_TITLE);
-            case 3: return get(PropertyKey.LENGTH);
-            case 4: return get(PropertyKey.QUALITY);
+            case 0: return getProperty(PropertyKey.NAME);
+            case 1: return getProperty(PropertyKey.ARTIST_NAME);
+            case 2: return getProperty(PropertyKey.ALBUM_TITLE);
+            case 3: return getProperty(PropertyKey.LENGTH);
+            case 4: return getProperty(PropertyKey.QUALITY);
             case 5: return vsr;
-            case 6: return get(PropertyKey.BITRATE);
-            case 7: return get(PropertyKey.GENRE);
-            case 8: return get(PropertyKey.TRACK_NUMBER);
-            case 9: return get(PropertyKey.RELEVANCE);
+            case 6: return getProperty(PropertyKey.BITRATE);
+            case 7: return getProperty(PropertyKey.GENRE);
+            case 8: return getProperty(PropertyKey.TRACK_NUMBER);
+            case 9: return getProperty(PropertyKey.RELEVANCE);
             case 10: return ""; // people with file
             case 11: return ""; // owner
             case 12: return vsr.getFileExtension();
-            case 13: return get(PropertyKey.SAMPLE_RATE);
+            case 13: return getProperty(PropertyKey.SAMPLE_RATE);
             default: return null;
         }
     }

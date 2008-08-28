@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
@@ -28,9 +29,12 @@ import org.limewire.ui.swing.util.GuiUtils;
  * in "List View".
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class SearchResultTableCellEditor
+public class ListViewTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
+
+    public static final int HEIGHT = 50;
+    public static final int WIDTH = 727;
 
     @Resource private Icon downloadIcon;
 
@@ -38,10 +42,10 @@ implements TableCellEditor, TableCellRenderer {
     private JLabel headingLabel = new JLabel();
     private JLabel similarLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
-    private JPanel panel;
+    private JPanel thePanel;
     private VisualSearchResult vsr;
 
-    public SearchResultTableCellEditor() {
+    public ListViewTableCellEditor() {
         // Cause the @Resource fields to be injected
         // using properties in AppFrame.properties.
         // The icon PNG file is in swingui/src/main/resources/
@@ -57,12 +61,12 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value, boolean isSelected, int row, int column) {
         vsr = (VisualSearchResult) value;
 
-        if (panel == null) makePanel();
+        if (thePanel == null) thePanel = makePanel();
 
         populatePanel((VisualSearchResult) value);
         setBackground(isSelected);
 
-        return panel;
+        return thePanel;
     }
 
     public Component getTableCellRendererComponent(
@@ -120,8 +124,9 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private void makePanel() {
-        panel = new JPanel(new GridBagLayout());
+    private JPanel makePanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.anchor = GridBagConstraints.WEST;
@@ -134,6 +139,8 @@ implements TableCellEditor, TableCellRenderer {
 
         gbc.weightx = 0;
         panel.add(makeRightPanel(), gbc);
+
+        return panel;
     }
 
     private Component makeRightPanel() {
@@ -143,30 +150,29 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void setBackground(boolean isSelected) {
+        if (thePanel == null) return;
         Color color = isSelected ? new Color(220, 220, 255) : Color.WHITE;
-        panel.setBackground(color);
-        int childCount = panel.getComponentCount();
+        thePanel.setBackground(color);
+        int childCount = thePanel.getComponentCount();
         for (int i = 0; i < childCount; i++) {
-            Component child = panel.getComponent(i);
+            Component child = thePanel.getComponent(i);
             child.setBackground(color);
         }
     }
 
     private void populatePanel(VisualSearchResult vsr) {
-        Map<Object, Object> properties = vsr.getProperties();
-
         String heading = "";
-        heading += properties.get(SearchResult.PropertyKey.ARTIST_NAME);
+        heading += vsr.getProperty(SearchResult.PropertyKey.ARTIST_NAME);
         heading += " - ";
-        heading += properties.get(SearchResult.PropertyKey.NAME);
+        heading += vsr.getProperty(SearchResult.PropertyKey.NAME);
         headingLabel.setText(heading);
 
-        Object comment = properties.get(SearchResult.PropertyKey.COMMENTS);
+        Object comment = vsr.getProperty(SearchResult.PropertyKey.COMMENTS);
         String subheading = "";
         if (comment != null) subheading += comment + " - ";
-        subheading += properties.get(SearchResult.PropertyKey.QUALITY);
+        subheading += vsr.getProperty(SearchResult.PropertyKey.QUALITY);
         subheading += " - ";
-        subheading += properties.get(SearchResult.PropertyKey.LENGTH);
+        subheading += vsr.getProperty(SearchResult.PropertyKey.LENGTH);
         subheadingLabel.setText(subheading);
 
         //int sourceCount = vsr.getSources().size();

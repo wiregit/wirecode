@@ -1,5 +1,9 @@
 package org.limewire.ui.swing.search;
 
+import java.util.Date;
+
+import static org.limewire.core.api.search.SearchResult.PropertyKey;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
@@ -46,7 +50,7 @@ class SortAndFilterPanel extends JXPanel {
     @Resource private Icon tableViewPressedIcon;
     @Resource private Icon tableViewUnpressedIcon;
 
-    private final JComboBox sortBox = new JComboBox();
+    private final JComboBox sortCombo = new JComboBox();
     
     private final JLabel sortLabel = new JLabel("Sort by:");
     private final JTextField filterBox = new FilteredTextField(FILTER_WIDTH);
@@ -55,18 +59,10 @@ class SortAndFilterPanel extends JXPanel {
 
     SortAndFilterPanel() {
         GuiUtils.assignResources(this);
-        
         setBackground(Color.LIGHT_GRAY);
-
         sortLabel.setForeground(Color.WHITE);
-        // TODO: RMV Are the following lines needed?
-        // FontUtils.changeSize(sortLabel, 1);
-        // FontUtils.changeStyle(sortLabel, Font.BOLD);
-
         setSearchCategory(SearchCategory.ALL);
-        
         configureViewButtons();
-        
         layoutComponents();
     }
 
@@ -83,7 +79,7 @@ class SortAndFilterPanel extends JXPanel {
         listViewToggleButton.setPressedIcon(listViewPressedIcon);
         listViewToggleButton.setSelected(true);
         listViewToggleButton.setMargin(insets);
-        listViewToggleButton.setToolTipText("List View");
+        listViewToggleButton.setToolTipText("List view");
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -96,7 +92,7 @@ class SortAndFilterPanel extends JXPanel {
         tableViewToggleButton.setIcon(tableViewUnpressedIcon);
         tableViewToggleButton.setPressedIcon(tableViewPressedIcon);
         tableViewToggleButton.setMargin(insets);
-        tableViewToggleButton.setToolTipText("Table View");
+        tableViewToggleButton.setToolTipText("Table view");
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -127,42 +123,146 @@ class SortAndFilterPanel extends JXPanel {
         ItemListener listener = new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
+                String item = e.getItem().toString();
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    if (e.getItem().equals("Relevance")) {
-                        sortedList.setComparator(null);
-                    } else if (e.getItem().equals("Size")) {
-                        sortedList.setComparator(new Comparator<VisualSearchResult>() {
-                            public int compare(VisualSearchResult o1, VisualSearchResult o2) {
-                                return ((Long) o2.getSize()).compareTo(o1.getSize());
-                            }
-                        });
-                    } else if (e.getItem().equals("File Extension")) {
-                        sortedList.setComparator(new Comparator<VisualSearchResult>() {
-                            public int compare(VisualSearchResult o1, VisualSearchResult o2) {
-                                // TODO: Support locales better.
-                                return o2.getFileExtension().compareToIgnoreCase(
-                                        o1.getFileExtension());
-                            }
-                        });
-                    } else if (e.getItem().equals("Sources")) {
-                        sortedList.setComparator(new Comparator<VisualSearchResult>() {
-                            public int compare(VisualSearchResult o1, VisualSearchResult o2) {
-                                return ((Integer) o2.getSources().size()).compareTo(o1.getSources()
-                                        .size());
-                            }
-                        });
-                    }
+                    sortedList.setComparator(getComparator(item));
                 }
             }
         };
+        sortCombo.addItemListener(listener);
         
+        // Trigger the initial sort.
         ItemEvent itemEvent = new ItemEvent(
-            sortBox, ItemEvent.ITEM_STATE_CHANGED,
-            sortBox.getSelectedItem(), ItemEvent.SELECTED);
+            sortCombo, ItemEvent.ITEM_STATE_CHANGED,
+            sortCombo.getSelectedItem(), ItemEvent.SELECTED);
         listener.itemStateChanged(itemEvent);
-        sortBox.addItemListener(listener);
         
         return sortedList;
+    }
+
+    private static Comparator<VisualSearchResult> getDateComparator(
+        final PropertyKey key) {
+        return new Comparator<VisualSearchResult>() {
+            public int compare(
+                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                Date v1 = (Date) vsr1.getProperty(key);
+                Date v2 = (Date) vsr2.getProperty(key);
+                return v1 == null ? 0 : v1.compareTo(v2);
+            }
+        };
+    }
+
+    private static Comparator<VisualSearchResult> getFloatComparator(
+        final PropertyKey key) {
+        return new Comparator<VisualSearchResult>() {
+            public int compare(
+                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                Float v1 = (Float) vsr1.getProperty(key);
+                Float v2 = (Float) vsr2.getProperty(key);
+                return v1 == null ? 0 : v1.compareTo(v2);
+            }
+        };
+    }
+
+    private static Comparator<VisualSearchResult> getLongComparator(
+        final PropertyKey key) {
+        return new Comparator<VisualSearchResult>() {
+            public int compare(
+                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                Long v1 = (Long) vsr1.getProperty(key);
+                Long v2 = (Long) vsr2.getProperty(key);
+                return v1 == null ? 0 : v1.compareTo(v2);
+            }
+        };
+    }
+
+    private static Comparator<VisualSearchResult> getStringComparator(
+        final PropertyKey key) {
+        return new Comparator<VisualSearchResult>() {
+            public int compare(
+                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                String v1 = (String) vsr1.getProperty(key);
+                String v2 = (String) vsr2.getProperty(key);
+                return v1 == null ? 0 : v1.compareTo(v2);
+            }
+        };
+    }
+
+    private Comparator<VisualSearchResult> getComparator(String item) {
+        if ("Album".equals(item)) {
+            return getStringComparator(PropertyKey.ALBUM_TITLE);
+        }
+
+        if ("Artist".equals(item)) {
+            return getStringComparator(PropertyKey.ARTIST_NAME);
+        }
+
+        if ("Date created (more recent)".equals(item)) {
+            return getDateComparator(PropertyKey.DATE_CREATED);
+        }
+
+        if ("File type".equals(item) || "Type".equals(item)) {
+            return new Comparator<VisualSearchResult>() {
+                public int compare(
+                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    String v1 = vsr1.getFileExtension();
+                    String v2 = vsr2.getFileExtension();
+                    return v1 == null ? 0 : v1.compareTo(v2);
+                }
+            };
+        }
+
+        if ("Friend (a-z)".equals(item)) {
+            return null; // TODO: RMV What to do here?
+        }
+
+        if ("Length".equals(item)) {
+            return getLongComparator(PropertyKey.LENGTH);
+        }
+
+        if ("Name".equals(item) || "Filename".equals(item)) {
+            return getStringComparator(PropertyKey.NAME);
+        }
+
+        if ("Quality (high to low)".equals(item)) {
+            return getLongComparator(PropertyKey.QUALITY);
+        }
+
+        if ("Relevance".equals(item)) {
+            return getFloatComparator(PropertyKey.RELEVANCE);
+        }
+
+        if ("Size (high to low)".equals(item)) {
+            return new Comparator<VisualSearchResult>() {
+                public int compare(
+                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    Long v1 = vsr1.getSize();
+                    Long v2 = vsr2.getSize();
+                    return v2.compareTo(v1);
+                }
+            };
+        }
+
+        if ("Size (low to high)".equals(item)) {
+            return new Comparator<VisualSearchResult>() {
+                public int compare(
+                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    Long v1 = vsr1.getSize();
+                    Long v2 = vsr2.getSize();
+                    return v1.compareTo(v2);
+                }
+            };
+        }
+
+        // TODO: How does Title differ from Name for Documents?
+
+        // TODO: RMV Does Type ever differ from File type?
+
+        if ("Year".equals(item)) {
+            return getLongComparator(PropertyKey.YEAR);
+        }
+
+        throw new IllegalArgumentException("unknown item \"" + item + '"');
     }
 
     private void layoutComponents() {
@@ -175,7 +275,7 @@ class SortAndFilterPanel extends JXPanel {
         gbc.insets.right = 5;
         add(sortLabel, gbc);
 
-        add(sortBox, gbc);
+        add(sortCombo, gbc);
         
         gbc.insets.left = gbc.insets.right = 0;
         add(listViewToggleButton, gbc);
@@ -207,13 +307,13 @@ class SortAndFilterPanel extends JXPanel {
     }
 
     public void setSearchCategory(SearchCategory category) {
-        sortBox.removeAllItems();
+        sortCombo.removeAllItems();
         String[] items = null;
 
         switch (category) {
             case ALL:
                 items = new String[] {
-                    "Relevance", "Name", "File Type",
+                    "Relevance", "Name", "File type",
                     "Size (high to low)", "Size (low to high)"
                 };
                 break;
@@ -236,7 +336,7 @@ class SortAndFilterPanel extends JXPanel {
                 break;
             case DOCUMENTS:
                 items = new String[] {
-                    "Relevance", "Name", "Title", "Type",
+                    "Relevance", "Filename", "Type",
                     "Size (low to high)", "Date created (more recent)"
                 };
                 break;
@@ -249,12 +349,12 @@ class SortAndFilterPanel extends JXPanel {
         }
 
         for (String item : items) {
-            sortBox.addItem(item);
+            sortCombo.addItem(item);
         }
 
         // TODO: RMV How can you determine if the user is signed on?
         //if (signedOn())
-            sortBox.addItem("Friend (a-z)");
+            sortCombo.addItem("Friend (a-z)");
     }
     
     private static class VisualSearchResultTextFilterator

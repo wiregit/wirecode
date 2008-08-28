@@ -1,4 +1,5 @@
 package org.limewire.ui.swing.table;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
@@ -8,6 +9,7 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.application.Resource;
@@ -18,6 +20,7 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 //TODO comment this beast
@@ -216,19 +219,50 @@ public class MouseableTable extends JXTable {
 	    }
 	}
 	
-    //TODO: remove this and set all editors on columns, not classes
     @Override
     public void setDefaultEditor(Class clazz, TableCellEditor editor) {
-        if (getModel() instanceof EventTableModel &&
-                ((EventTableModel) getModel()).getTableFormat() instanceof AdvancedTableFormat) {
-            AdvancedTableFormat format = (AdvancedTableFormat) ((EventTableModel) getModel()).getTableFormat();
+        boolean usesEventTableModel = getModel() instanceof EventTableModel;
+        
+        TableFormat tableFormat =
+            ((EventTableModel) getModel()).getTableFormat();
+        boolean usesAdvancedTableFormat =
+            tableFormat instanceof AdvancedTableFormat;
+
+        if (usesEventTableModel && usesAdvancedTableFormat) {
+            AdvancedTableFormat format = (AdvancedTableFormat) tableFormat;
             for (int i = 0; i < getModel().getColumnCount(); i++) {
-                if (format.getColumnClass(i) == clazz) {
+                Class columnClass = format.getColumnClass(i);
+                if (columnClass == clazz) {
                     getColumnModel().getColumn(i).setCellEditor(editor);
                 }
             }
         } else {
             super.setDefaultEditor(clazz, editor);
+        }
+    }
+
+    @Override
+    public void setDefaultRenderer(Class clazz, TableCellRenderer renderer) {
+        boolean usesEventTableModel = getModel() instanceof EventTableModel;
+        boolean usesAdvancedTableFormat = false;
+        TableFormat tableFormat = null;
+
+        if (usesEventTableModel) {
+            tableFormat = ((EventTableModel) getModel()).getTableFormat();
+            usesAdvancedTableFormat =
+                tableFormat instanceof AdvancedTableFormat;
+        }
+
+        if (usesEventTableModel && usesAdvancedTableFormat) {
+            AdvancedTableFormat format = (AdvancedTableFormat) tableFormat;
+            for (int i = 0; i < getModel().getColumnCount(); i++) {
+                Class columnClass = format.getColumnClass(i);
+                if (columnClass == clazz) {
+                    getColumnModel().getColumn(i).setCellRenderer(renderer);
+                }
+            }
+        } else {
+            super.setDefaultRenderer(clazz, renderer);
         }
     }
 }

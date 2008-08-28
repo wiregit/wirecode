@@ -139,6 +139,12 @@ public class FancyTab extends JXPanel {
             .addComponent(removeButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             );
     }
+
+    public void setFont(Font font) {
+        super.setFont(font);
+        if (mainButton != null) mainButton.setFont(font);
+        if (additionalText != null) additionalText.setFont(font);
+    }
     
     @Override
     public String toString() {

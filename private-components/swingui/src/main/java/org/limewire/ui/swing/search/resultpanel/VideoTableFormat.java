@@ -27,20 +27,20 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
         String fileExtension = vsr.getFileExtension();
 
         switch (index) {
-            case 0: return get(PropertyKey.NAME);
+            case 0: return getProperty(PropertyKey.NAME);
             case 1: return fileExtension; // TODO: RMV improve
-            case 2: return get(PropertyKey.LENGTH);
-            case 3: return get(PropertyKey.YEAR);
-            case 4: return get(PropertyKey.QUALITY);
+            case 2: return getProperty(PropertyKey.LENGTH);
+            case 3: return getProperty(PropertyKey.YEAR);
+            case 4: return getProperty(PropertyKey.QUALITY);
             case 5: return vsr;
-            case 6: return get(PropertyKey.RELEVANCE);
+            case 6: return getProperty(PropertyKey.RELEVANCE);
             case 7: return ""; // people with file
             case 8: return ""; // owner
-            case 9: return get(PropertyKey.RATING);
-            case 10: return get(PropertyKey.COMMENTS);
-            case 11: return get(PropertyKey.HEIGHT);
-            case 12: return get(PropertyKey.WIDTH);
-            case 13: return get(PropertyKey.BITRATE);
+            case 9: return getProperty(PropertyKey.RATING);
+            case 10: return getProperty(PropertyKey.COMMENTS);
+            case 11: return getProperty(PropertyKey.HEIGHT);
+            case 12: return getProperty(PropertyKey.WIDTH);
+            case 13: return getProperty(PropertyKey.BITRATE);
             default: return null;
         }
     }

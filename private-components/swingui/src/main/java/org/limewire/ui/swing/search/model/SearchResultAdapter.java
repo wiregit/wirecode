@@ -16,6 +16,7 @@ import org.limewire.core.api.search.SearchResult;
 class SearchResultAdapter implements VisualSearchResult {
     
     private final List<SearchResult> coreResults;
+    private Map<Object, Object> properties;
     private final Set<RemoteHost> remoteHosts;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
@@ -31,6 +32,29 @@ class SearchResultAdapter implements VisualSearchResult {
         });
         
         update();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof SearchResultAdapter)) return false;
+        
+        final SearchResultAdapter other = (SearchResultAdapter) obj;
+        
+        // TODO: RMV temporary, same description
+        return getDescription().equals(other.getDescription());
+        /*
+        if (coreResults == null) {
+            if (other.coreResults != null) return false;
+        } else if (!coreResults.equals(other.coreResults)) return false;
+        
+        if (remoteHosts == null) {
+            if (other.remoteHosts != null) return false;
+        } else if (!remoteHosts.equals(other.remoteHosts)) return false;
+        
+        return true;
+        */
     }
 
     @Override
@@ -55,11 +79,18 @@ class SearchResultAdapter implements VisualSearchResult {
     
     @Override
     public Map<Object, Object> getProperties() {
-        Map<Object, Object> properties = new HashMap<Object, Object>();
-        for(SearchResult result : coreResults) {
-            properties.putAll(result.getProperties());
+        if (properties == null) {
+            properties = new HashMap<Object, Object>();
+            for (SearchResult result : coreResults) {
+                properties.putAll(result.getProperties());
+            }
         }
+
         return properties;
+    }
+
+    public Object getProperty(Object key) {
+        return getProperties().get(key);
     }
     
     @Override
@@ -76,21 +107,6 @@ class SearchResultAdapter implements VisualSearchResult {
     public Collection<RemoteHost> getSources() {
         return remoteHosts;
     }
-    
-    @Override
-    public String toString() {
-        return getDescription() +
-            " with " + getSources().size() + " sources, " +
-            "in category: " + getCategory() +
-            ", with size: " + getSize() +
-            ", and extension: " + getFileExtension();
-    }
-
-    void update() {
-        for (SearchResult result : coreResults) {
-            remoteHosts.addAll(result.getSources());
-        }
-    }
 
     @Override
     public int hashCode() {
@@ -105,27 +121,19 @@ class SearchResultAdapter implements VisualSearchResult {
         */
         return getDescription().hashCode(); // TODO: RMV temporary
     }
-
+    
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (!(obj instanceof SearchResultAdapter)) return false;
-        
-        final SearchResultAdapter other = (SearchResultAdapter) obj;
-        
-        // TODO: RMV temporary, same description
-        return getDescription().equals(other.getDescription());
-        /*
-        if (coreResults == null) {
-            if (other.coreResults != null) return false;
-        } else if (!coreResults.equals(other.coreResults)) return false;
-        
-        if (remoteHosts == null) {
-            if (other.remoteHosts != null) return false;
-        } else if (!remoteHosts.equals(other.remoteHosts)) return false;
-        
-        return true;
-        */
+    public String toString() {
+        return getDescription() +
+            " with " + getSources().size() + " sources, " +
+            "in category: " + getCategory() +
+            ", with size: " + getSize() +
+            ", and extension: " + getFileExtension();
+    }
+
+    void update() {
+        for (SearchResult result : coreResults) {
+            remoteHosts.addAll(result.getSources());
+        }
     }
 }

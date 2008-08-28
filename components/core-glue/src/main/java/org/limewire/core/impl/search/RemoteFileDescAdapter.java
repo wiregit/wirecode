@@ -29,10 +29,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.locs = new ArrayList<IpPort>(locs);
     }
     
-    public RemoteFileDesc getRfd() {
-        return rfd;
-    }
-    
     public List<IpPort> getAlts() {
         return locs;
     }
@@ -50,6 +46,11 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public Map<SearchResult.PropertyKey, Object> getProperties() {
         return Collections.emptyMap();
+    }
+
+    @Override
+    public Object getProperty(PropertyKey key) {
+        return getProperties().get(key);
     }
 
     @Override
@@ -71,14 +72,13 @@ public class RemoteFileDescAdapter implements SearchResult {
         return ResultType.OTHER;
     }
 
+    public RemoteFileDesc getRfd() {
+        return rfd;
+    }
+    
     @Override
     public long getSize() {
         return rfd.getSize();
-    }
-
-    @Override
-    public String getUrn() {
-        return rfd.getSHA1Urn().toString();
     }
 
     @Override
@@ -118,5 +118,10 @@ public class RemoteFileDescAdapter implements SearchResult {
                 return 1 + locs.size();
             }
         };
+    }
+
+    @Override
+    public String getUrn() {
+        return rfd.getSHA1Urn().toString();
     }
 }

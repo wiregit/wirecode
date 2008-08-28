@@ -34,8 +34,12 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
         return columnNames[index];
     }
 
-    protected String get(PropertyKey key) {
-        Object value = vsr.getProperties().get(key);
+    protected Object getProperty(PropertyKey key) {
+        return vsr.getProperty(key);
+    }
+
+    protected String getString(PropertyKey key) {
+        Object value = vsr.getProperty(key);
         return value == null ? "?" : value.toString();
     }
 
