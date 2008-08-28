@@ -71,7 +71,7 @@ public class SearchResultsPanel extends JPanel {
         this.sortAndFilterPanel = new SortAndFilterPanel();
         this.scrollPane = new SearchScrollPane();
         EventList<VisualSearchResult> list =
-            sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults);
+            sortAndFilterPanel.getFilteredAndSortedList(visualSearchResults);
         
         this.resultsContainer = containerFactory.create(list, search);
         sortAndFilterPanel.addModeListener(new ModeListener() {

@@ -31,6 +31,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.AllTableFormat;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
@@ -56,6 +57,13 @@ class SortAndFilterPanel extends JXPanel {
     private final JTextField filterBox = new FilteredTextField(FILTER_WIDTH);
     private final JToggleButton listViewToggleButton = new JToggleButton();
     private final JToggleButton tableViewToggleButton = new JToggleButton();
+
+    private VisualSearchResultTextFilterator filterator =
+        new VisualSearchResultTextFilterator();
+
+    private TextComponentMatcherEditor<VisualSearchResult> editor =
+        new TextComponentMatcherEditor<VisualSearchResult>(
+            filterBox, filterator, true);
 
     SortAndFilterPanel() {
         GuiUtils.assignResources(this);
@@ -107,16 +115,14 @@ class SortAndFilterPanel extends JXPanel {
         viewGroup.add(tableViewToggleButton);
     }
     
-    public EventList<VisualSearchResult> getSortedAndFilteredList(
-            EventList<VisualSearchResult> visualSearchResults) {
+    public SortedList<VisualSearchResult> getFilteredAndSortedList(
+        EventList<VisualSearchResult> simpleList) {
 
-        VisualSearchResultTextFilterator filterator =
-            new VisualSearchResultTextFilterator();
-        TextComponentMatcherEditor<VisualSearchResult> editor =
-            new TextComponentMatcherEditor<VisualSearchResult>(
-                filterBox, filterator, true);
+        // Create a list that is filtered by a text field.
         EventList<VisualSearchResult> filteredList =
-            new FilterList<VisualSearchResult>(visualSearchResults, editor);
+            new FilterList<VisualSearchResult>(simpleList, editor);
+
+        // Created a SortedList that doesn't have a Comparator yet.
         final SortedList<VisualSearchResult> sortedList =
             new SortedList<VisualSearchResult>(filteredList, null);
 
@@ -124,7 +130,10 @@ class SortAndFilterPanel extends JXPanel {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 String item = e.getItem().toString();
+                //System.out.println("SortAndFilterPanel: item = " + item);
                 if (e.getStateChange() == ItemEvent.SELECTED) {
+                    //System.out.println("SortAndFilterPanel: changing Comparator");
+                    sortedList.setComparator(null);
                     sortedList.setComparator(getComparator(item));
                 }
             }
@@ -136,7 +145,7 @@ class SortAndFilterPanel extends JXPanel {
             sortCombo, ItemEvent.ITEM_STATE_CHANGED,
             sortCombo.getSelectedItem(), ItemEvent.SELECTED);
         listener.itemStateChanged(itemEvent);
-        
+
         return sortedList;
     }
 
@@ -205,8 +214,8 @@ class SortAndFilterPanel extends JXPanel {
             return new Comparator<VisualSearchResult>() {
                 public int compare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    String v1 = vsr1.getFileExtension();
-                    String v2 = vsr2.getFileExtension();
+                    String v1 = AllTableFormat.getMediaType(vsr1);
+                    String v2 = AllTableFormat.getMediaType(vsr2);
                     return v1 == null ? 0 : v1.compareTo(v2);
                 }
             };

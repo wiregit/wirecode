@@ -50,17 +50,23 @@ public class ConfigurableTable<E> extends MouseableTable {
             header.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    // Only honor right-clicks.
-                    // TODO: Why doesn't the following line work?
-                    //if (!e.isPopupTrigger()) return;
-                    if (e.getButton() != 3) return;
-                    
-                    // If a header popup menu was created ...
-                    if (headerPopup != null) {
-                        // Display the header popup menu where the user clicked.
-                        headerPopup.show(
-                            ConfigurableTable.this,
-                            e.getX(), e.getY() - header.getHeight());
+                    if (e.getButton() == 1) {
+                        int col = columnAtPoint(e.getPoint());
+                        String headerName = tableFormat.getColumnName(col);
+                        // TODO: RMV Need to update the "Sort by" combobox
+                        // TODO: RMV to match the new sort order.
+                        //sortCombo.setSelectedItem(headerName);
+
+                    // TODO: RMV Why doesn't the following line work?
+                    //} else if (!e.isPopupTrigger()) return;
+                    } else if (e.getButton() == 3) {
+                        // If a header popup menu was created ...
+                        if (headerPopup != null) {
+                            // Display the header popup menu where the user clicked.
+                            headerPopup.show(
+                                ConfigurableTable.this,
+                                e.getX(), e.getY() - header.getHeight());
+                        }
                     }
                 }
             });
@@ -154,6 +160,15 @@ public class ConfigurableTable<E> extends MouseableTable {
     }
 
     /**
+     * Sets the width of a given column.
+     * @param columnIndex the column index
+     * @param width the width
+     */
+    public void setColumnWidth(int columnIndex, int width) {
+        getColumnModel().getColumn(columnIndex).setPreferredWidth(width);
+    }
+
+    /**
      * Sets the objects whose data should be displayed in this table.
      * @param objects the objects
      */
@@ -169,15 +184,6 @@ public class ConfigurableTable<E> extends MouseableTable {
      */
     public void setEventList(EventList<E> eventList) {
         this.eventList = eventList;
-    }
-
-    /**
-     * Sets the width of a given column.
-     * @param columnIndex the column index
-     * @param width the width
-     */
-    public void setColumnWidth(int columnIndex, int width) {
-        getColumnModel().getColumn(columnIndex).setPreferredWidth(width);
     }
 
     /**

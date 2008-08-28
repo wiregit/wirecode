@@ -32,7 +32,7 @@ public class MouseableTable extends JXTable {
 	
 	private TableColors colors = new TableColors();
 	
-	public MouseableTable(){
+	public MouseableTable() {
 		initialize();
 	}
 	
@@ -41,24 +41,25 @@ public class MouseableTable extends JXTable {
 		initialize();
 	}
 	
-	public void setPopupHandler(TablePopupHandler popupHandler){
+	public void setPopupHandler(TablePopupHandler popupHandler) {
 		this.popupHandler = popupHandler;
 	}
 	
-	public void setDoubleClickHandler(TableDoubleClickHandler tableDoubleClickHandler){
+	public void setDoubleClickHandler(
+        TableDoubleClickHandler tableDoubleClickHandler) {
 		this.doubleClickHandler = tableDoubleClickHandler;
 	}
 	
-	protected void initialize(){	
+	protected void initialize() {	
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
 
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
 		setHighlighters(
-		        new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
-                new ColorHighlighter(HighlightPredicate.ODD, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground),
-                new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+            new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
+            new ColorHighlighter(HighlightPredicate.ODD, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground),
+            new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 		
 		//so that mouseovers will work within table
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -129,7 +130,8 @@ public class MouseableTable extends JXTable {
                     int col = columnAtPoint(e.getPoint());
                     int row = rowAtPoint(e.getPoint());
                     if (row >= 0 && col >= 0) {
-                        popupHandler.maybeShowPopup(e.getComponent(), e.getX(), e.getY());
+                        popupHandler.maybeShowPopup(
+                            e.getComponent(), e.getX(), e.getY());
                         TableCellEditor editor = getCellEditor();
                         if (editor != null) {
 							// force update editor colors
@@ -160,15 +162,15 @@ public class MouseableTable extends JXTable {
     /**
      * @return whether or not a popup menu is showing on the row
      */
-    public boolean isMenuShowing(int row){
-    	if(popupHandler != null){
+    public boolean isMenuShowing(int row) {
+    	if(popupHandler != null) {
     		return popupHandler.isPopupShowing(row);
     	}
     	return false;
     }
     
     @Override
-    public boolean isCellEditable(int row, int col){
+    public boolean isCellEditable(int row, int col) {
     	return getColumnModel().getColumn(col).getCellEditor() != null;
     }
 
@@ -214,7 +216,7 @@ public class MouseableTable extends JXTable {
 	    @Resource
 	    public Color selectionForeground;
 	    
-	    public TableColors(){
+	    public TableColors() {
 	        GuiUtils.assignResources(TableColors.this);
 	    }
 	}

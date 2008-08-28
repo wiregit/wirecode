@@ -41,7 +41,7 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case 3: return vsr;
             case 4: return getProperty(PropertyKey.RELEVANCE);
             case 5: return ""; // people with file
-            case 6: return ""; // owner
+            case 6: return getProperty(PropertyKey.OWNER);
             default: return null;
         }
     }

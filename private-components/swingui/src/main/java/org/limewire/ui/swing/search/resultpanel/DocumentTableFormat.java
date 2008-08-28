@@ -53,7 +53,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
             case 5: return vsr;
             case 6: return getProperty(PropertyKey.RELEVANCE);
             case 7: return ""; // people with file
-            case 8: return ""; // owner
+            case 8: return getProperty(PropertyKey.OWNER);
             case 9: return getProperty(PropertyKey.AUTHOR);
             default: return null;
         }

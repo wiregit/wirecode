@@ -39,34 +39,29 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
 
-        Icon icon = null;
-        String fileExtension = vsr.getFileExtension();
-        String type = null;
-        
-        if (index == 0) {
-            icon = iconManager.getIconForExtension(fileExtension);
-            //if (icon == null) {
-            //    System.out.println(
-            //        "AllTableFormat.getColumnValue: no icon for extension " +
-            //        fileExtension);
-            //}
-        } else if (index == 2) {
-            MediaType mediaType =
-                mediaType = MediaType.getMediaTypeForExtension(fileExtension);
-            type = mediaType == null ? fileExtension : mediaType.toString();
-            // TODO: RMV improve type text
-        }
-
         switch (index) {
-            case 0: return icon == null ? "none" : icon;
+            case 0: return getIcon(vsr);
             case 1: return getProperty(PropertyKey.NAME);
-            case 2: return type;
+            case 2: return getMediaType(vsr);
             case 3: return vsr.getSize();
             case 4: return vsr;
             case 5: return getProperty(PropertyKey.RELEVANCE);
             case 6: return ""; // people with file
-            case 7: return ""; // owner
+            case 7: return getProperty(PropertyKey.OWNER);
             default: return null;
         }
+    }
+
+    private Object getIcon(VisualSearchResult vsr) {
+        String ext = vsr.getFileExtension();
+        Icon icon = iconManager.getIconForExtension(ext);
+        return icon == null ? "none" : icon;
+    }
+
+    public static String getMediaType(VisualSearchResult vsr) {
+        String ext = vsr.getFileExtension();
+        MediaType mediaType = MediaType.getMediaTypeForExtension(ext);
+        // TODO: RMV improve the text returned
+        return mediaType == null ? ext : mediaType.toString();
     }
 }

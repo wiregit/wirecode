@@ -27,7 +27,7 @@ public class CalendarTableCellRenderer implements TableCellRenderer {
             SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy");
             text = sdf.format(calendar.getTime());
         } else {
-            text = value.toString();
+            text = value == null ? "" : value.toString();
         }
         
         label.setText(text);

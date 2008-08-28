@@ -84,6 +84,7 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.DATE_CREATED,
                     new GregorianCalendar(2008, 7, 27));
                 msr.setProperty(PropertyKey.NAME, name);
+                msr.setProperty(PropertyKey.OWNER, "Ross Geller");
                 msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
                 handleSearchResult(msr);
 
@@ -100,6 +101,7 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.COMMENTS, "Our album is awesome!");
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.LENGTH, "4:19");
+                msr.setProperty(PropertyKey.OWNER, "Phoebe Buffet");
                 msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
                 msr.setProperty(PropertyKey.QUALITY, "good quality");
                 handleSearchResult(msr);
@@ -120,6 +122,7 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.GENRE, "Jazz");
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.LENGTH, "4:31");
+                msr.setProperty(PropertyKey.OWNER, "Monica Geller");
                 msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
                 msr.setProperty(PropertyKey.QUALITY, "good quality");
                 msr.setProperty(PropertyKey.QUALITY, "excellent quality");
@@ -143,6 +146,8 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.HEIGHT, "480");
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.LENGTH, "0:48");
+                msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
+                msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
                 msr.setProperty(PropertyKey.RATING, "8");
                 msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
                 msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
@@ -161,6 +166,7 @@ public class MockSearch implements Search {
                 msr.addSource("phoebe");
                 msr.setUrn("www.swimming.org");
                 msr.setProperty(PropertyKey.NAME, name);
+                msr.setProperty(PropertyKey.OWNER, "Rachel Green");
                 msr.setProperty(PropertyKey.DATE_CREATED,
                     new GregorianCalendar(2008, 7, 20));
                 msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
