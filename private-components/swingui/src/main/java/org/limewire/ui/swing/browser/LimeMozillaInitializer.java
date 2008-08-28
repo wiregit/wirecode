@@ -22,6 +22,8 @@ import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
 import org.mozilla.interfaces.nsIComponentRegistrar;
 import org.mozilla.interfaces.nsIDownloadManager;
+import org.mozilla.interfaces.nsIPrefBranch;
+import org.mozilla.interfaces.nsIPrefService;
 import org.mozilla.xpcom.Mozilla;
 
 import com.limegroup.gnutella.DownloadManager;
@@ -80,24 +82,43 @@ public class LimeMozillaInitializer {
     }
 
     private static void overrideMozillaComponents(LimeWireCore limeWireCore) {
-        addDownloadListener(limeWireCore);
+        // addDownloadListener(limeWireCore);
+        updatePreferences();
         replaceDownloadManager(limeWireCore);
     }
 
+    private static void updatePreferences() {
+        nsIPrefService prefService = XPCOMUtils.getServiceProxy(
+                "@mozilla.org/preferences-service;1", nsIPrefService.class);
+
+        nsIPrefBranch prefBranch = prefService.getBranch("browser.download.");
+        boolean useDownloadDir = prefBranch.getBoolPref(
+                "useDownloadDir");
+        prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
+        prefService.getBranch("browser.download.").setIntPref("folderList", 2);
+        prefService.getBranch("browser.download.").setCharPref("dir","/home/pvertenten/Desktop/testmoz");
+        useDownloadDir = prefService.getBranch("browser.download.").getBoolPref(
+        "useDownloadDir");
+    }
+
     private static void replaceDownloadManager(LimeWireCore limeWireCore) {
-        register(new MozillaDownloadManager(limeWireCore.getDownloadManager()));
-    }
-
-    private static void addDownloadListener(LimeWireCore limeWireCore) {
+        register(new MozillaDownloadManager(limeWireCore.getDownloadServices(), limeWireCore
+                .getRemoteFileDescFactory()));
         register(new NsIDownloadManagerUIImpl());// removes download list screen
-
-        nsIDownloadManager nsidownloadManager = XPCOMUtils.getServiceProxy(
-                "@mozilla.org/download-manager;1", nsIDownloadManager.class);
-        nsidownloadManager.cleanUp();
-
-        DownloadManager downloadManager = limeWireCore.getDownloadManager();
-        nsidownloadManager.addListener(new MozillaDownloadManagerListener(downloadManager));
+        // register(new MozillaFilePicker());
     }
+
+    // private static void addDownloadListener(LimeWireCore limeWireCore) {
+    // register(new NsIDownloadManagerUIImpl());// removes download list screen
+    //
+    // nsIDownloadManager nsidownloadManager = XPCOMUtils.getServiceProxy(
+    // "@mozilla.org/download-manager;1", nsIDownloadManager.class);
+    // nsidownloadManager.cleanUp();
+    //
+    // DownloadManager downloadManager = limeWireCore.getDownloadManager();
+    // nsidownloadManager.addListener(new
+    // MozillaDownloadManagerListener(downloadManager));
+    // }
 
     private static String getResourceName() {
         if (OSUtils.isWindows()) {
