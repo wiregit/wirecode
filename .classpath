@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
+	<classpathentry kind="src" path="components/player/src/test/java"/>
+	<classpathentry kind="src" path="components/player/src/main/java"/>
+	<classpathentry kind="src" path="components/player-api/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/resources"/>
 	<classpathentry excluding="windows/|macosx/|target/" kind="src" output="gui" path="gui"/>
 	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
@@ -57,8 +60,8 @@
 	<classpathentry kind="src" output="components/xmpp-api/build/classes" path="components/xmpp-api/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
-    <classpathentry kind="lib" path="lib/jars/commons-math-1.2.jar"/>
-    <classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
+	<classpathentry kind="lib" path="lib/jars/commons-math-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>
 	<classpathentry kind="lib" path="lib/jars/daap.jar"/>
 	<classpathentry kind="lib" path="lib/jars/foxtrot.jar"/>

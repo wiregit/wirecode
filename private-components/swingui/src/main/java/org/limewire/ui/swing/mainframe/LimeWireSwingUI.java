@@ -11,10 +11,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
+import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.player.AudioPlayer;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.tray.TrayNotifier;

@@ -19,7 +19,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
-import org.limewire.ui.swing.player.AudioPlayer;
+import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;

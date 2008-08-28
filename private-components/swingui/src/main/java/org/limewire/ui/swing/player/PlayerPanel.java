@@ -24,6 +24,10 @@ import net.miginfocom.swing.MigLayout;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
+import org.limewire.player.api.AudioPlayer;
+import org.limewire.player.api.AudioPlayerEvent;
+import org.limewire.player.api.AudioPlayerListener;
+import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.MediaSlider;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -226,7 +230,8 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         heavyPanel.add(progressSlider, "dock south, gaptop 5px, gapbottom 5px");
         EventAnnotationProcessor.subscribe(this);
 
-        player.addAudioPlayerListener(new PlayerListener());
+        player.addAudioPlayerListener(new PlayerListener());        
+       
     }
     
     @EventSubscriber
@@ -309,7 +314,6 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
 
         @Override
         public void songOpened(Map<String, Object> properties) {
-           System.out.println(properties);
            titleLabel.setText((String)properties.get("title"));
            artistLabel.setText((String)properties.get("author"));
            albumLabel.setText((String)properties.get("album"));

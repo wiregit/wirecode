@@ -1,4 +1,5 @@
-package org.limewire.ui.swing.player;
+package org.limewire.player.api;
+
 
 import java.io.File;
 import java.io.InputStream;

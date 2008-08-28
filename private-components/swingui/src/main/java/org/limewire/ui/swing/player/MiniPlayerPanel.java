@@ -13,6 +13,10 @@ import javax.swing.JToolTip;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.HorizontalLayout;
+import org.limewire.player.api.AudioPlayer;
+import org.limewire.player.api.AudioPlayerEvent;
+import org.limewire.player.api.AudioPlayerListener;
+import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.CommonUtils;
 

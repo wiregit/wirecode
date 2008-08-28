@@ -1,4 +1,5 @@
-package org.limewire.ui.swing.player;
+package org.limewire.player.api;
+
 
 /**
  * This event is fired by the AudioPlayer everytime the state of the player changes.

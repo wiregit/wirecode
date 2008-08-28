@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.player;
+package org.limewire.player.impl;
 
 
 import java.io.IOException;
@@ -11,11 +11,16 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.player.api.AudioPlayer;
+import org.limewire.player.api.AudioPlayerEvent;
+import org.limewire.player.api.AudioPlayerListener;
+import org.limewire.player.api.AudioSource;
+import org.limewire.player.api.PlayerState;
+
 
 import com.google.inject.Singleton;
 
-import static org.limewire.ui.swing.player.PlayerState.*;
-
+import static org.limewire.player.api.PlayerState.*;
 
 /**
  *  An audio player to play compressed and uncompressed music.
