@@ -16,18 +16,23 @@ import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.xpcom.Mozilla;
 
-import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadServices;
 
-class MozillaDownloadManagerListener implements nsIDownloadProgressListener {
+/**
+ * This is an example of listening to a mozilla download and putting this info
+ * into the downloader list for the limewire client.
+ */
+class LimeMozillaDownloadManagerListener implements nsIDownloadProgressListener {
+
     public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
-    private final Map<Long, MozillaDownloadProgressListener> listeners;
+    private final Map<Long, LimeMozillaDownloadProgressListener> listeners;
 
-    private final DownloadManager downloadManager;
+    private final DownloadServices downloadServices;
 
-    public MozillaDownloadManagerListener(DownloadManager downloadManager) {
-        this.listeners = new WeakHashMap<Long, MozillaDownloadProgressListener>();
-        this.downloadManager = downloadManager;
+    public LimeMozillaDownloadManagerListener(DownloadServices downloadServices) {
+        this.listeners = new WeakHashMap<Long, LimeMozillaDownloadProgressListener>();
+        this.downloadServices = downloadServices;
     }
 
     private nsIDownloadManager getDownloadManager() {
@@ -38,17 +43,18 @@ class MozillaDownloadManagerListener implements nsIDownloadProgressListener {
 
     @Override
     public void onDownloadStateChange(short state, nsIDownload download) {
-        boolean added = addListener(download, state);
+        addListener(download, state);
     }
 
     private synchronized boolean addListener(nsIDownload download, short state) {
-        MozillaDownloadProgressListener listener = listeners.get(download.getId());
+        LimeMozillaDownloadProgressListener listener = listeners.get(download.getId());
         if (listener == null) {
-            listener = new MozillaDownloadProgressListener(download, state);
+            listener = new LimeMozillaDownloadProgressListener(download, state);
             listeners.put(download.getId(), listener);
             getDownloadManager().addListener(listener);
-            downloadManager.downloadFromMozilla(listener);
-            
+            // TODO would need to add back these methods for the download
+            // manager.
+            // downloadManager.downloadFromMozilla(listener);
             return true;
         }
         return false;
@@ -58,6 +64,7 @@ class MozillaDownloadManagerListener implements nsIDownloadProgressListener {
     public void onProgressChange(nsIWebProgress webProgress, nsIRequest request,
             long curSelfProgress, long maxSelfProgress, long curTotalProgress,
             long maxTotalProgress, nsIDownload download) {
+        // nothing to do for this listener
     }
 
     @Override

@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
-import org.limewire.ui.swing.browser.MozillaDownloadProgressListener;
+import org.limewire.ui.swing.browser.LimeMozillaDownloadProgressListener;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownload;
 import org.mozilla.interfaces.nsIDownloadManager;
@@ -21,16 +21,18 @@ import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MozillaDownloadMementoImpl;
 
+/**
+ * Downloader listening to events from the Mozilla download process.
+ */
 public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
-    public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
+    private static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
     private long downloadId;
 
-    private final MozillaDownloadProgressListener listener;
-   
+    private final LimeMozillaDownloadProgressListener listener;
 
-    public MozillaDownloaderImpl(MozillaDownloadProgressListener listener) {
+    public MozillaDownloaderImpl(LimeMozillaDownloadProgressListener listener) {
         super(new NoOpSaveLocationManager());
         this.listener = listener;
         this.downloadId = listener.getDownloadId();
@@ -396,5 +398,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         // nothing we do not want to init from memento
+        // TODO would need to stop error message in factory initing the
+        // downloader
     }
 }

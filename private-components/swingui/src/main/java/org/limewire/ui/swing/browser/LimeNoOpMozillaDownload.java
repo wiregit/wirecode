@@ -12,7 +12,7 @@ import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIURI;
 import org.mozilla.interfaces.nsIWebProgress;
 
-final class NoOpMozillaDownload implements nsIDownload {
+final class LimeNoOpMozillaDownload implements nsIDownload {
 	@Override
 	public long getAmountTransferred() {
 		throw new UnsupportedOperationException();

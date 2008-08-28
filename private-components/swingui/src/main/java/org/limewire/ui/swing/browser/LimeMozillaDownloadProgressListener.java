@@ -15,9 +15,11 @@ import com.google.inject.internal.base.Objects;
 import com.limegroup.bittorrent.SimpleBandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
 
-public class MozillaDownloadProgressListener implements nsIDownloadProgressListener {
-    private final nsIDownload download;
-
+/**
+ * This class listens to a specific Mozilla download and tracks some statistics
+ * for us.
+ */
+public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressListener {
     private final long downloadId;
 
     private final AtomicInteger state;
@@ -28,8 +30,8 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
 
     private final SimpleBandwidthTracker down;
 
-    public MozillaDownloadProgressListener(nsIDownload download, short state) {
-        this.download = Objects.nonNull(download, "download");
+    public LimeMozillaDownloadProgressListener(nsIDownload download, short state) {
+        Objects.nonNull(download, "download");
         this.downloadId = download.getId();
         this.state = new AtomicInteger(state);
         this.selfProgress = new AtomicLong();
@@ -41,9 +43,8 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
     @Override
     public void onDownloadStateChange(short state, nsIDownload download) {
         if (this.downloadId == download.getId()) {
-            this.state.set(state);
             // this is my download
-            System.out.println("state: " + this.state);
+            this.state.set(state);
         }
     }
 
@@ -57,12 +58,8 @@ public class MozillaDownloadProgressListener implements nsIDownloadProgressListe
 
             long diff = curTotalProgress - totalProgress.longValue();
             down.count(diff);
-
             selfProgress.set(curSelfProgress);
             totalProgress.set(curTotalProgress);
-            System.out.println("diff: " + diff);
-            System.out.println("curSelfProgress: " + selfProgress);
-            System.out.println("curTotalProgress: " + totalProgress);
         }
     }
 

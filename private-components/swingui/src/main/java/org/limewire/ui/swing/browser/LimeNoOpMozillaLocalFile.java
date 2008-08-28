@@ -12,7 +12,7 @@ import org.mozilla.interfaces.nsISimpleEnumerator;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.xpcom.Mozilla;
 
-final class NoOpNSILocalFile implements nsILocalFile {
+final class LimeNoOpMozillaLocalFile implements nsILocalFile {
 
     private File file;
 
@@ -20,97 +20,74 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     private String leafName = "";
 
-    public NoOpNSILocalFile(File file) {
+    public LimeNoOpMozillaLocalFile(File file) {
         Objects.nonNull(file, "file");
         this.file = file.getAbsoluteFile();
     }
 
     @Override
     public void appendRelativePath(String relativeFilePath) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
     }
 
     @Override
     public long getDiskSpaceAvailable() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return 0;
     }
 
     @Override
     public boolean getFollowLinks() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return false;
     }
 
     @Override
     public String getPersistentDescriptor() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return null;
     }
 
     @Override
     public String getRelativeDescriptor(nsILocalFile fromFile) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return null;
     }
 
     @Override
     public void initWithFile(nsILocalFile file) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void initWithPath(String filePath) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void launch() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void reveal() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void setFollowLinks(boolean followLinks) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void setPersistentDescriptor(String persistentDescriptor) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void setRelativeDescriptor(nsILocalFile fromFile, String relativeDesc) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public nsIFile _clone() {
-        return new NoOpNSILocalFile(new File(file.getAbsolutePath()));
+        return new LimeNoOpMozillaLocalFile(new File(file.getAbsolutePath()));
     }
 
     @Override
@@ -125,35 +102,27 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public boolean contains(nsIFile inFile, boolean recur) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return false;
     }
 
     @Override
     public void copyTo(nsIFile newParentDir, String newName) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void copyToFollowingLinks(nsIFile newParentDir, String newName) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void create(long type, long permissions) {
-       //do nothing, let limewire handle this action
+        // do nothing, let limewire handle this action
     }
 
     @Override
     public void createUnique(long type, long permissions) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
@@ -163,9 +132,7 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public nsISimpleEnumerator getDirectoryEntries() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return null;
     }
 
     @Override
@@ -175,9 +142,7 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public long getFileSizeOfLink() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return 0;
     }
 
     @Override
@@ -187,9 +152,7 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public long getLastModifiedTimeOfLink() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return 0;
     }
 
     @Override
@@ -199,9 +162,7 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public nsIFile getParent() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException();
-        // return null;
+        return new LimeNoOpMozillaLocalFile(file.getParentFile());
     }
 
     @Override
@@ -211,23 +172,17 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public long getPermissions() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return 0;
     }
 
     @Override
     public long getPermissionsOfLink() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return 0;
     }
 
     @Override
     public String getTarget() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-        // return null;
     }
 
     @Override
@@ -272,23 +227,18 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public void moveTo(nsIFile newParentDir, String newName) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
 
     }
 
     @Override
     public void normalize() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void remove(boolean recursive) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
@@ -303,9 +253,7 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public void setLastModifiedTimeOfLink(long lastModifiedTimeOfLink) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
@@ -315,16 +263,12 @@ final class NoOpNSILocalFile implements nsILocalFile {
 
     @Override
     public void setPermissions(long permissions) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public void setPermissionsOfLink(long permissionsOfLink) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException();
-
     }
 
     @Override

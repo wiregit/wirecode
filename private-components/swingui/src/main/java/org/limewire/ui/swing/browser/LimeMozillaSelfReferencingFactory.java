@@ -6,14 +6,14 @@ import org.mozilla.interfaces.nsIFactory;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.xpcom.Mozilla;
 
-public abstract class NsISelfReferencingFactory implements nsIFactory,
+public abstract class LimeMozillaSelfReferencingFactory implements nsIFactory,
 		nsISupports {
 
 	private final Log LOG;
 	private final String IID;
 	private final String CID;
 
-	public NsISelfReferencingFactory(String IID, String CID) {
+	public LimeMozillaSelfReferencingFactory(String IID, String CID) {
 		this.IID = IID;
 		this.CID = CID;
 		LOG = LogFactory.getLog(this.getClass());
