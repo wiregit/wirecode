@@ -34,7 +34,7 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case 7: return getProperty(PropertyKey.GENRE);
             case 8: return getProperty(PropertyKey.TRACK_NUMBER);
             case 9: return getProperty(PropertyKey.RELEVANCE);
-            case 10: return ""; // people with file
+            case 10: return vsr.getSources().size();
             case 11: return getProperty(PropertyKey.OWNER);
             case 12: return vsr.getFileExtension();
             case 13: return getProperty(PropertyKey.SAMPLE_RATE);

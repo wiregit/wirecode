@@ -34,7 +34,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case 4: return getProperty(PropertyKey.QUALITY);
             case 5: return vsr;
             case 6: return getProperty(PropertyKey.RELEVANCE);
-            case 7: return ""; // people with file
+            case 7: return vsr.getSources().size();
             case 8: return getProperty(PropertyKey.OWNER);
             case 9: return getProperty(PropertyKey.RATING);
             case 10: return getProperty(PropertyKey.COMMENTS);

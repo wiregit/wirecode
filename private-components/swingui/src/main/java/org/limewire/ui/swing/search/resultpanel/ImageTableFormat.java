@@ -40,7 +40,7 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case 2: return getProperty(PropertyKey.DATE_CREATED);
             case 3: return vsr;
             case 4: return getProperty(PropertyKey.RELEVANCE);
-            case 5: return ""; // people with file
+            case 5: return vsr.getSources().size();
             case 6: return getProperty(PropertyKey.OWNER);
             default: return null;
         }

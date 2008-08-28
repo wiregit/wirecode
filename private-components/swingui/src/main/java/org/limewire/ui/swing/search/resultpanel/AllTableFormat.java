@@ -46,7 +46,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case 3: return vsr.getSize();
             case 4: return vsr;
             case 5: return getProperty(PropertyKey.RELEVANCE);
-            case 6: return ""; // people with file
+            case 6: return vsr.getSources().size();
             case 7: return getProperty(PropertyKey.OWNER);
             default: return null;
         }
