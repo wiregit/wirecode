@@ -21,12 +21,10 @@ import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
 import org.mozilla.interfaces.nsIComponentRegistrar;
-import org.mozilla.interfaces.nsIDownloadManager;
 import org.mozilla.interfaces.nsIPrefBranch;
 import org.mozilla.interfaces.nsIPrefService;
 import org.mozilla.xpcom.Mozilla;
 
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.LimeWireCore;
 
 public class LimeMozillaInitializer {
@@ -92,18 +90,17 @@ public class LimeMozillaInitializer {
                 "@mozilla.org/preferences-service;1", nsIPrefService.class);
 
         nsIPrefBranch prefBranch = prefService.getBranch("browser.download.");
-        boolean useDownloadDir = prefBranch.getBoolPref(
-                "useDownloadDir");
+        boolean useDownloadDir = prefBranch.getBoolPref("useDownloadDir");
         prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
         prefService.getBranch("browser.download.").setIntPref("folderList", 2);
-        prefService.getBranch("browser.download.").setCharPref("dir","/home/pvertenten/Desktop/testmoz");
-        useDownloadDir = prefService.getBranch("browser.download.").getBoolPref(
-        "useDownloadDir");
+        prefService.getBranch("browser.download.").setCharPref("dir",
+                "/home/pvertenten/Desktop/testmoz");
+        useDownloadDir = prefService.getBranch("browser.download.").getBoolPref("useDownloadDir");
     }
 
     private static void replaceDownloadManager(LimeWireCore limeWireCore) {
-        register(new MozillaDownloadManager(limeWireCore.getDownloadServices(), limeWireCore
-                .getRemoteFileDescFactory()));
+        register(new MozillaDownloadManager(limeWireCore.getDownloadServices(),
+                limeWireCore.getRemoteFileDescFactory()));
         register(new NsIDownloadManagerUIImpl());// removes download list screen
         // register(new MozillaFilePicker());
     }
