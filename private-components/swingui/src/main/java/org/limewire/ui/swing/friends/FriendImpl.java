@@ -13,6 +13,7 @@ import org.limewire.xmpp.api.client.Presence.Mode;
  */
 public class FriendImpl extends AbstractBean implements Friend {
     private boolean chatting;
+    private boolean activeConversation;
     private final User user;
     private final Presence presence;
     private String status;
@@ -89,5 +90,17 @@ public class FriendImpl extends AbstractBean implements Friend {
     @Override
     public long getChatStartTime() {
         return chatStartTime;
+    }
+
+    @Override
+    public boolean isActiveConversation() {
+        return activeConversation;
+    }
+    
+    @Override
+    public void setActiveConversation(boolean active) {
+        boolean oldActiveConversation = activeConversation;
+        activeConversation = active;
+        firePropertyChange("activeConversation", oldActiveConversation, activeConversation);
     }
 }

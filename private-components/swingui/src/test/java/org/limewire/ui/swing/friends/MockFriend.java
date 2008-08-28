@@ -9,6 +9,7 @@ import org.limewire.xmpp.api.client.Presence.Mode;
 class MockFriend implements Friend {
     private final String name, status;
     private final Mode state;
+    private boolean activeConversation;
     
     public MockFriend(String name, String status, Mode state) {
         this.name = name;
@@ -67,5 +68,15 @@ class MockFriend implements Friend {
     @Override
     public void stopChat() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isActiveConversation() {
+        return activeConversation;
+    }
+
+    @Override
+    public void setActiveConversation(boolean active) {
+        this.activeConversation = active;
     }
 }

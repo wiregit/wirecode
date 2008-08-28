@@ -18,6 +18,10 @@ public interface Friend {
     
     boolean isChatting();
     
+    boolean isActiveConversation();
+    
+    void setActiveConversation(boolean active);
+    
     void startChat();
     
     void stopChat();

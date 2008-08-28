@@ -51,7 +51,6 @@ import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.Presence.Mode;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -81,6 +80,9 @@ public class FriendsPane extends JPanel {
     private final WeakHashMap<String, FriendImpl> idToFriendMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
+    private WeakReference<Friend>  activeConversation = new WeakReference<Friend>(null);
+    private static final Color LIGHT_GREY = new Color(218, 218, 218);
+    private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
     @Inject
     public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager) {
@@ -248,10 +250,20 @@ public class FriendsPane extends JPanel {
         MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
         MessageWriter writerWrapper = new MessageWriterImpl(myID, friend, writer);
         new ConversationStartedEvent(friend, writerWrapper).publish();
+        setActiveConversation(friend);
+    }
+
+    private void setActiveConversation(Friend friend) {
+        LOG.debugf("Setting active conversation: {0}", friend.getName());
+        Friend oldActiveConversation = activeConversation.get();
+        if (oldActiveConversation != null) {
+            oldActiveConversation.setActiveConversation(false);
+        }
+        activeConversation = new WeakReference<Friend>(friend);
+        friend.setActiveConversation(true);
     }
 
     private class FriendCellRenderer implements ListCellRenderer {
-        private final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
         private final IconLibrary icons;
         
         public FriendCellRenderer(IconLibrary icons) {
@@ -289,7 +301,7 @@ public class FriendsPane extends JPanel {
                 if (model.getSize() > (index + 1)) {
                     Friend nextFriend = (Friend) model.getElementAt(index + 1);
                     if (!nextFriend.isChatting()) {
-                        //Light-grey
+                        //Light-grey separator line between last chatting friend and non-chatting friends
                         border = new DropShadowBorder(new Color(194, 194, 194), 1, 1.0f, 1, false, false, true, false);
                     }
                 }
@@ -300,20 +312,19 @@ public class FriendsPane extends JPanel {
             cell.setEnabled(list.isEnabled());
 
             if (isSelected) {
-                if (friend.getMode() == Mode.chat) {
-                    RectanglePainter painter = new RectanglePainter();
-                    //light-blue gradient
-                    painter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
-                    painter.setBorderPaint(Color.WHITE);
-                    painter.setBorderWidth(0f);
-                    cell.setBackgroundPainter(painter);
-                } else {
-                    cell.setBackground(new Color(218, 218, 218));
-                }
+                cell.setBackground(LIGHT_GREY);
+            } else if (friend.isActiveConversation()) {
+                RectanglePainter painter = new RectanglePainter();
+                //light-blue gradient
+                painter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
+                painter.setBorderPaint(Color.WHITE);
+                painter.setBorderWidth(0f);
+                cell.setBackgroundPainter(painter);
             } else  {
                 cell.setBackground(list.getBackground());
                 cell.setForeground(list.getForeground());
             }
+            
             cell.setBorder(border);
             
             return cell;
