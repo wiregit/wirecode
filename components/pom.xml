@@ -55,10 +55,12 @@
     <module>setting</module>
     <module>statistic</module>
     <module>xmpp</module>
+    <module>player</module>
     <module>test-util</module>
     <module>core-api</module>
     <module>core-settings</module>
     <module>xmpp-api</module>
+    <module>player-api</module>
   </modules>
 
   <repositories>

@@ -11,7 +11,7 @@
   <artifactId>lw-player</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
-  <name>LimeWire playera Player Component</name>
+  <name>LimeWire player Player Component</name>
 
   <dependencies> 
     <dependency>
@@ -21,7 +21,7 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
-      <artifactId>lw-player</artifactId>
+      <artifactId>lw-player-api</artifactId>
       <version>${limewire.version}</version>
     </dependency>
     <dependency>
