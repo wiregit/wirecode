@@ -46,6 +46,7 @@ import org.limewire.ui.swing.action.PopupDecider;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
+import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
@@ -211,9 +212,9 @@ public class FriendsPane extends JPanel {
                     final FriendImpl newFriend = new FriendImpl(event.getUser(), presence);
                     presence.setIncomingChatListener(new IncomingChatListener() {
                         public MessageReader incomingChat(MessageWriter writer) {
-                            LOG.debugf("incomingChat started from: {0}", presence.getJID());
+                            LOG.debugf("{0} is typing a message", presence.getJID());
                             MessageWriter writerWrapper = new MessageWriterImpl(myID, newFriend, writer);
-                            ConversationStartedEvent event = new ConversationStartedEvent(newFriend, writerWrapper);
+                            ConversationStartedEvent event = new ConversationStartedEvent(newFriend, writerWrapper, false);
                             event.publish();
                             //Hang out until a responder has processed this event
                             event.await();
@@ -238,7 +239,12 @@ public class FriendsPane extends JPanel {
     
     @RuntimeTopicPatternEventSubscriber
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
-        LOG.debugf("Message: from {0} text: {1}", event.getMessage().getSenderName(), event.getMessage().getMessageText());
+        Message message = event.getMessage();
+        LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
+        Friend friend = message.getFriend();
+        if (!friend.isActiveConversation() && message.getType() == Type.Received) {
+            friend.setReceivingUnviewedMessages(true);
+        }
     }
     
     public String getTopicPatternName() {
@@ -252,7 +258,7 @@ public class FriendsPane extends JPanel {
     private void fireConversationStarted(Friend friend) {
         MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
         MessageWriter writerWrapper = new MessageWriterImpl(myID, friend, writer);
-        new ConversationStartedEvent(friend, writerWrapper).publish();
+        new ConversationStartedEvent(friend, writerWrapper, true).publish();
         setActiveConversation(friend);
     }
 
@@ -263,6 +269,7 @@ public class FriendsPane extends JPanel {
             oldActiveConversation.setActiveConversation(false);
         }
         activeConversation = new WeakReference<Friend>(friend);
+        friend.setReceivingUnviewedMessages(false);
         friend.setActiveConversation(true);
     }
 
@@ -292,7 +299,7 @@ public class FriendsPane extends JPanel {
             
             if (friend.isChatting()) {
                 //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally  
-                friendIcon.setIcon(icons.getChatting());
+                friendIcon.setIcon(friend.isReceivingUnviewedMessages() ? icons.getUnviewedMessages() : icons.getChatting());
                 
                 //FIXME:  This isn't exactly the right behavior. end chat icon should only 
                 //appear on hover during a chat.

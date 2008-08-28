@@ -84,4 +84,14 @@ class MockFriend implements Friend {
     public boolean isSignedInToLimewire() {
         return false;
     }
+
+    @Override
+    public boolean isReceivingUnviewedMessages() {
+        return false;
+    }
+
+    @Override
+    public void setReceivingUnviewedMessages(boolean hasMessages) {
+        
+    }
 }

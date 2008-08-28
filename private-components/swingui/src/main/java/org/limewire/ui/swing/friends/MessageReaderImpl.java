@@ -10,7 +10,7 @@ class MessageReaderImpl implements MessageReader {
     }
 
     public void readMessage(final String message) {
-        final Message msg = newMessage(message, Message.Type.Received);
+        final Message msg = newMessage(message, message == null ? Message.Type.Typing : Message.Type.Received);
         new MessageReceivedEvent(msg).publish();
     }
 

@@ -5,7 +5,7 @@ package org.limewire.ui.swing.friends;
  *
  */
 public interface Message {
-    enum Type { Sent, Received };
+    enum Type { Sent, Received, Typing };
     
     String getSenderName();
     

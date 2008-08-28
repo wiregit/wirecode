@@ -30,6 +30,10 @@ public interface Friend {
     
     long getChatStartTime();
     
+    boolean isReceivingUnviewedMessages();
+    
+    void setReceivingUnviewedMessages(boolean hasMessages);
+    
     MessageWriter createChat(MessageReader reader);
 
     void addPropertyChangeListener(PropertyChangeListener listener);

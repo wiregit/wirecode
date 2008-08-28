@@ -16,6 +16,7 @@ class IconLibraryImpl implements IconLibrary {
     @Resource private Icon available;
     @Resource private Icon away;
     @Resource private Icon chatting;
+    @Resource private Icon incomingChat;
     @Resource private Icon endChat;
     @Resource private Icon doNotDisturb;
     @Resource private Icon chatStatusStub;
@@ -37,6 +38,11 @@ class IconLibraryImpl implements IconLibrary {
     
     public Icon getChatting() {
         return chatting;
+    }
+
+    @Override
+    public Icon getUnviewedMessages() {
+        return incomingChat;
     }
 
     public Icon getEndChat() {

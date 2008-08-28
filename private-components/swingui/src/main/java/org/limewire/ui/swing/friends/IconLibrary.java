@@ -14,6 +14,8 @@ interface IconLibrary {
     
     Icon getChatting();
     
+    Icon getUnviewedMessages();
+    
     Icon getEndChat();
 
     Icon getDoNotDisturb();

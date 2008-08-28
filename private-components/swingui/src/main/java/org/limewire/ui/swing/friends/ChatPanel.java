@@ -57,7 +57,7 @@ public class ChatPanel extends JPanel implements Displayable {
             chats.put(friend.getName(), chatPane);
         }
         
-        if (conversationPanel.getComponent(0) != chatPane) {
+        if (conversationPanel.getComponent(0) != chatPane && event.isLocallyInitiated()) {
             conversationPanel.removeAll();
             conversationPanel.add(chatPane, BorderLayout.CENTER);
             //FIXME: Why doesn't add() trigger the repaint that revalidate() does?

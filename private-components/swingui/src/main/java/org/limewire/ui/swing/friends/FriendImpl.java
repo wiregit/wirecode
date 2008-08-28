@@ -20,6 +20,7 @@ public class FriendImpl extends AbstractBean implements Friend {
     private String status;
     private Mode mode;
     private long chatStartTime;
+    private boolean hasUnviewedMessages;
     
     FriendImpl(User user, Presence presence) {
         this.user = user;
@@ -108,5 +109,17 @@ public class FriendImpl extends AbstractBean implements Friend {
     @Override
     public boolean isSignedInToLimewire() {
         return presence instanceof LimePresence;
+    }
+
+    @Override
+    public boolean isReceivingUnviewedMessages() {
+        return hasUnviewedMessages;
+    }
+
+    @Override
+    public void setReceivingUnviewedMessages(boolean hasMessages) {
+        boolean oldHasUnviewedMessages = hasUnviewedMessages;
+        hasUnviewedMessages = hasMessages;
+        firePropertyChange("receivingUnviewedMessages", oldHasUnviewedMessages, hasMessages);
     }
 }
