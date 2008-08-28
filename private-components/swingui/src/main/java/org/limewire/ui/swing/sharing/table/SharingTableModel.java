@@ -19,11 +19,8 @@ public class SharingTableModel extends EventTableModel<FileItem> {
         this.fileList = fileList;
     }
     
-    public FileItem getFileItem(int index) {
-        return sharedItems.get(index);
-    }
-    
-    public FileList getFileList() {
-        return fileList;
+    public void removeFile(int index) { 
+        FileItem item = sharedItems.get(index);
+        fileList.removeFile(item.getFile());
     }
 }

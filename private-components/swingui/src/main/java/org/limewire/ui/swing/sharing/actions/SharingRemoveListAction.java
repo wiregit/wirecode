@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 
@@ -26,8 +25,7 @@ public class SharingRemoveListAction extends AbstractAction {
         int index = list.getSelectedIndex();
         if(index > -1) {
             ImageListModel model = (ImageListModel) list.getModel();
-            FileItem item = model.getFileItem(index);
-            model.getFileList().removeFile(item.getFile());
+            model.removeFile(index);
         }
     }
 }

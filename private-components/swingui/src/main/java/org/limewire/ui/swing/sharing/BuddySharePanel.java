@@ -234,7 +234,7 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         }
 
         @Override
-        public void listChanged(ListEvent<FileItem> listChanges) { System.out.println("list changed");
+        public void listChanged(ListEvent<FileItem> listChanges) {
             if(listChanges.getSourceList().size() > 0) {
                 viewSelectionPanel.setEnabled(true);
             } else {

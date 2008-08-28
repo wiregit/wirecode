@@ -18,12 +18,9 @@ public class ImageListModel extends EventListModel<FileItem>{
         this.fileList = fileList;
     }
     
-    public FileItem getFileItem(int index) {
-        return fileItems.get(index);
-    }
-    
-    public FileList getFileList() {
-        return fileList;
+    public void removeFile(int index) {
+        FileItem item = fileItems.get(index);
+        fileList.removeFile(item.getFile());
     }
 
 }

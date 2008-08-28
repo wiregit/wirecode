@@ -262,11 +262,14 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         private FileManager fileManager;
         private String name;
         
+        private Map<File, FileItem> lookup;
+        
         BuddyFileList(FileManager fileManager, String name) {
             this.fileManager = fileManager;
             this.name = name;
             
             this.fileManager.getBuddyFileList(name).addFileListListener(this);
+            lookup = new HashMap<File, FileItem>();
         }
         
         @Override
@@ -287,13 +290,15 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void addEvent(FileDesc fileDesc) {
             FileItem newItem = new CoreFileItem(fileDesc);  
+            lookup.put(fileDesc.getFile(), newItem);
             eventList.add(newItem);
         }
 
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
-            FileItem oldItem = new CoreFileItem(oldDesc);
-            FileItem newItem = new CoreFileItem(newDesc);  
+            FileItem oldItem = lookup.remove(oldDesc.getFile());
+            FileItem newItem = new CoreFileItem(newDesc);
+            lookup.put(newDesc.getFile(), newItem);
 
             eventList.remove(oldItem);
             eventList.add(newItem);
@@ -301,8 +306,8 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void removeEvent(FileDesc fileDesc) {
-            FileItem newItem = new CoreFileItem(fileDesc);  
-            eventList.remove(newItem);
+            FileItem old = lookup.remove(fileDesc.getFile());
+            eventList.remove(old);
         }
     }
     
