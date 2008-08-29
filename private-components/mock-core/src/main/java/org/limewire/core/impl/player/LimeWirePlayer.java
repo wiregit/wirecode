@@ -1,6 +1,16 @@
 package org.limewire.core.impl.player;
 
 
+import static org.limewire.player.api.PlayerState.EOM;
+import static org.limewire.player.api.PlayerState.GAIN;
+import static org.limewire.player.api.PlayerState.PAUSED;
+import static org.limewire.player.api.PlayerState.PLAYING;
+import static org.limewire.player.api.PlayerState.SEEKING;
+import static org.limewire.player.api.PlayerState.SEEKING_PAUSED;
+import static org.limewire.player.api.PlayerState.SEEKING_PLAY;
+import static org.limewire.player.api.PlayerState.STOPPED;
+import static org.limewire.player.api.PlayerState.UNKNOWN;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +27,7 @@ import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 
-
 import com.google.inject.Singleton;
-
-import static org.limewire.player.api.PlayerState.*;
 
 /**
  *  An audio player to play compressed and uncompressed music.
@@ -476,7 +483,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     protected void notifyEvent(final PlayerState state, final double value) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                fireStateUpdated(new AudioPlayerEvent(state,value));
+//                fireStateUpdated(new AudioPlayerEvent(state,value));
             }
         });
     }

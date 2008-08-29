@@ -3,23 +3,17 @@ package org.limewire.core.impl.player;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.limewire.player.api.AudioSource;
-import org.limewire.util.FileUtils;
+
+//import org.limewire.player.api.AudioSource;
+//import org.limewire.util.FileUtils;
 //import org.limewire.util.GenericsUtils;
 //import org.limewire.util.GenericsUtils.ScanMode;
 //import org.tritonus.share.sampled.TAudioFormat;
@@ -57,64 +51,6 @@ import org.limewire.util.FileUtils;
  *  </pre>
  */
 public class LimeAudioFormat {
-
-    /**
-     * Property values that are loaded into the properties map if we can't 
-     * parse the data using TAudioFileFormat
-     */
-    public static final String AUDIO_LENGTH_BYTES = "audio.length.bytes";
-
-    public static final String AUDIO_LENGTH_FRAMES = "audio.length.frames";
-
-    public static final String AUDIO_TYPE = "audio.type";
-
-    public static final String AUDIO_FRAMERATE_FPS = "audio.framerate.fps";
-
-    public static final String AUDIO_FRAMESIZE_BYTES = "audio.framesize.bytes";
-
-    public static final String AUDIO_SAMPLERATE_HZ = "audio.samplerate.hz";
-
-    public static final String AUDIO_SAMPLESIZE_BITS = "audio.samplesize.bits";
-
-    public static final String AUDIO_CHANNELS = "audio.channels";
-
-    /**
-     * Stream for reading from the audioSource
-     */
-    private final AudioInputStream audioInputStream;
-
-    /**
-     * Stream for writing audio data to sound card from
-     */
-    private final SourceDataLine sourceDataLine;
-
-    /**
-     * Stream for reading in encodedFormat. After decoding the inputStream, its
-     * no longer possible to use stream.available() to give us the correct
-     * current location so we save a reference of the encodedStream
-     */
-    private final AudioInputStream encodedAudioInputStream;
-
-    /**
-     * Audio source currently reading from (url, file, input stream)
-     */
-    private final AudioSource audioSource;
-
-    /**
-     * Properties of the current audio source
-     */
-    private final Map<String, Object> properties;
-
-    /**
-     * Total length of the current song in bytes
-     */
-    private final long totalLength;
-
-    /**
-     * Control for the gain on the sourceDataLine
-     */
-    private FloatControl gainControl;
-
     
     /**
      * Loads a file into the player and initializes all the input and output streams.
@@ -123,7 +59,7 @@ public class LimeAudioFormat {
      */
     public LimeAudioFormat(File file, long position) throws UnsupportedAudioFileException, 
                     IOException, LineUnavailableException, NullPointerException {
-        this( new AudioSource(file), position );
+//        this( new AudioSource(file), position );
     }
 
     /**
@@ -133,7 +69,7 @@ public class LimeAudioFormat {
      */
     public LimeAudioFormat(InputStream stream, long position) throws UnsupportedAudioFileException, 
                     IOException, LineUnavailableException, NullPointerException {
-        this( new AudioSource(stream), position );
+//        this( new AudioSource(stream), position );
     }
 
     /**
@@ -143,18 +79,7 @@ public class LimeAudioFormat {
      */ 
     public LimeAudioFormat(AudioSource audioSource, long position) throws UnsupportedAudioFileException, 
                     IOException, LineUnavailableException, NullPointerException {
-        if (audioSource == null)
-            throw new NullPointerException("Couldn't load song");
-            
-        this.audioSource = audioSource;
-        encodedAudioInputStream = createAudioInputStream(audioSource, position);
-        properties = createProperties(audioSource);
-        if( audioSource.getFile() != null )
-            totalLength = audioSource.getFile().length();
-        else
-            totalLength = encodedAudioInputStream.available();
-        audioInputStream = createDecodedAudioInputStream(encodedAudioInputStream);
-        sourceDataLine = createSourceDataLine(audioInputStream);
+
     }
 
     /**
@@ -178,31 +103,7 @@ public class LimeAudioFormat {
      */
     public static AudioInputStream createAudioInputStream(AudioSource source,
             long skip) throws UnsupportedAudioFileException, IOException, NullPointerException {
-        AudioInputStream stream; 
-        if (source.getFile() != null) {
-            // skip doesn't guarentee to return to skip the exact number of frames
-            // requested, don't try and skip to close to the EOF to avoid overflow
-            if( skip < 0 || skip > source.getFile().length() - 10000 )
-                skip = 0;
-            // use RandomAccessStreams to speed up mp3 searches since its encoded
-            if (source.getFile().getName().toLowerCase(Locale.US).endsWith(".mp3")) {
-                RandomAudioInputStream i = new RandomAudioInputStream(
-                        new RandomAccessFile(source.getFile(), "rw"));
-                i.skip(skip);
-                stream = AudioSystem.getAudioInputStream(i);
-            } else {
-                stream = AudioSystem.getAudioInputStream(source.getFile());
-                stream.skip(skip);
-            }
-
-        } else if (source.getStream() != null) {
-            stream = AudioSystem.getAudioInputStream(source.getStream());
-        } else if ( source.getURL() != null ) {
-            stream = AudioSystem.getAudioInputStream(source.getURL().openStream());
-        }
-        else
-            throw new IllegalArgumentException("Attempting to open invalid audio source");
-        return stream;
+        return null;
     }
 
     /**
@@ -225,33 +126,7 @@ public class LimeAudioFormat {
      */
     public static AudioInputStream createDecodedAudioInputStream(
             AudioInputStream audioInputStream) {
-        AudioFormat sourceFormat = audioInputStream.getFormat();
-
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, sourceFormat, LimeWirePlayer.EXTERNAL_BUFFER_SIZE);
-        
-        // if audioInputStream already in PCM format of audio card, do nothing
-        if( AudioSystem.isLineSupported(info)) { 
-            return audioInputStream;
-        } else {        
-            int nSampleSizeInBits = sourceFormat.getSampleSizeInBits();
-            if (nSampleSizeInBits <= 0)
-                nSampleSizeInBits = 16;
-            if ((sourceFormat.getEncoding() == AudioFormat.Encoding.ULAW)
-                    || (sourceFormat.getEncoding() == AudioFormat.Encoding.ALAW))
-                nSampleSizeInBits = 16;
-            if (nSampleSizeInBits != 8)
-                nSampleSizeInBits = 16;
-            AudioFormat targetFormat = new AudioFormat(
-                    AudioFormat.Encoding.PCM_SIGNED, sourceFormat.getSampleRate(),
-                    nSampleSizeInBits, sourceFormat.getChannels(), sourceFormat
-                            .getChannels()
-                            * (nSampleSizeInBits / 8),
-                    sourceFormat.getSampleRate(), false);
-            
-            info = new DataLine.Info(SourceDataLine.class, targetFormat, LimeWirePlayer.EXTERNAL_BUFFER_SIZE);
-            // Use reflection to try and load the proper decoded to create a decoded stream.
-            return AudioSystem.getAudioInputStream(targetFormat, audioInputStream);
-        }
+        return null;
     }
 
     /**
@@ -290,24 +165,7 @@ public class LimeAudioFormat {
     private SourceDataLine createSourceDataLine(
             AudioInputStream audioInputStream, int bufferSize)
             throws LineUnavailableException {
-        if( audioInputStream == null )
-            throw new NullPointerException("input stream is null");
-
-        AudioFormat audioFormat = audioInputStream.getFormat();
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class,
-                audioFormat, AudioSystem.NOT_SPECIFIED);
-        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
-
-        if (bufferSize <= 0)
-            bufferSize = line.getBufferSize();
-        line.open(audioFormat, bufferSize);
-
-        /*-- Is Gain Control supported ? --*/
-        if (line.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
-            gainControl = (FloatControl) line
-                    .getControl(FloatControl.Type.MASTER_GAIN);
-        }
-        return line;
+        return null;
     }
 
     /**
@@ -330,56 +188,7 @@ public class LimeAudioFormat {
      */
     private static Map<String, Object> createProperties(AudioSource source)
             throws UnsupportedAudioFileException, IOException {
-
-        AudioFileFormat audioFileFormat;
-        Map<String, Object> properties = new HashMap<String, Object>();
-
-        if (source.getFile() != null) {
-            audioFileFormat = AudioSystem.getAudioFileFormat(source.getFile());
-        } else if (source.getStream() != null) {
-            audioFileFormat = AudioSystem
-                    .getAudioFileFormat(source.getStream());
-        } else
-            return properties;
-
-//        if (audioFileFormat instanceof TAudioFileFormat) {
-//            // Tritonus SPI compliant audio file format.
-//            properties = GenericsUtils.scanForMap(
-//                    ((TAudioFileFormat) audioFileFormat).properties(),
-//                    String.class, Object.class, ScanMode.REMOVE);
-//            // Clone the Map because it is not mutable.
-//            Map<String, Object> newMap = new HashMap<String, Object>(properties);
-//            properties = newMap;
-//        } 
-        // Add JavaSound properties.
-        if (audioFileFormat.getByteLength() > 0)
-            properties.put(AUDIO_LENGTH_BYTES, audioFileFormat.getByteLength());
-        if (audioFileFormat.getFrameLength() > 0)
-            properties.put(AUDIO_LENGTH_FRAMES, audioFileFormat.getFrameLength());
-        if (audioFileFormat.getType() != null)
-            properties.put(AUDIO_TYPE, (audioFileFormat.getType().toString()));
-
-        AudioFormat audioFormat = audioFileFormat.getFormat();
-
-        if (audioFormat.getFrameRate() > 0)
-            properties.put(AUDIO_FRAMERATE_FPS, audioFormat.getFrameRate());
-        if (audioFormat.getFrameSize() > 0)
-            properties.put(AUDIO_FRAMESIZE_BYTES, audioFormat.getFrameSize());
-        if (audioFormat.getSampleRate() > 0)
-            properties.put(AUDIO_SAMPLERATE_HZ, audioFormat.getSampleRate());
-        if (audioFormat.getSampleSizeInBits() > 0)
-            properties.put(AUDIO_SAMPLESIZE_BITS, audioFormat
-                    .getSampleSizeInBits());
-        if (audioFormat.getChannels() > 0)
-            properties.put(AUDIO_CHANNELS, audioFormat.getChannels());
-//        if (audioFormat instanceof TAudioFormat) {
-//            // Tritonus SPI compliant audio format.
-//            Map<String, Object> addproperties = GenericsUtils.scanForMap(
-//                    ((TAudioFormat) audioFormat).properties(), String.class,
-//                    Object.class, ScanMode.REMOVE);
-//            properties.putAll(addproperties);
-//        }
-        return properties;
+        return null;
     }
     
 
@@ -387,21 +196,21 @@ public class LimeAudioFormat {
      * @return the audio source of the inputStream
      */
     public AudioSource getSource() {
-        return audioSource;
+        return null;
     }
 
     /**
      * @return the audioInputStream for reading from
      */
     public AudioInputStream getAudioInputStream() {
-        return audioInputStream;
+        return null;
     }
 
     /**
      * @return the sourcedataline for writing to
      */
     public SourceDataLine getSourceDataLine() {
-        return sourceDataLine;
+        return null;
     }
 
     /**
@@ -409,17 +218,14 @@ public class LimeAudioFormat {
      *      such as sampleRate, framesize, number of frames, etc..
      */
     public Map<String, Object> getProperties() {
-        if(properties != null )
-            return properties;
-        else
-           return new HashMap<String,Object>();
+        return null;
     }
 
     /**
      * @return the total number of frames in the input stream 
      */
     public long totalLength() {
-        return totalLength;
+        return 0;
     }
 
     /**
@@ -427,13 +233,6 @@ public class LimeAudioFormat {
      */
     public int available() {
         int avail = -1;
-        if ( encodedAudioInputStream != null ) {
-            try {
-                avail = encodedAudioInputStream.available();
-            } catch (IOException e) {
-                //don't catch, can't read from stream
-            }
-        }
         return avail;
     }
        
@@ -442,8 +241,6 @@ public class LimeAudioFormat {
      * be opened
      */
     public void startSourceDataLine(){
-        if( sourceDataLine != null && !sourceDataLine.isRunning())
-            sourceDataLine.start();
     }
     
     /**
@@ -451,17 +248,13 @@ public class LimeAudioFormat {
      * stream has been paused with intent to reopen it
      */
     public void stopSourceDataLine(){
-        if( sourceDataLine != null && sourceDataLine.isRunning()){
-            sourceDataLine.flush();
-            sourceDataLine.stop();
-        }
     }
     
     /**
      * @return frame position in the current song being played
      */
     public int getEncodedStreamPosition() {
-        return (int)(totalLength - available());
+        return 1;
     }
 
     /**
@@ -471,8 +264,6 @@ public class LimeAudioFormat {
      * @return - the number of bytes actually skipped
      */
     public long seek(long position) {
-        //TODO: modify javazoom mp3 decoder to support RandomAccessFiles at the bit level
-        //      and add a new interface for a seek method. 
        return -1; 
     }
     
@@ -481,62 +272,34 @@ public class LimeAudioFormat {
      *  the song is done being read from. 
      */
     public void closeStreams() {
-        //close our IO streams
-       FileUtils.close(encodedAudioInputStream);
-       FileUtils.close(audioInputStream);
-
-        if (sourceDataLine != null) {
-            sourceDataLine.stop();
-            sourceDataLine.close();
-        }
     }
     
     /**
      * Returns Gain value.
      */
     public float getGainValue() {
-        if (hasGainControl()) {
-            return gainControl.getValue();
-        } else {
             return 0.0F;
-        }
     }
 
     /**
      * Gets max Gain value.
      */
     public float getMaximumGain() {
-        if (hasGainControl()) {
-            return gainControl.getMaximum();
-        } else {
             return 0.0F;
-        }
     }
 
     /**
      * Gets min Gain value.
      */
     public float getMinimumGain() {
-        if (hasGainControl()) {
-            return gainControl.getMinimum();
-        } else {
             return 0.0F;
-        }
     }
 
     /**
      * Returns true if Gain control is supported.
      */
     public boolean hasGainControl() {
-        if (gainControl == null) {
-            // Try to get Gain control again (to support J2SE 1.5)
-            if ((sourceDataLine != null)
-                    && (sourceDataLine
-                            .isControlSupported(FloatControl.Type.MASTER_GAIN)))
-                gainControl = (FloatControl) sourceDataLine
-                        .getControl(FloatControl.Type.MASTER_GAIN);
-        }
-        return gainControl != null;
+        return false;
     }
 
     /**
@@ -547,16 +310,6 @@ public class LimeAudioFormat {
      *         operation
      */
     public void setGain(double fGain) throws IOException {
-        if (hasGainControl()) {
-            double ampGainDB = ((10.0f / 20.0f) * getMaximumGain())
-                    - getMinimumGain();
-            double cste = Math.log(10.0) / 20;
-            double valueDB = getMinimumGain() + (1 / cste)
-                    * Math.log(1 + (Math.exp(cste * ampGainDB) - 1) * fGain);
-
-            gainControl.setValue((float) valueDB);
-        } else
-            throw new IOException("Volume error");
     }
 
 

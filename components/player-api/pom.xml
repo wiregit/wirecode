@@ -8,11 +8,17 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>player-api</artifactId>
+  <artifactId>lw-player-api</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
   <name>LimeWire Media Player API Component</name>
 
   <dependencies>
+      <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-test-util</artifactId>
+      <version>${limewire.version}</version>
+	  <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

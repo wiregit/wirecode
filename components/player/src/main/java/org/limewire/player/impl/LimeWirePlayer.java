@@ -476,7 +476,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     protected void notifyEvent(final PlayerState state, final double value) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                fireStateUpdated(new AudioPlayerEvent(state,value));
+//                fireStateUpdated(new AudioPlayerEvent(state,value));
             }
         });
     }

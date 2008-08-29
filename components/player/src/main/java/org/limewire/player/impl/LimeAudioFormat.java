@@ -81,34 +81,34 @@ public class LimeAudioFormat {
     /**
      * Stream for reading from the audioSource
      */
-    private final AudioInputStream audioInputStream;
+    private  AudioInputStream audioInputStream;
 
     /**
      * Stream for writing audio data to sound card from
      */
-    private final SourceDataLine sourceDataLine;
+    private SourceDataLine sourceDataLine;
 
     /**
      * Stream for reading in encodedFormat. After decoding the inputStream, its
      * no longer possible to use stream.available() to give us the correct
      * current location so we save a reference of the encodedStream
      */
-    private final AudioInputStream encodedAudioInputStream;
+    private AudioInputStream encodedAudioInputStream;
 
     /**
      * Audio source currently reading from (url, file, input stream)
      */
-    private final AudioSource audioSource;
+    private AudioSource audioSource;
 
     /**
      * Properties of the current audio source
      */
-    private final Map<String, Object> properties;
+    private Map<String, Object> properties;
 
     /**
      * Total length of the current song in bytes
      */
-    private final long totalLength;
+    private long totalLength;
 
     /**
      * Control for the gain on the sourceDataLine
@@ -123,7 +123,8 @@ public class LimeAudioFormat {
      */
     public LimeAudioFormat(File file, long position) throws UnsupportedAudioFileException, 
                     IOException, LineUnavailableException, NullPointerException {
-        this( new AudioSource(file), position );
+        
+//        this( new AudioSource(file), position );
     }
 
     /**
@@ -133,7 +134,7 @@ public class LimeAudioFormat {
      */
     public LimeAudioFormat(InputStream stream, long position) throws UnsupportedAudioFileException, 
                     IOException, LineUnavailableException, NullPointerException {
-        this( new AudioSource(stream), position );
+//        this( new AudioSource(stream), position );
     }
 
     /**
