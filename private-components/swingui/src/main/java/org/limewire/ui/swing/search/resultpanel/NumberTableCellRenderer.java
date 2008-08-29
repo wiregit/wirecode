@@ -1,9 +1,8 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -21,11 +20,12 @@ public class NumberTableCellRenderer implements TableCellRenderer {
         boolean isSelected, boolean hasFocus,
         int row, int column) {
 
-        System.out.println("NumberTableCellRenderer.getTableCellRendererComponent entered");
-
         String text = value.toString();
+
         int availableWidth =
             table.getColumnModel().getColumn(column).getWidth();
+
+        /* TODO: RMV Does it need to be this complicated?
         availableWidth -= table.getIntercellSpacing().getWidth();
         Insets borderInsets = label.getBorder().getBorderInsets((Component) label);
         availableWidth -= borderInsets.left + borderInsets.right;
@@ -44,6 +44,14 @@ public class NumberTableCellRenderer implements TableCellRenderer {
         } else {
             label.setText(text);
         }
+        */
+
+        // Attempt to simplify.
+        label.setText(text);
+        Dimension size = label.getPreferredSize();
+        size.width = availableWidth;
+        label.setPreferredSize(size);
+        label.setHorizontalAlignment(JLabel.RIGHT);
 
         // Change the font so it's not bold.
         Font font = label.getFont().deriveFont(Font.PLAIN);

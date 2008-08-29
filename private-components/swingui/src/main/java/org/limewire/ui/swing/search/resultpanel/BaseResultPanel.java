@@ -83,8 +83,10 @@ public class BaseResultPanel extends JXPanel {
             Calendar.class, new CalendarTableCellRenderer());
         resultsTable.setDefaultRenderer(
             Icon.class, new IconTableCellRenderer());
-        resultsTable.setDefaultRenderer(
-            Number.class, new NumberTableCellRenderer());
+        // TODO: RMV Numbers are getting right-aligned without this!
+        // TODO: RMV Maybe NumberTableCellRenderer isn't needed.
+        //resultsTable.setDefaultRenderer(
+        //    Number.class, new NumberTableCellRenderer());
 
         ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
         resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);
