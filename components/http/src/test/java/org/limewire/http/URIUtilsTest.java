@@ -47,4 +47,9 @@ public class URIUtilsTest extends BaseTestCase {
             // expected result
         }
     }
+    
+    public void testGetPort() throws Exception {
+        assertEquals(80, URIUtils.getPort(new URI("HTTP://SOME.DOMAIN/")));
+    }
+    
 }

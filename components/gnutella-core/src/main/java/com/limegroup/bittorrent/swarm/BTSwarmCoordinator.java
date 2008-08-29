@@ -56,7 +56,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     @Override
     public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobControl callback) {
-        List<BTInterval> pieces = createBTInterval(range);
+        List<BTInterval> pieces = createBTIntervals(range);
         return new BTSwarmWriteJob(pieces, torrentDiskManager, callback);
     }
 
@@ -115,8 +115,8 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     @Override
     public Range renewLease(Range oldLease, Range newLease) {
-        List<BTInterval> oldInterval = createBTInterval(oldLease);
-        List<BTInterval> newInterval = createBTInterval(newLease);
+        List<BTInterval> oldInterval = createBTIntervals(oldLease);
+        List<BTInterval> newInterval = createBTIntervals(newLease);
         torrentDiskManager.renewLease(oldInterval, newInterval);
         requested.removeAll(oldInterval);
         requested.addAll(newInterval);
@@ -125,7 +125,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     @Override
     public void unlease(Range range) {
-        List<BTInterval> pieces = createBTInterval(range);
+        List<BTInterval> pieces = createBTIntervals(range);
         for (BTInterval btInterval : pieces) {
             torrentDiskManager.releaseInterval(btInterval);
             requested.remove(btInterval);
@@ -138,7 +138,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
      * @param range
      * @return
      */
-    private List<BTInterval> createBTInterval(Range range) {
+    private List<BTInterval> createBTIntervals(Range range) {
         List<BTInterval> btIntervals = new ArrayList<BTInterval>();
         long index = range.getLow();
         while (index <= range.getHigh()) {

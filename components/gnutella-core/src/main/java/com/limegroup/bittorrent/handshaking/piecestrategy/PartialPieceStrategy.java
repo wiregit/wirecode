@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent.handshaking.piecestrategy;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BitField;
 import org.limewire.collection.IntervalSet;
-import org.limewire.collection.MultiIterable;
 import org.limewire.collection.Range;
 
 import com.limegroup.bittorrent.BTInterval;
@@ -41,13 +39,14 @@ public class PartialPieceStrategy implements PieceStrategy {
         this.requestedRanges = requestedRanges;
     }
 
+    @Override
     public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
-        List<BTInterval> nextPieces = new ArrayList<BTInterval>();
         BTInterval nextPiece = assignPartialPieces(availableBlocks, exclude);
         if (nextPiece != null) {
-            nextPieces.add(nextPiece);
+            return Collections.singletonList(nextPiece);
+        } else {
+            return Collections.emptyList();
         }
-        return nextPieces;
     }
 
     /**
@@ -56,29 +55,18 @@ public class PartialPieceStrategy implements PieceStrategy {
      * 
      * @param exclude can be null
      */
-    private BTInterval assignPartialPieces(BitField bs, Set<BTInterval> exclude) {
-
-        BTInterval ret = null;
-
-        /**
-         * A view of the blocks the requested and partial blocks.
-         */
-        Iterable<Integer> requestedAndPartial = new MultiIterable<Integer>(partialBlocks.keySet(),
-                requestedRanges.keySet());
+    private BTInterval assignPartialPieces(BitField availableBlocks, Set<BTInterval> exclude) {
 
         // prepare a list of partial or requested blocks the remote host has
-        Collection<Integer> available = null;
-        for (int requested : requestedAndPartial) {
-            if (!bs.get(requested) || (btMetaInfo.isCompleteBlock(requested, requestedRanges))
-                    || btMetaInfo.isCompleteBlock(requested, partialBlocks)) {
+        Set<Integer> available = null;
+        for (int pieceIndex : partialBlocks.keySet()) {
+            if (!availableBlocks.get(pieceIndex) || btMetaInfo.isCompleteBlock(pieceIndex, partialBlocks)) {
                 continue;
             }
-
             if (available == null) {
-                available = new HashSet<Integer>(requestedRanges.size() + partialBlocks.size());
+                available = new HashSet<Integer>(partialBlocks.size());
             }
-
-            available.add(requested);
+            available.add(pieceIndex);
         }
 
         if (available == null) {
@@ -89,11 +77,12 @@ public class PartialPieceStrategy implements PieceStrategy {
             LOG.debug("available partial and requested blocks to attempt: " + available);
         }
         
-        available = new ArrayList<Integer>(available);
-        Collections.shuffle((List<Integer>) available);
+        List<Integer> availableIndices = new ArrayList<Integer>(available);
+        Collections.shuffle(availableIndices);
 
+        
         // go through and find a block that we can request something from.
-        for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext() && ret == null;) {
+        for (Iterator<Integer> iterator = availableIndices.iterator(); iterator.hasNext();) {
             int block = iterator.next();
 
             // figure out which parts of the chunks we need.
@@ -127,16 +116,18 @@ public class PartialPieceStrategy implements PieceStrategy {
                 continue;
             }
 
-            ret = new BTInterval(needed.getFirst(), block);
+            BTInterval ret = new BTInterval(needed.getFirst(), block);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("selected partial/requested interval " + ret + " with partial "
                         + partialBlocks.get(ret.getId()) + " requested "
                         + requestedRanges.get(ret.getId()) + " pending "
                         + pendingRanges.get(ret.getId()));
+                
             }
+            return ret;
         }
 
-        return ret;
+        return null;
     }
 
 }

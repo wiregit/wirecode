@@ -3,7 +3,9 @@ package org.limewire.swarm;
 import java.io.IOException;
 
 /**
- * Handles downloading from the given swarm source.
+ * Handles downloading from given swarm sources.
+ * 
+ * It is expected to handle multiple sources that are being added to it.
  */
 public interface SwarmSourceDownloader {
 

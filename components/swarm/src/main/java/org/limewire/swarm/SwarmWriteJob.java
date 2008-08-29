@@ -11,7 +11,8 @@ public interface SwarmWriteJob {
 
     /**
      * Notification that content is available in the decoder.
-     * This returns the amount of data that was read.
+     * 
+     * @return the amount of data that was read.
      */
     long write(SwarmContent content) throws IOException;
 

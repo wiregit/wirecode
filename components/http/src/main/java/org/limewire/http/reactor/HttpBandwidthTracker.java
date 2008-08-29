@@ -3,6 +3,7 @@ package org.limewire.http.reactor;
 /**
  * A simple implementation of the BandwidthTracker interface
  */
+// TODO duplicates SimpleBandwidthTracker
 public class HttpBandwidthTracker {
     private static final int DEFAULT_INTERVAL = 500;
 

@@ -4,13 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
 import org.limewire.http.util.FileServer;
+import org.limewire.net.LimeWireNetTestModule;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
@@ -31,6 +33,9 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 /**
  * 
  * 
@@ -46,6 +51,8 @@ public class SwarmerImplTest extends BaseTestCase {
 
     private FileServer fileServer = null;
 
+    private Injector injector;
+
     public SwarmerImplTest(String name) {
         super(name);
     }
@@ -56,6 +63,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetTestModule());
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
         super.setUp();
@@ -302,7 +310,7 @@ public class SwarmerImplTest extends BaseTestCase {
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
-        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator,
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(injector.getInstance(LimeConnectingIOReactorFactory.class), swarmCoordinator,
                 "LimeTest/1.1"));
         swarmer.start();
 
@@ -407,7 +415,7 @@ public class SwarmerImplTest extends BaseTestCase {
         swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
-        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(swarmCoordinator,
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(injector.getInstance(LimeConnectingIOReactorFactory.class), swarmCoordinator,
                 "LimeTest/1.1"));
         swarmer.getMeasuredBandwidth(true);
         swarmer.getMeasuredBandwidth(false);

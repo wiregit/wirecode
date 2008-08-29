@@ -7,17 +7,22 @@ import java.security.NoSuchAlgorithmException;
 
 import junit.framework.Test;
 
+import org.limewire.common.LimeWireCommonModule;
+import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
 import org.limewire.http.util.FileServer;
+import org.limewire.net.LimeWireNetTestModule;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
-import org.limewire.swarm.http.SwarmHttpSourceHandler;
+import org.limewire.swarm.http.SwarmHttpSourceDownloader;
 import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.limegroup.bittorrent.BTContext;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
@@ -51,6 +56,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     private FileServer fileServer = null;
 
+    private Injector injector;
+
     public BTSwarmCoordinatorTest(String name) {
         super(name);
     }
@@ -61,6 +68,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetTestModule());
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
     }
@@ -71,7 +79,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         fileServer.destroy();
     }
 
-    public void testSingleFileTorret() throws Exception {
+    public void testSingleFileTorrent() throws Exception {
 
         File torrentFile = getFile("test-single-webseed-single-file-no-peer.torrent");
 
@@ -95,7 +103,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     }
 
-    public void testMultiFileTorretDefaultPieceStrategy() throws Exception {
+    public void testMultiFileTorrentDefaultPieceStrategy() throws Exception {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
@@ -154,7 +162,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     }
 
-    public void testMultiFileTorretLargestGapStartPieceStrategy() throws Exception {
+    public void testMultiFileTorrentLargestGapStartPieceStrategy() throws Exception {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
@@ -275,7 +283,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(btCoordinator);
-        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(btCoordinator,
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(injector.getInstance(LimeConnectingIOReactorFactory.class), btCoordinator,
                 "LimeTest/1.1"));
 
         return swarmer;

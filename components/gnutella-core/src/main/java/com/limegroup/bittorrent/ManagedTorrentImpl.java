@@ -16,12 +16,13 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SyncWrapper;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
-import org.limewire.swarm.http.SwarmHttpSourceHandler;
+import org.limewire.swarm.http.SwarmHttpSourceDownloader;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.FileUtils;
 
@@ -167,7 +168,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             BTLinkManagerFactory linkManagerFactory,
             BTConnectionFetcherFactory connectionFetcherFactory, ContentManager contentManager,
             IPFilter ipFilter, TorrentManager torrentManager, FileManager fileManager,
-            NetworkInstanceUtils networkInstanceUtils) {
+            NetworkInstanceUtils networkInstanceUtils, LimeConnectingIOReactorFactory limeConnectingIOReactorFactory) {
         this.context = context;
         this.networkInvoker = networkInvoker;
         this.dispatcher = dispatcher;
@@ -193,7 +194,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
                 torrentDiskManager, new LargestGapStartPieceStrategy(metaInfo));
 
         webSeedSwarmer = new SwarmerImpl(btCoordinator);
-        webSeedSwarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceHandler(btCoordinator, LimeWireUtils.getHttpServer()));
+        webSeedSwarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(limeConnectingIOReactorFactory, btCoordinator, LimeWireUtils.getHttpServer()));
     }
 
     /*

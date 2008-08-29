@@ -12,7 +12,7 @@ public interface SwarmCoordinatorListener {
      * When the download is completed the SwarmCoordinator will fire
      * downloadCompleted to all the attached listeners.
      */
-    void downloadCompleted(SwarmCoordinator fileCoordinator, SwarmFileSystem fileSystem);
+    void downloadCompleted(SwarmCoordinator swarmCoordinator, SwarmFileSystem fileSystem);
 
     /**
      * When a block fails verification the blockVerificationFailed event will

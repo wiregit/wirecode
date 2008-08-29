@@ -24,10 +24,9 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.http.reactor.LimeConnectingIOReactor;
+import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.SocketsManagerImpl;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmSource;
@@ -57,9 +56,9 @@ import org.limewire.util.Objects;
  * which is to download until there are no more bytes to lease.
  * 
  */
-public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpRequestExecutionHandler {
+public class SwarmHttpSourceDownloader implements SwarmSourceDownloader, NHttpRequestExecutionHandler {
 
-    private static final Log LOG = LogFactory.getLog(SwarmHttpSourceHandler.class);
+    private static final Log LOG = LogFactory.getLog(SwarmHttpSourceDownloader.class);
 
     private final LimeConnectingIOReactor ioReactor;
 
@@ -71,7 +70,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
 
     private final SwarmStats stats;
 
-    public SwarmHttpSourceHandler(SwarmCoordinator swarmCoordinator, String userAgent) {
+    public SwarmHttpSourceDownloader(LimeConnectingIOReactorFactory limeConnectingIOReactorFactory, SwarmCoordinator swarmCoordinator, String userAgent) {
         this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "swarmCoordinator");
         this.stats = new SwarmStats();
 
@@ -82,8 +81,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
                 CoreConnectionPNames.STALE_CONNECTION_CHECK, false).setParameter(
                 CoreProtocolPNames.USER_AGENT, userAgent);
 
-        this.ioReactor = new LimeConnectingIOReactor(params, NIODispatcher.instance()
-                .getScheduledExecutorService(), new SocketsManagerImpl());
+        this.ioReactor = limeConnectingIOReactorFactory.createIOReactor(params);
 
         SwarmAsyncNHttpClientHandlerBuilder builder = new SwarmAsyncNHttpClientHandlerBuilder(
                 params, this);
@@ -93,7 +91,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
 
     }
-
+    
     /*
      * (non-Javadoc)
      * 
@@ -185,7 +183,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
     public void finalizeContext(HttpContext context) {
         LOG.tracef("finalizeContext: {0}", this);
         SwarmSource source = getSwarmSource(context);
-        source.connectionClosed(SwarmHttpSourceHandler.this);
+        source.connectionClosed(SwarmHttpSourceDownloader.this);
         closeContentListener(context);
     }
 
@@ -201,7 +199,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
         stats.incrementNumberOfResponses();
         if (isActive()) {
             SwarmSource source = getSwarmSource(context);
-            source.responseProcessed(SwarmHttpSourceHandler.this, new SwarmHttpSourceStatus(
+            source.responseProcessed(SwarmHttpSourceDownloader.this, new SwarmHttpSourceStatus(
                     response.getStatusLine()));
 
             if (LOG.isTraceEnabled()) {
@@ -347,7 +345,7 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
         }
         SwarmSource swarmSource = getSwarmSource(context);
         if (swarmSource != null) {
-            swarmSource.finished(SwarmHttpSourceHandler.this);
+            swarmSource.finished(SwarmHttpSourceDownloader.this);
         }
     }
 
@@ -441,19 +439,19 @@ public class SwarmHttpSourceHandler implements SwarmSourceDownloader, NHttpReque
         }
 
         public void cancelled(SessionRequest request) {
-            source.connectFailed(SwarmHttpSourceHandler.this);
+            source.connectFailed(SwarmHttpSourceDownloader.this);
         };
 
         public void completed(SessionRequest request) {
-            source.connected(SwarmHttpSourceHandler.this);
+            source.connected(SwarmHttpSourceDownloader.this);
         };
 
         public void failed(SessionRequest request) {
-            source.connectFailed(SwarmHttpSourceHandler.this);
+            source.connectFailed(SwarmHttpSourceDownloader.this);
         };
 
         public void timeout(SessionRequest request) {
-            source.connectFailed(SwarmHttpSourceHandler.this);
+            source.connectFailed(SwarmHttpSourceDownloader.this);
         };
 
     }

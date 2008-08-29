@@ -133,8 +133,8 @@ public interface SwarmCoordinator {
     Range renewLease(Range oldLease, Range newLease);
 
     /**
-     * Returns the swarmFile to be written at the start of the given Range.
-     * @param range
+     * Returns the swarm file containing the beginning of the range or null
+     * if there is none.
      */
     SwarmFile getSwarmFile(Range range);
 
