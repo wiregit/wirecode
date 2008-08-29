@@ -10,6 +10,11 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
+    private static final int BITRATE_INDEX = 6;
+    private static final int NUM_SOURCES_INDEX = 10;
+    private static final int RELEVANCE_INDEX = 9;
+    private static final int TRACK_INDEX = 8;
+
     public MusicTableFormat() {
         columnNames = new String[] {
             "Title", "Artist", "Album", "Length", "Quality",
@@ -18,6 +23,15 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
         };
 
         actionColumnIndex = 5;
+    }
+
+    @Override
+    public Class getColumnClass(int index) {
+        return index == BITRATE_INDEX ? Integer.class :
+            index == NUM_SOURCES_INDEX ? Integer.class :
+            index == RELEVANCE_INDEX ? Integer.class :
+            index == TRACK_INDEX ? Integer.class :
+            super.getColumnClass(index);
     }
 
     public Object getColumnValue(VisualSearchResult vsr, int index) {

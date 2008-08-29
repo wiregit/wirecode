@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.core.api.search.SearchResult.PropertyKey;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -8,7 +10,6 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -23,6 +24,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.MediaType;
 
 /**
  * This class is responsible for rendering an individual SearchResult
@@ -43,6 +45,7 @@ implements TableCellEditor, TableCellRenderer {
     private JLabel similarLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
     private JPanel thePanel;
+    private String schema;
     private VisualSearchResult vsr;
 
     public ListViewTableCellEditor() {
@@ -60,6 +63,10 @@ implements TableCellEditor, TableCellRenderer {
     public Component getTableCellEditorComponent(
         JTable table, Object value, boolean isSelected, int row, int column) {
         vsr = (VisualSearchResult) value;
+
+        MediaType mediaType =
+            MediaType.getMediaTypeForExtension(vsr.getFileExtension());
+        schema = mediaType == null ? "other" : mediaType.toString();
 
         if (thePanel == null) thePanel = makePanel();
 
@@ -161,10 +168,19 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populatePanel(VisualSearchResult vsr) {
-        String heading = "";
-        heading += vsr.getProperty(SearchResult.PropertyKey.ARTIST_NAME);
-        heading += " - ";
-        heading += vsr.getProperty(SearchResult.PropertyKey.NAME);
+        String heading = null;
+
+        if (MediaType.SCHEMA_AUDIO.equals(schema)) {
+            heading = vsr.getProperty(PropertyKey.ARTIST_NAME)
+                + " - " + vsr.getProperty(PropertyKey.NAME);
+        } else if (MediaType.SCHEMA_VIDEO.equals(schema)
+            || MediaType.SCHEMA_IMAGES.equals(schema)) {
+            heading = vsr.getProperty(PropertyKey.NAME).toString();
+        } else {
+            heading = vsr.getProperty(PropertyKey.NAME)
+                + "." + vsr.getFileExtension();
+        }
+
         headingLabel.setText(heading);
 
         Object comment = vsr.getProperty(SearchResult.PropertyKey.COMMENTS);

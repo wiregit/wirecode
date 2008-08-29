@@ -19,7 +19,6 @@ import javax.swing.Action;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
@@ -112,8 +111,6 @@ implements ListEventListener<VisualSearchResult> {
         // Get the most recent search result.
         EventList list = event.getSourceList();
         VisualSearchResult vsr = (VisualSearchResult) list.get(list.size() - 1);
-
-        String name = (String) vsr.getProperty(SearchResult.PropertyKey.NAME);
 
         // Determine its media type.
         String extension = vsr.getFileExtension();

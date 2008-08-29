@@ -25,6 +25,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
 
 /**
  * This class is a panel that displays search results.
@@ -49,7 +50,8 @@ public class ResultsContainer extends JXPanel {
         AudioResultsPanelFactory audioFactory,
         VideoResultsPanelFactory videoFactory,
         ImagesResultsPanelFactory imagesFactory,
-        DocumentsResultsPanelFactory documentsFactory) {
+        DocumentsResultsPanelFactory documentsFactory,
+        OtherResultsPanelFactory otherFactory) {
         
         panelMap.put(SearchCategory.ALL.name(),
             allFactory.create(visualSearchResults, search));
@@ -62,7 +64,7 @@ public class ResultsContainer extends JXPanel {
         panelMap.put(SearchCategory.DOCUMENTS.name(),
             documentsFactory.create(filter(ResultType.DOCUMENT, visualSearchResults), search));
         panelMap.put(SearchCategory.OTHER.name(),
-            documentsFactory.create(filter(ResultType.OTHER, visualSearchResults), search));
+            otherFactory.create(filter(ResultType.OTHER, visualSearchResults), search));
         
         setLayout(cardLayout);
         
@@ -90,10 +92,10 @@ public class ResultsContainer extends JXPanel {
     }
     
     void showCategory(SearchCategory category) {
-        currentPanel = panelMap.get(category.name()); 
-        cardLayout.show(this, category.name());
+        String name = category.name();
+        currentPanel = panelMap.get(name); 
+        cardLayout.show(this, name);
         currentPanel.setMode(mode);
-        
     }
     
     private EventList<VisualSearchResult> filter(

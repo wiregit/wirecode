@@ -17,7 +17,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
@@ -84,6 +83,8 @@ public class BaseResultPanel extends JXPanel {
             Calendar.class, new CalendarTableCellRenderer());
         resultsTable.setDefaultRenderer(
             Icon.class, new IconTableCellRenderer());
+        resultsTable.setDefaultRenderer(
+            Number.class, new NumberTableCellRenderer());
 
         ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
         resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);

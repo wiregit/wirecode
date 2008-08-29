@@ -10,6 +10,14 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
+    private static final int BITRATE_INDEX = 13;
+    private static final int HEIGHT_INDEX = 11;
+    private static final int NUM_SOURCES_INDEX = 7;
+    private static final int RATING_INDEX = 9;
+    private static final int RELEVANCE_INDEX = 6;
+    private static final int WIDTH_INDEX = 12;
+    private static final int YEAR_INDEX = 3;
+
     public VideoTableFormat() {
         columnNames = new String[] {
         "Title", "Type", "Length", "Year", "Quality",
@@ -18,6 +26,18 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
         };
 
         actionColumnIndex = 5;
+    }
+
+    @Override
+    public Class getColumnClass(int index) {
+        return index == BITRATE_INDEX ? Integer.class :
+            index == HEIGHT_INDEX ? Integer.class :
+            index == NUM_SOURCES_INDEX ? Integer.class :
+            index == RATING_INDEX ? Integer.class :
+            index == RELEVANCE_INDEX ? Integer.class :
+            index == WIDTH_INDEX ? Integer.class :
+            index == YEAR_INDEX ? Integer.class :
+            super.getColumnClass(index);
     }
 
     @Override

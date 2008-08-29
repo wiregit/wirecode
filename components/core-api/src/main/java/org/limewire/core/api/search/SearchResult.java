@@ -14,9 +14,10 @@ public interface SearchResult {
         BITRATE, // ex. 128, 160, 192, 224, 320
         COMMENTS,
         DATE_CREATED,
+        FILES_IN_ARCHIVE, // # of files in an archive file (zip, tar, ...)
         GENRE,
         HEIGHT,
-        LENGTH,
+        LENGTH, // in time (hh:mm:ss)
         NAME,
         OWNER,
         QUALITY,

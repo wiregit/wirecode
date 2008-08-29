@@ -73,7 +73,7 @@ public class MockSearch implements Search {
 
                 // Create a search result that will be categorized as "Documents".
                 msr = new MockSearchResult();
-                name = "Lab19.doc";
+                name = "Lab19";
                 msr.setDescription(name);
                 msr.setExtension("doc");
                 msr.setResultType(ResultType.DOCUMENT);
@@ -141,6 +141,7 @@ public class MockSearch implements Search {
                 msr.addSource("joey");
                 msr.setUrn("www.stlzoo.com");
                 msr.setProperty(PropertyKey.ARTIST_NAME, "St. Louis Zoo");
+                msr.setProperty(PropertyKey.BITRATE, "5000");
                 msr.setProperty(PropertyKey.COMMENTS,
                     "Who knew they could do that?");
                 msr.setProperty(PropertyKey.HEIGHT, "480");
@@ -157,7 +158,7 @@ public class MockSearch implements Search {
 
                 // Create a search result that will be categorized as "Images".
                 msr = new MockSearchResult();
-                name = "EightGoldMedals.png";
+                name = "EightGoldMedals";
                 msr.setDescription(name);
                 msr.setExtension("png");
                 msr.setResultType(ResultType.IMAGE);
@@ -170,7 +171,6 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.DATE_CREATED,
                     new GregorianCalendar(2008, 7, 20));
                 msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
-                // TODO: RMV For some reason the last search result doesn't make it to the GUI!
                 handleSearchResult(msr);
 
                 try {

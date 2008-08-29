@@ -8,6 +8,8 @@ import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.OtherResultsPanel;
+import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
@@ -37,17 +39,20 @@ public class LimeWireUiSearchModule extends AbstractModule {
             FactoryProvider.newFactory(
                 AudioResultsPanelFactory.class, AudioResultsPanel.class));
         
+        bind(DocumentsResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                DocumentsResultsPanelFactory.class, DocumentsResultsPanel.class));
+        
         bind(ImagesResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                 ImagesResultsPanelFactory.class, ImagesResultsPanel.class));
         
-        bind(DocumentsResultsPanelFactory.class).toProvider(
+        bind(OtherResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
-                DocumentsResultsPanelFactory.class, DocumentsResultsPanel.class));
+                OtherResultsPanelFactory.class, OtherResultsPanel.class));
         
         bind(VideoResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                 VideoResultsPanelFactory.class, VideoResultsPanel.class));
     }
-
 }

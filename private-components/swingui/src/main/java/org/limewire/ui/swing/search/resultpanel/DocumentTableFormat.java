@@ -16,6 +16,9 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
 
     private static final int DATE_CREATED_INDEX = 4;
     private static final int ICON_INDEX = 0;
+    private static final int NUM_SOURCES_INDEX = 7;
+    private static final int RELEVANCE_INDEX = 6;
+    private static final int SIZE_INDEX = 3;
 
     private IconManager iconManager;
 
@@ -34,6 +37,9 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     public Class getColumnClass(int index) {
         return index == DATE_CREATED_INDEX ? Calendar.class :
             index == ICON_INDEX ? Icon.class :
+            index == NUM_SOURCES_INDEX ? Integer.class :
+            index == RELEVANCE_INDEX ? Integer.class :
+            index == SIZE_INDEX ? Integer.class :
             super.getColumnClass(index);
     }
 

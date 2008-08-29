@@ -15,6 +15,9 @@ import org.limewire.util.MediaType;
 public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     private static final int ICON_INDEX = 0;
+    private static final int NUM_SOURCES_INDEX = 6;
+    private static final int RELEVANCE_INDEX = 5;
+    private static final int SIZE_INDEX = 3;
 
     private IconManager iconManager;
 
@@ -32,7 +35,11 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     @Override
     public Class getColumnClass(int index) {
-        return index == ICON_INDEX ? Icon.class : super.getColumnClass(index);
+        return index == ICON_INDEX ? Icon.class :
+            index == NUM_SOURCES_INDEX ? Integer.class :
+            index == RELEVANCE_INDEX ? Integer.class :
+            index == SIZE_INDEX ? Long.class :
+            super.getColumnClass(index);
     }
 
     @Override

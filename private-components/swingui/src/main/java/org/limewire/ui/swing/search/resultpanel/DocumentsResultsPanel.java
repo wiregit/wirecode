@@ -16,9 +16,7 @@ public class DocumentsResultsPanel extends BaseResultPanel {
         DocumentTableFormat tableFormat,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search) {
-        super("Documents from Everyone", eventList,
-            //new DocumentTableFormat(), 
-            tableFormat,
+        super("Documents from Everyone", eventList, tableFormat,
             searchResultDownloader, search);
     }
 }

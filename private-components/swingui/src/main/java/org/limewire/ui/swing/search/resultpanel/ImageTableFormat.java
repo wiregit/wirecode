@@ -12,6 +12,8 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     private static final int DATE_CREATED_INDEX = 2;
+    private static final int NUM_SOURCES_INDEX = 5;
+    private static final int RELEVANCE_INDEX = 4;
 
     public ImageTableFormat() {
         columnNames = new String[] {
@@ -25,6 +27,8 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public Class getColumnClass(int index) {
         return index == DATE_CREATED_INDEX ? Calendar.class :
+            index == NUM_SOURCES_INDEX ? Integer.class :
+            index == RELEVANCE_INDEX ? Integer.class :
             super.getColumnClass(index);
     }
 
