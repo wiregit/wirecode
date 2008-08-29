@@ -4,13 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.collection.Range;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
 import org.limewire.http.util.FileServer;
 import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmCoordinatorListener;
+import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
 import org.limewire.swarm.http.SwarmHttpSource;
@@ -61,7 +67,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     public BTSwarmCoordinatorTest(String name) {
         super(name);
     }
-    
+
     public static Test suite() {
         return buildTestSuite(BTSwarmCoordinatorTest.class);
     }
@@ -99,7 +105,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
+        assertDownload(swarmer, "8055d620ba0c507c1af957b43648c99f", downloadedFile, 44425);
 
     }
 
@@ -127,12 +133,12 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        assertDownload(swarmer, "8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload(swarmer, "db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
-    public void testMultiFileTorretRandomGapStrategy() throws Exception {
+    public void testMultiFileTorrentRandomGapStrategy() throws Exception {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
@@ -157,8 +163,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        assertDownload(swarmer, "8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload(swarmer, "db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
@@ -188,8 +194,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         URI uri = metaInfo.getWebSeeds()[0];
         swarmer.addSource(new SwarmHttpSource(uri, totalSize));
 
-        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
-        assertDownload("db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
+        assertDownload(swarmer, "8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload(swarmer, "db1dc452e77d30ce14acca6bac8c66bc", downloadedFile2, 411090);
 
     }
 
@@ -219,11 +225,11 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         swarmer.addSource(new SwarmHttpSource(uri1, totalSize));
         swarmer.addSource(new SwarmHttpSource(uri2, totalSize));
 
-        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload(swarmer, "8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
 
     }
 
-    public void testProblemTorrent() throws Exception {
+    public void testMultipleWebseedSingleFileTorrent() throws Exception {
 
         File torrentFile = getFile("test-multiple-webseed-single-file-no-peer.torrent");
 
@@ -251,7 +257,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         swarmer.addSource(new SwarmHttpSource(uri2, totalSize));
         swarmer.addSource(new SwarmHttpSource(uri3, totalSize));
 
-        assertDownload("8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
+        assertDownload(swarmer, "8055d620ba0c507c1af957b43648c99f", downloadedFile1, 44425);
 
     }
 
@@ -283,8 +289,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
         btCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(btCoordinator);
-        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(injector.getInstance(LimeConnectingIOReactorFactory.class), btCoordinator,
-                "LimeTest/1.1"));
+        swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(injector
+                .getInstance(LimeConnectingIOReactorFactory.class), btCoordinator, "LimeTest/1.1"));
 
         return swarmer;
     }
@@ -292,18 +298,54 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     /**
      * Asserts that the given file has the correct size, and matches the given
      * md5sum.
-     * 
-     * @param md5
-     * @param file
-     * @param fileSize
-     * @throws InterruptedException
-     * @throws NoSuchAlgorithmException
-     * @throws IOException
      */
-    private void assertDownload(String md5, File file, long fileSize) throws InterruptedException,
-            NoSuchAlgorithmException, IOException {
-        long sleepTime = (long) ((fileSize * 0.0001) + 3000);
-        Thread.sleep(sleepTime);
+    private void assertDownload(Swarmer swarmer, String md5, File file, long fileSize)
+            throws InterruptedException, NoSuchAlgorithmException, IOException {
+
+        SwarmCoordinator swarmCoordinator = swarmer.getCoordinator();
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        swarmCoordinator.addListener(new SwarmCoordinatorListener() {
+
+            @Override
+            public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
+
+            }
+
+            @Override
+            public void blockPending(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockUnleased(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockUnpending(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockVerificationFailed(SwarmCoordinator swarmCoordinator, Range block) {
+
+            }
+
+            @Override
+            public void blockVerified(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockWritten(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void downloadCompleted(SwarmCoordinator swarmCoordinator,
+                    SwarmFileSystem fileSystem) {
+                countDownLatch.countDown();
+            }
+
+        });
+
+        countDownLatch.await(5, TimeUnit.SECONDS);
+
         AssertComparisons.assertTrue(file.exists());
         AssertComparisons.assertEquals(fileSize, file.length());
         String testmd5 = FileUtils.getMD5(file);

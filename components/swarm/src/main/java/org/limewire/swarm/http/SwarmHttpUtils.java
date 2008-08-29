@@ -14,11 +14,10 @@ import org.limewire.io.IOUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-
 public class SwarmHttpUtils {
 
     private static final Log LOG = LogFactory.getLog(SwarmHttpUtils.class);
-    
+
     private SwarmHttpUtils() {
     }
 
@@ -31,34 +30,6 @@ public class SwarmHttpUtils {
             ioctrl.shutdown();
         } catch (IOException ignored) {
             LOG.warn("Error shutting down IOControl.", ignored);
-        }
-    }
-
-    /**
-     * Returns a {@link Range} object representing the data within the range
-     * request. The data should have 'bytes=X-Y'.
-     */
-    public static Range rangeForRequest(String value) {
-        if (!value.startsWith("bytes") || value.length() <= 6) {
-            return null;
-        }
-
-        int dash = value.indexOf('-');
-        if (dash == -1 || dash == value.length() - 1) {
-            return null;
-        }
-
-        try {
-            long low = Long.parseLong(value.substring(6, dash).trim());
-            long high = Long.parseLong(value.substring(dash + 1).trim());
-            if (low > high) {
-                return null;
-            } else {
-                return Range.createRange(low, high);
-            }
-        } catch (NumberFormatException nfe) {
-            nfe.printStackTrace();
-            return null;
         }
     }
 
@@ -79,16 +50,21 @@ public class SwarmHttpUtils {
             long numBeforeDash = numberFor(headerValue.substring(start, dash));
             long numBeforeSlash = numberFor(headerValue.substring(dash + 1, slash));
 
-            if (numBeforeSlash < numBeforeDash)
-                throw new IOException("invalid range, high (" + numBeforeSlash
+            if (numBeforeSlash < numBeforeDash) {
+                IOException e = new IOException("invalid range, high (" + numBeforeSlash
                         + ") less than low (" + numBeforeDash + ")");
+                LOG.warn(e.getMessage(), e);
+                throw e;
+            }
 
             return Range.createRange(numBeforeDash, numBeforeSlash);
 
             // TODO: Is it necessary to validate the number after the slash
             // matches the fileCoordinator's size (or is '*')?
         } catch (IndexOutOfBoundsException e) {
-            throw IOUtils.getIOException("Invalid Header: " + headerValue, e);
+            IOException ioException = IOUtils.getIOException("Invalid Header: " + headerValue, e);
+            LOG.warn(ioException.getMessage(), ioException);
+            throw ioException;
         }
 
     }
@@ -97,7 +73,9 @@ public class SwarmHttpUtils {
         try {
             return Long.parseLong(number);
         } catch (NumberFormatException nfe) {
-            throw IOUtils.getIOException("Invalid number: " + number, nfe);
+            IOException e = IOUtils.getIOException("Invalid number: " + number, nfe);
+            LOG.warn(e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -110,7 +88,9 @@ public class SwarmHttpUtils {
         if (contentLengthHeader != null) {
             long contentLength = SwarmHttpUtils.numberFor(contentLengthHeader.getValue());
             if (contentLength < 0) {
-                throw new IOException("Invalid content length: " + contentLength);
+                IOException e = new IOException("Invalid content length: " + contentLength);
+                LOG.warn(e.getMessage(), e);
+                throw e;
             }
 
             if (contentRange != null) {
@@ -123,10 +103,14 @@ public class SwarmHttpUtils {
             }
         } else if (contentRange == null) {
             // Fail miserably.
-            throw new IOException("No Content Range Found.");
+            IOException e = new IOException("No Content Range Found.");
+            LOG.warn(e.getMessage(), e);
+            throw e;
         } else {
             // Fail miserably.
-            throw new IOException("No content length, though content range existed.");
+            IOException e = new IOException("No content length, though content range existed.");
+            LOG.warn(e.getMessage(), e);
+            throw e;
         }
         return actualRange;
     }
@@ -135,7 +119,6 @@ public class SwarmHttpUtils {
         String requestLine = request != null ? request.getRequestLine().toString() : "null";
         String headers = request != null ? Arrays.asList(request.getAllHeaders()).toString()
                 : "null";
-
         String log = message + " request : " + requestLine + " headers: " + headers;
         return log;
     }
@@ -144,7 +127,6 @@ public class SwarmHttpUtils {
         String statusLine = response != null ? response.getStatusLine().toString() : "null";
         String headers = response != null ? Arrays.asList(response.getAllHeaders()).toString()
                 : "null";
-
         String log = message + ": " + statusLine + " headers: " + headers;
         return log;
     }

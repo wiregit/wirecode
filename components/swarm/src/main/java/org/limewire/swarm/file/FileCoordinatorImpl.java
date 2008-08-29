@@ -257,8 +257,9 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
                     // count if doing a 'full scan'.
                     amountLost += rangeToVerify.getHigh() - rangeToVerify.getLow() + 1;
 
-                    if (LOG.isDebugEnabled())
+                    if (LOG.isDebugEnabled()) {
                         LOG.debug("Lost range: " + rangeToVerify + ", total lost: " + amountLost);
+                    }
                 }
             }
         }
@@ -271,15 +272,15 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
     private void handleVerifiedPieces() {
         List<SwarmFile> swarmFiles = fileSystem.getSwarmFiles();
         for (SwarmFile swarmFile : swarmFiles) {
-            Range fileRange = Range.createRange(swarmFile.getStartBytePosition(), swarmFile.getEndBytePosition());
+            Range fileRange = Range.createRange(swarmFile.getStartBytePosition(), swarmFile
+                    .getEndBytePosition());
             if (verifiedBlocks.contains(fileRange)) {
                 try {
                     fileSystem.closeSwarmFile(swarmFile);
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    // TODO need to figure out what we will do in this case,
-                    // most likely jsut log the message
-                    e.printStackTrace();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Error closing swarmFile: " + swarmFile, e);
+                    }
                 }
             }
         }
@@ -404,7 +405,8 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         }
     }
 
-    public void finish() throws IOException {
+    @Override
+    public void close() throws IOException {
         synchronized (LOCK) {
             // TODO handle possible running write jobs.
             // TODO we can cancel the running write jobs through the scheduler

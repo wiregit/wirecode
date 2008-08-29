@@ -24,8 +24,6 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
 
     private ByteBuffer byteBuffer;
 
-    private final Object writeLock = new Object();
-
     private long piecePosition;
 
     private long pieceLow;
@@ -52,70 +50,58 @@ public class BTSwarmWriteJob implements SwarmWriteJob {
         this.maxBufferSize = maxBufferSize;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.limewire.swarm.SwarmWriteJob#cancel()
-     */
+    @Override
     public void cancel() {
         // nothing to cancel, we will be relying on the torrent disk manager to
         // do the actual writing
         // This job will just be used to aggregate the data we need
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.limewire.swarm.SwarmWriteJob#write(org.limewire.swarm.SwarmContent)
-     */
+    @Override
     public long write(SwarmContent content) throws IOException {
-        synchronized (writeLock) {
-
-            BTInterval piece = pieces.get(pieceIndex);
-            if (byteBuffer == null) {
-                int bufferSize = maxBufferSize;
-                if (bufferSize + piecePosition > piece.getHigh()) {
-                    bufferSize = (int) (piece.get32BitHigh() - piecePosition) + 1;
-                }
-
-                if (bufferSize == 0) {
-                    return 0;
-                }
-
-                byteBuffer = ByteBuffer.allocate(bufferSize);
+        BTInterval piece = pieces.get(pieceIndex);
+        if (byteBuffer == null) {
+            int bufferSize = maxBufferSize;
+            if (bufferSize + piecePosition > piece.getHigh()) {
+                bufferSize = (int) (piece.get32BitHigh() - piecePosition) + 1;
             }
 
-            long read = content.read(byteBuffer);
-            if (read == -1) {
-                throw new IOException("End of stream reached before expected.");
+            if (bufferSize == 0) {
+                return 0;
             }
-            
-            piecePosition += read;
-            callback.resume();
 
-            if (byteBuffer.remaining() == 0) {
-                // piece is done reading
-                final byte[] data = byteBuffer.array();
-                byteBuffer = null;
-                final int pieceId = piece.getId();
-
-                final long pieceLow = this.pieceLow;
-                final long pieceHigh = pieceLow + data.length - 1;
-
-                torrentDiskManager.writeBlock(new BTNECallable(pieceId, pieceLow, pieceHigh, data));
-
-                this.pieceLow = pieceHigh + 1;
-                if (piecePosition >= piece.getHigh()) {
-                    if (pieceIndex + 1 == pieces.size()) {
-                        return read;
-                    }
-                    this.pieceLow = pieces.get(++pieceIndex).getLow();
-                    this.piecePosition = this.pieceLow;
-                }
-            }
-            return read;
+            byteBuffer = ByteBuffer.allocate(bufferSize);
         }
+
+        long read = content.read(byteBuffer);
+        if (read == -1) {
+            throw new IOException("End of stream reached before expected.");
+        }
+
+        piecePosition += read;
+        callback.resume();
+
+        if (byteBuffer.remaining() == 0) {
+            // piece is done reading
+            final byte[] data = byteBuffer.array();
+            byteBuffer = null;
+            final int pieceId = piece.getId();
+
+            final long pieceLow = this.pieceLow;
+            final long pieceHigh = pieceLow + data.length - 1;
+
+            torrentDiskManager.writeBlock(new BTNECallable(pieceId, pieceLow, pieceHigh, data));
+
+            this.pieceLow = pieceHigh + 1;
+            if (piecePosition >= piece.getHigh()) {
+                if (pieceIndex + 1 == pieces.size()) {
+                    return read;
+                }
+                this.pieceLow = pieces.get(++pieceIndex).getLow();
+                this.piecePosition = this.pieceLow;
+            }
+        }
+        return read;
     }
 
 }

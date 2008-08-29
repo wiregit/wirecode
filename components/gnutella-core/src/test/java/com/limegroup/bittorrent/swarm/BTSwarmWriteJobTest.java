@@ -27,7 +27,7 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
         return buildTestSuite(BTSwarmWriteJobTest.class);
     }
 
-    public void testWrite1PartialPieces() throws Exception {
+    public void testWriteOnePartialPieces() throws Exception {
         List<BTInterval> pieces = new ArrayList<BTInterval>();
         final BTInterval piece1 = new BTInterval(0, 9, 0);
         pieces.add(piece1);
@@ -55,7 +55,7 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
         mockery.assertIsSatisfied();
     }
 
-    public void testWrite1Piece() throws Exception {
+    public void testWriteOnePiece() throws Exception {
         List<BTInterval> pieces = new ArrayList<BTInterval>();
         final BTInterval piece1 = new BTInterval(0, 9, 0);
         pieces.add(piece1);
@@ -88,7 +88,7 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
         mockery.assertIsSatisfied();
     }
 
-    public void testWrite2Pieces() throws Exception {
+    public void testWriteTwoPieces() throws Exception {
         List<BTInterval> pieces = new ArrayList<BTInterval>();
         final BTInterval piece1 = new BTInterval(0, 9, 0);
         final BTInterval piece2 = new BTInterval(0, 9, 1);
@@ -129,7 +129,7 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
         mockery.assertIsSatisfied();
     }
 
-    public void testWrite2PartialPieces() throws Exception {
+    public void testWriteTwoPartialPieces() throws Exception {
         List<BTInterval> pieces = new ArrayList<BTInterval>();
         final BTInterval piece1 = new BTInterval(3, 6, 0);
         final BTInterval piece2 = new BTInterval(6, 9, 1);
@@ -163,7 +163,7 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
         mockery.assertIsSatisfied();
     }
 
-    public void testWrite3Pieces() throws Exception {
+    public void testWriteThreePieces() throws Exception {
         List<BTInterval> pieces = new ArrayList<BTInterval>();
         final BTInterval piece1 = new BTInterval(0, 9, 0);
         final BTInterval piece2 = new BTInterval(0, 9, 1);
@@ -212,7 +212,7 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
         mockery.assertIsSatisfied();
     }
 
-    public void testWrite3PartialPieces() throws Exception {
+    public void testWriteThreePartialPieces() throws Exception {
         List<BTInterval> pieces = new ArrayList<BTInterval>();
         final BTInterval piece1 = new BTInterval(1, 9, 0);
         final BTInterval piece2 = new BTInterval(5, 9, 1);
@@ -257,7 +257,7 @@ public class BTSwarmWriteJobTest extends LimeTestCase {
         mockery.assertIsSatisfied();
     }
     
-    public void testWrite3PartialPiecesWriteCalledExtraTime() throws Exception {
+    public void testWriteThreePartialPiecesWriteCalledExtraTime() throws Exception {
         List<BTInterval> pieces = new ArrayList<BTInterval>();
         final BTInterval piece1 = new BTInterval(1, 9, 0);
         final BTInterval piece2 = new BTInterval(5, 9, 1);

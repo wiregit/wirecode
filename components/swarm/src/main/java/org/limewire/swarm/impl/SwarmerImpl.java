@@ -93,7 +93,7 @@ public class SwarmerImpl implements Swarmer {
             }
         }
         try {
-            swarmCoordinator.finish();
+            swarmCoordinator.close();
         } catch (IOException iox) {
             LOG.warnf("Unable to shutdown swarm coordinator: {0}", swarmCoordinator);
         }
@@ -120,6 +120,11 @@ public class SwarmerImpl implements Swarmer {
      */
     public boolean hasHandler(SwarmSourceType type) {
         return sourceDownloaders.containsKey(type);
+    }
+
+    @Override
+    public SwarmCoordinator getCoordinator() {
+        return swarmCoordinator;
     }
 
 }

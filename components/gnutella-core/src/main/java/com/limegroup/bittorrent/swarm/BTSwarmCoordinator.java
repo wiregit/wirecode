@@ -38,6 +38,11 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
 
     private final PieceStrategy pieceStrategy;
 
+    /**
+     * The requested ranges are used as an exclude set for the piece strategy
+     * implementations. This is necessary because when we reach end game we will
+     * start requesting from the multiple sources without this check.
+     */
     private final Set<BTInterval> requested;
 
     public BTSwarmCoordinator(BTMetaInfo btMetaInfo, TorrentFileSystem torrentFileSystem,
@@ -61,7 +66,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
     }
 
     @Override
-    public void finish() throws IOException {
+    public void close() throws IOException {
         // do nothing let the managed_torrent manage closing things
     }
 
@@ -118,25 +123,26 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         List<BTInterval> oldInterval = createBTIntervals(oldLease);
         List<BTInterval> newInterval = createBTIntervals(newLease);
         torrentDiskManager.renewLease(oldInterval, newInterval);
-        requested.removeAll(oldInterval);
-        requested.addAll(newInterval);
+        synchronized (requested) {
+            requested.removeAll(oldInterval);
+            requested.addAll(newInterval);
+        }
         return newLease;
     }
 
     @Override
     public void unlease(Range range) {
         List<BTInterval> pieces = createBTIntervals(range);
-        for (BTInterval btInterval : pieces) {
-            torrentDiskManager.releaseInterval(btInterval);
-            requested.remove(btInterval);
+        synchronized (requested) {
+            for (BTInterval btInterval : pieces) {
+                torrentDiskManager.releaseInterval(btInterval);
+                requested.remove(btInterval);
+            }
         }
     }
 
     /**
      * Takes a range and converts it into a List of BTInterval objects.
-     * 
-     * @param range
-     * @return
      */
     private List<BTInterval> createBTIntervals(Range range) {
         List<BTInterval> btIntervals = new ArrayList<BTInterval>();
@@ -174,7 +180,7 @@ public class BTSwarmCoordinator extends AbstractSwarmCoordinator {
         throw new UnsupportedOperationException(
                 "BTSwarmCoordinator.getAmountVerified() is not implemented.");
     }
-    
+
     @Override
     public void unpending(Range range) {
         // not the job of the BTSwarmCoordinator

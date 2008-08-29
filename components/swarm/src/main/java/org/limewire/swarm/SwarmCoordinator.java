@@ -1,12 +1,13 @@
 package org.limewire.swarm;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
-public interface SwarmCoordinator {
+public interface SwarmCoordinator extends Closeable {
 
     /**
      * Leases just a portion of data, only allowing ranges in availableRanges.
@@ -110,12 +111,6 @@ public interface SwarmCoordinator {
      * Removes a listener from this swarm coordinator.
      */
     void removeListener(SwarmCoordinatorListener swarmListener);
-
-    /**
-     * Shuts down any resources opened by this coordinator.
-     * @throws IOException
-     */
-    void finish() throws IOException;
 
     /**
      * Returns true if all the pieces have been written to disk.

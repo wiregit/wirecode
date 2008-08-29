@@ -47,4 +47,6 @@ public interface Swarmer {
      */
     boolean hasHandler(SwarmSourceType type);
 
+    SwarmCoordinator getCoordinator();
+
 }
