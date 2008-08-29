@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
-import org.limewire.ui.swing.browser.LimeMozillaDownloadProgressListener;
+import org.limewire.ui.swing.browser.download.LimeMozillaDownloadProgressListener;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownload;
 import org.mozilla.interfaces.nsIDownloadManager;
