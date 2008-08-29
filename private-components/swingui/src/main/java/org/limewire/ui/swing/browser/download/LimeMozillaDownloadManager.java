@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.browser;
+package org.limewire.ui.swing.browser.download;
 
 import java.io.File;
 import java.io.IOException;

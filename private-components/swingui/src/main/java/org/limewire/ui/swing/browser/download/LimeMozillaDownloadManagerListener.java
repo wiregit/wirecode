@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.ui.swing.browser;
+package org.limewire.ui.swing.browser.download;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -28,11 +28,11 @@ class LimeMozillaDownloadManagerListener implements nsIDownloadProgressListener 
 
     private final Map<Long, LimeMozillaDownloadProgressListener> listeners;
 
-    private final DownloadServices downloadServices;
+    //private final DownloadServices downloadServices;
 
     public LimeMozillaDownloadManagerListener(DownloadServices downloadServices) {
         this.listeners = new WeakHashMap<Long, LimeMozillaDownloadProgressListener>();
-        this.downloadServices = downloadServices;
+       // this.downloadServices = downloadServices;
     }
 
     private nsIDownloadManager getDownloadManager() {

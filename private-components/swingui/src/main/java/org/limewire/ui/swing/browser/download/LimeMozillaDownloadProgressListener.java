@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.browser;
+package org.limewire.ui.swing.browser.download;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
