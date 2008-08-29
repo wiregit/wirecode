@@ -7,7 +7,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,7 +23,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.MediaType;
@@ -47,6 +48,7 @@ implements TableCellEditor, TableCellRenderer {
     private JPanel thePanel;
     private String schema;
     private VisualSearchResult vsr;
+    private int similarCount;
 
     public ListViewTableCellEditor() {
         // Cause the @Resource fields to be injected
@@ -67,6 +69,8 @@ implements TableCellEditor, TableCellRenderer {
         MediaType mediaType =
             MediaType.getMediaTypeForExtension(vsr.getFileExtension());
         schema = mediaType == null ? "other" : mediaType.toString();
+
+        similarCount = vsr.getSimiliarResults().size();
 
         if (thePanel == null) thePanel = makePanel();
 
@@ -102,11 +106,8 @@ implements TableCellEditor, TableCellRenderer {
         gbc.gridy = 0;
         panel.add(fromWidget, gbc);
 
-        // TODO: RMV Uncomment this after debugging.
-        //if (similarCount > 0) {
-            gbc.gridy++;
-            panel.add(similarLabel, gbc);
-        //}
+        gbc.gridy++;
+        panel.add(similarLabel, gbc);
 
         return panel;
     }
@@ -120,6 +121,7 @@ implements TableCellEditor, TableCellRenderer {
         gbc.gridx = 0;
         gbc.gridy = 0;
         JLabel label = new JLabel(downloadIcon);
+        // TODO: RMV Why doesn't the download icon appear?
         panel.add(label, gbc);
 
         gbc.gridx++;
@@ -156,19 +158,17 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private void setBackground(boolean isSelected) {
-        if (thePanel == null) return;
-        Color color = isSelected ? new Color(220, 220, 255) : Color.WHITE;
-        thePanel.setBackground(color);
-        int childCount = thePanel.getComponentCount();
-        for (int i = 0; i < childCount; i++) {
-            Component child = thePanel.getComponent(i);
-            child.setBackground(color);
+    private void populateFrom(VisualSearchResult vsr) {
+        List<String> people = new ArrayList<String>();
+        Collection<RemoteHost> sources = vsr.getSources();
+        for (RemoteHost source : sources) {
+            people.add(source.getHostDescription());
         }
+        fromWidget.setPeople(people);
     }
 
-    private void populatePanel(VisualSearchResult vsr) {
-        String heading = null;
+    private void populateHeading(VisualSearchResult vsr) {
+        String heading;
 
         if (MediaType.SCHEMA_AUDIO.equals(schema)) {
             heading = vsr.getProperty(PropertyKey.ARTIST_NAME)
@@ -182,25 +182,50 @@ implements TableCellEditor, TableCellRenderer {
         }
 
         headingLabel.setText(heading);
+    }
 
-        Object comment = vsr.getProperty(SearchResult.PropertyKey.COMMENTS);
-        String subheading = "";
-        if (comment != null) subheading += comment + " - ";
-        subheading += vsr.getProperty(SearchResult.PropertyKey.QUALITY);
-        subheading += " - ";
-        subheading += vsr.getProperty(SearchResult.PropertyKey.LENGTH);
-        subheadingLabel.setText(subheading);
+    private void populatePanel(VisualSearchResult vsr) {
+        populateHeading(vsr);
+        populateSubheading(vsr);
+        populateFrom(vsr);
 
-        //int sourceCount = vsr.getSources().size();
-        //fromLabel.setText("From " + sourceCount + " people");
-        List<String> people = new ArrayList<String>();
-        Collection<RemoteHost> sources = vsr.getSources();
-        for (RemoteHost source : sources) {
-            people.add(source.getHostDescription());
+        String text = similarCount == 0 ?
+            "" : "Show " + similarCount + " similar files";
+        similarLabel.setText(text);
+    }
+
+    private void populateSubheading(VisualSearchResult vsr) {
+        String subheading;
+
+        if (MediaType.SCHEMA_AUDIO.equals(schema)) {
+            Object albumTitle = vsr.getProperty(PropertyKey.ALBUM_TITLE);
+            String prefix = albumTitle == null ? "" : albumTitle + " - ";
+            subheading = prefix + vsr.getProperty(PropertyKey.QUALITY)
+                + " - " + vsr.getProperty(PropertyKey.LENGTH);
+        } else if (MediaType.SCHEMA_VIDEO.equals(schema)) {
+            subheading = vsr.getProperty(PropertyKey.QUALITY)
+                + " - " + vsr.getProperty(PropertyKey.LENGTH);
+        } else if (MediaType.SCHEMA_IMAGES.equals(schema)) {
+            Object calendar = vsr.getProperty(PropertyKey.DATE_CREATED);
+            SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy");
+            subheading = calendar == null ?
+                "" : sdf.format(((Calendar) calendar).getTime());
+        } else {
+            subheading = "{application name}"
+                + " - " + vsr.getProperty(PropertyKey.FILE_SIZE) + "MB";
         }
-        fromWidget = new FromWidget(people.toArray(new String[] {}));
-        
-        int similarCount = vsr.getSimiliarResults().size();
-        similarLabel.setText("Show " + similarCount + " similar files");
+
+        subheadingLabel.setText(subheading);
+    }
+
+    private void setBackground(boolean isSelected) {
+        if (thePanel == null) return;
+        Color color = isSelected ? new Color(220, 220, 255) : Color.WHITE;
+        thePanel.setBackground(color);
+        int childCount = thePanel.getComponentCount();
+        for (int i = 0; i < childCount; i++) {
+            Component child = thePanel.getComponent(i);
+            child.setBackground(color);
+        }
     }
 }

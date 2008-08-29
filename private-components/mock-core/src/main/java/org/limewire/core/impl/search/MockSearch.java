@@ -37,7 +37,7 @@ public class MockSearch implements Search {
     public void addSearchListener(SearchListener searchListener) {
         listeners.add(searchListener);
     }
-    
+
     // TODO: RMV What should this method do?
     @Override
     public SearchCategory getCategory() {
@@ -83,9 +83,22 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
                 msr.setProperty(PropertyKey.DATE_CREATED,
                     new GregorianCalendar(2008, 7, 27));
+                msr.setProperty(PropertyKey.FILE_SIZE, 1.7);
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.OWNER, "Ross Geller");
                 msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
+
+                // Add a "similar" result.
+                try {
+                    MockSearchResult similarResult =
+                        (MockSearchResult) msr.clone();
+                    similarResult.setProperty(PropertyKey.NAME, name + "_2");
+                    msr.addSimilarResult(similarResult);
+                } catch (CloneNotSupportedException e) {
+                    // This should never happen.
+                    System.err.println("MockSearch: clone problem!");
+                }
+
                 handleSearchResult(msr);
 
                 // Create a search result that will be categorized as "Other".
@@ -99,6 +112,7 @@ public class MockSearch implements Search {
                 msr.setUrn("www.partytime.com");
                 msr.setProperty(PropertyKey.ARTIST_NAME, "Night Life");
                 msr.setProperty(PropertyKey.COMMENTS, "Our album is awesome!");
+                msr.setProperty(PropertyKey.FILE_SIZE, 2.8);
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.LENGTH, "4:19");
                 msr.setProperty(PropertyKey.OWNER, "Phoebe Buffet");
@@ -119,6 +133,7 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
                 msr.setProperty(PropertyKey.BITRATE, "192");
                 msr.setProperty(PropertyKey.COMMENTS, "very jazzy");
+                msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
                 msr.setProperty(PropertyKey.GENRE, "Jazz");
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.LENGTH, "4:31");
@@ -144,6 +159,7 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.BITRATE, "5000");
                 msr.setProperty(PropertyKey.COMMENTS,
                     "Who knew they could do that?");
+                msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
                 msr.setProperty(PropertyKey.HEIGHT, "480");
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.LENGTH, "0:48");
@@ -166,6 +182,7 @@ public class MockSearch implements Search {
                 msr.addSource("rachel");
                 msr.addSource("phoebe");
                 msr.setUrn("www.swimming.org");
+                msr.setProperty(PropertyKey.FILE_SIZE, 0.9);
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.OWNER, "Rachel Green");
                 msr.setProperty(PropertyKey.DATE_CREATED,
@@ -215,11 +232,14 @@ public class MockSearch implements Search {
         addResults("rp" + repeatCount++);
     }
 
-    private static class MockSearchResult implements SearchResult {
+    private static class MockSearchResult implements Cloneable, SearchResult {
 
-        private final List<RemoteHost> sources = new ArrayList<RemoteHost>();
+        private List<RemoteHost> sources = new ArrayList<RemoteHost>();
 
-        private final Map<PropertyKey, Object> properties =
+        private List<SearchResult> similarResults =
+            new ArrayList<SearchResult>();
+
+        private Map<PropertyKey, Object> properties =
             new HashMap<PropertyKey, Object>();
 
         private String description;
@@ -228,8 +248,33 @@ public class MockSearch implements Search {
         private ResultType resultType;
         private long size;
 
+        @Override
+        public void addSimilarResult(SearchResult result) {
+            similarResults.add(result);
+        }
+
         public void addSource(String host) {
             sources.add(new MockRemoteHost(host));
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            MockSearchResult copy = (MockSearchResult) super.clone();
+
+            // Copy contents of all the collection fields so they aren't shared.
+
+            copy.sources = new ArrayList<RemoteHost>();
+            for (RemoteHost rh : sources) copy.sources.add(rh);
+
+            copy.similarResults = new ArrayList<SearchResult>();
+            for (SearchResult sr : similarResults) copy.similarResults.add(sr);
+
+            copy.properties = new HashMap<PropertyKey, Object>();
+            for (PropertyKey key : properties.keySet()) {
+                copy.properties.put(key, properties.get(key));
+            }
+
+            return copy;
         }
 
         @Override
@@ -255,6 +300,10 @@ public class MockSearch implements Search {
         @Override
         public ResultType getResultType() {
             return resultType;
+        }
+
+        public List<SearchResult> getSimiliarResults() {
+            return similarResults;
         }
 
         @Override

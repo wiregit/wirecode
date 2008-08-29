@@ -8,6 +8,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 
+// TODO: RMV Why not use SearchResult instead?
 public interface VisualSearchResult {
     
     List<SearchResult> getCoreSearchResults();

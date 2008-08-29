@@ -12,6 +12,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -37,6 +38,10 @@ public class FromWidget extends JPanel {
 
     public FromWidget() {
         this(new String[] {});
+    }
+
+    public FromWidget(List<String> people) {
+        this(people.toArray(new String[]{}));
     }
 
     public FromWidget(String[] people) {
@@ -152,6 +157,10 @@ public class FromWidget extends JPanel {
         for (Component component : getComponents()) {
             component.setBackground(color);
         }
+    }
+
+    public void setPeople(List<String> people) {
+        setPeople(people.toArray(new String[]{}));
     }
 
     public void setPeople(String[] people) {

@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +95,20 @@ class SearchResultAdapter implements VisualSearchResult {
     
     @Override
     public List<VisualSearchResult> getSimiliarResults() {
-        return Collections.emptyList();
+        SearchResult result = coreResults.get(0);
+
+        List<VisualSearchResult> list = new ArrayList<VisualSearchResult>();
+
+        for (SearchResult similarResult : result.getSimiliarResults()) {
+            // Create a SearchResultAdapter for each similar result.
+            List<SearchResult> innerList = new ArrayList<SearchResult>();
+            innerList.add(similarResult);
+            VisualSearchResult vsr = new SearchResultAdapter(innerList);
+
+            list.add(vsr);
+        }
+
+        return list;
     }
     
     @Override

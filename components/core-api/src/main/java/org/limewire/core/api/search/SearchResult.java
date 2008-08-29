@@ -14,6 +14,7 @@ public interface SearchResult {
         BITRATE, // ex. 128, 160, 192, 224, 320
         COMMENTS,
         DATE_CREATED,
+        FILE_SIZE, // in megabytes
         FILES_IN_ARCHIVE, // # of files in an archive file (zip, tar, ...)
         GENRE,
         HEIGHT,
@@ -31,19 +32,23 @@ public interface SearchResult {
         YEAR
     }
 
-    String getUrn();
+    void addSimilarResult(SearchResult result);
 
+    String getDescription();
+    
+    String getFileExtension();
+    
     Map<PropertyKey, Object> getProperties();
 
     Object getProperty(PropertyKey key);
     
     ResultType getResultType();
     
-    String getDescription();
-    
+    List<SearchResult> getSimiliarResults();
+
     long getSize();
     
-    String getFileExtension();
-    
     List<RemoteHost> getSources();
+
+    String getUrn();
 }
