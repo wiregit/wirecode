@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
+import org.limewire.ui.swing.friends.Message.Type;
+
 public class ChatDocumentBuilderTest extends TestCase {
     public void testBuildChatTextWithLinks() {
         compareOutput("hey http://www.foo.com there",
@@ -26,9 +28,17 @@ public class ChatDocumentBuilderTest extends TestCase {
         compareOutput("hey <b>foo</b> there", 
                       "hey &lt;b&gt;foo&lt;/b&gt; there");
     }
+    
+    public void testBuildChatTextForNullMessage() {
+        compareOutput(null, "<div class=\"typing\">foo is typing a message...</div>", Message.Type.Typing);
+    }
 
     private void compareOutput(String input, String expected) {
-        String chatText = ChatDocumentBuilder.buildChatText(getMessages(input));
+        compareOutput(input, expected, Message.Type.Sent);
+    }
+
+    private void compareOutput(String input, String expected, Type type) {
+        String chatText = ChatDocumentBuilder.buildChatText(getMessages(type, input));
         
         assertTrue(chatText.startsWith(ChatDocumentBuilder.TOP));
         assertTrue(chatText.endsWith(ChatDocumentBuilder.BOTTOM));
@@ -41,10 +51,10 @@ public class ChatDocumentBuilderTest extends TestCase {
         assertEquals(expected, chatText);
     }
     
-    private ArrayList<Message> getMessages(String... messages) {
+    private ArrayList<Message> getMessages(Type type, String... messages) {
         ArrayList<Message> list = new ArrayList<Message>();
         for(String message : messages) {
-            list.add(new MessageImpl("foo", null, message, Message.Type.Sent));
+            list.add(new MessageImpl("foo", null, message, type));
         }
         return list;
     }
