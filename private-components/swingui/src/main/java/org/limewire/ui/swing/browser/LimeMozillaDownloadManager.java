@@ -10,8 +10,6 @@ import org.apache.http.HttpException;
 import org.limewire.core.settings.MozillaSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.SystemUtils;
-import org.limewire.util.SystemUtils.SpecialLocations;
 import org.mozilla.interfaces.mozIStorageConnection;
 import org.mozilla.interfaces.nsICancelable;
 import org.mozilla.interfaces.nsIDownload;
