@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.apache.http.HttpException;
+import org.limewire.core.settings.MozillaSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.SystemUtils;
@@ -74,8 +75,7 @@ public class LimeMozillaDownloadManager extends LimeMozillaSelfReferencingFactor
 
                     RemoteFileDesc rfd = null;
                     rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, fileName, urn, size);
-                    File saveDir = new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)
-                            + "/testmoz");
+                    File saveDir = new File(MozillaSettings.DOWNLOAD_DIR.getValue().getAbsolutePath());
 
                     LOG.debugf("Mozilla Download Save Directory: {0}", saveDir.toString());
 

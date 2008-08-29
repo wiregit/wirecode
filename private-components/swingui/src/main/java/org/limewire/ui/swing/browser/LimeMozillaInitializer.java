@@ -7,6 +7,7 @@ import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.MozillaSettings;
 import org.limewire.io.Expand;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
@@ -21,11 +22,9 @@ import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
 import org.mozilla.interfaces.nsIComponentRegistrar;
-import org.mozilla.interfaces.nsIDownloadManager;
 import org.mozilla.interfaces.nsIPrefService;
 import org.mozilla.xpcom.Mozilla;
 
-import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.LimeWireCore;
 
 public class LimeMozillaInitializer {
@@ -91,13 +90,14 @@ public class LimeMozillaInitializer {
         nsIPrefService prefService = XPCOMUtils.getServiceProxy(
                 "@mozilla.org/preferences-service;1", nsIPrefService.class);
 
+        // set default downloads to desktop, we are going ot override this with
+        // our own download manager
         prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
         prefService.getBranch("browser.download.").setIntPref("folderList", 0);
-        prefService
-                .getBranch("browser.helperApps.neverAsk.")
-                .setCharPref(
-                        "saveToDisk",
-                        "application/octet-stream, application/x-msdownload, application/exe, application/x-exe, application/dos-exe, vms/exe, application/x-winexe, application/msdos-windows, application/x-msdos-program, application/x-msdos-program, application/x-unknown-application-octet-stream, application/vnd.ms-powerpoint, application/excel, application/vnd.ms-publisher, application/x-unknown-message-rfc822, application/vnd.ms-excel, application/msword, application/x-mspublisher, application/x-tar, application/zip, application/x-gzip,application/x-stuffit,application/vnd.ms-works, application/powerpoint, application/rtf, application/postscript, application/x-gtar, video/quicktime, video/x-msvideo, video/mpeg, audio/x-wav, audio/x-midi, audio/x-aiff");
+
+        // setup which mime types do not prompt to download
+        prefService.getBranch("browser.helperApps.neverAsk.").setCharPref("saveToDisk",
+                MozillaSettings.DOWNLOAD_MIME_TYPES.getValue());
     }
 
     private static void replaceDownloadManager(LimeWireCore limeWireCore) {
