@@ -19,23 +19,27 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.Border;
-
-import net.miginfocom.swing.MigLayout;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.border.DropShadowBorder;
+import org.jdesktop.swingx.decorator.BorderHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -60,8 +64,9 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-import ca.odell.glazedlists.swing.EventListModel;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -83,7 +88,6 @@ public class FriendsPane extends JPanel {
     private final LibraryManager libraryManager;
     private WeakReference<Friend>  activeConversation = new WeakReference<Friend>(null);
     private static final Color LIGHT_GREY = new Color(218, 218, 218);
-    private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
     @Inject
     public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager) {
@@ -94,33 +98,32 @@ public class FriendsPane extends JPanel {
         this.libraryManager = libraryManager;
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
-        JList list = newSearchableJList(sortedFriends);
+        JTable table = newSearchableJTable(sortedFriends, icons);
         
-        addPopupMenus(list);
+        addPopupMenus(table);
         
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setCellRenderer(new FriendCellRenderer(icons));
-        JScrollPane scroll = new JScrollPane(list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scroll = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll);
         setPreferredSize(new Dimension(120, 200));
         
-        list.addMouseListener(new LaunchChatListener());
+        table.addMouseListener(new LaunchChatListener());
         
         EventAnnotationProcessor.subscribe(this);
     }
 
-    private void addPopupMenus(JList list) {
+    private void addPopupMenus(JComponent comp) {
         FriendContext context = new FriendContext();
         ViewLibrary viewLibrary = new ViewLibrary(context);
         ViewSharedFiles viewSharedFiles = new ViewSharedFiles(context);
-        JPopupMenu nonChattingPopup = PopupUtil.addPopupMenus(list, new FriendPopupDecider(false, context), new OpenChat(context));
+        JPopupMenu nonChattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(false, context), new OpenChat(context));
         nonChattingPopup.addSeparator();
         nonChattingPopup.add(viewLibrary);
         nonChattingPopup.add(viewSharedFiles);
         nonChattingPopup.addSeparator();
         nonChattingPopup.add(new RemoveBuddy(context));
         
-        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(list, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
+        JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
         chattingPopup.addSeparator();
         chattingPopup.add(new CloseChat(context));
     }
@@ -136,21 +139,28 @@ public class FriendsPane extends JPanel {
 
         @Override
         public boolean shouldDisplay(MouseEvent e) {
-            JList list = (JList) e.getComponent();
-            int index = list.locationToIndex(e.getPoint());
+            JTable table = (JTable) e.getComponent();
+            int index = table.rowAtPoint(e.getPoint());
             if (index < 0) {
                 return false;
             }
             //Popup selects the item (as per spec)
-            list.setSelectedIndex(index);
+            table.getSelectionModel().setSelectionInterval(index, index);
             
-            Friend friend = (Friend) list.getModel().getElementAt(index);
+            Friend friend = getFriend(table, index);
+            
             context.setFriend(friend);
             return friend.isChatting() == expected;
         }
+
     }
     
-    private JList newSearchableJList(EventList<Friend> friendsList) {
+    private static Friend getFriend(JTable table, int index) {
+        EventTableModel model = (EventTableModel)table.getModel();
+        return index < 0 ? null : (Friend) model.getElementAt(index);
+    }
+    
+    private JTable newSearchableJTable(final EventList<Friend> friendsList, final IconLibrary icons) {
         TextFilterator<Friend> friendFilterator = new TextFilterator<Friend>() {
             @Override
             public void getFilterStrings(List<String> baseList, Friend element) {
@@ -161,9 +171,43 @@ public class FriendsPane extends JPanel {
         final TextMatcherEditor<Friend> editor = new TextMatcherEditor<Friend>(friendFilterator);
         final FilterList<Friend> filter = new FilterList<Friend>(friendsList, editor);
         
-        final JList list = new JList(new EventListModel<Friend>(friendsList)); 
+        TableFormat<Friend> format = new TableFormat<Friend>() {
+            @Override
+            public int getColumnCount() {
+                return 3;
+            }
+
+            @Override
+            public String getColumnName(int column) {
+                switch(column) {
+                case 0:
+                    return "status";
+                case 1:
+                    return "name";
+                case 2:
+                    return "close";
+                }
+                throw new UnsupportedOperationException(tr("Too many columns expected in friends chat table. Tried getting column: ") + column);
+            }
+
+            @Override
+            public Object getColumnValue(Friend friend, int column) {
+                switch(column) {
+                case 0:
+                    Icon icon = getIcon(friend, icons);
+                    return icon;
+                case 1:
+                    return friend.getName();
+                case 2:
+                    return icons.getEndChat();
+                }
+                throw new UnsupportedOperationException(tr("Couldn't find value for unknown friends chat table column: ") + column);
+            }
+        };
         
-        list.addKeyListener(new KeyAdapter() {
+        final JXTable table = new JXTable(new EventTableModel<Friend>(friendsList, format)); 
+        
+        table.addKeyListener(new KeyAdapter() {
             ArrayList<String> keysPressed = new ArrayList<String>();
             @Override
             public void keyPressed(KeyEvent e) {
@@ -181,11 +225,11 @@ public class FriendsPane extends JPanel {
                 if (LOG.isDebugEnabled()) {
                     LOG.debugf("FriendsPane keyPressed(): {0} {1} ", KeyEvent.getKeyText(e.getKeyCode()), getKeyPressed());
                 }
-                    
                 
                 if (filter.size() > 0) {
                     Friend firstFriend = filter.get(0);
-                    list.setSelectedValue(firstFriend, true);
+                    int index = friendsList.indexOf(firstFriend);
+                    table.getSelectionModel().setSelectionInterval(index, index);
                 }
             }
             
@@ -198,7 +242,48 @@ public class FriendsPane extends JPanel {
             }
         });
         
-        return list;
+        IconCellRenderer iconRenderer = new IconCellRenderer();
+        TableColumnModel columnModel = table.getColumnModel();
+        TableColumn column0 = columnModel.getColumn(0);
+        column0.setCellRenderer(iconRenderer);
+        column0.setPreferredWidth(11);
+        columnModel.getColumn(1).setCellRenderer(new FriendNameCellRenderer());
+        TableColumn column2 = columnModel.getColumn(2);
+        column2.setCellRenderer(iconRenderer);
+        column2.setPreferredWidth(9);
+        
+        table.setShowVerticalLines(false);
+        
+        table.setTableHeader(null);
+        table.setColumnMargin(0);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        table.addHighlighter(new BorderHighlighter(new ChattingUnderlineHighlightPredicate(), 
+                new DropShadowBorder(new Color(194, 194, 194), 1, 1.0f, 1, false, false, true, false)));
+        
+        return table;
+    }
+    
+    private class ChattingUnderlineHighlightPredicate implements HighlightPredicate {
+
+        @Override
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            JXTable table = (JXTable) adapter.getComponent();
+            
+            int row = adapter.row;
+            Friend friend = getFriend(table, row);
+            
+            if (friend.isChatting()) {
+                EventTableModel model = (EventTableModel) table.getModel();
+                if (model.getRowCount() > (row + 1)) {
+                    Friend nextFriend = (Friend) model.getElementAt(row + 1);
+                    if (!nextFriend.isChatting()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
     
     @EventSubscriber
@@ -272,55 +357,27 @@ public class FriendsPane extends JPanel {
         friend.setReceivingUnviewedMessages(false);
         friend.setActiveConversation(true);
     }
-
-    private class FriendCellRenderer implements ListCellRenderer {
-        private final IconLibrary icons;
-        
-        public FriendCellRenderer(IconLibrary icons) {
-            this.icons = icons;
-        }
+    
+    private class IconCellRenderer extends JLabelCellRenderer {
 
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index,
-                boolean isSelected, boolean cellHasFocus) {
-            JXPanel cell = new JXPanel(new MigLayout("insets 0 2 0 1", "3[]6[]push[]", "1[]1"));
-            
-            Friend friend = (Friend) value;
-            
-            JLabel friendIcon = new JLabel(getIcon(friend, icons));
-            cell.add(friendIcon);
-            
-            JLabel friendName = new JLabel(friend.getName());
-            FontUtils.changeSize(friendName, -2.8f);
-            friendName.setMaximumSize(new Dimension(85, 12));
-            cell.add(friendName);
-            
-            Border border = EMPTY_BORDER;
-            
-            if (friend.isChatting()) {
-                //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally  
-                friendIcon.setIcon(friend.isReceivingUnviewedMessages() ? icons.getUnviewedMessages() : icons.getChatting());
-                
-                //FIXME:  This isn't exactly the right behavior. end chat icon should only 
-                //appear on hover during a chat.
-                if (cellHasFocus) {
-                    cell.add(new JLabel(icons.getEndChat()));
-                }
+        protected JXLabel getJLabel(Object value) {
+            return new JXLabel((Icon)value);
+        }
+    }
+    
+    private abstract class JLabelCellRenderer implements TableCellRenderer {
 
-                ListModel model = list.getModel();
-                if (model.getSize() > (index + 1)) {
-                    Friend nextFriend = (Friend) model.getElementAt(index + 1);
-                    if (!nextFriend.isChatting()) {
-                        //Light-grey separator line between last chatting friend and non-chatting friends
-                        border = new DropShadowBorder(new Color(194, 194, 194), 1, 1.0f, 1, false, false, true, false);
-                    }
-                }
-            }
+        @Override
+        public final Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            JXPanel cell = new JXPanel(new BorderLayout());
             
-            cell.setComponentOrientation(list.getComponentOrientation());
+            JLabel label = getJLabel(value);
+            cell.add(label, BorderLayout.WEST);
             
-            cell.setEnabled(list.isEnabled());
-
+            Friend friend = getFriend(table, row);
+            
             if (isSelected) {
                 cell.setBackground(LIGHT_GREY);
             } else if (friend.isActiveConversation()) {
@@ -331,22 +388,34 @@ public class FriendsPane extends JPanel {
                 painter.setBorderWidth(0f);
                 cell.setBackgroundPainter(painter);
             } else  {
-                cell.setBackground(list.getBackground());
-                cell.setForeground(list.getForeground());
+                cell.setBackground(table.getBackground());
+                cell.setForeground(table.getForeground());
             }
-            
-            cell.setBorder(border);
-            
+
             return cell;
         }
+
+        protected abstract JXLabel getJLabel(Object value);
     }
 
+    private class FriendNameCellRenderer extends JLabelCellRenderer {
+
+        @Override
+        protected JXLabel getJLabel(Object value) {
+            JXLabel friendName = new JXLabel(value.toString());
+            FontUtils.changeSize(friendName, -2.8f);
+            friendName.setMaximumSize(new Dimension(85, 12));
+            return friendName;
+        }
+    }
+    
     private class LaunchChatListener extends MouseAdapter {
         
         @Override
         public void mouseClicked(MouseEvent e) {
-            JList list = (JList)e.getSource();
-            Friend friend = (Friend)list.getSelectedValue();
+            JTable table = (JTable)e.getSource();
+            
+            Friend friend = getFriend(table, table.rowAtPoint(e.getPoint()));
             
             if (friend == null) {
                 return;
