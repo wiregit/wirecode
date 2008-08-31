@@ -7,10 +7,13 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -50,8 +53,24 @@ public class TopPanel extends JPanel {
         options.setForeground(getForeground());
         options.setBackground(getBackground());
         options.setBorderPainted(false);
-        options.add(new SignoutAction());
-        add(options);
+        options.add(new AddBuddyOption());
+        options.add(new RemoveBuddyOption());
+        options.add(new MoreChatOptionsOption());
+        options.addSeparator();
+        JCheckBoxMenuItem availableItem = new JCheckBoxMenuItem(new AvailableOption());
+        JCheckBoxMenuItem awayItem = new JCheckBoxMenuItem(new AwayOption());
+        ButtonGroup selectables = new ButtonGroup();
+        selectables.add(availableItem);
+        selectables.add(awayItem);
+        //Available by default
+        selectables.setSelected(availableItem.getModel(), true);
+        options.add(availableItem);
+        options.add(awayItem);
+        options.addSeparator();
+        options.add(new SignoffAction());
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(options);
+        add(menuBar);
         
         JButton closeChat = new JButton(new CloseAction(icons.getCloseChat()));
         closeChat.setBorderPainted(false);
@@ -90,14 +109,69 @@ public class TopPanel extends JPanel {
         }
     }
     
-    private static class SignoutAction extends AbstractAction {
-        public SignoutAction() {
-            super(tr("Sign Out"));
+    private static class SignoffAction extends AbstractAction {
+        public SignoffAction() {
+            super(tr("Sign off"));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            
+            new SignoffEvent().publish();
+        }
+    }
+    
+    private static class AddBuddyOption extends AbstractAction {
+        public AddBuddyOption() {
+            super(tr("Add buddy"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+        }
+    }
+    
+    private static class RemoveBuddyOption extends AbstractAction {
+        public RemoveBuddyOption() {
+            super(tr("Remove buddy"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+        }
+    }
+    
+    private static class MoreChatOptionsOption extends AbstractAction {
+        public MoreChatOptionsOption() {
+            super(tr("More chat options"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+        }
+    }
+    
+    private static class AvailableOption extends AbstractAction {
+        public AvailableOption() {
+            super(tr("Available (checkable)"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+        }
+    }
+    
+    private static class AwayOption extends AbstractAction {
+        public AwayOption() {
+            super(tr("Away (checkable)"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
         }
     }
 }

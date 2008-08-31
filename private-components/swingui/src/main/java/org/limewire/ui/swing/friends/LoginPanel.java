@@ -20,8 +20,10 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPConnection;
@@ -62,6 +64,8 @@ public class LoginPanel extends JPanel implements Displayable {
         GuiUtils.assignResources(this);
 
         initComponents();
+        
+        EventAnnotationProcessor.subscribe(this);
     }
 
     private void initComponents() {
@@ -182,6 +186,22 @@ public class LoginPanel extends JPanel implements Displayable {
             }
         }
         return config;
+    }
+    
+    @EventSubscriber
+    public void handleSignoffEvent(SignoffEvent event) {
+        List<XMPPConnection> connections = xmppService.getConnections();
+        for(XMPPConnection connection : connections) {
+            XMPPConnectionConfiguration configuration = connection.getConfiguration();
+            if(configuration.getServiceName().equals(GMAIL_SERVICE_NAME)) {
+                final XMPPConnection currentConnection = connection;
+                ThreadExecutor.startThread(new Runnable() {
+                    public void run() {
+                        currentConnection.logout();
+                    }
+                }, "xmpp-logout");
+            }
+        }
     }
     
     class SignInAction extends AbstractAction {

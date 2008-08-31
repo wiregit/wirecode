@@ -17,6 +17,7 @@ import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.Displayable;
 import org.limewire.ui.swing.friends.LoginPanel;
+import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 
 import com.google.inject.Inject;
@@ -71,6 +72,13 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
         mainPanel.remove(loginPanel);
         mainPanel.add(chatPanel);
         chatPanel.setLoggedInID(event.getID());
+        resetBounds();
+    }
+    
+    @EventSubscriber
+    public void handleLogoffEvent(SignoffEvent event) {
+        mainPanel.remove(chatPanel);
+        mainPanel.add(loginPanel);
         resetBounds();
     }
     

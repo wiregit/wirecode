@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.mainframe;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -18,6 +20,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.FriendsCountUpdater;
+import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
@@ -32,6 +35,9 @@ import com.google.inject.Singleton;
 @Singleton
 public class StatusPanel extends JPanel implements FriendsCountUpdater {
     private JButton friendsButton;
+    private String SIGN_IN = tr("Sign in");
+    private String FRIENDS = tr("Friends");
+    private boolean loggedIn;
 
     @Inject
     public StatusPanel(final TrayNotifier trayNotifier, final IconManager iconManager, AudioPlayer player) {
@@ -74,7 +80,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         miniPlayerPanel.setVisible(false);
         add(miniPlayerPanel);
 
-        friendsButton = new JButton(new FriendsAction("Sign in"));
+        friendsButton = new JButton(new FriendsAction(SIGN_IN));
         add(friendsButton);
         setBackground(Color.GRAY);
         setMinimumSize(new Dimension(0, 20));
@@ -86,7 +92,14 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
     
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
-        friendsButton.setText("Friends");
+        loggedIn = true;
+        friendsButton.setText(FRIENDS);
+    }
+    
+    @EventSubscriber
+    public void handleSignoffEvent(SignoffEvent event) {
+        loggedIn = false;
+        friendsButton.setText(SIGN_IN);
     }
     
     @Override
@@ -94,7 +107,9 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         SwingUtils.invokeLater(new Runnable() {
             @Override
             public void run() {
-                friendsButton.setText("Friends (" + count + ")");        
+                if (loggedIn) {
+                    friendsButton.setText(FRIENDS + " (" + count + ")");        
+                }
             }
         });
     }
