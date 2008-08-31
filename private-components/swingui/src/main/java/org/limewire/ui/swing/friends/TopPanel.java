@@ -66,7 +66,17 @@ public class TopPanel extends JPanel {
         Friend friend = event.getFriend();
         friendNameLabel.setText(friend.getName());
         friendNameLabel.setIcon(getIcon(friend, icons));
-        friendStatusLabel.setText("- " + friend.getStatus());
+        String status = friend.getStatus();
+        if (status != null && status.length() > 0) {
+            friendStatusLabel.setText("- " + status);
+        }
+    }
+    
+    @EventSubscriber
+    public void handleConversationEnded(CloseChatEvent event) {
+        friendNameLabel.setText("");
+        friendNameLabel.setIcon(null);
+        friendStatusLabel.setText("");
     }
     
     private static class CloseAction extends AbstractAction {

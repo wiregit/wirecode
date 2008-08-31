@@ -87,6 +87,7 @@ public class FriendImpl extends AbstractBean implements Friend {
     @Override
     public void stopChat() {
         setChatting(false);
+        setActiveConversation(false);
     }
 
     @Override

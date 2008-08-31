@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -58,16 +59,29 @@ public class ChatPanel extends JPanel implements Displayable {
         }
         
         if (conversationPanel.getComponent(0) != chatPane && event.isLocallyInitiated()) {
-            conversationPanel.removeAll();
-            conversationPanel.add(chatPane, BorderLayout.CENTER);
-            //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
-            conversationPanel.revalidate();
+            setConversationPanel(chatPane);
         }
         
         chatPane.handleDisplay();
         
         event.unlock();
         LOG.debug("unlocked");
+    }
+
+    private void setConversationPanel(JComponent comp) {
+        conversationPanel.removeAll();
+        conversationPanel.add(comp, BorderLayout.CENTER);
+        //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
+        conversationPanel.revalidate();
+    }
+
+    @EventSubscriber
+    public void handleCloseChat(CloseChatEvent event) {
+        LOG.debugf("Closing clat panel for {0}", event.getFriend().getName());
+        Friend friend = event.getFriend();
+        chats.remove(friend.getName());
+        
+        setConversationPanel(new JPanel());
     }
 
     @Override

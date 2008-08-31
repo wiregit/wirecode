@@ -152,7 +152,6 @@ public class FriendsPane extends JPanel {
             context.setFriend(friend);
             return friend.isChatting() == expected;
         }
-
     }
     
     private static Friend getFriend(JTable table, int index) {
@@ -194,6 +193,10 @@ public class FriendsPane extends JPanel {
             public Object getColumnValue(Friend friend, int column) {
                 switch(column) {
                 case 0:
+                    //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally
+                    if (friend.isChatting()) {
+                        return friend.isReceivingUnviewedMessages() ? icons.getUnviewedMessages() : icons.getChatting();
+                    }
                     Icon icon = getIcon(friend, icons);
                     return icon;
                 case 1:
@@ -244,13 +247,13 @@ public class FriendsPane extends JPanel {
         
         IconCellRenderer iconRenderer = new IconCellRenderer();
         TableColumnModel columnModel = table.getColumnModel();
-        TableColumn column0 = columnModel.getColumn(0);
-        column0.setCellRenderer(iconRenderer);
-        column0.setPreferredWidth(11);
+        TableColumn statusIconColumn = columnModel.getColumn(0);
+        statusIconColumn.setCellRenderer(iconRenderer);
+        statusIconColumn.setPreferredWidth(11);
         columnModel.getColumn(1).setCellRenderer(new FriendNameCellRenderer());
-        TableColumn column2 = columnModel.getColumn(2);
-        column2.setCellRenderer(iconRenderer);
-        column2.setPreferredWidth(9);
+        TableColumn closeIconColumn = columnModel.getColumn(2);
+        closeIconColumn.setCellRenderer(iconRenderer);
+        closeIconColumn.setPreferredWidth(9);
         
         table.setShowVerticalLines(false);
         
@@ -322,6 +325,7 @@ public class FriendsPane extends JPanel {
         friendsCountUpdater.setFriendsCount(friends.size());
     }
     
+    //FIXME This subscription is not working...
     @RuntimeTopicPatternEventSubscriber
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
@@ -359,10 +363,15 @@ public class FriendsPane extends JPanel {
     }
     
     private class IconCellRenderer extends JLabelCellRenderer {
-
+        
         @Override
         protected JXLabel getJLabel(Object value) {
             return new JXLabel((Icon)value);
+        }
+
+        @Override
+        protected String getPreferredBorderLayout() {
+            return BorderLayout.CENTER;
         }
     }
     
@@ -374,7 +383,7 @@ public class FriendsPane extends JPanel {
             JXPanel cell = new JXPanel(new BorderLayout());
             
             JLabel label = getJLabel(value);
-            cell.add(label, BorderLayout.WEST);
+            cell.add(label, getPreferredBorderLayout());
             
             Friend friend = getFriend(table, row);
             
@@ -396,6 +405,7 @@ public class FriendsPane extends JPanel {
         }
 
         protected abstract JXLabel getJLabel(Object value);
+        protected abstract String getPreferredBorderLayout();
     }
 
     private class FriendNameCellRenderer extends JLabelCellRenderer {
@@ -406,6 +416,11 @@ public class FriendsPane extends JPanel {
             FontUtils.changeSize(friendName, -2.8f);
             friendName.setMaximumSize(new Dimension(85, 12));
             return friendName;
+        }
+
+        @Override
+        protected String getPreferredBorderLayout() {
+            return BorderLayout.WEST;
         }
     }
     
@@ -475,7 +490,7 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            
+            //TODO: How do you switch to library view?
         }
     }
     
@@ -486,7 +501,7 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            
+            //TODO: How do you view shared files?
         }
 
         @Override
@@ -516,6 +531,9 @@ public class FriendsPane extends JPanel {
         }
 
         private int getSharedFileCount(Friend friend) {
+            if (!friend.isSignedInToLimewire()) {
+                return 0;
+            }
             FileList sharedFileList = libraryManager.getBuddy(friend.getName());
             int sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
             return sharedFileCount;
@@ -537,7 +555,7 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            
+            //TODO: How do you remove a buddy?
         }
     }
     
@@ -548,7 +566,26 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            
+            Friend friend = context.getFriend();
+            if (friend != null) {
+
+                friend.stopChat();
+                new CloseChatEvent(friend).publish();
+                
+                Friend nextFriend = null;
+                for(Friend tmpFriend : friends) {
+                    if (tmpFriend == friend || !tmpFriend.isChatting()) {
+                        continue;
+                    }
+                    if (nextFriend == null || tmpFriend.getChatStartTime() > nextFriend.getChatStartTime()) {
+                        nextFriend = tmpFriend;
+                    }
+                }
+
+                if (nextFriend != null) {
+                    fireConversationStarted(nextFriend);
+                }
+            }
         }
     }
 }
