@@ -490,6 +490,8 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            //minimize chat
+            new DisplayFriendsEvent().publish();
             //TODO: How do you switch to library view?
         }
     }
@@ -501,7 +503,10 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            //minimize chat
+            new DisplayFriendsEvent().publish();
             //TODO: How do you view shared files?
+            
         }
 
         @Override
@@ -534,8 +539,11 @@ public class FriendsPane extends JPanel {
             if (!friend.isSignedInToLimewire()) {
                 return 0;
             }
-            FileList sharedFileList = libraryManager.getBuddy(friend.getName());
-            int sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
+            int sharedFileCount = 0;
+            if (libraryManager.containsBuddy(friend.getName())) {
+                FileList sharedFileList = libraryManager.getBuddy(friend.getName());
+                sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
+            }
             return sharedFileCount;
         }
         
