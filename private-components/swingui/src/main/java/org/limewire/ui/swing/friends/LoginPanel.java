@@ -4,7 +4,6 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -20,16 +19,13 @@ import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,7 +37,6 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * @author Mario Aquino, Object Computing, Inc.
  * TODO: Swap labels on network button press?
- * TODO: Use xmpp API
  */
 @Singleton
 public class LoginPanel extends JPanel implements Displayable {
@@ -55,12 +50,14 @@ public class LoginPanel extends JPanel implements Displayable {
     private JButton signInButton;
     private JTextField userNameField;
     private JPanel topPanel;
-    private final XMPPService xmppService;
+    private final XMPPEventHandler xmppEventHandler;
     private static final String GMAIL_SERVICE_NAME = "gmail.com";
+    private static final String FACEBOOK_SERVICE_NAME = "facebook.com";
+    private ButtonGroup networkGroup;
 
     @Inject
-    public LoginPanel(XMPPService xmppService) {
-        this.xmppService = xmppService;
+    public LoginPanel(XMPPEventHandler xmppEventHandler) {
+        this.xmppEventHandler = xmppEventHandler;
         GuiUtils.assignResources(this);
 
         initComponents();
@@ -93,7 +90,7 @@ public class LoginPanel extends JPanel implements Displayable {
     }
     
     private void populateInputs() {
-        XMPPConnectionConfiguration config = getConfig(GMAIL_SERVICE_NAME);
+        XMPPConnectionConfiguration config = xmppEventHandler.getConfig(GMAIL_SERVICE_NAME);
         
         //FIXME: Temporary guard 
         if (config == null) {
@@ -143,11 +140,14 @@ public class LoginPanel extends JPanel implements Displayable {
     
     private JPanel getDetailsPanel() {
         
-        ButtonGroup networkGroup = new ButtonGroup();
+        networkGroup = new ButtonGroup();
         googleTalkButton = new JToggleButton(tr("Gmail"), gmail);
+        googleTalkButton.setActionCommand(GMAIL_SERVICE_NAME);
         networkGroup.add(googleTalkButton);
         facebookButton = new JToggleButton(tr("Facebook"), facebook);
+        facebookButton.setActionCommand(FACEBOOK_SERVICE_NAME);
         networkGroup.add(facebookButton);
+        networkGroup.setSelected(googleTalkButton.getModel(), true);
         
         FormLayout layout = new FormLayout("l:p, 2dlu, p", "p");
         PanelBuilder networksBuilder = new PanelBuilder(layout);
@@ -176,34 +176,6 @@ public class LoginPanel extends JPanel implements Displayable {
         return detailsPanelBuilder.getPanel();
     }
     
-    private XMPPConnectionConfiguration getConfig(String serviceName) {
-        XMPPConnectionConfiguration config = null;
-        List<XMPPConnection> connections = xmppService.getConnections();
-        for(XMPPConnection connection : connections) {
-            XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            if(configuration.getServiceName().equals(serviceName)) {
-                config = configuration;
-            }
-        }
-        return config;
-    }
-    
-    @EventSubscriber
-    public void handleSignoffEvent(SignoffEvent event) {
-        List<XMPPConnection> connections = xmppService.getConnections();
-        for(XMPPConnection connection : connections) {
-            XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            if(configuration.getServiceName().equals(GMAIL_SERVICE_NAME)) {
-                final XMPPConnection currentConnection = connection;
-                ThreadExecutor.startThread(new Runnable() {
-                    public void run() {
-                        currentConnection.logout();
-                    }
-                }, "xmpp-logout");
-            }
-        }
-    }
-    
     class SignInAction extends AbstractAction {
         public SignInAction() {
             super(tr("Sign in"));
@@ -213,33 +185,25 @@ public class LoginPanel extends JPanel implements Displayable {
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     synchronized (LoginPanel.this) {
-                        List<XMPPConnection> connections = xmppService.getConnections();
-                        for(XMPPConnection connection : connections) {
-                            XMPPConnectionConfiguration configuration = connection.getConfiguration();
-                            //FIXME: Update to distinguish for Facebook service name (whenever Facebook enables XMPP service)
-                            if(configuration.getServiceName().equals(GMAIL_SERVICE_NAME)) {
-                                if(!connection.isLoggedIn()) {
-                                    String userName = userNameField.getText().trim();
-                                    // TODO handle empty String
-                                    if(!userName.endsWith("@gmail.com")) {
-                                        // TODO ignoreCase?
-                                        userName += "@gmail.com";
-                                    }
-                                    configuration.setUsername(userName);
-                                    configuration.setPassword(new String(passwordField.getPassword()));
-                                    configuration.setAutoLogin(rememberMeCheckbox.isSelected());
-                                    try {
-                                        connection.login();
-                                    } catch (XMPPException e1) {
-                                        SwingUtilities.invokeLater(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                loginFailed();
-                                            }
-                                        });
-                                    }
-                                }
+                        String userName = userNameField.getText().trim();
+                        String serviceName = networkGroup.getSelection().getActionCommand();
+                        if (GMAIL_SERVICE_NAME.equals(serviceName)) {
+                            // TODO handle empty String
+                            if(!userName.endsWith("@gmail.com")) {
+                                // TODO ignoreCase?
+                                userName += "@gmail.com";
                             }
+                        }
+                        try {
+                            xmppEventHandler.login(serviceName, userName, 
+                                    new String(passwordField.getPassword()), rememberMeCheckbox.isSelected());
+                        } catch (XMPPException e1) {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loginFailed();
+                                }
+                            });
                         }
                     }
                 }
