@@ -69,12 +69,16 @@ public class TopPanel extends JPanel {
         options.addSeparator();
         options.add(new SignoffAction());
         JMenuBar menuBar = new JMenuBar();
+        menuBar.setForeground(getForeground());
+        menuBar.setBackground(getBackground());
+        menuBar.setBorderPainted(false);
         menuBar.add(options);
         add(menuBar);
         
         JButton closeChat = new JButton(new CloseAction(icons.getCloseChat()));
         closeChat.setBorderPainted(false);
         closeChat.setForeground(getForeground());
+        closeChat.setBackground(getBackground());
         add(closeChat);
         
         EventAnnotationProcessor.subscribe(this);
