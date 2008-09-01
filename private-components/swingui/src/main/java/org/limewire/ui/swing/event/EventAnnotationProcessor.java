@@ -152,10 +152,11 @@ public class EventAnnotationProcessor {
         String eventServiceName = topicPatternAnnotation.eventServiceName();
         EventService eventService = getEventServiceFromAnnotation(eventServiceName, eventServiceClass);
         
+        Pattern pattern = Pattern.compile(topic);
         ProxyTopicPatternSubscriber subscriber = new ProxyTopicPatternSubscriber(obj, method, topicPatternAnnotation.referenceStrength(),
-                eventService, topic, Pattern.compile(topic));
+                eventService, topic, pattern);
         
-        eventService.subscribeStrongly(topic, subscriber);
+        eventService.subscribeStrongly(pattern, subscriber);
     }
 
     private static EventService getEventServiceFromAnnotation(String eventServiceName, Class<? extends EventService> eventServiceClass) {
