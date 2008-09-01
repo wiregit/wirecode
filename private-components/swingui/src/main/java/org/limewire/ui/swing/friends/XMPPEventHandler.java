@@ -69,4 +69,14 @@ public class XMPPEventHandler {
         }
         return config;
     }
+    
+    @EventSubscriber
+    public void handlePresenceChange(PresenceChangeEvent event) {
+        List<XMPPConnection> connections = xmppService.getConnections();
+        for(XMPPConnection connection : connections) {
+            if (connection.isLoggedIn()) {
+                connection.setMode(event.getNewMode());
+            }
+        }
+    }
 }

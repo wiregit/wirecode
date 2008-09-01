@@ -21,6 +21,7 @@ import net.miginfocom.swing.MigLayout;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -164,7 +165,7 @@ public class TopPanel extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
+            new PresenceChangeEvent(Mode.available).publish();
         }
     }
     
@@ -175,7 +176,7 @@ public class TopPanel extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
+            new PresenceChangeEvent(Mode.away).publish();
         }
     }
 }
