@@ -325,7 +325,6 @@ public class FriendsPane extends JPanel {
         friendsCountUpdater.setFriendsCount(friends.size());
     }
     
-    //FIXME This subscription is not working...
     @RuntimeTopicPatternEventSubscriber
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
@@ -382,6 +381,8 @@ public class FriendsPane extends JPanel {
                 boolean isSelected, boolean hasFocus, int row, int column) {
             JXPanel cell = new JXPanel(new BorderLayout());
             
+            //Handle null possible sent in via AccessibleJTable inner class
+            value = value == null ? table.getValueAt(row, column) : value;
             JLabel label = getJLabel(value);
             cell.add(label, getPreferredBorderLayout());
             
