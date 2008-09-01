@@ -4,17 +4,21 @@ import java.util.List;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class XMPPEventHandler {
+    private static final Log LOG = LogFactory.getLog(XMPPEventHandler.class);
     private final XMPPService xmppService;
 
     @Inject
@@ -38,6 +42,11 @@ public class XMPPEventHandler {
                 }
             }
         }
+    }
+    
+    @EventSubscriber
+    public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
+        new PresenceChangeEvent(Mode.available).publish();
     }
     
     @EventSubscriber
@@ -75,6 +84,7 @@ public class XMPPEventHandler {
         List<XMPPConnection> connections = xmppService.getConnections();
         for(XMPPConnection connection : connections) {
             if (connection.isLoggedIn()) {
+                LOG.debugf("Changing presence for {0} to {1}", connection.getConfiguration().getServiceName(), event.getNewMode());
                 connection.setMode(event.getNewMode());
             }
         }

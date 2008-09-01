@@ -6,7 +6,7 @@ import javax.swing.Icon;
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
-interface IconLibrary {
+public interface IconLibrary {
 
     Icon getAvailable();
 

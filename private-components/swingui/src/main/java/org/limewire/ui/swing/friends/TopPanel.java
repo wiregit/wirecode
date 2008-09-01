@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -32,6 +33,9 @@ public class TopPanel extends JPanel {
     private JLabel friendNameLabel;
     private JLabel friendStatusLabel;
     private final IconLibrary icons;
+    private ButtonGroup availabilityButtonGroup;
+    private JCheckBoxMenuItem availablePopupItem;
+    private JCheckBoxMenuItem awayPopupItem;
 
     @Inject
     public TopPanel(IconLibrary icons) {
@@ -58,15 +62,13 @@ public class TopPanel extends JPanel {
         options.add(new RemoveBuddyOption());
         options.add(new MoreChatOptionsOption());
         options.addSeparator();
-        JCheckBoxMenuItem availableItem = new JCheckBoxMenuItem(new AvailableOption());
-        JCheckBoxMenuItem awayItem = new JCheckBoxMenuItem(new AwayOption());
-        ButtonGroup selectables = new ButtonGroup();
-        selectables.add(availableItem);
-        selectables.add(awayItem);
-        //Available by default
-        selectables.setSelected(availableItem.getModel(), true);
-        options.add(availableItem);
-        options.add(awayItem);
+        availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
+        awayPopupItem = new JCheckBoxMenuItem(new AwayOption());
+        availabilityButtonGroup = new ButtonGroup();
+        availabilityButtonGroup.add(availablePopupItem);
+        availabilityButtonGroup.add(awayPopupItem);
+        options.add(availablePopupItem);
+        options.add(awayPopupItem);
         options.addSeparator();
         options.add(new SignoffAction());
         JMenuBar menuBar = new JMenuBar();
@@ -103,6 +105,16 @@ public class TopPanel extends JPanel {
         friendStatusLabel.setText("");
     }
     
+    @EventSubscriber
+    public void handleStatusChange(PresenceChangeEvent event) {
+        Mode newMode = event.getNewMode();
+        ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
+                            newMode == Mode.away ? awayPopupItem.getModel() : null;
+        if (model != null) {
+            availabilityButtonGroup.setSelected(model, true);
+        }
+    }
+    
     private static class CloseAction extends AbstractAction {
         public CloseAction(Icon icon) {
             super("", icon);
@@ -111,17 +123,6 @@ public class TopPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             new DisplayFriendsEvent().publish();
-        }
-    }
-    
-    private static class SignoffAction extends AbstractAction {
-        public SignoffAction() {
-            super(tr("Sign off"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            new SignoffEvent().publish();
         }
     }
     
@@ -155,28 +156,6 @@ public class TopPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             // TODO Auto-generated method stub
-        }
-    }
-    
-    private static class AvailableOption extends AbstractAction {
-        public AvailableOption() {
-            super(tr("Available (checkable)"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            new PresenceChangeEvent(Mode.available).publish();
-        }
-    }
-    
-    private static class AwayOption extends AbstractAction {
-        public AwayOption() {
-            super(tr("Away (checkable)"));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            new PresenceChangeEvent(Mode.away).publish();
         }
     }
 }
