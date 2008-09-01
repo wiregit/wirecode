@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-25 11:30-0400\n"
+"POT-Creation-Date: 2008-09-01 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,32 +18,32 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #. These are used as resource keys to retreive descriptions in the GUI
-#: components/common/src/main/java/org/limewire/util/MediaType.java:40
+#: components/common/src/main/java/org/limewire/util/MediaType.java:39
 msgid "All Types"
 msgstr ""
 
-#: components/common/src/main/java/org/limewire/util/MediaType.java:42
+#: components/common/src/main/java/org/limewire/util/MediaType.java:41
 msgid "Documents"
 msgstr ""
 
-#: components/common/src/main/java/org/limewire/util/MediaType.java:43
+#: components/common/src/main/java/org/limewire/util/MediaType.java:42
 msgid "Programs"
 msgstr ""
 
-#: components/common/src/main/java/org/limewire/util/MediaType.java:44
+#: components/common/src/main/java/org/limewire/util/MediaType.java:43
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
 msgstr ""
 
-#: components/common/src/main/java/org/limewire/util/MediaType.java:45
+#: components/common/src/main/java/org/limewire/util/MediaType.java:44
 #: core/com/limegroup/gnutella/daap/DaapManager.java:179
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
 msgstr ""
 
-#: components/common/src/main/java/org/limewire/util/MediaType.java:46
+#: components/common/src/main/java/org/limewire/util/MediaType.java:45
 msgid "Images"
 msgstr ""
 
