@@ -49,13 +49,4 @@ public class FileServer {
     public final void stop() throws Exception {
         server.stop();
     }
-
-    public static void main(String[] args) throws Exception {
-        File resourceBaseDirectory = new File("/home/pvertenten/public_html");
-        FileServer fileServer = new FileServer(8080, resourceBaseDirectory);
-        fileServer.start();
-        fileServer.join();
-
-    }
-
 }
