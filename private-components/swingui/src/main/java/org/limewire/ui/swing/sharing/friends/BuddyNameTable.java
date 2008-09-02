@@ -1,11 +1,15 @@
 package org.limewire.ui.swing.sharing.friends;
 
 import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
 import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.JXTable;
+import org.limewire.ui.swing.sharing.menu.BuddySharingActionHandler;
+import org.limewire.ui.swing.sharing.menu.BuddySharingPopupHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -32,6 +36,35 @@ public class BuddyNameTable extends JXTable {
         
         getColumn(1).setWidth(30);
         getColumn(1).setPreferredWidth(30);
+        
+        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler());
+        
+        addMouseListener(new MouseAdapter() {
+            
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int col = columnAtPoint(e.getPoint());
+                    int row = rowAtPoint(e.getPoint());
+                    if(row != getSelectedRow()) {
+                        setRowSelectionInterval(row, row);
+                    }
+                    if (row >= 0 && col >= 0) {
+                        handler.maybeShowPopup(
+                            e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            }
+        });
     }
     
     private static class BuddyComparator implements Comparator<BuddyItem> {

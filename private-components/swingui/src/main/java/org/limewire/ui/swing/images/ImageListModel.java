@@ -22,5 +22,13 @@ public class ImageListModel extends EventListModel<FileItem>{
         FileItem item = fileItems.get(index);
         fileList.removeFile(item.getFile());
     }
+    
+    public FileList getFileList() {
+        return fileList;
+    }
+    
+    public FileItem getFileItem(int index) {
+        return fileItems.get(index);
+    }
 
 }

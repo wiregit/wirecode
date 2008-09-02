@@ -1,10 +1,15 @@
 package org.limewire.ui.swing.sharing.table;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
+import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -20,6 +25,35 @@ public class SharingFancyTable extends JXTable {
         setFillsViewportHeight(false);
         getTableHeader().setFocusable(false);
         getTableHeader().setReorderingAllowed(false);
+        
+        final SharingPopupHandler handler = new SharingPopupHandler(this, new SharingActionHandler());
+        
+        addMouseListener(new MouseAdapter() {
+            
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    int col = columnAtPoint(e.getPoint());
+                    int row = rowAtPoint(e.getPoint());
+                    if(row != getSelectedRow()) {
+                        setRowSelectionInterval(row, row);
+                    }
+                    if (row >= 0 && col >= 0) {
+                        handler.maybeShowPopup(
+                            e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            }
+        });
     }
     
     @Override

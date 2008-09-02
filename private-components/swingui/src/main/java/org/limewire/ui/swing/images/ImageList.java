@@ -2,6 +2,8 @@ package org.limewire.ui.swing.images;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -14,6 +16,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
+import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -43,6 +47,27 @@ public class ImageList extends JXList {
         setFixedCellHeight(190);
         setFixedCellWidth(190);
         setRolloverEnabled(true);
+        
+        final SharingPopupHandler handler = new SharingPopupHandler(this, new SharingActionHandler());
+        
+        addMouseListener(new MouseAdapter() {
+            
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    handler.maybeShowPopup(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
     }
     
     private class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
