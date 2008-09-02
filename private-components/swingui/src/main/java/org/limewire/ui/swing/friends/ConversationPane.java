@@ -43,6 +43,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * 
  */
 public class ConversationPane extends JPanel implements Displayable {
+    private static final String DISABLED_LIBRARY_TOOLTIP = tr(" isn't using LimeWire. Tell them about it to see their Library");
     private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private ArrayList<Message> messages = new ArrayList<Message>();
@@ -53,9 +54,9 @@ public class ConversationPane extends JPanel implements Displayable {
     private ResizingInputPanel inputPanel;
 
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted String conversationName, IconLibrary icons) {
+    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, IconLibrary icons) {
         this.icons = icons;
-        this.conversationName = conversationName;
+        this.conversationName = friend.getName();
         
         setLayout(new BorderLayout());
         
@@ -84,7 +85,7 @@ public class ConversationPane extends JPanel implements Displayable {
         
         scroll.getViewport().add(editor);
         
-        add(footerPanel(writer), BorderLayout.SOUTH);
+        add(footerPanel(writer, friend), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
         
@@ -112,10 +113,15 @@ public class ConversationPane extends JPanel implements Displayable {
         editor.setText(chatDoc);
     }
     
-    private JPanel footerPanel(MessageWriter writer) {
+    private JPanel footerPanel(MessageWriter writer, Friend friend) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
-        panel.add(new JXButton(tr("Library")), BorderLayout.NORTH);
+        JXButton libraryButton = new JXButton(tr("Library"));
+        if (!friend.isSignedInToLimewire()) {
+            libraryButton.setEnabled(false);
+            libraryButton.setToolTipText(friend.getName() + DISABLED_LIBRARY_TOOLTIP);
+        }
+        panel.add(libraryButton, BorderLayout.NORTH);
         inputPanel = new ResizingInputPanel(writer);
         panel.add(inputPanel, BorderLayout.CENTER);
         return panel;

@@ -54,7 +54,7 @@ public class ChatPanel extends JPanel implements Displayable {
         LOG.debugf("ConversationStartedEvent with friend: {0}", friend.getName());
         ConversationPane chatPane = chats.get(friend.getName());
         if (chatPane == null) {
-            chatPane = conversationFactory.create(event.getWriter(), friend.getName());
+            chatPane = conversationFactory.create(event.getWriter(), friend);
             chats.put(friend.getName(), chatPane);
         }
         
