@@ -331,6 +331,7 @@ public class FriendsPane extends JPanel {
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
         Friend friend = message.getFriend();
         if (!friend.isActiveConversation() && message.getType() == Type.Received) {
+            friend.startChat();
             friend.setReceivingUnviewedMessages(true);
         }
     }
