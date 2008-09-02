@@ -66,10 +66,22 @@ public class TorrentFileSystem {
 	 */
 	private File _completeFile;
 	
-	public TorrentFileSystem(TorrentFileSystemMemento torrentFileSystemMemento) {
+	public TorrentFileSystem(int numHashes, TorrentFileSystemMemento torrentFileSystemMemento) {
         this._name = torrentFileSystemMemento.getName();
         this._totalSize = torrentFileSystemMemento.getTotalSize();
         this._files = torrentFileSystemMemento.getFiles();
+        
+        //BEGIN TODO remove this code after releasing a few versions Sept 2nd 2008.
+        //There was a bug, where the file end piece would be set to numhashes instead of numhashes-1
+        //the piece index is zero based. old code used to ignore these propblems, some of the newer 
+        //code throws an illegal argument exception.
+        for(TorrentFile file : _files) {
+            if(file.getEndPiece() == numHashes) {
+                file.setEndPiece(numHashes -1);
+            }
+        }
+        //END TODO
+        
         this._unmodFiles = Collections.unmodifiableList(_files);
         _folders.addAll(torrentFileSystemMemento.getFolders());
         this._incompleteFile = torrentFileSystemMemento.getIncompleteFile();
@@ -136,7 +148,7 @@ public class TorrentFileSystem {
             TorrentFile f = new TorrentFile(data.getLength(), _completeFile.getAbsolutePath(), torrentPath);
             f.setBeginPiece(0);
             f.setStartByte(0);
-            f.setEndPiece(numHashes);
+            f.setEndPiece(numHashes-1);
             f.setEndByte(f.length());
             _files = new ArrayList<TorrentFile>(1);
             _files.add(f);

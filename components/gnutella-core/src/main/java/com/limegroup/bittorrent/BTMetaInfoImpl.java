@@ -283,7 +283,8 @@ public class BTMetaInfoImpl implements BTMetaInfo {
                 hashIter.set(VERIFIED_HASH);
         }
         Integer pieceLength = memento.getPieceLength();
-        fileSystem = new TorrentFileSystem(memento.getFileSystem());
+        int numblocks = _hashes.size();
+        fileSystem = new TorrentFileSystem(numblocks, memento.getFileSystem());
         _infoHash = memento.getInfoHash();
         try {
             _infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
