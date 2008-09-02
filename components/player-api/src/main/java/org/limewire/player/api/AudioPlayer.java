@@ -1,5 +1,9 @@
 package org.limewire.player.api;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+
 
 
 /**
@@ -12,6 +16,21 @@ public interface AudioPlayer {
      * Loads a song wrapped in a AudioSource object
      */
     public void loadSong(AudioSource source);
+    
+    /**
+     * Loads a song from a File 
+     */
+    public void loadSong(File source);
+    
+    /**
+     * Loads a song from an InputStream
+     */
+    public void loadSong(InputStream source);
+    
+    /**
+     * Loads a song from a URL
+     */
+    public void loadSong(URL source);
 	
 	/**
      * Begins playing the loaded song

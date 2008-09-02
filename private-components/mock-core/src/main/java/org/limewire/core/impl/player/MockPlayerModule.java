@@ -8,7 +8,7 @@ public class MockPlayerModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(AudioPlayer.class).to(LimeWirePlayer.class);
+        bind(AudioPlayer.class).to(MockAudioPlayer.class);
     }
 
 }

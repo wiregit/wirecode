@@ -1,7 +1,10 @@
 package org.limewire.player.impl;
 
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -141,6 +144,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     /**
      * Converts the playerstate from ints to PlayerState enums
      */
+    @Override
     public PlayerState getStatus() {
         return playerState;
     }
@@ -148,10 +152,28 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     /**
      * Loads a AudioSource into the player to play next
      */
+    @Override
     public void loadSong(AudioSource source) {
         if( source == null )
             throw new IllegalArgumentException();
         songBuffer.setSong(source);
+    }
+    
+
+
+    @Override
+    public void loadSong(File songFile) {
+        loadSong(new AudioSourceImpl(songFile));        
+    }
+
+    @Override
+    public void loadSong(InputStream songStream) {
+        loadSong(new AudioSourceImpl(songStream));  
+    }
+
+    @Override
+    public void loadSong(URL songUrl) {
+        loadSong(new AudioSourceImpl(songUrl));  
     }
 
     /**
@@ -476,7 +498,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
     protected void notifyEvent(final PlayerState state, final double value) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-//                fireStateUpdated(new AudioPlayerEvent(state,value));
+                fireStateUpdated(new AudioPlayerEvent(state,value));
             }
         });
     }
