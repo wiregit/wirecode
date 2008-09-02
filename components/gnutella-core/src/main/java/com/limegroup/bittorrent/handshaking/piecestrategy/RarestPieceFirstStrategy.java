@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent.handshaking.piecestrategy;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.limewire.collection.AndView;
@@ -33,15 +33,14 @@ public class RarestPieceFirstStrategy extends AbstractPieceStrategy {
     }
 
     public List<BTInterval> getNextPieces(BitField availableBlocks, BitField neededBlocks) {
-        List<BTInterval> nextPieces = new ArrayList<BTInterval>();
         BitField interestingBlocks = new AndView(availableBlocks, neededBlocks);
         int rarestPiece = getCurrentRarestPiece(interestingBlocks, minRareness);
 
         if (rarestPiece > -1) {
             BTInterval nextPiece = getBtMetaInfo().getPiece(rarestPiece);
-            nextPieces.add(nextPiece);
+            return Collections.singletonList(nextPiece);
         }
-        return nextPieces;
+        return Collections.emptyList();
     }
 
     /**

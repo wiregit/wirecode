@@ -1,5 +1,6 @@
 package org.limewire.swarm;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
  * Represents a collection of files on top the local file system. Maps between
  * the actual underlying filesystem and the view provided here.
  */
-public interface SwarmFileSystem {
+public interface SwarmFileSystem extends Closeable {
 
     /**
      * Writes data from the byteBuffer to the fileSystem, starting at 'start'.

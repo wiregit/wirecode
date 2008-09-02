@@ -28,10 +28,6 @@ public class SwarmerImpl implements Swarmer {
                 .synchronizedMap(new HashMap<SwarmSourceType, SwarmSourceDownloader>());
     }
 
-    public SwarmSourceDownloader getSwarmSourceHandler(Class<SwarmSource> clazz) {
-        return sourceDownloaders.get(clazz);
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -51,7 +47,7 @@ public class SwarmerImpl implements Swarmer {
     public void addSource(SwarmSource source) {
         SwarmSourceType type = source.getType();
 
-        if (!hasHandler(type)) {
+        if (!hasDownloaderRegistered(type)) {
             throw new IllegalStateException("No swarm source handler is registered for type: "
                     + type);
         }
@@ -118,7 +114,7 @@ public class SwarmerImpl implements Swarmer {
      * @see
      * org.limewire.swarm.Swarmer#hasHandler(org.limewire.swarm.SwarmSourceType)
      */
-    public boolean hasHandler(SwarmSourceType type) {
+    public boolean hasDownloaderRegistered(SwarmSourceType type) {
         return sourceDownloaders.containsKey(type);
     }
 

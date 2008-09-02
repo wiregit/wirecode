@@ -1,5 +1,7 @@
 package org.limewire.swarm;
 
+import org.limewire.nio.observer.Shutdownable;
+
 /**
  * The swarm is responsible for registering various SwarmSourceHandlers and
  * providing an interface to download a file from multiple sources in a swarm.
@@ -9,7 +11,7 @@ package org.limewire.swarm;
  * {@link #register(SwarmSourceType, SwarmSourceDownloader)} must be called before
  * anything else.
  */
-public interface Swarmer {
+public interface Swarmer extends Shutdownable {
     /**
      * Adds the given source to the swarm and delegates it the responsible
      * {@link SwarmSourceDownloader}.
@@ -45,7 +47,7 @@ public interface Swarmer {
     /**
      * Returns true if there is a handler for the given SwarmSourceType.
      */
-    boolean hasHandler(SwarmSourceType type);
+    boolean hasDownloaderRegistered(SwarmSourceType type);
 
     SwarmCoordinator getCoordinator();
 

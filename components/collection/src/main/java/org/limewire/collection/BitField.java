@@ -49,6 +49,9 @@ package org.limewire.collection;
  */
 public interface BitField {
 	public boolean get(int i);
+	/**
+	 * @return index of next set bit from index <code>i</code> or -1 if there is no bit left
+	 */
 	public int nextSetBit(int i);
 	public int nextClearBit(int i);
 	public int cardinality();

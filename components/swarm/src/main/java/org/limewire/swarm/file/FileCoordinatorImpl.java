@@ -136,7 +136,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
     public void unlease(Range range) {
         synchronized (LOCK) {
-            // assert hasLease(range); there are valid times where unless will
+            // don't assert hasLease(range); there are valid times where unlease will
             // be called and we don't have the lease
             deleteLease(range);
         }
