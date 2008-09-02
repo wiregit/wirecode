@@ -36,4 +36,12 @@ public class MockXMPPConnection implements XMPPConnection {
     public void setMode(Mode mode) {
         
     }
+
+    public void addUser(String id, String name) throws XMPPException {
+        
+    }
+
+    public void removeUser(String id) throws XMPPException {
+        
+    }
 }

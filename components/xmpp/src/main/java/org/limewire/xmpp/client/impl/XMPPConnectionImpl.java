@@ -305,6 +305,39 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
 //        }
 //    }
 
+    public void addUser(String id, String name) throws XMPPException {
+        Roster roster = connection.getRoster();
+        if(roster != null) {
+            // TODO smack enhancement
+            // TODO to support notifications when 
+            // TODO the Roster is created
+
+            try {
+                roster.createEntry(id, name, null);
+            } catch (org.jivesoftware.smack.XMPPException e) {
+                throw new XMPPException(e);
+            }
+        }
+    }
+    
+    public void removeUser(String id) throws XMPPException {
+        Roster roster = connection.getRoster();
+        if(roster != null) {
+            // TODO smack enhancement
+            // TODO to support notifications when 
+            // TODO the Roster is created
+
+            try {
+                RosterEntry entry = roster.getEntry(id);
+                if(entry!= null) {
+                    roster.removeEntry(entry);    
+                }                
+            } catch (org.jivesoftware.smack.XMPPException e) {
+                throw new XMPPException(e);
+            }
+        }
+    }
+
     public void handleEvent(AddressEvent event) {
         LOG.debugf("handling address event: {0}", event.getSource().toString());
         synchronized (this) {
