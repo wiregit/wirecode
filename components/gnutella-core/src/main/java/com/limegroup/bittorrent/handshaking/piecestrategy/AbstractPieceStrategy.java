@@ -11,7 +11,7 @@ public abstract class AbstractPieceStrategy implements PieceStrategy{
 
     }
 
-    public BTMetaInfo getBtMetaInfo() {
+    protected BTMetaInfo getBtMetaInfo() {
         return btMetaInfo;
     }
 
