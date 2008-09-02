@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
-	<classpathentry kind="src" path="components/swarm/src/test/resources"/>
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/resources"/>
 	<classpathentry excluding="windows/|macosx/|target/" kind="src" output="gui" path="gui"/>
 	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
@@ -43,8 +42,6 @@
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
 	<classpathentry kind="src" output="components/xmpp/build/classes" path="components/xmpp/src/main/java"/>
 	<classpathentry kind="src" output="components/xmpp/build/tests" path="components/xmpp/src/test/java"/>
-	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
-	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
 	<classpathentry excluding="windows/|windows/|linux/|osx/" kind="src" path="lib/resources"/>
 	<classpathentry kind="src" path="lib/resources/windows"/>
 	<classpathentry kind="src" output="private-components/integrated-ui/build/classes" path="private-components/integrated-ui/src/main/java"/>
@@ -95,8 +92,6 @@
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/swingx-0.9.3.jar" sourcepath="lib/sources/swingx-0.9.3-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/base64-2.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/jars/tests/javax.servlet-5.1.12.jar"/>
-	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-src.jar"/>
@@ -138,4 +133,9 @@
 	<classpathentry kind="lib" path="lib/jars/EventBus-1.2b.jar"/>
 	<classpathentry kind="lib" path="lib/jars/miglayout.jar"/>
 	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="lib/jars/tests/javax.servlet-5.1.12.jar"/>
+	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
+	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
+	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
+	<classpathentry kind="src" path="components/swarm/src/test/resources"/>
 </classpath>
