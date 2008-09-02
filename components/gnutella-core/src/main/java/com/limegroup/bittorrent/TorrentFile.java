@@ -25,9 +25,11 @@ public class TorrentFile extends File {
 	TorrentFile(long length, String path, String torrentPath) {
 		super(path);
 		this.length = length;
-		this.torrentPath = Objects.nonNull(torrentPath, "torrentPath");
+		this.torrentPath = torrentPath;
 		begin = -1; //these need to be initialized.
 		end = -1; 
+		startByte = -1;
+		endByte = -1;
 	}
 	
 	@Override

@@ -9,7 +9,8 @@ import java.util.Map;
 
 
 public class BTMetaInfoMementoImpl implements BTMetaInfoMemento, Serializable {
-    
+    private static final long serialVersionUID = 4808344749443143000L;
+
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
 
     @SuppressWarnings("unchecked")
