@@ -3,6 +3,7 @@
  */
 package com.limegroup.bittorrent.disk;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,8 +17,6 @@ import org.limewire.collection.IntervalSet;
 import com.limegroup.bittorrent.BTInterval;
 
 public class BlockRangeMap {
-
-    private static final long serialVersionUID = 4006274480019024111L;
 
     private final HashMap<Integer, IntervalSet> blocks;
 
