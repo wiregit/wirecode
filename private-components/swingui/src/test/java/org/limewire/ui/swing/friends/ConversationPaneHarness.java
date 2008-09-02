@@ -30,7 +30,7 @@ public class ConversationPaneHarness {
                     }
                 };
                 friend.writer = writer;
-                ConversationPane pane = new ConversationPane(writer, friend.getName(), new IconLibraryImpl());
+                ConversationPane pane = new ConversationPane(writer, friend, new IconLibraryImpl());
                 frame.add(pane);
                 
                 for(int i = 0; i < 10; i++) {

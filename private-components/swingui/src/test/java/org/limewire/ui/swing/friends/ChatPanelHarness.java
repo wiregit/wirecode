@@ -25,8 +25,8 @@ public class ChatPanelHarness {
                 final IconLibraryImpl icons = new IconLibraryImpl();
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
-                    public ConversationPane create(MessageWriter writer, String conversationName) {
-                        return new ConversationPane(writer, conversationName, icons);
+                    public ConversationPane create(MessageWriter writer, Friend friend) {
+                        return new ConversationPane(writer, friend, icons);
                     }
                 }, icons, new FriendsPane(icons, new MockFriendsCountUpdater(), new MockLibraryManager()), new TopPanel(icons)));
                 
