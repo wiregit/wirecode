@@ -62,18 +62,23 @@ public class SearchResultsPanel extends JPanel {
             @Assisted EventList<VisualSearchResult> visualSearchResults,
             @Assisted Search search,
             ResultsContainerFactory containerFactory,
-            SponsoredResultsPanel sponsoredResultsPanel) {
+            SponsoredResultsPanel sponsoredResultsPanel,
+            SortAndFilterPanel sortAndFilterPanel) {
         
         setBackground(Color.LIGHT_GRAY);
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         sponsoredResultsPanel.setVisible(false);
-        this.sortAndFilterPanel = new SortAndFilterPanel();
+        this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new SearchScrollPane();
         EventList<VisualSearchResult> list =
             sortAndFilterPanel.getFilteredAndSortedList(visualSearchResults);
         
+        // The ResultsContainerFactory create method takes two parameters
+        // which it passes to the ResultsContainer constructor
+        // for the parameters annotated with @Assisted.
         this.resultsContainer = containerFactory.create(list, search);
+
         sortAndFilterPanel.addModeListener(new ModeListener() {
             @Override
             public void setMode(Mode mode) {

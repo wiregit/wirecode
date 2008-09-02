@@ -151,7 +151,7 @@ public class MockSearch implements Search {
                 msr.setDescription(name);
                 msr.setExtension("ogv");
                 msr.setResultType(ResultType.VIDEO);
-                msr.setSize(1234L);
+                msr.setSize(9876L);
                 msr.addSource("chandler");
                 msr.addSource("joey");
                 msr.setUrn("www.stlzoo.com");
@@ -164,9 +164,9 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.LENGTH, "0:48");
                 msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
-                msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+                msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
                 msr.setProperty(PropertyKey.RATING, "8");
-                msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
+                msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
                 msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
                 msr.setProperty(PropertyKey.WIDTH, "640");
                 msr.setProperty(PropertyKey.YEAR, "2008");

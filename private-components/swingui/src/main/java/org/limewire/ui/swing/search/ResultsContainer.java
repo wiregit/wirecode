@@ -71,9 +71,6 @@ public class ResultsContainer extends JXPanel {
         for (Map.Entry<String, BaseResultPanel> entry : panelMap.entrySet()) {
             add(entry.getValue(), entry.getKey());
         }
-
-        //setBorder(BorderFactory.createTitledBorder(
-        //    BorderFactory.createLineBorder(Color.RED, 1), "ResultsContainer"));
     }
 
     public void synchronizeResultCount(SearchCategory key, final Action action) {
