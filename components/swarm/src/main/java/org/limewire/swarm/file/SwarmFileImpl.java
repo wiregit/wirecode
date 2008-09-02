@@ -3,6 +3,7 @@ package org.limewire.swarm.file;
 import java.io.File;
 
 import org.limewire.swarm.SwarmFile;
+import org.limewire.util.Objects;
 
 public class SwarmFileImpl implements SwarmFile {
     private final File file;
@@ -22,7 +23,8 @@ public class SwarmFileImpl implements SwarmFile {
      * @param completeSize
      */
     public SwarmFileImpl(File file, String path, long completeSize) {
-        this.file = file;
+        this.file = Objects.nonNull(file, "file");
+        assert completeSize >= 0;
         this.completeSize = completeSize;
         this.path = path;
         if (this.path == null) {
@@ -93,7 +95,7 @@ public class SwarmFileImpl implements SwarmFile {
      * @see org.limewire.swarm.file.SwarmFile#getEndByte()
      */
     public long getEndBytePosition() {
-        long endByte = getFileSize() > 0 ? getStartBytePosition() + getFileSize() - 1 : 0;
+        long endByte = getFileSize() > 0 ? getStartBytePosition() + getFileSize() - 1 : getStartBytePosition();
         return endByte;
     }
 }
