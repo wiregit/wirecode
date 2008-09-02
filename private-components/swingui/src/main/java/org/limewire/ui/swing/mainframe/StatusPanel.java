@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Random;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -100,17 +101,24 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         add(miniPlayerPanel);
 
         JMenuBar menuBar = new JMenuBar();
+        menuBar.setBackground(Color.WHITE);
+        menuBar.setOpaque(true);
         menuBar.setBorderPainted(false);
         JPanel menuPanel = new JPanel(new BorderLayout());
+        menuPanel.setBorder(BorderFactory.createLineBorder(new Color(159, 159, 159)));
+        menuPanel.setOpaque(true);
         menuPanel.setMinimumSize(new Dimension(0, 20));
         menuPanel.setMaximumSize(new Dimension(150, 20));
         menuPanel.add(menuBar, BorderLayout.WEST);
+        menuPanel.setBackground(menuBar.getBackground());
         
         add(menuPanel);
         
         statusMenu = new JMenu();
+        statusMenu.setOpaque(true);
         statusMenu.setEnabled(false);
         statusMenu.setIcon(icons.getEndChat());
+        statusMenu.setBackground(menuBar.getBackground());
         statusMenu.setBorderPainted(false);
         menuBar.add(statusMenu);
         friendsButton = new JButton(new FriendsAction(SIGN_IN));
