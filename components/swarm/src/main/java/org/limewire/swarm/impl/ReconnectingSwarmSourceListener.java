@@ -13,34 +13,17 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
 
     private SwarmStatus connectionStatus = null;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.limewire.swarm.SwarmSourceListener#connected(org.limewire.swarm.
-     * SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void connected(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         LOG.tracef("connected: {0}", source);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.limewire.swarm.SwarmSourceListener#connectFailed(org.limewire.swarm
-     * .SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void connectFailed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         LOG.tracef("connectFailed: {0}", source);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.limewire.swarm.SwarmSourceListener#connectionClosed(org.limewire.
-     * swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void connectionClosed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         connectionClosed(swarmSourceHandler, source, connectionStatus);
     }
@@ -58,11 +41,6 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
             LOG.tracef("error, not reconnecting: {0} status: {1}", source, status);
         } else if (status == null || status.isOk()) {
             LOG.tracef("reconnecting: {0} status: {1}", source, status);
-            try {
-                Thread.sleep(500);// wait a little before connecting
-            } catch (InterruptedException e) {
-                LOG.warn("sleep interrupted", e);
-            }
             // re-add this source back to the swarmer
             swarmSourceHandler.addSource(source);
         } else {
@@ -70,26 +48,14 @@ public class ReconnectingSwarmSourceListener implements SwarmSourceListener {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.limewire.swarm.SwarmSourceListener#responseProcessed(org.limewire
-     * .swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource,
-     * org.limewire.swarm.SwarmStatus)
-     */
+    @Override
     public void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         connectionStatus = status;
         LOG.tracef("responseProcessed: {0} status: {1}", source, status);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seeorg.limewire.swarm.SwarmSourceListener#finished(org.limewire.swarm.
-     * SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void finished(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         connectionStatus = new FinishedSwarmStatus();
         LOG.tracef("finished: {0}", source);
