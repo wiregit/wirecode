@@ -126,7 +126,7 @@ public class MockLibraryManager implements LibraryManager {
     }
 
     @Override
-    public Map<String, FileList> getUniqueLists() {
+    public Map<String, FileList> getAllBuddyLists() {
         return buddyMap;
     }
     
@@ -166,6 +166,40 @@ public class MockLibraryManager implements LibraryManager {
 
     @Override
     public void removeBuddyShareListListener(BuddyShareListListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    ///////////////////////////////////////////////
+    //  Accessors for Buddy Libraries
+    ///////////////////////////////////////////////
+
+    @Override
+    public void addBuddyLibrary(String name) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean containsBuddyLibrary(String name) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Map<String, FileList> getAllBuddyLibraries() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public FileList getBuddyLibrary(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void removeBuddyLibrary(String name) {
         // TODO Auto-generated method stub
         
     }

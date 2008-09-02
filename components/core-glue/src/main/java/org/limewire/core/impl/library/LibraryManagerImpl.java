@@ -36,7 +36,8 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     private LibraryFileList libraryFileList;
     private GnutellaFileList gnutellaFileList;
     private Map<String,FileList> buddyFileLists;
-//    private BuddyFileList buddyFileList;
+    
+    private Map<String, FileList> buddyLibraryFileLists;
     
     @Inject
     LibraryManagerImpl(FileManager fileManager) {
@@ -45,8 +46,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
         buddyFileLists = new HashMap<String, FileList>();
-//        buddyFileList = new BuddyFileList(fileManager, "All Buddys");
-        
+        buddyLibraryFileLists = new HashMap<String, FileList>();
     }
 
     @Override
@@ -77,17 +77,9 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     public FileList getGnutellaList() {
         return gnutellaFileList;
     }
-    
-//    @Override
-//    public FileList getAllBuddyList() {
-//        return gnutellaFileList;
-////        return null;
-//    }
 
     @Override
-    public Map<String, FileList> getUniqueLists() {
-//        Map<String, com.limegroup.gnutella.FileList> buddies = fileManager.getAllBuddyLists();
-//        return Collections.emptyMap();
+    public Map<String, FileList> getAllBuddyLists() {
         return buddyFileLists;
     }
     
@@ -133,6 +125,36 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         buddyListeners.remove(listener);
     }
     
+    //////////////////////////////////////////////////////
+    //  Accessors for Buddy Libraries (Files being shared with you)
+    /////////////////////////////////////////////////////
+
+    @Override
+    public Map<String, FileList> getAllBuddyLibraries() {
+        return buddyLibraryFileLists;
+    }
+
+    @Override
+    public FileList getBuddyLibrary(String name) {
+        return buddyLibraryFileLists.get(name);
+    }
+
+    @Override
+    public void addBuddyLibrary(String name) {
+        if(!buddyLibraryFileLists.containsKey(name)) {
+            buddyLibraryFileLists.put(name, new BuddyLibraryFileList(name));
+        }
+    }
+    
+    @Override
+    public void removeBuddyLibrary(String name) {
+        buddyLibraryFileLists.remove(name);
+    }
+    
+    @Override
+    public boolean containsBuddyLibrary(String name) {
+        return buddyLibraryFileLists.containsKey(name);
+    }
 
     @Override
     public void handleFileEvent(FileManagerEvent evt) {
@@ -153,31 +175,6 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 //        }
     }
     
-//    private class FileListener implements FileListListener {
-//
-//        private final EventList<FileItem> list;
-//        
-//        public FileListener(EventList<FileItem> list) {
-//            this.list = list;
-//        }
-//        
-//        @Override
-//        public void addEvent(FileDesc fileDesc) { 
-//            list.add(new CoreFileItem(fileDesc));
-//        }
-//
-//        @Override
-//        public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
-//            removeFileItem(list, oldDesc);
-//            list.add(new CoreFileItem(oldDesc));            
-//        }
-//
-//        @Override
-//        public void removeEvent(FileDesc fileDesc) {
-//            removeFileItem(list, fileDesc);
-//        }
-//    }
-    
     private static class Listener implements FileEventListener {
         private final LibraryListListener listener;
         
@@ -193,16 +190,6 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
             }
         }
     }
-
-    
-//    private void removeFileItem(EventList<FileItem> list, FileDesc toRemove) {
-//        for(FileItem item : list) {
-//            if(item.getFile().equals(toRemove.getFile())) {
-//                list.remove(item);
-//                return;
-//            }
-//        }
-//    }
     
     private class GnutellaFileList extends FileListImpl implements FileListListener {
 
@@ -373,5 +360,32 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         public int size() {
             return eventList.size();
         }
+    }
+    
+    private class BuddyLibraryFileList extends FileListImpl {
+
+        private final String name;
+        
+        public BuddyLibraryFileList(String name) {
+            this.name = name;
+        }
+        
+        @Override
+        public void addFile(File file) {
+            
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public void removeFile(File file) {
+
+        }
+        //TODO: add new accessors appropriate for creating FileItems based on
+        //      lookups. May also need to subclass CoreFileItem appropriate for
+        //      buddy library info.
     }
 }

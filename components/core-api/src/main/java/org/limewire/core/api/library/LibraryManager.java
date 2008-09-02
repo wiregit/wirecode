@@ -13,7 +13,7 @@ public interface LibraryManager {
     
     FileList getGnutellaList();
 
-    Map<String, FileList> getUniqueLists();
+    Map<String, FileList> getAllBuddyLists();
     
     FileList getBuddy(String name);
     
@@ -22,6 +22,16 @@ public interface LibraryManager {
     void removeBuddy(String name);
     
     boolean containsBuddy(String name);
+    
+    Map<String, FileList> getAllBuddyLibraries();
+    
+    FileList getBuddyLibrary(String name);
+    
+    void addBuddyLibrary(String name);
+    
+    void removeBuddyLibrary(String name);
+    
+    boolean containsBuddyLibrary(String name);
     
     void addBuddyShareListListener(BuddyShareListListener listener);
     

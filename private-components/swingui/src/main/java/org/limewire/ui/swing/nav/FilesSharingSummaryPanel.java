@@ -85,7 +85,7 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
         new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaList());
         
 		buddyButton.setName("FilesSharingSummaryPanel.buddies");
-		buddyButton.setIcon(new NumberIcon(libraryManager.getUniqueLists(), buddiesIcon));
+		buddyButton.setIcon(new NumberIcon(libraryManager.getAllBuddyLists(), buddiesIcon));
 		buddyButton.setUI(new HighlightToggleButtonUI(highLightColor));   
 		
 		setLayout(new MigLayout("insets 0 0 0 0", "", ""));
