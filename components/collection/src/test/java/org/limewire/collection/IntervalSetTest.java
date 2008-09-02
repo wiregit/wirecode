@@ -17,7 +17,6 @@ import org.limewire.util.ByteUtils;
 /**
  * Unit tests for IntervalSet
  */
-@SuppressWarnings( { "unchecked", "cast" } )
 public class IntervalSetTest extends BaseTestCase {
     
     private static final Log LOG = LogFactory.getLog(IntervalSetTest.class);

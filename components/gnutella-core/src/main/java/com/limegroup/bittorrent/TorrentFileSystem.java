@@ -66,10 +66,22 @@ public class TorrentFileSystem {
 	 */
 	private File _completeFile;
 	
-	public TorrentFileSystem(TorrentFileSystemMemento torrentFileSystemMemento) {
+	public TorrentFileSystem(int numHashes, TorrentFileSystemMemento torrentFileSystemMemento) {
         this._name = torrentFileSystemMemento.getName();
         this._totalSize = torrentFileSystemMemento.getTotalSize();
         this._files = torrentFileSystemMemento.getFiles();
+        
+        //BEGIN TODO remove this code after releasing a few versions Sept 2nd 2008.
+        //There was a bug, where the file end piece would be set to numhashes instead of numhashes-1
+        //the piece index is zero based. old code used to ignore these propblems, some of the newer 
+        //code throws an illegal argument exception.
+        for(TorrentFile file : _files) {
+            if(file.getEndPiece() == numHashes) {
+                file.setEndPiece(numHashes -1);
+            }
+        }
+        //END TODO
+        
         this._unmodFiles = Collections.unmodifiableList(_files);
         _folders.addAll(torrentFileSystemMemento.getFolders());
         this._incompleteFile = torrentFileSystemMemento.getIncompleteFile();
@@ -107,8 +119,16 @@ public class TorrentFileSystem {
         if(data.getFiles() != null) {
             List<BTData.BTFileData> files = data.getFiles();
             List<TorrentFile> torrents = new ArrayList<TorrentFile>(files.size());
+            long position = 0;
             for(BTData.BTFileData file : files) {
-            	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath());
+                String torrentPath = _name + file.getPath();
+            	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath(), torrentPath);
+            	f.setBeginPiece((int) (position / pieceLength));
+                f.setStartByte(position);
+                position += f.length();
+                f.setEndPiece((int) (position / pieceLength));
+                f.setEndByte(position-1);
+
             	if (!FileUtils.isReallyInParentPath(_completeFile, f))
             		throw new SaveLocationException(LocationCode.SECURITY_VIOLATION, f);
                 torrents.add(f);
@@ -117,14 +137,6 @@ public class TorrentFileSystem {
 			if (files.size() == 0)
 				throw new ValueException("bad metainfo, no files!");
 			
-			// add the beginning and ending chunks for each file.
-			long position = 0;
-			for (TorrentFile file : torrents) {
-				file.setBegin((int) (position / pieceLength));
-				position += file.length();
-				file.setEnd((int) (position / pieceLength));
-			}
-			
 			_files = torrents;
             
             // add folders, for easier conflict checking later on
@@ -132,10 +144,12 @@ public class TorrentFileSystem {
                 _folders.add(new File(_completeFile, folderPath));
 			_folders.add(_completeFile);
 		} else {
-            TorrentFile f = new TorrentFile(data.getLength(), _completeFile.getAbsolutePath());
-            f.setBegin(0);
-            f.setEnd(numHashes);
-            
+		    String torrentPath = data.getName();
+            TorrentFile f = new TorrentFile(data.getLength(), _completeFile.getAbsolutePath(), torrentPath);
+            f.setBeginPiece(0);
+            f.setStartByte(0);
+            f.setEndPiece(numHashes-1);
+            f.setEndByte(f.length());
             _files = new ArrayList<TorrentFile>(1);
             _files.add(f);
 		}
@@ -259,9 +273,11 @@ public class TorrentFileSystem {
 		for (int i = 0; i < l.size(); i++) {
 			TorrentFile current = l.get(i);
 			TorrentFile updated = new TorrentFile(current.length(), newPath
-					+ current.getPath().substring(offset));
-			updated.setBegin(current.getBegin());
-			updated.setEnd(current.getEnd());
+					+ current.getPath().substring(offset), current.getTorrentPath());
+			updated.setBeginPiece(current.getBeginPiece());
+			updated.setEndPiece(current.getEndPiece());
+			updated.setStartByte(current.getStartByte());
+			updated.setEndByte(current.getEndByte());
 			l.set(i,updated);
 		}
 	}

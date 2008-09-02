@@ -5,13 +5,13 @@ import java.net.URISyntaxException;
 import java.net.URI;
 import java.net.URL;
 
+import org.limewire.http.URIUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.service.ErrorService;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**

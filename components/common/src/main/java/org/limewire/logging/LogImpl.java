@@ -92,21 +92,18 @@ public class LogImpl implements Log {
         }
     }
     
-    @Override
     public void debugf(String message, Object arg) {
         if (delegate.isDebugEnabled()) {
             delegate.debug(MessageFormat.format(message, arg));
         }
     }
 
-    @Override
     public void debugf(String message, Object arg1, Object arg2) {
         if (delegate.isDebugEnabled()) {
             delegate.debug(MessageFormat.format(message, arg1, arg2));
         }
     }
 
-    @Override
     public void debugf(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isDebugEnabled()) {
             delegate.debug(MessageFormat.format(message, arg1, arg2, arg3));
@@ -119,21 +116,18 @@ public class LogImpl implements Log {
         }
     }
     
-    @Override
     public void infof(String message, Object arg) {
         if (delegate.isInfoEnabled()) {
             delegate.info(MessageFormat.format(message, arg));
         }
     }
 
-    @Override
     public void infof(String message, Object arg1, Object arg2) {
         if (delegate.isInfoEnabled()) {
             delegate.info(MessageFormat.format(message, arg1, arg2));
         }
     }
 
-    @Override
     public void infof(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isInfoEnabled()) {
             delegate.info(MessageFormat.format(message, arg1, arg2, arg3));
@@ -146,21 +140,18 @@ public class LogImpl implements Log {
         }
     }
     
-    @Override
     public void tracef(String message, Object arg) {
         if (delegate.isTraceEnabled()) {
             delegate.trace(MessageFormat.format(message, arg));
         }
     }
 
-    @Override
     public void tracef(String message, Object arg1, Object arg2) {
         if (delegate.isTraceEnabled()) {
             delegate.trace(MessageFormat.format(message, arg1, arg2));
         }
     }
 
-    @Override
     public void tracef(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isTraceEnabled()) {
             delegate.trace(MessageFormat.format(message, arg1, arg2, arg3));
@@ -173,21 +164,18 @@ public class LogImpl implements Log {
         }
     }
 
-    @Override
     public void warnf(String message, Object arg) {
         if (delegate.isWarnEnabled()) {
             delegate.warn(MessageFormat.format(message, arg));
         }
     }
 
-    @Override
     public void warnf(String message, Object arg1, Object arg2) {
         if (delegate.isWarnEnabled()) {
             delegate.warn(MessageFormat.format(message, arg1, arg2));
         }
     }
 
-    @Override
     public void warnf(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isWarnEnabled()) {
             delegate.warn(MessageFormat.format(message, arg1, arg2, arg3));

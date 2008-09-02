@@ -35,12 +35,14 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
     
     private final Executor ioExecutor;
     private final SocketsManager socketsManager;
+    
+    private final HttpBandwidthTracker up, down;
 
     // copied from DefaultClientIOEventDispatch
     private static final String NHTTP_CONN = "NHTTP_CONN";
     
     public LimeConnectingIOReactor(final HttpParams params, final Executor ioExecutor,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager, HttpBandwidthTracker up, HttpBandwidthTracker down) {
         if (params == null) {
             throw new IllegalArgumentException();
         }
@@ -48,6 +50,13 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
         this.params = params;
         this.ioExecutor = ioExecutor;
         this.socketsManager = socketsManager;
+        this.up = up;
+        this.down = down;
+    }
+    
+    public LimeConnectingIOReactor(final HttpParams params, final Executor ioExecutor,
+            SocketsManager socketsManager) {
+        this(params, ioExecutor,socketsManager, new HttpBandwidthTracker(), new HttpBandwidthTracker());
     }
     
     public void execute(IOEventDispatch eventDispatch) throws IOException {
@@ -55,6 +64,16 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
             throw new IllegalArgumentException("Event dispatch must be of type DefaultClientIOEventDispatch");
         }
         this.eventDispatch = eventDispatch;
+    }
+    
+    public float getMeasuredBandwidth(boolean downstream) {
+            if (downstream) {
+                down.measureBandwidth();
+                return down.getMeasuredBandwidth();
+            } else {
+                up.measureBandwidth();
+                return up.getMeasuredBandwidth();
+            }
     }
     
     public SessionRequest connect(SocketAddress remoteAddress, 
@@ -110,7 +129,7 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
         session.setAttribute(IOSession.ATTACHMENT_KEY, attachment);
         session.setSocketTimeout(HttpConnectionParams.getSoTimeout(this.params));
         
-        HttpChannel channel = new HttpChannel(session, eventDispatch, null);
+        HttpChannel channel = new HttpChannel(session, eventDispatch, null, up, down);
         session.setHttpChannel(channel);
         
         eventDispatch.connected(session);
@@ -136,10 +155,10 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
     }
 
     /** 
-     * Throws {@link UnsupportedOperationException}.
+     * 
      */
     public void shutdown() throws IOException {
-        throw new UnsupportedOperationException();
+        
     }
 
     /** 

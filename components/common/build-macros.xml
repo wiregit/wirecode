@@ -28,8 +28,8 @@
 	<property name="compile.debug"			value="true"/>
 	<property name="compile.deprecation"	value="true"/>
 	<property name="compile.optimize"		value="false"/>
-	<property name="compile.source"			value="1.5"/>
-	<property name="compile.target"			value="1.5"/>
+	<property name="compile.source"			value="1.6"/>
+	<property name="compile.target"			value="1.6"/>
     
     <macrodef name="do.setup-properties" description="Sets up common properties every macro uses.">
     	<attribute name="component"/>

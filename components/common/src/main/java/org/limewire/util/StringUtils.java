@@ -463,6 +463,16 @@ public class StringUtils {
             throw new RuntimeException("UTF-8 not supported?", ex);
         }
     }
+    
+    public static byte[] toAsciiBytes(String string) {
+        if (string == null)
+            return new byte[0];
+        try {
+            return string.getBytes("US-ASCII");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException("US-ASCII not supported?", ex);
+        }
+    }
 
     /**
      * A wrapped version of {@link String#String(byte[], String)} that changes

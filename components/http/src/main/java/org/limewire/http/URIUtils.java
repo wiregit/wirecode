@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.http;
+package org.limewire.http;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.StringTokenizer;
 
-import org.limewire.http.Constants;
 import org.limewire.service.ErrorService;
 
 /**
@@ -80,5 +79,24 @@ public class URIUtils {
 
     private static boolean isDelimiter(String s) {
         return RESERVED.contains(s);
+    }
+
+    /**
+     * Returns the port for the given URI. If no port can be found, it checks the scheme.
+     * If the scheme is http port 80 is returned, if https 443.
+     * @param uri
+     * @return
+     */
+    public static int getPort(URI uri) {
+        int port = uri.getPort();
+        if (port == -1) {
+            String scheme = uri.getScheme();
+            if ("http".equalsIgnoreCase(scheme)) {
+                port = 80;
+            } else if ("https".equalsIgnoreCase(scheme)) {
+                port = 443;
+            }
+        }
+        return port;
     }
 }

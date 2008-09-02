@@ -138,4 +138,9 @@
 	<classpathentry kind="lib" path="lib/jars/miglayout.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-snapshot.jar" sourcepath="lib/sources/guice-snapshot-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="lib/jars/tests/javax.servlet-5.1.12.jar"/>
+	<classpathentry kind="lib" path="lib/jars/tests/org.mortbay.jetty-5.1.12.jar"/>
+	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
+	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
+	<classpathentry kind="src" path="components/swarm/src/test/resources"/>
 </classpath>

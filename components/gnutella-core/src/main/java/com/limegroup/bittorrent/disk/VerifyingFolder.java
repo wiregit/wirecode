@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,12 +18,10 @@ import org.limewire.collection.BitField;
 import org.limewire.collection.BitFieldSet;
 import org.limewire.collection.BitSet;
 import org.limewire.collection.IntervalSet;
-import org.limewire.collection.MultiIterable;
 import org.limewire.collection.NECallable;
 import org.limewire.collection.NotView;
+import org.limewire.collection.OrView;
 import org.limewire.collection.RRProcessingQueue;
-import org.limewire.collection.Range;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.DiskException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.SystemUtils;
@@ -39,10 +33,15 @@ import com.limegroup.bittorrent.PieceReadListener;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
+import com.limegroup.bittorrent.handshaking.piecestrategy.EndGamePieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.PartialPieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
+import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
+import org.limewire.core.settings.SharingSettings;
 
 /**
  * Verifies the Pieces of the torrent to the .torrent meta information 
@@ -87,11 +86,6 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * Mapping of the index of each requested block and the requested ranges within 
 	 */
 	private BlockRangeMap requestedRanges;
-	
-	/**
-	 * A view of the blocks the requested and partial blocks.
-	 */
-	private Iterable<Integer> requestedAndPartial;
 	
 	/**
 	 * Mapping of the index of each block pending write and 
@@ -153,140 +147,137 @@ class VerifyingFolder implements TorrentDiskManager {
 	VerifyingFolder(TorrentContext context, 
 			boolean complete, 
             BTDiskManagerMemento data,
-			DiskController<TorrentFile> diskController) {
-		TorrentFileSystem system = context.getFileSystem();
-		_files = complete? system.getFiles() : system.getIncompleteFiles();
-		this.context = context;
-		_corruptedBytes = 0;
-		partialBlocks = new BlockRangeMap();
-		requestedRanges = new BlockRangeMap();
-		pendingRanges = new BlockRangeMap();
-		this.diskController = diskController;
-		
-		requestedAndPartial = 
-			new MultiIterable<Integer>(partialBlocks.keySet(), 
-					requestedRanges.keySet());
-		
-		if (complete) {
-			verifiedBlocks = context.getFullBitSet();
-			verified = context.getFullBitField();
-		} else {
-			verifiedBlocks = new BitSet(context.getMetaInfo().getNumBlocks());
-			if (data != null)
-				initialize(data);
-			verified = new BitFieldSet(verifiedBlocks, context.getMetaInfo().getNumBlocks());
-		}
-		
-		missing = new NotView(verified);
-	}
-	
-	/**
-	 * populates various fields from data object that was 
-	 * deserialized.
-	 */
-	private void initialize(BTDiskManagerMemento data) {
-		if (data.getPartialBlocks() != null) 
-			partialBlocks.putAll(data.getPartialBlocks());
-		
-		if (data.getVerifiedBlocks() != null) 
-			verifiedBlocks = data.getVerifiedBlocks();
-		
-		isVerifying = data.isVerifying();
-	}
-	
-	
-	public void writeBlock(NECallable<BTPiece> factory) {
-		if (storedException != null)
-			return;
-		QUEUE.execute(new WriteJob(factory),context.getMetaInfo().getURN());
-	}
-	
-	/**
-	 * This duplicates lots of code from VerifyingFile..
-	 * the two should eventually be abstracted somehow.
-	 */
-	private class WriteJob implements Runnable {
-		private final NECallable<BTPiece> factory;
-		
-		WriteJob(NECallable<BTPiece> factory) {
-			this.factory = factory;
-		}
-		
-		public void run() {
-			if (storedException != null)
-				return;
-			
-			BTPiece piece = factory.call();
-			
-			BTInterval in = piece.getInterval();
+            DiskController<TorrentFile> diskController) {
+        TorrentFileSystem system = context.getFileSystem();
+        _files = complete? system.getFiles() : system.getIncompleteFiles();
+        this.context = context;
+        _corruptedBytes = 0;
+        int numBlocks = context.getMetaInfo().getNumBlocks();
+        partialBlocks = new BlockRangeMap(numBlocks);
+        requestedRanges = new BlockRangeMap(numBlocks);
+        pendingRanges = new BlockRangeMap(numBlocks);
+        this.diskController = diskController;
+                
+        if (complete) {
+            verifiedBlocks = context.getFullBitSet();
+            verified = context.getFullBitField();
+        } else {
+            verifiedBlocks = new BitSet(context.getMetaInfo().getNumBlocks());
+            if (data != null)
+                initialize(data);
+            verified = new BitFieldSet(verifiedBlocks, context.getMetaInfo().getNumBlocks());
+        }
+        
+        missing = new NotView(verified);
+    }
+    
+    /**
+     * populates various fields from data object that was 
+     * deserialized.
+     */
+    private void initialize(BTDiskManagerMemento data) {
+        if (data.getPartialBlocks() != null) 
+            partialBlocks.putAll(data.getPartialBlocks());
+        
+        if (data.getVerifiedBlocks() != null) 
+            verifiedBlocks = data.getVerifiedBlocks();
+        
+        isVerifying = data.isVerifying();
+    }
+    
+    
+    public void writeBlock(NECallable<BTPiece> factory) {
+        if (storedException != null)
+            return;
+        QUEUE.execute(new WriteJob(factory),context.getMetaInfo().getURN());
+    }
+    
+    /**
+     * This duplicates lots of code from VerifyingFile..
+     * the two should eventually be abstracted somehow.
+     */
+    private class WriteJob implements Runnable {
+        private final NECallable<BTPiece> factory;
+        
+        WriteJob(NECallable<BTPiece> factory) {
+            this.factory = factory;
+        }
+        
+        public void run() {
+            if (storedException != null)
+                return;
+            
+            BTPiece piece = factory.call();
+            
+            BTInterval in = piece.getInterval();
             if (in.getId() >=  verified.maxSize()) 
                 return; // bad piece.
-			byte [] data = piece.getData();
-			
-			synchronized(VerifyingFolder.this) {
-				if (hasBlock(in.getId()))
-					return;
-				pendingRanges.addInterval(in);
-				requestedRanges.removeInterval(in);
-			}
-			
-			try {
-				writeBlockImpl(in, data);
-			} catch (IOException iox) {
-				if (isOpen()) {
-					storedException = iox;
-					notifyDiskProblem(iox);
-				}
-			} finally {
-				synchronized(VerifyingFolder.this) {
-					pendingRanges.removeInterval(in);
-				}
-			}
-		}
-	}
-	/**
-	 * Writes bytes to the underlying files.
-	 * 
-	 * @param in the BTInterval that is to be written
-	 * @param buf
-	 *            an array of byte containing the bytes to write
-	 */
-	private void writeBlockImpl(BTInterval in, byte[] buf) 
-	throws IOException {
-		
-		long startOffset = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
-		diskController.write(startOffset, buf);
-		
-		synchronized(this) {
-			pendingRanges.removeInterval(in);
-			partialBlocks.addInterval(in);
-			if (!isCompleteBlock(in.getId(), partialBlocks))
-				return;
-		}
-		
-		boolean verified = verifyQuick(in.getId());
-		
-		synchronized(this) {
-			partialBlocks.remove(in.getId());
-			if (verified) 
-				markPieceCompleted(in.getId());
-			else 
-				_corruptedBytes += getPieceSize(in.getId());
-		}
-		if (verified)
-			handleVerified(in.getId());
-	}
-	
-	private synchronized void markPieceCompleted(int blockId) {
-		partialBlocks.remove(blockId);
-		requestedRanges.remove(blockId);
-		verifiedBlocks.set(blockId);
-		bitFieldDirty = true;
-		if (verifiedBlocks.cardinality() == context.getMetaInfo().getNumBlocks()) {
-			verifiedBlocks = context.getFullBitSet();
-			verified = context.getFullBitField();
-			missing = new NotView(verified);
-		}
+            byte [] data = piece.getData();
+            
+            synchronized(VerifyingFolder.this) {
+                if (hasBlock(in.getId()))
+                    return;
+                pendingRanges.addInterval(in);
+                requestedRanges.removeInterval(in);
+            }
+            
+            try {
+                writeBlockImpl(in, data);
+            } catch (IOException iox) {
+                if (isOpen()) {
+                    storedException = iox;
+                    notifyDiskProblem(iox);
+                }
+            } finally {
+                synchronized(VerifyingFolder.this) {
+                    pendingRanges.removeInterval(in);
+                }
+            }
+        }
+    }
+    /**
+     * Writes bytes to the underlying files.
+     * 
+     * @param in the BTInterval that is to be written
+     * @param buf
+     *            an array of byte containing the bytes to write
+     */
+    private void writeBlockImpl(BTInterval in, byte[] buf) 
+    throws IOException {
+        
+        long startOffset = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
+        diskController.write(startOffset, buf);
+        
+        synchronized(this) {
+            pendingRanges.removeInterval(in);
+            partialBlocks.addInterval(in);
+            if (!context.getMetaInfo().isCompleteBlock(in.getId(), partialBlocks))
+                return;
+        }
+        
+        boolean verified = verifyQuick(in.getId());
+        
+        synchronized(this) {
+            partialBlocks.remove(in.getId());
+            if (verified) 
+                markPieceCompleted(in.getId());
+            else 
+                _corruptedBytes += context.getMetaInfo().getPieceSize(in.getId());
+        }
+        if (verified)
+            handleVerified(in.getId());
+    }
+    
+    private synchronized void markPieceCompleted(int blockId) {
+        partialBlocks.remove(blockId);
+        requestedRanges.remove(blockId);
+        verifiedBlocks.set(blockId);
+        bitFieldDirty = true;
+        if (verifiedBlocks.cardinality() == context.getMetaInfo().getNumBlocks()) {
+            verifiedBlocks = context.getFullBitSet();
+            verified = context.getFullBitField();
+            missing = new NotView(verified);
+        }
         
         // calculate the last verified offset here rather than on the
         // gui thread if single-file torrent.
@@ -299,115 +290,112 @@ class VerifyingFolder implements TorrentDiskManager {
         while(i < verified.maxSize() && verified.get(i))
             i++;
         lastVerifiedOffset = Math.min(context.getFileSystem().getTotalSize(), i * length);
-	}
-	
-	private boolean verifyQuick(int pieceNum) throws IOException {
-		try {
-			return verify(pieceNum, false);
-		} catch (InterruptedException impossible) {
-			ErrorService.error(impossible);
-			return false;
-		}
-	}
-	
-	/**
-	 * @param pieceNum the piece to verify
-	 * @param slow whether to not max out cpu
-	 * @return if the block at pieceNum is ok.
-	 */
-	private boolean verify(int pieceNum, boolean slow) 
-	throws IOException, InterruptedException {
-		MessageDigest md = context.getMetaInfo().getMessageDigest();
-		md.reset();
-		int pieceSize = getPieceSize(pieceNum);
-		byte [] buf = new byte[Math.min(65536,pieceSize)];
-		int read = 0;
-		long offset = (long)pieceNum * context.getMetaInfo().getPieceLength();
-		while (read < pieceSize) {
-			
-			int readNow = diskController.read(offset, buf, 0, buf.length);
-			if (readNow == 0)
-				return false;
-			
-			long start = System.nanoTime();
-			md.update(buf, 0, readNow);
-			
-			if (slow && SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
-					SharingSettings.FRIENDLY_HASHING.getValue()) {
-				long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-				// go extra slow if there are active torrents
-				interval *= QUEUE.size() > 0 ? 5 : 3; 
-				if (interval > 0) 
-					Thread.sleep(interval);
-				else
-					Thread.yield();
-			}
-			
-			read += readNow;
-			offset += readNow;
-		}
-		
-		byte [] sha1 = md.digest();
-		return context.getMetaInfo().verify(sha1, pieceNum);
-	}
-	
-	/**
-	 * performs various tasks after a block has been verified
-	 * such as notifying any listeners or closing files.
-	 */
-	private void handleVerified(int pieceNum) throws IOException {
-		closeAnyCompletedFiles(pieceNum);
-		notifyOfChunkCompletion(pieceNum);
-	}
-	
-	private void notifyOfChunkCompletion(int pieceNum) {
-		DiskManagerListener t = listener;
-		if (t != null)
-			t.chunkVerified(pieceNum);
-	}
-	
-	private void closeAnyCompletedFiles(int pieceNum) throws IOException {
-		List<TorrentFile> possiblyCompleted = null;
-		for (TorrentFile t : _files) {
-			if (t.getBegin() > pieceNum)
-				continue;
-			if (t.getEnd() < pieceNum)
-				break;
-			
-			if (possiblyCompleted == null)
-				possiblyCompleted = new ArrayList<TorrentFile>();
-			
-			possiblyCompleted.add(t);
-		}
-		
-		if (possiblyCompleted == null)
-			return;
-		
-		for (TorrentFile file : possiblyCompleted) {
-			boolean done = true;
-			for(int i = file.getBegin(); i <= file.getEnd(); i++) {
-				if (!hasBlock(i)) {
-					done = false;
-					break;
-				}
-			}
-			if (done) 
-				diskController.setReadOnly(file);
-		}
-	}
-	
-	private boolean isCompleteBlock(Range in, int id) {
-		return in.getLow() == 0 && in.getHigh() == getPieceSize(id) - 1;
-	}
-	
-	public synchronized boolean hasBlock(int block) {
-		return verified.get(block);
-	}
+    }
+    
+    private boolean verifyQuick(int pieceNum) throws IOException {
+        try {
+            return verify(pieceNum, false);
+        } catch (InterruptedException impossible) {
+            ErrorService.error(impossible);
+            return false;
+        }
+    }
+    
+    /**
+     * @param pieceNum the piece to verify
+     * @param slow whether to not max out cpu
+     * @return if the block at pieceNum is ok.
+     */
+    private boolean verify(int pieceNum, boolean slow) 
+    throws IOException, InterruptedException {
+        MessageDigest md = context.getMetaInfo().getMessageDigest();
+        md.reset();
+        int pieceSize = context.getMetaInfo().getPieceSize(pieceNum);
+        byte [] buf = new byte[Math.min(65536,pieceSize)];
+        int read = 0;
+        long offset = (long)pieceNum * context.getMetaInfo().getPieceLength();
+        while (read < pieceSize) {
+            
+            int readNow = diskController.read(offset, buf, 0, buf.length);
+            if (readNow == 0)
+                return false;
+            
+            long start = System.nanoTime();
+            md.update(buf, 0, readNow);
+            
+            if (slow && SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
+                    SharingSettings.FRIENDLY_HASHING.getValue()) {
+                long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+                // go extra slow if there are active torrents
+                interval *= QUEUE.size() > 0 ? 5 : 3; 
+                if (interval > 0) 
+                    Thread.sleep(interval);
+                else
+                    Thread.yield();
+            }
+            
+            read += readNow;
+            offset += readNow;
+        }
+        
+        byte [] sha1 = md.digest();
+        return context.getMetaInfo().verify(sha1, pieceNum);
+    }
+    
+    /**
+     * performs various tasks after a block has been verified
+     * such as notifying any listeners or closing files.
+     */
+    private void handleVerified(int pieceNum) throws IOException {
+        closeAnyCompletedFiles(pieceNum);
+        notifyOfChunkCompletion(pieceNum);
+    }
+    
+    private void notifyOfChunkCompletion(int pieceNum) {
+        DiskManagerListener t = listener;
+        if (t != null)
+            t.chunkVerified(pieceNum);
+    }
+    
+    private void closeAnyCompletedFiles(int pieceNum) throws IOException {
+        List<TorrentFile> possiblyCompleted = null;
+        for (TorrentFile t : _files) {
+            if (t.getBeginPiece() > pieceNum)
+                continue;
+            if (t.getEndPiece() < pieceNum)
+                break;
+            
+            if (possiblyCompleted == null)
+                possiblyCompleted = new ArrayList<TorrentFile>();
+            
+            possiblyCompleted.add(t);
+        }
+        
+        if (possiblyCompleted == null)
+            return;
+        
+        for (TorrentFile file : possiblyCompleted) {
+            boolean done = true;
+            for(int i = file.getBeginPiece(); i <= file.getEndPiece(); i++) {
+                if (!hasBlock(i)) {
+                    done = false;
+                    break;
+                }
+            }
+            if (done) 
+                diskController.setReadOnly(file);
+        }
+    }
+    
+    public synchronized boolean hasBlock(int block) {
+        return verified.get(block);
+    }
 
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
 	 */
 	public void open(final DiskManagerListener torrent) throws IOException {
+		//TODO refactor to be able to add multiple listeners
 		this.listener = torrent;
 		storedException = null;
 		
@@ -434,7 +422,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		// always verify any partial blocks that are large enough
 		// (could happen if lw was shutdown during verification)
 		for (int block : partialBlocks.keySet() ) {
-			if (isCompleteBlock(block, partialBlocks)) {
+			if (context.getMetaInfo().isCompleteBlock(block, partialBlocks)) {
 				isVerifying = true;
 				VERIFY_QUEUE.execute(new VerifyJob(block),context.getMetaInfo().getURN());
 			}
@@ -518,452 +506,341 @@ class VerifyingFolder implements TorrentDiskManager {
 				LOG.debug("reading piece " + in);
             long length64 = in.getHigh() - in.getLow() + 1;
             assert length64 <= Integer.MAX_VALUE;
-			int length = (int)length64;
-			long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
-			int offset = 0;
-			byte[] buf = new byte[length];
-			boolean success = false;
-			try {
-				do {
-					offset += diskController.read(position + offset, buf, offset, length - offset);
-				} while (offset < length);
-				success = true;
-			} catch (IOException bad) {
-				if (isOpen()) {
-					storedException = bad;
-					notifyDiskProblem(new DiskException(bad));
-				}
-			} finally {
-				if (success)
-					listener.pieceRead(in, buf);
-				else
-					listener.pieceReadFailed(in);
-			}
-		}
-	}
-	
-	private void notifyDiskProblem(IOException e) {
-		DiskManagerListener t = listener;
-		if (t != null)
-			t.diskExceptionHappened(new DiskException(e));
-	}
-	
-	/**
-	 * returns a random available range that has preferably not yet been
-	 * requested
-	 * 
-	 * @param bs the BitField of available ranges
-	 * @param exclude the set of ranges that the connection is already about to
-	 * request
-	 * @return a BTInterval that should be requested next.
-	 */
-	public synchronized BTInterval leaseRandom(BitField bs, Set<BTInterval> exclude) {
-		if (isComplete())
-			return null;
-		
-		if (LOG.isDebugEnabled())
-			LOG.debug("leasing random chunk from available cardinality "+bs.cardinality());
-		
-		BitField interesting = new AndView(bs, missing);
-		BTInterval leased = findRandom(interesting, exclude);
-		
-		if (leased != null) {
-			if (leased.getHigh() - leased.getLow() + 1 > BLOCK_SIZE)
-				leased = new BTInterval(leased.getLow(), leased.getLow() + BLOCK_SIZE - 1, leased.getId());
-			requestedRanges.addInterval(leased);
-			
-			if (LOG.isDebugEnabled())
-				LOG.debug("assigning "+leased);
-		}
-		else if (LOG.isDebugEnabled())
-			LOG.debug("couldn't find anything to assign "+exclude);
-		
-		return leased;
-	}
-	
-	private BTInterval findRandom(BitField bs, Set<BTInterval> exclude) {
-		
-		// first try to complete any partial pieces that are not requested
-		BTInterval ret = assignEndgame(bs, exclude, false);
-		if (ret != null)
-			return ret;
-		LOG.debug("couldn't find partial, looking for unnassigned");
-		
-		// then see if the remote has any pieces that are neither 
-		// partial nor already requested
-		ret = findUnassigned(bs);
-		if (ret != null)
-			return ret;
-		LOG.debug("couldn't find unassigned, looking for already requested");
-		
-		return assignEndgame(bs, exclude, true);
-	}
-	
-	private BTInterval findUnassigned(BitField available) {
-		int selected = -1;
-		int current = 1;
-		
-		for (int i = available.nextSetBit(0); i >= 0; i = available.nextSetBit(i+1)) {
-			if (pendingRanges.containsKey(i) || 
-					partialBlocks.containsKey(i) ||
-					requestedRanges.containsKey(i))
-				continue;
-			if (Math.random() < 1f/current++)
-				selected = i;
-		}
-		
-		if (selected == -1)
-			return null;
-		if (LOG.isDebugEnabled())
-			LOG.debug("selecting unassigned piece "+selected);
+            int length = (int)length64;
+            long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.getLow();
+            int offset = 0;
+            byte[] buf = new byte[length];
+            boolean success = false;
+            try {
+                do {
+                    offset += diskController.read(position + offset, buf, offset, length - offset);
+                } while (offset < length);
+                success = true;
+            } catch (IOException bad) {
+                if (isOpen()) {
+                    storedException = bad;
+                    notifyDiskProblem(new DiskException(bad));
+                }
+            } finally {
+                if (success)
+                    listener.pieceRead(in, buf);
+                else
+                    listener.pieceReadFailed(in);
+            }
+        }
+    }
+    
+    private void notifyDiskProblem(IOException e) {
+        DiskManagerListener t = listener;
+        if (t != null)
+            t.diskExceptionHappened(new DiskException(e));
+    }
+    
+    /**
+     * returns a random available range that has preferably not yet been
+     * requested
+     * 
+     * @param bs the BitField of available ranges
+     * @param exclude the set of ranges that the connection is already about to
+     * request
+     * @return a BTInterval that should be requested next.
+     */
+    public synchronized BTInterval leaseBTInterval(BitField bs, Set<BTInterval> exclude,
+            PieceStrategy pieceStrategy) {
+        if (isComplete())
+            return null;
 
-		return new BTInterval(0,getPieceSize(selected) - 1,selected);
-	}
-	
-	/**
-	 * Picks an interval that is already requested by another connection.  This is
-	 * referred to as "Endgame mode" and is done when there are no other pieces to 
-	 * request. 
-	 */
-	private BTInterval assignEndgame(BitField bs, Set<BTInterval>exclude, boolean endgame) {
-		
-		BTInterval ret = null;
-		
-		// prepare a list of partial or requested blocks the remote host has
-		Collection<Integer> available = null;
-		for (int requested : requestedAndPartial) {
-			if (!bs.get(requested) || 
-				(!endgame && isCompleteBlock(requested,requestedRanges)) ||
-				isCompleteBlock(requested, partialBlocks)) // during verification of block
-				continue;
+        if (LOG.isDebugEnabled())
+            LOG.debug("leasing random chunk from available cardinality " + bs.cardinality());
 
-			if (available == null)
-				available = new HashSet<Integer>(requestedRanges.size()+partialBlocks.size());
-			available.add(requested);
-		}
+        BitField interesting = new AndView(bs, missing);
+        List<BTInterval> toLease = findPiecesWithEndGame(interesting, exclude, pieceStrategy);
+        BTInterval lease = null;
 
-		if (available == null)
-			return null;
-	
-		if (LOG.isDebugEnabled())
-			LOG.debug("available partial and requested blocks to attempt: "+available);
-		
-		available = new ArrayList<Integer>(available);
-		Collections.shuffle((List<Integer>)available);
-		
-		// go through and find a block that we can request something from.
-		for (Iterator<Integer> iterator = available.iterator(); iterator.hasNext() && ret == null;) {
-			int block = iterator.next();
-			
-			// figure out which parts of the chunks we need.
-			IntervalSet needed = new IntervalSet();
-			needed = needed.invert(getPieceSize(block));
-			
-			IntervalSet partial = partialBlocks.get(block);
-			IntervalSet pending = pendingRanges.get(block);
-			IntervalSet requested = requestedRanges.get(block);
-			
-			// get the parts of the block we're missing
-			if (partial != null)
-				needed.delete(partial);
-			
-			// don't request any parts pending write
-			if (pending != null)
-				needed.delete(pending);
-			
-			// exclude any specified intervals 
-			for (Range excluded : exclude) 
-				needed.delete(excluded);
-			
-			// try not to request any parts that are already requested
-			if (requested != null) {
-				needed.delete(requested);
-				
-				// now, if we still have some parts of the chunk, get one of them
-				// if not and this is the last partial chunk, doubly-assign some
-				// part of it (a.k.a. endgame?)
-				if (endgame && needed.isEmpty() && !iterator.hasNext()) {
-					LOG.debug("endgame");
-                    try {
-                        needed = requested.clone();
-                    } catch (CloneNotSupportedException e) {
-                        throw new RuntimeException(e);
-                    }
+        if (toLease != null && toLease.size() > 0) {
+            lease = resize(toLease.get(0));
+            requestedRanges.addInterval(lease);
 
-                    // exclude the specified intervals again
-					for (Range excluded : exclude) 
-						needed.delete(excluded);
-				}
-			}
-			
-			if (needed.isEmpty()) 
-				continue;
-			
-			ret = new BTInterval(needed.getFirst(),block);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("selected partial/requested interval "+ret+
-						" with partial "+partialBlocks.get(ret.getId())+
-						" requested "+requestedRanges.get(ret.getId())+
-						" pending "+pendingRanges.get(ret.getId()));
-			}
-		}
-		
-		// couldn't find anything to assign.
-		return ret;
-	}
+            if (LOG.isDebugEnabled())
+                LOG.debug("assigning " + lease);
+        } else if (LOG.isDebugEnabled())
+            LOG.debug("couldn't find anything to assign " + exclude);
 
-	/**
-	 * @return whether the specified <code>BlockRangeMap</code> contains an 
-	 * interval that represents a complete piece.
-	 */	
-	private boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck) {
-		IntervalSet set = toCheck.get(pieceNum);
-		if (set == null)
-			return false;
-		if (set.getNumberOfIntervals() != 1)
-			return false;
-		Range i = set.getFirst();
-		return isCompleteBlock(i, pieceNum);
-	}
+        return lease;
+    }
 
-	/**
-	 * @return the size of the piece with given number.  All pieces
-	 * except the last one have the same size.
-	 */
-	private int getPieceSize(int pieceNum) {
-		BTMetaInfo info = context.getMetaInfo();
-		if (pieceNum == info.getNumBlocks() - 1) {
-			int ret =(int)(context.getFileSystem().getTotalSize() % 
-					info.getPieceLength());
-			if (ret != 0)
-				return ret;
-		} 
-		return info.getPieceLength();
-	}
-	
-	/**
-	 * Removes an interval from the internal list of already requested intervals.
-	 * <p>
-	 * Note that during endgame several connections may be requesting the same interval
-	 * and as one of them fails that interval will no longer be considered requested.
-	 * That's OK as it will only result in that interval requested again.
-	 */
-	public synchronized void releaseInterval(BTInterval in) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("releasing "+in);
-		requestedRanges.removeInterval(in);
-	}
+    private BTInterval resize(BTInterval lease) {
+        if (lease.getHigh() - lease.getLow() + 1 > BLOCK_SIZE)
+            lease = new BTInterval(lease.getLow(), lease.getLow() + BLOCK_SIZE - 1, lease.getId());
+        return lease;
+    }
 
-	/**
-	 * @return returns an array of byte where the i'th byte is 1 if we have
-	 *         written and verified the i'th piece of the torrent and 0
-	 *         otherwise
-	 */
-	public synchronized byte[] createBitField() {
-		if (bitField == null) 
-			bitField = new byte[(context.getMetaInfo().getNumBlocks() + 7) / 8];
-		
-		if (bitFieldDirty) {
-			if (isComplete()) {
-				for(int i = 0; i < bitField.length; i++)
-					bitField[i] = (byte)0xFF;
-				int odd = context.getMetaInfo().getNumBlocks() % 8;
-				if (odd != 0) 
-					bitField[bitField.length - 1] <<= (8 - odd);
-				
-			} else {
-				for(int i = verified.nextSetBit(0); i >= 0; i = verified.nextSetBit(i+1)) 
-					bitField[i / 8] = (byte) (bitField[i / 8] | (1 << (7 - i % 8)));
-			}
-			bitFieldDirty = false;
-		}
-			
-		return bitField;
-	}
+    public synchronized List<BTInterval> lease(BitField bs, Set<BTInterval> exclude,
+            PieceStrategy pieceStrategy) {
+        if (isComplete())
+            return null;
 
-	/**
-	 * verifies all the chunks that are associated with a list of files.
-	 */
-	private void verifyFiles(List<TorrentFile> l) {
-		int lastSet;
-		synchronized(this) {
-			lastSet = verifiedBlocks.length();
-		}
-		for (TorrentFile f : l) {
-			for (int i = Math.max(lastSet,f.getBegin()); i <= f.getEnd(); i++) 
-				VERIFY_QUEUE.execute(new VerifyJob(i),context.getMetaInfo().getURN());
-		}
-	}
+        if (LOG.isDebugEnabled())
+            LOG.debug("leasing random chunk from available cardinality " + bs.cardinality());
 
-	/**
-	 * A task that checks an already existing file on disk
-	 * against the .torrent metadata.  
-	 */
-	private class VerifyJob implements Runnable {
-		private final int pieceNum;
-		public VerifyJob(int pieceNum) {
-			this.pieceNum = pieceNum;
-		}
-		
-		public void run() {
-			if (storedException != null ||
-					!isOpen() ||
-					hasBlock(pieceNum))
-				return;
-			try {
-				
-				if (verify(pieceNum, true)) {
-					markPieceCompleted(pieceNum);
-					handleVerified(pieceNum);
-				} else 
-					_corruptedBytes += getPieceSize(pieceNum);
-			} catch (IOException bad) {
-				storedException = bad;
-			} catch (InterruptedException iex) { // should not happen
-				storedException = new InterruptedIOException();
-			} finally {
-				if (storedException != null && isOpen())
-					notifyDiskProblem(storedException);
-			}
-		}
-	}
+        BitField interesting = new AndView(bs, missing);
+        List<BTInterval> toLease = findPiecesWithEndGame(interesting, exclude, pieceStrategy);
 
-	/**
-	 * @return number of bytes written and verified
-	 */
-	public synchronized long getVerifiedBlockSize() {
-		BTMetaInfo info = context.getMetaInfo();
-		long ret = verified.cardinality() * (long)info.getPieceLength();
-		if (verified.get(info.getNumBlocks() - 1)) {
-			ret = ret - info.getPieceLength() + 
-				getPieceSize(info.getNumBlocks() -1 );
-		}
-		return ret;
-	}
-	
-	/**
-	 * @return number of bytes written
-	 */
-	public synchronized long getBlockSize() {
-		long written = getVerifiedBlockSize();
-		return written + partialBlocks.byteSize();
-	}
+        if (toLease != null && toLease.size() > 0) {
+            for (BTInterval lease : toLease) {
+                requestedRanges.addInterval(lease);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("assigning " + lease);
+                }
+            }
+        } else if (LOG.isDebugEnabled()) {
+            LOG.debug("couldn't find anything to assign " + exclude);
+        }
 
-	/**
-	 * @return number of bytes corrupted
-	 */
-	public synchronized long getNumCorruptedBytes() {
-		return _corruptedBytes;
-	}
-	
-	public BTDiskManagerMemento toMemento() {
-	    BTDiskManagerMemento memento = new BTDiskManagerMementoImpl();
+        return toLease;
+    }
+
+    private List<BTInterval> findPiecesWithEndGame(BitField bs, Set<BTInterval> exclude,
+            PieceStrategy pieceStrategy) {
+
+        PartialPieceStrategy partialPieceStrategy = new PartialPieceStrategy(context.getMetaInfo(),
+                exclude, false, partialBlocks, pendingRanges, requestedRanges);
+
+        // first try to complete any partial pieces that are not requested
+        List<BTInterval> nextPieces = partialPieceStrategy.getNextPieces(bs, missing);
+        if (nextPieces != null && nextPieces.size() > 0) {
+            return nextPieces;
+        }
+        LOG.debug("couldn't find partial, looking for unnassigned");
+
+        // then see if the remote has any pieces that are neither
+        // partial nor already requested
+        nextPieces = findUnassigned(bs, pieceStrategy);
+        if (nextPieces != null && nextPieces.size() > 0) {
+            return nextPieces;
+        }
+        LOG.debug("couldn't find unassigned, looking for already requested");
+
+        EndGamePieceStrategy endGameStrategy = new EndGamePieceStrategy(context.getMetaInfo(), exclude,
+                partialBlocks, pendingRanges, requestedRanges);
+        nextPieces = endGameStrategy.getNextPieces(bs, missing);
+
+        return nextPieces;
+    }
+    
+    private List<BTInterval> findUnassigned(BitField availableBlocks, PieceStrategy pieceStrategy) {
+        if (pieceStrategy == null) {
+            pieceStrategy = new RandomPieceStrategy(context.getMetaInfo());
+        }
+        BitField uninteresting = new OrView(pendingRanges.getBitField(), requestedRanges
+                .getBitField(), partialBlocks.getBitField());
+        BitField neededBlocks = new AndView(missing, new NotView(uninteresting));
+
+        List<BTInterval> nextPieces = pieceStrategy.getNextPieces(availableBlocks, neededBlocks);
+        return nextPieces;
+    }
+    
+    
+    /**
+     * Removes an interval from the internal list of already requested intervals.
+     * <p>
+     * Note that during endgame several connections may be requesting the same interval
+     * and as one of them fails that interval will no longer be considered requested.
+     * That's OK as it will only result in that interval requested again.
+     */
+    public synchronized void releaseInterval(BTInterval in) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("releasing "+in);
+        requestedRanges.removeInterval(in);
+    }
+
+    /**
+     * @return returns an array of byte where the i'th byte is 1 if we have
+     *         written and verified the i'th piece of the torrent and 0
+     *         otherwise
+     */
+    public synchronized byte[] createBitField() {
+        if (bitField == null) 
+            bitField = new byte[(context.getMetaInfo().getNumBlocks() + 7) / 8];
+        
+        if (bitFieldDirty) {
+            if (isComplete()) {
+                for(int i = 0; i < bitField.length; i++)
+                    bitField[i] = (byte)0xFF;
+                int odd = context.getMetaInfo().getNumBlocks() % 8;
+                if (odd != 0) 
+                    bitField[bitField.length - 1] <<= (8 - odd);
+                
+            } else {
+                for(int i = verified.nextSetBit(0); i >= 0; i = verified.nextSetBit(i+1)) 
+                    bitField[i / 8] = (byte) (bitField[i / 8] | (1 << (7 - i % 8)));
+            }
+            bitFieldDirty = false;
+        }
+            
+        return bitField;
+    }
+
+    /**
+     * verifies all the chunks that are associated with a list of files.
+     */
+    private void verifyFiles(List<TorrentFile> l) {
+        int lastSet;
+        synchronized(this) {
+            lastSet = verifiedBlocks.length();
+        }
+        for (TorrentFile f : l) {
+            for (int i = Math.max(lastSet,f.getBeginPiece()); i <= f.getEndPiece(); i++) 
+                VERIFY_QUEUE.execute(new VerifyJob(i),context.getMetaInfo().getURN());
+        }
+    }
+
+    /**
+     * A task that checks an already existing file on disk
+     * against the .torrent metadata.  
+     */
+    private class VerifyJob implements Runnable {
+        private final int pieceNum;
+        public VerifyJob(int pieceNum) {
+            this.pieceNum = pieceNum;
+        }
+        
+        public void run() {
+            if (storedException != null ||
+                    !isOpen() ||
+                    hasBlock(pieceNum))
+                return;
+            try {
+                
+                if (verify(pieceNum, true)) {
+                    markPieceCompleted(pieceNum);
+                    handleVerified(pieceNum);
+                } else 
+                    _corruptedBytes += context.getMetaInfo().getPieceSize(pieceNum);
+            } catch (IOException bad) {
+                storedException = bad;
+            } catch (InterruptedException iex) { // should not happen
+                storedException = new InterruptedIOException();
+            } finally {
+                if (storedException != null && isOpen())
+                    notifyDiskProblem(storedException);
+            }
+        }
+    }
+
+    /**
+     * @return number of bytes written and verified
+     */
+    public synchronized long getVerifiedBlockSize() {
+        BTMetaInfo info = context.getMetaInfo();
+        long ret = verified.cardinality() * (long)info.getPieceLength();
+        if (verified.get(info.getNumBlocks() - 1)) {
+            ret = ret - info.getPieceLength() + 
+                info.getPieceSize(info.getNumBlocks() -1 );
+        }
+        return ret;
+    }
+    
+   /*
+    * (non-Javadoc)
+    * @see com.limegroup.bittorrent.disk.TorrentDiskManager#getBlockSize()
+    */
+    public synchronized long getBlockSize() {
+        long written = getVerifiedBlockSize();
+        return written + partialBlocks.byteSize();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#getNumCorruptedBytes()
+     */
+    public synchronized long getNumCorruptedBytes() {
+        return _corruptedBytes;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#toMemento()
+     */
+    public BTDiskManagerMemento toMemento() {
+        BTDiskManagerMemento memento = new BTDiskManagerMementoImpl();
         synchronized(this) {
             // Deep-copy the IntervalSet to avoid ConcurrentModificationExceptions
             Map<Integer, IntervalSet> partial = new HashMap<Integer, IntervalSet>(partialBlocks.size());
-            try {
-                for(Map.Entry<Integer, IntervalSet> entry : partialBlocks.entrySet())
+            for(Map.Entry<Integer, IntervalSet> entry : partialBlocks.entrySet())
+                try {
                     partial.put(entry.getKey(), entry.getValue().clone());
-                memento.setPartialBlocks(partial);
-                memento.setVerifiedBlocks((BitSet)verifiedBlocks.clone());
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
+                    memento.setVerifiedBlocks((BitSet)verifiedBlocks.clone());
+                } catch (CloneNotSupportedException e) {
+                   throw new RuntimeException(e);
+                }
+            memento.setPartialBlocks(partial);
             memento.setVerifying(isVerifying);
         }
         if (BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue()) {
-        	try {
-        		diskController.flush();
-        	} catch (IOException iox) {
-        		// don't abort the serialization, but mark the file corrupt
-        		storedException = iox; 
-        	}
+            try {
+                diskController.flush();
+            } catch (IOException iox) {
+                // don't abort the serialization, but mark the file corrupt
+                storedException = iox; 
+            }
         }
         return memento;
     }
     
-	/* (non-Javadoc)
-	 * @see com.limegroup.bittorrent.TorrentFileManager#getAmountPending()
-	 */
-	public synchronized int getAmountPending() {
-		return (int)pendingRanges.byteSize();
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see com.limegroup.bittorrent.TorrentFileManager#getNumMissing(com.limegroup.gnutella.util.BitField)
-	 */
-	public synchronized int getNumMissing(BitField other) {
-		if (isComplete())
-			return verified.cardinality() - other.cardinality();
-		
-		BitField theirMissing = new NotView(other);
-		return (new AndView(verified, theirMissing)).cardinality();
-	}
-	
-	/**
-	 * @return true if the remote host has any pieces we miss
-	 */
-	public synchronized boolean containsAnyWeMiss(BitField other) {
-		// if we are complete we miss nothing
-		if (isComplete())
-			return false;
-		
-		BitField interesting = new AndView(other,missing);
-		return interesting.nextSetBit(0) > -1;
-	}
-	
+    /* (non-Javadoc)
+     * @see com.limegroup.bittorrent.TorrentFileManager#getAmountPending()
+     */
+    public synchronized int getAmountPending() {
+        return (int)pendingRanges.byteSize();
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see com.limegroup.bittorrent.TorrentFileManager#getNumMissing(com.limegroup.gnutella.util.BitField)
+     */
+    public synchronized int getNumMissing(BitField other) {
+        if (isComplete())
+            return verified.cardinality() - other.cardinality();
+        
+        BitField theirMissing = new NotView(other);
+        return (new AndView(verified, theirMissing)).cardinality();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#containsAnyWeMiss(org.limewire.collection.BitField)
+     */
+    public synchronized boolean containsAnyWeMiss(BitField other) {
+        // if we are complete we miss nothing
+        if (isComplete())
+            return false;
+        
+        BitField interesting = new AndView(other,missing);
+        return interesting.nextSetBit(0) > -1;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#getLastVerifiedOffset()
+     */
     public long getLastVerifiedOffset() {
         return lastVerifiedOffset;
     }
-    
-	private static class BlockRangeMap extends HashMap<Integer, IntervalSet> {
-		
-		private static final long serialVersionUID = 4006274480019024111L;
 
-		BlockRangeMap() {
-			super();
-		}
-		
-		private BlockRangeMap(int size) {
-			super(size);
-		}
-		
-		public void addInterval(BTInterval in) {
-			IntervalSet s = get(in.getBlockId());
-			if (s == null) {
-				s = new IntervalSet();
-				put(in.getBlockId(),s);
-			}
-			s.add(in);
-		}
-		
-		public void removeInterval(BTInterval in) {
-			IntervalSet s = get(in.getBlockId());
-			if (s == null)
-				return;
-			s.delete(in);
-			if (s.isEmpty())
-				remove(in.getBlockId());
-		}
-		
-		public long byteSize() {
-			long ret = 0;
-			for (IntervalSet set : values()) 
-				ret += set.getSize();
-			return ret;
-		}
-		
-		@Override
-        public BlockRangeMap clone() {
-			BlockRangeMap clone = new BlockRangeMap(size());
-			for (Map.Entry<Integer, IntervalSet> e : entrySet())
-                try {
-                    clone.put(e.getKey(), e.getValue().clone());
-                } catch (CloneNotSupportedException e1) {
-                    throw new RuntimeException(e1);
-                }
-            return clone;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.disk.TorrentDiskManager#renewLease(java.util.List, java.util.List)
+     */
+    public void renewLease(List<BTInterval> oldIntervals, List<BTInterval> newIntervals) {
+        synchronized (VerifyingFolder.this) {
+            for (BTInterval btInterval : oldIntervals) {
+                requestedRanges.removeInterval(btInterval);
+            }
+            for (BTInterval btInterval : newIntervals) {
+                requestedRanges.addInterval(btInterval);
+            }
+
+        }
+    }
 }

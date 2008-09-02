@@ -19,7 +19,7 @@ public class BTLinkManager implements Shutdownable,
 	 * The list of BTConnections that this torrent has.
 	 * LOCKING: this
 	 */
-	private final List<BTLink> _connections;
+	private final List<BTConnection> _connections;
 	
 	/**
 	 * The locations we are currently connected to.  Torrents have hundreds
@@ -30,7 +30,7 @@ public class BTLinkManager implements Shutdownable,
 		
 	
 	BTLinkManager() {
-		_connections = new ArrayList<BTLink>();
+		_connections = new ArrayList<BTConnection>();
 		endpoints = new StrictIpPortSet<TorrentLocation>();
 	}
 	
@@ -60,9 +60,9 @@ public class BTLinkManager implements Shutdownable,
 		return _connections.size();
 	}
 	
-	public synchronized void addLink(BTLink link) {
-		_connections.add(link);
-		endpoints.add(link.getEndpoint());
+	public synchronized void addConnection(BTConnection connection) {
+		_connections.add(connection);
+		endpoints.add(connection.getEndpoint());
 	}
 	
 	public synchronized void removeLink(BTLink link) {
@@ -120,7 +120,7 @@ public class BTLinkManager implements Shutdownable,
 		return qd;
 	}
 	
-	public List<BTLink> getConnections() {
+	public List<BTConnection> getConnections() {
 		return _connections;
 	}
 	

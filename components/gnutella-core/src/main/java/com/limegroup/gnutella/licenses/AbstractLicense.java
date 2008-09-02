@@ -25,6 +25,7 @@ import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+
 /**
  * A base license class, implementing common functionality.
  */

@@ -1,10 +1,11 @@
-package com.limegroup.gnutella.http;
+package org.limewire.http;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import junit.framework.Test;
 
+import org.limewire.http.URIUtils;
 import org.limewire.util.BaseTestCase;
 
 public class URIUtilsTest extends BaseTestCase {
@@ -46,4 +47,9 @@ public class URIUtilsTest extends BaseTestCase {
             // expected result
         }
     }
+    
+    public void testGetPort() throws Exception {
+        assertEquals(80, URIUtils.getPort(new URI("HTTP://SOME.DOMAIN/")));
+    }
+    
 }

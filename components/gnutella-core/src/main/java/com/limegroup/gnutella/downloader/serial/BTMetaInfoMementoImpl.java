@@ -2,13 +2,15 @@ package com.limegroup.gnutella.downloader.serial;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
 public class BTMetaInfoMementoImpl implements BTMetaInfoMemento, Serializable {
-    
+    private static final long serialVersionUID = 4808344749443143000L;
+
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
 
     @SuppressWarnings("unchecked")
@@ -81,5 +83,20 @@ public class BTMetaInfoMementoImpl implements BTMetaInfoMemento, Serializable {
 
     public void setPrivate(boolean aPrivate) {
         serialObjects.put("private", aPrivate);
+    }
+
+    @SuppressWarnings("unchecked")
+    public URI[] getWebSeeds() {
+        List<URI> uris = (List<URI>) serialObjects.get("url-list");
+        return uris == null ? null : uris.toArray(new URI[uris.size()]);
+    }
+
+    public void setWebSeeds(URI[] webSeeds) {
+        if (webSeeds != null) {
+            List<URI> uris = Arrays.asList(webSeeds);
+            serialObjects.put("url-list", uris);
+        } else {
+            serialObjects.put("url-list", new URI[0]);
+        }
     }
 }

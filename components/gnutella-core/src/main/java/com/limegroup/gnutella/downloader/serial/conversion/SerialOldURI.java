@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import com.limegroup.gnutella.http.URIUtils;
+import org.limewire.http.URIUtils;
+
 
 /**
  * helps to migrate persistant org.apache.commons.httpclient.URI's to java.net.URI's

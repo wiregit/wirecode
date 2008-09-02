@@ -41,4 +41,10 @@ public interface BTMetaInfoMemento {
     boolean isPrivate();
 
     void setPrivate(boolean aPrivate);
+    
+    URI[] getWebSeeds() ;
+    
+    void setWebSeeds(URI[] webSeeds);
+    
+    
 }

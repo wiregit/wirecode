@@ -86,4 +86,9 @@ public class FinishedTorrentDownload implements Torrent {
 	public int getTriedHostCount() {
 		return -1;
 	}
+
+    @Override
+    public boolean isDownloading() {
+        return false;
+    }
 }

@@ -49,6 +49,8 @@ interface Torrent {
 	
 	public boolean isActive();
 	
+	public boolean isDownloading();
+	
 	public TorrentState getState();
 	
 	public long getNextTrackerRequestTime();

@@ -2,6 +2,7 @@ package com.limegroup.bittorrent;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;
@@ -32,6 +33,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     private final Provider<TorrentManager> torrentManager;
     private final Provider<FileManager> fileManager;
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final LimeConnectingIOReactorFactory limeConnectingIOReactorFactory;
 
     @Inject
     public ManagedTorrentFactoryImpl(
@@ -46,7 +48,8 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
             Provider<IPFilter> ipFilter,
             Provider<TorrentManager> torrentManager,
             Provider<FileManager> fileManager,
-            NetworkInstanceUtils networkInstanceUtils) {
+            NetworkInstanceUtils networkInstanceUtils,
+            LimeConnectingIOReactorFactory limeConnectingIOReactorFactory) {
         this.eventDispatcher = eventDispatcher;
         this.scheduledExecutorService = scheduledExecutorService;
         this.networkManager = networkManager;
@@ -59,6 +62,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.limeConnectingIOReactorFactory = limeConnectingIOReactorFactory;
     }
 
     /* (non-Javadoc)
@@ -68,7 +72,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
         return new ManagedTorrentImpl(context, eventDispatcher, scheduledExecutorService,
                 networkManager, trackerManagerFactory, chokerFactory, linkManagerFactory,
                 connectionFetcherFactory, contentManager.get(), ipFilter.get(), torrentManager.get(),
-                fileManager.get(), networkInstanceUtils);
+                fileManager.get(), networkInstanceUtils, limeConnectingIOReactorFactory);
     }
 
 

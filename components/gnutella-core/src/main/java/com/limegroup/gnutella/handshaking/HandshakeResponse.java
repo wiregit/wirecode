@@ -17,6 +17,7 @@ import org.limewire.util.VersionFormatException;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+
 /**
  * Contains the necessary information to form a response to a 
  * connection handshake.  It contains a status code, a status message, and
