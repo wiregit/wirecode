@@ -105,10 +105,6 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     }
 
     private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
-        if (actualRange == null || leaseRange == null) {
-            throw new IOException("No actual or expected range?");
-        }
-
         if (actualRange.getLow() < leaseRange.getLow()
                 || actualRange.getHigh() > leaseRange.getHigh()) {
             String message = "Invalid actual range.  Expected: " + leaseRange + ", Actual: "
