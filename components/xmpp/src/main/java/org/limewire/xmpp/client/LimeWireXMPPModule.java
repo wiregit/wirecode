@@ -35,7 +35,7 @@ public class LimeWireXMPPModule extends AbstractModule {
                         
                     }
 
-                    public void fileOfferred(FileMetaData f) {
+                    public void fileOfferred(FileMetaData f, String fromJID) {
                     }
                 };
             }

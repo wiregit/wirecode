@@ -12,7 +12,8 @@ public interface FileOfferHandler {
     /**
      * Notifies the user that a contact has offered a file to them
      * @param f the file being offered
+     * @param fromJID who is offering the file
      * @return whether the user wants the file
      */
-    public void fileOfferred(FileMetaData f);
+    public void fileOfferred(FileMetaData f, String fromJID);
 }

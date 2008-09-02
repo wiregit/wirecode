@@ -20,7 +20,7 @@ public class FileOfferHandlerMock implements FileOfferHandler {
         xmppService.setFileOfferHandler(this);
     }
 
-    public void fileOfferred(FileMetaData f) {
+    public void fileOfferred(FileMetaData f, String fromJID) {
         offers.add(f);
     }
 }

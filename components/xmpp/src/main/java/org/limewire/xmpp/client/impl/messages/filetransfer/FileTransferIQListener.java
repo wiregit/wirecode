@@ -48,7 +48,7 @@ public class FileTransferIQListener implements PacketListener {
             LOG.debug("handling file transfer get " + packet.getPacketID());
         }
         // TODO async?
-        fileOfferHandler.fileOfferred(packet.getFileMetaData());
+        fileOfferHandler.fileOfferred(packet.getFileMetaData(), packet.getFrom());
         // TODO send acceptance or rejection;
         // TODO only needed for user feedback
     }
