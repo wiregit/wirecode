@@ -26,11 +26,11 @@
 	<import file="promotion/build.xml"/>
 	<import file="geocode/build.xml"/>
     <import file="xmpp/build.xml"/>
-    <import file="core-api/build.xml"/>
+	<import file="player/build.xml"/>
+	<import file="core-api/build.xml"/>
     <import file="core-settings/build.xml"/>
     <import file="xmpp-api/build.xml"/>
-	<import file="player/build.xml"/>
-    <import file="player-api/build.xml"/>
+	<import file="player-api/build.xml"/>
     <import file="swarm/build.xml"/>
 	
     <target name="initialize" depends="lw-setting.initialize, lw-statistic.initialize, lw-rudp.initialize, lw-nio.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize, lw-resources.initialize, lw-http.initialize,lw-net.initialize, lw-lwsserver.initialize, lw-promotion.initialize, lw-geocode.initialize, lw-xmpp.initialize, lw-player.initialize, lw-core-api.initialize, lw-core-settings.initialize, lw-xmpp-api.initialize, lw-player-api.initialize, lw-swarm.initialize" unless="initialized.all">
@@ -54,6 +54,7 @@
 				<path refid="tests.limewire.components.promotion.classpath"/>
 				<path refid="tests.limewire.components.geocode.classpath"/>
                 <path refid="tests.limewire.components.xmpp.classpath"/>
+                <path refid="tests.limewire.components.player.classpath"/>
                 <path refid="tests.limewire.components.core-api.classpath"/>
                 <path refid="tests.limewire.components.core-settings.classpath"/>
                 <path refid="tests.limewire.components.xmpp-api.classpath"/>
@@ -80,6 +81,7 @@
  			<pathelement location="${build.limewire.components.promotion.classes}"/>
  			<pathelement location="${build.limewire.components.geocode.classes}"/>
             <pathelement location="${build.limewire.components.xmpp.classes}"/>
+            <pathelement location="${build.limewire.components.player.classes}"/>
             <pathelement location="${build.limewire.components.core-api.classes}"/>
             <pathelement location="${build.limewire.components.core-settings.classes}"/>
             <pathelement location="${build.limewire.components.xmpp-api.classes}"/>
@@ -114,6 +116,7 @@
     		<include name="${limewire.components.promotion.relative.antglob.allsources}"/>
     		<include name="${limewire.components.geocode.relative.antglob.allsources}"/>
             <include name="${limewire.components.xmpp.relative.antglob.allsources}"/>
+            <include name="${limewire.components.player.relative.antglob.allsources}"/>
             <include name="${limewire.components.core-api.relative.antglob.allsources}"/>
             <include name="${limewire.components.core-settings.relative.antglob.allsources}"/>
             <include name="${limewire.components.xmpp-api.relative.antglob.allsources}"/>
@@ -139,6 +142,7 @@
 	     	<include name="${limewire.components.promotion.relative.antglob.tests}"/>    
 	     	<include name="${limewire.components.geocode.relative.antglob.tests}"/>
             <include name="${limewire.components.xmpp.relative.antglob.tests}"/> 
+            <include name="${limewire.components.player.relative.antglob.tests}"/> 
             <include name="${limewire.components.core-api.relative.antglob.tests}"/>
             <include name="${limewire.components.core-settings.relative.antglob.tests}"/>
             <include name="${limewire.components.xmpp-api.relative.antglob.tests}"/>
@@ -243,6 +247,7 @@
 	           	<fileset dir="${build.limewire.components.promotion.tests}" includes="**/*Test.class"/>
 	           	<fileset dir="${build.limewire.components.geocode.tests}" includes="**/*Test.class"/>
                 <fileset dir="${build.limewire.components.xmpp.tests}" includes="**/*Test.class"/>
+                <fileset dir="${build.limewire.components.player.tests}" includes="**/*Test.class"/>
                 <fileset dir="${build.limewire.components.core-api.tests}" includes="**/*Test.class"/>
                 <fileset dir="${build.limewire.components.core-settings.tests}" includes="**/*Test.class"/>
                 <fileset dir="${build.limewire.components.xmpp-api.tests}" includes="**/*Test.class"/>
@@ -281,6 +286,7 @@
     	    	<fileset dir="${build.limewire.components.promotion.classes}" />
     	    	<fileset dir="${build.limewire.components.geocode.classes}" />
                 <fileset dir="${build.limewire.components.xmpp.classes}" />
+                <fileset dir="${build.limewire.components.player.classes}" />
                 <fileset dir="${build.limewire.components.core-api.classes}"/>
                 <fileset dir="${build.limewire.components.core-settings.classes}"/>
                 <fileset dir="${build.limewire.components.xmpp-api.classes}"/>
