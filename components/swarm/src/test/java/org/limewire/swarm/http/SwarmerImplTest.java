@@ -307,7 +307,7 @@ public class SwarmerImplTest extends BaseTestCase {
         SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,
                 swarmBlockVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
                 selectionStrategy, 32 * 1024);
-        swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
+        //swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
         swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(injector.getInstance(LimeConnectingIOReactorFactory.class), swarmCoordinator,
@@ -361,13 +361,6 @@ public class SwarmerImplTest extends BaseTestCase {
     /**
      * Asserts that the given file has the correct size, and matches the given
      * md5sum.
-     * 
-     * @param md5
-     * @param file
-     * @param fileSize
-     * @throws InterruptedException
-     * @throws NoSuchAlgorithmException
-     * @throws IOException
      */
     private void assertDownload(String md5, File file, long fileSize)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
@@ -381,13 +374,6 @@ public class SwarmerImplTest extends BaseTestCase {
 
     /**
      * Creates a swarmerImpl for the given file using a default block verifier.
-     * 
-     * @param file
-     * @param path
-     * @param fileSize
-     * @return
-     * @throws InterruptedException
-     * @throws IOException
      */
     private Swarmer createSwarmer(File file, String path, long fileSize)
             throws InterruptedException, IOException {
@@ -396,14 +382,6 @@ public class SwarmerImplTest extends BaseTestCase {
 
     /**
      * Creates a swarmerImpl for the given file and block verifier.
-     * 
-     * @param file
-     * @param path
-     * @param fileSize
-     * @param swarmFileVerifier
-     * @return
-     * @throws InterruptedException
-     * @throws IOException
      */
     private Swarmer createSwarmer(File file, String path, long fileSize,
             SwarmBlockVerifier swarmFileVerifier) throws InterruptedException, IOException {
@@ -412,7 +390,7 @@ public class SwarmerImplTest extends BaseTestCase {
         SwarmCoordinator swarmCoordinator = createSwarmCoordinator(file, path, fileSize,
                 swarmFileVerifier);
 
-        swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
+        //swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
 
         Swarmer swarmer = new SwarmerImpl(swarmCoordinator);
         swarmer.register(SwarmSourceType.HTTP, new SwarmHttpSourceDownloader(injector.getInstance(LimeConnectingIOReactorFactory.class), swarmCoordinator,
