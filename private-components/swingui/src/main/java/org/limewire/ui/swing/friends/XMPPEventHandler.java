@@ -32,7 +32,6 @@ public class XMPPEventHandler {
         List<XMPPConnection> connections = xmppService.getConnections();
         for(XMPPConnection connection : connections) {
             XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            //FIXME: Update to distinguish for Facebook service name (whenever Facebook enables XMPP service)
             if(configuration.getServiceName().equals(serviceName)) {
                 if(!connection.isLoggedIn()) {
                     configuration.setUsername(username);
