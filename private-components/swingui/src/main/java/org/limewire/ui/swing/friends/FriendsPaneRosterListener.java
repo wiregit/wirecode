@@ -1,9 +1,13 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.library.BuddyLibrary;
+import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -16,6 +20,15 @@ import com.google.inject.Singleton;
 public class FriendsPaneRosterListener implements RegisteringEventListener<RosterEvent> {
     private static final Log LOG = LogFactory.getLog(FriendsPaneRosterListener.class);
 
+    private Navigator navigator;
+    private LibraryManager libraryManager;
+    
+    @Inject
+    public FriendsPaneRosterListener(Navigator navigator, LibraryManager libraryManager) {
+        this.navigator = navigator;
+        this.libraryManager = libraryManager;
+    }
+    
     @Inject
     public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
         rosterEventListenerSupport.addListener(this);
@@ -45,6 +58,12 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
                 }
             }
         });
+        
+        if(!libraryManager.containsBuddyLibrary(user.getName())) {
+            libraryManager.addBuddyLibrary(user.getName());
+            BuddyLibrary library = new BuddyLibrary(user.getName(), libraryManager.getBuddyLibrary(user.getName()));
+            navigator.addNavigablePanel(NavCategory.LIBRARY, library.getName(), library, false);
+        }
     }
 
     public void userUpdated(User user) {
