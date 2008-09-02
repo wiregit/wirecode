@@ -183,8 +183,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 			return DownloadStatus.RESUMING;
 		case CONNECTING:
 			return DownloadStatus.CONNECTING;
-		case DOWNLOADING:
+		}
+		
+		if(torrent.isDownloading())	{
 			return DownloadStatus.DOWNLOADING;
+		}
+		switch(torrent.getState()) {
 		case SAVING:
 			return DownloadStatus.SAVING;
 		case SEEDING:

@@ -153,7 +153,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     private final NetworkInstanceUtils networkInstanceUtils;
 
     private AtomicBoolean firstChunkVerifiedEventDispatched;
-
+    
     /**
      * Constructs new ManagedTorrent
      * 
@@ -295,7 +295,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         // state/webseeding variables
         BTMetaInfo metaInfo = context.getMetaInfo();
         if (metaInfo.hasWebSeeds()) {
-            state.set(TorrentState.DOWNLOADING);
             TorrentFileSystem torrentFileSystem = context.getFileSystem();
 
             long completeSize = torrentFileSystem.getTotalSize();
@@ -998,7 +997,8 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     /**
      * @return if the torrent is currently in one of the downloading states.
      */
-    boolean isDownloading() {
+    public boolean isDownloading() {
+        //TODO refactor state logic to be a little more dyanmic
         switch (state.get()) {
         case WAITING_FOR_TRACKER:
         case SCRAPING:
@@ -1006,6 +1006,11 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         case DOWNLOADING:
             return true;
         }
+        
+        if(webseeding.get()) {
+            return true;
+        }
+        
         return false;
     }
 
