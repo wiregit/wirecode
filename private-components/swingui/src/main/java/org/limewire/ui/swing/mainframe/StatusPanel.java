@@ -48,6 +48,7 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class StatusPanel extends JPanel implements FriendsCountUpdater {
+    private static final String OFFLINE = "offline";
     private final IconLibrary icons;
     private JButton friendsButton;
     private JMenu statusMenu;
@@ -137,6 +138,8 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         availabilityButtonGroup = new ButtonGroup();
         availabilityButtonGroup.add(availablePopupItem);
         availabilityButtonGroup.add(awayPopupItem);
+        
+        updateStatus(SIGN_IN, icons.getEndChat(), OFFLINE);
 
         setMinimumSize(new Dimension(0, 20));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
@@ -148,26 +151,27 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
         loggedIn = true;
-        updateStatus(FRIENDS, FriendsUtil.getIcon(Mode.available, icons));
+        updateStatus(FRIENDS, FriendsUtil.getIcon(Mode.available, icons), Mode.available.toString());
         statusMenu.setEnabled(true);
     }
 
-    private void updateStatus(String buttonText, Icon icon) {
+    private void updateStatus(String buttonText, Icon icon, String status) {
         friendsButton.setText(buttonText);
         statusMenu.setIcon(icon);
+        statusMenu.setToolTipText(tr(status + " - click to set status"));
     }
     
     @EventSubscriber
     public void handleSignoffEvent(SignoffEvent event) {
         loggedIn = false;
-        updateStatus(SIGN_IN, icons.getEndChat());
+        updateStatus(SIGN_IN, icons.getEndChat(), OFFLINE);
         statusMenu.setEnabled(false);
     }
     
     @EventSubscriber
     public void handleStatusChange(PresenceChangeEvent event) {
         Mode newMode = event.getNewMode();
-        updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons));
+        updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons), newMode.toString());
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
                             newMode == Mode.away ? awayPopupItem.getModel() : null;
         if (model != null) {
