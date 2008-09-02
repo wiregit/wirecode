@@ -39,7 +39,7 @@ public class SwarmHttpContentListener implements ResponseContentListener {
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
         if (!swarmCoordinator.isComplete()) {
-            LOG.trace("");
+            LOG.trace("contentAvailable called");
 
             if (finished) {
                 String message = "Already finished.";
@@ -79,7 +79,7 @@ public class SwarmHttpContentListener implements ResponseContentListener {
     }
 
     public void finished() {
-        LOG.trace("");
+        LOG.trace("finished");
         if (!finished) {
             finished = true;
             if (leaseRange != null) {
