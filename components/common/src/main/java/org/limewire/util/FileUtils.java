@@ -59,7 +59,7 @@ public class FileUtils {
         
         try {
             f = getCanonicalFile(f);
-        } catch (IOException tryAnyway){}
+        } catch (IOException ignore){}
         
         ObjectOutputStream out = null;
         try {
@@ -89,7 +89,7 @@ public class FileUtils {
         
         try {
             file = getCanonicalFile(file);
-        } catch (IOException tryAnyway){}
+        } catch (IOException ignore){}
         
         ObjectInputStream in = null;
         try {
@@ -137,7 +137,7 @@ public class FileUtils {
     /**
      * Determines if file 'a' is an ancestor of file 'b'.
      */
-    public static final boolean isAncestor(File a, File b) {
+    public static boolean isAncestor(File a, File b) {
         while(b != null) {
             if(b.equals(a))
                 return true;
@@ -160,7 +160,7 @@ public class FileUtils {
      * @return false if testParent is not the parent of testChild.
      * @throws IOException if getCanonicalPath throws IOException for either input file
      */
-    public static final boolean isReallyParent(File testParent, File testChild) throws IOException {
+    public static boolean isReallyParent(File testParent, File testChild) throws IOException {
         // Don't check testDirectory.isDirectory... 
         // If it's not a directory, it won't be the parent anyway.
         // This makes the tests more simple.
@@ -178,7 +178,7 @@ public class FileUtils {
      * really is a parent of testPath.
      * @see isReallyParent
      */
-    public static final boolean isReallyInParentPath(File testParent, File testChild) throws IOException {
+    public static boolean isReallyInParentPath(File testParent, File testChild) throws IOException {
 
     	String testParentName = getCanonicalPath(testParent);
         File testChildParentFile = testChild.getAbsoluteFile().getParentFile();
@@ -590,17 +590,17 @@ public class FileUtils {
 			return directory.delete();
 
 		File[] files = directory.listFiles();
-		for (int i = 0; i < files.length; i++) {
-			try {
-				if (!getCanonicalPath(files[i]).startsWith(canonicalParent))
-					continue;
-			} catch (IOException ioe) {
-				return false;
-			}
-            
-			if (!deleteRecursive(files[i]))
-				return false;
-		}
+        for (File file : files) {
+            try {
+                if (!getCanonicalPath(file).startsWith(canonicalParent))
+                    continue;
+            } catch (IOException ioe) {
+                return false;
+            }
+
+            if (!deleteRecursive(file))
+                return false;
+        }
 
 		return directory.delete();
 	}
@@ -615,8 +615,7 @@ public class FileUtils {
     		return true;
     	Set<File> unique = new HashSet<File>();
     	unique.add(a);
-    	for (File recursive: getFilesRecursive(a,null))
-    		unique.add(recursive);
+        unique.addAll(Arrays.asList(getFilesRecursive(a, null)));
     	
     	if (unique.contains(b))
     		return true;
@@ -694,7 +693,7 @@ public class FileUtils {
                 amountToRead-=read;
                 out.write(buf, 0, read);
             }
-        } catch (IOException e) {
+        } catch (IOException ignore) {
         } finally {
             close(in);
             flush(out);
@@ -899,11 +898,9 @@ public class FileUtils {
         }
     }
     
+       
     /**
      * Utility method to copy an input stream into the target output stream.
-     * @param inputStream
-     * @param outputStream
-     * @throws IOException
      */
     public static void write(InputStream inputStream, OutputStream outputStream) throws IOException {
         int numRead = 0;
@@ -915,11 +912,6 @@ public class FileUtils {
 
     /**
      * Utility method to generate an MD5 hash from a target file.
-     * 
-     * @param file
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws IOException
      */
     public static String getMD5(File file) throws NoSuchAlgorithmException, IOException {
         MessageDigest m = MessageDigest.getInstance("MD5");
