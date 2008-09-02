@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -271,6 +272,11 @@ public class FriendsPane extends JPanel {
 
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            //Clear the border on the renderer because the same panel is being reused for every cell
+            //and it will be set to an underlining border if this method returns true
+            JPanel panel = (JPanel)renderer;
+            panel.setBorder(BorderFactory.createEmptyBorder());
+
             JXTable table = (JXTable) adapter.getComponent();
             
             int row = adapter.row;
@@ -376,11 +382,23 @@ public class FriendsPane extends JPanel {
     }
     
     private abstract class JLabelCellRenderer implements TableCellRenderer {
+        private final JXPanel cell; 
+        private final RectanglePainter activeConversationPainter;
+        
+        public JLabelCellRenderer() {
+            cell = new JXPanel(new BorderLayout());
+            activeConversationPainter = new RectanglePainter();
+            //light-blue gradient
+            activeConversationPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
+            activeConversationPainter.setBorderPaint(Color.WHITE);
+            activeConversationPainter.setBorderWidth(0f);
+        }
 
         @Override
         public final Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            JXPanel cell = new JXPanel(new BorderLayout());
+            cell.removeAll();
+            cell.setBackgroundPainter(null);
             
             //Handle null possible sent in via AccessibleJTable inner class
             value = value == null ? table.getValueAt(row, column) : value;
@@ -392,12 +410,7 @@ public class FriendsPane extends JPanel {
             if (isSelected) {
                 cell.setBackground(LIGHT_GREY);
             } else if (friend.isActiveConversation()) {
-                RectanglePainter painter = new RectanglePainter();
-                //light-blue gradient
-                painter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
-                painter.setBorderPaint(Color.WHITE);
-                painter.setBorderWidth(0f);
-                cell.setBackgroundPainter(painter);
+                cell.setBackgroundPainter(activeConversationPainter);
             } else  {
                 cell.setBackground(table.getBackground());
                 cell.setForeground(table.getForeground());
@@ -456,7 +469,7 @@ public class FriendsPane extends JPanel {
         }
     }
     
-    private abstract class AbstractContextAction extends AbstractAction {
+    private static abstract class AbstractContextAction extends AbstractAction {
         protected final FriendContext context;
         
         public AbstractContextAction(String name, FriendContext context) {
@@ -479,7 +492,7 @@ public class FriendsPane extends JPanel {
         }
     }
     
-    private class ViewLibrary extends AbstractContextAction {
+    private static class ViewLibrary extends AbstractContextAction {
         public ViewLibrary(FriendContext context) {
             super("View Library", context);
         }
