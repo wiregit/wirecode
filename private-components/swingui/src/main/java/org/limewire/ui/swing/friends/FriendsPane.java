@@ -9,6 +9,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -29,6 +30,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.Timer;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -84,31 +87,33 @@ public class FriendsPane extends JPanel {
     
     private EventList<Friend> friends;
     private String myID;
+    private final IconLibrary icons;
     private final WeakHashMap<String, FriendImpl> idToFriendMap;
+    private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
     private WeakReference<Friend>  activeConversation = new WeakReference<Friend>(null);
     private static final Color LIGHT_GREY = new Color(218, 218, 218);
+    private JTable friendsTable;
 
     @Inject
     public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager) {
         super(new BorderLayout());
-        friends = new BasicEventList<Friend>();
-        idToFriendMap = new WeakHashMap<String, FriendImpl>();
+        this.icons = icons;
+        this.friends = new BasicEventList<Friend>();
+        this.idToFriendMap = new WeakHashMap<String, FriendImpl>();
+        this.friendTimerMap = new WeakHashMap<Friend, AlternatingIconTimer>();
         this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
-        JTable table = newSearchableJTable(sortedFriends, icons);
+        friendsTable = createFriendsTable(sortedFriends);
         
-        addPopupMenus(table);
+        addPopupMenus(friendsTable);
         
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane scroll = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scroll = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll);
         setPreferredSize(new Dimension(120, 200));
-        
-        table.addMouseListener(new LaunchChatListener());
         
         EventAnnotationProcessor.subscribe(this);
     }
@@ -160,7 +165,7 @@ public class FriendsPane extends JPanel {
         return index < 0 ? null : (Friend) model.getElementAt(index);
     }
     
-    private JTable newSearchableJTable(final EventList<Friend> friendsList, final IconLibrary icons) {
+    private JTable createFriendsTable(final EventList<Friend> friendsList) {
         TextFilterator<Friend> friendFilterator = new TextFilterator<Friend>() {
             @Override
             public void getFilterStrings(List<String> baseList, Friend element) {
@@ -194,12 +199,15 @@ public class FriendsPane extends JPanel {
             public Object getColumnValue(Friend friend, int column) {
                 switch(column) {
                 case 0:
+                    AlternatingIconTimer timer = friendTimerMap.get(friend);
+                    if (timer != null) {
+                        return timer.getIcon();
+                    }
                     //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally
                     if (friend.isChatting()) {
-                        return friend.isReceivingUnviewedMessages() ? icons.getUnviewedMessages() : icons.getChatting();
+                        return icons.getChatting();
                     }
-                    Icon icon = getIcon(friend, icons);
-                    return icon;
+                    return getIcon(friend, icons);
                 case 1:
                     return friend.getName();
                 case 2:
@@ -210,6 +218,8 @@ public class FriendsPane extends JPanel {
         };
         
         final JXTable table = new JXTable(new EventTableModel<Friend>(friendsList, format)); 
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.addMouseListener(new LaunchChatListener());
         
         table.addKeyListener(new KeyAdapter() {
             ArrayList<String> keysPressed = new ArrayList<String>();
@@ -339,6 +349,11 @@ public class FriendsPane extends JPanel {
         if (!friend.isActiveConversation() && message.getType() == Type.Received) {
             friend.startChat();
             friend.setReceivingUnviewedMessages(true);
+            if (!friendTimerMap.containsKey(friend)) {
+                AlternatingIconTimer iconTimer = new AlternatingIconTimer(friend);
+                friendTimerMap.put(friend, iconTimer);
+                iconTimer.start();
+            }
         }
     }
     
@@ -366,6 +381,7 @@ public class FriendsPane extends JPanel {
         activeConversation = new WeakReference<Friend>(friend);
         friend.setReceivingUnviewedMessages(false);
         friend.setActiveConversation(true);
+        friendTimerMap.remove(friend);
     }
     
     private class IconCellRenderer extends JLabelCellRenderer {
@@ -436,6 +452,46 @@ public class FriendsPane extends JPanel {
         @Override
         protected String getPreferredBorderLayout() {
             return BorderLayout.WEST;
+        }
+    }
+    
+    private class AlternatingIconTimer {
+        private WeakReference<Friend> friendRef;
+        private int flashCount;
+        
+        public AlternatingIconTimer(Friend friend) {
+            this.friendRef = new WeakReference<Friend>(friend);
+        }
+
+        public void start() {
+            Timer timer = new Timer(1500, new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Friend friend = friendRef.get();
+                    if (friend == null || flashCount == 4) {
+                        stopTimer(e);
+                        return;
+                    }
+                    
+                    int friendIndex = friends.indexOf(friend);
+                    if (friendIndex > -1) {
+                        AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
+                        model.fireTableCellUpdated(friendIndex, 0);
+                        flashCount++;
+                    }
+                }
+            });
+            timer.start();
+        }
+
+        private void stopTimer(ActionEvent e) {
+            Timer timer = (Timer) e.getSource();
+            timer.stop();
+        }
+        
+        public Icon getIcon() {
+            return flashCount % 2 == 0 ? icons.getUnviewedMessages() : icons.getChatting();
         }
     }
     
