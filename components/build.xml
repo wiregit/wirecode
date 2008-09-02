@@ -29,6 +29,7 @@
     <import file="core-api/build.xml"/>
     <import file="core-settings/build.xml"/>
     <import file="xmpp-api/build.xml"/>
+	<import file="player/build.xml"/>
     <import file="player-api/build.xml"/>
     <import file="swarm/build.xml"/>
 	
