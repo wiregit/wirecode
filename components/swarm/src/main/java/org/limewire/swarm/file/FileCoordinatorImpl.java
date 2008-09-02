@@ -87,7 +87,9 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         this.pendingBlocks = new IntervalSet();
         this.verifiedBlocks = new IntervalSet();
         this.blockSize = blockSize;
-        addListener(new LoggingSwarmCoordinatorListener());
+        if(LOG.isDebugEnabled() || LOG.isTraceEnabled()) {
+            addListener(new LoggingSwarmCoordinatorListener());
+        }
     }
 
     public Range leasePortion(IntervalSet availableRanges) {
@@ -213,7 +215,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
      * Returns true if this is complete either because all data is in
      * writtenBlocks, or all data is in verifiedBlocks.
      * 
-     * LOCK must be held while calling this.
+     * LOCK is held for the duration of this method call.
      */
     public boolean isComplete() {
         synchronized (LOCK) {
