@@ -6,10 +6,10 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
@@ -17,17 +17,19 @@ import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 
 public class SwarmFileSystemImpl implements SwarmFileSystem {
-    private List<SwarmFile> swarmFiles = Collections.synchronizedList(new ArrayList<SwarmFile>());
+    private final List<SwarmFile> swarmFiles;
 
-    private Map<SwarmFile, FileHandle> fileHandles = new HashMap<SwarmFile, FileHandle>();
+    private final Map<SwarmFile, FileHandle> fileHandles;
 
     private long completeSize = 0;
 
     public SwarmFileSystemImpl() {
-
+        this.swarmFiles = new CopyOnWriteArrayList<SwarmFile>();
+        this.fileHandles = new HashMap<SwarmFile, FileHandle>();
     }
 
     public SwarmFileSystemImpl(SwarmFileImpl swarmFile) {
+        this();
         addSwarmFile(swarmFile);
     }
 
@@ -86,10 +88,37 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         fileHandles.put(swarmFile, null);
     }
 
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
+        IOException firstException = null;
         for (SwarmFile swarmFile : swarmFiles) {
-            closeSwarmFile(swarmFile);
+            try {
+                closeSwarmFile(swarmFile);
+            } catch (IOException e) {
+                if (firstException == null) {
+                    firstException = e;
+                }
+            }
         }
+        if (firstException != null) {
+            throw firstException;
+        }
+    }
+
+    public List<SwarmFile> getSwarmFiles(Range range) {
+        ArrayList<SwarmFile> filesRet = new ArrayList<SwarmFile>();
+
+        long rangeStart = range.getLow();
+        long rangeEnd = range.getHigh();
+
+        for (SwarmFile swarmFile : swarmFiles) {
+            long startByte = swarmFile.getStartBytePosition();
+            long endByte = swarmFile.getEndBytePosition();
+            if (startByte <= rangeEnd && endByte >= rangeStart) {
+                filesRet.add(swarmFile);
+            }
+        }
+
+        return filesRet;
     }
 
     public synchronized void initialize() throws IOException {
@@ -177,22 +206,4 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             }
         }
     }
-
-    public List<SwarmFile> getSwarmFiles(Range range) {
-        ArrayList<SwarmFile> filesRet = new ArrayList<SwarmFile>();
-
-        long rangeStart = range.getLow();
-        long rangeEnd = range.getHigh();
-
-        for (SwarmFile swarmFile : swarmFiles) {
-            long startByte = swarmFile.getStartBytePosition();
-            long endByte = swarmFile.getEndBytePosition();
-            if (startByte <= rangeEnd && endByte >= rangeStart) {
-                filesRet.add(swarmFile);
-            }
-        }
-
-        return filesRet;
-    }
-
 }
