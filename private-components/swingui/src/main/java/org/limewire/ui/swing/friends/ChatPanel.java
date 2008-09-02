@@ -74,14 +74,26 @@ public class ChatPanel extends JPanel implements Displayable {
         //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
         conversationPanel.revalidate();
     }
+    
+    @EventSubscriber
+    public void handleSignoff(SignoffEvent event) {
+        //close all open chats when we sign-off
+        for(String key : chats.keySet()) {
+            closeChat(key);
+        }
+        setConversationPanel(new JPanel());
+    }
 
     @EventSubscriber
     public void handleCloseChat(CloseChatEvent event) {
-        LOG.debugf("Closing clat panel for {0}", event.getFriend().getName());
-        Friend friend = event.getFriend();
-        chats.remove(friend.getName());
+        closeChat(event.getFriend().getName());
         
         setConversationPanel(new JPanel());
+    }
+
+    private void closeChat(String chatKey) {
+        LOG.debugf("Closing clat panel for {0}", chatKey);
+        chats.remove(chatKey).closeChat();
     }
 
     @Override

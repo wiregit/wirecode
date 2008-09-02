@@ -100,6 +100,15 @@ public class TopPanel extends JPanel {
     
     @EventSubscriber
     public void handleConversationEnded(CloseChatEvent event) {
+        clearFriendInfo();
+    }
+    
+    @EventSubscriber
+    public void handleSignoff(SignoffEvent event) {
+        clearFriendInfo();
+    }
+
+    private void clearFriendInfo() {
         friendNameLabel.setText("");
         friendNameLabel.setIcon(null);
         friendStatusLabel.setText("");
