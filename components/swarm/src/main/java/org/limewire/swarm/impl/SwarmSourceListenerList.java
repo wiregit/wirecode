@@ -1,12 +1,11 @@
 package org.limewire.swarm.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.swarm.SwarmSource;
-import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmSourceDownloader;
+import org.limewire.swarm.SwarmSourceListener;
 import org.limewire.swarm.SwarmStatus;
 
 /**
@@ -16,53 +15,38 @@ public class SwarmSourceListenerList implements SwarmSourceListener {
     private final List<SwarmSourceListener> listeners;
 
     public SwarmSourceListenerList() {
-        this.listeners = Collections.synchronizedList(new ArrayList<SwarmSourceListener>());
+        this.listeners = new CopyOnWriteArrayList<SwarmSourceListener>();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.swarm.SwarmSourceListener#connectFailed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void connectFailed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connectFailed(swarmSourceHandler, source);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.swarm.SwarmSourceListener#connected(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void connected(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connected(swarmSourceHandler, source);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.swarm.SwarmSourceListener#connectionClosed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void connectionClosed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.connectionClosed(swarmSourceHandler, source);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.swarm.SwarmSourceListener#finished(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource)
-     */
+    @Override
     public void finished(SwarmSourceDownloader swarmSourceHandler, SwarmSource source) {
         for (SwarmSourceListener listener : listeners) {
             listener.finished(swarmSourceHandler, source);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.swarm.SwarmSourceListener#responseProcessed(org.limewire.swarm.SwarmSourceHandler, org.limewire.swarm.SwarmSource, org.limewire.swarm.SwarmStatus)
-     */
+    @Override
     public void responseProcessed(SwarmSourceDownloader swarmSourceHandler, SwarmSource source,
             SwarmStatus status) {
         for (SwarmSourceListener listener : listeners) {
