@@ -89,12 +89,12 @@ public class TopPanel extends JPanel {
     
     @EventSubscriber
     public void handleConversationStarted(ConversationStartedEvent event) {
-        Friend friend = event.getFriend();
-        friendNameLabel.setText(friend.getName());
-        friendNameLabel.setIcon(getIcon(friend, icons));
-        String status = friend.getStatus();
-        if (status != null && status.length() > 0) {
-            friendStatusLabel.setText("- " + status);
+        if (event.isLocallyInitiated()) {
+            Friend friend = event.getFriend();
+            friendNameLabel.setText(friend.getName());
+            friendNameLabel.setIcon(getIcon(friend, icons));
+            String status = friend.getStatus();
+            friendStatusLabel.setText(status != null && status.length() > 0 ? " - " + status : "");
         }
     }
     
