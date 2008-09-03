@@ -31,5 +31,11 @@
       <artifactId>lw-http</artifactId>
       <version>${limewire.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-test-util</artifactId>
+      <version>${limewire.version}</version>
+	  <scope>test</scope>
+    </dependency>    
   </dependencies> 
 </project>
