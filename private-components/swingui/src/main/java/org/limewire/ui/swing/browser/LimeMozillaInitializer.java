@@ -7,12 +7,9 @@ import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.settings.MozillaSettings;
 import org.limewire.io.Expand;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.ui.swing.browser.download.LimeMozillaDownloadManager;
-import org.limewire.ui.swing.browser.download.LimeMozillaSingletonFactory;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
@@ -21,13 +18,7 @@ import org.mozilla.browser.IMozillaWindowFactory;
 import org.mozilla.browser.MozillaConfig;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaWindow;
-import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.browser.impl.WindowCreator;
-import org.mozilla.interfaces.nsIComponentRegistrar;
-import org.mozilla.interfaces.nsIPrefService;
-import org.mozilla.xpcom.Mozilla;
-
-import com.limegroup.gnutella.LimeWireCore;
 
 public class LimeMozillaInitializer {
 
@@ -36,7 +27,7 @@ public class LimeMozillaInitializer {
     private LimeMozillaInitializer() {
     }
 
-    public static void initialize(LimeWireCore limeWireCore) {
+    public static void initialize() {
         File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
         // Check to see if the correct version of XUL exists.
         File xulFile = new File(xulInstallPath, "xul-v2.0b2-do-not-remove");
