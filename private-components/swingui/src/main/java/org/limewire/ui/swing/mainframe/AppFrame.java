@@ -72,8 +72,9 @@ public class AppFrame extends SingleFrameApplication {
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 
-        Injector injector = createInjector();
-        LimeMozillaDownloadManager mozillaDownloadManager =  injector.getInstance(LimeMozillaDownloadManager.class);
+        Injector localInjector = createInjector();
+
+        LimeMozillaDownloadManager mozillaDownloadManager =  localInjector.getInstance(LimeMozillaDownloadManager.class);
         
         //change default mozilla behavior
         overrideMozillaDefaults(mozillaDownloadManager);
