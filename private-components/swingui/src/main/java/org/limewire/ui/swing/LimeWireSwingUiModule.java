@@ -18,7 +18,7 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiMainframeModule());
         install(new LimeWireUiTrayModule());
         install(new LimeWireUiFriendsModule());
-        install(new LimeWireUiPlayerModule());
+        //install(new LimeWireUiPlayerModule());
         install(new LimeWireUiMozillaModule());
     }
 

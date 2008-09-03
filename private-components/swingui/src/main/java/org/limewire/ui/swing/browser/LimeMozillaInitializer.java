@@ -70,22 +70,6 @@ public class LimeMozillaInitializer {
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
     }
 
-    // TODO Remove this commented out code after it is decided we won't be
-    // listening
-    // to the mozilla downloads
-    // private static void addDownloadListener(LimeWireCore limeWireCore) {
-    // register(new LimeMozillaDownloadManagerUIImpl());// removes download list
-    // screen
-    //
-    // nsIDownloadManager nsidownloadManager = XPCOMUtils.getServiceProxy(
-    // "@mozilla.org/download-manager;1", nsIDownloadManager.class);
-    // nsidownloadManager.cleanUp();
-    //
-    // DownloadServices downloadServices = limeWireCore.getDownloadServices();
-    // nsidownloadManager.addListener(new
-    // LimeMozillaDownloadManagerListener(downloadServices));
-    // }
-
     private static String getResourceName() {
         if (OSUtils.isWindows()) {
             return "xulrunner-win32.zip";
