@@ -29,7 +29,6 @@ import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
-import org.limewire.swarm.impl.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.impl.SwarmerImpl;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
@@ -38,7 +37,6 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.limegroup.bittorrent.BTDownloader;
 
 /**
  * 
