@@ -207,45 +207,8 @@ public class SwarmerImplTest extends BaseTestCase {
     /**
      * Tests downloading 1 file from multiple sources with differant ranges of
      * bytes.
-     * 
-     * @throws Exception
      */
     public void testMultipleRanges() throws Exception {
-        runTest(new TestRun() {
-            public void run() throws Exception {
-                File file = createTestFile("testMultipleRanges.pdf");
-                try {
-                    String md5 = "8055d620ba0c507c1af957b43648c99f";
-                    URI uri = new URI("http://localhost:" + TEST_PORT + "/pub/");
-                    URI uri2 = new URI("http://www9.limewire.com/developer/");
-                    int lowByte1 = 0;
-                    int highByte1 = (2 * 16 * 1024) - 1;
-                    int lowByte2 = highByte1 + 1;
-                    int highByte2 = 44425 - 1;
-                    long fileSize = highByte2 + 1;
-                    Range range1 = Range.createRange(lowByte1, highByte1);
-                    Range range2 = Range.createRange(lowByte2, highByte2);
-
-                    Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-
-                    swarmer.addSource(new SwarmHttpSource(uri, range2));
-                    swarmer.addSource(new SwarmHttpSource(uri2, range1));
-
-                    assertDownload(md5, file, fileSize);
-                } finally {
-                    file.delete();
-                }
-            }
-        });
-    }
-
-    /**
-     * Tests downloading 1 file from multiple sources with differant ranges of
-     * bytes.
-     * 
-     * @throws Exception
-     */
-    public void testMultipleRanges2() throws Exception {
         runTest(new TestRun() {
             public void run() throws Exception {
                 File file = createTestFile("testMultipleRanges2.pdf");
