@@ -18,6 +18,8 @@ public interface IconLibrary {
     
     Icon getEndChat();
 
+    Icon getEndChatOverIcon();
+
     Icon getDoNotDisturb();
 
     Icon getChatStatusStub();

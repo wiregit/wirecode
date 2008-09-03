@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -26,6 +27,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -82,6 +84,10 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendsPane extends JPanel {
     
+    private static final int PREFERRED_WIDTH = 120;
+    private static final int RIGHT_EDGE_PADDING_PIXELS = 2;
+    private static final int RIGHT_ADJUSTED_WIDTH = PREFERRED_WIDTH - RIGHT_EDGE_PADDING_PIXELS;
+    private static final int ICON_WIDTH_FUDGE_FACTOR = 4;
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     
@@ -92,9 +98,10 @@ public class FriendsPane extends JPanel {
     private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
+    private final JScrollPane scrollPane;
     private String myID;
     private WeakReference<Friend> activeConversation = new WeakReference<Friend>(null);
-    private WeakReference<Friend> mouseHoverFriendRef = new WeakReference<Friend>(null);
+    private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
     private static final Color LIGHT_GREY = new Color(218, 218, 218);
 
     @Inject
@@ -112,9 +119,9 @@ public class FriendsPane extends JPanel {
         
         addPopupMenus(friendsTable);
         
-        JScrollPane scroll = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        add(scroll);
-        setPreferredSize(new Dimension(120, 200));
+        scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        add(scrollPane);
+        setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
         
         EventAnnotationProcessor.subscribe(this);
     }
@@ -376,8 +383,30 @@ public class FriendsPane extends JPanel {
         return getIcon(friend, icons);
     }
 
+    private void closeChat(Friend friend) {
+        if (friend != null) {
+
+            friend.stopChat();
+            new CloseChatEvent(friend).publish();
+            
+            Friend nextFriend = null;
+            for(Friend tmpFriend : friends) {
+                if (tmpFriend == friend || !tmpFriend.isChatting()) {
+                    continue;
+                }
+                if (nextFriend == null || tmpFriend.getChatStartTime() > nextFriend.getChatStartTime()) {
+                    nextFriend = tmpFriend;
+                }
+            }
+
+            if (nextFriend != null) {
+                fireConversationStarted(nextFriend);
+            }
+        }
+    }
+
     private class FriendCellRenderer implements TableCellRenderer {
-        private final JXPanel cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]2", "1[]0")); 
+        private final JXPanel cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]" + Integer.toString(RIGHT_EDGE_PADDING_PIXELS), "1[]0")); 
         private final JXLabel friendName;
         private final JXLabel chatStatus;
         private final JXLabel endChat;
@@ -408,7 +437,7 @@ public class FriendsPane extends JPanel {
             
             //Handle null possible sent in via AccessibleJTable inner class
             value = value == null ? table.getValueAt(row, column) : value;
-            boolean isChatHoveredOver = (friend == mouseHoverFriendRef.get() && friend.isChatting());
+            boolean isChatHoveredOver = (friend == mouseHoverFriend.getFriend() && friend.isChatting());
             renderComponent(cell, value, friend, isChatHoveredOver);
             
             if (isSelected || isChatHoveredOver) {
@@ -431,10 +460,21 @@ public class FriendsPane extends JPanel {
             panel.add(friendName);
             
             if (isChatHoveredOver) {
-                endChat.setIcon(icons.getEndChat());
+                Point hoverPoint = mouseHoverFriend.getHoverPoint();
+                Icon closeChatIcon = icons.getEndChat();
+                endChat.setIcon(isOverCloseIcon(hoverPoint, closeChatIcon.getIconWidth()) ? icons.getEndChatOverIcon() : closeChatIcon);
                 panel.add(endChat);
+            } else {
+                endChat.setIcon(null);
             }
         }
+    }
+
+    private boolean isOverCloseIcon(Point point, int closeChatIconWidth) {
+        JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
+        int scrollBarWidthAdjustment = verticalScrollBar.isVisible() ? verticalScrollBar.getWidth() : 0;
+        return point.x > RIGHT_ADJUSTED_WIDTH - closeChatIconWidth - ICON_WIDTH_FUDGE_FACTOR - scrollBarWidthAdjustment && 
+                                    point.x < RIGHT_ADJUSTED_WIDTH;
     }
 
     private class AlternatingIconTimer {
@@ -504,20 +544,40 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            JTable table = (JTable)e.getSource();
-            
-            Friend friend = getFriend(table, table.rowAtPoint(e.getPoint()));
+            Friend friend = getFriendFromPoint(e);
             
             if (friend == null) {
+                //Mouse is not hovering over a friend row
+                Friend previousMouseHoverFriend = mouseHoverFriend.getFriend();
+                if (previousMouseHoverFriend != null) {
+                    //Mouse used to be hovering over a friend, but has moved
+                    int previousMouseHoverFriendIndex = friends.indexOf(previousMouseHoverFriend);
+                    if (previousMouseHoverFriendIndex > -1) {
+                        //Friend is still in the list, but is no longer being hovered over
+                        mouseHoverFriend.clearHoverDetails();
+                        repaintTableCell(previousMouseHoverFriendIndex);
+                    }
+                }
+                
                 return;
             }
             
             int friendIndex = friends.indexOf(friend);
             if (friendIndex > -1) {
-                mouseHoverFriendRef = new WeakReference<Friend>(friend);
-                AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
-                model.fireTableCellUpdated(friendIndex, 0);
+                mouseHoverFriend.setHoverDetails(friend, e.getPoint());
+                repaintTableCell(friendIndex);
             }
+        }
+
+        private void repaintTableCell(int friendIndex) {
+            AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
+            model.fireTableCellUpdated(friendIndex, 0);
+        }
+
+        private Friend getFriendFromPoint(MouseEvent e) {
+            JTable table = (JTable)e.getSource();
+            
+            return getFriend(table, table.rowAtPoint(e.getPoint()));
         }
 
         /**
@@ -525,13 +585,44 @@ public class FriendsPane extends JPanel {
          */
         @Override
         public void mouseExited(MouseEvent e) {
-            Friend friend = mouseHoverFriendRef.get();
+            Friend friend = mouseHoverFriend.getFriend();
             if (friend != null) {
-                mouseHoverFriendRef = new WeakReference<Friend>(null);
+                mouseHoverFriend.clearHoverDetails();
                 int friendIndex = friends.indexOf(friend);
-                AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
-                model.fireTableCellUpdated(friendIndex, 0);
+                repaintTableCell(friendIndex);
             }
+        }
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (isOverCloseIcon(e.getPoint(), icons.getEndChat().getIconWidth())) {
+                Friend friend = getFriendFromPoint(e);
+                if (e.getClickCount() == 1 && friend != null && friend.isChatting()) {
+                    closeChat(friend);
+                }
+            }
+        }
+    }
+    
+    private static class FriendHoverBean {
+        private WeakReference<Friend> friend;
+        private Point hoverPoint;
+        
+        public void clearHoverDetails() {
+            setHoverDetails(null, null);
+        }
+        
+        public void setHoverDetails(Friend friend, Point point) {
+            this.friend = new WeakReference<Friend>(friend);
+            this.hoverPoint = point;
+        }
+
+        public Friend getFriend() {
+            return friend == null ? null : friend.get();
+        }
+        
+        public Point getHoverPoint() {
+            return hoverPoint;
         }
     }
     
@@ -668,25 +759,7 @@ public class FriendsPane extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             Friend friend = context.getFriend();
-            if (friend != null) {
-
-                friend.stopChat();
-                new CloseChatEvent(friend).publish();
-                
-                Friend nextFriend = null;
-                for(Friend tmpFriend : friends) {
-                    if (tmpFriend == friend || !tmpFriend.isChatting()) {
-                        continue;
-                    }
-                    if (nextFriend == null || tmpFriend.getChatStartTime() > nextFriend.getChatStartTime()) {
-                        nextFriend = tmpFriend;
-                    }
-                }
-
-                if (nextFriend != null) {
-                    fireConversationStarted(nextFriend);
-                }
-            }
+            closeChat(friend);
         }
     }
 }
