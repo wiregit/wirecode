@@ -85,17 +85,17 @@ public class FriendsPane extends JPanel {
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     
-    private EventList<Friend> friends;
-    private String myID;
+    private final EventList<Friend> friends;
+    private final JTable friendsTable;
     private final IconLibrary icons;
     private final WeakHashMap<String, FriendImpl> idToFriendMap;
     private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
+    private String myID;
     private WeakReference<Friend> activeConversation = new WeakReference<Friend>(null);
     private WeakReference<Friend> mouseHoverFriendRef = new WeakReference<Friend>(null);
     private static final Color LIGHT_GREY = new Color(218, 218, 218);
-    private JTable friendsTable;
 
     @Inject
     public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager) {
@@ -377,7 +377,7 @@ public class FriendsPane extends JPanel {
     }
 
     private class FriendCellRenderer implements TableCellRenderer {
-        private final JXPanel cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]2", "0[]0")); 
+        private final JXPanel cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]2", "1[]0")); 
         private final JXLabel friendName;
         private final JXLabel chatStatus;
         private final JXLabel endChat;
@@ -408,9 +408,10 @@ public class FriendsPane extends JPanel {
             
             //Handle null possible sent in via AccessibleJTable inner class
             value = value == null ? table.getValueAt(row, column) : value;
-            renderComponent(cell, value, friend);
+            boolean isChatHoveredOver = (friend == mouseHoverFriendRef.get() && friend.isChatting());
+            renderComponent(cell, value, friend, isChatHoveredOver);
             
-            if (isSelected) {
+            if (isSelected || isChatHoveredOver) {
                 cell.setBackground(LIGHT_GREY);
             } else if (friend.isActiveConversation()) {
                 cell.setBackgroundPainter(activeConversationPainter);
@@ -422,14 +423,14 @@ public class FriendsPane extends JPanel {
             return cell;
         }
 
-        protected void renderComponent(JPanel panel, Object value, Friend friend) {
+        protected void renderComponent(JPanel panel, Object value, Friend friend, boolean isChatHoveredOver) {
             chatStatus.setIcon(getChatIcon(friend));
             panel.add(chatStatus);
 
             friendName.setText(value.toString());
             panel.add(friendName);
             
-            if (friend == mouseHoverFriendRef.get() && friend.isChatting()) {
+            if (isChatHoveredOver) {
                 endChat.setIcon(icons.getEndChat());
                 panel.add(endChat);
             }
@@ -524,12 +525,10 @@ public class FriendsPane extends JPanel {
          */
         @Override
         public void mouseExited(MouseEvent e) {
-            System.out.println("Mouse has exited the table...");
             Friend friend = mouseHoverFriendRef.get();
             if (friend != null) {
                 mouseHoverFriendRef = new WeakReference<Friend>(null);
                 int friendIndex = friends.indexOf(friend);
-                System.out.println("Mouse left the table for row: " + friendIndex);
                 AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
                 model.fireTableCellUpdated(friendIndex, 0);
             }
