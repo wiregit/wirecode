@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -16,6 +18,7 @@ import org.limewire.net.LimeWireNetTestModule;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmCoordinatorListener;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmSource;
 import org.limewire.swarm.SwarmSourceType;
@@ -35,6 +38,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.limegroup.bittorrent.BTDownloader;
 
 /**
  * 
@@ -104,7 +108,7 @@ public class SwarmerImplTest extends BaseTestCase {
                     swarmer
                             .addSource(new SwarmHttpSource(uri, Range
                                     .createRange(lowByte, highByte)));
-                    assertDownload(md5, file, fileSize);
+                    assertDownload(swarmer, md5, file, fileSize);
 
                 } finally {
                     file.delete();
@@ -142,7 +146,7 @@ public class SwarmerImplTest extends BaseTestCase {
                             .addSource(new SwarmHttpSource(uri, Range
                                     .createRange(lowByte, highByte)));
 
-                    assertDownload(md5, file, fileSize);
+                    assertDownload(swarmer, md5, file, fileSize);
                 } finally {
                     file.delete();
                 }
@@ -169,7 +173,7 @@ public class SwarmerImplTest extends BaseTestCase {
                     swarmer
                             .addSource(new SwarmHttpSource(uri, Range
                                     .createRange(lowByte, highByte)));
-                    assertDownload(md5, file, fileSize);
+                    assertDownload(swarmer, md5, file, fileSize);
                 } finally {
                     file.delete();
                 }
@@ -196,7 +200,7 @@ public class SwarmerImplTest extends BaseTestCase {
                     swarmer
                             .addSource(new SwarmHttpSource(uri, Range
                                     .createRange(lowByte, highByte)));
-                    assertDownload(md5, file, fileSize);
+                    assertDownload(swarmer, md5, file, fileSize);
                 } finally {
                     file.delete();
                 }
@@ -235,7 +239,7 @@ public class SwarmerImplTest extends BaseTestCase {
                     swarmer.addSource(new SwarmHttpSource(uri2, range2));
                     swarmer.addSource(new SwarmHttpSource(uri1, range1));
                     swarmer.addSource(new SwarmHttpSource(uri3, range3));
-                    assertDownload(md5, file, fileSize);
+                    assertDownload(swarmer, md5, file, fileSize);
                 } finally {
                     file.delete();
                 }
@@ -279,7 +283,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
         swarmer.addSource(swarmSource);
 
-        Thread.sleep(3000);
+        finishDownload(swarmer);
 
         AssertComparisons.assertTrue(file1.exists());
         AssertComparisons.assertEquals(fileSize1, file1.length());
@@ -313,7 +317,7 @@ public class SwarmerImplTest extends BaseTestCase {
                     Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize,
                             new MD5SumFileVerifier(range, md5));
                     swarmer.addSource(new SwarmHttpSource(uri1, range));
-                    assertDownload(md5, file, fileSize);
+                    assertDownload(swarmer, md5, file, fileSize);
                 } finally {
                     file.delete();
                 }
@@ -321,14 +325,59 @@ public class SwarmerImplTest extends BaseTestCase {
         });
     }
 
+    
+    private void finishDownload(Swarmer swarmer) throws InterruptedException {
+        SwarmCoordinator swarmCoordinator = swarmer.getCoordinator();
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        swarmCoordinator.addListener(new SwarmCoordinatorListener() {
+            @Override
+            public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
+
+            }
+
+            @Override
+            public void blockPending(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockUnleased(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockUnpending(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockVerificationFailed(SwarmCoordinator swarmCoordinator, Range block) {
+
+            }
+
+            @Override
+            public void blockVerified(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void blockWritten(SwarmCoordinator swarmCoordinator, Range block) {
+            }
+
+            @Override
+            public void downloadCompleted(SwarmCoordinator swarmCoordinator,
+                    SwarmFileSystem fileSystem) {
+                countDownLatch.countDown();
+            }
+
+        });
+
+        countDownLatch.await(10, TimeUnit.SECONDS);
+    }
+    
     /**
      * Asserts that the given file has the correct size, and matches the given
      * md5sum.
      */
-    private void assertDownload(String md5, File file, long fileSize)
+    private void assertDownload(Swarmer swarmer, String md5, File file, long fileSize)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
-        long sleepTime = (long) ((fileSize * 0.0001) + 3000);
-        Thread.sleep(sleepTime);
+        finishDownload(swarmer);
         AssertComparisons.assertTrue(file.exists());
         AssertComparisons.assertEquals(fileSize, file.length());
         String testmd5 = FileUtils.getMD5(file);
