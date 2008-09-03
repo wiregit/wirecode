@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.downloads.table;
 
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadItem.Category;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -37,17 +39,23 @@ public class DownloadActionHandler {
             item.resume();
         } else if (actionCommmand == LINK_COMMAND){
             NativeLaunchUtils.openURL(ERROR_URL);
-        } else if (actionCommmand == PREVIEW_COMMAND){
-            NativeLaunchUtils.launchFile(item.getFile());
+        } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND){
+            launch(item);
         } else if (actionCommmand == LOCATE_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getFile());
-        } else if (actionCommmand == LAUNCH_COMMAND){
-            NativeLaunchUtils.launchFile(item.getFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
             //TODO properties
             throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadItems.remove(item);
+        }
+    }
+
+    private void launch(DownloadItem item) {
+        if(item.getCategory() == Category.AUDIO){
+            PlayerUtils.play(item.getFile());
+        } else {
+            NativeLaunchUtils.launchFile(item.getFile());
         }
     }
 }

@@ -8,6 +8,7 @@ import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -27,6 +28,7 @@ import org.jdesktop.swingx.JXCollapsiblePane;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
+//import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.MediaSlider;
 import org.limewire.ui.swing.components.Resizable;
@@ -230,8 +232,10 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         heavyPanel.add(progressSlider, "dock south, gaptop 5px, gapbottom 5px");
         EventAnnotationProcessor.subscribe(this);
 
-        player.addAudioPlayerListener(new PlayerListener());        
-       
+        player.addAudioPlayerListener(new PlayerListener());      
+        
+        player.loadSong(new File("C:/Documents and Settings/mturkel/My Documents/My Music/The Long Nines/Demo 1/1-Sick_of_You-The_Long_Nines.mp3"));
+       player.playSong();
     }
     
     @EventSubscriber
@@ -326,6 +330,7 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
 
         @Override
         public void stateChange(AudioPlayerEvent event) {
+            System.out.println("stateChange : " +event.getState());
             if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
                 playButton.setVisible(false);
                 pauseButton.setVisible(true);

@@ -26,6 +26,7 @@ import javax.swing.border.LineBorder;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.SimpleDownloadTable;
 import org.limewire.ui.swing.sharing.ViewSelectionPanel;
@@ -94,7 +95,7 @@ public class MainDownloadPanel extends JPanel {
 	 * Create the panel
 	 */
 	@Inject
-	public MainDownloadPanel(DownloadListManager downloadListManager) {
+	public MainDownloadPanel(DownloadListManager downloadListManager, AudioPlayer player) {
 		this.downloadMediator = new DownloadMediator(downloadListManager);
 		setLayout(new BorderLayout());
 		
