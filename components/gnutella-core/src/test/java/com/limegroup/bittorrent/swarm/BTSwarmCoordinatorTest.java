@@ -10,9 +10,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.common.LimeWireCommonModule;
 import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
-import org.limewire.net.LimeWireNetTestModule;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmCoordinatorListener;
 import org.limewire.swarm.SwarmFileSystem;
