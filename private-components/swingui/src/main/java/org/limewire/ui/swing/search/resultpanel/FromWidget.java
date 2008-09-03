@@ -51,6 +51,8 @@ public class FromWidget extends JPanel {
         border = new RoundedBorder(r);
         noBorder = BorderFactory.createEmptyBorder(r, r, r, r);
 
+        headerPanel.setOpaque(false);
+        
         createHeaderLabel();
         createMenus();
         layoutComponents();
