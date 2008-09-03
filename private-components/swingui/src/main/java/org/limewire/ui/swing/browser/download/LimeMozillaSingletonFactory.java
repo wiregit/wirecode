@@ -28,7 +28,7 @@ public abstract class LimeMozillaSingletonFactory implements nsIFactory, nsISupp
      * Returns the UID for this xpcom object.
      */
     public String getIID() {
-        getLogger().debug("");
+        getLogger().debug("getIID");
         return IID;
     }
 
@@ -36,31 +36,32 @@ public abstract class LimeMozillaSingletonFactory implements nsIFactory, nsISupp
      * Returns the contract id for this xpcom object.
      */
     public String getCID() {
-        getLogger().debug("");
+        getLogger().debug("getCID");
         return CID;
     }
 
     @Override
     public nsISupports queryInterface(String aIID) {
-        getLogger().debug("");
+        getLogger().debug("queryInterface");
         return Mozilla.queryInterface(this, aIID);
     }
 
     @Override
     public nsISupports createInstance(nsISupports arg0, String arg1) {
-        getLogger().debug("");
+        getLogger().debug("createInstance");
         return this;
     }
 
     @Override
     public void lockFactory(boolean arg0) {
-        getLogger().debug("");
+        getLogger().debug("lockFactory");
     }
 
     /**
      * Returns the component name of this xpcom object.
      */
     public String getComponentName() {
+        getLogger().debug("getComponentName");
         return toString();
     }
 

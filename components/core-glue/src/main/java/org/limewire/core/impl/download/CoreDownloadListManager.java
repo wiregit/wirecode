@@ -1,12 +1,18 @@
 package org.limewire.core.impl.download;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.http.HttpException;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadListener;
@@ -17,9 +23,12 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.core.settings.MozillaSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.setting.FileSetting;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -29,22 +38,26 @@ import ca.odell.glazedlists.ObservableElementList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.internal.base.Objects;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 
 @Singleton
 public class CoreDownloadListManager implements DownloadListManager {
     
+    private static final Log LOG = LogFactory.getLog(CoreDownloadListManager.class);
+    
 	private final EventList<DownloadItem> downloadItems;
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
 	private final QueueTimeCalculator queueTimeCalculator;
-    
+    private final ScheduledExecutorService backgroundExecutor;
     private static final int PERIOD = 1000;
 	
 	@Inject
@@ -52,6 +65,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             DownloadListenerList listenerList, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor,
             RemoteFileDescFactory remoteFileDescFactory) {
+	    this.backgroundExecutor = Objects.nonNull(backgroundExecutor, "backgroundExecutor");
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
@@ -185,6 +199,73 @@ public class CoreDownloadListManager implements DownloadListManager {
                 list.remove(downloadItem);
             }
         }
+
+    }
+
+
+    @Override
+    public void addDownload(final URI uri, final String fileName) {
+
+        Runnable work = new Runnable() {
+            @Override
+            public void run() {
+                URL url = null;
+                URLConnection urlConnection = null;
+                try {
+                    
+                    url = new URL(uri.toString());
+                    LOG.debugf("Adding Download: {0}", url.toString());
+                    LOG.debugf("File Name: {0}", fileName);
+
+                    urlConnection = url.openConnection();
+                    long size = urlConnection.getContentLength();
+                    LOG.debugf("Download Size: {0}", size);
+
+                    URN urn = null;
+
+                    RemoteFileDesc rfd = null;
+                    rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, fileName, urn, size);
+                    File saveDir = new File(MozillaSettings.DOWNLOAD_DIR.getValue()
+                            .getAbsolutePath());
+
+                    LOG.debugf("Download Save Directory: {0}", saveDir.toString());
+
+                    saveDir.mkdirs();
+                    boolean overwrite = true;
+                    LOG.debugf("Download Starting");
+
+                    // TODO instead of starting download, we will want to
+                    // integrate with the file dialog for the new UI.
+                    downloadManager.downloadFromStore(rfd, overwrite, saveDir, fileName);
+                } catch (IOException e) {
+                    LOG.error("error adding download: " + uri.toString(), e);
+                } catch (URISyntaxException e) {
+                    LOG.error("error adding download: " + uri.toString(), e);
+                } catch (HttpException e) {
+                    LOG.error("error adding download: " + uri.toString(), e);
+                } catch (InterruptedException e) {
+                    LOG.error("error adding download: " + uri.toString(), e);
+                } finally {
+                    if (urlConnection != null) {
+                        try {
+                            if (urlConnection.getInputStream() != null) {
+                                urlConnection.getInputStream().close();
+                            }
+                        } catch (IOException ignored) {
+                        }
+                        try {
+                            if (urlConnection.getOutputStream() != null) {
+                                urlConnection.getOutputStream().close();
+                            }
+                        } catch (IOException ignored) {
+                        }
+                    }
+                }
+            }
+        };
+
+        //TODO use a differant scheduler, don't want to lock up update calls to UI
+        backgroundExecutor.execute(work);
 
     }
 }

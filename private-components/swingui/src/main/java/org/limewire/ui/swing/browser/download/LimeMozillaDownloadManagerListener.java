@@ -21,6 +21,8 @@ import com.limegroup.gnutella.DownloadServices;
 /**
  * This is an example of listening to a mozilla download and putting this info
  * into the downloader list for the limewire client.
+ * 
+ * TODO remove this class if we decide we will not need to use mozilla to download files.
  */
 class LimeMozillaDownloadManagerListener implements nsIDownloadProgressListener {
 
@@ -28,11 +30,11 @@ class LimeMozillaDownloadManagerListener implements nsIDownloadProgressListener 
 
     private final Map<Long, LimeMozillaDownloadProgressListener> listeners;
 
-    //private final DownloadServices downloadServices;
+    private final DownloadServices downloadServices;
 
     public LimeMozillaDownloadManagerListener(DownloadServices downloadServices) {
         this.listeners = new WeakHashMap<Long, LimeMozillaDownloadProgressListener>();
-       // this.downloadServices = downloadServices;
+       this.downloadServices = downloadServices;
     }
 
     private nsIDownloadManager getDownloadManager() {

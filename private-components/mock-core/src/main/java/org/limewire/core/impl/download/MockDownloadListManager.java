@@ -2,11 +2,13 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URI;
 import java.util.List;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.DownloadItem.Category;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -130,6 +132,11 @@ public class MockDownloadListManager implements DownloadListManager {
             }
         }
 
+    }
+
+    @Override
+    public void addDownload(URI uri, String fileName) {
+      addDownload(new MockDownloadItem(fileName,0,DownloadState.DOWNLOADING,Category.OTHER));
     }
 
 }

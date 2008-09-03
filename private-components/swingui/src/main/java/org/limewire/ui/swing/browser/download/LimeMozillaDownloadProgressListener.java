@@ -18,6 +18,8 @@ import com.limegroup.gnutella.InsufficientDataException;
 /**
  * This class listens to a specific Mozilla download and tracks some statistics
  * for us.
+ * 
+ * TODO remove this class if we decide we will not need to use mozilla to download files.
  */
 public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressListener {
     private final long downloadId;
@@ -37,7 +39,6 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
         this.selfProgress = new AtomicLong();
         this.totalProgress = new AtomicLong();
         this.down = new SimpleBandwidthTracker();
-        System.out.println("starting state: " + state);
     }
 
     @Override
@@ -55,7 +56,6 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
 
         if (this.downloadId == download.getId()) {
             // this is my download
-
             long diff = curTotalProgress - totalProgress.longValue();
             down.count(diff);
             selfProgress.set(curSelfProgress);

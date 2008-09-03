@@ -32,7 +32,7 @@ import com.limegroup.gnutella.LimeWireCore;
 public class LimeMozillaInitializer {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaInitializer.class);
-
+        
     private LimeMozillaInitializer() {
     }
 
@@ -95,7 +95,7 @@ public class LimeMozillaInitializer {
         nsIPrefService prefService = XPCOMUtils.getServiceProxy(
                 "@mozilla.org/preferences-service;1", nsIPrefService.class);
 
-        // set default downloads to desktop, we are going ot override this with
+        // set default downloads to desktop, we are going to override this with
         // our own download manager This will prevent the save dialogue from opening
         prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
         prefService.getBranch("browser.download.").setIntPref("folderList", 0);
@@ -107,8 +107,7 @@ public class LimeMozillaInitializer {
                 MozillaSettings.DOWNLOAD_MIME_TYPES.getValue());
         
         //register our own download manager to replace the one provided by mozilla
-        registerComponent(new LimeMozillaDownloadManager(limeWireCore.getDownloadServices(), limeWireCore
-                .getRemoteFileDescFactory()));
+        registerComponent(new LimeMozillaDownloadManager(null));
     }
 
     // TODO Remove this commented out code after it is decided we won't be

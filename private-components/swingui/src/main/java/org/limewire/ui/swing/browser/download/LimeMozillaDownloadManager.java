@@ -1,15 +1,13 @@
 package org.limewire.ui.swing.browser.download;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 
-import org.apache.http.HttpException;
-import org.limewire.core.settings.MozillaSettings;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.service.ErrorService;
 import org.mozilla.interfaces.mozIStorageConnection;
 import org.mozilla.interfaces.nsICancelable;
 import org.mozilla.interfaces.nsIDownload;
@@ -20,99 +18,52 @@ import org.mozilla.interfaces.nsIMIMEInfo;
 import org.mozilla.interfaces.nsISimpleEnumerator;
 import org.mozilla.interfaces.nsIURI;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.internal.base.Objects;
-import com.limegroup.gnutella.DownloadServices;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 /**
  * This class minimally overrides the MozillaDownloadManager in order to
  * intercept download calls.
  */
-public class LimeMozillaDownloadManager extends LimeMozillaSingletonFactory implements nsIDownloadManager {
+@Singleton
+public class LimeMozillaDownloadManager extends LimeMozillaSingletonFactory implements
+        nsIDownloadManager {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadManager.class);
 
     public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
-    private final DownloadServices downloadServices;
+    private final DownloadListManager downloadListManager;
 
-    private final RemoteFileDescFactory remoteFileDescFactory;
-
-    public LimeMozillaDownloadManager(DownloadServices downloadServices,
-            RemoteFileDescFactory remoteFileDescFactory) {
+    @Inject
+    public LimeMozillaDownloadManager(DownloadListManager downloadListManager) {
         super(NS_IDOWNLOADMANAGER_IID, NS_IDOWNLOADMANAGER_CID);
-        this.downloadServices = Objects.nonNull(downloadServices, "downloadServices");
-        this.remoteFileDescFactory = remoteFileDescFactory;
+        this.downloadListManager = Objects.nonNull(downloadListManager, "downloadListManager");
     }
 
     @Override
     public nsIDownload addDownload(short downloadType, final nsIURI source, final nsIURI target,
             String displayName, nsIMIMEInfo mimeInfo, double startTime, nsILocalFile tempFile,
             nsICancelable cancelable) {
-        LOG.tracef("");
-        Thread work = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                URL url = null;
-                URLConnection urlConnection = null;
-                try {
+        LOG.tracef("addDownload");
 
-                    url = new URL(source.getAsciiSpec());
-                    LOG.debugf("Adding Mozilla Download: {0}", url.toString());
+        try {
+            LOG.debugf("Adding Mozilla Download: {0}", source.getSpec());
+            URI uri = new URI(source.getAsciiSpec());
 
-                    String fileName = new File(target.getPath()).getName();
-                    LOG.debugf("Mozilla File Name: {0}", fileName);
+            String fileName = new File(target.getPath()).getName();
+            LOG.debugf("Mozilla File Name: {0}", fileName);
 
-                    urlConnection = url.openConnection();
-                    long size = urlConnection.getContentLength();
-                    LOG.debugf("Mozilla Download Size: {0}", size);
-
-                    URN urn = null;
-
-                    RemoteFileDesc rfd = null;
-                    rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, fileName, urn, size);
-                    File saveDir = new File(MozillaSettings.DOWNLOAD_DIR.getValue().getAbsolutePath());
-
-                    LOG.debugf("Mozilla Download Save Directory: {0}", saveDir.toString());
-
-                    saveDir.mkdirs();
-                    boolean overwrite = true;
-                    LOG.debugf("Mozilla Download Starting");
-
-                    // TODO instead of starting download, we will want to
-                    // integrate with the file dialog for the new UI
-                    downloadServices.downloadFromStore(rfd, overwrite, saveDir, fileName);
-                } catch (IOException e) {
-                    LOG.error("error adding download: " + source.getSpec(), e);
-                } catch (URISyntaxException e) {
-                    LOG.error("error adding download: " + source.getSpec(), e);
-                } catch (HttpException e) {
-                    LOG.error("error adding download: " + source.getSpec(), e);
-                } catch (InterruptedException e) {
-                    LOG.error("error adding download: " + source.getSpec(), e);
-                } finally {
-                    if (urlConnection != null) {
-                        try {
-                            if (urlConnection.getInputStream() != null) {
-                                urlConnection.getInputStream().close();
-                            }
-                        } catch (IOException ignored) {
-                        }
-                        try {
-                            if (urlConnection.getOutputStream() != null) {
-                                urlConnection.getOutputStream().close();
-                            }
-                        } catch (IOException ignored) {
-                        }
-                    }
-                }
+            downloadListManager.addDownload(uri, fileName);
+        } catch (URISyntaxException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Error parsing uri for: " + source.getAsciiSpec(), e);
+                // TODO should inform the user of the error somehow
             }
-        });
+        }
 
-        work.start();
-
+        // required to at least return something
         nsIDownload download = new LimeNoOpMozillaDownload();
         return download;
     }
