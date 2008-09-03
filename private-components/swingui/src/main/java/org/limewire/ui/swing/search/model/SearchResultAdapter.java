@@ -99,14 +99,14 @@ class SearchResultAdapter implements VisualSearchResult {
 
         List<VisualSearchResult> list = new ArrayList<VisualSearchResult>();
 
-        for (SearchResult similarResult : result.getSimiliarResults()) {
-            // Create a SearchResultAdapter for each similar result.
-            List<SearchResult> innerList = new ArrayList<SearchResult>();
-            innerList.add(similarResult);
-            VisualSearchResult vsr = new SearchResultAdapter(innerList);
-
-            list.add(vsr);
-        }
+//        for (SearchResult similarResult : result.getSimiliarResults()) {
+//            // Create a SearchResultAdapter for each similar result.
+//            List<SearchResult> innerList = new ArrayList<SearchResult>();
+//            innerList.add(similarResult);
+//            VisualSearchResult vsr = new SearchResultAdapter(innerList);
+//
+//            list.add(vsr);
+//        }
 
         return list;
     }
