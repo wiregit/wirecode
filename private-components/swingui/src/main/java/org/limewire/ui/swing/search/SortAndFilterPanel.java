@@ -111,6 +111,8 @@ public class SortAndFilterPanel extends JXPanel {
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
                     outerThis.notifyModeListeners(ModeListener.Mode.LIST);
+                    sortLabel.setVisible(true);
+                    sortCombo.setVisible(true);
                 }
             }
         });
@@ -124,6 +126,8 @@ public class SortAndFilterPanel extends JXPanel {
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
                     outerThis.notifyModeListeners(ModeListener.Mode.TABLE);
+                    sortLabel.setVisible(false);
+                    sortCombo.setVisible(false);
                 }
             }
         });
