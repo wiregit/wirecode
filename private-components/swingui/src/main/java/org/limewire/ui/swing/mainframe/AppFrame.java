@@ -74,6 +74,8 @@ public class AppFrame extends SingleFrameApplication {
 
         Injector injector = createInjector();
         LimeMozillaDownloadManager mozillaDownloadManager =  injector.getInstance(LimeMozillaDownloadManager.class);
+        
+        //change default mozilla behavior
         overrideMozillaDefaults(mozillaDownloadManager);
         
         getMainFrame().setJMenuBar(new LimeMenuBar());
@@ -144,38 +146,34 @@ public class AppFrame extends SingleFrameApplication {
 
         uiDefaults.put("Table.background", bgColorResource);
     }
-    
-    
-    private void overrideMozillaDefaults(LimeMozillaDownloadManager mozillaDownloadManager) {
-        // addDownloadListener(limeWireCore); TODO remove after we know we no
-        // longer need to listen to the mozilla downloader
-        
-        //replace the download manager with our own
-        replaceDownloadManager(mozillaDownloadManager);
-    }
 
-    private void replaceDownloadManager(LimeMozillaDownloadManager mozillaDownloadManager) {
-        //lookup the preferences service by contract id.
-        //by getting a proxy we do not need to run code through mozilla thread.
+    private void overrideMozillaDefaults(LimeMozillaDownloadManager mozillaDownloadManager) {
+        // lookup the preferences service by contract id.
+        // by getting a proxy we do not need to run code through mozilla thread.
         nsIPrefService prefService = XPCOMUtils.getServiceProxy(
                 "@mozilla.org/preferences-service;1", nsIPrefService.class);
 
         // set default downloads to desktop, we are going to override this with
-        // our own download manager This will prevent the save dialogue from opening
+        // our own download manager This will prevent the save dialogue from
+        // opening
         prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
         prefService.getBranch("browser.download.").setIntPref("folderList", 0);
         prefService.getBranch("browser.download.manager.").setBoolPref("showWhenStarting", 0);
 
         // setup which mime types do not prompt to download
-        //this will prevent the save or open dialogue from prompting
+        // this will prevent the save or open dialogue from prompting
         prefService.getBranch("browser.helperApps.neverAsk.").setCharPref("saveToDisk",
                 MozillaSettings.DOWNLOAD_MIME_TYPES.getValue());
-        
-        //register our own download manager to replace the one provided by mozilla
-        registerComponent(mozillaDownloadManager);
+
+        // register our own download manager to replace the one provided by
+        // mozilla
+        registerMozillaComponent(mozillaDownloadManager);
+
+        // addDownloadListener(limeWireCore); TODO remove after we know we no
+        // longer need to listen to the mozilla downloader
     }
-    
-    private void registerComponent(LimeMozillaSingletonFactory factory) {
+
+    private void registerMozillaComponent(LimeMozillaSingletonFactory factory) {
         nsIComponentRegistrar cr = Mozilla.getInstance().getComponentRegistrar();
         cr.registerFactory(factory.getIID(), factory.getComponentName(), factory.getCID(), factory);
     }

@@ -45,6 +45,8 @@ class MozillaPopupWindow extends MozillaPanel {
     
     private void initialize() {
         //getContainerWindow().setIconImage(((ImageIcon)limeIcon).getImage());
+        //TODO set the icon
+        
         JToolBar toolbar = getToolbar();
         toolbar.add(new AbstractAction("Out") {
             // TODO: Add a picture.
