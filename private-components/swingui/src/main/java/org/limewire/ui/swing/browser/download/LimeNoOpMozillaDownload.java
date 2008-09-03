@@ -18,6 +18,15 @@ import org.mozilla.interfaces.nsIWebProgress;
  */
 final class LimeNoOpMozillaDownload implements nsIDownload {
     @Override
+    public long getId() {
+        // This currently gets called by mozilla, the exception gets eaten if we
+        // throw an UnsupportedOperationException,
+        // returning hashcode as id for now. since we are overriding the
+        // download manager, this id should not be used anywhere
+        return hashCode();
+    }
+    
+    @Override
     public long getAmountTransferred() {
         throw new UnsupportedOperationException();
     }
@@ -30,15 +39,6 @@ final class LimeNoOpMozillaDownload implements nsIDownload {
     @Override
     public String getDisplayName() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long getId() {
-        // This currently gets called by mozilla, the exception gets eaten if we
-        // throw an UnsupportedOperationException,
-        // returning hashcode as id for now. since we are overriding the
-        // download manager, this id should not be used anywhere
-        return hashCode();
     }
 
     @Override

@@ -10,7 +10,7 @@ import org.mozilla.xpcom.Mozilla;
  * This class provides helper methods for extending classes to register
  * themselves with mozilla.
  */
-public abstract class LimeMozillaSelfReferencingFactory implements nsIFactory, nsISupports {
+public abstract class LimeMozillaSingletonFactory implements nsIFactory, nsISupports {
 
     private final Log LOG;
 
@@ -18,7 +18,7 @@ public abstract class LimeMozillaSelfReferencingFactory implements nsIFactory, n
 
     private final String CID;
 
-    public LimeMozillaSelfReferencingFactory(String IID, String CID) {
+    public LimeMozillaSingletonFactory(String IID, String CID) {
         this.IID = IID;
         this.CID = CID;
         LOG = LogFactory.getLog(this.getClass());

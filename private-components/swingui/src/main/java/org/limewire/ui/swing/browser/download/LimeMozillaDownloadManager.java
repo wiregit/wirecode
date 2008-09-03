@@ -30,7 +30,7 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
  * This class minimally overrides the MozillaDownloadManager in order to
  * intercept download calls.
  */
-public class LimeMozillaDownloadManager extends LimeMozillaSelfReferencingFactory implements nsIDownloadManager {
+public class LimeMozillaDownloadManager extends LimeMozillaSingletonFactory implements nsIDownloadManager {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadManager.class);
 

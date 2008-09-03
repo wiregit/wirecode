@@ -13,8 +13,8 @@ import org.mozilla.interfaces.nsISupports;
 import org.mozilla.xpcom.Mozilla;
 
 /**
- * Minimal implemenation iof the nsILocalFile interface to be used by our own
- * nsIdownloadManager implemetnation.
+ * Minimal implemenation of the nsILocalFile interface to be used by our own
+ * nsIdownloadManager implementation. 
  */
 final class LimeNoOpMozillaLocalFile implements nsILocalFile {
 
