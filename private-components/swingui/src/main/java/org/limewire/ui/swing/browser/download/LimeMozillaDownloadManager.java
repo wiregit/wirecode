@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.service.ErrorService;
 import org.mozilla.interfaces.mozIStorageConnection;
 import org.mozilla.interfaces.nsICancelable;
 import org.mozilla.interfaces.nsIDownload;
