@@ -23,7 +23,6 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -33,8 +32,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.Timer;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXLabel;
@@ -92,7 +92,8 @@ public class FriendsPane extends JPanel {
     private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
-    private WeakReference<Friend>  activeConversation = new WeakReference<Friend>(null);
+    private WeakReference<Friend> activeConversation = new WeakReference<Friend>(null);
+    private WeakReference<Friend> mouseHoverFriendRef = new WeakReference<Friend>(null);
     private static final Color LIGHT_GREY = new Color(218, 218, 218);
     private JTable friendsTable;
 
@@ -179,39 +180,21 @@ public class FriendsPane extends JPanel {
         TableFormat<Friend> format = new TableFormat<Friend>() {
             @Override
             public int getColumnCount() {
-                return 3;
+                return 1;
             }
 
             @Override
             public String getColumnName(int column) {
-                switch(column) {
-                case 0:
-                    return "status";
-                case 1:
+                if (column == 0) {
                     return "name";
-                case 2:
-                    return "close";
                 }
                 throw new UnsupportedOperationException(tr("Too many columns expected in friends chat table. Tried getting column: ") + column);
             }
 
             @Override
             public Object getColumnValue(Friend friend, int column) {
-                switch(column) {
-                case 0:
-                    AlternatingIconTimer timer = friendTimerMap.get(friend);
-                    if (timer != null) {
-                        return timer.getIcon();
-                    }
-                    //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally
-                    if (friend.isChatting()) {
-                        return icons.getChatting();
-                    }
-                    return getIcon(friend, icons);
-                case 1:
+                if (column == 0) {
                     return friend.getName();
-                case 2:
-                    return icons.getEndChat();
                 }
                 throw new UnsupportedOperationException(tr("Couldn't find value for unknown friends chat table column: ") + column);
             }
@@ -220,6 +203,10 @@ public class FriendsPane extends JPanel {
         final JXTable table = new JXTable(new EventTableModel<Friend>(friendsList, format)); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new LaunchChatListener());
+        //Add as mouse listener and motion listener because it cares about MouseExit and MouseMove events
+        CloseChatListener closeChatListener = new CloseChatListener();
+        table.addMouseListener(closeChatListener);
+        table.addMouseMotionListener(closeChatListener);
         
         table.addKeyListener(new KeyAdapter() {
             ArrayList<String> keysPressed = new ArrayList<String>();
@@ -256,15 +243,8 @@ public class FriendsPane extends JPanel {
             }
         });
         
-        IconCellRenderer iconRenderer = new IconCellRenderer();
         TableColumnModel columnModel = table.getColumnModel();
-        TableColumn statusIconColumn = columnModel.getColumn(0);
-        statusIconColumn.setCellRenderer(iconRenderer);
-        statusIconColumn.setPreferredWidth(11);
-        columnModel.getColumn(1).setCellRenderer(new FriendNameCellRenderer());
-        TableColumn closeIconColumn = columnModel.getColumn(2);
-        closeIconColumn.setCellRenderer(iconRenderer);
-        closeIconColumn.setPreferredWidth(9);
+        columnModel.getColumn(0).setCellRenderer(new FriendCellRenderer());
         
         table.setShowVerticalLines(false);
         
@@ -384,30 +364,38 @@ public class FriendsPane extends JPanel {
         friendTimerMap.remove(friend);
     }
     
-    private class IconCellRenderer extends JLabelCellRenderer {
-        
-        @Override
-        protected JXLabel getJLabel(Object value) {
-            return new JXLabel((Icon)value);
+    private Icon getChatIcon(Friend friend) {
+        AlternatingIconTimer timer = friendTimerMap.get(friend);
+        if (timer != null) {
+            return timer.getIcon();
         }
-
-        @Override
-        protected String getPreferredBorderLayout() {
-            return BorderLayout.CENTER;
+        //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally
+        if (friend.isChatting()) {
+            return icons.getChatting();
         }
+        return getIcon(friend, icons);
     }
-    
-    private abstract class JLabelCellRenderer implements TableCellRenderer {
-        private final JXPanel cell; 
+
+    private class FriendCellRenderer implements TableCellRenderer {
+        private final JXPanel cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]2", "0[]0")); 
+        private final JXLabel friendName;
+        private final JXLabel chatStatus;
+        private final JXLabel endChat;
         private final RectanglePainter activeConversationPainter;
         
-        public JLabelCellRenderer() {
-            cell = new JXPanel(new BorderLayout());
+        public FriendCellRenderer() {
             activeConversationPainter = new RectanglePainter();
             //light-blue gradient
             activeConversationPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
             activeConversationPainter.setBorderPaint(Color.WHITE);
             activeConversationPainter.setBorderWidth(0f);
+            
+            this.friendName = new JXLabel();
+            this.chatStatus = new JXLabel();
+            this.endChat = new JXLabel();
+
+            FontUtils.changeSize(friendName, -2.8f);
+            friendName.setMaximumSize(new Dimension(85, 12));
         }
 
         @Override
@@ -416,12 +404,11 @@ public class FriendsPane extends JPanel {
             cell.removeAll();
             cell.setBackgroundPainter(null);
             
+            Friend friend = getFriend(table, row);
+            
             //Handle null possible sent in via AccessibleJTable inner class
             value = value == null ? table.getValueAt(row, column) : value;
-            JLabel label = getJLabel(value);
-            cell.add(label, getPreferredBorderLayout());
-            
-            Friend friend = getFriend(table, row);
+            renderComponent(cell, value, friend);
             
             if (isSelected) {
                 cell.setBackground(LIGHT_GREY);
@@ -435,26 +422,20 @@ public class FriendsPane extends JPanel {
             return cell;
         }
 
-        protected abstract JXLabel getJLabel(Object value);
-        protected abstract String getPreferredBorderLayout();
-    }
+        protected void renderComponent(JPanel panel, Object value, Friend friend) {
+            chatStatus.setIcon(getChatIcon(friend));
+            panel.add(chatStatus);
 
-    private class FriendNameCellRenderer extends JLabelCellRenderer {
-
-        @Override
-        protected JXLabel getJLabel(Object value) {
-            JXLabel friendName = new JXLabel(value.toString());
-            FontUtils.changeSize(friendName, -2.8f);
-            friendName.setMaximumSize(new Dimension(85, 12));
-            return friendName;
-        }
-
-        @Override
-        protected String getPreferredBorderLayout() {
-            return BorderLayout.WEST;
+            friendName.setText(value.toString());
+            panel.add(friendName);
+            
+            if (friend == mouseHoverFriendRef.get() && friend.isChatting()) {
+                endChat.setIcon(icons.getEndChat());
+                panel.add(endChat);
+            }
         }
     }
-    
+
     private class AlternatingIconTimer {
         private WeakReference<Friend> friendRef;
         private int flashCount;
@@ -510,6 +491,48 @@ public class FriendsPane extends JPanel {
             if (e.getClickCount() == 2 || friend.isChatting()) {
                 fireConversationStarted(friend);
              }
+        }
+    }
+    
+    /**
+     * Figures out which row  & friend the mouse is hovering over and asks the table
+     * to repaint itself.  This information is needed by the cell renderer to decide
+     * whether to paint a close chat icon at the right corner of the cell (if appropriate) 
+     */
+    private class CloseChatListener extends MouseAdapter {
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            JTable table = (JTable)e.getSource();
+            
+            Friend friend = getFriend(table, table.rowAtPoint(e.getPoint()));
+            
+            if (friend == null) {
+                return;
+            }
+            
+            int friendIndex = friends.indexOf(friend);
+            if (friendIndex > -1) {
+                mouseHoverFriendRef = new WeakReference<Friend>(friend);
+                AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
+                model.fireTableCellUpdated(friendIndex, 0);
+            }
+        }
+
+        /**
+         * Clears the mouseHoverFriend when the mouse leaves the table
+         */
+        @Override
+        public void mouseExited(MouseEvent e) {
+            System.out.println("Mouse has exited the table...");
+            Friend friend = mouseHoverFriendRef.get();
+            if (friend != null) {
+                mouseHoverFriendRef = new WeakReference<Friend>(null);
+                int friendIndex = friends.indexOf(friend);
+                System.out.println("Mouse left the table for row: " + friendIndex);
+                AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
+                model.fireTableCellUpdated(friendIndex, 0);
+            }
         }
     }
     
