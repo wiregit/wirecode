@@ -172,6 +172,23 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.YEAR, "2008");
                 handleSearchResult(msr);
 
+                // Create a search result that will be categorized as "Programs".
+                msr = new MockSearchResult();
+                name = "SuperSpreadsheet";
+                msr.setDescription(name);
+                msr.setExtension("exe");
+                msr.setResultType(ResultType.PROGRAM);
+                msr.setSize(8765L);
+                msr.addSource("chandler");
+                msr.setUrn("www.superspread.org");
+                msr.setProperty(PropertyKey.FILE_SIZE, 3.4);
+                msr.setProperty(PropertyKey.NAME, name);
+                msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
+                msr.setProperty(PropertyKey.DATE_CREATED,
+                    new GregorianCalendar(2008, 9, 2));
+                msr.setProperty(PropertyKey.RELEVANCE, 0.6f);
+                handleSearchResult(msr);
+
                 // Create a search result that will be categorized as "Images".
                 msr = new MockSearchResult();
                 name = "EightGoldMedals";

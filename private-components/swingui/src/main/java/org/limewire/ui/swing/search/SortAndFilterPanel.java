@@ -372,12 +372,12 @@ public class SortAndFilterPanel extends JXPanel {
                     "Quality"
                 };
                 break;
-            case IMAGES:
+            case IMAGE:
                 items = new String[] {
                     RELEVANCE_ITEM, "Name", "Type", "Date created (more recent)"
                 };
                 break;
-            case DOCUMENTS:
+            case DOCUMENT:
                 items = new String[] {
                     RELEVANCE_ITEM, "Filename", "Type",
                     "Size (low to high)", "Date created (more recent)"

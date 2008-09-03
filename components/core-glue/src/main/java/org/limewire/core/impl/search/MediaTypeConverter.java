@@ -15,9 +15,9 @@ public class MediaTypeConverter {
             return MediaType.getAnyTypeMediaType();
         case AUDIO:
             return MediaType.getAudioMediaType();
-        case DOCUMENTS:
+        case DOCUMENT:
             return MediaType.getDocumentMediaType();
-        case IMAGES:
+        case IMAGE:
             return MediaType.getImageMediaType();
         case VIDEO:
             return MediaType.getVideoMediaType();

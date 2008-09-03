@@ -93,8 +93,9 @@ class TopPanel extends JPanel implements SearchNavigator {
                     switch((SearchCategory) value) {
                     case ALL: value = I18n.tr("All"); break;
                     case AUDIO: value = I18n.tr("Music"); break;
-                    case DOCUMENTS: value = I18n.tr("Documents"); break;
-                    case IMAGES: value = I18n.tr("Images"); break;
+                    case DOCUMENT: value = I18n.tr("Documents"); break;
+                    case IMAGE: value = I18n.tr("Images"); break;
+                    case PROGRAM: value = I18n.tr("Programs"); break;
                     case VIDEO: value = I18n.tr("Videos"); break;
                     case OTHER: value = I18n.tr("Other"); break;
                     default:

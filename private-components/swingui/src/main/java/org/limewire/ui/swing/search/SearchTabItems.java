@@ -38,12 +38,14 @@ implements ListEventListener<VisualSearchResult> {
     private static final Map<String, String> schemaToTitleMap =
         new HashMap<String, String>();
 
+    private boolean isAll;
+
     static {
         schemaToTitleMap.put("audio", "Music");
         schemaToTitleMap.put("image", "Images");
         schemaToTitleMap.put("document", "Documents");
         schemaToTitleMap.put("video", "Videos");
-        schemaToTitleMap.put("application", "Other");
+        schemaToTitleMap.put("application", "Programs");
         schemaToTitleMap.put("custom", "Other");
         schemaToTitleMap.put("other", "Other");
     }
@@ -55,21 +57,45 @@ implements ListEventListener<VisualSearchResult> {
     private EventList eventList;
 
     SearchTabItems(SearchCategory category, SearchTabListener listener) {
+        isAll = category == SearchCategory.ALL;
+
         this.listener = listener;
         
         this.searchActionMaps = new ArrayList<TabActionMap>();
-        searchActionMaps.add(
-            newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
-        searchActionMaps.add(
-            newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
-        searchActionMaps.add(
-            newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
-        searchActionMaps.add(
-            newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGES)));
-        searchActionMaps.add(
-            newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENTS)));
-        searchActionMaps.add(
-            newTabActionMap(new SearchTabAction("Other", SearchCategory.OTHER)));
+        if (isAll) {
+            searchActionMaps.add(
+                newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
+            searchActionMaps.add(
+                newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
+            searchActionMaps.add(
+                newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
+            searchActionMaps.add(
+                newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGE)));
+            searchActionMaps.add(
+                newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENT)));
+            searchActionMaps.add(
+                newTabActionMap(new SearchTabAction("Programs", SearchCategory.PROGRAM)));
+            searchActionMaps.add(
+                newTabActionMap(new SearchTabAction("Other", SearchCategory.OTHER)));
+        } else if (category == SearchCategory.AUDIO) {
+            searchActionMaps.add(newTabActionMap(
+                new SearchTabAction("Music results ", SearchCategory.AUDIO)));
+        } else if (category == SearchCategory.VIDEO) {
+            searchActionMaps.add(newTabActionMap(
+                new SearchTabAction("Video results ", SearchCategory.VIDEO)));
+        } else if (category == SearchCategory.IMAGE) {
+            searchActionMaps.add(newTabActionMap(
+                new SearchTabAction("Image results ", SearchCategory.IMAGE)));
+        } else if (category == SearchCategory.DOCUMENT) {
+            searchActionMaps.add(newTabActionMap(
+                new SearchTabAction("Document results ", SearchCategory.DOCUMENT)));
+        } else if (category == SearchCategory.PROGRAM) {
+            searchActionMaps.add(newTabActionMap(
+                new SearchTabAction("Program results ", SearchCategory.PROGRAM)));
+        } else if (category == SearchCategory.OTHER) {
+            searchActionMaps.add(newTabActionMap(
+                new SearchTabAction("Other results ", SearchCategory.OTHER)));
+        }
 
         for (TabActionMap map : searchActionMaps) {
             SearchTabAction action = (SearchTabAction) map.getMainAction();
@@ -89,7 +115,7 @@ implements ListEventListener<VisualSearchResult> {
         // Make all the tabs except "All" invisible
         // until we get a matching search result.
         setTabsVisible(false);
-        getTab("All").setVisible(true);
+        if (isAll) getTab("All").setVisible(true);
 
         Font font = getFont().deriveFont(14.0f);
         font.deriveFont(Font.BOLD); // TODO: RMV This doesn't work!
@@ -119,10 +145,23 @@ implements ListEventListener<VisualSearchResult> {
         // Find the "tab" for the media type.
         String schema = mediaType == null ? "other" : mediaType.toString();
         String title = schemaToTitleMap.get(schema);
+        if (!isAll) {
+            if (title.endsWith("s")) {
+                title = title.substring(0, title.length() - 1);
+            }
+            title += " results ";
+        }
         FancyTab tab = getTab(title);
 
-        // Make that tab visible if it isn't already.
-        tab.setVisible(true);
+        if (tab == null) {
+            // TODO: RMV Remove this after debugging!
+            System.err.println(
+                "SearchTabItems.listChanged: no tab found with title \""
+                + title + '"');
+        } else {
+            // Make that tab visible if it isn't already.
+            tab.setVisible(true);
+        }
     }
     
     private TabActionMap newTabActionMap(SearchTabAction action) {

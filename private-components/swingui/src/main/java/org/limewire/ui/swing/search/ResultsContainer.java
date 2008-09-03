@@ -44,7 +44,7 @@ public class ResultsContainer extends JXPanel {
      * See LimeWireUISearchModule for binding information.
      */
     @AssistedInject ResultsContainer(
-        @Assisted EventList<VisualSearchResult> visualSearchResults, 
+        @Assisted EventList<VisualSearchResult> eventList, 
         @Assisted Search search,
         AllResultsPanelFactory allFactory,
         AudioResultsPanelFactory audioFactory,
@@ -54,17 +54,19 @@ public class ResultsContainer extends JXPanel {
         OtherResultsPanelFactory otherFactory) {
         
         panelMap.put(SearchCategory.ALL.name(),
-            allFactory.create(visualSearchResults, search));
+            allFactory.create(eventList, search));
         panelMap.put(SearchCategory.AUDIO.name(),
-            audioFactory.create(filter(ResultType.AUDIO, visualSearchResults), search));
+            audioFactory.create(filter(ResultType.AUDIO, eventList), search));
         panelMap.put(SearchCategory.VIDEO.name(),
-            videoFactory.create(filter(ResultType.VIDEO, visualSearchResults), search));
-        panelMap.put(SearchCategory.IMAGES.name(),
-            imagesFactory.create(filter(ResultType.IMAGE, visualSearchResults), search));
-        panelMap.put(SearchCategory.DOCUMENTS.name(),
-            documentsFactory.create(filter(ResultType.DOCUMENT, visualSearchResults), search));
+            videoFactory.create(filter(ResultType.VIDEO, eventList), search));
+        panelMap.put(SearchCategory.IMAGE.name(),
+            imagesFactory.create(filter(ResultType.IMAGE, eventList), search));
+        panelMap.put(SearchCategory.DOCUMENT.name(),
+            documentsFactory.create(filter(ResultType.DOCUMENT, eventList), search));
+        panelMap.put(SearchCategory.PROGRAM.name(),
+            documentsFactory.create(filter(ResultType.PROGRAM, eventList), search));
         panelMap.put(SearchCategory.OTHER.name(),
-            otherFactory.create(filter(ResultType.OTHER, visualSearchResults), search));
+            otherFactory.create(filter(ResultType.OTHER, eventList), search));
         
         setLayout(cardLayout);
         

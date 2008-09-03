@@ -9,8 +9,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 public class CategoryIconLabel extends JLabel {
     
-    public static enum Size{LARGE, SMALL};
-
+    public static enum Size { LARGE, SMALL };
     
     private Icon audioIcon;
     private Icon imageIcon;
@@ -45,9 +44,9 @@ public class CategoryIconLabel extends JLabel {
     @Resource
     private Icon largeOtherIcon;
     
-    public CategoryIconLabel(Size size){
+    public CategoryIconLabel(Size size) {
         GuiUtils.assignResources(this);
-        if(size == Size.LARGE){
+        if (size == Size.LARGE) {
             audioIcon = largeAudioIcon;
             imageIcon = largeImageIcon;
             videoIcon = largeVideoIcon;
@@ -64,7 +63,7 @@ public class CategoryIconLabel extends JLabel {
         }
     }
     
-    public void setIcon(DownloadItem.Category category){
+    public void setIcon(DownloadItem.Category category) {
         switch (category) {
         case AUDIO:
             setIcon(audioIcon);

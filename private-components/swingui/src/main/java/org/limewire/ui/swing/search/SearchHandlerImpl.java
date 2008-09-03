@@ -13,6 +13,7 @@ import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
+import org.limewire.core.api.search.ResultType;
 
 class SearchHandlerImpl implements SearchHandler {
     
@@ -31,10 +32,12 @@ class SearchHandlerImpl implements SearchHandler {
 
     @Override
     public Search doSearch(final SearchInfo info) {        
+        final SearchCategory searchCategory = info.getSearchCategory();
+
         Search search = searchFactory.createSearch(new SearchDetails() {
             @Override
             public SearchCategory getSearchCategory() {
-                return info.getSearchCategory();
+                return searchCategory;
             }
             
             @Override
@@ -58,14 +61,20 @@ class SearchHandlerImpl implements SearchHandler {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        model.addSearchResult(searchResult);
-                        // We can update the source count here because
-                        // we never expect things to remove -- changes
-                        // only happen on insertion.
-                        // If removes ever happen, we'll need to switch
-                        // to adding a listEventListener to
-                        // mode.getVisualSearchResults.
-                        item.sourceCountUpdated(model.getResultCount());
+                        ResultType resultType = searchResult.getResultType();
+
+                        // If the result is the type we are looking for ...
+                        if (searchCategory == SearchCategory.ALL
+                            || resultType.name().equals(searchCategory.name())) {
+                            model.addSearchResult(searchResult);
+                            // We can update the source count here because
+                            // we never expect things to be removed.
+                            // Changes only happen on insertion.
+                            // If removes ever happen, we'll need to switch
+                            // to adding a ListEventListener to
+                            // model.getVisualSearchResults.
+                            item.sourceCountUpdated(model.getResultCount());
+                        }
                     }
                 });
             }

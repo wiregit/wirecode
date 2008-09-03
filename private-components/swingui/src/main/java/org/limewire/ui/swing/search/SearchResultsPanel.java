@@ -59,7 +59,7 @@ public class SearchResultsPanel extends JPanel {
     @AssistedInject
     public SearchResultsPanel(
             @Assisted SearchInfo searchInfo,
-            @Assisted EventList<VisualSearchResult> visualSearchResults,
+            @Assisted EventList<VisualSearchResult> eventList,
             @Assisted Search search,
             ResultsContainerFactory containerFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
@@ -71,13 +71,13 @@ public class SearchResultsPanel extends JPanel {
         sponsoredResultsPanel.setVisible(false);
         this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new SearchScrollPane();
-        EventList<VisualSearchResult> list =
-            sortAndFilterPanel.getFilteredAndSortedList(visualSearchResults);
+        EventList<VisualSearchResult> sortedList =
+            sortAndFilterPanel.getFilteredAndSortedList(eventList);
         
         // The ResultsContainerFactory create method takes two parameters
         // which it passes to the ResultsContainer constructor
         // for the parameters annotated with @Assisted.
-        this.resultsContainer = containerFactory.create(list, search);
+        this.resultsContainer = containerFactory.create(sortedList, search);
 
         sortAndFilterPanel.addModeListener(new ModeListener() {
             @Override
@@ -99,7 +99,7 @@ public class SearchResultsPanel extends JPanel {
         
         this.searchTab =
             new SearchTabItems(searchInfo.getSearchCategory(), listener);
-        this.searchTab.setEventList(visualSearchResults);
+        this.searchTab.setEventList(eventList);
 
         for (Map.Entry<SearchCategory, Action> entry : searchTab.getResultCountActions()) {
             resultsContainer.synchronizeResultCount(
@@ -156,8 +156,9 @@ public class SearchResultsPanel extends JPanel {
                     "All".equals(title) ? SearchCategory.ALL :
                     "Music".equals(title) ? SearchCategory.AUDIO :
                     "Videos".equals(title) ? SearchCategory.VIDEO :
-                    "Images".equals(title) ? SearchCategory.IMAGES :
-                    "Documents".equals(title) ? SearchCategory.DOCUMENTS :
+                    "Images".equals(title) ? SearchCategory.IMAGE :
+                    "Documents".equals(title) ? SearchCategory.DOCUMENT :
+                    "Programs".equals(title) ? SearchCategory.PROGRAM :
                     SearchCategory.OTHER;
             }
         }
