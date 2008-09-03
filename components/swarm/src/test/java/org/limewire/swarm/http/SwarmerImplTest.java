@@ -13,7 +13,7 @@ import org.limewire.collection.Range;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
-import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.swarm.LimeWireSwarmTestModule;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.SwarmCoordinator;
@@ -64,7 +64,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetTestModule());
+        injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireSwarmTestModule());
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
         super.setUp();

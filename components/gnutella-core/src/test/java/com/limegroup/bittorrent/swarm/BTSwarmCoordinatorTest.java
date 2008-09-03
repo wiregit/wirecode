@@ -42,6 +42,8 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.LargestGapStartPieceSt
 import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomGapStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
+import com.limegroup.gnutella.LimeWireCoreModule;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class BTSwarmCoordinatorTest extends LimeTestCase {
@@ -74,7 +76,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetTestModule());
+        injector = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class));
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
     }
