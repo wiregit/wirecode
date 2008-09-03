@@ -18,11 +18,18 @@ import org.jdesktop.application.Action;
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.core.impl.MockModule;
+import org.limewire.core.settings.MozillaSettings;
 import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
+import org.limewire.ui.swing.browser.download.LimeMozillaDownloadManager;
+import org.limewire.ui.swing.browser.download.LimeMozillaSingletonFactory;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.mozilla.browser.XPCOMUtils;
+import org.mozilla.interfaces.nsIComponentRegistrar;
+import org.mozilla.interfaces.nsIPrefService;
+import org.mozilla.xpcom.Mozilla;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -66,7 +73,9 @@ public class AppFrame extends SingleFrameApplication {
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 
         Injector injector = createInjector();
-
+        LimeMozillaDownloadManager mozillaDownloadManager =  injector.getInstance(LimeMozillaDownloadManager.class);
+        overrideMozillaDefaults(mozillaDownloadManager);
+        
         getMainFrame().setJMenuBar(new LimeMenuBar());
 
         LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
@@ -135,4 +144,40 @@ public class AppFrame extends SingleFrameApplication {
 
         uiDefaults.put("Table.background", bgColorResource);
     }
+    
+    
+    private void overrideMozillaDefaults(LimeMozillaDownloadManager mozillaDownloadManager) {
+        // addDownloadListener(limeWireCore); TODO remove after we know we no
+        // longer need to listen to the mozilla downloader
+        
+        //replace the download manager with our own
+        replaceDownloadManager(mozillaDownloadManager);
+    }
+
+    private void replaceDownloadManager(LimeMozillaDownloadManager mozillaDownloadManager) {
+        //lookup the preferences service by contract id.
+        //by getting a proxy we do not need to run code through mozilla thread.
+        nsIPrefService prefService = XPCOMUtils.getServiceProxy(
+                "@mozilla.org/preferences-service;1", nsIPrefService.class);
+
+        // set default downloads to desktop, we are going to override this with
+        // our own download manager This will prevent the save dialogue from opening
+        prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
+        prefService.getBranch("browser.download.").setIntPref("folderList", 0);
+        prefService.getBranch("browser.download.manager.").setBoolPref("showWhenStarting", 0);
+
+        // setup which mime types do not prompt to download
+        //this will prevent the save or open dialogue from prompting
+        prefService.getBranch("browser.helperApps.neverAsk.").setCharPref("saveToDisk",
+                MozillaSettings.DOWNLOAD_MIME_TYPES.getValue());
+        
+        //register our own download manager to replace the one provided by mozilla
+        registerComponent(mozillaDownloadManager);
+    }
+    
+    private void registerComponent(LimeMozillaSingletonFactory factory) {
+        nsIComponentRegistrar cr = Mozilla.getInstance().getComponentRegistrar();
+        cr.registerFactory(factory.getIID(), factory.getComponentName(), factory.getCID(), factory);
+    }
+
 }

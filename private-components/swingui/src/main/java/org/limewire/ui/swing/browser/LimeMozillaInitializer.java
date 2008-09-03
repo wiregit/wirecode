@@ -75,39 +75,8 @@ public class LimeMozillaInitializer {
         });
         MozillaInitialization.initialize();
 
-        overrideMozillaDefaults(limeWireCore);
-
         if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
-    }
-
-    private static void overrideMozillaDefaults(LimeWireCore limeWireCore) {
-        // addDownloadListener(limeWireCore); TODO remove after we know we no
-        // longer need to listen to the mozilla downloader
-        
-        //replace the download manager with our own
-        replaceDownloadManager(limeWireCore);
-    }
-
-    private static void replaceDownloadManager(LimeWireCore limeWireCore) {
-        //lookup the preferences service by contract id.
-        //by getting a proxy we do not need to run code through mozilla thread.
-        nsIPrefService prefService = XPCOMUtils.getServiceProxy(
-                "@mozilla.org/preferences-service;1", nsIPrefService.class);
-
-        // set default downloads to desktop, we are going to override this with
-        // our own download manager This will prevent the save dialogue from opening
-        prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
-        prefService.getBranch("browser.download.").setIntPref("folderList", 0);
-        prefService.getBranch("browser.download.manager.").setBoolPref("showWhenStarting", 0);
-
-        // setup which mime types do not prompt to download
-        //this will prevent the save or open dialogue from prompting
-        prefService.getBranch("browser.helperApps.neverAsk.").setCharPref("saveToDisk",
-                MozillaSettings.DOWNLOAD_MIME_TYPES.getValue());
-        
-        //register our own download manager to replace the one provided by mozilla
-        registerComponent(new LimeMozillaDownloadManager(null));
     }
 
     // TODO Remove this commented out code after it is decided we won't be
@@ -137,10 +106,4 @@ public class LimeMozillaInitializer {
             throw new IllegalStateException("no resource for OS: " + OSUtils.getOS());
         }
     }
-
-    private static void registerComponent(LimeMozillaSingletonFactory factory) {
-        nsIComponentRegistrar cr = Mozilla.getInstance().getComponentRegistrar();
-        cr.registerFactory(factory.getIID(), factory.getComponentName(), factory.getCID(), factory);
-    }
-
 }

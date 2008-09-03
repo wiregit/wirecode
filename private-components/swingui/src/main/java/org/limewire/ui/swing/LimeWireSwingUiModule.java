@@ -1,5 +1,6 @@
 package org.limewire.ui.swing;
 
+import org.limewire.ui.swing.browser.LimeWireUiMozillaModule;
 import org.limewire.ui.swing.friends.LimeWireUiFriendsModule;
 import org.limewire.ui.swing.mainframe.LimeWireUiMainframeModule;
 import org.limewire.ui.swing.nav.LimeWireUiNavModule;
@@ -17,6 +18,7 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiMainframeModule());
         install(new LimeWireUiTrayModule());
         install(new LimeWireUiFriendsModule());
+        install(new LimeWireUiMozillaModule());
     }
 
 }
