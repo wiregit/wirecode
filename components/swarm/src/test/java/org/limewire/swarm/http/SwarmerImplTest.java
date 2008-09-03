@@ -13,7 +13,6 @@ import org.limewire.collection.Range;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
-import org.limewire.http.util.FileServer;
 import org.limewire.net.LimeWireNetTestModule;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmBlockVerifier;

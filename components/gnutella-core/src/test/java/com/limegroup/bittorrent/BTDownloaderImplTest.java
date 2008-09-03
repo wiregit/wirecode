@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.http.util.FileServer;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;

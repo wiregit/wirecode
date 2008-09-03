@@ -1,4 +1,4 @@
-package org.limewire.http.util;
+package com.limegroup.bittorrent;
 
 import java.io.File;
 
