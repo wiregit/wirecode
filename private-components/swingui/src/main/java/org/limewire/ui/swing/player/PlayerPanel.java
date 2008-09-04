@@ -8,7 +8,6 @@ import java.awt.Panel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -28,7 +27,6 @@ import org.jdesktop.swingx.JXCollapsiblePane;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
-//import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.MediaSlider;
 import org.limewire.ui.swing.components.Resizable;
