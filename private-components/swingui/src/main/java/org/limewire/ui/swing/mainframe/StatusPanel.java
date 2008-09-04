@@ -30,7 +30,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.AvailableOption;
 import org.limewire.ui.swing.friends.AwayOption;
-import org.limewire.ui.swing.friends.DisplayFriendsEvent;
+import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.friends.FriendsUtil;
 import org.limewire.ui.swing.friends.IconLibrary;
@@ -200,7 +200,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
 
         @Override
         public void actionPerformed(ActionEvent arg0) {
-            new DisplayFriendsEvent().publish();
+            new DisplayFriendsToggleEvent().publish();
         }
     }
 }

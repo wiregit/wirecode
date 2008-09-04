@@ -7,5 +7,13 @@ import org.limewire.ui.swing.AbstractEDTEvent;
  *
  */
 public class DisplayFriendsEvent extends AbstractEDTEvent {
+    private final boolean shouldShow;
+    
+    public DisplayFriendsEvent(boolean shouldShow) {
+        this.shouldShow = shouldShow;
+    }
 
+    public boolean shouldShow() {
+        return shouldShow;
+    }
 }

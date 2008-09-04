@@ -675,7 +675,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         @Override
         public void actionPerformed(ActionEvent e) {
             //minimize chat
-            new DisplayFriendsEvent().publish();
+            new DisplayFriendsEvent(false).publish();
             //TODO: How do you switch to library view?
         }
     }
@@ -688,7 +688,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         @Override
         public void actionPerformed(ActionEvent e) {
             //minimize chat
-            new DisplayFriendsEvent().publish();
+            new DisplayFriendsEvent(false).publish();
             //TODO: How do you view shared files?
             
         }

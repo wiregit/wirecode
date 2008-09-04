@@ -15,6 +15,7 @@ import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
+import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.Displayable;
 import org.limewire.ui.swing.friends.LoginPanel;
 import org.limewire.ui.swing.friends.SignoffEvent;
@@ -56,11 +57,20 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
 
     @EventSubscriber
     public void handleAppear(DisplayFriendsEvent event) {
-        if (isCollapsed()) {
+        displayFriendsPanel(event.shouldShow());
+    }
+
+    @EventSubscriber
+    public void handleAppear(DisplayFriendsToggleEvent event) {
+        displayFriendsPanel(isCollapsed());
+    }
+
+    private void displayFriendsPanel(boolean shouldDisplay) {
+        if (shouldDisplay) {
             resetBounds();
         }
-        // toggle
-        setCollapsed(!isCollapsed());
+        //If it should display, should not be collapsed and vice versa
+        setCollapsed(!shouldDisplay);
         mainPanel.setVisible(!isCollapsed());
         if (!isCollapsed()) {
             ((Displayable)mainPanel.getComponent(0)).handleDisplay();
@@ -80,6 +90,7 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
         mainPanel.remove(chatPanel);
         mainPanel.add(loginPanel);
         resetBounds();
+        displayFriendsPanel(false);
     }
     
     private void resetBounds() {

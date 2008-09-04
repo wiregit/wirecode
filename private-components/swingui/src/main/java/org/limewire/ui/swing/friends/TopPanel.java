@@ -13,7 +13,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -119,7 +118,7 @@ public class TopPanel extends JPanel {
         menuBar.add(options);
         add(menuBar);
         
-        JXButton closeChat = new JXButton(new CloseAction(icons.getCloseChat()));
+        JXButton closeChat = new JXButton(new SignoffAction(icons.getCloseChat()));
         closeChat.setBorderPainted(false);
         closeChat.setBackgroundPainter(new RectanglePainter<JXButton>(getBackground(), getBackground()));
         add(closeChat);
@@ -161,17 +160,6 @@ public class TopPanel extends JPanel {
                             newMode == Mode.away ? awayPopupItem.getModel() : null;
         if (model != null) {
             availabilityButtonGroup.setSelected(model, true);
-        }
-    }
-    
-    private static class CloseAction extends AbstractAction {
-        public CloseAction(Icon icon) {
-            super("", icon);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            new DisplayFriendsEvent().publish();
         }
     }
     
