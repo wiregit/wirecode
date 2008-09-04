@@ -726,8 +726,8 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                 return 0;
             }
             int sharedFileCount = 0;
-            if (libraryManager.containsBuddy(friend.getName())) {
-                FileList sharedFileList = libraryManager.getBuddy(friend.getName());
+            if (libraryManager.containsBuddy(friend.getID())) {
+                FileList sharedFileList = libraryManager.getBuddy(friend.getID());
                 sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
             }
             return sharedFileCount;
