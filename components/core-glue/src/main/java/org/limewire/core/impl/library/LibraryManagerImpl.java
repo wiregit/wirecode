@@ -1,21 +1,25 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.library.BuddyFileList;
 import org.limewire.core.api.library.BuddyShareListListener;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.ui.swing.sharing.table.CategoryFilter;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.Inject;
@@ -88,7 +92,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         if(buddyFileLists.containsKey(name))
             return buddyFileLists.get(name);
         
-        BuddyFileList newBuddyList = new BuddyFileList(fileManager, name);
+        BuddyFileListImpl newBuddyList = new BuddyFileListImpl(fileManager, name);
         buddyFileLists.put(name, newBuddyList);
         return newBuddyList;
     }
@@ -243,15 +247,17 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
             return "Gnutella List";
         }
     }
+
     
-    private class BuddyFileList extends FileListImpl implements FileListListener{
+    private class BuddyFileListImpl extends FileListImpl implements FileListListener, BuddyFileList {
 
         private FileManager fileManager;
         private String name;
+        private EventList<FileItem> filteredEventList;
         
         private Map<File, FileItem> lookup;
         
-        BuddyFileList(FileManager fileManager, String name) {
+        BuddyFileListImpl(FileManager fileManager, String name) {
             this.fileManager = fileManager;
             this.name = name;
             
@@ -272,6 +278,24 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public String getName() {
             return name;
+        }
+        
+        @Override
+        public void setFilteredModel(EventList<FileItem> filteredList) {
+            this.filteredEventList = filteredList;
+        }
+        
+        @Override
+        public EventList<FileItem> getFilteredModel() {
+            return this.filteredEventList;
+        }
+        
+        @Override
+        public int getFilteredSize() {
+            if(filteredEventList == null)
+                return 0;
+            else
+                return filteredEventList.size();
         }
 
         @Override

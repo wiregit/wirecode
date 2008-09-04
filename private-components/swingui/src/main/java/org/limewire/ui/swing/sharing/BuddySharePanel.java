@@ -19,6 +19,7 @@ import javax.swing.table.TableColumn;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.BuddyFileList;
 import org.limewire.core.api.library.BuddyShareListListener;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
@@ -75,6 +76,8 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
     
     private LibraryManager libraryManager;
     
+    private SharingHeaderPanel headerPanel;
+    
     @Inject
     public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
         GuiUtils.assignResources(this); 
@@ -83,9 +86,8 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
 
         libraryManager.addBuddy("All");
         this.fileList = libraryManager.getBuddy("All");
-//        this.fileList = libraryManager.getAllBuddyList();
-//        buddyLists = libraryManager.getUniqueLists();
         buddyLists = new HashMap<String,FileList>();
+        
         this.libraryManager.addBuddyShareListListener(this);
 
         viewCardLayout = new CardLayout();
@@ -93,12 +95,16 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         cardPanel.setLayout(viewCardLayout);
         cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
 
+        //TODO: fix this. ObservableElementList is an easy way to update the table when a list size changes
+        //  however it is making dynamic filtering of multiple lists very slow
         ObservableElementList.Connector<BuddyItem> buddyConnector = GlazedLists.beanConnector(BuddyItem.class);
         eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
+       
+//        eventList = GlazedLists.threadSafeList(new BasicEventList<BuddyItem>());
         buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat());
 
         
-        SharingHeaderPanel headerPanel = createHeader(cardPanel);
+        headerPanel = createHeader(cardPanel);
                
         loadBuddies();
         createCenterCards(headerPanel, cardPanel);
@@ -175,9 +181,13 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
     @Override
     public void handleBuddyShareEvent(BuddyShareEvent event, String name) {
         if(event == BuddyShareEvent.ADD) {
-            FileList fileList = libraryManager.getBuddy(name);
+            BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(name);
             buddyLists.put(name, fileList);
-            eventList.add(new BuddyItemImpl(name, fileList.getModel()));
+            FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
+                    new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
+            fileList.setFilteredModel(filteredList);
+            
+            eventList.add(new BuddyItemImpl(name, fileList.getFilteredModel()));
         } else {
             
         }
@@ -210,9 +220,9 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
                     emptyPanel.setBuddyName(buddyItem.getName());
     
       
-                    FileList fileList = buddyLists.get(buddyItem.getName());
+                    BuddyFileList fileList = (BuddyFileList) buddyLists.get(buddyItem.getName());
                     emptyPanel.setUserFileList(fileList);
-                    table.setModel(new SharingTableModel(fileList.getModel(), fileList, new SharingTableFormat()));
+                    table.setModel(new SharingTableModel(fileList.getFilteredModel(), fileList, new SharingTableFormat()));
                     TableColumn tc = table.getColumn(6);
                     tc.setCellEditor(editor);
                     tc.setCellRenderer(renderer);
