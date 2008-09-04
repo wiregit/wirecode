@@ -110,6 +110,11 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
     @Resource
     private ImageIcon progressIcon;
     
+    @Resource
+    private Color backgroundColor;
+    @Resource
+    private Color statusBackgroundColor;
+    
     private JButton backButton;
     private JButton playButton;
     private JButton pauseButton;
@@ -154,7 +159,7 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         add(heavyPanel);
         GuiUtils.assignResources(this);
         
-        heavyPanel.setBackground(new Color(128, 128, 128));
+        heavyPanel.setBackground(backgroundColor);
         
         ActionListener playerListener = new ButtonListener();
 
@@ -194,8 +199,7 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
 
         
         statusPanel = new JPanel(new MigLayout("wrap 1"));
-        //TODO: resources
-        statusPanel.setBackground(Color.WHITE);
+        statusPanel.setBackground(statusBackgroundColor);
         
         titleLabel = new JLabel("Clean Your Room");
         FontUtils.bold(titleLabel);
