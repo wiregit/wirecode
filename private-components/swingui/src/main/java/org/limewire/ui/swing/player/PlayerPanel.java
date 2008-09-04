@@ -31,6 +31,7 @@ import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.MediaSlider;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.event.PanelDisplayedEvent;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -241,7 +242,22 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         }
         // toggle
         setCollapsed(!isCollapsed());
-        heavyPanel.setVisible(!isCollapsed());        
+        heavyPanel.setVisible(!isCollapsed());    
+        
+        if (!isCollapsed()){
+            new PanelDisplayedEvent(this).publish();
+        }
+    }
+    
+    /**
+     * Hides PlayerPanel when another panel is shown in the same layer.
+     */
+    @EventSubscriber
+    public void handleOtherPanelDisplayed(PanelDisplayedEvent event){
+        if(event.getDisplayedPanel() != this){
+            setCollapsed(true);
+            heavyPanel.setVisible(false);
+        }
     }
     
     private class ButtonListener implements ActionListener {

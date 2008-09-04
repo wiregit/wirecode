@@ -13,6 +13,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.event.PanelDisplayedEvent;
 import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
@@ -74,6 +75,18 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
         mainPanel.setVisible(!isCollapsed());
         if (!isCollapsed()) {
             ((Displayable)mainPanel.getComponent(0)).handleDisplay();
+            new PanelDisplayedEvent(this).publish();
+        }
+    }
+    
+    /**
+     * Hides FriendsPanel when another panel is shown in the same layer.
+     */
+    @EventSubscriber
+    public void handleOtherPanelDisplayed(PanelDisplayedEvent event){
+        if(event.getDisplayedPanel() != this){
+            setCollapsed(true);
+            mainPanel.setVisible(false);
         }
     }
     
