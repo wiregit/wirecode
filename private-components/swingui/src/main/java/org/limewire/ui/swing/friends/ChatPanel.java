@@ -52,10 +52,10 @@ public class ChatPanel extends JPanel implements Displayable {
     public void handleAddConversation(ConversationStartedEvent event) {
         Friend friend = event.getFriend();
         LOG.debugf("ConversationStartedEvent with friend: {0}", friend.getName());
-        ConversationPane chatPane = chats.get(friend.getName());
+        ConversationPane chatPane = chats.get(friend.getID());
         if (chatPane == null) {
             chatPane = conversationFactory.create(event.getWriter(), friend);
-            chats.put(friend.getName(), chatPane);
+            chats.put(friend.getID(), chatPane);
         }
         
         if (conversationPanel.getComponent(0) != chatPane && event.isLocallyInitiated()) {
@@ -86,9 +86,17 @@ public class ChatPanel extends JPanel implements Displayable {
 
     @EventSubscriber
     public void handleCloseChat(CloseChatEvent event) {
-        closeChat(event.getFriend().getName());
+        closeChat(event.getFriend().getID());
         
         setConversationPanel(new JPanel());
+    }
+    
+    @EventSubscriber
+    public void handleRemoveBuddy(RemoveBuddyEvent event) {
+        final String friendID = event.getFriend().getID();
+        if (chats.containsKey(friendID)) {
+            closeChat(friendID);
+        }
     }
 
     private void closeChat(String chatKey) {

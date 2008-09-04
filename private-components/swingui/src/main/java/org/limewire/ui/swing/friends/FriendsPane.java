@@ -62,6 +62,7 @@ import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.User;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -296,11 +297,12 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     public void handlePresenceUpdate(PresenceUpdateEvent event) {
         LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
         final Presence presence = event.getPresence();
-        FriendImpl friend = idToFriendMap.get(presence.getJID());
+        final User user = event.getUser();
+        FriendImpl friend = idToFriendMap.get(user.getId());
         switch(presence.getType()) {
             case available:
                 if(friend == null) {
-                    final FriendImpl newFriend = new FriendImpl(event.getUser(), presence);
+                    final FriendImpl newFriend = new FriendImpl(user, presence);
                     presence.setIncomingChatListener(new IncomingChatListener() {
                         public MessageReader incomingChat(MessageWriter writer) {
                             LOG.debugf("{0} is typing a message", presence.getJID());
@@ -314,14 +316,14 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                     });
                     friend = newFriend;
                     friends.add(friend);
-                    idToFriendMap.put(presence.getJID(), friend);
+                    idToFriendMap.put(user.getId(), friend);
                 }
                 friend.setStatus(presence.getStatus());
                 friend.setMode(presence.getMode());
                 break;
             case unavailable:
                 if (friend != null) {
-                    friends.remove(idToFriendMap.remove(presence.getJID()));
+                    friends.remove(idToFriendMap.remove(user.getId()));
                 } 
                 break;
         }
@@ -747,10 +749,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            final Friend friend = context.getFriend();
-            if (friend != null) {
-                new RemoveBuddyEvent(friend).publish();
-            }
+            removeBuddy(context.getFriend());
         }
     }
     
@@ -774,8 +773,13 @@ public class FriendsPane extends JPanel implements BuddyRemover {
 
     @Override
     public void removeSelectedBuddy() {
-        Friend selectedFriend = getSelectedFriend();
+        removeBuddy(getSelectedFriend());
+    }
+
+    private void removeBuddy(Friend selectedFriend) {
         if (selectedFriend != null) {
+            friends.remove(selectedFriend);
+            idToFriendMap.remove(selectedFriend.getID());
             new RemoveBuddyEvent(selectedFriend).publish();
         }
     }
