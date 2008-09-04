@@ -31,6 +31,8 @@ import javax.swing.event.PopupMenuListener;
 import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -117,10 +119,9 @@ public class TopPanel extends JPanel {
         menuBar.add(options);
         add(menuBar);
         
-        JButton closeChat = new JButton(new CloseAction(icons.getCloseChat()));
+        JXButton closeChat = new JXButton(new CloseAction(icons.getCloseChat()));
         closeChat.setBorderPainted(false);
-        closeChat.setForeground(getForeground());
-        closeChat.setBackground(getBackground());
+        closeChat.setBackgroundPainter(new RectanglePainter<JXButton>(getBackground(), getBackground()));
         add(closeChat);
         
         EventAnnotationProcessor.subscribe(this);

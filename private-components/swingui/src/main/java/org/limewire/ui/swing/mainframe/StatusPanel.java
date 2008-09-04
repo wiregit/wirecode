@@ -24,6 +24,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.AvailableOption;
@@ -50,7 +52,7 @@ import com.google.inject.Singleton;
 public class StatusPanel extends JPanel implements FriendsCountUpdater {
     private static final String OFFLINE = "offline";
     private final IconLibrary icons;
-    private JButton friendsButton;
+    private JXButton friendsButton;
     private JMenu statusMenu;
     private String SIGN_IN = tr("Sign in");
     private String FRIENDS = tr("Friends");
@@ -102,7 +104,8 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         add(miniPlayerPanel);
 
         JMenuBar menuBar = new JMenuBar();
-        menuBar.setBackground(Color.WHITE);
+        Color whiteBackground = Color.WHITE;
+        menuBar.setBackground(whiteBackground);
         menuBar.setOpaque(true);
         menuBar.setBorderPainted(false);
         JPanel menuPanel = new JPanel(new BorderLayout());
@@ -111,7 +114,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         menuPanel.setMinimumSize(new Dimension(0, 20));
         menuPanel.setMaximumSize(new Dimension(150, 20));
         menuPanel.add(menuBar, BorderLayout.WEST);
-        menuPanel.setBackground(menuBar.getBackground());
+        menuPanel.setBackground(whiteBackground);
         
         add(menuPanel);
         
@@ -119,12 +122,11 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         statusMenu.setOpaque(true);
         statusMenu.setEnabled(false);
         statusMenu.setIcon(icons.getEndChat());
-        statusMenu.setBackground(menuBar.getBackground());
+        statusMenu.setBackground(whiteBackground);
         statusMenu.setBorderPainted(false);
         menuBar.add(statusMenu);
-        friendsButton = new JButton(new FriendsAction(SIGN_IN));
-        friendsButton.setBackground(statusMenu.getBackground());
-        friendsButton.setBorderPainted(false);
+        friendsButton = new JXButton(new FriendsAction(SIGN_IN));
+        friendsButton.setBackgroundPainter(new RectanglePainter<JXButton>(whiteBackground, whiteBackground));
         menuPanel.add(friendsButton, BorderLayout.EAST);
         
         statusMenu.add(new SignoffAction());
