@@ -18,6 +18,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
+import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.table.SharingTable;
@@ -75,15 +76,21 @@ public class GnutellaSharePanel extends GenericSharingPanel {
                 });
             }
         });
-        
+                
         overviewCardLayout = new CardLayout();
         this.setLayout(overviewCardLayout);
 
+        setupEmptyPanel(emptyPanel);
         createTablesPanels();
     
         add(emptyPanel, EMPTY);
         add(nonEmptyPanel, NONEMPTY);
         overviewCardLayout.show(this,EMPTY);
+    }
+    
+    private void setupEmptyPanel(JPanel emptyPanel) {
+        ShareDropTarget drop = new ShareDropTarget(this, fileList);
+        emptyPanel.setDropTarget(drop.getDropTarget());
     }
 
     
