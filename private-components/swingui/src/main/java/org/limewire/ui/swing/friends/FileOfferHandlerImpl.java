@@ -16,6 +16,6 @@ class FileOfferHandlerImpl implements FileOfferHandler {
     }
 
     public void fileOfferred(FileMetaData f, String fromJID) {
-        // TODO update UI
+        new FileOfferedEvent(f, fromJID).publish();
     }
 }
