@@ -233,9 +233,7 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         EventAnnotationProcessor.subscribe(this);
 
         player.addAudioPlayerListener(new PlayerListener());      
-        
-        player.loadSong(new File("C:/Documents and Settings/mturkel/My Documents/My Music/The Long Nines/Demo 1/1-Sick_of_You-The_Long_Nines.mp3"));
-       player.playSong();
+      
     }
     
     @EventSubscriber
