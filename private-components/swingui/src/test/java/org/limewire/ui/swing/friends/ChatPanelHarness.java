@@ -23,12 +23,13 @@ public class ChatPanelHarness {
             public void run() {
                 JFrame frame = new JFrame();
                 final IconLibraryImpl icons = new IconLibraryImpl();
+                FriendsPane friendsPane = new FriendsPane(icons, new MockFriendsCountUpdater(), new MockLibraryManager());
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, Friend friend) {
                         return new ConversationPane(writer, friend, icons);
                     }
-                }, icons, new FriendsPane(icons, new MockFriendsCountUpdater(), new MockLibraryManager()), new TopPanel(icons)));
+                }, icons, friendsPane, new TopPanel(icons, friendsPane)));
                 
                 frame.pack();
                 frame.setVisible(true);

@@ -18,6 +18,12 @@ class MockFriend implements Friend {
     }
 
     @Override
+    public String getID() {
+        //Use name for now - add an id field if needed in the future
+        return name;
+    }
+
+    @Override
     public String getName() {
         return name;
     }

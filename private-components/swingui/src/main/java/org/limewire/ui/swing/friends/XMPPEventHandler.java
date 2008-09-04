@@ -58,11 +58,9 @@ public class XMPPEventHandler {
     }
     
     private void logout() {
-        List<XMPPConnection> connections = xmppService.getConnections();
-        for(XMPPConnection connection : connections) {
-            if (connection.isLoggedIn()) {
-                connection.logout();
-            }
+        final XMPPConnection connection = getLoggedInConnection();
+        if (connection != null) {
+            connection.logout();
         }
     }
     
@@ -80,12 +78,56 @@ public class XMPPEventHandler {
     
     @EventSubscriber
     public void handlePresenceChange(PresenceChangeEvent event) {
+        final XMPPConnection connection = getLoggedInConnection();
+        if (connection != null) {
+            LOG.debugf("Changing presence for {0} to {1}", connection.getConfiguration().getServiceName(), event.getNewMode());
+            connection.setMode(event.getNewMode());
+        }
+    }
+    
+    private XMPPConnection getLoggedInConnection() {
         List<XMPPConnection> connections = xmppService.getConnections();
         for(XMPPConnection connection : connections) {
             if (connection.isLoggedIn()) {
-                LOG.debugf("Changing presence for {0} to {1}", connection.getConfiguration().getServiceName(), event.getNewMode());
-                connection.setMode(event.getNewMode());
+                return connection;
             }
+        }
+        return null;
+    }
+    
+    @EventSubscriber
+    public void handleAddBuddy(final AddBuddyEvent event) {
+        final XMPPConnection connection = getLoggedInConnection();
+        if (connection != null) {
+            LOG.debugf("Adding new buddy: ID {0} - Name {1}", event.getId(), event.getName());
+            ThreadExecutor.startThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        connection.addUser(event.getId(), event.getName());
+                    } catch (XMPPException e) {
+                        LOG.error("Could not add buddy", e);
+                    }
+                }
+            }, "add-buddy");
+        }
+    }
+    
+    @EventSubscriber
+    public void handleRemoveBuddy(final RemoveBuddyEvent event) {
+        final XMPPConnection connection = getLoggedInConnection();
+        if (connection != null) {
+            LOG.debugf("Removing buddy: ID {0} - Name {1}", event.getFriend().getID(), event.getFriend().getName());
+            ThreadExecutor.startThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        connection.removeUser(event.getFriend().getID());
+                    } catch (XMPPException e) {
+                        LOG.error("Could not remove buddy", e);
+                    }
+                }
+            }, "remove-buddy");
         }
     }
 }

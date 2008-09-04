@@ -10,6 +10,8 @@ import org.limewire.xmpp.api.client.Presence.Mode;
  *
  */
 public interface Friend {
+    String getID();
+    
     String getName();
     
     String getStatus();

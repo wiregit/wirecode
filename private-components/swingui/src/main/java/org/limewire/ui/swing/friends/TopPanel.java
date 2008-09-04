@@ -4,18 +4,29 @@ import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -33,13 +44,15 @@ public class TopPanel extends JPanel {
     private JLabel friendNameLabel;
     private JLabel friendStatusLabel;
     private final IconLibrary icons;
+    private final BuddyRemover buddyRemover;
     private ButtonGroup availabilityButtonGroup;
     private JCheckBoxMenuItem availablePopupItem;
     private JCheckBoxMenuItem awayPopupItem;
 
     @Inject
-    public TopPanel(IconLibrary icons) {
+    public TopPanel(IconLibrary icons, BuddyRemover buddyRemover) {
         this.icons = icons;
+        this.buddyRemover = buddyRemover;
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
         setLayout(new MigLayout("insets 0 0 0 0", "3[][]0:push[]0[]0", "0[]0"));
@@ -54,6 +67,32 @@ public class TopPanel extends JPanel {
         add(friendStatusLabel);
         
         JMenu options = new JMenu(tr("Options"));
+        final JPopupMenu popup = options.getPopupMenu();
+        popup.addPopupMenuListener(new PopupMenuListener() {
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                //no-op
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                //no-op
+            }
+
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                for(Component comp : popup.getComponents()) {
+                    if (comp instanceof JMenuItem) {
+                        JMenuItem item = (JMenuItem)comp;
+                        Action action = item.getAction();
+                        if (action != null) {
+                            item.setEnabled(action.isEnabled());
+                        }
+                    }
+                }
+            }
+        });
         FontUtils.changeSize(options, -3.0f);
         options.setForeground(getForeground());
         options.setBackground(getBackground());
@@ -135,25 +174,61 @@ public class TopPanel extends JPanel {
         }
     }
     
-    private static class AddBuddyOption extends AbstractAction {
+    private class AddBuddyOption extends AbstractAction {
         public AddBuddyOption() {
             super(tr("Add buddy"));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
+            final JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(TopPanel.this), tr("Add Buddy"));
+            dialog.setModalityType(ModalityType.MODELESS);
+            dialog.setLayout(new MigLayout("", "[right]2[]2[]", "[]2[]2[]"));
+            dialog.add(new JLabel(tr("Buddy ID:")));
+            final JTextField idTextField = new JTextField(25);
+            dialog.add(idTextField, "span, wrap");
+            dialog.add(new JLabel(tr("Name:")));
+            final JTextField nameField = new JTextField(25);
+            dialog.add(nameField, "span, wrap");
+            
+            JButton ok = new JButton(tr("Add buddy"));
+            ok.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (idTextField.getText().length() > 0)
+                    dialog.setVisible(false);
+                    new AddBuddyEvent(idTextField.getText(), nameField.getText()).publish();
+                }
+            });
+            
+            JButton cancel = new JButton(tr("Cancel"));
+            cancel.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dialog.setVisible(false);
+                }
+            });
+            
+            dialog.add(ok, "cell 1 2");
+            dialog.add(cancel, "cell 2 2");
+            dialog.pack();
+            dialog.setVisible(true);
         }
     }
     
-    private static class RemoveBuddyOption extends AbstractAction {
+    private class RemoveBuddyOption extends AbstractAction {
         public RemoveBuddyOption() {
             super(tr("Remove buddy"));
         }
 
         @Override
+        public boolean isEnabled() {
+            return buddyRemover.canRemoveSelectedBuddy();
+        }
+
+        @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
+            buddyRemover.removeSelectedBuddy();
         }
     }
     

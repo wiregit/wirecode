@@ -82,7 +82,7 @@ import com.google.inject.Singleton;
  *
  */
 @Singleton
-public class FriendsPane extends JPanel {
+public class FriendsPane extends JPanel implements BuddyRemover {
     
     private static final int PREFERRED_WIDTH = 120;
     private static final int RIGHT_EDGE_PADDING_PIXELS = 2;
@@ -747,7 +747,10 @@ public class FriendsPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO: How do you remove a buddy?
+            final Friend friend = context.getFriend();
+            if (friend != null) {
+                new RemoveBuddyEvent(friend).publish();
+            }
         }
     }
     
@@ -761,5 +764,27 @@ public class FriendsPane extends JPanel {
             Friend friend = context.getFriend();
             closeChat(friend);
         }
+    }
+
+    @Override
+    public boolean canRemoveSelectedBuddy() {
+        Friend selectedFriend = getSelectedFriend();
+        return selectedFriend != null && !selectedFriend.isChatting();
+    }
+
+    @Override
+    public void removeSelectedBuddy() {
+        Friend selectedFriend = getSelectedFriend();
+        if (selectedFriend != null) {
+            new RemoveBuddyEvent(selectedFriend).publish();
+        }
+    }
+    
+    private Friend getSelectedFriend() {
+        int selectedRow = friendsTable.getSelectedRow();
+        if (selectedRow > -1) {
+            return getFriend(friendsTable, selectedRow);
+        }
+        return null;
     }
 }
