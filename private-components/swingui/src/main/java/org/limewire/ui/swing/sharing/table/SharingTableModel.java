@@ -27,4 +27,8 @@ public class SharingTableModel extends EventTableModel<FileItem> {
     public FileList getFileList() {
         return fileList;
     }
+    
+    public FileItem getFileItem(int index) {
+        return sharedItems.get(index);
+    }
 }

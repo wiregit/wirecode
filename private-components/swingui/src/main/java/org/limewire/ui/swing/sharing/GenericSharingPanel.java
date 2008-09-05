@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.TextFilterator;
@@ -51,6 +52,9 @@ public abstract class GenericSharingPanel extends JPanel {
         @Override
         public void getFilterStrings(List<String> baseList, FileItem element) {
            baseList.add(element.getName());
+           baseList.add((String)element.getProperty(Keys.ALBUM));
+           baseList.add((String)element.getProperty(Keys.TITLE));
+           //TODO: finish linking properties here
         }
     }
 

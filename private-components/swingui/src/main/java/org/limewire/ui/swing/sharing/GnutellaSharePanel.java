@@ -23,8 +23,10 @@ import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
+import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,6 +46,8 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     @Resource
     protected Icon sharingIcon;
     
+    private IconManager iconManager;
+    
     private ViewSelectionPanel viewSelectionPanel;
        
     private final FileList fileList;
@@ -57,8 +61,10 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     MultiButtonTableCellRendererEditor renderer;
     
     @Inject
-    public GnutellaSharePanel(LibraryManager libraryManager, SharingEmptyPanel emptyPanel) {
+    public GnutellaSharePanel(LibraryManager libraryManager, IconManager iconManager, SharingEmptyPanel emptyPanel) {
         GuiUtils.assignResources(this); 
+        
+        this.iconManager = iconManager;
         
         this.fileList = libraryManager.getGnutellaList();
         this.fileList.getModel().addListEventListener(new ListEventListener<FileItem>(){
@@ -149,6 +155,9 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         TableColumn tc = table.getColumn(6);
         tc.setCellEditor(editor);
         tc.setCellRenderer(renderer);
+        
+        tc = table.getColumn(0);
+        tc.setCellRenderer(new IconLabelRenderer(iconManager));
     }
     
     private List<Action> createActions() {

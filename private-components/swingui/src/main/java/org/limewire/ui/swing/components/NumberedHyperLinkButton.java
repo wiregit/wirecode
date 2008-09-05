@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
@@ -17,6 +18,8 @@ public class NumberedHyperLinkButton extends HyperLinkButton {
     
     private int displayNumber = 0;
     
+    private Color disabledColor;
+    
     public NumberedHyperLinkButton(String text) {
         super(text);
     }
@@ -29,10 +32,26 @@ public class NumberedHyperLinkButton extends HyperLinkButton {
         this.displayNumber = value;
         if(value > 0) {
             FontUtils.underline(this);
+            setEnabled(true);
         } else {
             FontUtils.removeUnderline(this);
+            setEnabled(false);
         }
         super.setText(text + "(" + displayNumber + ")");
+    }
+    
+    @Override
+    public void setEnabled(boolean value) {
+        super.setEnabled(value);
+        if(value) {
+            super.setForeground(foregroundColor);
+        } else {
+            super.setForeground(disabledColor);
+        }
+    }
+    
+    public void setDisabledColor(Color color) {
+        this.disabledColor = color;
     }
     
     @Override

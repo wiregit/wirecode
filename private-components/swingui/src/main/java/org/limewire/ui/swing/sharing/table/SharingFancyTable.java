@@ -8,8 +8,11 @@ import javax.swing.ListSelectionModel;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
+import org.limewire.ui.swing.table.TableDoubleClickHandler;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -26,6 +29,20 @@ public class SharingFancyTable extends JXTable {
         getTableHeader().setFocusable(false);
         getTableHeader().setReorderingAllowed(false);
         
+        final TableDoubleClickHandler doubleClickHandler = new TableDoubleClickHandler() {
+            @Override
+            public void handleDoubleClick(int row) {
+                if( row >= 0 && row < getModel().getRowCount()) {
+                    FileItem item = ((SharingTableModel) getModel()).getFileItem(row); System.out.println(item.getName() + " " + item.getCategory());
+                    if(PlayerUtils.isPlayableFile(item.getFile())) {
+                        PlayerUtils.play(item.getFile());
+                    } else {
+                        NativeLaunchUtils.launchFile(item.getFile());
+                    }
+                }
+            }
+        };
+        
         final SharingPopupHandler handler = new SharingPopupHandler(this, new SharingActionHandler());
         
         addMouseListener(new MouseAdapter() {
@@ -38,6 +55,16 @@ public class SharingFancyTable extends JXTable {
             @Override
             public void mousePressed(MouseEvent e) {
                 maybeShowPopup(e);
+            }
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(e.getClickCount() == 1) {
+                    maybeShowPopup(e);
+                } else if(e.getClickCount() > 1) {
+                    int row = rowAtPoint(e.getPoint());
+                    doubleClickHandler.handleDoubleClick(row);
+                }
             }
 
             private void maybeShowPopup(MouseEvent e) {

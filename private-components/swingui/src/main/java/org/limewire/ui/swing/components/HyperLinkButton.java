@@ -17,7 +17,7 @@ import org.limewire.ui.swing.util.FontUtils;
  */
 public class HyperLinkButton extends JButton implements MouseListener {
     protected Color mouseOverColor = getForeground();
-    private Color foregroundColor = getForeground();
+    protected Color foregroundColor = getForeground();
     
     protected String text;
     
@@ -72,8 +72,10 @@ public class HyperLinkButton extends JButton implements MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
-        super.setForeground(foregroundColor);
-        setCursor(oldCursor);
+        if(isEnabled()) {
+            super.setForeground(foregroundColor);
+            setCursor(oldCursor);
+        }
     }
 
     @Override

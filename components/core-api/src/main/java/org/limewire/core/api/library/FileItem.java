@@ -13,7 +13,7 @@ public interface FileItem {
     };
     
     public static enum Keys {
-        IMAGE, TEMP_IMAGE,TITLE, AUTHOR, ALBUM
+        IMAGE, TEMP_IMAGE, TITLE, AUTHOR, ALBUM
     }
     
     File getFile();

@@ -2,6 +2,8 @@ package org.limewire.ui.swing.sharing.menu;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.FileItem.Category;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 public class SharingActionHandler {
@@ -9,6 +11,7 @@ public class SharingActionHandler {
     public static final String UNSHARE = "UNSHARE";
     public static final String LOCATE = "LOCATE";
     public static final String PROPERTIES = "PROPERTIES";
+    public static final String LAUNCH = "LAUNCH";
     
     public void performAction(String actionCommand, FileList fileList, FileItem item) {
         if(actionCommand == UNSHARE) {
@@ -17,6 +20,16 @@ public class SharingActionHandler {
             NativeLaunchUtils.launchExplorer(item.getFile());
         } else if(actionCommand == PROPERTIES) {
             
+        } else if(actionCommand == LAUNCH) {
+            launch(item);
+        }
+    }
+    
+    private void launch(FileItem item) {
+        if(item.getCategory() == Category.AUDIO){
+            PlayerUtils.play(item.getFile());
+        } else {
+            NativeLaunchUtils.launchFile(item.getFile());
         }
     }
 }

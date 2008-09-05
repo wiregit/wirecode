@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import java.io.File;
+import java.util.Locale;
 
 import org.limewire.player.api.AudioPlayer;
 
@@ -13,5 +14,10 @@ public class PlayerUtils {
     public static void play(File audioFile){
         player.loadSong(audioFile);
         player.playSong();
+    }
+    
+    public static boolean isPlayableFile(File file) {
+        String name = file.getName().toLowerCase(Locale.US);
+        return name.endsWith(".mp3") || name.endsWith(".ogg") || name.endsWith(".wav");
     }
 }
