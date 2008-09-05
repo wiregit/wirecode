@@ -161,7 +161,8 @@ public class AppFrame extends SingleFrameApplication {
         String downloadDir = MozillaSettings.DOWNLOAD_DIR.getValue().getAbsolutePath();
         prefService.getBranch("browser.download.").setCharPref("dir", downloadDir);
         prefService.getBranch("browser.download.manager.").setBoolPref("showWhenStarting", 0);
-
+        prefService.getBranch("browser.download.manager.").setBoolPref("showAlertOnComplete", 0);
+        
         // setup which mime types do not prompt to download
         // this will prevent the save or open dialogue from prompting
         prefService.getBranch("browser.helperApps.neverAsk.").setCharPref("saveToDisk",
