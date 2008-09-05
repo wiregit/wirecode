@@ -17,41 +17,43 @@ import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.SystemUtils;
 import org.mozilla.browser.IMozillaWindow;
 import org.mozilla.browser.MozillaPanel;
-import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.impl.ChromeAdapter;
 
 class MozillaPopupPanel extends MozillaPanel {
 
     @Resource
     private Icon limeIcon;
-    
+
     @Resource
     private String limeFrameIconLocation;
-    
+
     private File icoFile;
-   
-    
-    MozillaPopupPanel(MozillaWindow window, boolean attachNewBrowserOnCreation) {
-        super(window, attachNewBrowserOnCreation, null, null);
+
+    MozillaPopupPanel(boolean attachNewBrowserOnCreation) {
+        super(null, attachNewBrowserOnCreation, null, null);
         GuiUtils.assignResources(this);
-        icoFile = new File(URI.create(ClassLoader.getSystemResource(limeFrameIconLocation).getFile()).getPath()).getAbsoluteFile();
+        icoFile = new File(URI.create(
+                ClassLoader.getSystemResource(limeFrameIconLocation).getFile()).getPath())
+                .getAbsoluteFile();
         initialize();
     }
-    
+
     @Override
     public void addNotify() {
         super.addNotify();
         SystemUtils.setWindowIcon(this, icoFile);
     }
-    
-    private void initialize() {
-        
-        IMozillaWindow mozillaWindow = getContainerWindow();
-        if(mozillaWindow != null && mozillaWindow instanceof JFrame) {
-            JFrame frame = (JFrame)mozillaWindow;
-            frame.setIconImage(((ImageIcon)limeIcon).getImage());    
-        }
 
+    @Override
+    public void setContainerWindow(IMozillaWindow parentWin) {
+        super.setContainerWindow(parentWin);
+        if (parentWin != null && parentWin instanceof JFrame) {
+            JFrame frame = (JFrame) parentWin;
+            frame.setIconImage(((ImageIcon) limeIcon).getImage());
+        }
+    }
+
+    private void initialize() {
         JToolBar toolbar = getToolbar();
         toolbar.add(new AbstractAction("Out") {
             // TODO: Add a picture.
@@ -60,23 +62,23 @@ class MozillaPopupPanel extends MozillaPanel {
             }
         });
     }
-    
+
     @Override
     public void onAttachBrowser(final ChromeAdapter chromeAdapter, ChromeAdapter parentChromeAdapter) {
-        super.onAttachBrowser(chromeAdapter, parentChromeAdapter);                   
+        super.onAttachBrowser(chromeAdapter, parentChromeAdapter);
         BrowserUtils.addDomListener(chromeAdapter);
         SwingUtils.invokeLater(new Runnable() {
-            public void run() {               
+            public void run() {
                 addKeyListener(new MozillaKeyListener(chromeAdapter));
             }
         });
     }
-    
+
     @Override
     public void onDetachBrowser() {
-        if(getChromeAdapter() != null) {
+        if (getChromeAdapter() != null) {
             BrowserUtils.removeDomListener(getChromeAdapter());
-        }        
+        }
         super.onDetachBrowser();
     }
 }

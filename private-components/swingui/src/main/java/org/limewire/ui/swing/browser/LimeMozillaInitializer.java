@@ -58,11 +58,9 @@ public class LimeMozillaInitializer {
         WindowCreator.setWindowFactory(new IMozillaWindowFactory() {
             @Override
             public IMozillaWindow create(boolean attachNewBrowserOnCreation) {
-                MozillaWindow window = new MozillaWindow();
-                MozillaPopupPanel popupWindow = new MozillaPopupPanel(window, attachNewBrowserOnCreation);
-                popupWindow.setContainerWindow(window);
-                popupWindow.setVisible(true);
-                return window;
+                MozillaPopupPanel popupPanel = new MozillaPopupPanel(attachNewBrowserOnCreation);
+                MozillaWindow popupWindow = new MozillaWindow(popupPanel);
+                return popupWindow;
             }
         });
         MozillaInitialization.initialize();
