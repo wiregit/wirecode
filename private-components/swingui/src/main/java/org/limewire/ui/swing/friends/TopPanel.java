@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
@@ -45,6 +44,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class TopPanel extends JPanel {
     
+    private JLabel friendAvailabiltyIcon;
     private JLabel friendNameLabel;
     private JLabel friendStatusLabel;
     private final IconLibrary icons;
@@ -52,7 +52,7 @@ public class TopPanel extends JPanel {
     private ButtonGroup availabilityButtonGroup;
     private JCheckBoxMenuItem availablePopupItem;
     private JCheckBoxMenuItem awayPopupItem;
-
+    
     @Inject
     public TopPanel(final IconLibrary icons, BuddyRemover buddyRemover) {
         this.icons = icons;
@@ -60,8 +60,10 @@ public class TopPanel extends JPanel {
         
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
-        setLayout(new MigLayout("insets 0 0 0 0", "3[shrinkprio 50][]3:push[shrinkprio 0]0[shrinkprio 0]0[shrinkprio 0]0", "0[]0"));
+        setLayout(new MigLayout("insets 0 0 0 0", "3[]3[shrinkprio 50][]3:push[shrinkprio 0]0[shrinkprio 0]0[shrinkprio 0]0", "0[]0"));
         
+        friendAvailabiltyIcon = new JLabel();
+        add(friendAvailabiltyIcon);
         friendNameLabel = new JLabel();
         friendNameLabel.setForeground(getForeground());
         add(friendNameLabel, "wmin 0");
@@ -172,20 +174,24 @@ public class TopPanel extends JPanel {
         EventAnnotationProcessor.subscribe(this);
     }
     
+    private String getAvailabilityHTML(Mode mode) {
+        return "<html><img src=\"" + FriendsUtil.getIconURL(mode) + "\" /></html>";
+    }
+    
     @Override
     public String getToolTipText() {
         String name = friendNameLabel.getText();
         String label = friendStatusLabel.getText();
         String tooltip = name + label;
-        return tooltip.length() == 0 ? null : tooltip;
+        return tooltip.length() == 0 ? null : friendAvailabiltyIcon.getText().replace("</html>", "&nbsp;" + tooltip + "</html>");
     }
-
+    
     @EventSubscriber
     public void handleConversationStarted(ConversationStartedEvent event) {
         if (event.isLocallyInitiated()) {
             Friend friend = event.getFriend();
+            friendAvailabiltyIcon.setText(getAvailabilityHTML(friend.getMode()));
             friendNameLabel.setText(friend.getName());
-            friendNameLabel.setIcon(getIcon(friend, icons));
             String status = friend.getStatus();
             friendStatusLabel.setText(status != null && status.length() > 0 ? " - " + status : "");
         }

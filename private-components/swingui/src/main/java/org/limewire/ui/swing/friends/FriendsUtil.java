@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import java.net.URL;
+
 import javax.swing.Icon;
 
 import org.limewire.xmpp.api.client.Presence;
@@ -21,5 +23,20 @@ public class FriendsUtil {
             return icons.getDoNotDisturb();
         }
         return icons.getAway();
+    }
+    
+    public static String getIconURL(Presence.Mode mode) {
+        switch(mode) {
+        case available:
+            return getURL("/org/limewire/ui/swing/mainframe/resources/icons/friends/available.png");
+        case dnd:
+            return getURL("/org/limewire/ui/swing/mainframe/resources/icons/friends/doNotDisturb.png");
+        }
+        return getURL("/org/limewire/ui/swing/mainframe/resources/icons/friends/away.png");
+    }
+    
+    private static String getURL(String path) {
+        URL resource = TopPanel.class.getResource(path);
+        return resource != null ? resource.toExternalForm() : "";
     }
 }
