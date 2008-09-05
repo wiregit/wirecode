@@ -128,7 +128,8 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         FormLayout layout = new FormLayout("p, 4dlu, p:g", "p, 3dlu, p, p, p");
         PanelBuilder builder = new PanelBuilder(layout);
         CellConstraints cc = new CellConstraints();
-        builder.addLabel(tr("Have a Gmail or Facebook account?"), cc.xyw(1, 1, 3));
+        //builder.addLabel(tr("Have a Gmail or Facebook account?"), cc.xyw(1, 1, 3));
+        builder.addLabel(tr("Have a Gmail account?"), cc.xyw(1, 1, 3));
         builder.addLabel(tr("- Access your friends' libraries"), cc.xy(3, 3));
         builder.addLabel(tr("- See what new files they have"), cc.xy(3, 4));
         builder.addLabel(tr("- Chat with your friends"), cc.xy(3, 5));
@@ -173,14 +174,14 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         networkGroup.add(googleTalkButton);
         facebookButton = new JToggleButton(tr("Facebook"), facebook);
         facebookButton.setActionCommand(FACEBOOK_SERVICE_NAME);
-        networkGroup.add(facebookButton);
+        //networkGroup.add(facebookButton);
         networkGroup.setSelected(googleTalkButton.getModel(), true);
         
         FormLayout layout = new FormLayout("l:p, 2dlu, p", "p");
         PanelBuilder networksBuilder = new PanelBuilder(layout);
         CellConstraints cc = new CellConstraints();
         networksBuilder.add(googleTalkButton, cc.xy(1, 1));
-        networksBuilder.add(facebookButton, cc.xy(3, 1));
+        //networksBuilder.add(facebookButton, cc.xy(3, 1));
         JPanel networkPanel = networksBuilder.getPanel();
         
         layout = new FormLayout("l:p", "p, p");
