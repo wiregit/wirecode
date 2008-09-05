@@ -118,8 +118,10 @@ public class CoreDownloadItem implements DownloadItem {
             return 100;
         }
 
-        // TODO - check for div by zero?
-        return (int) (100 * getCurrentSize() / getTotalSize());
+        if(getTotalSize() == 0)
+            return 0;
+        else
+            return (int) (100 * getCurrentSize() / getTotalSize());
     }
 
     @Override
