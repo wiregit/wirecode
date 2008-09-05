@@ -61,6 +61,7 @@ public class LimeMozillaInitializer {
                 MozillaWindow window = new MozillaWindow();
                 MozillaPopupPanel popupWindow = new MozillaPopupPanel(window, attachNewBrowserOnCreation);
                 popupWindow.setContainerWindow(window);
+                popupWindow.setVisible(true);
                 return window;
             }
         });

@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.ui.swing.browser.download.LimeMozillaDownloadProgressListener;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -279,5 +280,7 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
      *  at any time for checkpointing purposes.  Returns true if and only if the 
      *  file was successfully written. */
     public void writeSnapshot();
+    
+    public Downloader downloadFromMozilla(LimeMozillaDownloadProgressListener listener);
 
 }
