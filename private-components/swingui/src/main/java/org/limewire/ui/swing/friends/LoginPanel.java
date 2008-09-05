@@ -101,7 +101,7 @@ public class LoginPanel extends JPanel implements Displayable {
             userNameField.setText(config.getUsername());
             passwordField.setText(config.getPassword());
         }
-        rememberMeCheckbox.setSelected(config.isAutoLogin());
+        rememberMeCheckbox.setSelected(true);
     }
     
     @Override
