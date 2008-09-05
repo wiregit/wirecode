@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
+import com.google.inject.Inject;
 import java.awt.Font;
 import java.util.Comparator;
 import javax.swing.Icon;
@@ -27,9 +28,6 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
     ResultsTableFormat(int actionColumnIndex, int lastVisibleColumnIndex) {
         this.actionColumnIndex = actionColumnIndex;
         this.lastVisibleColumnIndex = lastVisibleColumnIndex;
-
-        // TODO: RMV How can you get the singleton instance?
-        //iconManager = IconManager.instance();
     }
 
     public Class getColumnClass(int index) {
@@ -55,8 +53,7 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
 
     protected JLabel getIconLabel(VisualSearchResult vsr) {
         String ext = vsr.getFileExtension();
-        Icon icon = iconManager == null ? null :
-            iconManager.getIconForExtension(ext);
+        Icon icon = iconManager.getIconForExtension(ext);
 
         String name = (String) getProperty(PropertyKey.NAME);
 
@@ -110,5 +107,10 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
         VisualSearchResult vsr, Object value, int index) {
         // do nothing with the new value
         return vsr;
+    }
+
+    @Inject
+    public void setIconManager(IconManager iconManager) {
+        this.iconManager = iconManager;
     }
 }

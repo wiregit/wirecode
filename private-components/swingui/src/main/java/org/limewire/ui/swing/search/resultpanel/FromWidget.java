@@ -113,13 +113,10 @@ public class FromWidget extends JPanel {
     }
 
     public void setPeople(String[] people) {
-        System.out.println("FromWidget: setting people to:");
-        for (String person : people) System.out.println("  " + person);
-
         this.people = people;
         menu.clear();
-        //if (submenu != null) submenu.clear();
         submenu = null;
+	menu.setSubmenu(null);
         updateHeaderLabel();
         updateMenus();
     }
