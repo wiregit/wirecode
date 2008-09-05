@@ -11,7 +11,14 @@ public class ListViewTableFormat
 extends ResultsTableFormat<VisualSearchResult> {
 
     public ListViewTableFormat() {
+        super(1, 0);
         columnNames = new String[] { "not used" };
+    }
+
+    @Override
+    public Class getColumnClass(int index) {
+        return index == 0 ? VisualSearchResult.class :
+            super.getColumnClass(index);
     }
 
     @Override

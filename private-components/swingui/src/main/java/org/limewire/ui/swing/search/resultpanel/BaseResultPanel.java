@@ -17,7 +17,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
 import java.util.Calendar;
-import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 import org.limewire.ui.swing.ConfigurableTable;
@@ -36,7 +35,8 @@ public class BaseResultPanel extends JXPanel {
     BaseResultPanel(String title,
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
-            SearchResultDownloader searchResultDownloader, Search search) {
+            SearchResultDownloader searchResultDownloader,
+            Search search) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
@@ -51,9 +51,6 @@ public class BaseResultPanel extends JXPanel {
         add(new JScrollPane(resultsList), ModeListener.Mode.LIST.name());
         add(new JScrollPane(resultsTable), ModeListener.Mode.TABLE.name());
         setMode(ModeListener.Mode.LIST);
-
-        //setBorder(BorderFactory.createTitledBorder(
-        //    BorderFactory.createLineBorder(Color.RED, 1), "BaseResultPanel"));
     }
     
     private void configureList(EventList<VisualSearchResult> eventList) {
@@ -73,7 +70,7 @@ public class BaseResultPanel extends JXPanel {
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,
-        ResultsTableFormat<VisualSearchResult> tableFormat) {
+        final ResultsTableFormat<VisualSearchResult> tableFormat) {
         resultsTable = new ConfigurableTable<VisualSearchResult>(true);
 
         resultsTable.setEventList(eventList);
@@ -82,7 +79,7 @@ public class BaseResultPanel extends JXPanel {
         resultsTable.setDefaultRenderer(
             Calendar.class, new CalendarTableCellRenderer());
         resultsTable.setDefaultRenderer(
-            Icon.class, new IconTableCellRenderer());
+            Component.class, new ComponentTableCellRenderer());
         // TODO: RMV Numbers are getting right-aligned without this!
         // TODO: RMV Maybe NumberTableCellRenderer isn't needed.
         //resultsTable.setDefaultRenderer(
@@ -92,8 +89,20 @@ public class BaseResultPanel extends JXPanel {
         resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);
         resultsTable.setDefaultEditor(VisualSearchResult.class, editor);
 
-        resultsTable.setColumnWidth(
-            tableFormat.getActionButtonColumnIndex(), 100);
+        int columnIndex = tableFormat.getActionColumnIndex();
+        resultsTable.setColumnWidth(columnIndex, 100);
+
+        // Don't allow sorting on the "Actions" column
+        resultsTable.getColumnExt(columnIndex).setSortable(false);
+
+        // Make some columns invisible by default.
+        int columnCount = resultsTable.getColumnCount();
+        int lastVisibleColumnIndex = tableFormat.getLastVisibleColumnIndex();
+        // We have to loop backwards because making a column invisible
+        // changes the index of the columns after it.
+        for (int i = columnCount - 1; i > lastVisibleColumnIndex; i--) {
+            resultsTable.setColumnVisible(i, false);
+        }
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {

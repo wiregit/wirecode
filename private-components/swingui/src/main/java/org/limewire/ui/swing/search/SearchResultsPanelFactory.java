@@ -10,5 +10,4 @@ public interface SearchResultsPanelFactory {
     public SearchResultsPanel createSearchResultsPanel(SearchInfo searchInfo,
             EventList<VisualSearchResult> visualSearchResults,
             Search search);
-
 }

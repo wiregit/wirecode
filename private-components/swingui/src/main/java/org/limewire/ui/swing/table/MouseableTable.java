@@ -257,10 +257,13 @@ public class MouseableTable extends JXTable {
 
         if (usesEventTableModel && usesAdvancedTableFormat) {
             AdvancedTableFormat format = (AdvancedTableFormat) tableFormat;
+            boolean matched = false;
             for (int i = 0; i < getModel().getColumnCount(); i++) {
                 Class columnClass = format.getColumnClass(i);
                 if (columnClass == clazz) {
                     getColumnModel().getColumn(i).setCellRenderer(renderer);
+                    matched = true;
+                    break;
                 }
             }
         } else {

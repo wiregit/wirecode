@@ -19,13 +19,13 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int YEAR_INDEX = 3;
 
     public VideoTableFormat() {
+        super(5, 5);
+
         columnNames = new String[] {
         "Title", "Type", "Length", "Year", "Quality",
-        "Actions", "Relevance", "People with File", "Owner", "Rating",
+        "", "Relevance", "People with File", "Owner", "Rating",
         "Comments", "Height", "Width", "Bitrate"
         };
-
-        actionColumnIndex = 5;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search;
 
+import ca.odell.glazedlists.EventList;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.util.HashMap;
@@ -19,7 +20,6 @@ import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.matchers.Matcher;
 
@@ -97,10 +97,10 @@ public class ResultsContainer extends JXPanel {
         currentPanel.setMode(mode);
     }
     
-    private EventList<VisualSearchResult> filter(
-        final ResultType category, EventList<VisualSearchResult> list) {
+    private FilterList<VisualSearchResult> filter(
+        final ResultType category, EventList<VisualSearchResult> eventList) {
         return new FilterList<VisualSearchResult>(
-            list, new Matcher<VisualSearchResult>() {
+            eventList, new Matcher<VisualSearchResult>() {
             @Override
             public boolean matches(VisualSearchResult item) {
                 return item.getCategory() == category;

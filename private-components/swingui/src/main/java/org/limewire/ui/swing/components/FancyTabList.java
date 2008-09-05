@@ -41,7 +41,8 @@ public class FancyTabList extends JXPanel {
     private final Action closeAllAction;
         
     private FancyTabProperties props;
-    private int maxTabs;
+    private int maxTotalTabs = 10;
+    private int maxVisibleTabs;
     
     private LayoutStyle layoutStyle;
 
@@ -64,7 +65,7 @@ public class FancyTabList extends JXPanel {
         maximumWidth = 150;
         preferredWidth = 150;
         layoutStyle = LayoutStyle.FIXED;
-        maxTabs = Integer.MAX_VALUE;
+        maxVisibleTabs = Integer.MAX_VALUE;
         
         props = new FancyTabProperties();
         closeOtherAction = new CloseOther();
@@ -79,8 +80,13 @@ public class FancyTabList extends JXPanel {
 
     /** Adds a new tab based on the given action at the specified index. */
     public void addTabActionMapAt(TabActionMap actionMap, int i) {
+        int size = tabs.size();
+        if (size == maxTotalTabs) {
+            tabs.remove(size - 1); // remove the last tab
+        }
+
         FancyTab tab = createAndPrepareTab(actionMap);
-        this.tabs.add(i, tab);
+        tabs.add(i, tab);
         layoutTabs();
     }
 
@@ -114,23 +120,23 @@ public class FancyTabList extends JXPanel {
      */
     private List<FancyTab> getPendingVisibleTabs() {
         List<FancyTab> vizTabs;
-        if (maxTabs >= tabs.size()) {
+        if (maxVisibleTabs >= tabs.size()) {
             vizStartIdx = 0;
             vizTabs = tabs;
         } else {        
             FancyTab selectedTab = getSelectedTab();
-            if (tabs.size() - vizStartIdx < maxTabs) {
-                vizStartIdx = tabs.size() - maxTabs;
+            if (tabs.size() - vizStartIdx < maxVisibleTabs) {
+                vizStartIdx = tabs.size() - maxVisibleTabs;
             }
-            vizTabs = tabs.subList(vizStartIdx, vizStartIdx + maxTabs);
+            vizTabs = tabs.subList(vizStartIdx, vizStartIdx + maxVisibleTabs);
             if (!vizTabs.contains(selectedTab)) {
                 int selIdx = tabs.indexOf(selectedTab);
                 if (vizStartIdx > selIdx) { // We have to shift left
                     vizStartIdx = selIdx;
                 } else { // We have to shift right
-                    vizStartIdx = selIdx-maxTabs+1;
+                    vizStartIdx = selIdx-maxVisibleTabs+1;
                 }
-                vizTabs = tabs.subList(vizStartIdx, vizStartIdx+maxTabs);
+                vizTabs = tabs.subList(vizStartIdx, vizStartIdx+maxVisibleTabs);
             }
         }
         return vizTabs;
@@ -184,7 +190,7 @@ public class FancyTabList extends JXPanel {
             verGroup.addComponent(tab, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
         }
         
-        if (tabs.size() > maxTabs) {
+        if (tabs.size() > maxVisibleTabs) {
             JComponent more = new FancyTabMoreButton(tabs, moreTriangle, props);
             horGroup.addComponent(more);
             verGroup.addComponent(more);
@@ -214,7 +220,7 @@ public class FancyTabList extends JXPanel {
             verGroup.addComponent(tab, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
         }
         
-        if (tabs.size() > maxTabs) {
+        if (tabs.size() > maxVisibleTabs) {
             JComponent more = new FancyTabMoreButton(tabs, moreTriangle, props);
             horGroup.addComponent(more);
             verGroup.addComponent(more);
@@ -290,9 +296,13 @@ public class FancyTabList extends JXPanel {
         layoutTabs();
     }
     
+    public void setMaxTotalTabs(int max) {
+        this.maxTotalTabs = max;
+    }
+    
     /** Sets the maximum number of tabs to render at once. */
-    public void setMaxTabs(int max) {
-        this.maxTabs = max;
+    public void setMaxVisibleTabs(int max) {
+        this.maxVisibleTabs = max;
         layoutTabs();
     }
     

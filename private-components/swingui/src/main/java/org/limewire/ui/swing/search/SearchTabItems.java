@@ -117,7 +117,7 @@ implements ListEventListener<VisualSearchResult> {
         setTabsVisible(false);
         if (isAll) getTab("All").setVisible(true);
 
-        Font font = getFont().deriveFont(14.0f);
+        Font font = getFont().deriveFont(12.0f);
         font.deriveFont(Font.BOLD); // TODO: RMV This doesn't work!
         setTextFont(font);
     }
@@ -154,7 +154,7 @@ implements ListEventListener<VisualSearchResult> {
         FancyTab tab = getTab(title);
 
         if (tab == null) {
-            // TODO: RMV Remove this after debugging!
+            // This should never happen!
             System.err.println(
                 "SearchTabItems.listChanged: no tab found with title \""
                 + title + '"');

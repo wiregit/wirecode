@@ -16,12 +16,12 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int RELEVANCE_INDEX = 4;
 
     public ImageTableFormat() {
+        super(3, 3);
+
         columnNames = new String[] {
-            "Name", "Type", "Date Created", "Actions", "Relevance",
+            "Name", "Type", "Date Created", "", "Relevance",
             "People with File", "Owner"
         };
-
-        actionColumnIndex = 3;
     }
 
     @Override

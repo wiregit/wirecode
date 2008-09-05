@@ -21,6 +21,7 @@ import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 
 import ca.odell.glazedlists.EventList;
 
+import ca.odell.glazedlists.SortedList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.limewire.ui.swing.components.FancyTab;
@@ -63,7 +64,7 @@ public class SearchResultsPanel extends JPanel {
             @Assisted Search search,
             ResultsContainerFactory containerFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
-            SortAndFilterPanel sortAndFilterPanel) {
+            final SortAndFilterPanel sortAndFilterPanel) {
         
         setBackground(Color.LIGHT_GRAY);
         
@@ -71,7 +72,7 @@ public class SearchResultsPanel extends JPanel {
         sponsoredResultsPanel.setVisible(false);
         this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new SearchScrollPane();
-        EventList<VisualSearchResult> sortedList =
+        SortedList<VisualSearchResult> sortedList =
             sortAndFilterPanel.getFilteredAndSortedList(eventList);
         
         // The ResultsContainerFactory create method takes two parameters
@@ -91,6 +92,7 @@ public class SearchResultsPanel extends JPanel {
             new SearchTabItems.SearchTabListener() {
             @Override
             public void categorySelected(SearchCategory searchCategory) {
+                sortAndFilterPanel.clearFilterBox();
                 resultsContainer.showCategory(searchCategory);
                 syncColumnHeader();
                 syncSortBy();

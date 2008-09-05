@@ -31,6 +31,8 @@ public class FancyPopupMenu extends JWindow {
     private static final Color HIGHLIGHT_COLOR = new Color(220, 220, 255);
     public static final int CORNER_RADIUS = 8;
 
+    private static int instanceCounter;
+
     private Border border = new RoundedBorder(CORNER_RADIUS);
     private FancyPopupMenu submenu;
     private JLabel headerLabel;
@@ -40,9 +42,12 @@ public class FancyPopupMenu extends JWindow {
     private Map<JLabel, Action> labelToActionMap =
         new HashMap<JLabel, Action>();
     private Window owner;
+    private int instanceNumber;
 
     public FancyPopupMenu(Window owner) {
         super(owner);
+        instanceNumber = ++instanceCounter;
+
         this.owner = owner;
         panel.setOpaque(false);
         panel.setBorder(border);
@@ -51,7 +56,7 @@ public class FancyPopupMenu extends JWindow {
 
     public FancyPopupMenu(Window owner, String header) {
         this(owner);
-        headerLabel = addItem(header);
+        addItem(header);
     }
 
     public JLabel addItem(Action action) {
@@ -61,8 +66,7 @@ public class FancyPopupMenu extends JWindow {
         return label;
     }
 
-    public JLabel addItem(String item) {
-        final JLabel label = new JLabel(item);
+    public JLabel addItem(final JLabel label) {
         label.setOpaque(true); // required for background colors
         panel.add(label);
 
@@ -112,8 +116,11 @@ public class FancyPopupMenu extends JWindow {
         });
 
         lastLabel = label;
-
         return label;
+    }
+
+    public JLabel addItem(String item) {
+        return addItem(new JLabel(item));
     }
 
     public void addItems(String[] items) {
@@ -123,6 +130,26 @@ public class FancyPopupMenu extends JWindow {
     public void addSeparator() {
         if (lastLabel == null) return;
         lastLabel.setBorder(new BottomBorder());
+    }
+
+    public void clear() {
+        panel.removeAll();
+        headerLabel = null;
+        selectedLabel = null;
+        labelToActionMap.clear();
+    }
+
+    /**
+     * This method is useful for debuggin.
+     * @param title the title to be displayed at the beginning of the output
+     */
+    public void dump(String title) {
+        System.out.println("FancyPopupMenu.dump: " + title);
+        System.out.println("  instance #" + instanceNumber);
+        System.out.println("  header: " + (headerLabel == null ? "none" : headerLabel.getText()));
+        //System.out.println("  submenu: " + (submenu == null ? "none" : submenu.instanceNumber));
+        //System.out.println("  selectedLabel: " + (selectedLabel == null ? "none" : selectedLabel.getText()));
+        System.out.println("  component count: " + panel.getComponentCount());
     }
 
     private static String getActionName(Action action) {
@@ -135,6 +162,10 @@ public class FancyPopupMenu extends JWindow {
 
     public void paintComponent(Graphics g) {
         // do nothing
+    }
+
+    public void setHeader(String text) {
+        headerLabel = addItem(text);
     }
 
     public void setSubmenu(FancyPopupMenu submenu) {

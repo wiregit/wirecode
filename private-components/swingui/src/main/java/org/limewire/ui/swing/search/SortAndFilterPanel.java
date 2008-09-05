@@ -336,6 +336,10 @@ public class SortAndFilterPanel extends JXPanel {
     public synchronized void removeModeListener(ModeListener listener) {
         modeListeners.remove(listener);
     }
+
+    public void clearFilterBox() {
+        filterBox.setText("");
+    }
     
     /**
      * Sets the state of the view toggle buttons.

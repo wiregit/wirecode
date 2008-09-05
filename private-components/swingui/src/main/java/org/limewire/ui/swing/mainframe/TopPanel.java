@@ -152,12 +152,10 @@ class TopPanel extends JPanel implements SearchNavigator {
             2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
         searchList.setHighlightPainter(new RectanglePainter<JXButton>(
             2, 2, 0, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY));
-        searchList.setMaxTabs(3);
+        searchList.setMaxVisibleTabs(3);
+        searchList.setMaxTotalTabs(10);
         searchList.setName("TopPanel.SearchList");
         add(searchList, gbc);
-
-        //setBorder(BorderFactory.createTitledBorder(
-        //    BorderFactory.createLineBorder(Color.RED, 1), "TopPanel"));
     };
     
     /**

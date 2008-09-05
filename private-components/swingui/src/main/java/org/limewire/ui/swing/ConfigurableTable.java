@@ -142,11 +142,12 @@ public class ConfigurableTable<E> extends MouseableTable {
 
             String headerName = column.getTitle();
 
-            // Find the header popup menu item this this name.
+            // Find the header popup menu item that matches this name.
             Component[] components = headerPopup.getComponents();
             for (Component component : components) {
                 JMenuItem item = (JMenuItem) component; 
                 if (item.getText().equals(headerName)) {
+                    // Don't all it to be selected.
                     item.setEnabled(false);
                     disabledMenuItem = item;
                     break;
@@ -166,6 +167,32 @@ public class ConfigurableTable<E> extends MouseableTable {
      */
     public void setColumnWidth(int columnIndex, int width) {
         getColumnModel().getColumn(columnIndex).setPreferredWidth(width);
+    }
+
+    /**
+     * Sets the visibility of a given column.
+     * @param columnIndex the column index
+     * @param visible true to be visible; false to hide
+     */
+    public void setColumnVisible(int columnIndex, boolean visible) {
+        TableColumnExt column = getColumnExt(columnIndex);
+        column.setVisible(visible);
+        String columnTitle = column.getTitle();
+
+        // Find the matching checkbox menu item.
+        JCheckBoxMenuItem matchingItem = null;
+        int itemCount = headerPopup.getComponentCount();
+        for (int i = 0; i < itemCount; i++) {
+            JCheckBoxMenuItem item =
+                (JCheckBoxMenuItem) headerPopup.getComponent(i);
+            String itemTitle = item.getText();
+            if (itemTitle.equals(columnTitle)) {
+                matchingItem = item;
+                break;
+            }
+        }
+
+        if (matchingItem != null) matchingItem.setSelected(visible);
     }
 
     /**

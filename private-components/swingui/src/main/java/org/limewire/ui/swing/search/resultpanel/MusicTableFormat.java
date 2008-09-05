@@ -16,13 +16,13 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int TRACK_INDEX = 8;
 
     public MusicTableFormat() {
+        super(5, 5);
+
         columnNames = new String[] {
             "Title", "Artist", "Album", "Length", "Quality",
-            "Actions", "Bitrate", "Genre", "Track", "Relevance",
+            "", "Bitrate", "Genre", "Track", "Relevance",
             "People with File", "Owner", "Type", "Sample Rate"
         };
-
-        actionColumnIndex = 5;
     }
 
     @Override
