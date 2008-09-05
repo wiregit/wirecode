@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
@@ -8,6 +9,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.library.BuddyLibrary;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
+import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -51,14 +53,29 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
                 if(presence.getType().equals(Presence.Type.available)) {
                     //TODO: Should distinguish between Sharable/Lime and "regular" presence with 2 event types
                     new PresenceUpdateEvent(user, presence).publish();
+                    if(presence instanceof LimePresence) {
+                        addBuddyLibrary(user);
+                    }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     new PresenceUpdateEvent(user, presence).publish();
+                    if(presence instanceof LimePresence) {
+                        removeBuddyLibrary(user);
+                    }
                 } else {
                     // TODO update UI
                 }
             }
-        });
-        
+        });        
+    }
+
+    private void removeBuddyLibrary(User user) {
+        FileList libraryList = libraryManager.getBuddyLibrary(user.getName());
+        BuddyLibrary library = new BuddyLibrary(user.getName(), libraryList);
+        navigator.removeNavigablePanel(NavCategory.LIBRARY, library.getName());
+        libraryManager.removeBuddyLibrary(user.getName());
+    }
+
+    private void addBuddyLibrary(User user) {
         if(!libraryManager.containsBuddyLibrary(user.getName())) {
             libraryManager.addBuddyLibrary(user.getName());
             BuddyLibrary library = new BuddyLibrary(user.getName(), libraryManager.getBuddyLibrary(user.getName()));

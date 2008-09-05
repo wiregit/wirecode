@@ -64,6 +64,13 @@ class NavigatorImpl implements Navigator {
         return item;
     }
 
+    public void removeNavigablePanel(NavCategory category, String name) {
+        NavItem navItem = navTree.getNavigableItemByName(category, name);
+        if(navItem != null) {
+            removeNavigablePanel(category, navItem);
+        }
+    }
+
     private void removeNavigablePanel(NavCategory category, NavItem navItem) {
         navTree.removeNavigableItem(category, navItem);
         navTarget.removeNavigablePanel(navItem);

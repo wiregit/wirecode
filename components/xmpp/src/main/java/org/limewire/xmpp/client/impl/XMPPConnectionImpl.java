@@ -23,6 +23,7 @@ import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
@@ -251,7 +252,14 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                                     updatePresence(user, presence);
                                 }
                             } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
-                                user.removePresense(new PresenceImpl(presence, connection));
+                                Presence p = user.getPresence(presence.getFrom());
+                                if(p != null) {
+                                    if(p instanceof LimePresence) {
+                                        user.removePresense(new LimePresenceImpl(presence, connection));    
+                                    } else {
+                                        user.removePresense(new PresenceImpl(presence, connection));   
+                                    }                                    
+                                }
                             }
                         }
                     }

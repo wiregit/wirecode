@@ -24,6 +24,15 @@ public interface Navigator {
     public NavItem addNavigablePanel(NavCategory category, String name, JComponent panel, boolean userRemovable);
     
     /**
+     * Removes a panel described by the given name, in the category.
+     * 
+     * @param category The category this belongs in
+     * @param name The name this should be rendered with
+     * @param panel The panel to display when selected
+     */
+    public void removeNavigablePanel(NavCategory category, String name);
+    
+    /**
      * Adds a listener that is notified when a {@link NavItem} is selected.
      */
     public void addNavListener(NavSelectionListener itemListener);

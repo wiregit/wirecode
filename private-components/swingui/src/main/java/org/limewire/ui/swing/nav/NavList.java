@@ -131,7 +131,12 @@ class NavList extends JXPanel {
     public void clearSelection() {
         itemList.clearSelection();
     }
-    
+
+    public NavItem getNavItem(String name) {
+        int row = getRowForName(name);
+        return (NavItem)listModel.getValueAt(row, 1);
+    }
+
     private class NavListCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table,

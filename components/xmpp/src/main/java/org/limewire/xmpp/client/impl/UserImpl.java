@@ -8,9 +8,11 @@ import org.jivesoftware.smack.RosterEntry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.StringUtils;
+import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.concurrent.ThreadExecutor;
 
 public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
@@ -55,16 +57,20 @@ public class UserImpl implements User {
         firePresenceListeners(presence);      
     }
 
-    private void firePresenceListeners(Presence presence) {
-        for(PresenceListener listener : presenceListeners) {
-            listener.presenceChanged(presence);
+    private void firePresenceListeners(final Presence presence) {
+        for(final PresenceListener listener : presenceListeners) {
+            Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
+                public void run() {
+                    listener.presenceChanged(presence);
+                }                
+            }), "presence-listener-thread-" + listener);
+            t.start();
         }
     }
 
     void removePresense(Presence presence) {
         presences.remove(presence.getJID());
         firePresenceListeners(presence);
-
     }
     
     public void addPresenceListener(PresenceListener presenceListener) {

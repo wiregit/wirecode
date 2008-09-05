@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.ListenerSupport;
@@ -56,13 +57,19 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                         browseFactory.createBrowse(address).start(new BrowseListener() {
                             public void handleBrowseResult(SearchResult searchResult) {
                                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
+                                if(!libraryManager.containsBuddyLibrary(user.getName())) {
+                                    // TODO locking
+                                    libraryManager.addBuddyLibrary(user.getName());
+                                    FileList list = libraryManager.getBuddyLibrary(user.getName());
+                                    //list.addFile();
+                                }
                             }
                         });
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     //new PresenceUpdateEvent(user, presence).publish();
-                }
-            }
+                }                
+            }   
         });
 
         Thread t = new Thread(new Runnable(){

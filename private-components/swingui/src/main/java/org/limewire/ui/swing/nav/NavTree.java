@@ -74,6 +74,16 @@ public class NavTree extends JXPanel implements NavigableTree {
     }
     
     @Override
+    public NavItem getNavigableItemByName(NavCategory category, String name) {
+        for(NavList list : navigableLists) {
+            if(list.getCategory() == category) {
+                return list.getNavItem(name);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void selectNavigableItem(NavCategory category, NavItem navItem) {
         for(NavList list : navigableLists) {
             if(list.getCategory() == category) {
