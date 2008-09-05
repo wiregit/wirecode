@@ -21,7 +21,6 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 /**
  * This class listens to a specific Mozilla download and tracks some statistics
  * for us.
- * 
  */
 public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressListener {
     private final long downloadId;
@@ -120,6 +119,8 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
 
     public float getMeasuredBandwidth() {
         try {
+            down.measureBandwidth();
+            //TODO i shouldn't have to do the above measure bandwidth call.
             return down.getMeasuredBandwidth();
         } catch (InsufficientDataException e) {
             return 0;
