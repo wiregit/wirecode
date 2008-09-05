@@ -58,16 +58,16 @@ public class TopPanel extends JPanel {
         this.buddyRemover = buddyRemover;
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
-        setLayout(new MigLayout("insets 0 0 0 0", "3[][]0:push[]0[]0[]0", "0[]0"));
+        setLayout(new MigLayout("insets 0 0 0 0", "3[shrinkprio 50][]3:push[shrinkprio 0]0[shrinkprio 0]0[shrinkprio 0]0", "0[]0"));
         
         friendNameLabel = new JLabel();
         friendNameLabel.setForeground(getForeground());
-        add(friendNameLabel);
+        add(friendNameLabel, "wmin 0");
         
         friendStatusLabel = new JLabel();
         friendStatusLabel.setForeground(getForeground());
         FontUtils.changeSize(friendStatusLabel, -1.8f);
-        add(friendStatusLabel);
+        add(friendStatusLabel, "wmin 0");
         
         JMenu options = new JMenu(tr("Options"));
         final JPopupMenu popup = options.getPopupMenu();
