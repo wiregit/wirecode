@@ -19,7 +19,7 @@ public class SharingActionHandler {
         } else if(actionCommand == LOCATE) {
             NativeLaunchUtils.launchExplorer(item.getFile());
         } else if(actionCommand == PROPERTIES) {
-            
+            //TODO: need to make properties get info and launch it here
         } else if(actionCommand == LAUNCH) {
             launch(item);
         }

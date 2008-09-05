@@ -233,7 +233,10 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
                 setForeground(Color.BLACK);
             }
             
-            setText(value.toString());
+            if(value == null)
+                setText("");
+            else
+                setText(value.toString());
             
             return this;
         }

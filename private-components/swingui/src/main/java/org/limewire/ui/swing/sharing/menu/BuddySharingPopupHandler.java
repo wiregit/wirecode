@@ -96,6 +96,7 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
     
     private class MenuListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
+            //TODO: finish this
 //            actionHandler.performAction(e.getActionCommand(), fileList, fileItem);
         }
     }
