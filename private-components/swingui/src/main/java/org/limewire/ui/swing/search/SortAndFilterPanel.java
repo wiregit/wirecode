@@ -37,7 +37,6 @@ import org.limewire.ui.swing.friends.ChatLoginState;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.AllTableFormat;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
@@ -75,7 +74,7 @@ public class SortAndFilterPanel extends JXPanel {
 
     private TextComponentMatcherEditor<VisualSearchResult> editor =
         new TextComponentMatcherEditor<VisualSearchResult>(
-            filterBox, filterator, true);
+            filterBox, filterator, true); // true for "live"
 
     private boolean repopulatingCombo;
 
@@ -240,8 +239,8 @@ public class SortAndFilterPanel extends JXPanel {
             return new Comparator<VisualSearchResult>() {
                 public int compare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    String v1 = AllTableFormat.getMediaType(vsr1);
-                    String v2 = AllTableFormat.getMediaType(vsr2);
+                    String v1 = vsr1.getMediaType();
+                    String v2 = vsr2.getMediaType();
                     return v1 == null ? 0 : v1.compareTo(v2);
                 }
             };
@@ -414,13 +413,32 @@ public class SortAndFilterPanel extends JXPanel {
     
     private static class VisualSearchResultTextFilterator
     implements TextFilterator<VisualSearchResult> {
+        private List<String> list;
+        private VisualSearchResult vsr;
+
         @Override
         public void getFilterStrings(
-                List<String> baseList, VisualSearchResult element) {
-            baseList.add(element.getDescription());
-            baseList.add(element.getCategory().toString());
-            baseList.add(element.getFileExtension());
-            baseList.add(String.valueOf(element.getSize()));
+                List<String> list, VisualSearchResult vsr) {
+            this.list = list;
+            this.vsr = vsr;
+            addProperty(PropertyKey.NAME);
+            addProperty(PropertyKey.ALBUM_TITLE);
+            addProperty(PropertyKey.ARTIST_NAME);
+            addProperty(PropertyKey.OWNER);
+            addProperty(PropertyKey.LENGTH);
+            addProperty(PropertyKey.FILE_SIZE);
+            list.add(vsr.getMediaType());
+            long size = vsr.getSize();
+            if (size > 0) list.add(String.valueOf(size));
+        }
+
+        private void addProperty(PropertyKey key) {
+            Object value = vsr.getProperty(key);
+            if (value != null) {
+                String text = value.toString();
+                System.out.println("SortAndFilterPanel: text = " + text);
+                list.add(text);
+            }
         }
     }
 }

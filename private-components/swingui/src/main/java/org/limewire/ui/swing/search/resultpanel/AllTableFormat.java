@@ -41,7 +41,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         switch (index) {
             case 0: return getIconLabel(vsr);
-            case 1: return getMediaType(vsr);
+            case 1: return vsr.getMediaType();
             case 2: return vsr.getSize();
             case 3: return vsr;
             case 4: return getProperty(PropertyKey.RELEVANCE);
@@ -49,12 +49,5 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case 6: return getProperty(PropertyKey.OWNER);
             default: return null;
         }
-    }
-
-    public static String getMediaType(VisualSearchResult vsr) {
-        String ext = vsr.getFileExtension();
-        MediaType mediaType = MediaType.getMediaTypeForExtension(ext);
-        // TODO: RMV improve the text returned
-        return mediaType == null ? ext : mediaType.toString();
     }
 }

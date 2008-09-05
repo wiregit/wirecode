@@ -65,9 +65,14 @@ public class MouseableTable extends JXTable {
 		addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-                int col = columnAtPoint(e.getPoint());
+                // Get the table cell that the mouse is over.
                 int row = rowAtPoint(e.getPoint());
+                int col = columnAtPoint(e.getPoint());
+                
+                // If the cell is editable and
+                // it's not already being edited ...
                 if (isCellEditable(row, col)) {
+                    //&& (row != getEditingRow() || col != getEditingColumn())) {
                     editCellAt(row, col);
                 }
             }

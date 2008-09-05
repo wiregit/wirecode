@@ -24,6 +24,8 @@ public interface VisualSearchResult {
     ResultType getCategory();
     
     String getDescription();
+
+    String getMediaType();
     
     long getSize();
     

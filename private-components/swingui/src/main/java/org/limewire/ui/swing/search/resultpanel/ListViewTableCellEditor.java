@@ -7,6 +7,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,13 +16,14 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -77,6 +80,8 @@ implements TableCellEditor, TableCellRenderer {
         populatePanel((VisualSearchResult) value);
         setBackground(isSelected);
 
+        thePanel.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+
         return thePanel;
     }
 
@@ -84,8 +89,11 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value,
         boolean isSelected, boolean hasFocus,
         int row, int column) {
-        return getTableCellEditorComponent(
+
+        JPanel panel = (JPanel) getTableCellEditorComponent(
             table, value, isSelected, row, column);
+        panel.setBorder(BorderFactory.createEmptyBorder());
+        return panel;
     }
 
     private Component makeCenterPanel() {
@@ -148,6 +156,16 @@ implements TableCellEditor, TableCellRenderer {
 
         gbc.weightx = 0;
         panel.add(makeRightPanel(), gbc);
+
+        panel.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                System.out.println("got a mouse press; button = " + e.getButton());
+                if (e.getButton() == 3) {
+                    System.out.println("got a right click");
+                }
+            }
+        });
 
         return panel;
     }

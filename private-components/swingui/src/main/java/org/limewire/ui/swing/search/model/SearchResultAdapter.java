@@ -12,6 +12,7 @@ import java.util.TreeSet;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.util.MediaType;
 
 class SearchResultAdapter implements VisualSearchResult {
     
@@ -77,6 +78,14 @@ class SearchResultAdapter implements VisualSearchResult {
         return coreResults.get(0).getFileExtension();
     }
     
+    @Override
+    public String getMediaType() {
+        String ext = getFileExtension();
+        MediaType mediaType = MediaType.getMediaTypeForExtension(ext);
+        // TODO: RMV improve the text returned
+        return mediaType == null ? ext : mediaType.toString();
+    }
+
     @Override
     public Map<Object, Object> getProperties() {
         if (properties == null) {
