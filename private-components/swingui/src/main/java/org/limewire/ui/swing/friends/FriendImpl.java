@@ -128,4 +128,9 @@ public class FriendImpl extends AbstractBean implements Friend {
         hasUnviewedMessages = hasMessages;
         firePropertyChange("receivingUnviewedMessages", oldHasUnviewedMessages, hasMessages);
     }
+
+    @Override
+    public boolean jidBelongsTo(String jid) {
+        return user.jidBelongsTo(jid);
+    }
 }

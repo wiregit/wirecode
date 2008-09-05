@@ -22,5 +22,12 @@ public interface User {
      * @param presenceListener
      */
     public void addPresenceListener(PresenceListener presenceListener);
-
+    
+    /**
+     * Provides an indication of whether the supplied String (assumed to be a Presence jid)
+     * belongs to this user
+     * @param jid
+     * @return true if the the jid belongs to this user, otherwise false
+     */
+    public boolean jidBelongsTo(String jid);
 }

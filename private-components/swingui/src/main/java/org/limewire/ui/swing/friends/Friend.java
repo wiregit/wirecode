@@ -18,6 +18,8 @@ public interface Friend {
 
     Mode getMode();
     
+    boolean jidBelongsTo(String jid);
+    
     boolean isChatting();
     
     boolean isActiveConversation();

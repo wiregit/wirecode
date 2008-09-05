@@ -11,6 +11,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.JTextComponent;
 
 import org.limewire.ui.swing.action.CopyAction;
 import org.limewire.ui.swing.action.CutAction;
@@ -64,6 +65,10 @@ class ResizingInputPanel extends JPanel implements Displayable {
     @Override
     public void handleDisplay() {
         text.requestFocusInWindow();
+    }
+    
+    public JTextComponent getInputComponent() {
+        return text;
     }
 
     private class SendMessage extends AbstractAction {

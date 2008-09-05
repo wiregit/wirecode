@@ -100,4 +100,9 @@ class MockFriend implements Friend {
     public void setReceivingUnviewedMessages(boolean hasMessages) {
         
     }
+
+    @Override
+    public boolean jidBelongsTo(String jid) {
+        return false;
+    }
 }

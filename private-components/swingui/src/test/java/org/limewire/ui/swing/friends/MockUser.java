@@ -27,4 +27,10 @@ public class MockUser implements User {
     public String getName() {
         return name;
     }
+
+    @Override
+    public boolean jidBelongsTo(String jid) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

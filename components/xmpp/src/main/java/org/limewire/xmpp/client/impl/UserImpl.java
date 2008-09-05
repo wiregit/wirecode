@@ -83,4 +83,9 @@ public class UserImpl implements User {
         presences.put(updatedPresence.getJID(), updatedPresence);
         firePresenceListeners(updatedPresence);
     }
+
+    @Override
+    public boolean jidBelongsTo(String jid) {
+        return presences.containsKey(jid);
+    }
 }
