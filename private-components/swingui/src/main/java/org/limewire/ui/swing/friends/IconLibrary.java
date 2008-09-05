@@ -30,4 +30,9 @@ public interface IconLibrary {
     
     Icon getCloseChat();
 
+    Icon getMinimizeNormal();
+
+    Icon getMinimizeOver();
+    
+    Icon getMinimizeDown();
 }

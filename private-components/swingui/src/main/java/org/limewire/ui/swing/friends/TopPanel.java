@@ -8,6 +8,8 @@ import java.awt.Component;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -51,12 +53,12 @@ public class TopPanel extends JPanel {
     private JCheckBoxMenuItem awayPopupItem;
 
     @Inject
-    public TopPanel(IconLibrary icons, BuddyRemover buddyRemover) {
+    public TopPanel(final IconLibrary icons, BuddyRemover buddyRemover) {
         this.icons = icons;
         this.buddyRemover = buddyRemover;
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
-        setLayout(new MigLayout("insets 0 0 0 0", "3[][]0:push[]0[]0", "0[]0"));
+        setLayout(new MigLayout("insets 0 0 0 0", "3[][]0:push[]0[]0[]0", "0[]0"));
         
         friendNameLabel = new JLabel();
         friendNameLabel.setForeground(getForeground());
@@ -118,9 +120,35 @@ public class TopPanel extends JPanel {
         menuBar.add(options);
         add(menuBar);
         
+        RectanglePainter<JXButton> backgroundPainter = new RectanglePainter<JXButton>(getBackground(), getBackground());
+        final JXButton minimizeChat = new JXButton(new MinimizeChat());
+        minimizeChat.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                minimizeChat.setIcon(icons.getMinimizeOver());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                minimizeChat.setIcon(icons.getMinimizeNormal());
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                minimizeChat.setIcon(icons.getMinimizeDown());
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                minimizeChat.setIcon(icons.getMinimizeNormal());
+            }
+        });
+        minimizeChat.setBorderPainted(false);
+        minimizeChat.setBackgroundPainter(backgroundPainter);
+        add(minimizeChat);
         JXButton closeChat = new JXButton(new SignoffAction(icons.getCloseChat()));
         closeChat.setBorderPainted(false);
-        closeChat.setBackgroundPainter(new RectanglePainter<JXButton>(getBackground(), getBackground()));
+        closeChat.setBackgroundPainter(backgroundPainter);
         add(closeChat);
         
         EventAnnotationProcessor.subscribe(this);
@@ -229,6 +257,17 @@ public class TopPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             // TODO Auto-generated method stub
+        }
+    }
+    
+    private class MinimizeChat extends AbstractAction {
+        public MinimizeChat() {
+            super("", icons.getMinimizeNormal());
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new DisplayFriendsEvent(false).publish();
         }
     }
 }
