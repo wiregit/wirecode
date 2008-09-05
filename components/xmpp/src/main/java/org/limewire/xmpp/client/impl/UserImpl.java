@@ -94,4 +94,8 @@ public class UserImpl implements User {
     public boolean jidBelongsTo(String jid) {
         return presences.containsKey(jid);
     }
+    
+    Presence getPresence(String jid) {
+        return presences.get(jid);
+    }
 }
