@@ -18,6 +18,12 @@ public abstract class LimeMozillaSingletonFactory implements nsIFactory, nsISupp
 
     private final String CID;
 
+    /**
+     * Constructs a singleton  factory for the given implementation.
+     * 
+     * @param IID the uid of this nsISupports object
+     * @param CID the contractId used to find this object
+     */
     public LimeMozillaSingletonFactory(String IID, String CID) {
         this.IID = IID;
         this.CID = CID;
