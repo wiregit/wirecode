@@ -8,18 +8,28 @@ import java.util.StringTokenizer;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.setting.StringSetSetting;
 import org.limewire.util.Objects;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 public class XMPPUserSettings extends LimeProps {
      private static final StringSetSetting XMPP_USERS =
 		FACTORY.createStringSetSetting("XMPP_USERS", "");
+
+    private static PasswordManager passwordManager;
     
     private XMPPUserSettings() {}
     
     @Singleton
     static class XMPPUserConfigs implements Provider<Map<String, XMPPUserConfiguration>> {
+
+        @Inject
+        public XMPPUserConfigs(PasswordManager passwordManager) {
+            XMPPUserSettings.passwordManager = passwordManager;
+        }
 
         public Map<String, XMPPUserConfiguration> get() {
             Map<String, XMPPUserConfiguration> configurations = new HashMap<String, XMPPUserConfiguration>();
@@ -33,20 +43,35 @@ public class XMPPUserSettings extends LimeProps {
     }
     
     public static class XMPPUserConfiguration {
+
+        private static final Log LOG = LogFactory.getLog(XMPPUserSettings.XMPPUserConfiguration.class);
+
         private final String serviceName;
         private String username;
         private String password;
         private boolean isAutoLogin;
-        
+        private final String originalConnectionString;
+        private boolean logonDetailsChanged;
+
         public XMPPUserConfiguration(String connectionString) {
+            originalConnectionString = connectionString;
+            isAutoLogin = false;
+            password = null;
+            logonDetailsChanged = false;
+
             StringTokenizer st = new StringTokenizer(connectionString, " ");
             serviceName = st.nextToken();
             if(st.hasMoreTokens()) {
                 username = st.nextToken();
-                password = st.nextToken(); 
-                isAutoLogin = true;
-            } else {
-                isAutoLogin = false;
+
+                try {
+                    password = passwordManager.loadPasswordFromUserName(username);
+                    isAutoLogin = true;
+                } catch (XmppEncryptionException e) {
+                    // TODO: Perform any necessary error handling related to indicating to all
+                    // concerned parties that this is an invalid config!
+                    LOG.warn("Error loading password.", e);
+                }
             }
         }
 
@@ -56,14 +81,8 @@ public class XMPPUserSettings extends LimeProps {
         
         public void setUsername(String username) {
             if(!Objects.equalOrNull(this.username, username)) {
-                if(isAutoLogin()) {
-                    XMPP_USERS.remove(this.toString());
-                }
                 this.username = username;
-                if(isAutoLogin()) {
-                    XMPP_USERS.add(this.toString());
-                    FACTORY.save();
-                }
+                this.logonDetailsChanged = true;
             }
         }
 
@@ -73,14 +92,8 @@ public class XMPPUserSettings extends LimeProps {
         
         public void setPassword(String password) {
             if(!Objects.equalOrNull(this.password, password)) {
-                if(isAutoLogin()) {
-                    XMPP_USERS.remove(this.toString());
-                }
                 this.password = password;
-                if(isAutoLogin()) {
-                    XMPP_USERS.add(this.toString());
-                    FACTORY.save();
-                }
+                this.logonDetailsChanged = true;
             }
         }
 
@@ -93,10 +106,20 @@ public class XMPPUserSettings extends LimeProps {
         }
 
         public void setAutoLogin(boolean autoLogin) {
-            if(!Objects.equalOrNull(this.isAutoLogin, autoLogin)) {
-                XMPP_USERS.remove(this.toString());
+            if (logonDetailsChanged || (this.isAutoLogin != autoLogin)) {
+                XMPP_USERS.remove(originalConnectionString);
                 this.isAutoLogin = autoLogin;
-                XMPP_USERS.add(this.toString());
+                if (isAutoLogin) {
+                    try {
+                        passwordManager.storePassword(username, password);
+                    } catch (XmppEncryptionException e) {
+                        // TODO: Call an error listener to notify a component of the error
+                        // Currently, the error will be discovered when the xmppService tries to autologin
+                    }
+                    XMPP_USERS.add(this.toString());
+                } else {
+                    passwordManager.removePassword(username);
+                }
                 FACTORY.save();
             }
         }
@@ -107,10 +130,6 @@ public class XMPPUserSettings extends LimeProps {
             if(username != null) {
                 sb.append(' ');
                 sb.append(username);
-            }
-            if(password != null) {
-                sb.append(' ');
-                sb.append(password);
             }
             return sb.toString();
         }

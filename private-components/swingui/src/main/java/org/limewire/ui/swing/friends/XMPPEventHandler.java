@@ -36,8 +36,8 @@ public class XMPPEventHandler {
                 if(!connection.isLoggedIn()) {
                     configuration.setUsername(username);
                     configuration.setPassword(password);
-                    configuration.setAutoLogin(autologin);
                     connection.login();
+                    configuration.setAutoLogin(autologin);
                 }
             }
         }
