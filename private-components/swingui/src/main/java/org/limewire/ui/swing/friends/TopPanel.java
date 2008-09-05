@@ -146,10 +146,24 @@ public class TopPanel extends JPanel {
         minimizeChat.setBorderPainted(false);
         minimizeChat.setBackgroundPainter(backgroundPainter);
         add(minimizeChat);
-        JXButton closeChat = new JXButton(new SignoffAction(icons.getCloseChat()));
-        closeChat.setBorderPainted(false);
-        closeChat.setBackgroundPainter(backgroundPainter);
-        add(closeChat);
+        final JMenu signoffMenu = new JMenu();
+        signoffMenu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                signoffMenu.doClick();
+            }
+        });
+        signoffMenu.setForeground(getForeground());
+        signoffMenu.setBackground(getBackground());
+        signoffMenu.setBorderPainted(false);
+        signoffMenu.setIcon(icons.getCloseChat());
+        signoffMenu.add(new SignoffAction());
+        JMenuBar signoffMenuBar = new JMenuBar();
+        signoffMenuBar.setForeground(getForeground());
+        signoffMenuBar.setBackground(getBackground());
+        signoffMenuBar.setBorderPainted(false);
+        signoffMenuBar.add(signoffMenu);
+        add(signoffMenuBar);
         
         EventAnnotationProcessor.subscribe(this);
     }
