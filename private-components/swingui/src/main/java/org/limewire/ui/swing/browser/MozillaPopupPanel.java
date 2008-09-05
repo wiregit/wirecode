@@ -47,7 +47,7 @@ class MozillaPopupPanel extends MozillaPanel {
     private void initialize() {
         
         IMozillaWindow mozillaWindow = getContainerWindow();
-        if(mozillaWindow instanceof JFrame) {
+        if(mozillaWindow != null && mozillaWindow instanceof JFrame) {
             JFrame frame = (JFrame)mozillaWindow;
             frame.setIconImage(((ImageIcon)limeIcon).getImage());    
         }
