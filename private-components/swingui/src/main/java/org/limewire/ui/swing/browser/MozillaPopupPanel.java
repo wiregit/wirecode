@@ -7,6 +7,7 @@ import java.net.URI;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JToolBar;
 
 import org.jdesktop.application.Resource;
@@ -19,7 +20,7 @@ import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.MozillaWindow;
 import org.mozilla.browser.impl.ChromeAdapter;
 
-class MozillaPopupWindow extends MozillaPanel {
+class MozillaPopupPanel extends MozillaPanel {
 
     @Resource
     private Icon limeIcon;
@@ -30,8 +31,8 @@ class MozillaPopupWindow extends MozillaPanel {
     private File icoFile;
    
     
-    MozillaPopupWindow(boolean attachNewBrowserOnCreation) {
-        super(null, attachNewBrowserOnCreation, null, null);
+    MozillaPopupPanel(MozillaWindow window, boolean attachNewBrowserOnCreation) {
+        super(window, attachNewBrowserOnCreation, null, null);
         GuiUtils.assignResources(this);
         icoFile = new File(URI.create(ClassLoader.getSystemResource(limeFrameIconLocation).getFile()).getPath()).getAbsoluteFile();
         initialize();
@@ -44,9 +45,13 @@ class MozillaPopupWindow extends MozillaPanel {
     }
     
     private void initialize() {
-        //getContainerWindow().setIconImage(((ImageIcon)limeIcon).getImage());
-        //TODO set the icon
         
+        IMozillaWindow mozillaWindow = getContainerWindow();
+        if(mozillaWindow instanceof JFrame) {
+            JFrame frame = (JFrame)mozillaWindow;
+            frame.setIconImage(((ImageIcon)limeIcon).getImage());    
+        }
+
         JToolBar toolbar = getToolbar();
         toolbar.add(new AbstractAction("Out") {
             // TODO: Add a picture.

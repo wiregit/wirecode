@@ -13,7 +13,7 @@ public interface DownloadListManager extends SearchResultDownloader {
 
     /**
      * Downloads the file from the given uri saving to filename. This method
-     * should handle allowing the user to select a directory to save teh file to
+     * should handle allowing the user to select a directory to save the file to
      * and whether or not the file should be overwritten.
      * 
      * @param uri location to download the file from

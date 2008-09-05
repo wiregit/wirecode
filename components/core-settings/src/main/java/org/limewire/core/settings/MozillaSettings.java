@@ -8,7 +8,7 @@ import org.limewire.util.SystemUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
 
 /**
- * Settings to override mozilla default behaviour.
+ * Settings to override mozilla default behavior.
  */
 public class MozillaSettings extends LimeProps {
 

@@ -264,8 +264,6 @@ public class CoreDownloadListManager implements DownloadListManager {
             }
         };
 
-        //TODO use a differant scheduler, don't want to lock up update calls to UI
         backgroundExecutor.execute(work);
-
     }
 }

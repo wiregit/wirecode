@@ -169,9 +169,6 @@ public class AppFrame extends SingleFrameApplication {
         // register our own download manager to replace the one provided by
         // mozilla
         registerMozillaComponent(mozillaDownloadManager);
-
-        // addDownloadListener(limeWireCore); TODO remove after we know we no
-        // longer need to listen to the mozilla downloader
     }
 
     private void registerMozillaComponent(LimeMozillaSingletonFactory factory) {

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.ui.swing.browser.download;
 
 import org.mozilla.interfaces.nsICancelable;
