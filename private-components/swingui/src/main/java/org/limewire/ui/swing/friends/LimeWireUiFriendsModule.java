@@ -22,7 +22,7 @@ public class LimeWireUiFriendsModule extends AbstractModule {
                 FactoryProvider.newFactory(
                         ConversationPaneFactory.class, ConversationPane.class));
         bind(FriendsPaneRosterListener.class);
-        bind(XMPPErrorListener.class).to(XMPPErrorListenerImpl.class);
+        bind(XMPPErrorListener.class).to(LoginPanel.class);
         bind(FileOfferHandler.class).to(FileOfferHandlerImpl.class);
         bind(XMPPConnectionListener.class).to(XMPPConnectionListenerImpl.class);
     }

@@ -21,11 +21,15 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,7 +43,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * TODO: Swap labels on network button press?
  */
 @Singleton
-public class LoginPanel extends JPanel implements Displayable {
+public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener {
     @Resource private Icon gmail;
     @Resource private Icon facebook;
 
@@ -53,6 +57,7 @@ public class LoginPanel extends JPanel implements Displayable {
     private final XMPPEventHandler xmppEventHandler;
     private static final String GMAIL_SERVICE_NAME = "gmail.com";
     private static final String FACEBOOK_SERVICE_NAME = "facebook.com";
+    private static final Log LOG = LogFactory.getLog(LoginPanel.class);
     private ButtonGroup networkGroup;
 
     @Inject
@@ -89,6 +94,16 @@ public class LoginPanel extends JPanel implements Displayable {
         populateInputs();
     }
     
+    @Override
+    public void error(XMPPException exception) {
+        loginFailed(exception);
+    }
+
+    @Inject
+    public void register(XMPPService xmppService) {
+        xmppService.setXmppErrorListener(this);
+    }
+
     private void populateInputs() {
         XMPPConnectionConfiguration config = xmppEventHandler.getConfig(GMAIL_SERVICE_NAME);
         
@@ -120,21 +135,33 @@ public class LoginPanel extends JPanel implements Displayable {
         return builder.getPanel();
     }
     
-    private void loginFailed() {
-        topPanel.removeAll();
-        topPanel.add(noConnectionAvailablePanel());
+    private void loginFailed(final XMPPException e1) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                String errorMsg = e1.getMessage();
+                final LoginErrorState error = errorMsg.contains("authentication failed") ? 
+                LoginErrorState.UsernameOrPasswordError : LoginErrorState.NetworkError;
+        
+                topPanel.removeAll();
+                topPanel.add(noConnectionAvailablePanel(error));
+                if (error == LoginErrorState.UsernameOrPasswordError) {
+                    passwordField.setText("");
+                }
+            }
+        });
     }
     
-    private JPanel noConnectionAvailablePanel() {
+    private JPanel noConnectionAvailablePanel(LoginErrorState error) {
         FormLayout layout = new FormLayout("c:p:g", "7dlu,p, p, 7dlu");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.nextLine();
-        JLabel label = builder.addLabel(tr("Could not log you in"));
+        JLabel label = builder.addLabel(tr("Could not log you in."));
         //A pretty crimson
         label.setForeground(new Color(112, 13, 37));
         FontUtils.changeSize(label, 2.0f);
         builder.nextLine();
-        builder.addLabel(tr("Please try again."));
+        builder.addLabel(tr(error.getMessage()));
         return builder.getPanel();
     }
     
@@ -176,6 +203,20 @@ public class LoginPanel extends JPanel implements Displayable {
         return detailsPanelBuilder.getPanel();
     }
     
+    private static enum LoginErrorState {
+        UsernameOrPasswordError("<html><center>Incorrect email/password combination.<br/>Please try again</center></html>"),
+        NetworkError("Network error. Please try again later");
+        
+        private final String message;
+        LoginErrorState(String message) {
+            this.message = message;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+    }
+    
     class SignInAction extends AbstractAction {
         public SignInAction() {
             super(tr("Sign in"));
@@ -198,12 +239,9 @@ public class LoginPanel extends JPanel implements Displayable {
                             xmppEventHandler.login(serviceName, userName, 
                                     new String(passwordField.getPassword()), rememberMeCheckbox.isSelected());
                         } catch (XMPPException e1) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    loginFailed();
-                                }
-                            });
+                            LOG.error("Unable to login", e1);
+                            
+                            loginFailed(e1);
                         }
                     }
                 }
