@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
@@ -56,6 +57,7 @@ public class TopPanel extends JPanel {
     public TopPanel(final IconLibrary icons, BuddyRemover buddyRemover) {
         this.icons = icons;
         this.buddyRemover = buddyRemover;
+        
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
         setLayout(new MigLayout("insets 0 0 0 0", "3[shrinkprio 50][]3:push[shrinkprio 0]0[shrinkprio 0]0[shrinkprio 0]0", "0[]0"));
@@ -165,9 +167,19 @@ public class TopPanel extends JPanel {
         signoffMenuBar.add(signoffMenu);
         add(signoffMenuBar);
         
+        ToolTipManager.sharedInstance().registerComponent(this);
+        
         EventAnnotationProcessor.subscribe(this);
     }
     
+    @Override
+    public String getToolTipText() {
+        String name = friendNameLabel.getText();
+        String label = friendStatusLabel.getText();
+        String tooltip = name + label;
+        return tooltip.length() == 0 ? null : tooltip;
+    }
+
     @EventSubscriber
     public void handleConversationStarted(ConversationStartedEvent event) {
         if (event.isLocallyInitiated()) {
