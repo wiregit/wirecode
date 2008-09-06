@@ -164,6 +164,7 @@ implements TableCellEditor, TableCellRenderer {
         panel.add(makeCenterPanel(), gbc);
 
         gbc.weightx = 0;
+        actionPanel.setOpaque(false);
         panel.add(actionPanel, gbc);
 
         panel.addMouseListener(new MouseAdapter() {
