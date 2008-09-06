@@ -54,7 +54,7 @@ implements ListEventListener<VisualSearchResult> {
 
     private final SearchTabListener listener;
     
-    private EventList eventList;
+    private EventList<VisualSearchResult> eventList;
 
     SearchTabItems(SearchCategory category, SearchTabListener listener) {
         isAll = category == SearchCategory.ALL;
