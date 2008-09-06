@@ -24,7 +24,6 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 //TODO comment this beast
-import javax.swing.event.ChangeEvent;
 public class MouseableTable extends JXTable {
     
 	private TablePopupHandler popupHandler;
@@ -42,12 +41,6 @@ public class MouseableTable extends JXTable {
 		initialize();
 	}
 
-    @Override
-    public void editingCanceled(ChangeEvent e) {
-        super.editingCanceled(e);
-        System.out.println("MouseableTable.editingCanceled called");
-    }
-	
 	public void setPopupHandler(TablePopupHandler popupHandler) {
 		this.popupHandler = popupHandler;
 	}
