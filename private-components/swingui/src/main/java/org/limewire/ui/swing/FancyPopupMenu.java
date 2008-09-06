@@ -41,6 +41,7 @@ public class FancyPopupMenu extends JWindow {
     private JPanel panel = new JPanel(new GridLayout(0, 1));
     private Map<JLabel, Action> labelToActionMap =
         new HashMap<JLabel, Action>();
+    private String selectedName;
     private Window owner;
     private int instanceNumber;
 
@@ -56,17 +57,17 @@ public class FancyPopupMenu extends JWindow {
 
     public FancyPopupMenu(Window owner, String header) {
         this(owner);
-        addItem(header);
+        add(header);
     }
 
-    public JLabel addItem(Action action) {
+    public JLabel add(Action action) {
         String text = getActionName(action);
-        JLabel label = addItem(text);
+        JLabel label = add(text);
         labelToActionMap.put(label, action);
         return label;
     }
 
-    public JLabel addItem(final JLabel label) {
+    public JLabel add(final JLabel label) {
         label.setOpaque(true); // required for background colors
         panel.add(label);
 
@@ -110,6 +111,7 @@ public class FancyPopupMenu extends JWindow {
                         }
                     }
                 } else {
+                    selectedLabel = label;
                     submenu.showRight(label);
                 }
             }
@@ -119,12 +121,12 @@ public class FancyPopupMenu extends JWindow {
         return label;
     }
 
-    public JLabel addItem(String item) {
-        return addItem(new JLabel(item));
+    public JLabel add(String item) {
+        return add(new JLabel(item));
     }
 
-    public void addItems(String[] items) {
-        for (String item : items) addItem(item);
+    public void add(String[] items) {
+        for (String item : items) add(item);
     }
 
     public void addSeparator() {
@@ -139,19 +141,6 @@ public class FancyPopupMenu extends JWindow {
         labelToActionMap.clear();
     }
 
-    /**
-     * This method is useful for debuggin.
-     * @param title the title to be displayed at the beginning of the output
-     */
-    public void dump(String title) {
-        System.out.println("FancyPopupMenu.dump: " + title);
-        System.out.println("  instance #" + instanceNumber);
-        System.out.println("  header: " + (headerLabel == null ? "none" : headerLabel.getText()));
-        //System.out.println("  submenu: " + (submenu == null ? "none" : submenu.instanceNumber));
-        //System.out.println("  selectedLabel: " + (selectedLabel == null ? "none" : selectedLabel.getText()));
-        System.out.println("  component count: " + panel.getComponentCount());
-    }
-
     private static String getActionName(Action action) {
         return action.getValue(Action.NAME).toString();
     }
@@ -160,12 +149,13 @@ public class FancyPopupMenu extends JWindow {
         return selectedLabel == null ? null : selectedLabel.getText();
     }
 
+    // TODO: RMV is overriding this necessary?
     public void paintComponent(Graphics g) {
         // do nothing
     }
 
     public void setHeader(String text) {
-        headerLabel = addItem(text);
+        headerLabel = add(text);
     }
 
     public void setSubmenu(FancyPopupMenu submenu) {

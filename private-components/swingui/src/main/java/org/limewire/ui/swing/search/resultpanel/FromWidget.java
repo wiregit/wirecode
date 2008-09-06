@@ -1,17 +1,16 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.Border;
-import org.limewire.ui.swing.FancyPopupMenu;
 import org.limewire.ui.swing.RoundedBorder;
 
 /**
@@ -23,20 +22,20 @@ import org.limewire.ui.swing.RoundedBorder;
 public class FromWidget extends JPanel {
 
     private static final char DOWN_ARROW = '\u25BC';
-    private static final int R = FancyPopupMenu.CORNER_RADIUS;
+    private static final int R = 8; // rounded border corner radius
 
     private Border border = new RoundedBorder(R);
     private Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
-    private FancyPopupMenu menu;
-    private FancyPopupMenu submenu;
-    private JLabel headerLabel = new JLabel("no header yet");
+    private JPopupMenu menu;
+    private JLabel headerLabel = new JLabel();
     private JPanel headerPanel =
         new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     private String[] people;
 
     public FromWidget() {
-        Window owner = (Window) getTopLevelAncestor();
-        menu = new FancyPopupMenu(owner);
+        menu = new JPopupMenu();
+        menu.setBorder(border);
+        //setInsets(menu);
 
         configureHeader();
         layoutComponents();
@@ -44,9 +43,10 @@ public class FromWidget extends JPanel {
     }
 
     private void configureHeader() {
-        headerPanel.setOpaque(false);
-        headerPanel.setBorder(noBorder);
+        // The label has to be in a panel so we can add a border.
         headerPanel.add(headerLabel);
+        headerPanel.setBorder(noBorder);
+        headerPanel.setOpaque(false);
 
         headerLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -61,18 +61,35 @@ public class FromWidget extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (people.length == 0) return;
-                if (menu.isVisible()) {
-                    menu.setVisible(false);
-                } else {
-                    menu.showOver(headerLabel);
+                if (people.length > 0) {
+                    menu.show((Component) e.getSource(), -R, -R);
                 }
             }
         });
     }
 
-    private String getSelectedPerson() {
-        return people.length > 1 ? menu.getSelectedText() : people[0];
+    private Action getChatAction(final String person) {
+        return new AbstractAction("Chat") {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("starting chat with " + person);
+            }
+        };
+    }
+
+    private Action getLibraryAction(final String person) {
+        return new AbstractAction("View library") {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("viewing library of " + person);
+            }
+        };
+    }
+
+    private Action getSharingAction(final String person) {
+        return new AbstractAction("Files I'm Sharing") {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("showing files shared by " + person);
+            }
+        };
     }
 
     private void layoutComponents() {
@@ -80,29 +97,18 @@ public class FromWidget extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.anchor = GridBagConstraints.NORTH;
-        gbc.insets = new Insets(FancyPopupMenu.CORNER_RADIUS, 0, 0, 0);
+        gbc.insets = new Insets(R, 0, 0, 0);
         add(new JLabel("From "), gbc);
 
         gbc.insets.top = 0;
         add(headerPanel, gbc);
     }
 
-    private void populateLastMenu(FancyPopupMenu lastMenu) {
-        Action action = new AbstractAction("Chat") {
-            public void actionPerformed(ActionEvent e) {
-                System.out.println(
-                    "starting chat with " + getSelectedPerson());
-            }
-        };
-        lastMenu.addItem(action);
-        
-        action = new AbstractAction("View Library") {
-            public void actionPerformed(ActionEvent e) {
-                System.out.println(
-                    "viewing library of " + getSelectedPerson());
-            }
-        };
-        lastMenu.addItem(action);
+    private void setInsets(Component component) {
+        JComponent jc = (JComponent) component;
+        Insets insets = jc.getInsets();
+        insets.left = insets.right = 0;
+        insets.top = insets.bottom = 2;
     }
 
     public void setPeople(List<String> people) {
@@ -111,9 +117,7 @@ public class FromWidget extends JPanel {
 
     public void setPeople(String[] people) {
         this.people = people;
-        menu.clear();
-        submenu = null;
-	menu.setSubmenu(null);
+        menu.removeAll();
         updateHeaderLabel();
         updateMenus();
     }
@@ -124,34 +128,28 @@ public class FromWidget extends JPanel {
             people.length == 1 ? people[0] + DOWN_ARROW :
             people.length + " people " + DOWN_ARROW;
         headerLabel.setText(text);
-        menu.setHeader(text);
+        menu.setLabel(text);
+        menu.add(text);
     }
 
     private void updateMenus() {
-        // TODO: RMV Why is the next line needed?
-        // The next line removes headerLabel from panel
-        // because it can't be in two containers!
-        headerPanel.add(headerLabel);
-
-        if (people.length == 0) return; // menus have no items
+        if (people.length == 0) return; // menu has no items
 
         if (people.length == 1) {
-            populateLastMenu(menu);
-
+            String person = people[0];
+            menu.add(getChatAction(person));
+            menu.add(getLibraryAction(person));
             menu.addSeparator();
-
-            Action action = new AbstractAction("Files I'm Sharing") {
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println(
-                        "showing files shared by " + getSelectedPerson());
-                }
-            };
-            menu.addItem(action);
+            menu.add(getSharingAction(person));
         } else {
-            menu.addItems(people);
-            submenu = new FancyPopupMenu(menu);
-            menu.setSubmenu(submenu);
-            populateLastMenu(submenu);
+            for (String person : people) {
+                JMenu submenu = new JMenu(person);
+                submenu.setBorder(border);
+                submenu.add(getChatAction(person));
+                submenu.add(getLibraryAction(person));
+
+                menu.add(submenu);
+            }
         }
     }
 }
