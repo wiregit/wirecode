@@ -34,7 +34,7 @@ class MessageWriterImpl implements MessageWriter {
         return new MessageImpl(localID, friend, message, type);
     }
 
-    public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
+    public void setChatState(ChatState chatState) throws XMPPException {
         writer.setChatState(chatState);
     }
 }

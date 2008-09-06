@@ -12,5 +12,5 @@ public interface MessageWriter {
      */
     public void writeMessage(String message) throws XMPPException;
 
-    public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException;
+    public void setChatState(ChatState chatState) throws XMPPException;
 }

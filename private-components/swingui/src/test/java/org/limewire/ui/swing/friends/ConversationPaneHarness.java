@@ -29,7 +29,7 @@ public class ConversationPaneHarness {
                         new MessageReceivedEvent(new MessageImpl("me", friend, message, Type.Sent)).publish();
                     }
 
-                    public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
+                    public void setChatState(ChatState chatState) {
                         // TODO
                     }
                 };

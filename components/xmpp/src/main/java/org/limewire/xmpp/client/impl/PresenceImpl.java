@@ -49,8 +49,12 @@ class PresenceImpl implements Presence {
                 }
             }
             
-            public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
-                ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
+            public void setChatState(ChatState chatState) throws XMPPException {
+                try {
+                    ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
+                } catch (org.jivesoftware.smack.XMPPException e) {
+                    throw new XMPPException(e);
+                }
             }
         };
     }
@@ -72,8 +76,12 @@ class PresenceImpl implements Presence {
                                 }
                             }
 
-                            public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
-                                ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
+                            public void setChatState(ChatState chatState) throws XMPPException {
+                                try {
+                                    ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
+                                } catch (org.jivesoftware.smack.XMPPException e) {
+                                    throw new XMPPException(e);
+                                }
                             }
                         };
                         final MessageReader reader = listener.incomingChat(writer);
