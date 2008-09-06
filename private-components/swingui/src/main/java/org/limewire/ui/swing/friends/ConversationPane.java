@@ -33,6 +33,7 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
 
 import com.google.inject.assistedinject.Assisted;
@@ -48,10 +49,11 @@ public class ConversationPane extends JPanel implements Displayable {
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private ArrayList<Message> messages = new ArrayList<Message>();
     private JEditorPane editor;
-    private IconLibrary icons;
+    private final IconLibrary icons;
     private final String conversationName;
     private final Color BACKGROUND_COLOR = Color.WHITE;
     private ResizingInputPanel inputPanel;
+    private ChatState currentChatState;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, IconLibrary icons) {
@@ -92,23 +94,36 @@ public class ConversationPane extends JPanel implements Displayable {
         EventAnnotationProcessor.subscribe(this);
     }
     
-    @RuntimeTopicEventSubscriber
+    @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
         LOG.debugf("Message: from {0} text: {1} topic: {2}", event.getMessage().getSenderName(), event.getMessage().getMessageText(), topic);
-        handleMessage(event.getMessage());
+        messages.add(event.getMessage());
+        displayMessages();
+    }
+    
+    @RuntimeTopicEventSubscriber(methodName="getChatStateTopicName")
+    public void handleChatStateUpdate(String topic, ChatStateEvent event) {
+        LOG.debugf("Chat state update for {0} to {1}", event.getFriend().getName(), event.getState());
+        if (currentChatState != event.getState()) {
+            currentChatState = event.getState();
+            displayMessages();
+        }
     }
     
     public void closeChat() {
         EventAnnotationProcessor.unsubscribe(this);
     }
     
-    public String getTopicName() {
+    public String getMessageReceivedTopicName() {
         return MessageReceivedEvent.buildTopic(conversationName);
     }
+
+    public String getChatStateTopicName() {
+        return ChatStateEvent.buildTopic(conversationName);
+    }
     
-    private void handleMessage(Message message) {
-        messages.add(message);
-        String chatDoc = ChatDocumentBuilder.buildChatText(messages);
+    private void displayMessages() {
+        String chatDoc = ChatDocumentBuilder.buildChatText(messages, currentChatState);
         LOG.debugf("Chat doc: {0}", chatDoc);
         editor.setText(chatDoc);
     }
@@ -124,6 +139,7 @@ public class ConversationPane extends JPanel implements Displayable {
         panel.add(libraryButton, BorderLayout.NORTH);
         inputPanel = new ResizingInputPanel(writer);
         panel.add(inputPanel, BorderLayout.CENTER);
+
         return panel;
     }
     

@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.friends;
 
-import org.limewire.ui.swing.friends.Message.Type;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.util.ArrayList;
+
+import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.xmpp.api.client.ChatState;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -38,18 +40,37 @@ class ChatDocumentBuilder {
         "</body>" +
         "</html>";
     
-    public static String buildChatText(ArrayList<Message> messages) {
+    public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState) {
+        boolean otherConversantIsTyping = currentChatState == ChatState.composing;
+        
         StringBuilder builder = new StringBuilder();
         builder.append(TOP);
         
-        for(int i = 0; i < messages.size(); i++) {
-            Message message = messages.get(i);
-            if(!isPreviousFromSameSender(message, messages, i)) {
+        Type lastMessageType = null;
+        String otherConversantName = null;
+        
+        for(Message message : messages) {
+
+            if (message.getType() == Type.Received) {
+                otherConversantName = message.getSenderName();
+            }
+
+            if (lastMessageType == null) {
+                //The first message of a conversation
+                appendDiv(builder, message);
+            } else if (lastMessageType != message.getType()) {
+                builder.append(LINE_BREAK);
                 appendDiv(builder, message);
             }
+            lastMessageType = message.getType();
+            
             builder.append(processContent(message));
             
-            builder.append(LINE_BREAK).append(isNextFromSameSender(message, messages, i) ? "" : LINE_BREAK);
+            builder.append(LINE_BREAK);
+        }
+        
+        if(otherConversantIsTyping) {
+            appendIsTypingMessage(builder, otherConversantName);
         }
         
         builder.append(BOTTOM);
@@ -60,34 +81,30 @@ class ChatDocumentBuilder {
         Type type = message.getType();
         String cssClass = type == Type.Sent ? "me" : type == Type.Received ? "them" : "typing";
         String content = message.getSenderName();
-        if (type == Type.Typing) {
-            content += tr(" is typing a message...");
-        }
         return builder.append("<div class=\"")
         .append(cssClass)
         .append("\">")
         .append(content)
-        .append(type != Type.Typing ? ":" : "")
+        .append(":")
         .append("</div>");
+    }
+    
+    private static void appendIsTypingMessage(StringBuilder builder, String senderName) {
+        String cssClass = "typing";
+        String content = senderName + tr(" is typing a message...");
+        
+        builder.append("<div class=\"")
+        .append(cssClass)
+        .append("\">")
+        .append(content)
+        .append("</div>")
+        .append("<br/>");
     }
 
     private static String processContent(Message message) {
-        if (message.getType() == Type.Typing) {
-            return "";
-        }
-        
         String messageText = message.getMessageText();
-        
         messageText = messageText.replace("<", "&lt;").replace(">", "&gt;");
         
         return URLWrapper.wrap(messageText);
-    }
-    
-    private static boolean isPreviousFromSameSender(Message message, ArrayList<Message> messages, int index) {
-        return index > 0 && message.getType() == messages.get(index - 1).getType();
-    }
-    
-    private static boolean isNextFromSameSender(Message message, ArrayList<Message> messages, int index) {
-        return index + 1 < messages.size() && message.getType() == messages.get(index + 1).getType();
     }
 }

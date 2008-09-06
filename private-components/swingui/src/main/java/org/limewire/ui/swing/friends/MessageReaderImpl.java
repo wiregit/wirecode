@@ -11,8 +11,10 @@ class MessageReaderImpl implements MessageReader {
     }
 
     public void readMessage(final String message) {
-        final Message msg = newMessage(message, message == null ? Message.Type.Typing : Message.Type.Received);
-        new MessageReceivedEvent(msg).publish();
+        if (message != null) {
+            final Message msg = newMessage(message, Message.Type.Received);
+            new MessageReceivedEvent(msg).publish();
+        }
     }
 
     private Message newMessage(String message, Message.Type type) {
@@ -20,6 +22,6 @@ class MessageReaderImpl implements MessageReader {
     }
 
     public void newChatState(ChatState chatState) {
-        // TODO update the UI
+        new ChatStateEvent(friend, chatState).publish();
     }
 }
