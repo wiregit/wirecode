@@ -1,14 +1,14 @@
 package org.limewire.ui.swing.friends;
 
-import java.awt.Dimension;
+import java.awt.*;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.XMPPException;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -27,6 +27,10 @@ public class ConversationPaneHarness {
                     @Override
                     public void writeMessage(String message) throws XMPPException {
                         new MessageReceivedEvent(new MessageImpl("me", friend, message, Type.Sent)).publish();
+                    }
+
+                    public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
+                        // TODO
                     }
                 };
                 friend.writer = writer;

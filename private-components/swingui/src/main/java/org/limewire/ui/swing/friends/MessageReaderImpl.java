@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends;
 
 import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.ChatState;
 
 class MessageReaderImpl implements MessageReader {
     private final Friend friend;
@@ -16,5 +17,9 @@ class MessageReaderImpl implements MessageReader {
 
     private Message newMessage(String message, Message.Type type) {
         return new MessageImpl(friend.getName(), friend, message, type);
+    }
+
+    public void newChatState(ChatState chatState) {
+        // TODO update the UI
     }
 }

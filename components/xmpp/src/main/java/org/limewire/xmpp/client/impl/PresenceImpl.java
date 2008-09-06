@@ -4,9 +4,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.IncomingChatListener;
@@ -31,9 +31,13 @@ class PresenceImpl implements Presence {
         if(LOG.isInfoEnabled()) {
             LOG.info("new chat with " + getJID());
         }
-        final Chat chat = connection.getChatManager().createChat(StringUtils.parseBareAddress(getJID()), new MessageListener() {
+        final Chat chat = connection.getChatManager().createChat(StringUtils.parseBareAddress(getJID()), new ChatStateListener() {
             public void processMessage(Chat chat, Message message) {
                 reader.readMessage(message.getBody());
+            }
+
+            public void stateChanged(Chat chat, org.jivesoftware.smackx.ChatState state) {
+                reader.newChatState(ChatState.valueOf(state.toString()));
             }
         });
         return new MessageWriter() {
@@ -74,10 +78,14 @@ class PresenceImpl implements Presence {
                         };
                         final MessageReader reader = listener.incomingChat(writer);
                         // TODO race condition
-                        chat.addMessageListener(new MessageListener() {
+                        chat.addMessageListener(new ChatStateListener() {
                             public void processMessage(Chat chat, Message message) {
                                 reader.readMessage(message.getBody());
-                            }                        
+                            }
+
+                            public void stateChanged(Chat chat, org.jivesoftware.smackx.ChatState state) {
+                                reader.newChatState(ChatState.valueOf(state.toString()));
+                            }
                         });
                     }
                 }

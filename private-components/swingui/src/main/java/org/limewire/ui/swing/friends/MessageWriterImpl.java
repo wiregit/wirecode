@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
 
@@ -31,5 +32,9 @@ class MessageWriterImpl implements MessageWriter {
 
     private Message newMessage(String message, Message.Type type) {
         return new MessageImpl(localID, friend, message, type);
+    }
+
+    public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
+        writer.setChatState(chatState);
     }
 }

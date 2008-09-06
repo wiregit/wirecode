@@ -11,6 +11,7 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
@@ -138,6 +139,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("adding connection listener for "+ connection.toString());
                     }
+                    ChatStateManager.getInstance(connection);
                     ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     Address address = null;
                     synchronized (XMPPConnectionImpl.this) {
