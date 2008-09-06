@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import javax.swing.AbstractButton;
@@ -61,8 +63,6 @@ public class ActionButtonPanel extends JPanel {
 
         setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
         createButtons();
-
-        setOpaque(false);
     }
 
     private void calculateHeight() {
@@ -145,6 +145,16 @@ public class ActionButtonPanel extends JPanel {
         return buttonIndex == DOWNLOAD ? downloadUpIcon :
             buttonIndex == MORE_INFO ? infoUpIcon :
             buttonIndex == MARK_AS_JUNK ? junkUpIcon : null;
+    }
+
+    @Override
+    public void setBackground(Color bg) {
+        super.setBackground(bg);
+        
+        Component[] components = getComponents();
+        for (Component component : components) {
+            component.setBackground(bg);
+        }
     }
 
     /**

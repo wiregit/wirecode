@@ -151,7 +151,15 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private JPanel makePanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
+        JPanel panel = new JPanel(new GridBagLayout()) {
+            @Override
+            public void setBackground(Color bg) {
+                super.setBackground(bg);
+                if (actionComponent != null) {
+                    actionComponent.setBackground(bg);
+                }
+            }
+        };
         panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         GridBagConstraints gbc = new GridBagConstraints();
 
