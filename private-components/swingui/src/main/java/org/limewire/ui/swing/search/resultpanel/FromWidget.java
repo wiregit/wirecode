@@ -14,8 +14,7 @@ import javax.swing.border.Border;
 import org.limewire.ui.swing.RoundedBorder;
 
 /**
- * Note that we can't use JPopupMenu for this because it doesn't have
- * the look called for in the spec.
+ * This widget is used in the search results list view.
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
@@ -26,10 +25,10 @@ public class FromWidget extends JPanel {
 
     private Border border = new RoundedBorder(R);
     private Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
-    private JPopupMenu menu;
     private JLabel headerLabel = new JLabel();
     private JPanel headerPanel =
         new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    private JPopupMenu menu;
     private String[] people;
 
     public FromWidget() {
@@ -147,7 +146,7 @@ public class FromWidget extends JPanel {
         } else {
             for (String person : people) {
                 JMenu submenu = new JMenu(person);
-                submenu.setBorder(border);
+                //submenu.setBorder(border);
                 submenu.add(getChatAction(person));
                 submenu.add(getLibraryAction(person));
 

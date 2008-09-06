@@ -25,6 +25,8 @@ public class BaseResultPanel extends JXPanel {
     
     private ActionColumnTableCellEditor actionEditor =
         new ActionColumnTableCellEditor();
+    private ActionColumnTableCellEditor actionRenderer =
+        new ActionColumnTableCellEditor();
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
     private ConfigurableTable<VisualSearchResult> resultsList;
@@ -63,9 +65,20 @@ public class BaseResultPanel extends JXPanel {
         resultsList.setEventList(eventList);
         resultsList.setTableFormat(new ListViewTableFormat());
 
+        // Note that the same ListViewTableCellEditor instance
+        // can be used for both the editor and the renderer
+        // because the renderer receives paint requests for some cells
+        // while another cell is being edited
+        // and they can't share state (the list of sources).
+        // The two ListViewTableCellEditor instances
+        // can share the same ActionColumnTableCellEditor though.
+
+        ListViewTableCellEditor renderer =
+            new ListViewTableCellEditor(actionRenderer);
+        resultsList.setDefaultRenderer(VisualSearchResult.class, renderer);
+
         ListViewTableCellEditor editor =
             new ListViewTableCellEditor(actionEditor);
-        resultsList.setDefaultRenderer(VisualSearchResult.class, editor);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
@@ -86,8 +99,10 @@ public class BaseResultPanel extends JXPanel {
         resultsTable.setDefaultRenderer(
             Component.class, new ComponentTableCellRenderer());
 
-        resultsTable.setDefaultRenderer(VisualSearchResult.class, actionEditor);
-        resultsTable.setDefaultEditor(VisualSearchResult.class, actionEditor);
+        resultsTable.setDefaultRenderer(
+            VisualSearchResult.class, actionRenderer);
+        resultsTable.setDefaultEditor(
+            VisualSearchResult.class, actionEditor);
 
         int columnIndex = tableFormat.getActionColumnIndex();
         resultsTable.setColumnWidth(columnIndex, 100);

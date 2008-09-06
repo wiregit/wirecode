@@ -98,7 +98,6 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value,
         boolean isSelected, boolean hasFocus,
         int row, int column) {
-
         JPanel panel = (JPanel) getTableCellEditorComponent(
             table, value, isSelected, row, column);
 
@@ -200,20 +199,24 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populateHeading(VisualSearchResult vsr) {
+        String name = getProperty(vsr, PropertyKey.NAME);
         String heading;
 
         if (MediaType.SCHEMA_AUDIO.equals(schema)) {
-            heading = vsr.getProperty(PropertyKey.ARTIST_NAME)
-                + " - " + vsr.getProperty(PropertyKey.NAME);
+            heading = getProperty(vsr, PropertyKey.ARTIST_NAME) + " - " + name;
         } else if (MediaType.SCHEMA_VIDEO.equals(schema)
             || MediaType.SCHEMA_IMAGES.equals(schema)) {
-            heading = vsr.getProperty(PropertyKey.NAME).toString();
+            heading = name;
         } else {
-            heading = vsr.getProperty(PropertyKey.NAME)
-                + "." + vsr.getFileExtension();
+            heading = name + "." + vsr.getFileExtension();
         }
 
         headingLabel.setText(heading);
+    }
+
+    private String getProperty(VisualSearchResult vsr, PropertyKey key) {
+        Object property = vsr.getProperty(key);
+        return property == null ? "?" : property.toString();
     }
 
     private void populatePanel(VisualSearchResult vsr) {
