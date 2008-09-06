@@ -100,7 +100,7 @@ public class ChatPanel extends JPanel implements Displayable {
     }
 
     private void closeChat(String chatKey) {
-        LOG.debugf("Closing clat panel for {0}", chatKey);
+        LOG.debugf("Closing chat panel for {0}", chatKey);
         chats.remove(chatKey).closeChat();
     }
 
