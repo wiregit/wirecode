@@ -7,6 +7,8 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatStateManager;
+import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -42,6 +44,10 @@ class PresenceImpl implements Presence {
                     throw new XMPPException(e);
                 }
             }
+            
+            public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
+                ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
+            }
         };
     }
 
@@ -60,6 +66,10 @@ class PresenceImpl implements Presence {
                                 } catch (org.jivesoftware.smack.XMPPException e) {
                                     throw new XMPPException(e);
                                 }
+                            }
+
+                            public void setChatState(ChatState chatState) throws org.jivesoftware.smack.XMPPException {
+                                ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
                             }
                         };
                         final MessageReader reader = listener.incomingChat(writer);

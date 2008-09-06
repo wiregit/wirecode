@@ -5,4 +5,6 @@ package org.limewire.xmpp.api.client;
  */
 public interface MessageReader {
     public void readMessage(String message);
+
+    public void newChatState(ChatState chatState);
 }
