@@ -70,6 +70,7 @@ public class FromWidget extends JPanel {
 
     private Action getChatAction(final String person) {
         return new AbstractAction("Chat") {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("starting chat with " + person);
             }
@@ -78,6 +79,7 @@ public class FromWidget extends JPanel {
 
     private Action getLibraryAction(final String person) {
         return new AbstractAction("View library") {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("viewing library of " + person);
             }
@@ -86,6 +88,7 @@ public class FromWidget extends JPanel {
 
     private Action getSharingAction(final String person) {
         return new AbstractAction("Files I'm Sharing") {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("showing files shared by " + person);
             }
