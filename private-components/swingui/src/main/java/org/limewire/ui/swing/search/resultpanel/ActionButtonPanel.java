@@ -61,6 +61,8 @@ public class ActionButtonPanel extends JPanel {
 
         setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
         createButtons();
+
+        setOpaque(false);
     }
 
     private void calculateHeight() {
@@ -72,6 +74,7 @@ public class ActionButtonPanel extends JPanel {
 
     private void createButtons() {
         int buttonIndex = 0;
+
         for (Icon[] iconSet : icons) {
             Icon upIcon = iconSet[0];
             Icon overIcon = iconSet[1];

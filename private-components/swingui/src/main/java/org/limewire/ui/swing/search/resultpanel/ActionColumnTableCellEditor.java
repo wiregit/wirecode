@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import ca.odell.glazedlists.swing.EventTableModel;
-
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -32,7 +30,6 @@ implements TableCellEditor, TableCellRenderer {
     
     private ActionButtonPanel panel;
     private VisualSearchResult vsr;
-    private boolean internalSelect;
     
     @Override
     public Object getCellEditorValue() {
@@ -44,29 +41,13 @@ implements TableCellEditor, TableCellRenderer {
         
         panel = new ActionButtonPanel();
         
-        table.setRowHeight(panel.getIconHeight() + 2*table.getRowMargin());
-        
         JToggleButton junkButton = panel.getJunkButton();
         junkButton.addItemListener(new ItemListener() {
             @SuppressWarnings("unchecked")
             @Override
             public void itemStateChanged(ItemEvent event) {
-                if (internalSelect) return;
-                
-                int row = table.getSelectedRow();
-                int column = table.getSelectedColumn();
-                
-                EventTableModel<VisualSearchResult> model =
-                    (EventTableModel<VisualSearchResult>) table.getModel();
-                VisualSearchResult vsr = model.getElementAt(row);
-                
                 boolean junk = event.getStateChange() == ItemEvent.SELECTED;
-                
                 junkMap.put(vsr, junk);
-                
-                model.fireTableCellUpdated(row, column);
-                
-                fireEditingStopped(); // make renderer reappear
             }
         });
         
@@ -80,10 +61,13 @@ implements TableCellEditor, TableCellRenderer {
         
         panel = getPanel(table);
         vsr = (VisualSearchResult) value;
-        internalSelect = true;
+
+        // If the VisualSearchResult for the current row is currently
+        // marked as junk then display the junkButton as pressed.
         JToggleButton junkButton = panel.getJunkButton();
-        junkButton.getModel().setPressed(isJunk(vsr));
-        internalSelect = false;
+        boolean junk = isJunk(vsr);
+        junkButton.setSelected(junk);
+
         return panel;
     }
 
@@ -92,10 +76,8 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column) {
         
-        Component component = getTableCellEditorComponent(
+        return getTableCellEditorComponent(
             table, value, isSelected, row, column);
-        
-        return component;
     }
     
     @Override
@@ -104,8 +86,6 @@ implements TableCellEditor, TableCellRenderer {
     }
     
     private boolean isJunk(VisualSearchResult vsr) {
-        if (vsr == null) return false;
-        
         Boolean junk = junkMap.get(vsr);
         if (junk == null) junk = false;
         return junk;

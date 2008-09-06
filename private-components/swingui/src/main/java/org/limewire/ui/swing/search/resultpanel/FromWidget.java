@@ -51,19 +51,16 @@ public class FromWidget extends JPanel {
         headerLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                System.out.println("FromWidget: got mouseEntered");
                 headerPanel.setBorder(border);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                System.out.println("FromWidget: got mouseExited");
                 if (!menu.isVisible()) headerPanel.setBorder(noBorder);
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println("FromWidget: got mousePressed");
                 if (people.length == 0) return;
                 if (menu.isVisible()) {
                     menu.setVisible(false);

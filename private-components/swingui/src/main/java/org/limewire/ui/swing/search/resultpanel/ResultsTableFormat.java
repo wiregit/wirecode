@@ -62,6 +62,8 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
         Font font = label.getFont().deriveFont(Font.PLAIN);
         label.setFont(font);
 
+        label.setOpaque(true);
+
         return label;
     }
 

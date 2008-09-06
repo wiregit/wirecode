@@ -24,6 +24,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 //TODO comment this beast
+import javax.swing.event.ChangeEvent;
 public class MouseableTable extends JXTable {
     
 	private TablePopupHandler popupHandler;
@@ -40,6 +41,12 @@ public class MouseableTable extends JXTable {
 		super(model);
 		initialize();
 	}
+
+    @Override
+    public void editingCanceled(ChangeEvent e) {
+        super.editingCanceled(e);
+        System.out.println("MouseableTable.editingCanceled called");
+    }
 	
 	public void setPopupHandler(TablePopupHandler popupHandler) {
 		this.popupHandler = popupHandler;
@@ -72,6 +79,7 @@ public class MouseableTable extends JXTable {
                 // If the cell is editable and
                 // it's not already being edited ...
                 if (isCellEditable(row, col)) {
+                    // Mark commented the following line.
                     //&& (row != getEditingRow() || col != getEditingColumn())) {
                     editCellAt(row, col);
                 }
@@ -105,18 +113,32 @@ public class MouseableTable extends JXTable {
 			}
 
 			@Override
-			public void mouseExited(MouseEvent e) {//clears mouseover color - necessary for coordinating between multiple tables
-				TableCellEditor editor = getCellEditor();
-				Component component = e.getComponent();
-				//if component isn't editor we shouldn't be editing
-				if (editor != null && component != editor) {
-					//check subcomponent too - this prevents color from flashing
-					//when mousing over the buttons
-					if (component == null
-							|| component.getComponentAt(e.getPoint()) != editor) {
-						editor.cancelCellEditing();
-					}
+			public void mouseExited(MouseEvent e) {
+                // clears mouseover color -
+                // necessary for coordinating between multiple tables
 
+				TableCellEditor editor = getCellEditor();
+                //System.out.println("MouseableTable.mouseExited: editor is a "
+                //    + editor.getClass().getName());
+
+				Component component = e.getComponent();
+                //System.out.println("MouseableTable.mouseExited: component is a "
+                //    + component.getClass().getName());
+
+				// if component isn't editor we shouldn't be editing
+				if (editor != null && component != editor) {
+					// check subcomponent too - this prevents
+                    // color from flashing when mousing over the buttons
+					Component componentAtPoint =
+                        component.getComponentAt(e.getPoint());
+                    //System.out.println(
+                    //    "MouseableTable.mouseExited: componentAtPoint is a "
+                    //    + componentAtPoint.getClass().getName());
+
+					if (component == null || componentAtPoint != editor) {
+                        // Mark commented the following line.
+						//editor.cancelCellEditing();
+					}
 				}
 			}
 			

@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
@@ -16,8 +17,8 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractCellEditor;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -44,16 +45,21 @@ implements TableCellEditor, TableCellRenderer {
 
     @Resource private Icon downloadIcon;
 
+    private ActionColumnTableCellEditor actionEditor;
+    private Component actionComponent;
     private FromWidget fromWidget = new FromWidget();
     private JLabel headingLabel = new JLabel();
     private JLabel similarLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
+    private JPanel actionPanel = new JPanel();
     private JPanel thePanel;
     private String schema;
     private VisualSearchResult vsr;
     private int similarCount;
 
-    public ListViewTableCellEditor() {
+    public ListViewTableCellEditor(ActionColumnTableCellEditor actionEditor) {
+        this.actionEditor = actionEditor;
+
         // Cause the @Resource fields to be injected
         // using properties in AppFrame.properties.
         // The icon PNG file is in swingui/src/main/resources/
@@ -67,8 +73,8 @@ implements TableCellEditor, TableCellRenderer {
 
     public Component getTableCellEditorComponent(
         JTable table, Object value, boolean isSelected, int row, int column) {
-        vsr = (VisualSearchResult) value;
 
+        vsr = (VisualSearchResult) value;
         MediaType mediaType =
             MediaType.getMediaTypeForExtension(vsr.getFileExtension());
         schema = mediaType == null ? "other" : mediaType.toString();
@@ -77,10 +83,13 @@ implements TableCellEditor, TableCellRenderer {
 
         if (thePanel == null) thePanel = makePanel();
 
+        actionComponent = actionEditor.getTableCellEditorComponent(
+            table, value, isSelected, row, column);
+        actionPanel.removeAll();
+        actionPanel.add(actionComponent);
+
         populatePanel((VisualSearchResult) value);
         setBackground(isSelected);
-
-        thePanel.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
 
         return thePanel;
     }
@@ -92,7 +101,7 @@ implements TableCellEditor, TableCellRenderer {
 
         JPanel panel = (JPanel) getTableCellEditorComponent(
             table, value, isSelected, row, column);
-        panel.setBorder(BorderFactory.createEmptyBorder());
+
         return panel;
     }
 
@@ -155,24 +164,20 @@ implements TableCellEditor, TableCellRenderer {
         panel.add(makeCenterPanel(), gbc);
 
         gbc.weightx = 0;
-        panel.add(makeRightPanel(), gbc);
+        panel.add(actionPanel, gbc);
 
-        panel.addMouseMotionListener(new MouseAdapter() {
+        panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println("got a mouse press; button = " + e.getButton());
                 if (e.getButton() == 3) {
-                    System.out.println("got a right click");
+                    JComponent component = (JComponent) e.getSource();
+                    Window window = (Window) component.getTopLevelAncestor();
+                    SearchResultMenu menu = new SearchResultMenu(window, vsr);
+                    menu.show(component, e.getX(), e.getY());
                 }
             }
         });
 
-        return panel;
-    }
-
-    private Component makeRightPanel() {
-        JPanel panel = new ActionButtonPanel();
-        panel.setOpaque(false);
         return panel;
     }
 

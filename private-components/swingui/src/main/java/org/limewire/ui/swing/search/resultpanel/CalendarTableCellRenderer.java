@@ -36,6 +36,8 @@ public class CalendarTableCellRenderer implements TableCellRenderer {
         Font font = label.getFont().deriveFont(Font.PLAIN);
         label.setFont(font);
 
+        label.setOpaque(false);
+
         return label;
     }
 }

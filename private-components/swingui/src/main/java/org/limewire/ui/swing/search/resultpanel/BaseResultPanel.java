@@ -23,6 +23,8 @@ import org.limewire.ui.swing.ConfigurableTable;
 
 public class BaseResultPanel extends JXPanel {
     
+    private ActionColumnTableCellEditor actionEditor =
+        new ActionColumnTableCellEditor();
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
     private ConfigurableTable<VisualSearchResult> resultsList;
@@ -61,12 +63,15 @@ public class BaseResultPanel extends JXPanel {
         resultsList.setEventList(eventList);
         resultsList.setTableFormat(new ListViewTableFormat());
 
-        ListViewTableCellEditor editor = new ListViewTableCellEditor();
+        ListViewTableCellEditor editor =
+            new ListViewTableCellEditor(actionEditor);
         resultsList.setDefaultRenderer(VisualSearchResult.class, editor);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
         resultsList.setColumnWidth(0, ListViewTableCellEditor.WIDTH);
+
+        resultsList.setRowHeight(42);
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,
@@ -80,14 +85,9 @@ public class BaseResultPanel extends JXPanel {
             Calendar.class, new CalendarTableCellRenderer());
         resultsTable.setDefaultRenderer(
             Component.class, new ComponentTableCellRenderer());
-        // TODO: RMV Numbers are getting right-aligned without this!
-        // TODO: RMV Maybe NumberTableCellRenderer isn't needed.
-        //resultsTable.setDefaultRenderer(
-        //    Number.class, new NumberTableCellRenderer());
 
-        ActionColumnTableCellEditor editor = new ActionColumnTableCellEditor();
-        resultsTable.setDefaultRenderer(VisualSearchResult.class, editor);
-        resultsTable.setDefaultEditor(VisualSearchResult.class, editor);
+        resultsTable.setDefaultRenderer(VisualSearchResult.class, actionEditor);
+        resultsTable.setDefaultEditor(VisualSearchResult.class, actionEditor);
 
         int columnIndex = tableFormat.getActionColumnIndex();
         resultsTable.setColumnWidth(columnIndex, 100);
@@ -103,6 +103,8 @@ public class BaseResultPanel extends JXPanel {
         for (int i = columnCount - 1; i > lastVisibleColumnIndex; i--) {
             resultsTable.setColumnVisible(i, false);
         }
+
+        resultsTable.setRowHeight(26);
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {
