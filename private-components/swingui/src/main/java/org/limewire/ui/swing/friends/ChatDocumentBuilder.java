@@ -41,8 +41,6 @@ class ChatDocumentBuilder {
         "</html>";
     
     public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState) {
-        boolean otherConversantIsTyping = currentChatState == ChatState.composing;
-        
         StringBuilder builder = new StringBuilder();
         builder.append(TOP);
         
@@ -69,9 +67,7 @@ class ChatDocumentBuilder {
             builder.append(LINE_BREAK);
         }
         
-        if(otherConversantIsTyping) {
-            appendIsTypingMessage(builder, otherConversantName);
-        }
+        appendIsTypingMessage(builder, otherConversantName, currentChatState);
         
         builder.append(BOTTOM);
         return builder.toString();
@@ -89,9 +85,21 @@ class ChatDocumentBuilder {
         .append("</div>");
     }
     
-    private static void appendIsTypingMessage(StringBuilder builder, String senderName) {
+    private static void appendIsTypingMessage(StringBuilder builder, String senderName, ChatState chatState) {
+        String stateMessage = null;
+        switch(chatState) {
+        case composing:
+            stateMessage = " is typing a message...";
+            break;
+        case paused:
+            stateMessage = " has entered text";
+            break;
+        default:
+            return;
+        }
+        
         String cssClass = "typing";
-        String content = senderName + tr(" is typing a message...");
+        String content = senderName + tr(stateMessage);
         
         builder.append("<div class=\"")
         .append(cssClass)

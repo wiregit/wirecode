@@ -36,11 +36,20 @@ public class ChatDocumentBuilderTest extends TestCase {
                 new String[] {"hey there"});
     }
 
-    public void testBuildChatTextForExternallyInitiatedConversationMessages() {
+    public void testBuildChatTextForExternallyInitiatedConversationWhenTheyAreTyping() {
         StringBuilder conversation = new StringBuilder();
         conversation.append("<div class=\"them\">you:</div>heynow<br/>")
                     .append("<div class=\"typing\">you is typing a message...</div><br/>");
         compareOutput(conversation.toString(), ChatState.composing, 
+                new Type[] {Type.Received},  
+                new String[] {"heynow"});
+    }
+
+    public void testBuildChatTextForExternallyInitiatedConversationWhenTheyArePaused() {
+        StringBuilder conversation = new StringBuilder();
+        conversation.append("<div class=\"them\">you:</div>heynow<br/>")
+        .append("<div class=\"typing\">you has entered text</div><br/>");
+        compareOutput(conversation.toString(), ChatState.paused, 
                 new Type[] {Type.Received},  
                 new String[] {"heynow"});
     }
