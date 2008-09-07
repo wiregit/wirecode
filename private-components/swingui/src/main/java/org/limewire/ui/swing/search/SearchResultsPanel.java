@@ -104,7 +104,7 @@ public class SearchResultsPanel extends JPanel {
             @Override
             public void searchFiltered() {
                 SearchCategory category = getCategory(filteredList);
-                resultsContainer.showCategory(category);
+                updateCategory(category);
             }
         });
 
@@ -119,11 +119,9 @@ public class SearchResultsPanel extends JPanel {
         SearchTabItems.SearchTabListener listener =
             new SearchTabItems.SearchTabListener() {
             @Override
-            public void categorySelected(SearchCategory searchCategory) {
+            public void categorySelected(SearchCategory category) {
                 sortAndFilterPanel.clearFilterBox();
-                resultsContainer.showCategory(searchCategory);
-                syncColumnHeader();
-                syncSortBy();
+                updateCategory(category);
             }
         };
         
@@ -261,5 +259,11 @@ public class SearchResultsPanel extends JPanel {
         bottom.add(sponsoredResultsPanel, "aligny top, alignx right");
         scrollPane.setViewportView(bottom);
         syncColumnHeader();
+    }
+
+    private void updateCategory(SearchCategory category) {
+        resultsContainer.showCategory(category);
+        syncColumnHeader();
+        syncSortBy();
     }
 }

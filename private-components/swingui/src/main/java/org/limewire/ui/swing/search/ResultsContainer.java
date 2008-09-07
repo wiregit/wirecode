@@ -93,9 +93,6 @@ public class ResultsContainer extends JXPanel {
     }
     
     void showCategory(SearchCategory category) {
-        System.out.println(
-            "ResultsContainer.showCategory: changing category to "
-            + category.name());
         String name = category.name();
         currentPanel = panelMap.get(name); 
         cardLayout.show(this, name);
