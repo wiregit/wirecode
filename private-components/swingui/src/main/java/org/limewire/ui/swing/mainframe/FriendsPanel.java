@@ -3,14 +3,13 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Panel;
 import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.jdesktop.swingx.JXCollapsiblePane;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.PanelDisplayedEvent;
@@ -30,18 +29,18 @@ import com.google.inject.Singleton;
  * TODO: Add Javadocs
  */
 @Singleton
-public class FriendsPanel extends JXCollapsiblePane implements Resizable{
+public class FriendsPanel extends JXPanel implements Resizable{
     private final LoginPanel loginPanel;
     private final ChatPanel chatPanel;
     //Heavy-weight component so that it can appear above other heavy-weight components
-    private final Panel mainPanel;
+    private final java.awt.Panel mainPanel;
     
     @Inject
     public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel) {
-        super(Direction.UP, new BorderLayout());
+        super(new BorderLayout());
         this.chatPanel = chatPanel;
         this.loginPanel = loginPanel;
-        this.mainPanel = new Panel();
+        this.mainPanel = new java.awt.Panel();
         
         mainPanel.setVisible(false);
         mainPanel.setBackground(getBackground());
@@ -51,7 +50,7 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
         loginPanel.setBorder(lineBorder);
         mainPanel.add(loginPanel);
         add(mainPanel);
-        setCollapsed(true);
+        setVisible(false);
         
         EventAnnotationProcessor.subscribe(this);
     }
@@ -63,17 +62,17 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
 
     @EventSubscriber
     public void handleAppear(DisplayFriendsToggleEvent event) {
-        displayFriendsPanel(isCollapsed());
+        displayFriendsPanel(!isVisible());
     }
 
     private void displayFriendsPanel(boolean shouldDisplay) {
         if (shouldDisplay) {
             resetBounds();
         }
-        //If it should display, should not be collapsed and vice versa
-        setCollapsed(!shouldDisplay);
-        mainPanel.setVisible(!isCollapsed());
-        if (!isCollapsed()) {
+
+        mainPanel.setVisible(shouldDisplay);
+        setVisible(shouldDisplay);
+        if (shouldDisplay) {
             ((Displayable)mainPanel.getComponent(0)).handleDisplay();
             new PanelDisplayedEvent(this).publish();
         }
@@ -85,7 +84,7 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
     @EventSubscriber
     public void handleOtherPanelDisplayed(PanelDisplayedEvent event){
         if(event.getDisplayedPanel() != this){
-            setCollapsed(true);
+            setVisible(false);
             mainPanel.setVisible(false);
         }
     }
@@ -116,7 +115,7 @@ public class FriendsPanel extends JXCollapsiblePane implements Resizable{
 
     @Override
     public void resize() {
-        if (!isCollapsed()) {
+        if (isVisible()) {
             resetBounds();
         }
     }
