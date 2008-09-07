@@ -425,7 +425,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             this.chatStatus = new JXLabel();
             this.endChat = new JXLabel();
 
-            FontUtils.changeSize(friendName, -2.8f);
+            FontUtils.changeSize(friendName, -2.0f);
             friendName.setMaximumSize(new Dimension(85, 12));
         }
 

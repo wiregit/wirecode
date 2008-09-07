@@ -100,7 +100,7 @@ public class TopPanel extends JPanel {
                 }
             }
         });
-        FontUtils.changeSize(options, -3.0f);
+        FontUtils.changeSize(options, -2.0f);
         options.setForeground(getForeground());
         options.setBackground(getBackground());
         options.setBorderPainted(false);
