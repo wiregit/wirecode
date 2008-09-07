@@ -254,7 +254,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         TableColumnModel columnModel = table.getColumnModel();
         columnModel.getColumn(0).setCellRenderer(new FriendCellRenderer());
         
-        table.setShowVerticalLines(false);
+        table.setShowGrid(false, false);
         
         table.setTableHeader(null);
         table.setColumnMargin(0);
