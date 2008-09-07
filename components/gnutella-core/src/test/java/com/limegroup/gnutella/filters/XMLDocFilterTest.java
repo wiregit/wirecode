@@ -130,6 +130,7 @@ public class XMLDocFilterTest extends LimeTestCase {
     
     public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address, QueryReplyFactory queryReplyFactory) {
         String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(new Response [] { resp } );
+        System.out.println(xmlCollectionString);
         if (xmlCollectionString == null)
             xmlCollectionString = "";
 

@@ -2,9 +2,12 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
 import com.limegroup.gnutella.metadata.audio.reader.AudioDataReader;
@@ -28,7 +31,10 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  */
 public class MetaDataFactoryImpl implements MetaDataFactory {
 
-    private static final Log LOG = LogFactory.getLog(MetaDataFactory.class); 
+    private static final Log LOG = LogFactory.getLog(MetaDataFactory.class);
+    
+    
+    private final ConcurrentMap<String, MetaReaderFactory> factoriesByExtension = new ConcurrentHashMap<String, MetaReaderFactory>();
     
     /**
      * factory method which returns an instance of MetaDataEditor which
@@ -42,7 +48,16 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
             return getAudioEditorForFile(name);
         //add video types here
         return null;
-        
+    }
+
+    @Override
+    public void registerReaderFactory(MetaReaderFactory factory, String...fileExtensions) {
+        for (String extension : fileExtensions) {
+            MetaReaderFactory existingFactory = factoriesByExtension.put(extension, factory);
+            if (existingFactory != null) {
+                throw new IllegalArgumentException("factory: " + existingFactory + " already resistered for: " + extension);
+            }
+        }
     }
     
     /** Creates MetaData for the file, if possible. */  
@@ -54,6 +69,15 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
                 return parseVideoMetaData(f);          
             else if (LimeXMLUtils.isSupportedMultipleFormat(f))
                 return parseMultipleFormat(f);
+            else {
+                String extension = FileUtils.getFileExtension(f);
+                if (extension != null) {
+                    MetaReaderFactory factory = factoriesByExtension.get(extension);
+                    if (factory != null) {
+                        return factory.createReader(f);
+                    }
+                }
+            }
         } catch (OutOfMemoryError e) {
             LOG.warn("Ran out of memory while parsing.",e);
             throw (IOException)new IOException().initCause(e);

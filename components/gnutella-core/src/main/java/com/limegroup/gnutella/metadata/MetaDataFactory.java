@@ -19,4 +19,13 @@ public interface MetaDataFactory {
      * or return null if reading the file meta data if not supprted
      */
     public MetaReader parse(File f) throws IOException;
+    
+    /**
+     * Registers a reader factory for a number of file extensions
+     * @param fileExtensions must not be null or empty.
+     * 
+     * @throws IllegalArgumentException if another factory is already registered
+     * for one of the given extensions
+     */
+    public void registerReaderFactory(MetaReaderFactory factory, String...fileExtensions);
 }

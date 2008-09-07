@@ -1,11 +1,13 @@
 package com.limegroup.bittorrent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.InvalidDataException;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
@@ -45,5 +47,11 @@ public class BTMetaInfoFactoryImpl implements BTMetaInfoFactory {
      */
     private BTMetaInfo createBTMetaInfoFromData (BTData data) throws IOException {
         return new BTMetaInfoImpl(data);
+    }
+
+    @Override
+    public BTMetaInfo createMetaInfo(File torrentFile) throws IOException {
+        byte[] torrentBytes = FileUtils.readFileFully(torrentFile);
+        return createBTMetaInfoFromBytes(torrentBytes);
     }
 }
