@@ -14,4 +14,6 @@ public interface Message {
     String getMessageText();
     
     Type getType();
+    
+    long getMessageTimeMillis();
 }

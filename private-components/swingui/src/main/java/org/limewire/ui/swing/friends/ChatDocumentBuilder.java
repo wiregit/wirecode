@@ -46,25 +46,31 @@ class ChatDocumentBuilder {
         
         Type lastMessageType = null;
         String otherConversantName = null;
-        
+        long lastMessageTimeFromMe = 0;
         for(Message message : messages) {
 
-            if (message.getType() == Type.Received) {
+            Type type = message.getType();
+            if (type == Type.Received) {
                 otherConversantName = message.getSenderName();
             }
-
+            
             if (lastMessageType == null) {
                 //The first message of a conversation
                 appendDiv(builder, message);
-            } else if (lastMessageType != message.getType()) {
+            } else if (lastMessageType != type || (type == Type.Sent && lastMessageTimeFromMe + 60000 < message.getMessageTimeMillis())) {
                 builder.append(LINE_BREAK);
                 appendDiv(builder, message);
             }
-            lastMessageType = message.getType();
+            
+            lastMessageType = type;
             
             builder.append(processContent(message));
             
             builder.append(LINE_BREAK);
+            
+            if (type == Type.Sent) {
+                lastMessageTimeFromMe = message.getMessageTimeMillis();
+            }
         }
         
         appendIsTypingMessage(builder, otherConversantName, currentChatState);

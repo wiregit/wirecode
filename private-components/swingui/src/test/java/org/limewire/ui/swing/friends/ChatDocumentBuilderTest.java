@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.friends;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -74,12 +76,28 @@ public class ChatDocumentBuilderTest extends TestCase {
                 new String[] {"heynow", "yo", "fooey"});
     }
 
+    public void testBuildChatTextForMessagesISendMoreThan60SecondsApart() {
+        StringBuilder conversation = new StringBuilder();
+        conversation.append("<div class=\"me\">me:</div>heynow<br/><br/>")
+        .append("<div class=\"me\">me:</div>yo<br/>");
+        
+        List<Message> messages = Arrays.asList(new Message[] {
+          new MockMessage(null, "heynow", 0, "me", Type.Sent),      
+          new MockMessage(null, "yo", 600001, "me", Type.Sent),      
+        });
+        compareOutput(conversation.toString(), ChatState.active, new ArrayList<Message>(messages));
+    }
+
     private void compareOutput(String input, String expected) {
         compareOutput(expected, ChatState.active, new Type[] {Type.Sent}, input);
     }
 
     private void compareOutput(String expected, ChatState state, Type[] type, String... input) {
-        String chatText = ChatDocumentBuilder.buildChatText(getMessages(type, input), state);
+        compareOutput(expected, state, getMessages(type, input));
+    }
+
+    private void compareOutput(String expected, ChatState state, ArrayList<Message> messages) {
+        String chatText = ChatDocumentBuilder.buildChatText(messages, state);
         
         assertTrue(chatText.startsWith(ChatDocumentBuilder.TOP));
         assertTrue(chatText.endsWith(ChatDocumentBuilder.BOTTOM));
