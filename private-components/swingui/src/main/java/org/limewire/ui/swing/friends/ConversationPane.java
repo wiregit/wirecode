@@ -123,7 +123,7 @@ public class ConversationPane extends JPanel implements Displayable {
     }
     
     private void displayMessages() {
-        String chatDoc = ChatDocumentBuilder.buildChatText(messages, currentChatState);
+        String chatDoc = ChatDocumentBuilder.buildChatText(messages, currentChatState, conversationName);
         LOG.debugf("Chat doc: {0}", chatDoc);
         editor.setText(chatDoc);
     }

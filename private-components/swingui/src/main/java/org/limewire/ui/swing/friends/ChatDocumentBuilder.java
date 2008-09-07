@@ -40,24 +40,20 @@ class ChatDocumentBuilder {
         "</body>" +
         "</html>";
     
-    public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState) {
+    public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState, String conversationName) {
         StringBuilder builder = new StringBuilder();
         builder.append(TOP);
         
         Type lastMessageType = null;
-        String otherConversantName = null;
         long lastMessageTimeFromMe = 0;
         for(Message message : messages) {
 
             Type type = message.getType();
-            if (type == Type.Received) {
-                otherConversantName = message.getSenderName();
-            }
             
             if (lastMessageType == null) {
                 //The first message of a conversation
                 appendDiv(builder, message);
-            } else if (lastMessageType != type || (type == Type.Sent && lastMessageTimeFromMe + 60000 < message.getMessageTimeMillis())) {
+            } else if (lastMessageType != type || sixtySecondRule(lastMessageTimeFromMe, message)) {
                 builder.append(LINE_BREAK);
                 appendDiv(builder, message);
             }
@@ -73,10 +69,14 @@ class ChatDocumentBuilder {
             }
         }
 
-        appendIsTypingMessage(builder, otherConversantName, currentChatState);
+        appendIsTypingMessage(builder, conversationName, currentChatState);
         
         builder.append(BOTTOM);
         return builder.toString();
+    }
+
+    private static boolean sixtySecondRule(long lastMessageTimeFromMe, Message message) {
+        return message.getType() == Type.Sent && lastMessageTimeFromMe + 60000 < message.getMessageTimeMillis();
     }
 
     private static StringBuilder appendDiv(StringBuilder builder, Message message) {
@@ -105,11 +105,11 @@ class ChatDocumentBuilder {
         String content = senderName + tr(stateMessage);
         
         builder.append("<div class=\"")
-        .append(cssClass)
-        .append("\">")
-        .append(content)
-        .append("</div>")
-        .append("<br/>");
+               .append(cssClass)
+               .append("\">")
+               .append(content)
+               .append("</div>")
+               .append("<br/>");
     }
 
     private static String processContent(Message message) {

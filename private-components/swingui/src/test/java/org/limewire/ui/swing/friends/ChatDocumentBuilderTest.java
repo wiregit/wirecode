@@ -97,7 +97,7 @@ public class ChatDocumentBuilderTest extends TestCase {
     }
 
     private void compareOutput(String expected, ChatState state, ArrayList<Message> messages) {
-        String chatText = ChatDocumentBuilder.buildChatText(messages, state);
+        String chatText = ChatDocumentBuilder.buildChatText(messages, state, "you");
         
         assertTrue(chatText.startsWith(ChatDocumentBuilder.TOP));
         assertTrue(chatText.endsWith(ChatDocumentBuilder.BOTTOM));
