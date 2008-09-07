@@ -208,8 +208,8 @@ public class TopPanel extends JPanel {
     }
 
     private void clearFriendInfo() {
+        friendAvailabiltyIcon.setText("");
         friendNameLabel.setText("");
-        friendNameLabel.setIcon(null);
         friendStatusLabel.setText("");
     }
     
