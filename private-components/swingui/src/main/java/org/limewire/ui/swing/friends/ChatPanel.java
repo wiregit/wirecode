@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,7 +107,10 @@ public class ChatPanel extends JPanel implements Displayable {
 
     @Override
     public void handleDisplay() {
-        // No-op
+        Component component = conversationPanel.getComponent(0);
+        if (component instanceof Displayable) {
+            ((Displayable)component).handleDisplay();
+        }
     }
     
     public void setLoggedInID(String id) {
