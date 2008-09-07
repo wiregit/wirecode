@@ -13,6 +13,7 @@ public interface SearchResult {
         AUTHOR,
         BITRATE, // ex. 128, 160, 192, 224, 320
         COMMENTS,
+        COMPANY,
         DATE_CREATED,
         FILE_SIZE, // in megabytes
         FILES_IN_ARCHIVE, // # of files in an archive file (zip, tar, ...)
@@ -21,6 +22,7 @@ public interface SearchResult {
         LENGTH, // in time (hh:mm:ss)
         NAME,
         OWNER,
+        PLATFORM,
         QUALITY,
         RATING,
         RELEVANCE,
