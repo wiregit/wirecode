@@ -85,7 +85,7 @@ public class ChatDocumentBuilderTest extends TestCase {
           new MockMessage(null, "heynow", 0, "me", Type.Sent),      
           new MockMessage(null, "yo", 600001, "me", Type.Sent),      
         });
-        compareOutput(conversation.toString(), ChatState.active, new ArrayList<Message>(messages));
+        compareOutput(conversation.toString(), null, new ArrayList<Message>(messages));
     }
 
     private void compareOutput(String input, String expected) {

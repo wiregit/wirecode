@@ -72,7 +72,7 @@ class ChatDocumentBuilder {
                 lastMessageTimeFromMe = message.getMessageTimeMillis();
             }
         }
-        
+
         appendIsTypingMessage(builder, otherConversantName, currentChatState);
         
         builder.append(BOTTOM);
@@ -93,14 +93,11 @@ class ChatDocumentBuilder {
     
     private static void appendIsTypingMessage(StringBuilder builder, String senderName, ChatState chatState) {
         String stateMessage = null;
-        switch(chatState) {
-        case composing:
+        if (chatState == ChatState.composing) {
             stateMessage = " is typing a message...";
-            break;
-        case paused:
+        } else if (chatState == ChatState.paused) {
             stateMessage = " has entered text";
-            break;
-        default:
+        } else {
             return;
         }
         
