@@ -24,6 +24,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import java.util.HashMap;
+import org.limewire.core.api.search.ResultType;
 import org.limewire.ui.swing.components.FancyTab;
 
 /**
@@ -32,6 +34,24 @@ import org.limewire.ui.swing.components.FancyTab;
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class SearchResultsPanel extends JPanel {
+    
+    private static Map<ResultType, SearchCategory> resultTypeToSearchCategoryMap =
+        new HashMap<ResultType, SearchCategory>();
+
+    static {
+        resultTypeToSearchCategoryMap.put(
+            ResultType.AUDIO, SearchCategory.AUDIO);
+        resultTypeToSearchCategoryMap.put(
+            ResultType.VIDEO, SearchCategory.VIDEO);
+        resultTypeToSearchCategoryMap.put(
+            ResultType.IMAGE, SearchCategory.IMAGE);
+        resultTypeToSearchCategoryMap.put(
+            ResultType.DOCUMENT, SearchCategory.DOCUMENT);
+        resultTypeToSearchCategoryMap.put(
+            ResultType.PROGRAM, SearchCategory.PROGRAM);
+        resultTypeToSearchCategoryMap.put(
+            ResultType.OTHER, SearchCategory.OTHER);
+    }
     
     /**
      * This is the subpanel that appears in the upper-left corner
@@ -60,7 +80,7 @@ public class SearchResultsPanel extends JPanel {
     @AssistedInject
     public SearchResultsPanel(
             @Assisted SearchInfo searchInfo,
-            @Assisted EventList<VisualSearchResult> eventList,
+            @Assisted final EventList<VisualSearchResult> eventList,
             @Assisted Search search,
             ResultsContainerFactory containerFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
@@ -72,13 +92,21 @@ public class SearchResultsPanel extends JPanel {
         sponsoredResultsPanel.setVisible(false);
         this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new SearchScrollPane();
-        SortedList<VisualSearchResult> sortedList =
+        final SortedList<VisualSearchResult> filteredList =
             sortAndFilterPanel.getFilteredAndSortedList(eventList);
         
         // The ResultsContainerFactory create method takes two parameters
         // which it passes to the ResultsContainer constructor
         // for the parameters annotated with @Assisted.
-        this.resultsContainer = containerFactory.create(sortedList, search);
+        this.resultsContainer = containerFactory.create(filteredList, search);
+
+        sortAndFilterPanel.addFilterListener(new SearchFilterListener() {
+            @Override
+            public void searchFiltered() {
+                SearchCategory category = getCategory(filteredList);
+                resultsContainer.showCategory(category);
+            }
+        });
 
         sortAndFilterPanel.addModeListener(new ModeListener() {
             @Override
@@ -87,7 +115,7 @@ public class SearchResultsPanel extends JPanel {
                 syncColumnHeader();
             }
         });
-        
+
         SearchTabItems.SearchTabListener listener =
             new SearchTabItems.SearchTabListener() {
             @Override
@@ -99,9 +127,9 @@ public class SearchResultsPanel extends JPanel {
             }
         };
         
-        this.searchTab =
+        searchTab =
             new SearchTabItems(searchInfo.getSearchCategory(), listener);
-        this.searchTab.setEventList(eventList);
+        searchTab.setEventList(eventList);
 
         for (Map.Entry<SearchCategory, Action> entry : searchTab.getResultCountActions()) {
             resultsContainer.synchronizeResultCount(
@@ -109,9 +137,44 @@ public class SearchResultsPanel extends JPanel {
         }
         
         layoutComponents();
+    }
 
-        //setBorder(BorderFactory.createTitledBorder(
-        //    BorderFactory.createLineBorder(Color.RED, 1), "SearchResultsPanel"));
+    private SearchCategory getCategory(EventList<VisualSearchResult> eventList) {
+        SearchCategory searchCategory = SearchCategory.ALL;
+
+        int count = eventList.size();
+        if (count >= 1) {
+            // Get the SearchCategory of the first result.
+            VisualSearchResult vsr = eventList.get(0);
+            searchCategory = getSearchCategory(vsr);
+
+            // Verify that all the rest match ... or use ALL.
+            for (int i = 1; i < count; i++) {
+                vsr = eventList.get(i);
+                // Checking for null in case the size of the list
+                // changes while this is running.
+                if (vsr == null) break;
+
+                SearchCategory category = getSearchCategory(vsr);
+                if (category != searchCategory) {
+                    searchCategory = SearchCategory.ALL;
+                    break;
+                }
+            }
+        }
+
+        return searchCategory;
+    }
+
+    /**
+     * Gets the SearchCategory that corresponds to the ResultType
+     * of a given VisualSearchResult.
+     * @param vsr the VisualSearchResult
+     * @return the SearchCategory
+     */
+    private static SearchCategory getSearchCategory(VisualSearchResult vsr) {
+        ResultType resultType = vsr.getCategory();
+        return resultTypeToSearchCategoryMap.get(resultType);
     }
     
     public void addSponsoredResults(List<SponsoredResult> sponsoredResults){
@@ -175,7 +238,6 @@ public class SearchResultsPanel extends JPanel {
                 "[][grow]");
         
         setLayout(layout);
-        //add(searchTab.getSearchTab(), "push, growy");
         add(searchTab, "push, growy");
         add(sortAndFilterPanel, "wrap, align right");
         add(scrollPane, "span, grow");

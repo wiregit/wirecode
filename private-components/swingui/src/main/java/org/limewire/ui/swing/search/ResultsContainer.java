@@ -26,6 +26,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
 
 /**
  * This class is a panel that displays search results.
@@ -51,7 +52,8 @@ public class ResultsContainer extends JXPanel {
         VideoResultsPanelFactory videoFactory,
         ImagesResultsPanelFactory imagesFactory,
         DocumentsResultsPanelFactory documentsFactory,
-        OtherResultsPanelFactory otherFactory) {
+        OtherResultsPanelFactory otherFactory,
+        ProgramResultsPanelFactory programFactory) {
         
         panelMap.put(SearchCategory.ALL.name(),
             allFactory.create(eventList, search));
@@ -64,7 +66,7 @@ public class ResultsContainer extends JXPanel {
         panelMap.put(SearchCategory.DOCUMENT.name(),
             documentsFactory.create(filter(ResultType.DOCUMENT, eventList), search));
         panelMap.put(SearchCategory.PROGRAM.name(),
-            documentsFactory.create(filter(ResultType.PROGRAM, eventList), search));
+            programFactory.create(filter(ResultType.PROGRAM, eventList), search));
         panelMap.put(SearchCategory.OTHER.name(),
             otherFactory.create(filter(ResultType.OTHER, eventList), search));
         
@@ -91,6 +93,9 @@ public class ResultsContainer extends JXPanel {
     }
     
     void showCategory(SearchCategory category) {
+        System.out.println(
+            "ResultsContainer.showCategory: changing category to "
+            + category.name());
         String name = category.name();
         currentPanel = panelMap.get(name); 
         cardLayout.show(this, name);

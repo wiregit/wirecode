@@ -181,9 +181,12 @@ public class MockSearch implements Search {
                 msr.setSize(8765L);
                 msr.addSource("chandler");
                 msr.setUrn("www.superspread.org");
+                msr.setProperty(PropertyKey.AUTHOR, "James Gosling");
+                msr.setProperty(PropertyKey.COMPANY, "FriendSoft");
                 msr.setProperty(PropertyKey.FILE_SIZE, 3.4);
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
+                msr.setProperty(PropertyKey.PLATFORM, "Mac OS X");
                 msr.setProperty(PropertyKey.DATE_CREATED,
                     new GregorianCalendar(2008, 9, 2));
                 msr.setProperty(PropertyKey.RELEVANCE, 0.6f);

@@ -121,7 +121,7 @@ implements ListEventListener<VisualSearchResult> {
         font.deriveFont(Font.BOLD); // TODO: RMV This doesn't work!
         setTextFont(font);
     }
-    
+
     public Collection<Map.Entry<SearchCategory, Action>> getResultCountActions() {
         Map<SearchCategory, Action> counts =
             new EnumMap<SearchCategory, Action>(SearchCategory.class);

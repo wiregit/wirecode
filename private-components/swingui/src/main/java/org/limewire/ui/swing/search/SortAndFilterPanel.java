@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search;
 
+import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import java.util.Date;
 
 import static org.limewire.core.api.search.SearchResult.PropertyKey;
@@ -8,6 +9,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.MatcherEditor.Listener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
@@ -55,6 +57,9 @@ public class SortAndFilterPanel extends JXPanel {
     
     private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
     
+    private final List<SearchFilterListener> filterListeners =
+        new ArrayList<SearchFilterListener>();
+
     @Resource private Icon listViewPressedIcon;
     @Resource private Icon listViewUnpressedIcon;
     @Resource private Icon tableViewPressedIcon;
@@ -88,9 +93,31 @@ public class SortAndFilterPanel extends JXPanel {
         configureViewButtons();
         layoutComponents();
 
+        editor.addMatcherEditorListener(new Listener<VisualSearchResult>() {
+            public void changedMatcher(Event<VisualSearchResult> arg0) {
+                synchronized (filterListeners) {
+                    for (SearchFilterListener listener : filterListeners) {
+                        listener.searchFiltered();
+                    }
+                }
+            }
+        });
+
         EventAnnotationProcessor.subscribe(this);
     }
 
+    public void addFilterListener(SearchFilterListener listener) {
+        synchronized (filterListeners) {
+            filterListeners.add(listener);
+        }
+    }
+
+    public void removeFilterListener(SearchFilterListener listener) {
+        synchronized (filterListeners) {
+            filterListeners.remove(listener);
+        }
+    }
+    
     public synchronized void addModeListener(ModeListener listener) {
         modeListeners.add(listener);
     }
@@ -436,7 +463,6 @@ public class SortAndFilterPanel extends JXPanel {
             Object value = vsr.getProperty(key);
             if (value != null) {
                 String text = value.toString();
-                System.out.println("SortAndFilterPanel: text = " + text);
                 list.add(text);
             }
         }

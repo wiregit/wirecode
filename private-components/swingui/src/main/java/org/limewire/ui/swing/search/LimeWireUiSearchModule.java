@@ -15,6 +15,8 @@ import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryProvider;
+import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanel;
+import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
 
 
 public class LimeWireUiSearchModule extends AbstractModule {
@@ -50,6 +52,10 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(OtherResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                 OtherResultsPanelFactory.class, OtherResultsPanel.class));
+        
+        bind(ProgramResultsPanelFactory.class).toProvider(
+            FactoryProvider.newFactory(
+                ProgramResultsPanelFactory.class, ProgramResultsPanel.class));
         
         bind(VideoResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
