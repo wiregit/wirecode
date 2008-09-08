@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
 import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.ui.swing.sharing.menu.BuddySharingActionHandler;
@@ -22,7 +24,14 @@ import ca.odell.glazedlists.swing.EventTableModel;
 public class BuddyNameTable extends JXTable {
 
     public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat) {
-        super(new EventTableModel<BuddyItem>(new SortedList<BuddyItem>(eventList, new BuddyComparator()), tableFormat));
+//        super(new EventTableModel<BuddyItem>(new SortedList<BuddyItem>(eventList, new BuddyComparator()), tableFormat));
+        
+        SortedList<BuddyItem> buddyList = new SortedList<BuddyItem>(eventList, new BuddyComparator());       
+
+        setModel(new EventTableModel<BuddyItem>(buddyList, tableFormat));
+//        EventSelectionModel model = new EventSelectionModel<BuddyItem>(buddyList);
+//        setSelectionModel(model);
+//        buddyList.setMode(SortedList.STRICT_SORT_ORDER);
         
         setBackground(Color.GRAY);
         setColumnControlVisible(false);
@@ -65,7 +74,19 @@ public class BuddyNameTable extends JXTable {
                 }
             }
         });
+        
+        getModel().addTableModelListener(new TableModelListener(){
+
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                System.out.println("table changed " + e.getFirstRow() + " " + e.getLastRow());
+            }});
+//        this.
+//        buddyList.addListEventListener(new ListEventListener<BuddyItem>(
+//                ));
     }
+    
+//    public void set
     
     private static class BuddyComparator implements Comparator<BuddyItem> {
 

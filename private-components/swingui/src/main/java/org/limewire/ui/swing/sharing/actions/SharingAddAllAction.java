@@ -45,26 +45,35 @@ public class SharingAddAllAction extends AbstractAction {
         if(myLibraryList == null || userList == null)
             return;
         
-        FileList currentList = userList;
+        final FileList currentList = userList;
+        final boolean selectMusic = musicBox.isSelected();
+        final boolean selectVideo = videoBox.isSelected();
+        final boolean selectImage = imageBox.isSelected();
         
-        if(musicBox.isSelected()) {
-            FilterList<FileItem> audio = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
-            for(FileItem item : audio) {
-                currentList.addFile(item.getFile());
+        //TODO: convert this to an executor service
+        Thread t = new Thread(new Runnable(){
+            public void run() {
+                if(selectMusic) {
+                    FilterList<FileItem> audio = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
+                    for(FileItem item : audio) {
+                        currentList.addFile(item.getFile());
+                    }
+                }
+                if(selectVideo) {
+                    FilterList<FileItem> video = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.VIDEO));
+                    for(FileItem item : video) {
+                        currentList.addFile(item.getFile());
+                    }
+                }
+                if(selectImage) {
+                    FilterList<FileItem> image = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.IMAGE));
+                    for(FileItem item : image) {
+                        currentList.addFile(item.getFile());
+                    }
+                }
             }
-        }
-        if(videoBox.isSelected()) {
-            FilterList<FileItem> video = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.VIDEO));
-            for(FileItem item : video) {
-                currentList.addFile(item.getFile());
-            }
-        }
-        if(imageBox.isSelected()) {
-            FilterList<FileItem> image = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.IMAGE));
-            for(FileItem item : image) {
-                currentList.addFile(item.getFile());
-            }
-        }
+        });
+        t.start();
 
         reset();
     }

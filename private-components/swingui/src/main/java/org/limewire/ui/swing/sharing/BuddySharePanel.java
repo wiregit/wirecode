@@ -214,11 +214,10 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         public void valueChanged(ListSelectionEvent e) { 
             if(!e.getValueIsAdjusting()) {
                 int index = buddy.getSelectedRow();
-                if( index >= 0) {
+                if( index >= 0 && index < buddy.getModel().getRowCount()) {
                     BuddyItem buddyItem = (BuddyItem) buddy.getModel().getValueAt(index, 0);
                     headerPanel.setBuddyName(buddyItem.getName());
                     emptyPanel.setBuddyName(buddyItem.getName());
-    
       
                     BuddyFileList fileList = (BuddyFileList) buddyLists.get(buddyItem.getName());
                     emptyPanel.setUserFileList(fileList);

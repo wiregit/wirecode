@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -32,7 +34,7 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
     private JLabel titleLabel;
     private JLabel text;
     
-    private SharingCheckBox musicCheckBox;
+    private SharingCheckBox audioCheckBox;
     private SharingCheckBox videoCheckBox;
     private SharingCheckBox imageCheckBox;
     
@@ -57,14 +59,19 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
         
         text = new JLabel();
 
-        musicCheckBox = new SharingCheckBox("All my music");
+        audioCheckBox = new SharingCheckBox("All my music");
         videoCheckBox = new SharingCheckBox("All my video");
         imageCheckBox = new SharingCheckBox("All my images");
         
-        addAllAction = new SharingAddAllAction(musicCheckBox, videoCheckBox, imageCheckBox);
+        addAllAction = new SharingAddAllAction(audioCheckBox, videoCheckBox, imageCheckBox);
         addAllAction.setLibrary(libraryManager.getLibraryList());
         shareButton = new JButton(addAllAction);
         shareButton.setFocusable(false);
+        shareButton.setEnabled(false);
+        shareButton.setToolTipText("Use the checkboxes above to choose items to share");
+        
+        
+        new BoxChangeListener(shareButton, audioCheckBox, videoCheckBox, imageCheckBox);
         
         setText("");
         
@@ -73,7 +80,7 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
         add(titleLabel, "center, gaptop 120, wrap 70");
         add(text, "center, top, wrap");
         
-        add(musicCheckBox, "sizegroupx1, center, gaptop 30, wrap");
+        add(audioCheckBox, "sizegroupx1, center, gaptop 30, wrap");
         add(videoCheckBox, "sizegroupx1, center, wrap");
         add(imageCheckBox, "sizegroupx1, center, wrap 30");
         add(shareButton, "center, wrap");
@@ -99,6 +106,12 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
     @Override
     public void setBuddyName(String name) {
         setText(name);
+        
+        // when changing the user name, reset checkboxes to false to 
+        //  prevent accidental sharing
+        audioCheckBox.setSelected(false);
+        videoCheckBox.setSelected(false);
+        imageCheckBox.setSelected(false);
     }
 
     @Override
@@ -108,6 +121,35 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
     
     public void setUserFileList(FileList fileList) {
         addAllAction.setUserLibrary(fileList);
+    }
+    
+    private class BoxChangeListener implements ItemListener {
+        
+        private JButton button;
+        private JCheckBox audioBox;
+        private JCheckBox videoBox;
+        private JCheckBox imageBox;
+        
+        public BoxChangeListener(JButton button, JCheckBox audioBox, JCheckBox videoBox, JCheckBox imageBox) {
+            this.button = button;
+            this.audioBox = audioBox;
+            this.videoBox = videoBox;
+            this.imageBox = imageBox;
+            
+            audioBox.addItemListener(this);
+            videoBox.addItemListener(this);
+            imageBox.addItemListener(this);
+        }
+
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+
+            if(audioBox.isSelected() || videoBox.isSelected() || imageBox.isSelected())
+                button.setEnabled(true);
+            else
+                button.setEnabled(false);
+        }
+        
     }
     
 }
