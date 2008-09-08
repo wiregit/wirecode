@@ -483,7 +483,7 @@ public class StringUtils {
      * the unlikely encoding exception into a runtime exception. Returns null if
      * the passed in array is null.
      */
-    public static String toStringFromUTF8Bytes(byte[] bytes) {
+    public static String toUTF8String(byte[] bytes) {
         if (bytes == null)
             return null;
         try {

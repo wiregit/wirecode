@@ -15,7 +15,10 @@ public interface BTData {
         private final Long length;
         private final String path;
         
-        BTFileData(Long length, String path) {
+        /**
+         * public for testing
+         */
+        public BTFileData(Long length, String path) {
             this.length = length;
             this.path = path;
         }

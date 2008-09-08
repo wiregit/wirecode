@@ -1,11 +1,13 @@
 package com.limegroup.bittorrent.metadata;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.limewire.service.ErrorService;
+import org.limewire.http.URIUtils;
 import org.limewire.util.NameValue;
 import org.limewire.util.StringUtils;
 
@@ -20,8 +22,11 @@ public class TorrentMetaData implements MetaData {
 
     private final BTData data;
 
-    public TorrentMetaData(BTData data) {
+    private List<NameValue<String>> nameValues;
+
+    public TorrentMetaData(BTData data) throws IOException {
         this.data = data;
+        nameValues = Collections.unmodifiableList(buildNameValueList());
     }
 
     @Override
@@ -34,14 +39,9 @@ public class TorrentMetaData implements MetaData {
         throw new UnsupportedOperationException("not implemented yet");
     }
 
-    @Override
-    public List<NameValue<String>> toNameValueList() {
+    private List<NameValue<String>> buildNameValueList() throws IOException {
         NameValueListBuilder builder = new NameValueListBuilder();
-        try {
-            builder.add("info_hash", new String(data.getInfoHash(), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            ErrorService.error(e);
-        }
+        builder.add("infohash", StringUtils.toUTF8String(data.getInfoHash()));
         builder.add("announce", data.getAnnounce());
         builder.add("length", data.getLength());
         builder.add("name", data.getName());
@@ -52,18 +52,25 @@ public class TorrentMetaData implements MetaData {
         if (uris.length() > 0) {
             builder.add("webseeds", uris);
         }
-        
         List<BTFileData> files = data.getFiles();
         List<String> filePaths = new ArrayList<String>(files.size());
         List<Long> fileLengths = new ArrayList<Long>(files.size());
         for (BTFileData file : files) {
-            filePaths.add(file.getPath());
+            try {
+                filePaths.add(URIUtils.toURI("file:///" + file.getPath()).toASCIIString());
+            } catch (URISyntaxException e) {
+                throw new IOException(e);
+            }
             fileLengths.add(file.getLength());
         }
         builder.add("filepaths", StringUtils.explode(filePaths, "\t"));
         builder.add("filelenghts", StringUtils.explode(fileLengths, "\t"));
-
         return builder.toList();
+    }
+    
+    @Override
+    public List<NameValue<String>> toNameValueList() {
+        return nameValues;
     }
 
     private static class NameValueListBuilder {

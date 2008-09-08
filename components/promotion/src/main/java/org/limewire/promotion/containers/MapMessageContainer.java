@@ -64,7 +64,7 @@ public abstract class MapMessageContainer implements MessageContainer {
             throw new NullPointerException("key must not be null.");
         if (!payload.hasKey(key))
             return null;
-        return StringUtils.toStringFromUTF8Bytes(payload.get(key));
+        return StringUtils.toUTF8String(payload.get(key));
     }
 
     /**
