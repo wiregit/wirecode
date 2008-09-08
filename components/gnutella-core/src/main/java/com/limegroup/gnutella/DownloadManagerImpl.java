@@ -30,7 +30,6 @@ import org.limewire.lifecycle.ServiceStage;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.service.MessageService;
-import org.limewire.ui.swing.browser.download.LimeMozillaDownloadProgressListener;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -64,6 +63,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.mozilla.MozillaDownloadListener;
 import com.limegroup.mozilla.MozillaDownloaderImpl;
 
 @Singleton
@@ -793,7 +793,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         return ret;
     }
     
-    public synchronized Downloader downloadFromMozilla(LimeMozillaDownloadProgressListener listener) {
+    public synchronized Downloader downloadFromMozilla(MozillaDownloadListener listener) {
         CoreDownloader downloader = new MozillaDownloaderImpl(listener);
         initializeDownload(downloader, false);
         return downloader;

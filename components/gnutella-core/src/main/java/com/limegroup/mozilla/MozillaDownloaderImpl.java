@@ -4,9 +4,6 @@ import java.io.File;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
-import org.limewire.ui.swing.browser.download.LimeMozillaDownloadProgressListener;
-import org.mozilla.browser.XPCOMUtils;
-import org.mozilla.interfaces.nsIDownloadManager;
 
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
@@ -25,16 +22,11 @@ import com.limegroup.gnutella.downloader.serial.MozillaDownloadMementoImpl;
  */
 public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
-    private static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
+    private final MozillaDownloadListener listener;
 
-    private long downloadId;
-
-    private final LimeMozillaDownloadProgressListener listener;
-
-    public MozillaDownloaderImpl(LimeMozillaDownloadProgressListener listener) {
+    public MozillaDownloaderImpl(MozillaDownloadListener listener) {
         super(new NoOpSaveLocationManager());
         this.listener = listener;
-        this.downloadId = listener.getDownloadId();
     }
 
     @Override
@@ -62,17 +54,9 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
         return !isResumable();
     }
 
-    private nsIDownloadManager getDownloadManager() {
-        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(NS_IDOWNLOADMANAGER_CID,
-                nsIDownloadManager.class);
-        return downloadManager;
-    }
-
     @Override
     public void discardCorruptDownload(boolean delete) {
-        nsIDownloadManager downloadManager = getDownloadManager();
-        downloadManager.cancelDownload(downloadId);
-        downloadManager.removeDownload(downloadId);
+        finish();
     }
 
     @Override
@@ -247,14 +231,14 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public void pause() {
         if (!isPaused() && !isInactive() && !isCompleted()) {
-            getDownloadManager().pauseDownload(downloadId);
+            listener.pauseDownload();
         }
     }
 
     @Override
     public boolean resume() {
         if (isPaused()) {
-            getDownloadManager().resumeDownload(downloadId);
+            listener.resumeDownload();
         }
         return true;
     }
@@ -282,12 +266,12 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public void finish() {
         try {
-            getDownloadManager().cancelDownload(downloadId);
+            listener.cancelDownload();
         } catch (Exception ignored) {
             // yum
         }
         try {
-            getDownloadManager().removeDownload(downloadId);
+            listener.removeDownload();
         } catch (Exception ignored) {
             // yum
         }
@@ -295,7 +279,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public void addListener(EventListener<DownloadStatusEvent> listener) {
-        //TODO implement
+        // TODO implement
     }
 
     @Override

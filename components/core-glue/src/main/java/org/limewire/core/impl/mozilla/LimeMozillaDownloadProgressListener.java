@@ -1,9 +1,11 @@
-package org.limewire.ui.swing.browser.download;
+package org.limewire.core.impl.mozilla;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.limewire.util.Objects;
+import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDOMDocument;
 import org.mozilla.interfaces.nsIDownload;
 import org.mozilla.interfaces.nsIDownloadManager;
@@ -13,16 +15,17 @@ import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.xpcom.Mozilla;
 
-import com.google.inject.internal.base.Objects;
 import com.limegroup.bittorrent.SimpleBandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.mozilla.MozillaDownloadListener;
 
 /**
  * This class listens to a specific Mozilla download and tracks some statistics
  * for us.
  */
-public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressListener {
+public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressListener,
+        MozillaDownloadListener {
     private final long downloadId;
 
     private final AtomicInteger state;
@@ -120,7 +123,7 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
     public float getMeasuredBandwidth() {
         try {
             down.measureBandwidth();
-            //TODO i shouldn't have to do the above measure bandwidth call.
+            // TODO i shouldn't have to do the above measure bandwidth call.
             return down.getMeasuredBandwidth();
         } catch (InsufficientDataException e) {
             return 0;
@@ -194,5 +197,31 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
 
     public long getContentLength() {
         return contentLength.get();
+    }
+
+    @Override
+    public void cancelDownload() {
+        getDownloadManager().cancelDownload(downloadId);
+    }
+
+    @Override
+    public void pauseDownload() {
+        getDownloadManager().pauseDownload(downloadId);
+    }
+
+    @Override
+    public void removeDownload() {
+        getDownloadManager().removeDownload(downloadId);
+    }
+
+    @Override
+    public void resumeDownload() {
+        getDownloadManager().resumeDownload(downloadId);
+    }
+
+    private nsIDownloadManager getDownloadManager() {
+        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(
+                "@mozilla.org/download-manager;1", nsIDownloadManager.class);
+        return downloadManager;
     }
 }

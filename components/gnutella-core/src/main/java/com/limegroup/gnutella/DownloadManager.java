@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.ui.swing.browser.download.LimeMozillaDownloadProgressListener;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -19,6 +18,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.mozilla.MozillaDownloadListener;
 
 
 /** 
@@ -281,6 +281,6 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
      *  file was successfully written. */
     public void writeSnapshot();
     
-    public Downloader downloadFromMozilla(LimeMozillaDownloadProgressListener listener);
+    public Downloader downloadFromMozilla(MozillaDownloadListener listener);
 
 }

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.browser.download;
+package org.limewire.core.impl.mozilla;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -8,7 +8,6 @@ import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDOMDocument;
 import org.mozilla.interfaces.nsIDownload;
 import org.mozilla.interfaces.nsIDownloadManager;
-import org.mozilla.interfaces.nsIDownloadProgressListener;
 import org.mozilla.interfaces.nsIRequest;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIWebProgress;
@@ -17,14 +16,13 @@ import org.mozilla.xpcom.Mozilla;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadServices;
 
 /**
  * This is an example of listening to a mozilla download and putting this info
  * into the downloader list for the limewire client.
  */
 @Singleton
-public class LimeMozillaDownloadManagerListener implements nsIDownloadProgressListener {
+public class LimeMozillaDownloadManagerListenerImpl implements org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener {
 
     public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
@@ -33,7 +31,7 @@ public class LimeMozillaDownloadManagerListener implements nsIDownloadProgressLi
     private final DownloadManager downloadManager;
 
     @Inject
-    public LimeMozillaDownloadManagerListener(DownloadManager downloadManager) {
+    public LimeMozillaDownloadManagerListenerImpl(DownloadManager downloadManager) {
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.listeners = new WeakHashMap<Long, LimeMozillaDownloadProgressListener>();
     }
