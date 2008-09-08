@@ -18,7 +18,7 @@ public class LimeXMLProperties {
      */
     public static final long DEFAULT_NONFILE_INDEX = 0x00000000FFFFFFFFl;
     
-    private String[] BUILT_IN_SCHEMAS = { "application", "audio", "document", "image", "video" };
+    private String[] BUILT_IN_SCHEMAS = { "application", "audio", "document", "image", "video", "torrent" };
 
     /** schema resource directory. */
     private static final String SCHEMA_RESOURCE_PATH = "org/limewire/xml/schema/";

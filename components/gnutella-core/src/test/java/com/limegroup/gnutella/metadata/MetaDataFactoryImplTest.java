@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent.metadata;
+package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 import java.util.List;
@@ -53,7 +53,7 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
         List<NameValue<String>> values = metaData.toNameValueList();
         String filepaths = null;
         for (NameValue<String> value : values) {
-            if (value.getName().equals("filepaths")) {
+            if (value.getName().equals(TorrentMetaData.FILE_PATHS)) {
                 filepaths = value.getValue();
                 break;
             }
@@ -78,7 +78,7 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
         List<NameValue<String>> values = metaData.toNameValueList();
         String name = null;
         for (NameValue<String> value : values) {
-            if (value.getName().equals("name")) {
+            if (value.getName().equals(TorrentMetaData.NAME)) {
                 name = value.getValue();
                 break;
             }

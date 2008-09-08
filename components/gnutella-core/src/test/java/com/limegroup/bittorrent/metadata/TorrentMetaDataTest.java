@@ -11,9 +11,9 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.http.URIUtils;
+import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.NameValue;
-import org.limewire.util.StringUtils;
 
 import com.limegroup.bittorrent.BTData;
 import com.limegroup.bittorrent.BTData.BTFileData;
@@ -51,7 +51,7 @@ public class TorrentMetaDataTest extends BaseTestCase {
            allowing(data).getPieceLength();
            will(returnValue(2L));
            allowing(data).isPrivate();
-           will(returnValue(false));
+           will(returnValue(true));
            allowing(data).getWebSeeds();
            will(returnValue(getUris()));
            allowing(data).getFiles();
@@ -59,15 +59,16 @@ public class TorrentMetaDataTest extends BaseTestCase {
         }});
         
         List<NameValue<String>> values = new TorrentMetaData(data).toNameValueList();
-        assertContainsNameValue(values, "infohash", StringUtils.toUTF8String(infoHash));
-        assertContainsNameValue(values, "announce", "http://localhost/announce");
-        assertContainsNameValue(values, "length", "300");
-        assertContainsNameValue(values, "name", "torrent file");
-        assertContainsNameValue(values, "piecelength", "2");
-        assertContainsNameValue(values, "private", "false");
-        assertContainsNameValue(values, "webseeds", "http://localhost/name%09hello\thttp://test/%22me%22");
-        assertContainsNameValue(values, "filepaths", "file:/home/test+me+%22hello+world%22\tfile:/home/me/%E3%83%95%E3%82%A1");
-        assertContainsNameValue(values, "filelenghts", "200\t100");
+        assertContainsNameValue(values, TorrentMetaData.INFO_HASH, Base32.encode(infoHash));
+        assertContainsNameValue(values, TorrentMetaData.ANNOUNCE, "http://localhost/announce");
+        assertContainsNameValue(values, TorrentMetaData.LENGTH, "300");
+        assertContainsNameValue(values, TorrentMetaData.NAME, "torrent file");
+        // not sent right now
+        // assertContainsNameValue(values, TorrentMetaData.PIECE_LENGTH, "2");
+        assertContainsNameValue(values, TorrentMetaData.PRIVATE, "true");
+        assertContainsNameValue(values, TorrentMetaData.WEBSEEDS, "http://localhost/name%09hello\thttp://test/%22me%22");
+        assertContainsNameValue(values, TorrentMetaData.FILE_PATHS, "home/test+me+%22hello+world%22\thome/me/%E3%83%95%E3%82%A1");
+        assertContainsNameValue(values, TorrentMetaData.FILE_LENGTHS, "200\t100");
     }
     
     private void assertContainsNameValue(List<NameValue<String>> values, String name,
