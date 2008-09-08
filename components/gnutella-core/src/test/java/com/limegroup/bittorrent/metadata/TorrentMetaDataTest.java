@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import junit.framework.Test;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.http.URIUtils;
@@ -24,6 +26,10 @@ public class TorrentMetaDataTest extends BaseTestCase {
         super(name);
     }
 
+    public static Test suite() {
+        return buildTestSuite(TorrentMetaDataTest.class);
+    }
+    
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();

@@ -1,7 +1,9 @@
-package com.limegroup.gnutella.metadata;
+package com.limegroup.bittorrent.metadata;
 
 import java.io.File;
 import java.util.List;
+
+import junit.framework.Test;
 
 import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
@@ -11,6 +13,10 @@ import com.limegroup.bittorrent.metadata.TorrentMetaData;
 import com.limegroup.bittorrent.metadata.TorrentMetaReader;
 import com.limegroup.bittorrent.metadata.TorrentMetaReaderFactory;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.metadata.MetaData;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
+import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class MetaDataFactoryImplTest extends LimeTestCase {
@@ -19,6 +25,10 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
 
     public MetaDataFactoryImplTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(MetaDataFactoryImplTest.class);
     }
     
     @Override
