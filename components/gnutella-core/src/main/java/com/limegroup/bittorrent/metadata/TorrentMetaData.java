@@ -42,7 +42,11 @@ public class TorrentMetaData implements MetaData {
     private List<NameValue<String>> buildNameValueList() throws IOException {
         NameValueListBuilder builder = new NameValueListBuilder();
         builder.add("infohash", StringUtils.toUTF8String(data.getInfoHash()));
-        builder.add("announce", data.getAnnounce());
+        try {
+            builder.add("announce", URIUtils.toURI(data.getAnnounce()).toASCIIString());
+        } catch (URISyntaxException ie) {
+            throw new IOException(ie);
+        }
         builder.add("length", data.getLength());
         builder.add("name", data.getName());
         builder.add("piecelength", data.getPieceLength());
