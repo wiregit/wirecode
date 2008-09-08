@@ -40,5 +40,20 @@
       <version>${limewire.version}</version>
 	  <scope>test</scope>
     </dependency>
+    <dependency>
+	    <groupId>mozilla</groupId>
+	    <artifactId>mozswing-interfaces</artifactId>
+	    <version>1.9</version>
+	</dependency>
+	<dependency>
+	      <groupId>org.mozilla</groupId>
+	      <artifactId>mozswing</artifactId>
+	      <version>2008-08-26</version>
+	 </dependency>
+	 <dependency>
+	      <groupId>mozilla</groupId>
+	      <artifactId>mozilla-glue</artifactId>
+	      <version>mozswing1.9-06242008</version>
+	 </dependency>
   </dependencies>
 </project>
