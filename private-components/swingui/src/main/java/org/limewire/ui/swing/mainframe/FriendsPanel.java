@@ -10,14 +10,18 @@ import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.PanelDisplayedEvent;
+import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.Displayable;
 import org.limewire.ui.swing.friends.LoginPanel;
+import org.limewire.ui.swing.friends.MessageReceivedEvent;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 
@@ -30,16 +34,20 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class FriendsPanel extends JXPanel implements Resizable{
+    private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
+    private static final Log LOG = LogFactory.getLog(FriendsPanel.class);
     private final LoginPanel loginPanel;
     private final ChatPanel chatPanel;
+    private final UnseenMessageListener unseenMessageListener;
     //Heavy-weight component so that it can appear above other heavy-weight components
     private final java.awt.Panel mainPanel;
     
     @Inject
-    public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel) {
+    public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel, UnseenMessageListener unseenMessageListener) {
         super(new BorderLayout());
         this.chatPanel = chatPanel;
         this.loginPanel = loginPanel;
+        this.unseenMessageListener = unseenMessageListener;
         this.mainPanel = new java.awt.Panel();
         
         mainPanel.setVisible(false);
@@ -73,6 +81,7 @@ public class FriendsPanel extends JXPanel implements Resizable{
         mainPanel.setVisible(shouldDisplay);
         setVisible(shouldDisplay);
         if (shouldDisplay) {
+            unseenMessageListener.clearUnseenMessages();
             ((Displayable)mainPanel.getComponent(0)).handleDisplay();
             new PanelDisplayedEvent(this).publish();
         }
@@ -86,6 +95,14 @@ public class FriendsPanel extends JXPanel implements Resizable{
         if(event.getDisplayedPanel() != this){
             setVisible(false);
             mainPanel.setVisible(false);
+        }
+    }
+    
+    @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
+    public void handleMessageReceived(String topic, MessageReceivedEvent event) {
+        if (!isVisible()) {
+            LOG.debug("Got an unseen message...");
+            unseenMessageListener.unseenMessagesReceived();
         }
     }
     
@@ -103,6 +120,10 @@ public class FriendsPanel extends JXPanel implements Resizable{
         mainPanel.add(loginPanel);
         resetBounds();
         displayFriendsPanel(false);
+    }
+    
+    public String getMessagingTopicPatternName() {
+        return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
     }
     
     private void resetBounds() {

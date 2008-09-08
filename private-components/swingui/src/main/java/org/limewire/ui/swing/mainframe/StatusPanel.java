@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Random;
 
@@ -22,9 +23,11 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -49,7 +52,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class StatusPanel extends JPanel implements FriendsCountUpdater {
+public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMessageListener {
     private static final String OFFLINE = "offline";
     private final IconLibrary icons;
     private JXButton friendsButton;
@@ -60,10 +63,12 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
     private ButtonGroup availabilityButtonGroup;
     private JCheckBoxMenuItem availablePopupItem;
     private JCheckBoxMenuItem awayPopupItem;
+    private final UnseenMessageFlasher flasher;
 
     @Inject
     public StatusPanel(final TrayNotifier trayNotifier, final IconManager iconManager, IconLibrary icons, AudioPlayer player) {
         this.icons = icons;
+        
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setBackground(Color.GRAY);
         add(new JLabel("status"));
@@ -147,6 +152,8 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
         setPreferredSize(new Dimension(1024, 20));
         
+        this.flasher = new UnseenMessageFlasher(friendsButton);
+        
         EventAnnotationProcessor.subscribe(this);
     }
     
@@ -156,7 +163,8 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         updateStatus(FRIENDS, FriendsUtil.getIcon(Mode.available, icons), Mode.available.toString());
         statusMenu.setEnabled(true);
     }
-
+    
+    
     private void updateStatus(String buttonText, Icon icon, String status) {
         friendsButton.setText(buttonText);
         statusMenu.setIcon(icon);
@@ -201,6 +209,65 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             new DisplayFriendsToggleEvent().publish();
+        }
+    }
+
+    @Override
+    public void clearUnseenMessages() {
+        flasher.reset();
+    }
+
+    @Override
+    public void unseenMessagesReceived() {
+        flasher.flash();
+    }
+    
+    private static class UnseenMessageFlasher {
+        private static Painter<JXButton> BLACK_BACKGROUND_PAINTER = new RectanglePainter<JXButton>(Color.BLACK, Color.BLACK);
+        private boolean hasFlashed;
+        private final JXButton flashingButton;
+        private final Color originalForeground;
+        private final Painter<JXButton> originalBackgroundPainter;
+        
+        public UnseenMessageFlasher(JXButton flashingButton) {
+            this.flashingButton = flashingButton;
+            this.originalForeground = flashingButton.getForeground();
+            
+            this.originalBackgroundPainter = flashingButton.getBackgroundPainter();
+        }
+
+        public void flash() {
+            if (!hasFlashed) {
+                new Timer(1500, new ActionListener() {
+                    private int flashCount;
+                    
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (flashCount++ < 5) {
+                            flashingButton.setForeground(toggle(flashingButton.getForeground()));
+                            flashingButton.setBackgroundPainter(toggle(flashingButton.getBackgroundPainter()));
+                        } else {
+                            Timer timer = (Timer)e.getSource();
+                            timer.stop();
+                        }
+                    }
+                    
+                    private Color toggle(Color color) {
+                        return color.equals(Color.WHITE) ? Color.BLACK : Color.WHITE;
+                    }
+                    
+                    private Painter<JXButton> toggle(Painter<JXButton> painter) {
+                        return painter.equals(originalBackgroundPainter) ? BLACK_BACKGROUND_PAINTER : originalBackgroundPainter;
+                    }
+                }).start();
+                hasFlashed = true;
+            }
+        }
+        
+        public void reset() {
+            flashingButton.setForeground(originalForeground);
+            flashingButton.setBackgroundPainter(originalBackgroundPainter);
+            hasFlashed = false;
         }
     }
 }

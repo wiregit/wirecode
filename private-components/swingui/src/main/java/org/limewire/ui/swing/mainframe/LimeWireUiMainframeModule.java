@@ -17,5 +17,6 @@ public class LimeWireUiMainframeModule extends AbstractModule {
         bind(NavigableTree.class).to(NavTree.class);
         bind(SearchNavigator.class).to(TopPanel.class);
         bind(FriendsCountUpdater.class).to(StatusPanel.class);
+        bind(UnseenMessageListener.class).to(StatusPanel.class);
     }
 }
