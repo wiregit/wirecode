@@ -153,14 +153,17 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
      * The following scenarios are tested:
      *
      * 1. All keywords in search match 1 file name (should return 1 match)
-     *    Search term "four six" matches "eight four six.mp3"
-     * 2. All keywords in search match, but not for the same file. (should return 0 matches)
+     *    Search term "four six" matches "eight four six.mp3
+     * 2. All keywords match multiple times for the same document (should return 1 match)
+     * 3. All keywords in search match, but not for the same file. (should return 0 matches)
      *    Search term "seven nine", files "eight four six.txt", "seven.txt" and "nine.avi"
-     * 3. Search with keyword that matches in different metadata fields of different files (matches)
-     * 4. Every keyword in search matches in a metadata field, but not for the same file. (No matches)
-     * 5. Every keyword in search matches for a file, but not in same metadata field. (No matches)
-     * 6. Every keyword in search matches in same metadata field name but for different files (No matches)
-     * 7. Removing file from file manager results in both exact matches
+     * 4. Search with keyword that matches in different metadata fields of different files (matches)
+     * 5. Every keyword in search matches in a metadata field, but not for the same file. (No matches)
+     * 6. Every keyword in search matches for the same file, but not in same metadata field. (1 Match)
+     * 7. Every keyword in search matches in same metadata field name but for different files (No matches)
+     * 8. Search keyword matches prefix of metadata or file name for multiple files.
+     *    All files that matched are returned.
+     * 9. Removing file from file manager results in both exact matches
      *    and prefix matches (file name or metadata) NO LONGER MATCHING for the file that was removed
      *
      */
@@ -169,7 +172,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
 
         File eightFourSixFile = createNewNamedTestFile(10, "eight four six.mp3");
         LimeXMLDocument eightFourSixXml = limeXMLDocumentFactory.createLimeXMLDocument(
-            FileManagerTestUtils.buildAudioXMLString("artist=\"sixty seven\" album=\"zero one\" genre=\"five nine\" "));
+            FileManagerTestUtils.buildAudioXMLString("artist=\"sixty seven\" album=\"zero one\" genre=\"five numerically\" "));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(eightFourSixXml);
         addIfShared(eightFourSixFile, l1);
@@ -198,34 +201,39 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         addIfShared(algebraFile, l4);
 
         
-        // all keywords in search term match file name
+        // 1. All keywords in search term match file name
         responses = keywordIndex.query(queryRequestFactory.createQuery("four six"));
         assertEquals(1, responses.length);
         assertEquals(eightFourSixXml.getXMLString(), responses[0].getDocument().getXMLString());
 
-        // Every keyword in search matches, but not for the same file.
+        // 2. keyword matches multiple times for the same document
+        responses = keywordIndex.query(queryRequestFactory.createQuery("six"));
+        assertEquals(1, responses.length);
+        assertTrue(responsesContain(eightFourSixXml));
+
+        // 3. Every keyword in search matches, but not for the same file.
         responses = keywordIndex.query(queryRequestFactory.createQuery("seven nine"));
         assertEquals(0, responses.length);
 
-        // search with keyword that matches in different metadata fields of different files
+        // 4. search with 1 keyword that matches in different metadata fields of different files
         responses = keywordIndex.query(queryRequestFactory.createQuery("interesting"));
         assertEquals(2, responses.length);
         assertTrue(responsesContain(seven, nine));
 
-        // Every keyword in search matches in a metadata field, but not for the same file.
+        // 5. Every keyword in search matches in a metadata field, but not for the same file.
         responses = keywordIndex.query(queryRequestFactory.createQuery("plus special writer"));
         assertEquals(0, responses.length);
 
-        // Every keyword in search matches for same file, but not in same metadata field
+        // 6. Every keyword in search matches for same file, but not in same metadata field
         responses = keywordIndex.query(queryRequestFactory.createQuery("interesting front page stuff"));
-        assertEquals(0, responses.length);
+        assertEquals(1, responses.length);
 
-        // Every keyword in search matches in same metadata field name but for different files (No matches)
+        // 7. Every keyword in search matches in same metadata field name but for different files (No matches)
         responses = keywordIndex.query(queryRequestFactory.createQuery("front plus minus"));
         assertEquals(0, responses.length);
 
-        // search keyword matches prefix of metadata or file name
-        // for multiple files. All files that matched are returned.
+        // 8. Search keyword matches prefix of metadata or file name for multiple files. 
+        //    All files that matched are returned.
         responses = keywordIndex.query(queryRequestFactory.createQuery("eig"));
         assertEquals(3, responses.length);
         assertTrue(responsesContain(algebraXml, nine, eightFourSixXml));
@@ -233,8 +241,8 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         // remove a file for which "eig" matches in the metadata
         fman.removeFile(algebraFile);
 
-        // perform same query as before, and while the other files should still match,
-        // the removed file should no longer match
+        // 9. Perform same query as before, and while the other files should still match,
+        //    the removed file should no longer match
         responses = keywordIndex.query(queryRequestFactory.createQuery("eig"));
         assertEquals(2, responses.length);
         assertTrue(responsesContain(eightFourSixXml, nine));
@@ -249,7 +257,8 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
      *
      * 2. Given a file with metadata of "title='one six eight'", a metadata search
      *    for "title='six eight ten'" should fail because although 2 keywords match that attribute,
-     *    1 keyword does not match.
+     *    1 keyword does not match.  The keyword that does not match for "title" may match in another metadata
+     *    field such as "artist" or "album".
      */
     public void testMetaQueryKeywordMatching() throws Exception {
         waitForLoad();

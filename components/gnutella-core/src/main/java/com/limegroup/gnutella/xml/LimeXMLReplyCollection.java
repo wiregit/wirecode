@@ -179,19 +179,21 @@ public class LimeXMLReplyCollection {
     public LimeXMLDocument createIfNecessary(FileDesc fd) {
         LimeXMLDocument doc = null;
         URN urn = fd.getSHA1Urn();
-        
-        if(!mainMap.containsKey(urn)) {
-            File file = fd.getFile();
-            // If we have no documents for this FD, or the file-format only supports
-            // a single kind of metadata, construct a document.
-            // This is necessary so that we don't keep trying to parse formats that could
-            // be multiple kinds of files every time.   
-            if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
-                doc = constructDocument(file);
-                if(doc != null) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Adding newly constructed document for file: " + file + ", doc: " + doc);
-                    addReply(fd, doc);
+
+        synchronized(mainMap) {
+            if(!mainMap.containsKey(urn)) {
+                File file = fd.getFile();
+                // If we have no documents for this FD, or the file-format only supports
+                // a single kind of metadata, construct a document.
+                // This is necessary so that we don't keep trying to parse formats that could
+                // be multiple kinds of files every time.
+                if(fd.getLimeXMLDocuments().size() == 0 || !LimeXMLUtils.isSupportedMultipleFormat(file)) {
+                    doc = constructDocument(file);
+                    if(doc != null) {
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Adding newly constructed document for file: " + file + ", doMore ec: " + doc);
+                        addReply(fd, doc);
+                    }
                 }
             }
         }
@@ -475,17 +477,12 @@ public class LimeXMLReplyCollection {
             
             for(Map.Entry<String, String> entry : query.getNameValueSet()) {
                 // Get the name of the particular field being queried for.
-                final String name = entry.getKey();
-                // Lookup the matching Trie for that field.
-                StringTrie<List<LimeXMLDocument>> trie = trieMap.get(name);
-                // No matching trie?.. Ignore.
-                if(trie == null)
-                    continue;
+                Set<String> metadata = Collections.singleton(entry.getKey());
 
-                // Get the value of that field being queried for.    
+                // Get the value of that field being queried for.
                 final String value = entry.getValue();
 
-                Set<LimeXMLDocument> repliesForMetadata = getMatchingRepliesForMetadataField(trie, value);
+                Set<LimeXMLDocument> repliesForMetadata = getMatchingDocumentsIntersectKeywords(metadata, value);
 
                 if (!repliesForMetadata.isEmpty()) {
 
@@ -523,45 +520,36 @@ public class LimeXMLReplyCollection {
     }
 
     public Set<LimeXMLDocument> getMatchingDocuments(String query) {
-        Set<LimeXMLDocument> totalMatches = new IdentityHashSet<LimeXMLDocument>();
         synchronized(mainMap) {
-            for (String attrName : trieMap.keySet()) {
-                StringTrie<List<LimeXMLDocument>> trie = trieMap.get(attrName);
-                totalMatches.addAll(getMatchingRepliesForMetadataField(trie, query));
-            }
+            return getMatchingDocumentsIntersectKeywords(trieMap.keySet(), query);
         }
-        return totalMatches;
     }
 
     /**
-     * Extract keywords from query string, search
-     * the StringTrie for each keyword, and
-     * intersect the results when done.
+     * Returns a Set of matching {@link LimeXMLDocument}s for a passed in Set of metadata fields.
+     * The query string is broken down into keywords, and only results common
+     * to all keywords are returned.
+     * <p/>
+     * <ol>
+     *    <li>Extract keywords from query</li>
+     *    <li>For each keyword, search the metadata fields for matches (names of metadata fields are passed in)</li>
+     *    <li>Return the matching LimeXMLDocuments common to all keywords</li>
+     * </ol>
+     * <p/>
+     * NOTE: Caller of this method MUST SYNCHRONIZE on {@link #mainMap}
      *
-     * @param trie the StringTrie that matches keywords to list of results
+     * @param metadataFields names of metadata fields to search for matches
      * @param query the query string to use for the search
      * @return LimeXMLDocuments
      */
-    private static Set<LimeXMLDocument>
-                    getMatchingRepliesForMetadataField(StringTrie<List<LimeXMLDocument>> trie, String query) {
+    private Set<LimeXMLDocument> getMatchingDocumentsIntersectKeywords(Set<String> metadataFields, String query) {
         Set<LimeXMLDocument> matches = null;
         Set<String> keywords = QueryUtils.extractKeywords(query, true);
 
         for (String keyword : keywords) {
 
-            Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(keyword);
-
-            // if any keyword within the query gives us empty results
-            // there are no matches for this metadata attribute value
-            if (!(iter.hasNext())) {
-                return Collections.emptySet();
-            }
-
-            // first, add all lime xml doc matches from all Lists in Iterator
-            List<LimeXMLDocument> allMatchedDocsForKeyword = new ArrayList<LimeXMLDocument>();
-            while (iter.hasNext()) {
-                allMatchedDocsForKeyword.addAll(iter.next());
-            }
+            Set<LimeXMLDocument> allMatchedDocsForKeyword =
+                    getMatchingDocumentsForMetadata(metadataFields, keyword);
 
             // matches contains all common lime xml docs that match
             // all keywords in the query
@@ -574,7 +562,37 @@ public class LimeXMLReplyCollection {
 
             // if no docs in common, there is no chance of a match
             if (matches.size() == 0) {
-                return Collections.emptySet();        
+                return Collections.emptySet();
+            }
+        }
+        return matches;
+    }
+
+    /**
+     * Returns a Set of matching {@link LimeXMLDocument}s for a passed in Set of metadata fields and a search term
+     * This method does not break the search term into keywords.
+     * <p/>
+     * NOTE: Caller of this method MUST SYNCHRONIZE on {@link #mainMap}
+     *
+     * @param metadataFields names of metadata fields to search for matches
+     * @param searchTerm the query string to use for the search
+     * @return LimeXMLDocuments
+     */
+    private Set<LimeXMLDocument> getMatchingDocumentsForMetadata(Set<String> metadataFields, String searchTerm) {
+
+        // first, add all lime xml doc matches from all Lists in Iterator
+        Set<LimeXMLDocument> matches = new IdentityHashSet<LimeXMLDocument>();
+
+        for (String metadataFieldName : metadataFields) {
+
+            // get StringTrie associated with metadata field
+            StringTrie<List<LimeXMLDocument>> trie = trieMap.get(metadataFieldName);
+            if(trie == null) {
+                continue;
+            }
+            Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(searchTerm);
+            while (iter.hasNext()) {
+                matches.addAll(iter.next());
             }
         }
         return matches;
