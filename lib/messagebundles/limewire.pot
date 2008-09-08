@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-01 11:30-0400\n"
+"POT-Creation-Date: 2008-09-08 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -723,7 +723,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:188
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:249
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:250
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:346
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:148
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:38
@@ -732,11 +732,11 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:52
 msgid "Automatically Scroll"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:64
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:65
 msgid "About LimeWire"
 msgstr ""
 
@@ -744,7 +744,7 @@ msgstr ""
 #. *
 #. * String to be displayed in title bar of LW client.
 #.
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:81
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:264
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
 msgid "LimeWire"
@@ -754,18 +754,18 @@ msgstr ""
 #. *
 #. * 'Close'.
 #.
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:105
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
 #: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:104
 msgid "Close"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:107
 msgid "Close This Window"
 msgstr ""
 
 #. introduction
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:178
 msgid ""
 "Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a "
 "collaborative <a href=\"http://www.limewire.org/\">open source effort</a> "
@@ -778,41 +778,41 @@ msgid ""
 msgstr ""
 
 #. developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:182
 msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
 msgstr ""
 
 #. business developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:200
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
 
 #. web developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:212
 msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
 
 #. support staff
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:219
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
 
 #. previous developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:229
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
 
 #. open source contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:259
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -821,7 +821,7 @@ msgid ""
 msgstr ""
 
 #. internationalization contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:296
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:297
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -829,21 +829,21 @@ msgid ""
 msgstr ""
 
 #. community VIPs
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:300
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:301
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
 
 #. conclusion
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:321
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:322
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:326
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:327
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
@@ -928,7 +928,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/DialogOption.java:26
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:89
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:265
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:266
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:348
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:876
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:937
@@ -1367,7 +1367,7 @@ msgstr ""
 #. * The paste action.
 #.
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:56
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:225
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:226
 msgid "Paste"
 msgstr ""
 
@@ -1502,19 +1502,19 @@ msgid ""
 "like to choose another location?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:19
+#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
 msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:34
+#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:35
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:37
+#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:38
 msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
@@ -1528,7 +1528,7 @@ msgstr ""
 msgid "Please wait while LimeWire shuts down..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/SplashWindow.java:108
+#: gui/com/limegroup/gnutella/gui/SplashWindow.java:109
 msgid "Loading LimeWire..."
 msgstr ""
 
@@ -2614,62 +2614,62 @@ msgstr ""
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:48
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:49
 msgid "C&onnect"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:49
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:50
 msgid "Connect to the Network"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:77
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:78
 msgid "D&isconnect"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:78
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:79
 msgid "Disconnect from the Network"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:109
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:110
 msgid "O&pen Magnet or Torrent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:110
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:111
 msgid "Opens a magnet link or torrent file"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:135
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:136
 msgid "Open Magnet or Torrent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:168
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:169
 msgid ""
 "Type a magnet link, or the path or Web address of a torrent file, and "
 "LimeWire will download it for you."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:175
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:176
 msgid "Open:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:236
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:237
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:246
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:119
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:207
 msgid "Browse..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:257
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:258
 msgid ""
 "LimeWire cannot open this file or address. Make sure you typed it correctly, "
 "and then try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:342
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:343
 msgid "&Close"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:343
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "Close the Program"
 msgstr ""
 
@@ -3583,44 +3583,44 @@ msgid ""
 "setting. Your firewall software may look different than the below picture."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:45
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:46
 msgid "You're almost done!"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:46
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:47
 msgid "State your intent below to start using LimeWire "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:48
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:49
 msgid ""
 "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
 "authorized files only.  Installing and using either program does not "
 "consitute a license for obtaining or distributing unauthorized content."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:49
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:50
 msgid "Find out more..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:56
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:57
 #, java-format
 msgid ""
 "<html><div display=\"block\" color=\"#515151\" size=\"13\">I <b>will not</b> "
 "use LimeWire {0} for copyright infringement.</div></html>"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:64
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:65
 #, java-format
 msgid ""
 "<html><div display=\"block\" color=\"#515151\" size=\"13\">I <b>might use</"
 "b> LimeWire {0} for copyright infringement.</div></html>"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:27
+#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:28
 msgid "State Your Intent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:28
+#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:29
 msgid "One more thing..."
 msgstr ""
 
