@@ -21,6 +21,10 @@ public class SharingAddAction extends AbstractAction {
     private FileList libraryList;
     private Category category;
     
+    public SharingAddAction(FileList libraryList, Category category) {
+        this(null, libraryList, category);
+    }
+    
     public SharingAddAction(FileList userList, FileList libraryList, Category category) {
         this.userList = userList;
         this.libraryList = libraryList;
@@ -29,15 +33,15 @@ public class SharingAddAction extends AbstractAction {
         
     @Override
     public void actionPerformed(ActionEvent e) {
-        if( userList == null )
-            return;
-        FilterList<FileItem> audio = new FilterList<FileItem>( libraryList.getModel(), new CategoryFilter(category));
+        if( userList == null || libraryList == null)
+            return; 
+        FilterList<FileItem> audio = new FilterList<FileItem>(libraryList.getModel(), new CategoryFilter(category)); 
         for(FileItem item : audio) {
             userList.addFile(item.getFile());
         }
     }
     
-    public void userFileList(FileList userList) {
+    public void setUserFileList(FileList userList) {
         this.userList = userList;
     }
 }

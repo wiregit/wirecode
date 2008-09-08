@@ -76,7 +76,7 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
     
     private LibraryManager libraryManager;
     
-    private SharingHeaderPanel headerPanel;
+    private BuddySharingHeaderPanel headerPanel;
     
     @Inject
     public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
@@ -129,7 +129,7 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         }
     }
     
-    private SharingHeaderPanel createHeader(JPanel cardPanel) {
+    private BuddySharingHeaderPanel createHeader(JPanel cardPanel) {
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.LIST_SELECTED), 
                 new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.TABLE_SELECTED));
         
@@ -196,13 +196,13 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
     private class BuddySelectionListener implements ListSelectionListener, ListEventListener<FileItem> {
 
         private JTable buddy;
-        private SharingHeaderPanel headerPanel;
+        private BuddySharingHeaderPanel headerPanel;
         private SharingBuddyEmptyPanel emptyPanel;
         private JPanel cardPanel;
         
         private EventList<FileItem> currentList;
         
-        public BuddySelectionListener(JTable table, SharingHeaderPanel headerPanel, SharingBuddyEmptyPanel emptyPanel, JPanel cardPanel) {
+        public BuddySelectionListener(JTable table, BuddySharingHeaderPanel headerPanel, SharingBuddyEmptyPanel emptyPanel, JPanel cardPanel) {
             this.buddy = table;
             this.headerPanel = headerPanel;
             this.emptyPanel = emptyPanel;
@@ -227,7 +227,8 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
                     tc.setCellEditor(editor);
                     tc.setCellRenderer(renderer);
                     sharingFancyPanel.setModel(fileList.getModel(), fileList);
-                                    
+                    headerPanel.setModel(fileList);                
+                    
                     if(currentList != null)
                         currentList.removeListEventListener(this);
                     currentList = fileList.getModel();
@@ -235,8 +236,10 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
                     
                     if(currentList.size() > 0) {
                         viewSelectionPanel.setEnabled(true);
+                        headerPanel.setEnabled(true);
                     } else {
                         viewSelectionPanel.setEnabled(false);
+                        headerPanel.setEnabled(false);
                     }
                     viewCardLayout.show(cardPanel, viewSelectionPanel.getSelectedButton());
                 }
