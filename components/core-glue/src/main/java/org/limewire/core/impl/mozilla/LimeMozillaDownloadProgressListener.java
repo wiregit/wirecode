@@ -64,26 +64,26 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
             // this is my download
             long diff = curTotalProgress - totalProgress.longValue();
             down.count(diff);
+            if (!isPaused()) {
+                // this event might come in after pausing, so we don't want to
+                // change the state in that event
+                int state = download.getState();
+                this.state.set(state);
+            }
             totalProgress.set(curTotalProgress);
             contentLength.set(download.getSize());
-
-            this.state.set(download.getState());
-
-            if (maxTotalProgress == curTotalProgress) {
-                System.out.println("done!");
-            }
         }
     }
 
     @Override
-    public void onSecurityChange(nsIWebProgress webProgress, nsIRequest request, long state,
-            nsIDownload download) {
+    public void onSecurityChange(nsIWebProgress webProgress, nsIRequest request,
+            long state, nsIDownload download) {
         // don't care about this event.
     }
 
     @Override
-    public void onStateChange(nsIWebProgress webProgress, nsIRequest request, long stateFlags,
-            long status, nsIDownload download) {
+    public void onStateChange(nsIWebProgress webProgress, nsIRequest request,
+            long stateFlags, long status, nsIDownload download) {
         if (this.downloadId == download.getId()) {
             // this is my download
             this.state.set(download.getState());
@@ -116,11 +116,11 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
         return downloadId;
     }
 
-    public float getAverageBandwidth() {
+    public synchronized float getAverageBandwidth() {
         return down.getAverageBandwidth();
     }
 
-    public float getMeasuredBandwidth() {
+    public synchronized float getMeasuredBandwidth() {
         try {
             down.measureBandwidth();
             // TODO i shouldn't have to do the above measure bandwidth call.
@@ -130,22 +130,21 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
         }
     }
 
-    public void measureBandwidth() {
+    public synchronized void measureBandwidth() {
         down.measureBandwidth();
     }
 
-    public boolean isCompleted() {
+    public synchronized boolean isCompleted() {
         return state.get() == nsIDownloadManager.DOWNLOAD_FINISHED;
     }
 
-    public boolean isPaused() {
+    public synchronized boolean isPaused() {
         int myState = state.get();
-        boolean paused = myState == nsIDownloadManager.DOWNLOAD_PAUSED
-                || myState == nsIDownloadManager.DOWNLOAD_NOTSTARTED;
+        boolean paused = myState == nsIDownloadManager.DOWNLOAD_PAUSED;
         return paused;
     }
 
-    public DownloadStatus getDownloadStatus() {
+    public synchronized DownloadStatus getDownloadStatus() {
         if (isCompleted()) {
             return DownloadStatus.COMPLETE;
         }
@@ -182,40 +181,42 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
         return saveFile;
     }
 
-    public boolean isInactive() {
+    public synchronized boolean isInactive() {
         boolean inactive = state.get() != nsIDownloadManager.DOWNLOAD_DOWNLOADING;
         return inactive;
     }
 
-    public long getAmountDownloaded() {
+    public synchronized long getAmountDownloaded() {
         return totalProgress.get();
     }
 
-    public long getAmountPending() {
+    public synchronized long getAmountPending() {
         return getContentLength() - getAmountDownloaded();
     }
 
-    public long getContentLength() {
+    public synchronized long getContentLength() {
         return contentLength.get();
     }
 
     @Override
-    public void cancelDownload() {
+    public synchronized void cancelDownload() {
         getDownloadManager().cancelDownload(downloadId);
     }
 
     @Override
     public void pauseDownload() {
+        state.set(nsIDownloadManager.DOWNLOAD_PAUSED);
         getDownloadManager().pauseDownload(downloadId);
     }
 
     @Override
-    public void removeDownload() {
+    public synchronized void removeDownload() {
         getDownloadManager().removeDownload(downloadId);
     }
 
     @Override
-    public void resumeDownload() {
+    public synchronized void resumeDownload() {
+        state.set(nsIDownloadManager.DOWNLOAD_QUEUED);
         getDownloadManager().resumeDownload(downloadId);
     }
 
