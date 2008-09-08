@@ -138,12 +138,19 @@ implements ListEventListener<VisualSearchResult> {
         EventList list = event.getSourceList();
         VisualSearchResult vsr = (VisualSearchResult) list.get(list.size() - 1);
 
+        // Uncomment to output the name of each result.
+        //Object property = vsr.getProperty(PropertyKey.NAME);
+        //String name = property == null ? "unknown" : property.toString();
+        //System.out.println("SearchTabItems.listChanged: name = " + name);
+
         // Determine its media type.
         String extension = vsr.getFileExtension();
         MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
 
         // Find the "tab" for the media type.
         String schema = mediaType == null ? "other" : mediaType.toString();
+        //System.out.println("SearchTabItems.listChanged: schema = " + schema);
+
         String title = schemaToTitleMap.get(schema);
         if (!isAll) {
             if (title.endsWith("s")) {

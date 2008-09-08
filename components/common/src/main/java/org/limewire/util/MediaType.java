@@ -140,7 +140,7 @@ public class MediaType implements Serializable {
                 "avi", "asf", "asx", "wmv", "qt", "mov",
                 "fli", "flc", "flx", "flv", 
                 "wml", "vrml", "swf", "dcr", "jve", "nsv", 
-                "mkv", "ogm",
+                "mkv", "ogm", "ogv",
                 "cdg", "srt", "sub", "idx", "flv"
             });
         
