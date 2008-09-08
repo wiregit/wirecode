@@ -29,9 +29,9 @@ public class SharingHeaderPanel extends JXPanel implements BuddyUpdate {
     
     private final String staticText;
     
-    private JLabel descriptionLabel;
-    private JTextField filterBox;
-    private ViewSelectionPanel viewSelectionPanel;
+    protected JLabel descriptionLabel;
+    protected JTextField filterBox;
+    protected ViewSelectionPanel viewSelectionPanel;
     
     public SharingHeaderPanel(Icon icon, String staticText, String name, ViewSelectionPanel viewPanel) {
         GuiUtils.assignResources(this);
@@ -40,6 +40,7 @@ public class SharingHeaderPanel extends JXPanel implements BuddyUpdate {
     
         this.staticText = staticText;
         this.viewSelectionPanel = viewPanel;
+        createComponents();
         createComponents(icon, staticText + name);
         layoutComponents();
     }
@@ -48,12 +49,15 @@ public class SharingHeaderPanel extends JXPanel implements BuddyUpdate {
         return filterBox;
     }
     
+    protected void createComponents() {
+    }
+    
     private void createComponents(Icon icon, String text) {
         descriptionLabel = new JLabel(text, icon, JLabel.LEFT);
         filterBox = new FilteredTextField(FILTER_WIDTH);
     }
     
-    private void layoutComponents() {
+    protected void layoutComponents() {
         setLayout(new MigLayout());
 
         add(descriptionLabel, "push");

@@ -41,8 +41,6 @@ import ca.odell.glazedlists.event.ListEventListener;
  */
 //TODO: merge this with SharingFancyTablePanel during cleanup of Sharing package
 public class SharingFancyListPanel extends JPanel implements ListEventListener<FileItem> {
-
-    private Icon panelIcon = null;
     
     private final ImageList imageList;
     
@@ -53,7 +51,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
     private SharingRemoveAllAction removeAction;
     private EventList<FileItem> currentEventList;
     
-    public SharingFancyListPanel(String name, EventList<FileItem> eventList, DropTarget dropTarget, FileList fileList) {       
+    public SharingFancyListPanel(String name, EventList<FileItem> eventList, DropTarget dropTarget, FileList fileList, Icon panelIcon) {       
         setBackground(Color.WHITE);
         
         this.currentEventList = eventList;

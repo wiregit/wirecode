@@ -38,8 +38,6 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingFancyTablePanel extends JPanel implements ListEventListener<FileItem> {
-
-    private Icon panelIcon = null;
     
     @Resource
     private Icon cancelIcon;
@@ -57,12 +55,12 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     private SharingRemoveAllAction removeAction;
     private EventList<FileItem> currentEventList;
     
-    public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, DropTarget dropTarget, FileList fileList) {
-        this(name, eventList, tableFormat, true, dropTarget, fileList);
+    public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, DropTarget dropTarget, FileList fileList, Icon panelIcon) {
+        this(name, eventList, tableFormat, true, dropTarget, fileList, panelIcon);
     }
     
     public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, 
-            boolean paintTableHeader, DropTarget dropTarget, FileList fileList) {
+            boolean paintTableHeader, DropTarget dropTarget, FileList fileList, Icon panelIcon) {
         
         this.tableFormat = tableFormat;
         this.currentEventList = eventList;

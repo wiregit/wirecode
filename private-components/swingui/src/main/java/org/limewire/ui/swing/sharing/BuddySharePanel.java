@@ -133,7 +133,7 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.LIST_SELECTED), 
                 new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.TABLE_SELECTED));
         
-        SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with ", "", viewSelectionPanel);
+        BuddySharingHeaderPanel headerPanel = new BuddySharingHeaderPanel(sharingIcon, "Sharing with ", "", viewSelectionPanel, libraryManager);
         return headerPanel;
     }
     
