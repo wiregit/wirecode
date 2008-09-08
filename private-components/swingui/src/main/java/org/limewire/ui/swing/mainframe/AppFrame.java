@@ -18,17 +18,11 @@ import org.jdesktop.application.Action;
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.core.impl.MockModule;
-import org.limewire.core.impl.mozilla.LimeMozillaDownloadManagerListenerImpl;
-import org.limewire.core.settings.MozillaSettings;
 import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
-import org.limewire.ui.swing.browser.download.LimeMozillaDownloadManager;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.mozilla.browser.XPCOMUtils;
-import org.mozilla.interfaces.nsIDownloadManager;
-import org.mozilla.interfaces.nsIPrefService;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -71,11 +65,11 @@ public class AppFrame extends SingleFrameApplication {
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 
-        Injector localInjector = createInjector();
+        Injector injector = createInjector();
 
         getMainFrame().setJMenuBar(new LimeMenuBar());
 
-        LimeWireSwingUI ui = localInjector.getInstance(LimeWireSwingUI.class);
+        LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
         
@@ -141,5 +135,4 @@ public class AppFrame extends SingleFrameApplication {
 
         uiDefaults.put("Table.background", bgColorResource);
     }
-
 }

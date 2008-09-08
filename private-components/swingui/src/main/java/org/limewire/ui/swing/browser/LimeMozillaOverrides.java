@@ -2,7 +2,6 @@ package org.limewire.ui.swing.browser;
 
 import org.limewire.core.impl.mozilla.LimeMozillaDownloadManagerListenerImpl;
 import org.limewire.core.settings.MozillaSettings;
-import org.limewire.ui.swing.browser.download.LimeMozillaDownloadManager;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownloadManager;
 import org.mozilla.interfaces.nsIPrefService;
@@ -12,6 +11,8 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class LimeMozillaOverrides {
+
+    public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
     @Inject
     public LimeMozillaOverrides(LimeMozillaDownloadManagerListenerImpl downloadManagerListener) {
@@ -41,8 +42,8 @@ public class LimeMozillaOverrides {
                 MozillaSettings.DOWNLOAD_MIME_TYPES.getValue());
 
         // adding the download listener
-        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(
-                LimeMozillaDownloadManager.NS_IDOWNLOADMANAGER_CID, nsIDownloadManager.class);
+        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(NS_IDOWNLOADMANAGER_CID,
+                nsIDownloadManager.class);
         downloadManager.addListener(mozillaDownloadManagerListener);
     }
 }
