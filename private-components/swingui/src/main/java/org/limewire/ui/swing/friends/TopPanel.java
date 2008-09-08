@@ -4,6 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,7 +61,7 @@ public class TopPanel extends JPanel {
         
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
-        setLayout(new MigLayout("insets 0 0 0 0", "3[]3[shrinkprio 50][]3:push[shrinkprio 0]0[shrinkprio 0]0[shrinkprio 0]0", "0[]0"));
+        setLayout(new MigLayout("insets 0 0 0 0", "3[]3[shrinkprio 50][]3:push[shrinkprio 0]3[shrinkprio 0]3[shrinkprio 0]0", "0[]0"));
         
         friendAvailabiltyIcon = new JLabel();
         add(friendAvailabiltyIcon);
@@ -126,6 +127,8 @@ public class TopPanel extends JPanel {
         
         RectanglePainter<JXButton> backgroundPainter = new RectanglePainter<JXButton>(getBackground(), getBackground());
         final JXButton minimizeChat = new JXButton(new MinimizeChat());
+        minimizeChat.setMinimumSize(new Dimension(13, 14));
+        minimizeChat.setPreferredSize(new Dimension(13, 14));
         minimizeChat.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
