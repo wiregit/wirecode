@@ -22,17 +22,12 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
     private IconManager iconManager;
     protected String[] columnNames;
     protected VisualSearchResult vsr;
-    private int actionColumnIndex;
+    protected int actionColumnIndex;
     private int lastVisibleColumnIndex;
 
     ResultsTableFormat(int actionColumnIndex, int lastVisibleColumnIndex) {
         this.actionColumnIndex = actionColumnIndex;
         this.lastVisibleColumnIndex = lastVisibleColumnIndex;
-    }
-
-    public Class getColumnClass(int index) {
-        return index == actionColumnIndex ?
-            VisualSearchResult.class : String.class;
     }
 
     /**
@@ -41,6 +36,15 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
      */
     public int getActionColumnIndex() {
         return actionColumnIndex;
+    }
+
+    public Class getColumnClass(int index) {
+        return index == actionColumnIndex ?
+            VisualSearchResult.class : String.class;
+    }
+
+    public Comparator getColumnComparator(int index) {
+        return null;
     }
 
     public int getColumnCount() {
@@ -66,6 +70,13 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
 
         return label;
     }
+
+    /**
+     * Gets the initial column width of the column with a given index.
+     * @param index the column index
+     * @return the initial column width
+     */
+    public abstract int getInitialColumnWidth(int index);
 
     /**
      * Gets the index of the last column that should be visible by default.
@@ -95,10 +106,6 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
     protected String getString(PropertyKey key) {
         Object value = vsr.getProperty(key);
         return value == null ? "?" : value.toString();
-    }
-
-    public Comparator getColumnComparator(int index) {
-        return null;
     }
 
     public boolean isEditable(VisualSearchResult vsr, int index) {

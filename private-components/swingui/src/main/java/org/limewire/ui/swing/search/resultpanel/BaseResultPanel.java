@@ -104,15 +104,19 @@ public class BaseResultPanel extends JXPanel {
         resultsTable.setDefaultEditor(
             VisualSearchResult.class, actionEditor);
 
-        int columnIndex = tableFormat.getActionColumnIndex();
-        resultsTable.setColumnWidth(columnIndex, 100);
-
         // Don't allow sorting on the "Actions" column
+        int columnIndex = tableFormat.getActionColumnIndex();
         resultsTable.getColumnExt(columnIndex).setSortable(false);
+
+        // Set default width of all visible columns.
+        int lastVisibleColumnIndex = tableFormat.getLastVisibleColumnIndex();
+        for (int i = 0; i <= lastVisibleColumnIndex; i++) {
+            resultsTable.setColumnWidth(
+                i, tableFormat.getInitialColumnWidth(i));
+        }
 
         // Make some columns invisible by default.
         int columnCount = resultsTable.getColumnCount();
-        int lastVisibleColumnIndex = tableFormat.getLastVisibleColumnIndex();
         // We have to loop backwards because making a column invisible
         // changes the index of the columns after it.
         for (int i = columnCount - 1; i > lastVisibleColumnIndex; i--) {

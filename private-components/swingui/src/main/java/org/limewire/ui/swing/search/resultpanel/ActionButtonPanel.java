@@ -4,11 +4,18 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.ToolTipManager;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -19,6 +26,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class ActionButtonPanel extends JPanel {
 
+    private static final Point toolTipOffset = new Point(0, 25);
     private static final String[] TOOLTIPS =
         { "Download", "More Info", "Mark as Junk" };
     
@@ -42,9 +50,9 @@ public class ActionButtonPanel extends JPanel {
     @Resource private Icon junkUpIcon;
 
     private Icon[][] icons;
-    private JButton downloadButton = new JButton();
-    private JButton infoButton = new JButton();
-    private JToggleButton junkButton = new JToggleButton();
+    private JButton downloadButton;
+    private JButton infoButton;
+    private JToggleButton junkButton;
     private int height;
 
     public ActionButtonPanel() {
@@ -53,6 +61,27 @@ public class ActionButtonPanel extends JPanel {
         // The icon PNG file is in swingui/src/main/resources/
         // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
+
+        downloadButton = new JButton() {
+            @Override
+            public Point getToolTipLocation(MouseEvent e) {
+                return getToolTipOffset(this);
+            }
+        };
+        
+        infoButton = new JButton() {
+            @Override
+            public Point getToolTipLocation(MouseEvent e) {
+                return getToolTipOffset(this);
+            }
+        };
+        
+        junkButton = new JToggleButton() {
+            @Override
+            public Point getToolTipLocation(MouseEvent e) {
+                return getToolTipOffset(this);
+            }
+        };
         
         icons = new Icon[][] {
             { downloadUpIcon, downloadOverIcon, downloadDownIcon },
@@ -63,6 +92,40 @@ public class ActionButtonPanel extends JPanel {
 
         setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
         createButtons();
+
+        // Set the tooltip delay to zero only when the mouse is over this panel.
+        addMouseListener(new MouseAdapter() {
+            private int delay;
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // Save the previous delay.
+                delay = ToolTipManager.sharedInstance().getInitialDelay();
+                ToolTipManager.sharedInstance().setInitialDelay(0);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // Restore the previous delay.
+                ToolTipManager.sharedInstance().setInitialDelay(delay);
+            }
+        });
+    }
+
+    private Point getToolTipOffset(JComponent component) {
+        // Determine the size of the tooltip.
+        Font font = component.getFont();
+        FontMetrics fm = component.getFontMetrics(font);
+        String text = component.getToolTipText();
+        int toolTipWidth = fm.stringWidth(text);
+        int toolTipHeight = fm.getHeight();
+
+        Dimension componentSize = component.getSize();
+
+        int x = componentSize.width/2 - toolTipWidth/2 + 1;
+        int y = -toolTipHeight - 3;
+
+        return new Point(x, y);
     }
 
     private void calculateHeight() {

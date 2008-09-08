@@ -26,4 +26,9 @@ extends ResultsTableFormat<VisualSearchResult> {
         this.vsr = vsr;
         return vsr;
     }
+
+    @Override
+    public int getInitialColumnWidth(int index) {
+        return 100;
+    }
 }
