@@ -20,13 +20,10 @@ public class TorrentMetaData implements MetaData {
 
     public static final String TORRENT_SCHEMA = "http://www.limewire.com/schemas/torrent.xsd";
 
-    private final BTData data;
-
     private List<NameValue<String>> nameValues;
 
     public TorrentMetaData(BTData data) throws IOException {
-        this.data = data;
-        nameValues = Collections.unmodifiableList(buildNameValueList());
+        nameValues = Collections.unmodifiableList(buildNameValueList(data));
     }
 
     @Override
@@ -39,7 +36,7 @@ public class TorrentMetaData implements MetaData {
         throw new UnsupportedOperationException("not implemented yet");
     }
 
-    private List<NameValue<String>> buildNameValueList() throws IOException {
+    private List<NameValue<String>> buildNameValueList(BTData data) throws IOException {
         NameValueListBuilder builder = new NameValueListBuilder();
         builder.add("infohash", StringUtils.toUTF8String(data.getInfoHash()));
         try {
@@ -47,7 +44,10 @@ public class TorrentMetaData implements MetaData {
         } catch (URISyntaxException ie) {
             throw new IOException(ie);
         }
-        builder.add("length", data.getLength());
+        Long length = data.getLength();
+        if (length != null) {
+            builder.add("length", length);
+        }
         builder.add("name", data.getName());
         builder.add("piecelength", data.getPieceLength());
         builder.add("private", Boolean.toString(data.isPrivate()));
@@ -57,18 +57,20 @@ public class TorrentMetaData implements MetaData {
             builder.add("webseeds", uris);
         }
         List<BTFileData> files = data.getFiles();
-        List<String> filePaths = new ArrayList<String>(files.size());
-        List<Long> fileLengths = new ArrayList<Long>(files.size());
-        for (BTFileData file : files) {
-            try {
-                filePaths.add(URIUtils.toURI("file:///" + file.getPath()).toASCIIString());
-            } catch (URISyntaxException e) {
-                throw new IOException(e);
+        if (files != null) {
+            List<String> filePaths = new ArrayList<String>(files.size());
+            List<Long> fileLengths = new ArrayList<Long>(files.size());
+            for (BTFileData file : files) {
+                try {
+                    filePaths.add(URIUtils.toURI("file:/" + file.getPath()).toASCIIString());
+                } catch (URISyntaxException e) {
+                    throw new IOException(e);
+                }
+                fileLengths.add(file.getLength());
             }
-            fileLengths.add(file.getLength());
+            builder.add("filepaths", StringUtils.explode(filePaths, "\t"));
+            builder.add("filelenghts", StringUtils.explode(fileLengths, "\t"));
         }
-        builder.add("filepaths", StringUtils.explode(filePaths, "\t"));
-        builder.add("filelenghts", StringUtils.explode(fileLengths, "\t"));
         return builder.toList();
     }
     

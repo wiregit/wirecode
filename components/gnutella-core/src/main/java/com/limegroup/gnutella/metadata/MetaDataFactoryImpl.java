@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
 import com.limegroup.gnutella.metadata.audio.reader.AudioDataReader;
 import com.limegroup.gnutella.metadata.audio.reader.MP3MetaData;
@@ -29,12 +30,12 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * Implementation of MetaDataFactory. Returns the appropriate reader/writer for
  * the file type if one exists, null if one does not exist 
  */
+@Singleton
 public class MetaDataFactoryImpl implements MetaDataFactory {
 
     private static final Log LOG = LogFactory.getLog(MetaDataFactory.class);
     
-    
-    private final ConcurrentMap<String, MetaReaderFactory> factoriesByExtension = new ConcurrentHashMap<String, MetaReaderFactory>();
+    private final ConcurrentMap<String, MetaReaderFactory> readerFactoriesByExtension = new ConcurrentHashMap<String, MetaReaderFactory>();
     
     /**
      * factory method which returns an instance of MetaDataEditor which
@@ -53,7 +54,7 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
     @Override
     public void registerReaderFactory(MetaReaderFactory factory, String...fileExtensions) {
         for (String extension : fileExtensions) {
-            MetaReaderFactory existingFactory = factoriesByExtension.put(extension, factory);
+            MetaReaderFactory existingFactory = readerFactoriesByExtension.put(extension, factory);
             if (existingFactory != null) {
                 throw new IllegalArgumentException("factory: " + existingFactory + " already resistered for: " + extension);
             }
@@ -72,7 +73,7 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
             else {
                 String extension = FileUtils.getFileExtension(f);
                 if (extension != null) {
-                    MetaReaderFactory factory = factoriesByExtension.get(extension);
+                    MetaReaderFactory factory = readerFactoriesByExtension.get(extension);
                     if (factory != null) {
                         return factory.createReader(f);
                     }

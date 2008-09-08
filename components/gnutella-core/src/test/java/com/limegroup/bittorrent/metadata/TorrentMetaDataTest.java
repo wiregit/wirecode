@@ -60,7 +60,7 @@ public class TorrentMetaDataTest extends BaseTestCase {
         assertContainsNameValue(values, "piecelength", "2");
         assertContainsNameValue(values, "private", "false");
         assertContainsNameValue(values, "webseeds", "http://localhost/name%09hello\thttp://test/%22me%22");
-        assertContainsNameValue(values, "filepaths", "file:///home/test+me+%22hello+world%22\tfile:///home/me/%E3%83%95%E3%82%A1");
+        assertContainsNameValue(values, "filepaths", "file:/home/test+me+%22hello+world%22\tfile:/home/me/%E3%83%95%E3%82%A1");
         assertContainsNameValue(values, "filelenghts", "200\t100");
     }
     
