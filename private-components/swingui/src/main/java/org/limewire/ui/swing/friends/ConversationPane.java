@@ -32,6 +32,7 @@ import org.limewire.ui.swing.action.CopyAllAction;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
+import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -98,6 +99,9 @@ public class ConversationPane extends JPanel implements Displayable {
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
         LOG.debugf("Message: from {0} text: {1} topic: {2}", event.getMessage().getSenderName(), event.getMessage().getMessageText(), topic);
         messages.add(event.getMessage());
+        if (event.getMessage().getType() == Type.Received) {
+            currentChatState = ChatState.active;
+        }
         displayMessages();
     }
     
