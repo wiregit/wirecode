@@ -41,6 +41,11 @@ class ChatDocumentBuilder {
         "</html>";
     
     public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState, String conversationName) {
+        return buildChatText(messages, currentChatState, conversationName, false);
+    }
+    
+    public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState, 
+            String conversationName, boolean friendSignedOff) {
         StringBuilder builder = new StringBuilder();
         builder.append(TOP);
         
@@ -69,7 +74,7 @@ class ChatDocumentBuilder {
             }
         }
 
-        appendIsTypingMessage(builder, conversationName, currentChatState);
+        appendIsTypingMessage(builder, conversationName, currentChatState, friendSignedOff);
         
         builder.append(BOTTOM);
         return builder.toString();
@@ -91,9 +96,11 @@ class ChatDocumentBuilder {
         .append("</div>");
     }
     
-    private static void appendIsTypingMessage(StringBuilder builder, String senderName, ChatState chatState) {
+    private static void appendIsTypingMessage(StringBuilder builder, String senderName, ChatState chatState, boolean friendSignedOff) {
         String stateMessage = null;
-        if (chatState == ChatState.composing) {
+        if (friendSignedOff) {
+            stateMessage = " has signed off";
+        } else if (chatState == ChatState.composing) {
             stateMessage = " is typing a message...";
         } else if (chatState == ChatState.paused) {
             stateMessage = " has entered text";

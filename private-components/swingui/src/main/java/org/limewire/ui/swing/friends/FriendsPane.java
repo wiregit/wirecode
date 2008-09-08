@@ -38,7 +38,6 @@ import javax.swing.table.TableColumnModel;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
@@ -91,6 +90,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private static final int ICON_WIDTH_FUDGE_FACTOR = 4;
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
+    private static final String ALL_PRESENCE_UPDATES_TOPIC_PATTERN = PresenceUpdateEvent.buildTopic(".*");
     
     private final EventList<Friend> friends;
     private final JTable friendsTable;
@@ -272,7 +272,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             //Clear the border on the renderer because the same panel is being reused for every cell
             //and it will be set to an underlining border if this method returns true
-            JPanel panel = (JPanel)renderer;
+            JComponent panel = (JComponent)renderer;
             panel.setBorder(BorderFactory.createEmptyBorder());
 
             JXTable table = (JXTable) adapter.getComponent();
@@ -293,8 +293,8 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         }
     }
     
-    @EventSubscriber
-    public void handlePresenceUpdate(PresenceUpdateEvent event) {
+    @RuntimeTopicPatternEventSubscriber(methodName="getPresenceUpdateTopicPatternName")
+    public void handlePresenceUpdate(String topic, PresenceUpdateEvent event) {
         LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
         final Presence presence = event.getPresence();
         final User user = event.getUser();
@@ -330,7 +330,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         friendsCountUpdater.setFriendsCount(friends.size());
     }
     
-    @RuntimeTopicPatternEventSubscriber
+    @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
@@ -346,8 +346,12 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         }
     }
     
-    public String getTopicPatternName() {
+    public String getMessagingTopicPatternName() {
         return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
+    }
+    
+    public String getPresenceUpdateTopicPatternName() {
+        return ALL_PRESENCE_UPDATES_TOPIC_PATTERN;
     }
     
     public void setLoggedInID(String id) {

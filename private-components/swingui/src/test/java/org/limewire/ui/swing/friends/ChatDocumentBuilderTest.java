@@ -56,6 +56,15 @@ public class ChatDocumentBuilderTest extends TestCase {
                 new String[] {"heynow"});
     }
 
+    public void testBuildChatTextForConversationWhenTheyHaveSignedOff() {
+        StringBuilder conversation = new StringBuilder();
+        conversation.append("<div class=\"them\">you:</div>heynow<br/>")
+        .append("<div class=\"typing\">you has signed off</div><br/>");
+        compareOutput(conversation.toString(), null, true, 
+                new Type[] {Type.Received},  
+                new String[] {"heynow"});
+    }
+
     public void testBuildChatTextShowingTypingMessagesRemovedAfterReceivingFollowupMessage() {
         StringBuilder conversation = new StringBuilder();
         conversation.append("<div class=\"them\">you:</div>heynow<br/>")
@@ -85,7 +94,7 @@ public class ChatDocumentBuilderTest extends TestCase {
           new MockMessage(null, "heynow", 0, "me", Type.Sent),      
           new MockMessage(null, "yo", 600001, "me", Type.Sent),      
         });
-        compareOutput(conversation.toString(), null, new ArrayList<Message>(messages));
+        compareOutput(conversation.toString(), null, false, new ArrayList<Message>(messages));
     }
 
     private void compareOutput(String input, String expected) {
@@ -93,11 +102,15 @@ public class ChatDocumentBuilderTest extends TestCase {
     }
 
     private void compareOutput(String expected, ChatState state, Type[] type, String... input) {
-        compareOutput(expected, state, getMessages(type, input));
+        compareOutput(expected, state, false, getMessages(type, input));
     }
 
-    private void compareOutput(String expected, ChatState state, ArrayList<Message> messages) {
-        String chatText = ChatDocumentBuilder.buildChatText(messages, state, "you");
+    private void compareOutput(String expected, ChatState state, boolean friendHasSignedOff, Type[] type, String... input) {
+        compareOutput(expected, state, friendHasSignedOff, getMessages(type, input));
+    }
+
+    private void compareOutput(String expected, ChatState state, boolean friendHasSignedOff, ArrayList<Message> messages) {
+        String chatText = ChatDocumentBuilder.buildChatText(messages, state, "you", friendHasSignedOff);
         
         assertTrue(chatText.startsWith(ChatDocumentBuilder.TOP));
         assertTrue(chatText.endsWith(ChatDocumentBuilder.BOTTOM));

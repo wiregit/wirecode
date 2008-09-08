@@ -36,6 +36,7 @@ import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.xmpp.api.client.Presence;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -52,6 +53,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private JEditorPane editor;
     private final IconLibrary icons;
     private final String conversationName;
+    private final String friendId;
     private final Color BACKGROUND_COLOR = Color.WHITE;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
@@ -60,6 +62,7 @@ public class ConversationPane extends JPanel implements Displayable {
     public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, IconLibrary icons) {
         this.icons = icons;
         this.conversationName = friend.getName();
+        this.friendId = friend.getID();
         
         setLayout(new BorderLayout());
         
@@ -114,6 +117,18 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
     
+    @RuntimeTopicEventSubscriber(methodName="getPresenceUpdateTopicName")
+    public void handlePresenceUpdate(String topic, PresenceUpdateEvent event) {
+        org.limewire.xmpp.api.client.Presence.Type type = event.getPresence().getType();
+        if (type == Presence.Type.unavailable) {
+            displayMessages(true);
+            inputPanel.getInputComponent().setEnabled(false);
+        } else if (type == Presence.Type.available) {
+            displayMessages(false);
+            inputPanel.getInputComponent().setEnabled(true);
+        }
+    }
+    
     public void closeChat() {
         EventAnnotationProcessor.unsubscribe(this);
     }
@@ -126,8 +141,16 @@ public class ConversationPane extends JPanel implements Displayable {
         return ChatStateEvent.buildTopic(conversationName);
     }
     
+    public String getPresenceUpdateTopicName() {
+        return PresenceUpdateEvent.buildTopic(friendId);
+    }
+    
     private void displayMessages() {
-        String chatDoc = ChatDocumentBuilder.buildChatText(messages, currentChatState, conversationName);
+        displayMessages(false);
+    }
+
+    private void displayMessages(boolean friendSignedOff) {
+        String chatDoc = ChatDocumentBuilder.buildChatText(messages, currentChatState, conversationName, friendSignedOff);
         LOG.debugf("Chat doc: {0}", chatDoc);
         editor.setText(chatDoc);
     }
