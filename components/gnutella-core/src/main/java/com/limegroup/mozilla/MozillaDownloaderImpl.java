@@ -1,6 +1,7 @@
 package com.limegroup.mozilla;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
-import com.limegroup.gnutella.downloader.serial.MozillaDownloadMementoImpl;
 
 /**
  * Downloader listening to events from the Mozilla download process.
@@ -23,6 +23,8 @@ import com.limegroup.gnutella.downloader.serial.MozillaDownloadMementoImpl;
 public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     private final MozillaDownloadListener listener;
+
+    private AtomicBoolean shouldBeRemoved = new AtomicBoolean(false);
 
     public MozillaDownloaderImpl(MozillaDownloadListener listener) {
         super(new NoOpSaveLocationManager());
@@ -245,7 +247,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public void stop() {
-        pause();
+        finish();
     }
 
     @Override
@@ -266,6 +268,12 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public void finish() {
         try {
+            pause();
+        } catch (Exception ignored) {
+            // yum
+        }
+
+        try {
             listener.cancelDownload();
         } catch (Exception ignored) {
             // yum
@@ -275,6 +283,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
         } catch (Exception ignored) {
             // yum
         }
+        shouldBeRemoved.set(true);
     }
 
     @Override
@@ -293,7 +302,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public boolean shouldBeRemoved() {
-        return false;
+        return shouldBeRemoved.get();
     }
 
     @Override
@@ -323,13 +332,17 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     protected DownloadMemento createMemento() {
-        return new MozillaDownloadMementoImpl();
+        return null;
     }
 
     @Override
     public void initFromMemento(DownloadMemento memento) throws InvalidDataException {
-        // nothing we do not want to init from memento
-        // TODO would need to stop error message in factory initing the
-        // downloader
+        // nothing we do not want to init from mementos
     }
+
+    @Override
+    public boolean supportsMemento() {
+        return false;
+    }
+
 }

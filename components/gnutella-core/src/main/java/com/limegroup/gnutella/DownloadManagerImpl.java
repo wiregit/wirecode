@@ -290,7 +290,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         synchronized(this) {
             mementos = new ArrayList<DownloadMemento>(active.size() + waiting.size());
             for(CoreDownloader downloader : activeAndWaiting) {
-                mementos.add(downloader.toMemento());
+                if(downloader.supportsMemento()) {
+                    mementos.add(downloader.toMemento());
+                }
             }
         }
         
