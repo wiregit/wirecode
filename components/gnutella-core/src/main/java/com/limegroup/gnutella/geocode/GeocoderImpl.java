@@ -30,7 +30,6 @@ final class GeocoderImpl extends AbstractGeocoder {
 
     public void initialize() {
         String url = GeocodeSettings.GEOCODE_URL.getValue();
-        System.out.println("GeocodeImpl.initialize: url = " + url);
         if(url == null || url.equals("")) {
             setInvalid(new IllegalArgumentException("No URL"));
             return;
@@ -48,12 +47,12 @@ final class GeocoderImpl extends AbstractGeocoder {
         }
         
         LimeHttpClient client = httpClient.get();
-        System.out.println("GeocodeImpl.initialize: client = " + client);
         HttpResponse response = null;
         try {
-            System.out.println("GeocodeImpl.initialize: calling client.execute");
+            //System.out.println("GeocodeImpl.initialize: calling client.execute");
+            // TODO: The following call seems to hang on some systems.
             response = client.execute(get);
-            System.out.println("GeocodeImpl.initialize: response = " + response);
+            //System.out.println("GeocodeImpl.initialize: response = " + response);
             if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 HttpEntity entity = response.getEntity();
                 if(entity != null) {
