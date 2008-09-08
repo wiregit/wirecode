@@ -214,7 +214,7 @@ public class TopPanel extends JPanel {
     }
     
     @EventSubscriber
-    public void handleStatusChange(PresenceChangeEvent event) {
+    public void handleStatusChange(SelfAvailabilityUpdateEvent event) {
         Mode newMode = event.getNewMode();
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
                             newMode == Mode.away ? awayPopupItem.getModel() : null;

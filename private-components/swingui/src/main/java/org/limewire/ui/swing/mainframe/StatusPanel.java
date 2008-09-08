@@ -34,7 +34,7 @@ import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.friends.FriendsUtil;
 import org.limewire.ui.swing.friends.IconLibrary;
-import org.limewire.ui.swing.friends.PresenceChangeEvent;
+import org.limewire.ui.swing.friends.SelfAvailabilityUpdateEvent;
 import org.limewire.ui.swing.friends.SignoffAction;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
@@ -171,7 +171,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater {
     }
     
     @EventSubscriber
-    public void handleStatusChange(PresenceChangeEvent event) {
+    public void handleStatusChange(SelfAvailabilityUpdateEvent event) {
         Mode newMode = event.getNewMode();
         updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons), newMode.toString());
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :

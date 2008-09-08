@@ -45,7 +45,7 @@ public class XMPPEventHandler {
     
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
-        new PresenceChangeEvent(Mode.available).publish();
+        new SelfAvailabilityUpdateEvent(Mode.available).publish();
     }
     
     @EventSubscriber
@@ -77,7 +77,7 @@ public class XMPPEventHandler {
     }
     
     @EventSubscriber
-    public void handlePresenceChange(PresenceChangeEvent event) {
+    public void handlePresenceChange(SelfAvailabilityUpdateEvent event) {
         final XMPPConnection connection = getLoggedInConnection();
         if (connection != null) {
             LOG.debugf("Changing presence for {0} to {1}", connection.getConfiguration().getServiceName(), event.getNewMode());

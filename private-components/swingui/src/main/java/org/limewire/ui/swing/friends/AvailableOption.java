@@ -15,6 +15,6 @@ public class AvailableOption extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        new PresenceChangeEvent(Mode.available).publish();
+        new SelfAvailabilityUpdateEvent(Mode.available).publish();
     }
 }

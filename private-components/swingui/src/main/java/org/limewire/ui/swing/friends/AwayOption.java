@@ -15,6 +15,6 @@ public class AwayOption extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        new PresenceChangeEvent(Mode.away).publish();
+        new SelfAvailabilityUpdateEvent(Mode.away).publish();
     }
 }
