@@ -30,10 +30,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
 import javax.swing.Timer;
-import javax.swing.UIManager;
-import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
@@ -483,10 +482,6 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private class CustomTooltipLocationTable extends JXTable {
         public CustomTooltipLocationTable(TableModel dm) {
             super(dm);
-            //Resorting to setting the tooltip background at the UIManager layer because otherwise the
-            //toolip popup will have a yellow (or some other color) border corresponding to the default
-            //toolip background color
-            UIManager.put("ToolTip.background", new ColorUIResource(new Color(172, 172, 172)));
         }
 
         @Override
@@ -494,6 +489,13 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             Point location = scrollPane.getLocation();
             int width2 = scrollPane.getWidth();
             return new Point(location.x + width2, event.getPoint().y);
+        }
+
+        @Override
+        public JToolTip createToolTip() {
+            JToolTip tooltip = super.createToolTip();
+            tooltip.setBackground(new Color(172, 172, 172));
+            return tooltip;
         }
 
         @Override
