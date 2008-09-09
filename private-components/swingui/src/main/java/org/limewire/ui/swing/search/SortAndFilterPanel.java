@@ -260,11 +260,17 @@ public class SortAndFilterPanel extends JXPanel {
             return getStringComparator(PropertyKey.ARTIST_NAME, true);
         }
 
+        if ("Company".equals(item)) {
+            return getStringComparator(PropertyKey.COMPANY, true);
+        }
+
         if ("Date created (more recent)".equals(item)) {
             return getDateComparator(PropertyKey.DATE_CREATED, false);
         }
 
-        if ("File type".equals(item) || "Type".equals(item)) {
+        if ("File extension".equals(item)
+            || "File type".equals(item)
+            || "Type".equals(item)) {
             return new Comparator<VisualSearchResult>() {
                 public int compare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
@@ -283,8 +289,14 @@ public class SortAndFilterPanel extends JXPanel {
             return getLongComparator(PropertyKey.LENGTH, true);
         }
 
-        if ("Name".equals(item) || "Filename".equals(item)) {
+        if ("Name".equals(item)
+            || "Filename".equals(item)
+            || "Title".equals(item)) {
             return getStringComparator(PropertyKey.NAME, true);
+        }
+
+        if ("Platform".equals(item)) {
+            return getStringComparator(PropertyKey.PLATFORM, true);
         }
 
         if ("Quality".equals(item)) {
@@ -400,24 +412,31 @@ public class SortAndFilterPanel extends JXPanel {
                 break;
             case VIDEO:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Title", "Type", "Length", "Year",
-                    "Quality"
+                    RELEVANCE_ITEM, "Title", "File extension", "Length",
+                    "Year", "Quality"
                 };
                 break;
             case IMAGE:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "Type", "Date created (more recent)"
+                    RELEVANCE_ITEM, "Name", "File extension",
+                    "Date created (more recent)"
                 };
                 break;
             case DOCUMENT:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Filename", "Type",
+                    RELEVANCE_ITEM, "Name", "Title", "Type",
                     "Size (low to high)", "Date created (more recent)"
+                };
+                break;
+            case PROGRAM:
+                items = new String[] {
+                    RELEVANCE_ITEM, "Name", "Size (low to high)",
+                    "Platform", "Company"
                 };
                 break;
             default:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "File type",
+                    RELEVANCE_ITEM, "Name", "Type",
                     "Size (high to low)", "Size (low to high)"
                 };
                 break;

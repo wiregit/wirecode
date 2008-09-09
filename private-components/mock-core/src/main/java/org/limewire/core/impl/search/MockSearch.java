@@ -149,7 +149,7 @@ public class MockSearch implements Search {
                 msr = new MockSearchResult();
                 name = "Monkey on Skateboard";
                 msr.setDescription(name);
-                msr.setExtension("ogv");
+                msr.setExtension("ogm");
                 msr.setResultType(ResultType.VIDEO);
                 msr.setSize(9876L);
                 msr.addSource("chandler");

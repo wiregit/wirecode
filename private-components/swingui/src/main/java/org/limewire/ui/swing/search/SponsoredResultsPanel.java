@@ -25,8 +25,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 
-class SponsoredResultsPanel extends JXPanel {
-    
+public class SponsoredResultsPanel extends JXPanel {
   
     private final NavTree navTree;
     private final StorePanel storePanel;

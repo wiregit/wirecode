@@ -121,6 +121,7 @@ public class SearchResultsPanel extends JPanel {
             @Override
             public void categorySelected(SearchCategory category) {
                 sortAndFilterPanel.clearFilterBox();
+                sortAndFilterPanel.setSearchCategory(category);
                 updateCategory(category);
             }
         };
@@ -176,11 +177,11 @@ public class SearchResultsPanel extends JPanel {
     }
     
     public void addSponsoredResults(List<SponsoredResult> sponsoredResults){
-        for(SponsoredResult result : sponsoredResults){
+        for (SponsoredResult result : sponsoredResults){
             sponsoredResultsPanel.addEntry(result);
         }
         
-        if(!sponsoredResultsPanel.isVisible()) {
+        if (!sponsoredResultsPanel.isVisible()) {
             sponsoredResultsPanel.setVisible(true);
             syncColumnHeader();
         }
@@ -208,14 +209,12 @@ public class SearchResultsPanel extends JPanel {
     }
 
     private void syncSortBy() {
-        SearchCategory category = SearchCategory.ALL; // the default
-
         if (searchTab != null) {
             FancyTab tab = searchTab.getSelectedTab();
             
             if (tab != null) {
                 String title = tab.getTitle();
-                category =
+                SearchCategory category =
                     "All".equals(title) ? SearchCategory.ALL :
                     "Music".equals(title) ? SearchCategory.AUDIO :
                     "Videos".equals(title) ? SearchCategory.VIDEO :
@@ -223,10 +222,10 @@ public class SearchResultsPanel extends JPanel {
                     "Documents".equals(title) ? SearchCategory.DOCUMENT :
                     "Programs".equals(title) ? SearchCategory.PROGRAM :
                     SearchCategory.OTHER;
+
+                sortAndFilterPanel.setSearchCategory(category);
             }
         }
-
-        sortAndFilterPanel.setSearchCategory(category);
     }
     
     private void layoutComponents() {

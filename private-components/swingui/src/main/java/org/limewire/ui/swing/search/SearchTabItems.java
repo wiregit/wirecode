@@ -19,6 +19,7 @@ import javax.swing.Action;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
@@ -137,17 +138,17 @@ implements ListEventListener<VisualSearchResult> {
         EventList list = event.getSourceList();
         VisualSearchResult vsr = (VisualSearchResult) list.get(list.size() - 1);
 
-        // Uncomment to output the name of each result.
-        //Object property = vsr.getProperty(PropertyKey.NAME);
-        //String name = property == null ? "unknown" : property.toString();
-        //System.out.println("SearchTabItems.listChanged: name = " + name);
-
         // Determine its media type.
         String extension = vsr.getFileExtension();
         MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
 
         // Find the "tab" for the media type.
         String schema = mediaType == null ? "other" : mediaType.toString();
+
+        // Uncomment to output the name and schema type of each result.
+        //Object property = vsr.getProperty(PropertyKey.NAME);
+        //String name = property == null ? "unknown" : property.toString();
+        //System.out.println("SearchTabItems.listChanged: name = " + name);
         //System.out.println("SearchTabItems.listChanged: schema = " + schema);
 
         String title = schemaToTitleMap.get(schema);
