@@ -2,10 +2,13 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
@@ -21,9 +24,11 @@ import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.Displayable;
 import org.limewire.ui.swing.friends.LoginPanel;
+import org.limewire.ui.swing.friends.Message;
 import org.limewire.ui.swing.friends.MessageReceivedEvent;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -103,6 +108,18 @@ public class FriendsPanel extends JXPanel implements Resizable{
         if (!isVisible()) {
             LOG.debug("Got an unseen message...");
             unseenMessageListener.unseenMessagesReceived();
+            Component root = SwingUtilities.getRoot(this);
+            if (root instanceof JFrame) {
+                JFrame frame = (JFrame)root;
+                Message message = event.getMessage();
+                StringBuilder builder = new StringBuilder();
+                builder.append(tr("Chat from "))
+                    .append(message.getSenderName())
+                    .append(" - ")
+                    .append(message.getMessageText())
+                    .append(tr(" - LimeWire 5"));
+                frame.setTitle(builder.toString());
+            }
         }
     }
     
