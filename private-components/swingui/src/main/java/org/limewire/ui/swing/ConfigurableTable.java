@@ -74,12 +74,6 @@ public class ConfigurableTable<E> extends MouseableTable {
             // Remove the table header.
             setTableHeader(null);
         }
-
-        // Size all the columns.
-        TableColumnModel tcm = getColumnModel();
-        for (int i = 0; i < tcm.getColumnCount(); i++) {
-            tcm.getColumn(i).setPreferredWidth(100);
-        }
     }
 
     /**

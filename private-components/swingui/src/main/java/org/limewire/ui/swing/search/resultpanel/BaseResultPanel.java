@@ -16,9 +16,12 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
+import java.awt.Window;
 import java.util.Calendar;
+import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.ConfigurableTable;
 
 public class BaseResultPanel extends JXPanel {
@@ -57,16 +60,17 @@ public class BaseResultPanel extends JXPanel {
         setMode(ModeListener.Mode.LIST);
     }
     
-    private void configureList(EventList<VisualSearchResult> eventList) {
+    private void configureList(final EventList<VisualSearchResult> eventList) {
         // We're using a JTable with one column instead of JList
         // because that will allow us to display buttons with rollover icons.
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
 
         resultsList.setEventList(eventList);
-        resultsList.setTableFormat(new ListViewTableFormat());
+        ListViewTableFormat tableFormat = new ListViewTableFormat();
+        resultsList.setTableFormat(tableFormat);
 
         // Note that the same ListViewTableCellEditor instance
-        // can be used for both the editor and the renderer
+        // cannot be used for both the editor and the renderer
         // because the renderer receives paint requests for some cells
         // while another cell is being edited
         // and they can't share state (the list of sources).
@@ -81,10 +85,29 @@ public class BaseResultPanel extends JXPanel {
             new ListViewTableCellEditor(actionEditor);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
-        resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
-        resultsList.setColumnWidth(0, ListViewTableCellEditor.WIDTH);
+        int columnIndex = 0;
+        resultsList.setColumnWidth(columnIndex,
+            tableFormat.getInitialColumnWidth(columnIndex));
 
-        resultsList.setRowHeight(42);
+        resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
+
+        resultsList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // If a right-click has occurred ...
+                if (e.getButton() == 3) {
+                    // Get the VisualSearchResult that was selected.
+                    int row = resultsList.rowAtPoint(e.getPoint());
+                    VisualSearchResult vsr = eventList.get(row);
+
+                    // Display a SearchResultMenu for the VisualSearchResult.
+                    JComponent component = (JComponent) e.getSource();
+                    Window window = (Window) component.getTopLevelAncestor();
+                    SearchResultMenu menu = new SearchResultMenu(window, vsr);
+                    menu.show(component, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,

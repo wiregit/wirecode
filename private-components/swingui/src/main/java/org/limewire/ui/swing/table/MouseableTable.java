@@ -111,12 +111,7 @@ public class MouseableTable extends JXTable {
                 // necessary for coordinating between multiple tables
 
 				TableCellEditor editor = getCellEditor();
-                //System.out.println("MouseableTable.mouseExited: editor is a "
-                //    + editor.getClass().getName());
-
 				Component component = e.getComponent();
-                //System.out.println("MouseableTable.mouseExited: component is a "
-                //    + component.getClass().getName());
 
 				// if component isn't editor we shouldn't be editing
 				if (editor != null && component != editor) {
@@ -124,9 +119,6 @@ public class MouseableTable extends JXTable {
                     // color from flashing when mousing over the buttons
 					Component componentAtPoint =
                         component.getComponentAt(e.getPoint());
-                    //System.out.println(
-                    //    "MouseableTable.mouseExited: componentAtPoint is a "
-                    //    + componentAtPoint.getClass().getName());
 
 					if (component == null || componentAtPoint != editor) {
                         // Mark commented the following line.

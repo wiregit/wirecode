@@ -29,6 +29,6 @@ extends ResultsTableFormat<VisualSearchResult> {
 
     @Override
     public int getInitialColumnWidth(int index) {
-        return 100;
+        return ListViewTableCellEditor.WIDTH;
     }
 }

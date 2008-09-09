@@ -7,9 +7,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Window;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,7 +15,6 @@ import java.util.List;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -40,8 +36,10 @@ public class ListViewTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
+    private static final Color SELECTED_COLOR = Color.GREEN;
+
     public static final int HEIGHT = 50;
-    public static final int WIDTH = 727;
+    public static final int WIDTH = 740;
 
     @Resource private Icon downloadIcon;
 
@@ -53,8 +51,10 @@ implements TableCellEditor, TableCellRenderer {
     private JLabel subheadingLabel = new JLabel();
     private JPanel actionPanel = new JPanel();
     private JPanel thePanel;
+    private JTable table;
     private String schema;
     private VisualSearchResult vsr;
+    private int row;
     private int similarCount;
 
     public ListViewTableCellEditor(ActionColumnTableCellEditor actionEditor) {
@@ -73,6 +73,12 @@ implements TableCellEditor, TableCellRenderer {
 
     public Component getTableCellEditorComponent(
         JTable table, Object value, boolean isSelected, int row, int column) {
+
+        //System.out.println(
+        //    "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
+
+        this.table = table;
+        this.row = row;
 
         vsr = (VisualSearchResult) value;
         MediaType mediaType =
@@ -98,10 +104,9 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value,
         boolean isSelected, boolean hasFocus,
         int row, int column) {
-        JPanel panel = (JPanel) getTableCellEditorComponent(
-            table, value, isSelected, row, column);
 
-        return panel;
+        return (JPanel) getTableCellEditorComponent(
+            table, value, isSelected, row, column);
     }
 
     private Component makeCenterPanel() {
@@ -150,7 +155,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private JPanel makePanel() {
-        JPanel panel = new JPanel(new GridBagLayout()) {
+        final JPanel panel = new JPanel(new GridBagLayout()) {
             @Override
             public void setBackground(Color bg) {
                 super.setBackground(bg);
@@ -159,6 +164,7 @@ implements TableCellEditor, TableCellRenderer {
                 }
             }
         };
+
         panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -173,18 +179,6 @@ implements TableCellEditor, TableCellRenderer {
         gbc.weightx = 0;
         actionPanel.setOpaque(false);
         panel.add(actionPanel, gbc);
-
-        panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == 3) {
-                    JComponent component = (JComponent) e.getSource();
-                    Window window = (Window) component.getTopLevelAncestor();
-                    SearchResultMenu menu = new SearchResultMenu(window, vsr);
-                    menu.show(component, e.getX(), e.getY());
-                }
-            }
-        });
 
         return panel;
     }
@@ -255,8 +249,10 @@ implements TableCellEditor, TableCellRenderer {
 
     private void setBackground(boolean isSelected) {
         if (thePanel == null) return;
-        Color color = isSelected ? new Color(220, 220, 255) : Color.WHITE;
+
+        Color color = isSelected ? SELECTED_COLOR : Color.WHITE;
         thePanel.setBackground(color);
+
         int childCount = thePanel.getComponentCount();
         for (int i = 0; i < childCount; i++) {
             Component child = thePanel.getComponent(i);
