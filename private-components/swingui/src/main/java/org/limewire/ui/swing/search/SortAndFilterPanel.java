@@ -183,7 +183,9 @@ public class SortAndFilterPanel extends JXPanel {
                     && !item.equals(sortBy)) { // changing sort order
                     Comparator<VisualSearchResult> comparator =
                         getComparator(item);
+                    // TODO: RMV Determine which row, if any, is selected.
                     sortedList.setComparator(comparator);
+                    // TODO: RMV Restore the row selection.
                     sortBy = item;
                 }
             }
@@ -314,10 +316,6 @@ public class SortAndFilterPanel extends JXPanel {
                 }
             };
         }
-
-        // TODO: How does Title differ from Name for Documents?
-
-        // TODO: RMV Does Type ever differ from File type?
 
         if ("Year".equals(item)) {
             return getLongComparator(PropertyKey.YEAR, true);

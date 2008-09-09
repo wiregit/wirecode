@@ -167,6 +167,7 @@ implements ListEventListener<VisualSearchResult> {
                 + title + '"');
         } else {
             // Make that tab visible if it isn't already.
+            tab.underline();
             tab.setVisible(true);
         }
     }

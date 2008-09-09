@@ -315,8 +315,7 @@ public class FancyTab extends JXPanel {
                 removeButton.setIcon(removeSelectedIcon);
                 break;
             case BACKGROUND:
-                FontUtils.underline(mainButton);
-                FontUtils.underline(additionalText);
+                underline();
                 mainButton.setForeground(props.getNormalColor());
                 additionalText.setForeground(props.getNormalColor());
                 this.setBackgroundPainter(props.getNormalPainter());
@@ -440,5 +439,10 @@ public class FancyTab extends JXPanel {
                                     modifiers));
             }
         }
+    }
+
+    public void underline() {
+        FontUtils.underline(mainButton);
+        FontUtils.underline(additionalText);
     }
 }

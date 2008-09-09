@@ -7,7 +7,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JButton;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -24,8 +23,9 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 //TODO comment this beast
+import javax.swing.ListSelectionModel;
 public class MouseableTable extends JXTable {
-    
+
 	private TablePopupHandler popupHandler;
 
 	private TableDoubleClickHandler doubleClickHandler;
@@ -52,6 +52,7 @@ public class MouseableTable extends JXTable {
 	
 	protected void initialize() {	
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
 

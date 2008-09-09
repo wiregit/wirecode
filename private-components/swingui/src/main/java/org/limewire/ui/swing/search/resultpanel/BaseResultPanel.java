@@ -16,12 +16,12 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 import java.awt.Window;
 import java.util.Calendar;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.ConfigurableTable;
 
 public class BaseResultPanel extends JXPanel {
@@ -63,7 +63,33 @@ public class BaseResultPanel extends JXPanel {
     private void configureList(final EventList<VisualSearchResult> eventList) {
         // We're using a JTable with one column instead of JList
         // because that will allow us to display buttons with rollover icons.
-        resultsList = new ConfigurableTable<VisualSearchResult>(false);
+        resultsList = new ConfigurableTable<VisualSearchResult>(false) {
+            // TODO: RMV Want the code below to fix loss of row selection
+            // TODO: RMV after sorting or filtering?
+            /*
+            private VisualSearchResult selectedVSR;
+
+            public void setSelected(VisualSearchResult selectedVSR) {
+                this.selectedVSR = selectedVSR;
+            }
+
+            public void restoreSelection() {
+                if (selectedVSR == null) return;
+                
+                TableModel tableModel = getModel();
+                int rowCount = tableModel.getRowCount();
+                for (int row = 0; row < rowCount; row++) {
+                    Object obj = tableModel.getValueAt(row, 0);
+                    if (obj == selectedVSR) {
+                        System.out.println(
+                            "BaseResultPanel: restored selection of row " + row);
+                        setRowSelectionInterval(row, row);
+                        break;
+                    }
+                }
+            }
+            */
+        };
 
         resultsList.setEventList(eventList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();
@@ -91,6 +117,11 @@ public class BaseResultPanel extends JXPanel {
 
         resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
 
+        //EventSelectionModel<VisualSearchResult> selectionModel =
+        //    new EventSelectionModel<VisualSearchResult>(eventList);
+        // The next line breaks everything!
+        //resultsList.setSelectionModel(selectionModel);
+        
         resultsList.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
