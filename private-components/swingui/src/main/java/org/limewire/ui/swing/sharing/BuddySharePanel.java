@@ -101,7 +101,7 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
        
 //        eventList = GlazedLists.threadSafeList(new BasicEventList<BuddyItem>());
-        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat());
+        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager);
 
         
         headerPanel = createHeader(cardPanel);

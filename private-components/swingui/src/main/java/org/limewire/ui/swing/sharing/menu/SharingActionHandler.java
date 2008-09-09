@@ -13,16 +13,22 @@ public class SharingActionHandler {
     public static final String PROPERTIES = "PROPERTIES";
     public static final String LAUNCH = "LAUNCH";
     
-    public void performAction(String actionCommand, FileList fileList, FileItem item) {
-        if(actionCommand == UNSHARE) {
-            fileList.removeFile(item.getFile());
-        } else if(actionCommand == LOCATE) {
-            NativeLaunchUtils.launchExplorer(item.getFile());
-        } else if(actionCommand == PROPERTIES) {
-            //TODO: need to make properties get info and launch it here
-        } else if(actionCommand == LAUNCH) {
-            launch(item);
-        }
+    public void performAction(final String actionCommand, final FileList fileList, final FileItem item) {
+        //TODO: move this to a background executor
+        Thread t = new Thread(new Runnable(){
+            public void run() {
+                if(actionCommand == UNSHARE) {
+                    fileList.removeFile(item.getFile());
+                } else if(actionCommand == LOCATE) {
+                    NativeLaunchUtils.launchExplorer(item.getFile());
+                } else if(actionCommand == PROPERTIES) {
+                    //TODO: need to make properties get info and launch it here
+                } else if(actionCommand == LAUNCH) {
+                    launch(item);
+                }     
+            }
+        });
+        t.start();
     }
     
     private void launch(FileItem item) {

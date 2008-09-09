@@ -6,10 +6,9 @@ import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
 import javax.swing.ListSelectionModel;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 
 import org.jdesktop.swingx.JXTable;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.menu.BuddySharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.BuddySharingPopupHandler;
 
@@ -23,12 +22,15 @@ import ca.odell.glazedlists.swing.EventTableModel;
  */
 public class BuddyNameTable extends JXTable {
 
-    public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat) {
+    private EventTableModel<BuddyItem> tableModel;
+    
+    public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat, LibraryManager libraryManager) {
 //        super(new EventTableModel<BuddyItem>(new SortedList<BuddyItem>(eventList, new BuddyComparator()), tableFormat));
         
         SortedList<BuddyItem> buddyList = new SortedList<BuddyItem>(eventList, new BuddyComparator());       
-
-        setModel(new EventTableModel<BuddyItem>(buddyList, tableFormat));
+        tableModel = new EventTableModel<BuddyItem>(buddyList, tableFormat);
+        
+        setModel(tableModel);
 //        EventSelectionModel model = new EventSelectionModel<BuddyItem>(buddyList);
 //        setSelectionModel(model);
 //        buddyList.setMode(SortedList.STRICT_SORT_ORDER);
@@ -46,7 +48,7 @@ public class BuddyNameTable extends JXTable {
         getColumn(1).setWidth(30);
         getColumn(1).setPreferredWidth(30);
         
-        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler());
+        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler(libraryManager), libraryManager);
         
         addMouseListener(new MouseAdapter() {
             
@@ -74,19 +76,11 @@ public class BuddyNameTable extends JXTable {
                 }
             }
         });
-        
-        getModel().addTableModelListener(new TableModelListener(){
-
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                System.out.println("table changed " + e.getFirstRow() + " " + e.getLastRow());
-            }});
-//        this.
-//        buddyList.addListEventListener(new ListEventListener<BuddyItem>(
-//                ));
     }
     
-//    public void set
+    public EventTableModel<BuddyItem> getEventTableModel() {
+        return tableModel;
+    }
     
     private static class BuddyComparator implements Comparator<BuddyItem> {
 

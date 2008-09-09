@@ -52,4 +52,8 @@ public class FileListAdapter implements FileList {
         return eventList.size();
     }
 
+    @Override
+    public void clear() {
+        eventList.clear();
+    }
 }

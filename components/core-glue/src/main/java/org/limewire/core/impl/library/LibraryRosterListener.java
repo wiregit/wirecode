@@ -71,12 +71,12 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                 }                
             }   
         });
-
+        //TODO: fix this
         Thread t = new Thread(new Runnable(){
             public void run() {
-                if(!libraryManager.containsBuddy(user.getId())) {
+//                if(!libraryManager.containsBuddy(user.getId())) {
                     libraryManager.addBuddy(user.getId());
-                }
+//                }
             }
         }); t.start();
 

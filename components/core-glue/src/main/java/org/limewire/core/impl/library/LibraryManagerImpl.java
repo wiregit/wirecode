@@ -238,6 +238,11 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
             FileItem old = lookup.remove(fileDesc.getFile());
             eventList.remove(old);
         }
+        
+        @Override
+        public void clear() {
+            fileManager.getSharedFileList().clear();
+        }
 
         @Override
         public String getName() {
@@ -275,6 +280,11 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public String getName() {
             return name;
+        }
+        
+        @Override
+        public void clear() {
+            fileManager.getBuddyFileList(name).clear();
         }
         
         @Override
@@ -354,6 +364,11 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
                 break;
             }
         }
+        
+        @Override
+        public void clear() {
+            
+        }
 
         @Override
         public String getName() {
@@ -404,6 +419,10 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void removeFile(File file) {
 
+        }
+        
+        public void clear() {
+            
         }
         //TODO: add new accessors appropriate for creating FileItems based on
         //      lookups. May also need to subclass CoreFileItem appropriate for

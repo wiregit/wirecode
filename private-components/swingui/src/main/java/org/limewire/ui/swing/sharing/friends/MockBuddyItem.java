@@ -2,6 +2,8 @@ package org.limewire.ui.swing.sharing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.core.api.library.FileList;
+
 public class MockBuddyItem implements BuddyItem {
 
     private String name;
@@ -28,6 +30,24 @@ public class MockBuddyItem implements BuddyItem {
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener l) {
+    }
+
+    @Override
+    public FileList getLibrary() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean hasLibrary() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void setLibrary(FileList libraryFileList) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -15,4 +15,6 @@ public interface FileList {
     public String getName();
     
     public int size();
+    
+    public void clear();
 }

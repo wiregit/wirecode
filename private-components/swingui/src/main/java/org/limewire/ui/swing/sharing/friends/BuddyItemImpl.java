@@ -4,6 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FileList;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -13,6 +14,7 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<FileItem>{
 
     private final String name;
     private final EventList<FileItem> eventList;
+    private FileList buddyLibraryList;
     
     private int size = 0;
     
@@ -52,5 +54,20 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<FileItem>{
             this.size = newSize;
             support.firePropertyChange("size", oldSize, newSize);
         }
+    }
+
+    @Override
+    public FileList getLibrary() {
+        return buddyLibraryList;
+    }
+
+    @Override
+    public boolean hasLibrary() {
+        return buddyLibraryList != null;
+    }
+
+    @Override
+    public void setLibrary(FileList libraryFileList) {
+        this.buddyLibraryList = libraryFileList;
     }
 }

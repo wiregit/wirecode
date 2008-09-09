@@ -7,9 +7,11 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JTable;
 
+import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
+import org.limewire.ui.swing.sharing.friends.BuddyNameTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.I18n;
 
@@ -29,14 +31,19 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
     private JMenuItem imageShareAllItem;
     private JMenuItem unshareAllItem;
     
-    private JTable table;
+    private BuddyNameTable table;
     private final BuddySharingActionHandler actionHandler;
+    private final LibraryManager libraryManager;
     
     protected final MenuListener menuListener;
 
-    public BuddySharingPopupHandler(JTable table, BuddySharingActionHandler handler) {
+    private BuddyItem currentBuddy;
+    private FileList buddyFileList;
+    
+    public BuddySharingPopupHandler(BuddyNameTable table, BuddySharingActionHandler handler, LibraryManager libraryManager) {
         this.table = table;
         this.actionHandler = handler;
+        this.libraryManager = libraryManager;
         this.menuListener = new MenuListener();
         
         initialize();
@@ -83,21 +90,27 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
     public void maybeShowPopup(Component component, int x, int y) {
         popupRow = table.rowAtPoint(new Point(x, y));
         
-        EventTableModel<BuddyItem> model = (EventTableModel<BuddyItem>) table.getModel();
-        BuddyItem item = model.getElementAt(popupRow);
-        if(item.size() > 0) {
+        EventTableModel<BuddyItem> model = table.getEventTableModel();
+        currentBuddy = model.getElementAt(popupRow);
+        if(currentBuddy.size() > 0) {
             unshareAllItem.setEnabled(true);
         } else {
             unshareAllItem.setEnabled(false);
         }
+        if(currentBuddy.hasLibrary()) {
+            viewLibraryItem.setEnabled(true);
+        } else {
+            viewLibraryItem.setEnabled(false);
+        }
+        
+        buddyFileList = libraryManager.getBuddy(currentBuddy.getName());
         
         popupMenu.show(component, x, y);
     }
     
     private class MenuListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            //TODO: finish this
-//            actionHandler.performAction(e.getActionCommand(), fileList, fileItem);
+            actionHandler.performAction(e.getActionCommand(), buddyFileList, currentBuddy);
         }
     }
 }
