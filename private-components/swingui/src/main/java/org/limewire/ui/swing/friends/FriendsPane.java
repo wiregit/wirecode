@@ -32,9 +32,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -208,7 +211,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             }
         };
         
-        final JXTable table = new JXTable(new EventTableModel<Friend>(friendsList, format)); 
+        final JXTable table = new CustomTooltipLocationTable(new EventTableModel<Friend>(friendsList, format)); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new LaunchChatListener());
         //Add as mouse listener and motion listener because it cares about MouseExit and MouseMove events
@@ -412,13 +415,14 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     }
 
     private class FriendCellRenderer implements TableCellRenderer {
-        private final JXPanel cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]" + Integer.toString(RIGHT_EDGE_PADDING_PIXELS), "1[]0")); 
+        private final JXPanel cell; 
         private final JXLabel friendName;
         private final JXLabel chatStatus;
         private final JXLabel endChat;
         private final RectanglePainter activeConversationPainter;
         
         public FriendCellRenderer() {
+            cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]" + Integer.toString(RIGHT_EDGE_PADDING_PIXELS), "1[]0"));
             activeConversationPainter = new RectanglePainter();
             //light-blue gradient
             activeConversationPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
@@ -475,7 +479,50 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             }
         }
     }
+    
+    private class CustomTooltipLocationTable extends JXTable {
+        public CustomTooltipLocationTable(TableModel dm) {
+            super(dm);
+            //Resorting to setting the tooltip background at the UIManager layer because otherwise the
+            //toolip popup will have a yellow (or some other color) border corresponding to the default
+            //toolip background color
+            UIManager.put("ToolTip.background", new ColorUIResource(new Color(172, 172, 172)));
+        }
 
+        @Override
+        public Point getToolTipLocation(MouseEvent event) {
+            Point location = scrollPane.getLocation();
+            int width2 = scrollPane.getWidth();
+            return new Point(location.x + width2, event.getPoint().y);
+        }
+
+        @Override
+        public String getToolTipText(MouseEvent event) {
+            int row = friendsTable.rowAtPoint(event.getPoint());
+            if (row == -1) {
+                return null;
+            }
+            EventTableModel model = (EventTableModel) friendsTable.getModel();
+            Friend friend = (Friend) model.getElementAt(row);
+            StringBuilder tooltip = new StringBuilder();
+            tooltip.append("<html>")
+                .append("<head>")
+                .append("<style>body { margin: 2px 10px 2px 4px;}</style")
+                .append("</head>")
+                .append("<body>")
+                .append("<img src=\"")
+                .append(FriendsUtil.getIconURL(friend.getMode())).append("\"/>&nbsp;")
+                .append("<b>").append(friend.getName()).append("</b><br/>");
+            String status = friend.getStatus();
+            if (status != null && status.length() > 0) {
+                tooltip.append("<div color=\"rgb(255,255,255)\">").append(status).append("</div>");
+            }
+            tooltip.append("</body>")
+                .append("</html>");
+            return tooltip.toString();
+        }
+    }
+    
     private boolean isOverCloseIcon(Point point, int closeChatIconWidth) {
         JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
         int scrollBarWidthAdjustment = verticalScrollBar.isVisible() ? verticalScrollBar.getWidth() : 0;
