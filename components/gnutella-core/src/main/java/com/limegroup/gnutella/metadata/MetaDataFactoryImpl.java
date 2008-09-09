@@ -2,6 +2,7 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -10,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
 import com.limegroup.gnutella.metadata.audio.reader.AudioDataReader;
 import com.limegroup.gnutella.metadata.audio.reader.MP3MetaData;
 import com.limegroup.gnutella.metadata.audio.reader.OGGMetaData;
@@ -35,7 +35,12 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
 
     private static final Log LOG = LogFactory.getLog(MetaDataFactory.class);
     
-    private final ConcurrentMap<String, MetaReaderFactory> readerFactoriesByExtension = new ConcurrentHashMap<String, MetaReaderFactory>();
+    private final ConcurrentMap<String, MetaReader> readerByExtension = new ConcurrentHashMap<String, MetaReader>();
+    
+    public MetaDataFactoryImpl() {
+        WMMetaReader metaReader = new WMMetaReader();
+        registerReader(metaReader, metaReader.getSupportedExtensions());
+    }
     
     /**
      * factory method which returns an instance of MetaDataEditor which
@@ -52,32 +57,20 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
     }
 
     @Override
-    public void registerReaderFactory(MetaReaderFactory factory, String...fileExtensions) {
+    public void registerReader(MetaReader reader, String...fileExtensions) {
         for (String extension : fileExtensions) {
-            MetaReaderFactory existingFactory = readerFactoriesByExtension.put(extension, factory);
-            if (existingFactory != null) {
-                throw new IllegalArgumentException("factory: " + existingFactory + " already resistered for: " + extension);
+            MetaReader existingReader= readerByExtension.put(extension, reader);
+            if (existingReader != null) {
+                throw new IllegalArgumentException("factory: " + existingReader.getClass() + " already resistered for: " + extension);
             }
         }
     }
     
-    /** Creates MetaData for the file, if possible. */  
-    public MetaReader parse(File f) throws IOException {
+    public MetaData parse(File file) throws IOException {
         try {
-            if (LimeXMLUtils.isSupportedAudioFormat(f))
-                return parseAudioFile(f);
-            else if (LimeXMLUtils.isSupportedVideoFormat(f))
-                return parseVideoMetaData(f);          
-            else if (LimeXMLUtils.isSupportedMultipleFormat(f))
-                return parseMultipleFormat(f);
-            else {
-                String extension = FileUtils.getFileExtension(f);
-                if (extension != null) {
-                    MetaReaderFactory factory = readerFactoriesByExtension.get(extension);
-                    if (factory != null) {
-                        return factory.createReader(f);
-                    }
-                }
+            MetaReader reader = getMetaReader(file);
+            if (reader != null) {
+                return reader.parse(file);
             }
         } catch (OutOfMemoryError e) {
             LOG.warn("Ran out of memory while parsing.",e);
@@ -89,14 +82,18 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
         return null;
     }
     
-    /** Figures out what kind of MetaData should exist for this file. */
-    private MetaReader parseMultipleFormat(File f) throws IOException {
-        if(LimeXMLUtils.isASFFile(f)) {
-            ASFParser p = new ASFParser(f);
-            if(p.hasVideo())
-                return new WMVMetaData(p);
-            else if(p.hasAudio())
-                return new WMAMetaData(p);
+    /** Creates MetaData for the file, if possible. */  
+    public MetaReader getMetaReader(File f) {
+        if (LimeXMLUtils.isSupportedAudioFormat(f))
+            return getAudioReader(f);
+        else if (LimeXMLUtils.isSupportedVideoFormat(f))
+            return getVideoReader(f);         
+        else {
+            String extension = FileUtils.getFileExtension(f);
+            if (extension != null) {
+                MetaReader reader = readerByExtension.get(extension.toLowerCase(Locale.US));
+                return reader;
+            }
         }
         return null;
     }
@@ -121,17 +118,17 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
      * Reads the meta data for the audio file if LimeWire can parse
      * it, otherwise return null if file type is not supported
      */
-    private MetaReader parseAudioFile(File f) throws IOException, IllegalArgumentException { 
+    private MetaReader getAudioReader(File f) {
         if (LimeXMLUtils.isMP3File(f))
-            return new MP3MetaData(f);
+            return new MP3MetaData();
         if (LimeXMLUtils.isOGGFile(f))
-            return new OGGMetaData(f);
+            return new OGGMetaData();
         if (LimeXMLUtils.isFLACFile(f))
-            return new AudioDataReader(f);
+            return new AudioDataReader();
         if (LimeXMLUtils.isM4AFile(f))
-            return new AudioDataReader(f);
+            return new AudioDataReader();
         if (LimeXMLUtils.isWMAFile(f))
-            return new WMAMetaData(f);
+            return new WMAMetaData();
         
         return null;
     }
@@ -140,18 +137,17 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
      * Reads the meta data for the video file if LimeWire can parse
      * it, otherwise return null if the file type is not suported
      */
-    private MetaReader parseVideoMetaData(File file)
-            throws IOException {
+    private MetaReader getVideoReader(File file) {
         if (LimeXMLUtils.isRIFFFile(file))
-            return new RIFFMetaData(file);
+            return new RIFFMetaData();
         else if (LimeXMLUtils.isOGMFile(file))
-            return new OGMMetaData(file);
+            return new OGMMetaData();
         else if(LimeXMLUtils.isWMVFile(file))
-            return new WMVMetaData(file);
+            return new WMVMetaData();
         else if(LimeXMLUtils.isMPEGFile(file))
-            return new MPEGMetaData(file);
+            return new MPEGMetaData();
         else if (LimeXMLUtils.isQuickTimeFile(file))
-            return new MOVMetaData(file);
+            return new MOVMetaData();
             
         return null;
     }

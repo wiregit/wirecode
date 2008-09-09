@@ -32,13 +32,13 @@ import com.google.inject.Provider;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.licenses.LicenseType;
+import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.metadata.MetaDataWriter;
-import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+import com.limegroup.gnutella.util.QueryUtils;
 
 /**
  * Maps LimeXMLDocuments for FileDescs in a specific schema.
@@ -671,7 +671,7 @@ public class LimeXMLReplyCollection {
         
         
         // try reading the file off of disk
-        MetaReader existing = null;
+        MetaData existing = null;
         try {
             existing = metaDataFactory.parse(new File(fileName));
         } catch (IOException e) {
@@ -679,7 +679,7 @@ public class LimeXMLReplyCollection {
         }
         
         //We are supposed to pick and chose the better set of tags
-        if(!newValues.needsToUpdate(existing.getMetaData())) {
+        if(!newValues.needsToUpdate(existing)) {
             LOG.debug("tag read from disk is same as XML doc.");
             return null;
         }

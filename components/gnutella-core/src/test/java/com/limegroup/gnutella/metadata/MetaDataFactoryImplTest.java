@@ -10,13 +10,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.bittorrent.metadata.TorrentMetaData;
-import com.limegroup.bittorrent.metadata.TorrentMetaReader;
-import com.limegroup.bittorrent.metadata.TorrentMetaReaderFactory;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.metadata.MetaData;
-import com.limegroup.gnutella.metadata.MetaDataFactory;
-import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
-import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class MetaDataFactoryImplTest extends LimeTestCase {
@@ -46,9 +40,7 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
         File torrentFile = TestUtils.getResourceInPackage("messages.torrent", getClass());
         assertTrue(torrentFile.exists());
         
-        MetaReader metaReader = metaDataFactory.parse(torrentFile);
-        assertTrue(metaReader instanceof TorrentMetaReader);
-        MetaData metaData = metaReader.getMetaData();
+        MetaData metaData = metaDataFactory.parse(torrentFile);
         assertTrue(metaData instanceof TorrentMetaData);
         List<NameValue<String>> values = metaData.toNameValueList();
         String filepaths = null;
@@ -71,9 +63,7 @@ public class MetaDataFactoryImplTest extends LimeTestCase {
         File torrentFile = TestUtils.getResourceInPackage("bthavetest.torrent", getClass());
         assertTrue(torrentFile.exists());
         
-        MetaReader metaReader = metaDataFactory.parse(torrentFile);
-        assertTrue(metaReader instanceof TorrentMetaReader);
-        MetaData metaData = metaReader.getMetaData();
+        MetaData metaData = metaDataFactory.parse(torrentFile);
         assertTrue(metaData instanceof TorrentMetaData);
         List<NameValue<String>> values = metaData.toNameValueList();
         String name = null;

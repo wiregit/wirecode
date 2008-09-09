@@ -9,28 +9,29 @@ import java.io.InputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteUtils;
 
+import com.limegroup.gnutella.metadata.MetaReader;
+import com.limegroup.gnutella.metadata.video.VideoMetaData;
+
 /**
  *  Reads RIFF files meta data 
  */
-public class RIFFMetaData extends VideoDataReader {
-
-	public RIFFMetaData(File f) throws IOException {
-		super(f);
-	}
+public class RIFFMetaData implements MetaReader {
 
 	@Override
-    protected void parseFile(File f) throws IOException {
+    public VideoMetaData parse(File f) throws IOException {
 		InputStream is = null;
 		try {
 			is = new FileInputStream(f);
 			DataInputStream dis = new DataInputStream(is);
-			readRIFFHeader(dis);
+			VideoMetaData videoData = new VideoMetaData();
+			readRIFFHeader(videoData, dis);
+			return videoData;
 		} finally {
             IOUtils.close(is);
 		}
 	}
 
-	private void readRIFFHeader(DataInputStream dis) throws IOException {
+	private void readRIFFHeader(VideoMetaData videoData, DataInputStream dis) throws IOException {
 		byte[] dword = new byte[4];
 		dis.readFully(dword);
 
@@ -86,4 +87,9 @@ public class RIFFMetaData extends VideoDataReader {
 		// there are more headers but we are not currently interested in parsing
 		// them
 	}
+
+    @Override
+    public String[] getSupportedExtensions() {
+        return null;
+    }
 }

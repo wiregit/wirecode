@@ -1,7 +1,5 @@
 package org.limewire.util;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,8 +19,7 @@ import org.limewire.i18n.I18nMarker;
  * are inner anonymous classes be careful where to add new inner classes
  * and fields.
  */
-public class MediaType implements Serializable {
-    private static final long serialVersionUID = 3999062781289258389L;
+public class MediaType {
     
     // These values should match standard MIME content-type
     // categories and/or XSD Mime Type names.
@@ -267,7 +264,7 @@ public class MediaType implements Serializable {
     /**
      * Returns the MIME-Type of this.
      */
-    public String getMimeType() {
+    public String getSchema() {
         return schema;
     }
     
@@ -343,19 +340,6 @@ public class MediaType implements Serializable {
         return hash;
     }
         
-    /*
-     * We canoncialize the default mediatypes, but since MediaType has
-     * a public constructor only 'equals' comparisons should be used.
-     */
-    Object readResolve() throws ObjectStreamException {
-        for (MediaType type : ALL_MEDIA_TYPES) {
-            if (equals(type)) {
-                return type;
-            }
-        }
-        return this;
-    }
- 
     /**
      * Retrieves the any media type.
      */

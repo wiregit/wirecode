@@ -34,7 +34,6 @@ import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
-import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.templates.StoreFileNameTemplateProcessor;
 import com.limegroup.gnutella.templates.StoreSubDirectoryTemplateProcessor;
@@ -181,8 +180,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         // parse the meta data of this file
         AudioMetaData metaData = null;
         try {
-            MetaReader reader = metaDataFactory.parse(newDownloadFile);
-            metaData = (AudioMetaData) reader.getMetaData();
+            metaData = (AudioMetaData) metaDataFactory.parse(newDownloadFile);
         } catch (IOException e) {
             // don't catch this exception, problem reading the ID3 tags, just
             // use default locations instead

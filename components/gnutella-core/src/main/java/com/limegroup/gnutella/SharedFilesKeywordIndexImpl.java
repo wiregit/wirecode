@@ -516,7 +516,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             // get schema uri from media type
             LimeXMLReplyCollection col = mapper.getReplyCollection(
-                    getSchemaUriFromMimeType(mt.getMimeType()));
+                    getSchemaUriFromMimeType(mt.getSchema()));
 
             if (col != null) {
     		    collections.add(col);

@@ -41,7 +41,7 @@ public class MetaDataReader {
      * given schemaURI.
      */
     public LimeXMLDocument readDocument(File file) throws IOException {
-        MetaReader data = metaDataFactory.parse(file);
+        MetaData data = metaDataFactory.parse(file);
         if (data == null)
             throw new IOException("unable to parse file");
 
