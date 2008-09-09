@@ -543,7 +543,7 @@ public class LimeXMLReplyCollection {
      * @return LimeXMLDocuments
      */
     private Set<LimeXMLDocument> getMatchingDocumentsIntersectKeywords(Set<String> metadataFields, String query) {
-        Set<LimeXMLDocument> matches = null;
+        Set<LimeXMLDocument> matches = new IdentityHashSet<LimeXMLDocument>();
         Set<String> keywords = QueryUtils.extractKeywords(query, true);
 
         for (String keyword : keywords) {
@@ -553,8 +553,7 @@ public class LimeXMLReplyCollection {
 
             // matches contains all common lime xml docs that match
             // all keywords in the query
-            if (matches == null) {
-                matches = new IdentityHashSet<LimeXMLDocument>();
+            if (matches.size() == 0) {
                 matches.addAll(allMatchedDocsForKeyword);
             } else {
                 matches.retainAll(allMatchedDocsForKeyword);
