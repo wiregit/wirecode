@@ -52,7 +52,8 @@ public class SharingFancyPanel extends JPanel {
     private SharingFancyTablePanel documentTable;
     private SharingFancyTablePanel programTable;
     private SharingFancyTablePanel otherTable;
-    //TODO: what to do about programs??
+    
+    private SharingShortcutPanel shortcuts;
     
     private final JScrollPane scrollPane;
     
@@ -80,7 +81,7 @@ public class SharingFancyPanel extends JPanel {
         otherTable = new SharingFancyTablePanel(other, list.get(5), new SharingFancyDefaultTableFormat(), drop.getDropTarget(), originalList, appIcon);
         
         
-        SharingShortcutPanel shortcuts = new SharingShortcutPanel(
+        shortcuts = new SharingShortcutPanel(
                 new String[]{music, video, image, doc, program, other},
                 new Action[]{new BookmarkJumpAction(this, musicTable),
                              new BookmarkJumpAction(this, videoTable),
@@ -105,6 +106,8 @@ public class SharingFancyPanel extends JPanel {
     }
     
     public void setModel(EventList<FileItem> eventList, FileList fileList) {
+        //TODO: these need to be lazily created and stored somewhere, FileList?? so we don't keep recreating them
+        //		GlazedLists.multiMap would be perfect if they supported EventLists instead of Lists
         List<EventList<FileItem>> list = new ArrayList<EventList<FileItem>>();
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.AUDIO)));
         list.add(new FilterList<FileItem>(eventList, new CategoryFilter(FileItem.Category.VIDEO)));
@@ -119,6 +122,8 @@ public class SharingFancyPanel extends JPanel {
         documentTable.setModel(list.get(3), fileList);
         programTable.setModel(list.get(4), fileList);
         otherTable.setModel(list.get(5), fileList);
+        
+        shortcuts.setModel(list);
     }
     
     /**

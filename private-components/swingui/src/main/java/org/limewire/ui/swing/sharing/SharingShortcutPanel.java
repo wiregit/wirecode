@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Action;
@@ -18,34 +19,62 @@ import ca.odell.glazedlists.event.ListEventListener;
 public class SharingShortcutPanel extends JPanel {
 
     private String[] names;
+    private List<EventList<FileItem>> models;
+    private List<SharingListEventListener> listeners;
+    private List<NumberedHyperLinkButton> buttons;
      
     public SharingShortcutPanel(String[] names, Action[] actions, List<EventList<FileItem>> models) {
         this.names = names;
+        this.models = models;
         
-        createComponents(actions, models);
+        listeners = new ArrayList<SharingListEventListener>();
+        buttons = new ArrayList<NumberedHyperLinkButton>();
+        
+        createComponents(actions);
     }
     
-    private void createComponents(Action[] actions, List<EventList<FileItem>> models) {
+    private void createComponents(Action[] actions) {
         for(int i = 0; i < names.length; i++) {
             final NumberedHyperLinkButton button = new NumberedHyperLinkButton(names[i], actions[i]);
             button.setForegroundColor(Color.BLUE);
             button.setMouseOverColor(Color.GREEN);
             button.setDisabledColor(Color.DARK_GRAY);
             button.setDisplayNumber(0);
-            models.get(i).addListEventListener(new ListEventListener<FileItem>(){
-                @Override
-                public void listChanged(ListEvent<FileItem> listChanges) {
-                    final int size = listChanges.getSourceList().size();
-                    SwingUtilities.invokeLater(new Runnable(){
-                        public void run() {
-                            button.setDisplayNumber(size);                                
-                        }
-                    });
-                }
-            });
+            SharingListEventListener listener = new SharingListEventListener(button);
+            models.get(i).addListEventListener(listener);
+            listeners.add(listener);
+            buttons.add(button);
             add(button);
             if(i + 1 < names.length)
                 add(new Circle(8));
+        }
+    }
+    
+    public void setModel(List<EventList<FileItem>> model) {
+        for(int i = 0; i < listeners.size(); i++) {
+            models.get(i).removeListEventListener(listeners.get(i));
+            model.get(i).addListEventListener(listeners.get(i));
+            buttons.get(i).setDisplayNumber(model.get(i).size());
+        }
+        this.models = model;
+    }
+    
+    private class SharingListEventListener implements ListEventListener<FileItem> {
+
+        private NumberedHyperLinkButton button;
+        
+        public SharingListEventListener(NumberedHyperLinkButton button) {
+            this.button = button;
+        }
+        
+        @Override
+        public void listChanged(ListEvent<FileItem> listChanges) {
+            final int size = listChanges.getSourceList().size();
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    button.setDisplayNumber(size);                                
+                }
+            });
         }
     }
 }
