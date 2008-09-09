@@ -480,6 +480,8 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     }
     
     private class CustomTooltipLocationTable extends JXTable {
+        private final Color GRAY_BACKGROUND = new Color(172, 172, 172);
+
         public CustomTooltipLocationTable(TableModel dm) {
             super(dm);
         }
@@ -494,7 +496,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         @Override
         public JToolTip createToolTip() {
             JToolTip tooltip = super.createToolTip();
-            tooltip.setBackground(new Color(172, 172, 172));
+            tooltip.setBackground(GRAY_BACKGROUND);
             return tooltip;
         }
 
