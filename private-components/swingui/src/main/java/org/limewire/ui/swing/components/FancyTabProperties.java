@@ -8,7 +8,7 @@ import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.util.I18n;
 
-class FancyTabProperties implements Cloneable {
+public class FancyTabProperties implements Cloneable {
     
     private Painter<JXButton> highlightPainter;
     private Painter<JXButton> normalPainter;

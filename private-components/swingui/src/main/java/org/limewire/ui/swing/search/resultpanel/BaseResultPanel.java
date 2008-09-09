@@ -119,7 +119,7 @@ public class BaseResultPanel extends JXPanel {
 
         //EventSelectionModel<VisualSearchResult> selectionModel =
         //    new EventSelectionModel<VisualSearchResult>(eventList);
-        // The next line breaks everything!
+        // TODO: RMV The next line breaks everything!
         //resultsList.setSelectionModel(selectionModel);
         
         resultsList.addMouseListener(new MouseAdapter() {

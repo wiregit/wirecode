@@ -92,9 +92,6 @@ implements ListEventListener<VisualSearchResult> {
         } else if (category == SearchCategory.PROGRAM) {
             searchActionMaps.add(newTabActionMap(
                 new SearchTabAction("Program results ", SearchCategory.PROGRAM)));
-        } else if (category == SearchCategory.OTHER) {
-            searchActionMaps.add(newTabActionMap(
-                new SearchTabAction("Other results ", SearchCategory.OTHER)));
         }
 
         for (TabActionMap map : searchActionMaps) {
@@ -128,7 +125,9 @@ implements ListEventListener<VisualSearchResult> {
         for (TabActionMap map : searchActionMaps) {
             SearchCategory category =
                 ((SearchTabAction) map.getMainAction()).getCategory();
-            counts.put(category, map.getMoreTextAction());
+            if (category != SearchCategory.ALL) {
+                counts.put(category, map.getMoreTextAction());
+            }
         }
         return counts.entrySet();
     }
@@ -174,7 +173,7 @@ implements ListEventListener<VisualSearchResult> {
     
     private TabActionMap newTabActionMap(SearchTabAction action) {
         Action moreText = new NoOpAction();
-        moreText.putValue(Action.NAME, "#");
+        moreText.putValue(Action.NAME, "");
         return new TabActionMap(action, null, moreText, null);
     }
 

@@ -62,7 +62,8 @@ implements TableCellEditor, TableCellRenderer {
 
         // Cause the @Resource fields to be injected
         // using properties in AppFrame.properties.
-        // The icon PNG file is in swingui/src/main/resources/
+        // The icon PNG file is in
+        // private-components/swingui/src/main/resources/
         // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
     }

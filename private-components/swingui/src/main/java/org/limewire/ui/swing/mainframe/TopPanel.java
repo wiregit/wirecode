@@ -58,6 +58,9 @@ class TopPanel extends JPanel implements SearchNavigator {
     private final FancyTabList searchList;
     private final Navigator navigator;
     private final TextFieldWithEnterButton textField;
+
+    // TODO: This needs to be controlled by some other code eventually.
+    private final boolean programEnabled = true;
     
     @Resource private Icon enterUpIcon;
     @Resource private Icon enterOverIcon;
@@ -79,6 +82,9 @@ class TopPanel extends JPanel implements SearchNavigator {
         textField.setMaximumSize(120);
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
+        combo.removeItem(SearchCategory.OTHER);
+        if (!programEnabled) combo.removeItem(SearchCategory.PROGRAM);
+
         combo.setName("TopPanel.combo");
         JLabel search = new JLabel(I18n.tr("Search"));
         search.setName("TopPanel.SearchLabel");

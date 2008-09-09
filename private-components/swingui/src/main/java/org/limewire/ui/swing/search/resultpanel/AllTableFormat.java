@@ -13,8 +13,8 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     private static final int ACTION_INDEX = 3;
     private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 5;
-    private static final int OWNER_INDEX = 6;
+    private static final int NUM_SOURCES_INDEX = 6;
+    private static final int OWNER_INDEX = 7;
     private static final int RELEVANCE_INDEX = 4;
     private static final int SIZE_INDEX = 2;
     private static final int TYPE_INDEX = 1;
@@ -24,7 +24,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         columnNames = new String[] {
             "Name", "Type", "Size", "",
-            "Relevance", "People with File", "Owner"
+            "Relevance", "Extension", "People with File", "Owner"
         };
     }
 

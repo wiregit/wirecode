@@ -134,7 +134,7 @@ public class FancyTabList extends JXPanel {
                 if (vizStartIdx > selIdx) { // We have to shift left
                     vizStartIdx = selIdx;
                 } else { // We have to shift right
-                    vizStartIdx = selIdx-maxVisibleTabs+1;
+                    vizStartIdx = selIdx - maxVisibleTabs + 1;
                 }
                 vizTabs = tabs.subList(vizStartIdx, vizStartIdx+maxVisibleTabs);
             }

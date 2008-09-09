@@ -28,11 +28,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
-import javax.swing.LayoutStyle;
 import javax.swing.SwingUtilities;
 import javax.swing.JToggleButton.ToggleButtonModel;
-import javax.swing.LayoutStyle.ComponentPlacement;
 
+import javax.swing.LayoutStyle;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -115,18 +114,14 @@ public class FancyTab extends JXPanel {
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
         
-        // Commented out by RMV to match search results spec.
-        //layout.setAutoCreateGaps(true);
-        
+        // TODO: mainButton text is getting truncated too soon; could fit more
         layout.setHorizontalGroup(layout.createSequentialGroup()
             .addGap(5)
             .addComponent(busyLabel)
-            .addPreferredGap(ComponentPlacement.RELATED)
+            .addGap(5)
             .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-            // Commented out by RMV to match search results spec.
-            //.addPreferredGap(ComponentPlacement.RELATED)
             .addComponent(additionalText)
-            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)    
             .addComponent(removeButton)
             .addGap(5)    
         );
@@ -140,6 +135,7 @@ public class FancyTab extends JXPanel {
             );
     }
 
+    @Override
     public void setFont(Font font) {
         super.setFont(font);
         if (mainButton != null) mainButton.setFont(font);
@@ -182,8 +178,9 @@ public class FancyTab extends JXPanel {
             label.setOpaque(false);
             label.setFont(mainButton.getFont());
             
-            String name = (String)tabActions.getMoreTextAction().getValue(Action.NAME);
-            if (name != null) {
+            String name =
+                (String) tabActions.getMoreTextAction().getValue(Action.NAME);
+            if (name != null && name.length() > 0) {
                 label.setText("(" + name + ")");
                 label.setVisible(true);
             }

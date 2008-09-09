@@ -25,9 +25,9 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
         super(ACTION_INDEX, ACTION_INDEX);
 
         columnNames = new String[] {
-            "Title", "Artist", "Album", "Length", "Quality",
+            "Name", "Artist", "Album", "Length", "Quality",
             "", "Bitrate", "Genre", "Track", "Relevance",
-            "People with File", "Owner", "Type", "Sample Rate"
+            "People with File", "Owner", "Extension", "Sample Rate"
         };
     }
 
