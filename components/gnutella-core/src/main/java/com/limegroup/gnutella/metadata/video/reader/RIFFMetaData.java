@@ -90,6 +90,6 @@ public class RIFFMetaData implements MetaReader {
 
     @Override
     public String[] getSupportedExtensions() {
-        return null;
+        return new String[] { "avi" };
     }
 }

@@ -191,7 +191,7 @@ public class MPEGMetaData implements MetaReader {
 
     @Override
     public String[] getSupportedExtensions() {
-        return null;
+        return new String[] { "mpg", "mpeg" };
     }
 
 

@@ -35,7 +35,7 @@ public class TorrentMetaReader implements MetaReader {
     
     @Inject
     public void register(MetaDataFactory metaDataFactory) {
-        metaDataFactory.registerReader(this, getSupportedExtensions());
+        metaDataFactory.registerReader(this);
     }
 
 }

@@ -145,4 +145,9 @@ public class MP3MetaData extends AudioDataReader {
         return cleanGenre;
         
     }
+    
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "mp3" };
+    }
 }

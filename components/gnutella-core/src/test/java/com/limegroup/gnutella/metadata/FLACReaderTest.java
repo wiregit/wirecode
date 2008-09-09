@@ -39,7 +39,7 @@ public class FLACReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"Flac.flac");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
     }
 }

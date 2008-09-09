@@ -22,10 +22,8 @@ public interface MetaDataFactory {
     
     /**
      * Registers a reader factory for a number of file extensions
-     * @param fileExtensions must not be null or empty.
-     * 
      * @throws IllegalArgumentException if another factory is already registered
      * for one of the given extensions
      */
-    void registerReader(MetaReader reader, String... fileExtensions);
+    void registerReader(MetaReader reader);
 }

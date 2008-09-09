@@ -327,6 +327,6 @@ public class MOVMetaData implements MetaReader {
 
     @Override
     public String[] getSupportedExtensions() {
-        return null;
+        return new String[] { "mov", "m4v", "mp4", "3gp" };
     }
 }

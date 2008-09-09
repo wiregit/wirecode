@@ -39,8 +39,8 @@ public class M4AReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"M4A.m4a");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
     }
 }
 

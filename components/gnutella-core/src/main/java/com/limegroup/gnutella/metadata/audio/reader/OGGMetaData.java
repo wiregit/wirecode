@@ -15,4 +15,9 @@ public class OGGMetaData extends AudioDataReader {
             audioData.setLicense(tag.getFirst(TagFieldKey.COPYRIGHT));
         }
     }
+    
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "ogg" };
+    }
 }

@@ -47,7 +47,7 @@ public class WMAMetaData implements MetaReader {
 
     @Override
     public String[] getSupportedExtensions() {
-        return new String[] { "wma", "asf" };
+        return new String[] { "wma" };
     }
 
 }

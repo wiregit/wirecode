@@ -37,8 +37,7 @@ public class ASFParsingTest extends LimeTestCase {
 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/simple description.wma");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = metaDataFactory.parse(f);
-	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
+	    AudioMetaData  amd = (AudioMetaData) metaDataFactory.parse(f);
 	    
 	    assertEquals("Normal Author", amd.getArtist());
 	    assertEquals("Normal Title", amd.getTitle());
@@ -61,8 +60,7 @@ public class ASFParsingTest extends LimeTestCase {
 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/extended description.wma");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = metaDataFactory.parse(f);
-	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
+	    AudioMetaData amd = (AudioMetaData) metaDataFactory.parse(f);
 	       
 	    assertEquals("An Artist", amd.getArtist());
 	    assertEquals("A Title", amd.getTitle());
@@ -84,8 +82,7 @@ public class ASFParsingTest extends LimeTestCase {
 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/vbr encoding.asf");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = metaDataFactory.parse(f);
-	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
+	    AudioMetaData amd = (AudioMetaData) metaDataFactory.parse(f);
 	    
 	    assertEquals("Another Artist", amd.getArtist());
 	    assertEquals("Another Title", amd.getTitle());

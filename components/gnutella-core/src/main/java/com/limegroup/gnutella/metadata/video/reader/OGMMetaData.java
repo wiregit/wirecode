@@ -187,7 +187,7 @@ public class OGMMetaData implements MetaReader {
 
     @Override
     public String[] getSupportedExtensions() {
-        return null;
+        return new String[] { "ogm" };
     }
 
 
