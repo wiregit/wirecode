@@ -11,20 +11,12 @@ import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.CapsulePainter;
-import org.jdesktop.swingx.painter.CompoundPainter;
-import org.jdesktop.swingx.painter.Painter;
-import org.jdesktop.swingx.painter.RectanglePainter;
-import org.jdesktop.swingx.painter.CapsulePainter.Portion;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -51,7 +43,6 @@ public class ConversationPane extends JPanel implements Displayable {
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private ArrayList<Message> messages = new ArrayList<Message>();
     private JEditorPane editor;
-    private final IconLibrary icons;
     private final String conversationName;
     private final String friendId;
     private final Color BACKGROUND_COLOR = Color.WHITE;
@@ -59,8 +50,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private ChatState currentChatState;
 
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, IconLibrary icons) {
-        this.icons = icons;
+    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend) {
         this.conversationName = friend.getName();
         this.friendId = friend.getID();
         
@@ -176,99 +166,6 @@ public class ConversationPane extends JPanel implements Displayable {
         inputPanel.handleDisplay();
     }
 
-    @SuppressWarnings("unused")
-    private JPanel wrap(JPanel panel, boolean isHeader) {
-        JPanel wrapper = new JPanel(new GridBagLayout());
-        
-        GridBagConstraints con = new GridBagConstraints();
-        con.insets = new Insets(isHeader ? 0 : 6, 6, 6, 6);
-        con.fill = GridBagConstraints.HORIZONTAL;
-        con.weightx = 1.0;
-        wrapper.add(panel, con);
-        return wrapper;
-    }
-
-    @SuppressWarnings("unused")
-    private JPanel headerPanel(Friend friend) {
-        JXPanel headerPanel = roundPanel(new Color(144, 144, 144), true);
-        
-        headerPanel.setLayout(new BorderLayout());
-
-        JPanel statusPanel = new JPanel(new GridBagLayout());
-        statusPanel.setOpaque(false);
-        
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridheight = 2;
-        constraints.insets = new Insets(8, 8, 8, 0);
-        statusPanel.add(new JLabel(icons.getChatStatusStub()), constraints);
-
-        JLabel name = new JLabel(friend.getName(), icons.getAvailable(), SwingConstants.LEFT);
-        name.setForeground(Color.WHITE);
-        constraints = new GridBagConstraints();
-        constraints.anchor = GridBagConstraints.SOUTHWEST;
-        constraints.insets = new Insets(8, 4, 0, 8);
-        statusPanel.add(name, constraints);
-
-        constraints = new GridBagConstraints();
-        constraints.gridx = 1;
-        constraints.gridy = 1;
-        constraints.anchor = GridBagConstraints.NORTHWEST;
-        constraints.insets = new Insets(0, 4, 8, 8);
-        statusPanel.add(new JLabel(friend.getStatus()), constraints);
-        
-        JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setOpaque(false);
-        buttonsPanel.setLayout(new GridBagLayout());
-
-        constraints = new GridBagConstraints();
-        constraints.insets = new Insets(8, 0, 0, 0);
-        JXButton libraryButton = new JXButton(icons.getLibrary());
-        libraryButton.setBorderPainted(false);
-        buttonsPanel.add(libraryButton, constraints);
-        JXButton sharingButton = new JXButton(icons.getSharing());
-        sharingButton.setBorderPainted(false);
-        buttonsPanel.add(sharingButton, constraints);
-
-        JLabel libraryLabel = new JLabel(tr("Library"));
-        libraryLabel.setForeground(Color.WHITE);
-        constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-        constraints.insets = new Insets(0, 0, 8, 0);
-        buttonsPanel.add(libraryLabel, constraints);
-
-        JLabel sharingLabel = new JLabel(tr("Sharing"));
-        sharingLabel.setForeground(Color.WHITE);
-        constraints = new GridBagConstraints();
-        constraints.gridx = 1;
-        constraints.gridy = 1;
-        constraints.insets = new Insets(0, 8, 8, 8);
-        buttonsPanel.add(sharingLabel, constraints);
-        
-        headerPanel.add(statusPanel, BorderLayout.WEST);
-        headerPanel.add(buttonsPanel, BorderLayout.EAST);
-        
-        return headerPanel;
-    }
-
-    private JXPanel roundPanel(Color backgroundColor, boolean flatTop) {
-        JXPanel panel = new JXPanel();
-        RectanglePainter painter = new RectanglePainter(backgroundColor, backgroundColor);
-        painter.setRounded(true);
-        painter.setRoundHeight(20);
-        painter.setRoundWidth(20);
-
-        Painter panelPainter = painter;
-        if (flatTop) {
-            CapsulePainter capsulePainter = new CapsulePainter(Portion.Bottom);
-            capsulePainter.setFillPaint(backgroundColor);
-            panelPainter = new CompoundPainter(painter, capsulePainter);
-        }
-        
-        panel.setBackgroundPainter(panelPainter);
-        return panel;
-    }
-    
     private class HyperlinkListener implements javax.swing.event.HyperlinkListener {
 
         @Override

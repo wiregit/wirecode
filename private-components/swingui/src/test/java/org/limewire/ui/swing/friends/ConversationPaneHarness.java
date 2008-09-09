@@ -1,14 +1,15 @@
 package org.limewire.ui.swing.friends;
 
-import java.awt.*;
+import java.awt.Dimension;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -34,7 +35,7 @@ public class ConversationPaneHarness {
                     }
                 };
                 friend.writer = writer;
-                ConversationPane pane = new ConversationPane(writer, friend, new IconLibraryImpl());
+                ConversationPane pane = new ConversationPane(writer, friend);
                 frame.add(pane);
                 
                 for(int i = 0; i < 10; i++) {
