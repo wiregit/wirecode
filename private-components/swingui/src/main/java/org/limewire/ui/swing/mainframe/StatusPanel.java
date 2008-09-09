@@ -183,7 +183,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMe
         Mode newMode = event.getNewMode();
         updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons), newMode.toString());
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
-                            newMode == Mode.away ? awayPopupItem.getModel() : null;
+                            (newMode == Mode.away || newMode == Mode.xa) ? awayPopupItem.getModel() : null;
         if (model != null) {
             availabilityButtonGroup.setSelected(model, true);
         }

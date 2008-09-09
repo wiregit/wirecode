@@ -220,7 +220,7 @@ public class TopPanel extends JPanel {
     public void handleStatusChange(SelfAvailabilityUpdateEvent event) {
         Mode newMode = event.getNewMode();
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
-                            newMode == Mode.away ? awayPopupItem.getModel() : null;
+                            (newMode == Mode.away  || newMode == Mode.xa) ? awayPopupItem.getModel() : null;
         if (model != null) {
             availabilityButtonGroup.setSelected(model, true);
         }

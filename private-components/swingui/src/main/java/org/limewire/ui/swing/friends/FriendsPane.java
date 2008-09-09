@@ -64,6 +64,7 @@ import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -93,6 +94,8 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     private static final String ALL_PRESENCE_UPDATES_TOPIC_PATTERN = PresenceUpdateEvent.buildTopic(".*");
+    private static final Color LIGHT_GREY = new Color(218, 218, 218);
+    private static final int TWENTY_MINUTES_IN_MILLIS = 1200000;
     
     private final EventList<Friend> friends;
     private final JTable friendsTable;
@@ -102,10 +105,10 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
     private final JScrollPane scrollPane;
+    private final Timer idleTimer;
     private String myID;
     private WeakReference<Friend> activeConversation = new WeakReference<Friend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
-    private static final Color LIGHT_GREY = new Color(218, 218, 218);
 
     @Inject
     public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager) {
@@ -127,6 +130,46 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
         
         EventAnnotationProcessor.subscribe(this);
+        
+        idleTimer = new IdleTimer();
+        idleTimer.start();
+        
+    }
+
+    private static class IdleTimer extends Timer {
+        private SelfAvailabilityAction availabilityAction;
+        
+        public IdleTimer() {
+            this(TWENTY_MINUTES_IN_MILLIS, new SelfAvailabilityAction());
+        }
+        
+        public IdleTimer(int delay, SelfAvailabilityAction listener) {
+            super(delay, listener);
+            this.availabilityAction = listener;
+        }
+        
+        @Override
+        public void restart() {
+            super.restart();
+            availabilityAction.resetAvailability();
+        }
+    }
+    
+    private static class SelfAvailabilityAction implements ActionListener {
+        private boolean hasChangedAvailability;
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            new SelfAvailabilityUpdateEvent(Mode.xa).publish();
+            hasChangedAvailability = true;
+        }
+        
+        public void resetAvailability() {
+            if (hasChangedAvailability) {
+                new SelfAvailabilityUpdateEvent(Mode.available).publish();
+                hasChangedAvailability = false;
+            }
+        }
     }
 
     private void addPopupMenus(JComponent comp) {
@@ -345,6 +388,10 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                 friendTimerMap.put(friend, iconTimer);
                 iconTimer.start();
             }
+        }
+        
+        if (message.getType() == Type.Sent) {
+            idleTimer.restart();
         }
     }
     

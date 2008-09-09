@@ -29,6 +29,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -41,18 +42,20 @@ public class ConversationPane extends JPanel implements Displayable {
     private static final String DISABLED_LIBRARY_TOOLTIP = tr(" isn't using LimeWire. Tell them about it to see their Library");
     private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
-    private ArrayList<Message> messages = new ArrayList<Message>();
-    private JEditorPane editor;
+    private final ArrayList<Message> messages = new ArrayList<Message>();
+    private final JEditorPane editor;
     private final String conversationName;
     private final String friendId;
-    private final Color BACKGROUND_COLOR = Color.WHITE;
+    private final MessageWriter writer;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
+    private static final Color BACKGROUND_COLOR = Color.WHITE;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend) {
         this.conversationName = friend.getName();
         this.friendId = friend.getID();
+        this.writer = writer;
         
         setLayout(new BorderLayout());
         
@@ -120,6 +123,12 @@ public class ConversationPane extends JPanel implements Displayable {
     }
     
     public void closeChat() {
+        try {
+            writer.setChatState(ChatState.gone);
+        } catch (XMPPException e) {
+            LOG.error("Could not set chat state while closing the conversation", e);
+        }
+        
         EventAnnotationProcessor.unsubscribe(this);
     }
     
