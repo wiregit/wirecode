@@ -27,8 +27,8 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
         super(ACTION_INDEX, ACTION_INDEX);
 
         columnNames = new String[] {
-            "Relevance", "Title", "File Extension", "Length", "Year",
-            "Quality", "People with File", "Owner", "Rating",
+            "Name", "Extension", "Length", "Year", "Quality", "",
+            "Relevance", "People with file", "Owner", "Rating",
             "Comments", "Height", "Width", "Bitrate"
         };
     }

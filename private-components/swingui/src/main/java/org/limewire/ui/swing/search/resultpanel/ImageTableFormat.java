@@ -22,8 +22,8 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
         super(ACTION_INDEX, ACTION_INDEX);
 
         columnNames = new String[] {
-            "Name", "Type", "Date Created", "", "Relevance",
-            "People with File", "Owner"
+            "Name", "Extension", "Date created", "", "Relevance",
+            "People with file", "Owner"
         };
     }
 

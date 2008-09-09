@@ -24,7 +24,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         columnNames = new String[] {
             "Name", "Size", "Platform", "Company", "",
-            "Relevance", "Extension", "People with File", "Owner", "Author"
+            "Relevance", "Extension", "People with file", "Owner", "Author"
         };
     }
 

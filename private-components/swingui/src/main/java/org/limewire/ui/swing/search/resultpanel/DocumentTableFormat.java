@@ -15,7 +15,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     private static final int ACTION_INDEX = 4;
     private static final int DATE_INDEX = 3;
     private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 6;
+    private static final int NUM_SOURCES_INDEX = 7;
     private static final int RELEVANCE_INDEX = 5;
     private static final int SIZE_INDEX = 2;
     private static final int TYPE_INDEX = 1;
@@ -24,8 +24,8 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
         super(ACTION_INDEX, ACTION_INDEX);
 
         columnNames = new String[] {
-            "Name", "Type", "Size", "Date Created",
-            "", "Relevance", "People with File", "Owner", "Author"
+            "Name", "Type", "Size", "Date created", "", "Relevance",
+            "Extension", "People with file", "Owner", "Author"
         };
     }
 
@@ -52,9 +52,10 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
             case DATE_INDEX: return getProperty(PropertyKey.DATE_CREATED);
             case ACTION_INDEX: return vsr;
             case RELEVANCE_INDEX: return getProperty(PropertyKey.RELEVANCE);
+            case 6: return fileExtension;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 7: return getProperty(PropertyKey.OWNER);
-            case 8: return getProperty(PropertyKey.AUTHOR);
+            case 8: return getProperty(PropertyKey.OWNER);
+            case 9: return getProperty(PropertyKey.AUTHOR);
             default: return null;
         }
     }
