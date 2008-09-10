@@ -6,6 +6,7 @@ import static org.limewire.core.api.search.SearchResult.PropertyKey;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -203,6 +204,8 @@ implements TableCellEditor, TableCellRenderer {
 
     private Component makeLeftPanel() {
         downloadButton = new JLabel(downloadIcon);
+        downloadButton.setCursor(
+            Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         downloadButton.setOpaque(false);
         downloadButton.addMouseListener(new MouseAdapter() {
             @Override
