@@ -13,7 +13,7 @@ public interface VisualSearchResult {
     
     List<SearchResult> getCoreSearchResults();
 
-    List<VisualSearchResult> getSimiliarResults();
+    List<VisualSearchResult> getSimilarResults();
 
     Map<Object, Object> getProperties();
 
@@ -30,4 +30,11 @@ public interface VisualSearchResult {
     long getSize();
     
     String getFileExtension();
+
+    /**
+     * @return true if currently being downloaded; false otherwise
+     */
+    boolean isDownloading();
+
+    void setDownloading(boolean downloading);
 }

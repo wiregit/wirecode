@@ -112,22 +112,6 @@ public class ActionButtonPanel extends JPanel {
         });
     }
 
-    private Point getToolTipOffset(JComponent component) {
-        // Determine the size of the tooltip.
-        Font font = component.getFont();
-        FontMetrics fm = component.getFontMetrics(font);
-        String text = component.getToolTipText();
-        int toolTipWidth = fm.stringWidth(text);
-        int toolTipHeight = fm.getHeight();
-
-        Dimension componentSize = component.getSize();
-
-        int x = componentSize.width/2 - toolTipWidth/2 + 1;
-        int y = -toolTipHeight - 3;
-
-        return new Point(x, y);
-    }
-
     private void calculateHeight() {
         for (Icon[] iconSet : icons) {
             Icon upIcon = iconSet[0];
@@ -197,6 +181,22 @@ public class ActionButtonPanel extends JPanel {
         return buttonIndex == DOWNLOAD ? downloadOverIcon :
             buttonIndex == MORE_INFO ? infoOverIcon :
             buttonIndex == MARK_AS_JUNK ? junkOverIcon : null;
+    }
+
+    private Point getToolTipOffset(JComponent component) {
+        // Determine the size of the tooltip.
+        Font font = component.getFont();
+        FontMetrics fm = component.getFontMetrics(font);
+        String text = component.getToolTipText();
+        int toolTipWidth = fm.stringWidth(text);
+        int toolTipHeight = fm.getHeight();
+
+        Dimension componentSize = component.getSize();
+
+        int x = componentSize.width/2 - toolTipWidth/2 + 1;
+        int y = -toolTipHeight - 3;
+
+        return new Point(x, y);
     }
 
     /**

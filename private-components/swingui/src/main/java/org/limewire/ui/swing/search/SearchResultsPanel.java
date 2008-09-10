@@ -53,6 +53,8 @@ public class SearchResultsPanel extends JPanel {
             ResultType.OTHER, SearchCategory.OTHER);
     }
     
+    private EventList<VisualSearchResult> originalEventList;
+    
     /**
      * This is the subpanel that appears in the upper-left corner
      * of each search results tab.  It displays the numbers of results
@@ -85,6 +87,8 @@ public class SearchResultsPanel extends JPanel {
             ResultsContainerFactory containerFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
             final SortAndFilterPanel sortAndFilterPanel) {
+
+        originalEventList = eventList;
         
         setBackground(Color.LIGHT_GRAY);
         
@@ -92,6 +96,7 @@ public class SearchResultsPanel extends JPanel {
         sponsoredResultsPanel.setVisible(false);
         this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new SearchScrollPane();
+
         final SortedList<VisualSearchResult> filteredList =
             sortAndFilterPanel.getFilteredAndSortedList(eventList);
         
@@ -174,6 +179,10 @@ public class SearchResultsPanel extends JPanel {
     private static SearchCategory getSearchCategory(VisualSearchResult vsr) {
         ResultType resultType = vsr.getCategory();
         return resultTypeToSearchCategoryMap.get(resultType);
+    }
+
+    public EventList<VisualSearchResult> getOriginalEventList() {
+        return originalEventList;
     }
     
     public void addSponsoredResults(List<SponsoredResult> sponsoredResults){

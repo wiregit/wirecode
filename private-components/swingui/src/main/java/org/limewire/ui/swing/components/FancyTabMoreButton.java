@@ -23,14 +23,22 @@ import javax.swing.GroupLayout.SequentialGroup;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.search.resultpanel.SearchTabPopup;
 import org.limewire.ui.swing.util.I18n;
 
 public class FancyTabMoreButton extends JXButton {
     
     private final FancyTabProperties props;
+    private JPopupMenu menu = new JPopupMenu(I18n.tr("more"));
+    private List<FancyTab> tabs;
     
-    public FancyTabMoreButton(List<FancyTab> tabs, Icon triangle, FancyTabProperties props) {
+    public FancyTabMoreButton(List<FancyTab> tabs,
+            Icon triangle,
+            FancyTabProperties props) {
+
         super(I18n.tr("more"), triangle);
+
+        this.tabs = tabs;
         this.props = props;
         
         setContentAreaFilled(false);
@@ -44,12 +52,14 @@ public class FancyTabMoreButton extends JXButton {
         this.addActionListener(listener);
     }
     
-    private JComponent createMenuItemFor(final JPopupMenu menu, final FancyTab tab) {
+    private JComponent createMenuItemFor(
+            final JPopupMenu menu, final FancyTab tab) {
+
         JXPanel jp = new JXPanel();
         jp.setOpaque(false);
         jp.setBackgroundPainter(props.getNormalPainter());
         
-        AbstractButton selectButton = tab.createMainButton();
+        final AbstractButton selectButton = tab.createMainButton();
         selectButton.setHorizontalAlignment(SwingConstants.LEADING);
         selectButton.addActionListener(new ActionListener() {
             @Override
@@ -57,7 +67,32 @@ public class FancyTabMoreButton extends JXButton {
                 menu.setVisible(false);
             }
         });
-        
+
+        // TODO: RMV This was an attempt to implement part of item 2.7.a
+        // TODO: RMV in the Search Results spec.
+        // TODO: RMV It says that a popup menu should be displayed
+        // TODO: RMV if the user right-clicks an item in the "more" menu.
+        // TODO: RMV That's difficult to implement because when the user
+        // TODO: RMV left or right clicks on a JPopupMenu item,
+        // TODO: RMV the menu is dismissed.
+        /*
+        selectButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // Find the corresponding FancyTab.
+                String title = selectButton.getText();
+                for (FancyTab tab : tabs) {
+                    String tabTitle = tab.getTitle();
+                    if (tabTitle.equals(title)) {
+                        // Display the popup menu over the tab.
+                        SearchTabPopup menu = new SearchTabPopup(tab);
+                        menu.show(e);
+                        break;
+                    }
+                }
+            }
+        });
+        */
         
         JButton removeButton = tab.createRemoveButton();
         if(props.isRemovable()) {
@@ -149,11 +184,13 @@ public class FancyTabMoreButton extends JXButton {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            JPopupMenu menu = new JPopupMenu(I18n.tr("more"));
-            for(FancyTab tab : tabs) {
+            menu.removeAll();
+
+            for (FancyTab tab : tabs) {
                 menu.add(createMenuItemFor(menu, tab));
             }
-            JComponent source = (JComponent)e.getSource();
+
+            JComponent source = (JComponent) e.getSource();
             menu.show(source, 3, source.getBounds().height);
         }
         

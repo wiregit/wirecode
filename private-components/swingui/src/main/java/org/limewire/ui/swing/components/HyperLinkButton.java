@@ -31,6 +31,7 @@ public class HyperLinkButton extends JButton implements MouseListener {
         setBorder(null);
         setContentAreaFilled(false);
         setFocusable(false);
+        setOpaque(false);
         addMouseListener(this);
     }
     

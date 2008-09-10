@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.MouseEvent;
 import static org.limewire.core.api.search.SearchResult.PropertyKey;
 
 import java.awt.Color;
@@ -7,6 +9,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -16,13 +22,15 @@ import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.MediaType;
@@ -44,16 +52,20 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Icon downloadIcon;
 
     private ActionColumnTableCellEditor actionEditor;
-    private Component actionComponent;
+    private ActionButtonPanel actionButtonPanel;
     private FromWidget fromWidget = new FromWidget();
+    private HyperLinkButton downloadingLink =
+        new HyperLinkButton("Downloading...");
+    private JLabel downloadButton;
+    private HyperLinkButton similarButton = new HyperLinkButton(null);
     private JLabel headingLabel = new JLabel();
-    private JLabel similarLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
-    private JPanel actionPanel = new JPanel();
-    private JPanel thePanel;
+    private JXPanel actionPanel = new JXPanel();
+    private JXPanel thePanel;
     private JTable table;
     private String schema;
     private VisualSearchResult vsr;
+    private boolean isShowingSimilar;
     private int row;
     private int similarCount;
 
@@ -78,6 +90,24 @@ implements TableCellEditor, TableCellRenderer {
         //System.out.println(
         //    "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
 
+        // Find the SearchResultPanel that the table is nested inside.
+        // TODO: RMV Want this code?
+        /*
+        Container child = table.getParent();
+        while (true) {
+            Container parent = child.getParent();
+            if (parent == null) break;
+            if (parent instanceof SearchResultsPanel) {
+                searchResultsPanel = (SearchResultsPanel) parent;
+                break;
+            }
+
+            //System.out.println("container is a "
+            //    + parent.getClass().getName());
+            child = parent;
+        }
+        */
+
         this.table = table;
         this.row = row;
 
@@ -86,14 +116,24 @@ implements TableCellEditor, TableCellRenderer {
             MediaType.getMediaTypeForExtension(vsr.getFileExtension());
         schema = mediaType == null ? "other" : mediaType.toString();
 
-        similarCount = vsr.getSimiliarResults().size();
+        similarCount = vsr.getSimilarResults().size();
+        similarButton.setVisible(similarCount > 0);
 
         if (thePanel == null) thePanel = makePanel();
 
-        actionComponent = actionEditor.getTableCellEditorComponent(
+        actionButtonPanel =
+            (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
             table, value, isSelected, row, column);
         actionPanel.removeAll();
-        actionPanel.add(actionComponent);
+        actionPanel.add(actionButtonPanel);
+
+        final JToggleButton junkButton = actionButtonPanel.getJunkButton();
+        junkButton.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                float opacity = junkButton.isSelected() ? 0.2f : 1.0f;
+                thePanel.setAlpha(opacity);
+            }
+        });
 
         populatePanel((VisualSearchResult) value);
         setBackground(isSelected);
@@ -106,12 +146,39 @@ implements TableCellEditor, TableCellRenderer {
         boolean isSelected, boolean hasFocus,
         int row, int column) {
 
-        return (JPanel) getTableCellEditorComponent(
+        return (JXPanel) getTableCellEditorComponent(
             table, value, isSelected, row, column);
     }
 
+    @SuppressWarnings("unchecked")
     private Component makeCenterPanel() {
-        JPanel panel = new JPanel(new GridBagLayout()) {
+        similarButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                isShowingSimilar = !isShowingSimilar;
+                String text = (isShowingSimilar ? "Hide" : "Show")
+                    + ' ' + similarCount + " similar files";
+                similarButton.setText(text);
+
+                // TODO: RMV Waiting for feedback on replacing use of
+                // TODO: RMV VisualSearchResult with SearchResult.
+                /*
+                BasicSearchResultsModel model = SearchHandlerImpl.model;
+                List<VisualSearchResult> list = vsr.getSimilarResults();
+                for (VisualSearchResult similarVSR : list) {
+                    // TODO: RMV PROBLEM!  The model holds objects that
+                    // TODO: RMV implement SearchResult, not VisualSearchResult!
+                    // TODO: RMV Why are both interfaces needed?
+                    if (isShowingSimilar) {
+                        model.addSearchResult(similarVSR); //, list.size() - 1);
+                    } else {
+                        model.removeSearchResult(similarVSR);
+                    }
+                }
+                */
+            }
+        });
+
+        JXPanel panel = new JXPanel(new GridBagLayout()) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -129,39 +196,68 @@ implements TableCellEditor, TableCellRenderer {
         panel.add(fromWidget, gbc);
 
         gbc.gridy++;
-        panel.add(similarLabel, gbc);
+        panel.add(similarButton, gbc);
 
         return panel;
     }
 
     private Component makeLeftPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setOpaque(false);
+        downloadButton = new JLabel(downloadIcon);
+        downloadButton.setOpaque(false);
+        downloadButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                vsr.setDownloading(true);
+                downloadButton.setEnabled(false);
+                downloadingLink.setVisible(true);
+            }
+        });
+
         GridBagConstraints gbc = new GridBagConstraints();
+
+        JXPanel downloadPanel = new JXPanel(new GridBagLayout());
+        downloadPanel.setOpaque(false);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        downloadPanel.add(downloadButton, gbc);
+        downloadPanel.add(downloadingLink, gbc);
+
+        JXPanel headingPanel = new JXPanel(new GridBagLayout());
+        headingPanel.setOpaque(false);
+        gbc.gridx = 0;
+        headingPanel.add(headingLabel, gbc);
+        headingPanel.add(subheadingLabel, gbc);
+
+        JXPanel panel = new JXPanel(new GridBagLayout());
+        panel.setOpaque(false);
 
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        JLabel label = new JLabel(downloadIcon);
-        // TODO: RMV Why doesn't the download icon appear?
-        panel.add(label, gbc);
+        panel.add(downloadPanel, gbc);
 
         gbc.gridx++;
-        panel.add(headingLabel, gbc);
-
-        gbc.gridy++;
-        panel.add(subheadingLabel, gbc);
+        panel.add(headingPanel, gbc);
 
         return panel;
     }
 
-    private JPanel makePanel() {
-        final JPanel panel = new JPanel(new GridBagLayout()) {
+    private JXPanel makePanel() {
+        final JXPanel panel = new JXPanel(new GridBagLayout()) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                int count = 1;
+                if (isShowingSimilar) count += similarCount;
+                size.height = count * HEIGHT;
+                return size;
+            }
+
             @Override
             public void setBackground(Color bg) {
                 super.setBackground(bg);
-                if (actionComponent != null) {
-                    actionComponent.setBackground(bg);
+                if (actionButtonPanel != null) {
+                    actionButtonPanel.setBackground(bg);
                 }
             }
         };
@@ -215,13 +311,18 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populatePanel(VisualSearchResult vsr) {
+        boolean downloading = vsr.isDownloading();
+        downloadButton.setEnabled(!downloading);
+        downloadingLink.setVisible(downloading);
+
         populateHeading(vsr);
         populateSubheading(vsr);
         populateFrom(vsr);
 
-        String text = similarCount == 0 ?
-            "" : "Show " + similarCount + " similar files";
-        similarLabel.setText(text);
+        if (similarCount > 0) {
+            String text = "Show " + similarCount + " similar files";
+            similarButton.setText(text);
+        }
     }
 
     private void populateSubheading(VisualSearchResult vsr) {

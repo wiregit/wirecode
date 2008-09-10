@@ -19,6 +19,7 @@ class SearchResultAdapter implements VisualSearchResult {
     private final List<SearchResult> coreResults;
     private Map<Object, Object> properties;
     private final Set<RemoteHost> remoteHosts;
+    private boolean downloading;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
@@ -43,7 +44,7 @@ class SearchResultAdapter implements VisualSearchResult {
         
         final SearchResultAdapter other = (SearchResultAdapter) obj;
         
-        // TODO: RMV temporary, same description
+        // TODO: RMV Should the comparison be only on the description?
         return getDescription().equals(other.getDescription());
         /*
         if (coreResults == null) {
@@ -103,19 +104,19 @@ class SearchResultAdapter implements VisualSearchResult {
     }
     
     @Override
-    public List<VisualSearchResult> getSimiliarResults() {
+    public List<VisualSearchResult> getSimilarResults() {
         SearchResult result = coreResults.get(0);
 
         List<VisualSearchResult> list = new ArrayList<VisualSearchResult>();
 
-//        for (SearchResult similarResult : result.getSimiliarResults()) {
-//            // Create a SearchResultAdapter for each similar result.
-//            List<SearchResult> innerList = new ArrayList<SearchResult>();
-//            innerList.add(similarResult);
-//            VisualSearchResult vsr = new SearchResultAdapter(innerList);
-//
-//            list.add(vsr);
-//        }
+        for (SearchResult similarResult : result.getSimiliarResults()) {
+            // Create a SearchResultAdapter for each similar result.
+            List<SearchResult> innerList = new ArrayList<SearchResult>();
+            innerList.add(similarResult);
+            VisualSearchResult vsr = new SearchResultAdapter(innerList);
+
+            list.add(vsr);
+        }
 
         return list;
     }
@@ -141,7 +142,17 @@ class SearchResultAdapter implements VisualSearchResult {
             ((remoteHosts == null) ? 0 : remoteHosts.hashCode());
         return result;
         */
-        return getDescription().hashCode(); // TODO: RMV temporary
+        return getDescription().hashCode(); // TODO: RMV Changed to match equal.
+    }
+
+    @Override
+    public boolean isDownloading() {
+        return downloading;
+    }
+
+    @Override
+    public void setDownloading(boolean downloading) {
+        this.downloading = downloading;
     }
     
     @Override

@@ -41,7 +41,7 @@ public class TabActionMap {
         }
     }
     
-    Action getRemoveOthers() {
+    public Action getRemoveOthers() {
         return removeOthers;
     }
     
@@ -49,7 +49,7 @@ public class TabActionMap {
         this.removeOthers = removeOthers;
     }
 
-    Action getRemoveAll() {
+    public Action getRemoveAll() {
         return removeAll;
     }
 

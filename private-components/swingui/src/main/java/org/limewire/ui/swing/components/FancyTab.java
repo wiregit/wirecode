@@ -2,7 +2,6 @@ package org.limewire.ui.swing.components;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -18,7 +17,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -26,15 +24,18 @@ import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
-import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
 import javax.swing.JToggleButton.ToggleButtonModel;
-
+import javax.swing.JToggleButton;
 import javax.swing.LayoutStyle;
+import javax.swing.SwingUtilities;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.FancyTabProperties;
+import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.search.resultpanel.SearchTabPopup;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -104,7 +105,7 @@ public class FancyTab extends JXPanel {
         
         addMouseListener(highlightListener);
         mainButton.addMouseListener(highlightListener);
-        
+
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
         
         layoutComponents();
@@ -221,7 +222,7 @@ public class FancyTab extends JXPanel {
         button.setHideActionText(true);
         button.setVisible(false);
         if (removeButton != null) {
-            for(ActionListener listener : removeButton.getActionListeners()) {
+            for (ActionListener listener : removeButton.getActionListeners()) {
                 if (listener == tabActions.getRemoveAction()) {
                     // Ignore the remove action -- it's added implicitly.
                     continue;
@@ -253,7 +254,15 @@ public class FancyTab extends JXPanel {
         return button;
     }
     
-    void remove() {
+    public FancyTabProperties getProperties() {
+        return props;
+    }
+    /** Gets the action underlying this tab. */
+    public TabActionMap getTabActionMap() {
+        return tabActions;
+    }
+    
+    public void remove() {
         removeButton.doClick(0);
     }
     
@@ -269,11 +278,6 @@ public class FancyTab extends JXPanel {
         removeButton.removeActionListener(listener);
     }
 
-    /** Gets the action underlying this tab. */
-    TabActionMap getTabActionMap() {
-        return tabActions;
-    }
-    
     /** Selects this tab. */
     void setSelected(boolean selected) {
         mainButton.setSelected(selected);
@@ -330,31 +334,11 @@ public class FancyTab extends JXPanel {
         return (String)tabActions.getMainAction().getValue(Action.NAME);
     }
     
-    private void showPopup(MouseEvent event) {
-        if (props.isRemovable() || !tabActions.getRightClickActions().isEmpty()) {
-            JPopupMenu menu = new JPopupMenu();
-            for(Action action : tabActions.getRightClickActions()) {
-                menu.add(action);
-            }
-            
-            if (menu.getComponentCount() != 0 && props.isRemovable()) {
-                menu.addSeparator();
-            }
-            
-            if (props.isRemovable()) {
-                menu.add(new AbstractAction(props.getCloseOneText()) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        remove();
-                    }
-                });
-                menu.add(tabActions.getRemoveOthers());
-                menu.addSeparator();
-                menu.add(tabActions.getRemoveAll());
-            }
-            
-            menu.show((Component)event.getSource(), event.getX()+3, event.getY()+3);
-        }
+    private void showPopup(MouseEvent e) {
+        // A new popup menu needs to be created each time
+        // because its contents can change.
+        SearchTabPopup menu = new SearchTabPopup(this);
+        menu.show(e);
     }
     
     private class HighlightListener extends MouseAdapter {

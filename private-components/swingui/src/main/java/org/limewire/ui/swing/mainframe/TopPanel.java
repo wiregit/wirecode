@@ -146,6 +146,7 @@ class TopPanel extends JPanel implements SearchNavigator {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1;
         gbc.insets = new Insets(5, 0, 0, 0);
+
         searchList = new FancyTabList();
         searchList.setCloseAllText(I18n.tr("Close all searches"));
         searchList.setCloseOneText(I18n.tr("Close search"));
@@ -185,6 +186,7 @@ class TopPanel extends JPanel implements SearchNavigator {
             NavCategory.SEARCH, title, searchPanel, false);
         final SearchAction action = new SearchAction(item, search);
         search.addSearchListener(action);
+
         final Action moreTextAction = new NoOpAction();
         final Action repeat = new AbstractAction(I18n.tr("Repeat search")) {
             @Override

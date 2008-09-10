@@ -9,14 +9,18 @@ import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import org.limewire.core.api.search.ResultType;
+import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 
-class SearchHandlerImpl implements SearchHandler {
+public class SearchHandlerImpl implements SearchHandler {
     
+    // TODO: RMV This shouldn't be static. I'm just testing a bug fix.
+    public static BasicSearchResultsModel model = new BasicSearchResultsModel();
+
+
     private final SearchFactory searchFactory;
     private final SearchResultsPanelFactory panelFactory;
     private final SearchNavigator searchNavigator;
@@ -47,7 +51,6 @@ class SearchHandlerImpl implements SearchHandler {
         });
         
         String panelTitle = info.getTitle();
-        final BasicSearchResultsModel model = new BasicSearchResultsModel();
         final SearchResultsPanel searchPanel =
             panelFactory.createSearchResultsPanel(
                 info, model.getVisualSearchResults(), search);

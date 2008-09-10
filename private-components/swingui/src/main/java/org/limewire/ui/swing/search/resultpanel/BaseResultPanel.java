@@ -16,7 +16,6 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 import java.awt.Window;
 import java.util.Calendar;
 import javax.swing.JComponent;
@@ -52,7 +51,7 @@ public class BaseResultPanel extends JXPanel {
                 
         configureList(eventList);
         configureTable(eventList, tableFormat);
-        
+ 
         // TODO: RMV I think these JScrollPanes are fighting with the ones
         // TODO: RMV that Sam added outside that include Sponsored Results.
         add(new JScrollPane(resultsList), ModeListener.Mode.LIST.name());
@@ -61,35 +60,9 @@ public class BaseResultPanel extends JXPanel {
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList) {
-        // We're using a JTable with one column instead of JList
+        // We're using a MouseableTable with one column instead of JList
         // because that will allow us to display buttons with rollover icons.
-        resultsList = new ConfigurableTable<VisualSearchResult>(false) {
-            // TODO: RMV Want the code below to fix loss of row selection
-            // TODO: RMV after sorting or filtering?
-            /*
-            private VisualSearchResult selectedVSR;
-
-            public void setSelected(VisualSearchResult selectedVSR) {
-                this.selectedVSR = selectedVSR;
-            }
-
-            public void restoreSelection() {
-                if (selectedVSR == null) return;
-                
-                TableModel tableModel = getModel();
-                int rowCount = tableModel.getRowCount();
-                for (int row = 0; row < rowCount; row++) {
-                    Object obj = tableModel.getValueAt(row, 0);
-                    if (obj == selectedVSR) {
-                        System.out.println(
-                            "BaseResultPanel: restored selection of row " + row);
-                        setRowSelectionInterval(row, row);
-                        break;
-                    }
-                }
-            }
-            */
-        };
+        resultsList = new ConfigurableTable<VisualSearchResult>(false);
 
         resultsList.setEventList(eventList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();

@@ -19,7 +19,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumnModel;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.ui.swing.table.MouseableTable;
 
@@ -30,6 +29,7 @@ import org.limewire.ui.swing.table.MouseableTable;
 public class ConfigurableTable<E> extends MouseableTable {
 
     private EventList<E> eventList;
+    private EventList<E> originalEventList;
     private EventTableModel<E> tableModel;
     private JMenuItem disabledMenuItem;
     private JPopupMenu headerPopup;
@@ -74,6 +74,14 @@ public class ConfigurableTable<E> extends MouseableTable {
             // Remove the table header.
             setTableHeader(null);
         }
+    }
+
+    public EventList<E> getEventList() {
+        return eventList;
+    }
+
+    public EventList<E> getOriginalEventList() {
+        return originalEventList;
     }
 
     /**
@@ -194,7 +202,7 @@ public class ConfigurableTable<E> extends MouseableTable {
      * @param objects the objects
      */
     public void setData(Collection<E> objects) {
-        eventList = new BasicEventList<E>();
+        originalEventList = eventList = new BasicEventList<E>();
         for (E object : objects) eventList.add(object);
     }
 

@@ -22,7 +22,7 @@ public class BasicSearchResultsModel {
 //    private final FunctionList<List<VisualSearchResult>, VisualSearchResult> 
     
     public BasicSearchResultsModel() {
-        allSearchResults = new BasicEventList<SearchResult>();        
+        allSearchResults = new BasicEventList<SearchResult>();
         groupingListUrns = new GroupingList<SearchResult>(
             allSearchResults, new UrnComparator());
         groupedUrnResults =
@@ -40,6 +40,10 @@ public class BasicSearchResultsModel {
     
     public void addSearchResult(SearchResult result) {
         allSearchResults.add(result);
+    }
+    
+    public void removeSearchResult(SearchResult result) {
+        allSearchResults.remove(result);
     }
     
     private static class UrnComparator implements Comparator<SearchResult> {
