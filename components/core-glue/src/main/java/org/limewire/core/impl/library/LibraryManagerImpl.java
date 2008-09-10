@@ -88,7 +88,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     public FileList getBuddy(String name) {
         if(buddyFileLists.containsKey(name))
             return buddyFileLists.get(name);
-        
+
         BuddyFileListImpl newBuddyList = new BuddyFileListImpl(fileManager, name);
         buddyFileLists.put(name, newBuddyList);
         return newBuddyList;
@@ -262,9 +262,25 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         BuddyFileListImpl(FileManager fileManager, String name) {
             this.fileManager = fileManager;
             this.name = name;
-            
+                     
             this.fileManager.getBuddyFileList(name).addFileListListener(this);
             lookup = new HashMap<File, FileItem>();
+            loadSavedFiles();
+        }
+        
+        //TODO: reexamine this. Needs to be loaded on a seperate thread and maybe cleaned up somehow
+        private void loadSavedFiles() {
+            com.limegroup.gnutella.FileList fileList = this.fileManager.getBuddyFileList(name);  
+
+              synchronized (fileList.getLock()) {
+                  Iterator<FileDesc> iter = fileList.iterator();
+                  while(iter.hasNext()) {
+                      FileDesc fileDesc = iter.next();
+                      FileItem newItem = new CoreFileItem(fileDesc);  
+                      lookup.put(fileDesc.getFile(), newItem);
+                      eventList.add(newItem);
+                  }
+              }
         }
         
         @Override

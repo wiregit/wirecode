@@ -24,6 +24,8 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<FileItem>{
         this.name = name;
         this.eventList = eventList;
         this.eventList.addListEventListener(this);
+        
+        size = eventList.size();
     }
     
     public void addPropertyChangeListener(PropertyChangeListener l) {

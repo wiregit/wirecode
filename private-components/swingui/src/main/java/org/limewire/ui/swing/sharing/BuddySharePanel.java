@@ -29,7 +29,6 @@ import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
-import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
 import org.limewire.ui.swing.sharing.friends.BuddyItemImpl;
@@ -65,8 +64,6 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     protected Icon sharingIcon;
     
     private ViewSelectionPanel viewSelectionPanel;
-       
-    private final FileList fileList;
     
     private CardLayout viewCardLayout;
 
@@ -91,8 +88,6 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         
         this.libraryManager = libraryManager;
 
-        libraryManager.addBuddy("All");
-        this.fileList = libraryManager.getBuddy("All");
         buddyLists = new HashMap<String,FileList>();
 
         viewCardLayout = new CardLayout();
@@ -105,13 +100,10 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         ObservableElementList.Connector<BuddyItem> buddyConnector = GlazedLists.beanConnector(BuddyItem.class);
         eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
        
-//        eventList = GlazedLists.threadSafeList(new BasicEventList<BuddyItem>());
         buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager);
-
         
         headerPanel = createHeader(cardPanel);
-               
-//        loadBuddies();
+
         createCenterCards(headerPanel, cardPanel);
 
         viewCardLayout.show(cardPanel, ViewSelectionPanel.DISABLED);
@@ -125,14 +117,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         add(headerPanel, "dock north");
         add(new JScrollPane(buddyTable), "grow");
         add(cardPanel, "grow");
-        
     }
-    
-//    private void loadBuddies() {
-//        for(String name : buddyLists.keySet()) {
-//            eventList.add(new BuddyItemImpl(name, buddyLists.get(name).getModel()));
-//        }
-//    }
     
     private BuddySharingHeaderPanel createHeader(JPanel cardPanel) {
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.LIST_SELECTED), 
@@ -143,14 +128,11 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     }
     
     private void createCenterCards(SharingHeaderPanel headerPanel, JPanel cardPanel) {
-        FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
-                new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
-        
-
-        createTable(filteredList);
+        EventList<FileItem> tempList = new BasicEventList<FileItem>();
+        createTable(tempList);
         
         JScrollPane scrollPane = new JScrollPane();
-        sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList);
+        sharingFancyPanel = new SharingFancyPanel(tempList, scrollPane, null);
         scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),TABLE);
@@ -159,9 +141,9 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         
     }
     
-    private void createTable(FilterList<FileItem> filteredList) {
-        table = new SharingTable(filteredList, fileList, new SharingTableFormat());
-        table.setTransferHandler(new SharingTransferHandler(fileList));
+    private void createTable(EventList<FileItem> eventList) {
+        table = new SharingTable(eventList, null, new SharingTableFormat());
+//        table.setTransferHandler(new SharingTransferHandler(fileList));
         table.setDropMode(DropMode.ON);
         
         editor = new MultiButtonTableCellRendererEditor(20);
@@ -242,7 +224,6 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
                 viewSelectionPanel.setEnabled(false);
             }
         }
-        
     }
     
     @Inject
@@ -274,8 +255,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
               new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         fileList.setFilteredModel(filteredList);
-      
+
         eventList.add(new BuddyItemImpl(name, fileList.getFilteredModel()));
     }
-
 }
