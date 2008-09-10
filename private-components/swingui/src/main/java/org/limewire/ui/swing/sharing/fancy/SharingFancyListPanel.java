@@ -22,8 +22,9 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
@@ -40,7 +41,7 @@ import ca.odell.glazedlists.event.ListEventListener;
  *  Display images in a list below a title and line
  */
 //TODO: merge this with SharingFancyTablePanel during cleanup of Sharing package
-public class SharingFancyListPanel extends JPanel implements ListEventListener<FileItem> {
+public class SharingFancyListPanel extends JPanel implements ListEventListener<LocalFileItem> {
     
     private final ImageList imageList;
     
@@ -49,9 +50,9 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
     private final UnshareButton layerButton;
     
     private SharingRemoveAllAction removeAction;
-    private EventList<FileItem> currentEventList;
+    private EventList<LocalFileItem> currentEventList;
     
-    public SharingFancyListPanel(String name, EventList<FileItem> eventList, DropTarget dropTarget, FileList fileList, Icon panelIcon) {       
+    public SharingFancyListPanel(String name, EventList<LocalFileItem> eventList, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon) {       
         setBackground(Color.WHITE);
         
         this.currentEventList = eventList;
@@ -117,7 +118,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
         setVisible(false);
     }
     
-    public void setModel(EventList<FileItem> eventList, FileList fileList) {
+    public void setModel(EventList<LocalFileItem> eventList, LocalFileList fileList) {
         currentEventList.removeListEventListener(this);
         currentEventList = eventList;
         currentEventList.addListEventListener(this);
@@ -136,7 +137,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<F
     }
     
     @Override
-    public void listChanged(ListEvent<FileItem> listChanges) {
+    public void listChanged(ListEvent<LocalFileItem> listChanges) {
         final int size = listChanges.getSourceList().size();
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {

@@ -10,20 +10,19 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
 import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.EventList;
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
@@ -115,11 +114,11 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
     }
 
     @Override
-    public void setEventList(EventList<FileItem> model) {
+    public void setEventList(EventList<LocalFileItem> model) {
 //        addAllAction.setUserLibrary(model);
     }
     
-    public void setUserFileList(FileList fileList) {
+    public void setUserFileList(LocalFileList fileList) {
         addAllAction.setUserLibrary(fileList);
     }
     

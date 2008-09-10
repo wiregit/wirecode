@@ -14,8 +14,9 @@ import javax.swing.border.EmptyBorder;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -34,7 +35,7 @@ public class ImageList extends JXList {
     @Resource
     private Icon errorIcon; 
     
-    public ImageList(EventList<FileItem> eventList, FileList fileList) {
+    public ImageList(EventList<LocalFileItem> eventList, LocalFileList fileList) {
         super(new ImageListModel(eventList, fileList));
 
         GuiUtils.assignResources(this); 
@@ -81,7 +82,7 @@ public class ImageList extends JXList {
         public Component getListCellRendererComponent(JList list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
 
-            FileItem item = (FileItem)value;
+            LocalFileItem item = (LocalFileItem)value;
             ImageIcon imageIcon = (ImageIcon) item.getProperty(FileItem.Keys.IMAGE);
             if(imageIcon != null) {
                 setIcon(imageIcon);

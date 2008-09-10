@@ -2,9 +2,9 @@ package org.limewire.core.impl.library;
 
 import java.io.File;
 
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 
-public class MockFileItem implements FileItem {
+public class MockLocalFileItem implements LocalFileItem {
 
     private final String name;
     private final long size;
@@ -14,7 +14,7 @@ public class MockFileItem implements FileItem {
     private final int numUploads;
     private final Category category;
     
-    public MockFileItem(String name, long size, long creationTime, long lastModified,
+    public MockLocalFileItem(String name, long size, long creationTime, long lastModified,
             int numHits, int numUploads, Category category) {
         this.name = name;
         this.size = size;

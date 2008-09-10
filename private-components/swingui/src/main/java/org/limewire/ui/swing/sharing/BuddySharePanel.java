@@ -16,14 +16,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.BuddyFileList;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -42,6 +41,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -50,9 +52,7 @@ import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 public class BuddySharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
@@ -128,7 +128,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     }
     
     private void createCenterCards(SharingHeaderPanel headerPanel, JPanel cardPanel) {
-        EventList<FileItem> tempList = new BasicEventList<FileItem>();
+        EventList<LocalFileItem> tempList = new BasicEventList<LocalFileItem>();
         createTable(tempList);
         
         JScrollPane scrollPane = new JScrollPane();
@@ -141,7 +141,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         
     }
     
-    private void createTable(EventList<FileItem> eventList) {
+    private void createTable(EventList<LocalFileItem> eventList) {
         table = new SharingTable(eventList, null, new SharingTableFormat());
 //        table.setTransferHandler(new SharingTransferHandler(fileList));
         table.setDropMode(DropMode.ON);
@@ -252,8 +252,8 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     private void addBuddy(String name) {
         BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(name);
         buddyLists.put(name, fileList);
-        FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
-              new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
+        FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getModel(), 
+              new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         fileList.setFilteredModel(filteredList);
 
         eventList.add(new BuddyItemImpl(name, fileList.getFilteredModel()));

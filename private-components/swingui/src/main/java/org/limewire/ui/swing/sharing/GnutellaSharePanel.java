@@ -14,8 +14,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
@@ -50,7 +50,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     
     private ViewSelectionPanel viewSelectionPanel;
        
-    private final FileList fileList;
+    private final LocalFileList fileList;
     
     private CardLayout overviewCardLayout;
     private CardLayout tableCardLayout;
@@ -67,9 +67,9 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         this.iconManager = iconManager;
         
         this.fileList = libraryManager.getGnutellaList();
-        this.fileList.getModel().addListEventListener(new ListEventListener<FileItem>(){
+        this.fileList.getModel().addListEventListener(new ListEventListener<LocalFileItem>(){
             @Override
-            public void listChanged(ListEvent<FileItem> listChanges) {
+            public void listChanged(ListEvent<LocalFileItem> listChanges) {
                 final int size = listChanges.getSourceList().size();
                 SwingUtilities.invokeLater(new Runnable(){
                     public void run() {
@@ -126,8 +126,8 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     
     private void createCenterCards(SharingHeaderPanel headerPanel, JPanel cardPanel) {
 
-        FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
-                new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
+        FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getModel(), 
+                new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         
         createTable(filteredList);
         
@@ -140,7 +140,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         tableCardLayout.show(cardPanel, ViewSelectionPanel.LIST_SELECTED);
     }
     
-    private void createTable(FilterList<FileItem> filteredList) {
+    private void createTable(FilterList<LocalFileItem> filteredList) {
         table = new SharingTable(filteredList, fileList, new SharingTableFormat());
         table.setTransferHandler(new SharingTransferHandler(fileList));
         table.setDropMode(DropMode.ON);

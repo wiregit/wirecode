@@ -5,13 +5,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
 import com.limegroup.gnutella.FileDesc;
 
-public class CoreFileItem implements FileItem {
+public class CoreLocalFileItem implements LocalFileItem {
 
     private final File file;
     private final String name;
@@ -23,7 +23,7 @@ public class CoreFileItem implements FileItem {
     private final Category category;
     private final Map<Keys,Object> map;
     
-    public CoreFileItem(FileDesc fileDesc) { 
+    public CoreLocalFileItem(FileDesc fileDesc) { 
         this.file = fileDesc.getFile();
         this.name = fileDesc.getFileName();
         this.creationTime = fileDesc.getCreationTime();

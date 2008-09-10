@@ -8,8 +8,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
 import org.limewire.ui.swing.sharing.friends.BuddyNameTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -38,7 +38,7 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
     protected final MenuListener menuListener;
 
     private BuddyItem currentBuddy;
-    private FileList buddyFileList;
+    private LocalFileList buddyFileList;
     
     public BuddySharingPopupHandler(BuddyNameTable table, BuddySharingActionHandler handler, LibraryManager libraryManager) {
         this.table = table;

@@ -20,13 +20,12 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.plaf.metal.MetalToggleButtonUI;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.sharing.BuddySharePanel;
 import org.limewire.ui.swing.sharing.GenericSharingPanel;
@@ -37,6 +36,8 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator {
     
@@ -103,7 +104,7 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
     
     private class NumberIcon implements Icon {
         private final FileList fileList;
-        private final Map<String, FileList> fileLists;
+        private final Map<String, LocalFileList> fileLists;
         private final Icon delegateIcon;
         
         public NumberIcon(FileList fileList, Icon icon) {
@@ -112,7 +113,7 @@ public class FilesSharingSummaryPanel extends JPanel implements SharingNavigator
             this.fileLists = null;
         }
         
-        public NumberIcon(Map<String, FileList> fileLists, Icon icon) {
+        public NumberIcon(Map<String, LocalFileList> fileLists, Icon icon) {
             this.fileList = null;
             this.delegateIcon = icon;
             this.fileLists = fileLists;

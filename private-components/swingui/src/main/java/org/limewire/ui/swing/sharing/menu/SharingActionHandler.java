@@ -1,8 +1,9 @@
 package org.limewire.ui.swing.sharing.menu;
 
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FileItem.Category;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
@@ -13,7 +14,7 @@ public class SharingActionHandler {
     public static final String PROPERTIES = "PROPERTIES";
     public static final String LAUNCH = "LAUNCH";
     
-    public void performAction(final String actionCommand, final FileList fileList, final FileItem item) {
+    public void performAction(final String actionCommand, final LocalFileList fileList, final LocalFileItem item) {
         //TODO: move this to a background executor
         Thread t = new Thread(new Runnable(){
             public void run() {
@@ -31,7 +32,7 @@ public class SharingActionHandler {
         t.start();
     }
     
-    private void launch(FileItem item) {
+    private void launch(LocalFileItem item) {
         if(item.getCategory() == Category.AUDIO){
             PlayerUtils.play(item.getFile());
         } else {

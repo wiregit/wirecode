@@ -10,14 +10,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.core.api.library.BuddyFileList;
 import org.limewire.core.api.library.BuddyShareListListener;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.api.library.RemoteFileList;
+import org.limewire.core.api.search.SearchResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,6 +26,10 @@ import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileListListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
 
 @Singleton
 class LibraryManagerImpl implements LibraryManager, FileEventListener {
@@ -36,9 +40,9 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     
     private LibraryFileList libraryFileList;
     private GnutellaFileList gnutellaFileList;
-    private Map<String,FileList> buddyFileLists;
+    private Map<String, LocalFileList> buddyFileLists;
     
-    private Map<String, FileList> buddyLibraryFileLists;
+    private Map<String, RemoteFileList> buddyLibraryFileLists;
     
     @Inject
     LibraryManagerImpl(FileManager fileManager) {
@@ -46,8 +50,8 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
-        buddyFileLists = new HashMap<String, FileList>();
-        buddyLibraryFileLists = new HashMap<String, FileList>();
+        buddyFileLists = new HashMap<String, LocalFileList>();
+        buddyLibraryFileLists = new HashMap<String, RemoteFileList>();
     }
 
     @Override
@@ -70,22 +74,22 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     }
     
     @Override
-    public FileList getLibraryList() {
+    public LocalFileList getLibraryList() {
         return libraryFileList;
     }
     
     @Override
-    public FileList getGnutellaList() {
+    public LocalFileList getGnutellaList() {
         return gnutellaFileList;
     }
 
     @Override
-    public Map<String, FileList> getAllBuddyLists() {
+    public Map<String, LocalFileList> getAllBuddyLists() {
         return buddyFileLists;
     }
     
     @Override
-    public FileList getBuddy(String name) {
+    public LocalFileList getBuddy(String name) {
         if(buddyFileLists.containsKey(name))
             return buddyFileLists.get(name);
 
@@ -131,12 +135,12 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     /////////////////////////////////////////////////////
 
     @Override
-    public Map<String, FileList> getAllBuddyLibraries() {
+    public Map<String, RemoteFileList> getAllBuddyLibraries() {
         return buddyLibraryFileLists;
     }
 
     @Override
-    public FileList getBuddyLibrary(String name) {
+    public RemoteFileList getBuddyLibrary(String name) {
         return buddyLibraryFileLists.get(name);
     }
 
@@ -192,7 +196,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         }
     }
     
-    private class GnutellaFileList extends FileListImpl implements FileListListener {
+    private class GnutellaFileList extends LocalFileListImpl implements FileListListener {
 
         private FileManager fileManager;
         
@@ -218,7 +222,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            FileItem newItem = new CoreFileItem(fileDesc);  
+            FileItem newItem = new CoreLocalFileItem(fileDesc);  
             lookup.put(fileDesc.getFile(), newItem);
             eventList.add(newItem);
         }
@@ -226,7 +230,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
             FileItem old = lookup.remove(oldDesc.getFile());
-            FileItem newItem = new CoreFileItem(newDesc);
+            FileItem newItem = new CoreLocalFileItem(newDesc);
             lookup.put(newDesc.getFile(), newItem);
             
             eventList.remove(old);
@@ -238,7 +242,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
             FileItem old = lookup.remove(fileDesc.getFile());
             eventList.remove(old);
         }
-        
+
         @Override
         public void clear() {
             fileManager.getSharedFileList().clear();
@@ -251,11 +255,11 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     }
 
     
-    private class BuddyFileListImpl extends FileListImpl implements FileListListener, BuddyFileList {
+    private class BuddyFileListImpl extends LocalFileListImpl implements FileListListener, BuddyFileList {
 
         private FileManager fileManager;
         private String name;
-        private EventList<FileItem> filteredEventList;
+        private EventList<LocalFileItem> filteredEventList;
         
         private Map<File, FileItem> lookup;
         
@@ -276,7 +280,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
                   Iterator<FileDesc> iter = fileList.iterator();
                   while(iter.hasNext()) {
                       FileDesc fileDesc = iter.next();
-                      FileItem newItem = new CoreFileItem(fileDesc);  
+                      FileItem newItem = new CoreLocalFileItem(fileDesc);  
                       lookup.put(fileDesc.getFile(), newItem);
                       eventList.add(newItem);
                   }
@@ -304,12 +308,12 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         }
         
         @Override
-        public void setFilteredModel(EventList<FileItem> filteredList) {
+        public void setFilteredModel(EventList<LocalFileItem> filteredList) {
             this.filteredEventList = filteredList;
         }
         
         @Override
-        public EventList<FileItem> getFilteredModel() {
+        public EventList<LocalFileItem> getFilteredModel() {
             return this.filteredEventList;
         }
         
@@ -323,7 +327,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            FileItem newItem = new CoreFileItem(fileDesc);  
+            FileItem newItem = new CoreLocalFileItem(fileDesc);  
             lookup.put(fileDesc.getFile(), newItem);
             eventList.add(newItem);
         }
@@ -331,7 +335,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
             FileItem oldItem = lookup.remove(oldDesc.getFile());
-            FileItem newItem = new CoreFileItem(newDesc);
+            FileItem newItem = new CoreLocalFileItem(newDesc);
             lookup.put(newDesc.getFile(), newItem);
 
             eventList.remove(oldItem);
@@ -345,7 +349,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         }
     }
     
-    private class LibraryFileList extends FileListImpl implements FileEventListener {
+    private class LibraryFileList extends LocalFileListImpl implements FileEventListener {
 
         private FileManager fileManager;
         
@@ -370,7 +374,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         public void handleFileEvent(FileManagerEvent evt) {
             switch(evt.getType()) {
             case ADD_FILE:
-                eventList.add(new CoreFileItem(evt.getNewFileDesc()));
+                eventList.add(new CoreLocalFileItem(evt.getNewFileDesc()));
                 break;
             case REMOVE_FILE:
                 remove(evt.getNewFile());
@@ -380,7 +384,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
                 break;
             }
         }
-        
+
         @Override
         public void clear() {
             
@@ -392,10 +396,10 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         }
     }
     
-    private abstract class FileListImpl implements FileList {
+    private abstract class LocalFileListImpl implements LocalFileList {
         final EventList<FileItem> eventList;
         
-        FileListImpl() {
+        LocalFileListImpl() {
             eventList = GlazedLists.threadSafeList(new BasicEventList<FileItem>());
         }
         
@@ -414,27 +418,43 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         }
     }
     
-    private class BuddyLibraryFileList extends FileListImpl {
+    private abstract class RemoteFileListImpl implements RemoteFileList {
+        final EventList<RemoteFileItem> eventList;
+        
+        RemoteFileListImpl() {
+            eventList = GlazedLists.threadSafeList(new BasicEventList<RemoteFileItem>());
+        }
+        
+        @Override
+        public EventList<RemoteFileItem> getModel() {
+            return eventList;
+        }
+        
+        @Override
+        public int size() {
+            return eventList.size();
+        }
+    }
+    
+    private class BuddyLibraryFileList extends RemoteFileListImpl {
 
         private final String name;
         
         public BuddyLibraryFileList(String name) {
             this.name = name;
         }
-        
-        @Override
-        public void addFile(File file) {
-            
+
+        public void addFile(SearchResult file) {
+            eventList.add(new CoreRemoteFileItem(file));
+        }
+
+        public void removeFile(SearchResult file) {
+            eventList.remove(new CoreRemoteFileItem(file));
         }
 
         @Override
         public String getName() {
             return name;
-        }
-
-        @Override
-        public void removeFile(File file) {
-
         }
         
         public void clear() {

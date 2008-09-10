@@ -1,8 +1,9 @@
 package org.limewire.ui.swing.sharing.menu;
 
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 
@@ -22,25 +23,25 @@ public class BuddySharingActionHandler {
         this.libraryManager = libraryManager;
     }
     
-    public void performAction(final String actionCommand, final FileList fileList, final BuddyItem item) {
+    public void performAction(final String actionCommand, final LocalFileList fileList, final BuddyItem item) {
         //TODO: background executor
         Thread t = new Thread(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {
                     //TODO: set navigator here
                 } else if(actionCommand == SHARE_ALL_VIDEO) {
-                    FilterList<FileItem> video = new FilterList<FileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.VIDEO));
-                    for(FileItem fileItem : video) {
+                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.VIDEO));
+                    for(LocalFileItem fileItem : video) {
                         fileList.addFile(fileItem.getFile());
                     }
                 } else if(actionCommand == SHARE_ALL_AUDIO) {
-                    FilterList<FileItem> audio = new FilterList<FileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.AUDIO));
-                    for(FileItem fileItem : audio) {
+                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.AUDIO));
+                    for(LocalFileItem fileItem : audio) {
                         fileList.addFile(fileItem.getFile());
                     }
                 } else if(actionCommand == SHARE_ALL_IMAGE) {
-                    FilterList<FileItem> image = new FilterList<FileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.IMAGE));
-                    for(FileItem fileItem : image) {
+                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.IMAGE));
+                    for(LocalFileItem fileItem : image) {
                         fileList.addFile(fileItem.getFile());
                     }
                 } else if(actionCommand == UNSHARE_ALL) {

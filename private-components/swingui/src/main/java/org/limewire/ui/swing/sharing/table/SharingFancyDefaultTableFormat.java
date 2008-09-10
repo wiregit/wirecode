@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.sharing.table;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 
 import ca.odell.glazedlists.gui.TableFormat;
 
@@ -8,7 +9,7 @@ import ca.odell.glazedlists.gui.TableFormat;
  * Default information to display in a table for what is being shared. 
  * Defaultly only the file name is displayed.
  */
-public class SharingFancyDefaultTableFormat implements TableFormat<FileItem> {
+public class SharingFancyDefaultTableFormat implements TableFormat<LocalFileItem> {
   
     public static final String[] columnLabels = new String[] {"Name", ""};
     
@@ -26,7 +27,7 @@ public class SharingFancyDefaultTableFormat implements TableFormat<FileItem> {
     }
 
     @Override
-    public Object getColumnValue(FileItem baseObject, int column) {
+    public Object getColumnValue(LocalFileItem baseObject, int column) {
         if(column == 0) return baseObject.getName();
         else if(column == 1) return baseObject;
         

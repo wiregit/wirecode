@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
@@ -91,7 +91,7 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
         add(viewSelectionPanel);
     }
     
-    public void setModel(FileList fileList) {
+    public void setModel(LocalFileList fileList) {
         musicAction.setUserFileList(fileList);
         videoAction.setUserFileList(fileList);
         imageAction.setUserFileList(fileList);

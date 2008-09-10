@@ -6,8 +6,8 @@ import java.awt.event.MouseEvent;
 import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.JXTable;
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
@@ -19,7 +19,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingFancyTable extends JXTable {
 
-    public SharingFancyTable(EventList<FileItem> sharedItems, FileList fileList, TableFormat<FileItem> tableFormat) {
+    public SharingFancyTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
         super(new SharingTableModel(sharedItems, fileList, tableFormat));
         
         setColumnControlVisible(false);
@@ -33,7 +33,7 @@ public class SharingFancyTable extends JXTable {
             @Override
             public void handleDoubleClick(int row) {
                 if( row >= 0 && row < getModel().getRowCount()) {
-                    FileItem item = ((SharingTableModel) getModel()).getFileItem(row); System.out.println(item.getName() + " " + item.getCategory());
+                    LocalFileItem item = ((SharingTableModel) getModel()).getFileItem(row); System.out.println(item.getName() + " " + item.getCategory());
                     if(PlayerUtils.isPlayableFile(item.getFile())) {
                         PlayerUtils.play(item.getFile());
                     } else {
@@ -91,7 +91,7 @@ public class SharingFancyTable extends JXTable {
         return false;        
     }
 
-    public void setModel(EventList<FileItem> sharedItems, FileList fileList, TableFormat<FileItem> tableFormat) {
+    public void setModel(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
         super.setModel(new SharingTableModel(sharedItems, fileList, tableFormat));
     }
 }

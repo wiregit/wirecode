@@ -10,8 +10,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -33,8 +33,8 @@ public class SharingPopupHandler implements TablePopupHandler {
     
     protected final MenuListener menuListener;
     
-    private FileItem fileItem;
-    private FileList fileList;
+    private LocalFileItem fileItem;
+    private LocalFileList fileList;
     
     public SharingPopupHandler(JList list, SharingActionHandler handler) {
         this.list = list;

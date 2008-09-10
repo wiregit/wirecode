@@ -5,7 +5,7 @@ import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.IconManager;
 
 
@@ -23,7 +23,7 @@ public class IconLabelRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
         
-        FileItem item = (FileItem) value;
+        LocalFileItem item = (LocalFileItem) value;
         
         if(table.getSelectedRow() == row) {
             this.setBackground(table.getSelectionBackground());

@@ -3,29 +3,27 @@ package org.limewire.ui.swing.sharing.friends;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileItem;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-public class BuddyItemImpl implements BuddyItem, ListEventListener<FileItem>{
+public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem>{
 
     private final String name;
-    private final EventList<FileItem> eventList;
+    private final EventList<LocalFileItem> eventList;
     private FileList buddyLibraryList;
     
     private int size = 0;
     
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     
-    public BuddyItemImpl(String name, EventList<FileItem> eventList) {
+    public BuddyItemImpl(String name, EventList<LocalFileItem> eventList) {
         this.name = name;
         this.eventList = eventList;
         this.eventList.addListEventListener(this);
-        
-        size = eventList.size();
     }
     
     public void addPropertyChangeListener(PropertyChangeListener l) {
@@ -48,7 +46,7 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<FileItem>{
     }
 
     @Override
-    public void listChanged(ListEvent<FileItem> listChanges) {
+    public void listChanged(ListEvent<LocalFileItem> listChanges) {
         int newSize = listChanges.getSourceList().size();
         if(newSize != size) {
 //        if((newSize > 0 && size == 0) || (newSize == 0 && size > 0) ) {

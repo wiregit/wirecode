@@ -9,7 +9,7 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.search.FilteredTextField;
 import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -71,7 +71,7 @@ public class SharingHeaderPanel extends JXPanel implements BuddyUpdate {
     }
 
     @Override
-    public void setEventList(EventList<FileItem> model) {
+    public void setEventList(EventList<LocalFileItem> model) {
 
     }
 }

@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.core.api.library.BuddyShareListListener;
+import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.FileItem.Category;
+import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.RemoteFileList;
 
 
 public class MockLibraryManager implements LibraryManager {
@@ -16,14 +18,14 @@ public class MockLibraryManager implements LibraryManager {
     private FileListAdapter gnutellaList;
     private FileListAdapter buddyList;
     
-    private Map<String, FileList> buddyMap;
+    private Map<String, LocalFileList> buddyMap;
     
     public MockLibraryManager() {
         allFileList = new FileListAdapter("My Library");
         gnutellaList = new FileListAdapter("Gnutella List");
         buddyList = new FileListAdapter("Buddy List");
         
-        buddyMap = new HashMap<String, FileList>();
+        buddyMap = new HashMap<String, LocalFileList>();
 
         initializeMockGnutellaData();
         initializeMockBuddyData();
@@ -31,15 +33,15 @@ public class MockLibraryManager implements LibraryManager {
     }
     
     private void initializeMockGnutellaData(){
-        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
+        MockLocalFileItem item = new MockLocalFileItem("Small Town Hero.mp3", 1000,12345,23456, 5,1, Category.AUDIO);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,3,2, Category.AUDIO);
+        item = new MockLocalFileItem("LimeWireStore.html", 12345,12312,534512,3,2, Category.AUDIO);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
+        item = new MockLocalFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
         gnutellaList.addFileItem(item);
         allFileList.addFileItem(item);
         
@@ -50,7 +52,7 @@ public class MockLibraryManager implements LibraryManager {
                 } catch (InterruptedException e) {
                     return;
                 }
-                MockFileItem item = new MockFileItem("Lazy load.png", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
+                MockLocalFileItem item = new MockLocalFileItem("Lazy load.png", 32423, 3415412, 123123,0,0, Category.DOCUMENT);
                 gnutellaList.addFileItem(item);
                 allFileList.addFileItem(item);
             }
@@ -59,15 +61,15 @@ public class MockLibraryManager implements LibraryManager {
     }
     
     private void initializeMockBuddyData(){
-        MockFileItem item = new MockFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1, Category.IMAGE);
+        MockLocalFileItem item = new MockLocalFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1, Category.IMAGE);
         buddyList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("LimeWireStore.html", 12345,12312,534512,5,0, Category.OTHER);
+        item = new MockLocalFileItem("LimeWireStore.html", 12345,12312,534512,5,0, Category.OTHER);
         buddyList.addFileItem(item);
         allFileList.addFileItem(item);
         
-        item = new MockFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.OTHER);
+        item = new MockLocalFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.OTHER);
         buddyList.addFileItem(item);
         allFileList.addFileItem(item);
     }
@@ -111,7 +113,7 @@ public class MockLibraryManager implements LibraryManager {
     
 
     @Override
-    public FileList getLibraryList() {
+    public LocalFileList getLibraryList() {
         return allFileList;
     }
     
@@ -121,17 +123,17 @@ public class MockLibraryManager implements LibraryManager {
 //    }
     
     @Override
-    public FileList getGnutellaList() {
+    public LocalFileList getGnutellaList() {
         return gnutellaList;
     }
 
     @Override
-    public Map<String, FileList> getAllBuddyLists() {
+    public Map<String, LocalFileList> getAllBuddyLists() {
         return buddyMap;
     }
     
     @Override
-    public FileList getBuddy(String name) {
+    public LocalFileList getBuddy(String name) {
         return new FileListAdapter(name);
     }
 
@@ -187,13 +189,13 @@ public class MockLibraryManager implements LibraryManager {
     }
 
     @Override
-    public Map<String, FileList> getAllBuddyLibraries() {
+    public Map<String, RemoteFileList> getAllBuddyLibraries() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public FileList getBuddyLibrary(String name) {
+    public RemoteFileList getBuddyLibrary(String name) {
         // TODO Auto-generated method stub
         return null;
     }

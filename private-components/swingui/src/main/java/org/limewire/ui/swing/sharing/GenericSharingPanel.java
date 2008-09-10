@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileItem.Keys;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.TextFilterator;
@@ -48,9 +49,9 @@ public abstract class GenericSharingPanel extends JPanel {
         } 
     }
     
-    protected class SharingTextFilterer implements TextFilterator<FileItem> {
+    protected class SharingTextFilterer implements TextFilterator<LocalFileItem> {
         @Override
-        public void getFilterStrings(List<String> baseList, FileItem element) {
+        public void getFilterStrings(List<String> baseList, LocalFileItem element) {
            baseList.add(element.getName());
            baseList.add((String)element.getProperty(Keys.ALBUM));
            baseList.add((String)element.getProperty(Keys.TITLE));

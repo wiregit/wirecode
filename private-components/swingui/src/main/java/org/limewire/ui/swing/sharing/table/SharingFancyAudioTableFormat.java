@@ -1,13 +1,14 @@
 package org.limewire.ui.swing.sharing.table;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 
 import ca.odell.glazedlists.gui.TableFormat;
 
 /**
  * Decides what data to display in the Audio Format
  */
-public class SharingFancyAudioTableFormat implements TableFormat<FileItem> {
+public class SharingFancyAudioTableFormat implements TableFormat<LocalFileItem> {
 
     public static final String[] columnLabels = new String[] {"Artist", "Song", "Album",""};
     
@@ -25,7 +26,7 @@ public class SharingFancyAudioTableFormat implements TableFormat<FileItem> {
     }
 
     @Override
-    public Object getColumnValue(FileItem baseObject, int column) {
+    public Object getColumnValue(LocalFileItem baseObject, int column) {
         if(column == 0) {
             String name = (String) baseObject.getProperty(FileItem.Keys.AUTHOR);
             if(name != null)

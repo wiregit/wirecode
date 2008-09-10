@@ -12,14 +12,14 @@ import java.awt.dnd.DropTargetListener;
 import java.io.File;
 import java.util.List;
 
-import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileList;
 
 public class ShareDropTarget implements DropTargetListener {
 
     private DropTarget dropTarget;
-    private FileList fileList;
+    private LocalFileList fileList;
     
-    public ShareDropTarget(Component component, FileList fileList) {
+    public ShareDropTarget(Component component, LocalFileList fileList) {
         dropTarget = new DropTarget(component, DnDConstants.ACTION_COPY, this, true, null);
         this.fileList = fileList;
     }

@@ -21,8 +21,9 @@ import javax.swing.table.TableColumn;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
@@ -37,14 +38,14 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.TableFormat;
 
-public class SharingFancyTablePanel extends JPanel implements ListEventListener<FileItem> {
+public class SharingFancyTablePanel extends JPanel implements ListEventListener<LocalFileItem> {
     
     @Resource
     private Icon cancelIcon;
     
     private SharingFancyTable table;
     
-    private final TableFormat<FileItem> tableFormat;
+    private final TableFormat<LocalFileItem> tableFormat;
     
     private final ConfirmationUnshareButton unShareAllButton;
     
@@ -53,14 +54,14 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     MultiButtonTableCellRendererEditor renderer;
     
     private SharingRemoveAllAction removeAction;
-    private EventList<FileItem> currentEventList;
+    private EventList<LocalFileItem> currentEventList;
     
-    public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, DropTarget dropTarget, FileList fileList, Icon panelIcon) {
+    public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon) {
         this(name, eventList, tableFormat, true, dropTarget, fileList, panelIcon);
     }
     
-    public SharingFancyTablePanel(String name, EventList<FileItem> eventList, TableFormat<FileItem> tableFormat, 
-            boolean paintTableHeader, DropTarget dropTarget, FileList fileList, Icon panelIcon) {
+    public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, 
+            boolean paintTableHeader, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon) {
         
         this.tableFormat = tableFormat;
         this.currentEventList = eventList;
@@ -104,7 +105,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         setVisible(false);
     }
     
-    private SharingFancyTable createTable(EventList<FileItem> eventList, FileList fileList, TableFormat<FileItem> tableFormat, DropTarget dropTarget) {
+    private SharingFancyTable createTable(EventList<LocalFileItem> eventList, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat, DropTarget dropTarget) {
         if( table == null) {
             table = new SharingFancyTable(eventList, fileList, tableFormat);
             table.setDropTarget(dropTarget);
@@ -134,7 +135,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         tc.setCellRenderer(renderer);
     }
     
-    public void setModel(EventList<FileItem> eventList, FileList fileList) {
+    public void setModel(EventList<LocalFileItem> eventList, LocalFileList fileList) {
         currentEventList.removeListEventListener(this);
         currentEventList = eventList;
         currentEventList.addListEventListener(this);
@@ -155,7 +156,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     }
 
     @Override
-    public void listChanged(ListEvent<FileItem> listChanges) {
+    public void listChanged(ListEvent<LocalFileItem> listChanges) {
         final int size = listChanges.getSourceList().size();
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {

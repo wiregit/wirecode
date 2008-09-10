@@ -11,8 +11,9 @@ import javax.swing.SwingWorker;
 
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.ImageLocalFileItem;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.ImageFileItem;
 import org.limewire.ui.swing.util.ImageScaler;
 
 /**
@@ -23,10 +24,10 @@ import org.limewire.ui.swing.util.ImageScaler;
 public class ImageLoader extends SwingWorker<Icon, Object> {
     
     private final JList list;
-    private final FileItem fileItem;
+    private final LocalFileItem fileItem;
     private final Icon errorIcon;
     
-    public ImageLoader(JList list, FileItem fileItem, Icon errorIcon) {
+    public ImageLoader(JList list, LocalFileItem fileItem, Icon errorIcon) {
         this.list = list;
         this.fileItem = fileItem;
         this.errorIcon = errorIcon;
@@ -46,10 +47,10 @@ public class ImageLoader extends SwingWorker<Icon, Object> {
         } 
         
         // if the image is larger than our viewport, resize the image before saving
-        if( image != null && (image.getWidth() > ImageFileItem.HEIGHT || 
-                image.getHeight() > ImageFileItem.HEIGHT) ) {
-            image = ImageScaler.getRatioPreservedScaledImage(image, ImageFileItem.WIDTH, 
-                  ImageFileItem.HEIGHT, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false);
+        if( image != null && (image.getWidth() > ImageLocalFileItem.HEIGHT || 
+                image.getHeight() > ImageLocalFileItem.HEIGHT) ) {
+            image = ImageScaler.getRatioPreservedScaledImage(image, ImageLocalFileItem.WIDTH, 
+                  ImageLocalFileItem.HEIGHT, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false);
         } 
         if(image == null) {
             fileItem.setProperty(FileItem.Keys.IMAGE, errorIcon);

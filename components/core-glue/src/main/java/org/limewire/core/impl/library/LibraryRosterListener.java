@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
@@ -56,12 +57,17 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                         browseFactory.createBrowse(address).start(new BrowseListener() {
                             public void handleBrowseResult(SearchResult searchResult) {
                                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
-                                if(!libraryManager.containsBuddyLibrary(user.getName())) {
-                                    // TODO locking
-                                    libraryManager.addBuddyLibrary(user.getName());
-//                                    FileList list = libraryManager.getBuddyLibrary(user.getName());
-                                    //list.addFile();
+                                String name = user.getName();
+                                if(name == null) {
+                                    name = user.getId();
                                 }
+                                synchronized (libraryManager) {
+                                    if(!libraryManager.containsBuddyLibrary(name)) {
+                                        libraryManager.addBuddyLibrary(name);                                        
+                                    }
+                                }
+                                RemoteFileList list = libraryManager.getBuddyLibrary(name);
+                                list.addFile(searchResult);
                             }
                         });
                     }

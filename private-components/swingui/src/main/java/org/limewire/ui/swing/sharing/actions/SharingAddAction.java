@@ -4,9 +4,10 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FileItem.Category;
+import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 
 import ca.odell.glazedlists.FilterList;
@@ -17,7 +18,7 @@ import ca.odell.glazedlists.FilterList;
  */
 public class SharingAddAction extends AbstractAction {
 
-    private FileList userList;
+    private LocalFileList userList;
     private FileList libraryList;
     private Category category;
     
@@ -25,7 +26,7 @@ public class SharingAddAction extends AbstractAction {
         this(null, libraryList, category);
     }
     
-    public SharingAddAction(FileList userList, FileList libraryList, Category category) {
+    public SharingAddAction(LocalFileList userList, FileList libraryList, Category category) {
         this.userList = userList;
         this.libraryList = libraryList;
         this.category = category;
@@ -35,13 +36,13 @@ public class SharingAddAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         if( userList == null || libraryList == null)
             return; 
-        FilterList<FileItem> audio = new FilterList<FileItem>(libraryList.getModel(), new CategoryFilter(category)); 
-        for(FileItem item : audio) {
+        FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>(libraryList.getModel(), new CategoryFilter(category)); 
+        for(LocalFileItem item : audio) {
             userList.addFile(item.getFile());
         }
     }
     
-    public void setUserFileList(FileList userList) {
+    public void setUserFileList(LocalFileList userList) {
         this.userList = userList;
     }
 }

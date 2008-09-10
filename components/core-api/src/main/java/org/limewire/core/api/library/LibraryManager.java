@@ -9,13 +9,13 @@ public interface LibraryManager {
     
     void removeLibraryListener(LibraryListListener libraryListener);
     
-    FileList getLibraryList();
+    LocalFileList getLibraryList();
     
-    FileList getGnutellaList();
+    LocalFileList getGnutellaList();
 
-    Map<String, FileList> getAllBuddyLists();
+    Map<String, LocalFileList> getAllBuddyLists();
     
-    FileList getBuddy(String name);
+    LocalFileList getBuddy(String name);
     
     void addBuddy(String name);
     
@@ -23,9 +23,9 @@ public interface LibraryManager {
     
     boolean containsBuddy(String name);
     
-    Map<String, FileList> getAllBuddyLibraries();
+    Map<String, RemoteFileList> getAllBuddyLibraries();
     
-    FileList getBuddyLibrary(String name);
+    RemoteFileList getBuddyLibrary(String name);
     
     void addBuddyLibrary(String name);
     

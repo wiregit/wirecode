@@ -1,13 +1,14 @@
 package org.limewire.ui.swing.sharing.table;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 
 import ca.odell.glazedlists.gui.TableFormat;
 
 /**
  * Headers and column names for non fancy sharing table.
  */
-public class SharingTableFormat implements TableFormat<FileItem> {
+public class SharingTableFormat implements TableFormat<LocalFileItem> {
 
     public static final String[] columnLabels = new String[] {"Name", "Size", "Created", "Modified", "Hits", "Uploads", "Actions"};
         
@@ -25,7 +26,7 @@ public class SharingTableFormat implements TableFormat<FileItem> {
     }
 
     @Override
-    public Object getColumnValue(FileItem baseObject, int column) {
+    public Object getColumnValue(LocalFileItem baseObject, int column) {
         if(column == 0) return baseObject;
         else if(column == 1) return baseObject.getSize();
         else if(column == 2) return baseObject.getCreationTime();

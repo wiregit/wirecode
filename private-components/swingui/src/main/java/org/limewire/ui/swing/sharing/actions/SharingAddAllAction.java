@@ -7,6 +7,8 @@ import javax.swing.JCheckBox;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 
 import ca.odell.glazedlists.FilterList;
@@ -17,8 +19,8 @@ public class SharingAddAllAction extends AbstractAction {
     private JCheckBox videoBox;
     private JCheckBox imageBox;
     
-    private FileList userList;
-    private FileList myLibraryList;
+    private LocalFileList userList;
+    private LocalFileList myLibraryList;
     
     public SharingAddAllAction(JCheckBox musicBox, JCheckBox videoBox, JCheckBox imageBox) {
         this.musicBox = musicBox;
@@ -26,11 +28,11 @@ public class SharingAddAllAction extends AbstractAction {
         this.imageBox = imageBox;
     }
     
-    public void setLibrary(FileList libraryList) {
+    public void setLibrary(LocalFileList libraryList) {
         this.myLibraryList = libraryList;
     }
     
-    public void setUserLibrary(FileList userList) {
+    public void setUserLibrary(LocalFileList userList) {
         this.userList = userList;
     }
 
@@ -45,7 +47,7 @@ public class SharingAddAllAction extends AbstractAction {
         if(myLibraryList == null || userList == null)
             return;
         
-        final FileList currentList = userList;
+        final LocalFileList currentList = userList;
         final boolean selectMusic = musicBox.isSelected();
         final boolean selectVideo = videoBox.isSelected();
         final boolean selectImage = imageBox.isSelected();
@@ -54,20 +56,20 @@ public class SharingAddAllAction extends AbstractAction {
         Thread t = new Thread(new Runnable(){
             public void run() {
                 if(selectMusic) {
-                    FilterList<FileItem> audio = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
-                    for(FileItem item : audio) {
+                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
+                    for(LocalFileItem item : audio) {
                         currentList.addFile(item.getFile());
                     }
                 }
                 if(selectVideo) {
-                    FilterList<FileItem> video = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.VIDEO));
-                    for(FileItem item : video) {
+                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.VIDEO));
+                    for(LocalFileItem item : video) {
                         currentList.addFile(item.getFile());
                     }
                 }
                 if(selectImage) {
-                    FilterList<FileItem> image = new FilterList<FileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.IMAGE));
-                    for(FileItem item : image) {
+                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.IMAGE));
+                    for(LocalFileItem item : image) {
                         currentList.addFile(item.getFile());
                     }
                 }

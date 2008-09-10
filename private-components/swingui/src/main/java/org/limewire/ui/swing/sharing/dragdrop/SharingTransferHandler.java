@@ -9,16 +9,16 @@ import java.util.List;
 
 import javax.swing.TransferHandler;
 
-import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileList;
 
 /**
  * A transfer handler for adding shared files to a table.
  */
 public class SharingTransferHandler extends TransferHandler {
     
-    private FileList fileList;
+    private LocalFileList fileList;
     
-    public SharingTransferHandler(FileList fileList) {
+    public SharingTransferHandler(LocalFileList fileList) {
         this.fileList = fileList;
     }
 

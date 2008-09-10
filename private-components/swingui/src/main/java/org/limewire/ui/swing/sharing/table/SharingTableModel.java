@@ -1,34 +1,35 @@
 package org.limewire.ui.swing.sharing.table;
 
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
-public class SharingTableModel extends EventTableModel<FileItem> {
+public class SharingTableModel extends EventTableModel<LocalFileItem> {
 
-    private EventList<FileItem> sharedItems;
+    private EventList<LocalFileItem> sharedItems;
     
-    private FileList fileList;
+    private LocalFileList fileList;
     
-    public SharingTableModel(EventList<FileItem> sharedItems, FileList fileList, TableFormat<FileItem> tableFormat) {
+    public SharingTableModel(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
         super(sharedItems, tableFormat);
         this.sharedItems = sharedItems;
         this.fileList = fileList;
     }
     
     public void removeFile(int index) { 
-        FileItem item = sharedItems.get(index);
+        LocalFileItem item = sharedItems.get(index);
         fileList.removeFile(item.getFile());
     }
     
-    public FileList getFileList() {
+    public LocalFileList getFileList() {
         return fileList;
     }
     
-    public FileItem getFileItem(int index) {
+    public LocalFileItem getFileItem(int index) {
         return sharedItems.get(index);
     }
 }

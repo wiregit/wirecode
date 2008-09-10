@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Circle;
 import org.limewire.ui.swing.components.NumberedHyperLinkButton;
 
@@ -19,11 +20,11 @@ import ca.odell.glazedlists.event.ListEventListener;
 public class SharingShortcutPanel extends JPanel {
 
     private String[] names;
-    private List<EventList<FileItem>> models;
+    private List<EventList<LocalFileItem>> models;
     private List<SharingListEventListener> listeners;
     private List<NumberedHyperLinkButton> buttons;
      
-    public SharingShortcutPanel(String[] names, Action[] actions, List<EventList<FileItem>> models) {
+    public SharingShortcutPanel(String[] names, Action[] actions, List<EventList<LocalFileItem>> models) {
         this.names = names;
         this.models = models;
         
@@ -50,7 +51,7 @@ public class SharingShortcutPanel extends JPanel {
         }
     }
     
-    public void setModel(List<EventList<FileItem>> model) {
+    public void setModel(List<EventList<LocalFileItem>> model) {
         for(int i = 0; i < listeners.size(); i++) {
             models.get(i).removeListEventListener(listeners.get(i));
             model.get(i).addListEventListener(listeners.get(i));
@@ -59,7 +60,7 @@ public class SharingShortcutPanel extends JPanel {
         this.models = model;
     }
     
-    private class SharingListEventListener implements ListEventListener<FileItem> {
+    private class SharingListEventListener implements ListEventListener<LocalFileItem> {
 
         private NumberedHyperLinkButton button;
         
@@ -68,7 +69,7 @@ public class SharingShortcutPanel extends JPanel {
         }
         
         @Override
-        public void listChanged(ListEvent<FileItem> listChanges) {
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
             final int size = listChanges.getSourceList().size();
             SwingUtilities.invokeLater(new Runnable(){
                 public void run() {

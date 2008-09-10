@@ -6,8 +6,8 @@ import java.awt.event.MouseEvent;
 import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
@@ -20,7 +20,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingTable extends StripedJXTable {
 
-    public SharingTable(EventList<FileItem> sharedItems, FileList fileList, TableFormat<FileItem> tableFormat) {
+    public SharingTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
         super(new SharingTableModel(sharedItems, fileList, tableFormat));
         
         setColumnControlVisible(true);
@@ -32,7 +32,7 @@ public class SharingTable extends StripedJXTable {
             @Override
             public void handleDoubleClick(int row) {
                 if( row >= 0 && row < getModel().getRowCount()) {
-                    FileItem item = ((SharingTableModel) getModel()).getFileItem(row); 
+                    LocalFileItem item = ((SharingTableModel) getModel()).getFileItem(row); 
                     if(PlayerUtils.isPlayableFile(item.getFile())) {
                         PlayerUtils.play(item.getFile());
                     } else {

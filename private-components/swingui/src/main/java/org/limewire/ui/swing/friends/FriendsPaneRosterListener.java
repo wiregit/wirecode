@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.friends;
 
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.logging.Log;
@@ -22,8 +22,8 @@ import com.google.inject.Singleton;
 public class FriendsPaneRosterListener implements RegisteringEventListener<RosterEvent> {
     private static final Log LOG = LogFactory.getLog(FriendsPaneRosterListener.class);
 
-    private Navigator navigator;
-    private LibraryManager libraryManager;
+    private final Navigator navigator;
+    private final LibraryManager libraryManager;
     
     @Inject
     public FriendsPaneRosterListener(Navigator navigator, LibraryManager libraryManager) {
@@ -69,18 +69,28 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
     }
 
     private void removeBuddyLibrary(User user) {
-        FileList libraryList = libraryManager.getBuddyLibrary(user.getName());
-        BuddyLibrary library = new BuddyLibrary(user.getName(), libraryList);
+        String name = user.getName();
+        if(name == null) {
+            name = user.getId();
+        }
+        RemoteFileList libraryList = libraryManager.getBuddyLibrary(name);
+        BuddyLibrary library = new BuddyLibrary(name, libraryList);
         navigator.removeNavigablePanel(NavCategory.LIBRARY, library.getName());
-        libraryManager.removeBuddyLibrary(user.getName());
+        libraryManager.removeBuddyLibrary(name);
     }
 
     private void addBuddyLibrary(User user) {
-        if(!libraryManager.containsBuddyLibrary(user.getName())) {
-            libraryManager.addBuddyLibrary(user.getName());
-            BuddyLibrary library = new BuddyLibrary(user.getName(), libraryManager.getBuddyLibrary(user.getName()));
-            navigator.addNavigablePanel(NavCategory.LIBRARY, library.getName(), library, false);
+        String name = user.getName();
+        if(name == null) {
+            name = user.getId();
         }
+        synchronized (libraryManager) {
+            if(!libraryManager.containsBuddyLibrary(name)) {
+                libraryManager.addBuddyLibrary(name);  
+            }
+        }
+        BuddyLibrary library = new BuddyLibrary(name, libraryManager.getBuddyLibrary(name));
+        navigator.addNavigablePanel(NavCategory.LIBRARY, library.getName(), library, false);
     }
 
     public void userUpdated(User user) {
