@@ -558,7 +558,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             StringBuilder tooltip = new StringBuilder();
             tooltip.append("<html>")
                 .append("<head>")
-                .append("<style>body { margin: 2px 10px 2px 4px;}</style")
+                .append("<style>body { margin: 2px 10px 2px 4px;}</style>")
                 .append("</head>")
                 .append("<body>")
                 .append("<img src=\"")
