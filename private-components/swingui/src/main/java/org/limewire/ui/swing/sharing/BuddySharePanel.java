@@ -18,12 +18,16 @@ import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.BuddyFileList;
-import org.limewire.core.api.library.BuddyShareListListener;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.RegisteringEventListener;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
@@ -36,6 +40,8 @@ import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.xmpp.api.client.User;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -50,7 +56,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class BuddySharePanel extends GenericSharingPanel implements BuddyShareListListener {
+public class BuddySharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
     public static final String NAME = "All Friends";
     
     @Resource
@@ -81,14 +87,13 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
     @Inject
     public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
         GuiUtils.assignResources(this); 
+        EventAnnotationProcessor.subscribe(this);
         
         this.libraryManager = libraryManager;
 
         libraryManager.addBuddy("All");
         this.fileList = libraryManager.getBuddy("All");
         buddyLists = new HashMap<String,FileList>();
-        
-        this.libraryManager.addBuddyShareListListener(this);
 
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
@@ -106,7 +111,7 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         
         headerPanel = createHeader(cardPanel);
                
-        loadBuddies();
+//        loadBuddies();
         createCenterCards(headerPanel, cardPanel);
 
         viewCardLayout.show(cardPanel, ViewSelectionPanel.DISABLED);
@@ -123,11 +128,11 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         
     }
     
-    private void loadBuddies() {
-        for(String name : buddyLists.keySet()) {
-            eventList.add(new BuddyItemImpl(name, buddyLists.get(name).getModel()));
-        }
-    }
+//    private void loadBuddies() {
+//        for(String name : buddyLists.keySet()) {
+//            eventList.add(new BuddyItemImpl(name, buddyLists.get(name).getModel()));
+//        }
+//    }
     
     private BuddySharingHeaderPanel createHeader(JPanel cardPanel) {
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.LIST_SELECTED), 
@@ -175,22 +180,6 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
         List<Action> list = new ArrayList<Action>();
         list.add(new SharingRemoveTableAction(table, cancelIcon));
         return list;
-    }
-    
-
-    @Override
-    public void handleBuddyShareEvent(BuddyShareEvent event, String name) {
-        if(event == BuddyShareEvent.ADD) {
-            BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(name);
-            buddyLists.put(name, fileList);
-            FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
-                    new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
-            fileList.setFilteredModel(filteredList);
-            
-            eventList.add(new BuddyItemImpl(name, fileList.getFilteredModel()));
-        } else {
-            
-        }
     }
     
     private class BuddySelectionListener implements ListSelectionListener, ListEventListener<FileItem> {
@@ -254,6 +243,39 @@ public class BuddySharePanel extends GenericSharingPanel implements BuddyShareLi
             }
         }
         
+    }
+    
+    @Inject
+    public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
+        rosterEventListenerSupport.addListener(this);
+    }
+
+    @Override
+    public void handleEvent(RosterEvent event) {
+        if(event.getType().equals(User.EventType.USER_ADDED)) {
+            if(!libraryManager.containsBuddy(event.getSource().getId())) {
+                libraryManager.addBuddy(event.getSource().getId());
+            }
+            addBuddy(event.getSource().getId());
+        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+            libraryManager.removeBuddy(event.getSource().getId());
+        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
+        }
     }   
+    
+    @EventSubscriber
+    public void handleSignoff(SignoffEvent event) {
+        eventList.clear();
+    }
+    
+    private void addBuddy(String name) {
+        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(name);
+        buddyLists.put(name, fileList);
+        FilterList<FileItem> filteredList = new FilterList<FileItem>(fileList.getModel(), 
+              new TextComponentMatcherEditor<FileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
+        fileList.setFilteredModel(filteredList);
+      
+        eventList.add(new BuddyItemImpl(name, fileList.getFilteredModel()));
+    }
 
 }
