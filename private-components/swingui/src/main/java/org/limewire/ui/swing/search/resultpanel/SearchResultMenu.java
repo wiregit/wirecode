@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import javax.swing.AbstractAction;
@@ -17,10 +16,11 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class SearchResultMenu extends JPopupMenu {
 
-    public SearchResultMenu(Window owner, final VisualSearchResult vsr) {
+    public SearchResultMenu(final BaseResultPanel brp,
+            final VisualSearchResult vsr) {
         add(new AbstractAction("Download") {
             public void actionPerformed(ActionEvent e) {
-                vsr.download();
+                brp.download(vsr);
             }
         });
 

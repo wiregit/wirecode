@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.beans.PropertyChangeEvent;
 import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
@@ -16,11 +17,13 @@ import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
-import java.awt.Window;
+import java.beans.PropertyChangeListener;
 import java.util.Calendar;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
+import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.ConfigurableTable;
 
 public class BaseResultPanel extends JXPanel {
@@ -95,18 +98,9 @@ public class BaseResultPanel extends JXPanel {
         // TODO: RMV The next line breaks everything!
         //resultsList.setSelectionModel(selectionModel);
         
-        resultsList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int row = resultsList.rowAtPoint(e.getPoint());
-                VisualSearchResult vsr = eventList.get(row);
-                if (e.getClickCount() >= 2) {
-                    vsr.download();
-                    // TODO: RMV Refresh the editor/renderer.
-                    //JComponent component = (JComponent) e.getSource();
-                }
-            }
+        resultsList.addMouseListener(new ResultDownloader());
 
+        resultsList.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 // If a right-click has occurred ...
@@ -117,8 +111,8 @@ public class BaseResultPanel extends JXPanel {
 
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
-                    Window window = (Window) component.getTopLevelAncestor();
-                    SearchResultMenu menu = new SearchResultMenu(window, vsr);
+                    SearchResultMenu menu =
+                        new SearchResultMenu(BaseResultPanel.this, vsr);
                     menu.show(component, e.getX(), e.getY());
                 }
             }
@@ -163,6 +157,34 @@ public class BaseResultPanel extends JXPanel {
 
         resultsTable.setRowHeight(26);
     }
+
+    public void download(final VisualSearchResult vsr) {
+        try {
+            // TODO: Need to go through some of the rigor that
+            // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
+            // went through.. checking for conflicts, etc.
+            DownloadItem di = searchResultDownloader.addDownload(
+                search, vsr.getCoreSearchResults());
+            di.addPropertyChangeListener(new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if ("state".equals(evt.getPropertyName())) {
+                        DownloadState state = (DownloadState) evt.getNewValue();
+                        if (state == DownloadState.CANCELLED
+                            || state == DownloadState.DONE
+                            || state == DownloadState.ERROR) {
+                            vsr.setDownloading(false);
+                            // TODO: RMV Need to trigger a re-render of the corresponding list row.
+                        }
+                    }
+                }
+            });
+             
+            vsr.setDownloading(true);
+        } catch (SaveLocationException sle) {
+            // TODO: Do something!
+            sle.printStackTrace();
+        }
+    }
     
     public EventList<VisualSearchResult> getResultsEventList() {
         return baseEventList;
@@ -187,28 +209,15 @@ public class BaseResultPanel extends JXPanel {
             if (e.getClickCount() == 2) {
                 int row = resultsList.rowAtPoint(e.getPoint());
                 TableModel tm = resultsList.getModel();
-                VisualSearchResult item =
+                VisualSearchResult vsr =
                     (VisualSearchResult) tm.getValueAt(row, 0);
-                
-                try {
-                    // TODO: Need to go through some of the rigor that 
-                    // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
-                    // went through.. checking for conflicts, etc.
-                    searchResultDownloader.addDownload(
-                        search, item.getCoreSearchResults());
-                } catch (SaveLocationException sle) {
-                    // TODO: Do something!
-                    sle.printStackTrace();
-                }
+                download(vsr);
             }
         }
     }
 
     public Component getScrollPaneHeader() {
-        if(visibileComponent == resultsTable) {
-            return resultsTable.getTableHeader();
-        } else {
-            return null;
-        }
+        return visibileComponent == resultsTable ?
+            resultsTable.getTableHeader() : null;
     }
 }

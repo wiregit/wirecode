@@ -15,16 +15,18 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
-
+import org.limewire.core.api.download.DownloadItem.Category;
 
 public class MockDownloadListManager implements DownloadListManager {
 	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
 	private EventList<DownloadItem> downloadItems;
 	
 	public MockDownloadListManager(){
-	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
+	    ObservableElementList.Connector<DownloadItem> downloadConnector =
+            GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedLists.threadSafeList(
-	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));
+	        new ObservableElementList<DownloadItem>(
+            new BasicEventList<DownloadItem>(), downloadConnector));
 		initializeMockData();
 	}
 
@@ -34,19 +36,37 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 
 	@Override
-	public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults) {
-	    // TODO Auto-generated method stub
-	    return null;
+	public DownloadItem addDownload(
+            Search search, List<? extends SearchResult> coreSearchResults) {
+        String title = "title"; // TODO: RMV What should go here?
+        long totalSize = 123;
+        DownloadState state = DownloadState.DOWNLOADING;
+        Category category = Category.AUDIO;
+        final MockDownloadItem mdi =
+            new MockDownloadItem(title, totalSize, state, category);
+
+        // Simulate a search.
+        Runnable runnable = new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+                mdi.setState(DownloadState.DONE);
+            }
+        };
+
+        new Thread(runnable).start();
+
+	    return mdi;
 	}
-	
 	
 	public synchronized void addDownload(DownloadItem downloadItem){
 	    downloadItem.addPropertyChangeListener(cancelListener);
 		downloadItems.add(downloadItem);
-		
 	}
 	
-
 	private void initializeMockData(){
 	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 446,
 				DownloadState.DOWNLOADING, DownloadItem.Category.VIDEO);
@@ -90,8 +110,6 @@ public class MockDownloadListManager implements DownloadListManager {
         item.addDownloadSource(new MockDownloadSource("Bob"));
         addDownload(item);
         
-
-        
         item = new MockDownloadItem("Corrupt other file", 55,
                 DownloadState.ERROR, DownloadItem.Category.OTHER);
         item.addDownloadSource(new MockDownloadSource("Al"));
@@ -122,14 +140,11 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 	
 	private class RemoveCancelledListener implements PropertyChangeListener {
-        
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getNewValue() == DownloadState.CANCELLED) {
                 downloadItems.remove(evt.getSource());
             }
         }
-
     }
-
 }

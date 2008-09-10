@@ -106,6 +106,7 @@ public class MockDownloadItem implements DownloadItem {
 
 	private synchronized void start() {
 		new Thread() {
+            @Override
 			public void run() {
 				while (isRunning() && getCurrentSize() < getTotalSize()) {
 					setCurrentSize(getCurrentSize() + 5);
@@ -126,8 +127,7 @@ public class MockDownloadItem implements DownloadItem {
 		return state;
 	}
 
-	//TODO: should be public?  or should state be handled internally?
-	private synchronized void setState(DownloadState state) {
+	public synchronized void setState(DownloadState state) {
 		DownloadState oldState = this.state;
 		this.state = state;
 		support.firePropertyChange("state", oldState, state);

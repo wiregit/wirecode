@@ -6,6 +6,7 @@ import static org.limewire.core.api.search.SearchResult.PropertyKey;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -364,7 +365,14 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void startDownload() {
-        vsr.download();
+        // Find the BaseResultPanel this is inside.
+        Container parent = thePanel.getParent();
+        while (!(parent instanceof BaseResultPanel)) {
+            parent = parent.getParent();
+        }
+        BaseResultPanel brp = (BaseResultPanel) parent;
+
+        brp.download(vsr);
         downloadButton.setEnabled(false);
         downloadingLink.setVisible(true);
     }

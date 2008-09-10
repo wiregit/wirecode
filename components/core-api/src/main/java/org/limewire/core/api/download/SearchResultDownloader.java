@@ -20,5 +20,4 @@ public interface SearchResultDownloader {
      */
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults)
             throws SaveLocationException;
-
 }

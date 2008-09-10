@@ -41,6 +41,4 @@ public enum DownloadState {
 	public boolean isSearchAgainable() {
 		return searchAgainable;
 	}
-	
-	
 }

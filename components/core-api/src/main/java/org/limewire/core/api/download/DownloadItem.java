@@ -4,14 +4,10 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
 
-
-
-
 /**
  * A single download
- *
  */
-public interface DownloadItem  {	
+public interface DownloadItem {	
 
 	public static enum Category {
 		VIDEO, AUDIO, DOCUMENT, IMAGE, PROGRAM, OTHER
@@ -48,7 +44,7 @@ public interface DownloadItem  {
      */
 	public long getRemainingDownloadTime();
 	
-	 /**
+    /**
      * @return seconds remaining or <code>UNKNOWN</code> if unknown
      */
     public long getRemainingQueueTime();
@@ -76,7 +72,6 @@ public interface DownloadItem  {
      */
     public int getQueuePosition();
   
-   
     public ErrorState getErrorState();
     
     public int getLocalQueuePriority();
@@ -87,5 +82,4 @@ public interface DownloadItem  {
     public boolean isLaunchable();
 
     public File getFile();
-    
 }
