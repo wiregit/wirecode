@@ -2,7 +2,7 @@ package org.limewire.core.api.library;
 
 import java.io.File;
 
-import com.limegroup.gnutella.FileDetails;
+//import com.limegroup.gnutella.FileDetails;
 
 /**
  * A File that is displayed in a library
