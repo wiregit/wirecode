@@ -123,6 +123,7 @@ implements ListEventListener<VisualSearchResult> {
     public Collection<Map.Entry<SearchCategory, Action>> getResultCountActions() {
         Map<SearchCategory, Action> counts =
             new EnumMap<SearchCategory, Action>(SearchCategory.class);
+
         for (TabActionMap map : searchActionMaps) {
             SearchCategory category =
                 ((SearchTabAction) map.getMainAction()).getCategory();
@@ -130,6 +131,7 @@ implements ListEventListener<VisualSearchResult> {
                 counts.put(category, map.getMoreTextAction());
             }
         }
+
         return counts.entrySet();
     }
 

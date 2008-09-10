@@ -11,6 +11,8 @@ import org.limewire.core.api.search.SearchResult;
 // TODO: RMV Why not use SearchResult instead?
 public interface VisualSearchResult {
     
+    void download();
+
     List<SearchResult> getCoreSearchResults();
 
     List<VisualSearchResult> getSimilarResults();
@@ -35,6 +37,4 @@ public interface VisualSearchResult {
      * @return true if currently being downloaded; false otherwise
      */
     boolean isDownloading();
-
-    void setDownloading(boolean downloading);
 }

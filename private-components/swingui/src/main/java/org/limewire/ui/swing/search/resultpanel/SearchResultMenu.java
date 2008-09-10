@@ -17,10 +17,10 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class SearchResultMenu extends JPopupMenu {
 
-    public SearchResultMenu(Window owner, VisualSearchResult vsr) {
+    public SearchResultMenu(Window owner, final VisualSearchResult vsr) {
         add(new AbstractAction("Download") {
             public void actionPerformed(ActionEvent e) {
-                // TODO: RMV Implement this!
+                vsr.download();
             }
         });
 

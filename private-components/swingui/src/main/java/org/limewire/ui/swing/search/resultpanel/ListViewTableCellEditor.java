@@ -210,9 +210,7 @@ implements TableCellEditor, TableCellRenderer {
         downloadButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                vsr.setDownloading(true);
-                downloadButton.setEnabled(false);
-                downloadingLink.setVisible(true);
+                startDownload();
             }
         });
 
@@ -363,5 +361,11 @@ implements TableCellEditor, TableCellRenderer {
             Component child = thePanel.getComponent(i);
             child.setBackground(color);
         }
+    }
+
+    private void startDownload() {
+        vsr.download();
+        downloadButton.setEnabled(false);
+        downloadingLink.setVisible(true);
     }
 }

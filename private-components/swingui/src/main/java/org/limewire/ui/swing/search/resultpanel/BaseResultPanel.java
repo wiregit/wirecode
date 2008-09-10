@@ -97,6 +97,17 @@ public class BaseResultPanel extends JXPanel {
         
         resultsList.addMouseListener(new MouseAdapter() {
             @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = resultsList.rowAtPoint(e.getPoint());
+                VisualSearchResult vsr = eventList.get(row);
+                if (e.getClickCount() >= 2) {
+                    vsr.download();
+                    // TODO: RMV Refresh the editor/renderer.
+                    //JComponent component = (JComponent) e.getSource();
+                }
+            }
+
+            @Override
             public void mousePressed(MouseEvent e) {
                 // If a right-click has occurred ...
                 if (e.getButton() == 3) {

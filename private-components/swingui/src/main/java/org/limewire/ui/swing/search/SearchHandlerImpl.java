@@ -69,14 +69,25 @@ public class SearchHandlerImpl implements SearchHandler {
                         // If the result is the type we are looking for ...
                         if (searchCategory == SearchCategory.ALL
                             || resultType.name().equals(searchCategory.name())) {
+
                             model.addSearchResult(searchResult);
+
                             // We can update the source count here because
                             // we never expect things to be removed.
                             // Changes only happen on insertion.
                             // If removes ever happen, we'll need to switch
                             // to adding a ListEventListener to
                             // model.getVisualSearchResults.
-                            item.sourceCountUpdated(model.getResultCount());
+
+                            // Which of the following two lines is correct?
+                            // See JIRA LWC-1757.
+                            int count = model.getResultCount();
+                            //int count = model.getVisualSearchResults().size();
+
+                            // This sets the number displayed in parens
+                            // after the search string in the associated
+                            // tab at the top of the UI.
+                            item.sourceCountUpdated(count);
                         }
                     }
                 });

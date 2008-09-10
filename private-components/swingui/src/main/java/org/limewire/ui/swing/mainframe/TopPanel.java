@@ -221,6 +221,7 @@ class TopPanel extends JPanel implements SearchNavigator {
             public void sourceCountUpdated(int newSourceCount) {
                 moreTextAction.putValue(Action.NAME,
                     String.valueOf(newSourceCount));
+
                 if (newSourceCount >= 100) {
                     action.killBusy();
                 }

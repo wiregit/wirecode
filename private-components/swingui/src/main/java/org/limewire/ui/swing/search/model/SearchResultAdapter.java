@@ -37,6 +37,12 @@ class SearchResultAdapter implements VisualSearchResult {
     }
 
     @Override
+    public void download() {
+        downloading = true;
+        // TODO: RMV How is a download actually started?
+    }
+    
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -150,11 +156,6 @@ class SearchResultAdapter implements VisualSearchResult {
         return downloading;
     }
 
-    @Override
-    public void setDownloading(boolean downloading) {
-        this.downloading = downloading;
-    }
-    
     @Override
     public String toString() {
         return getDescription() +

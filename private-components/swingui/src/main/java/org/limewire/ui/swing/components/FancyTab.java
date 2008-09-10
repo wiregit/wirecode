@@ -32,9 +32,6 @@ import javax.swing.SwingUtilities;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.components.FancyTabList;
-import org.limewire.ui.swing.components.FancyTabProperties;
-import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.search.resultpanel.SearchTabPopup;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -192,7 +189,8 @@ public class FancyTab extends JXPanel {
                     if (evt.getPropertyName().equals(Action.NAME)) {
                         if (evt.getNewValue() != null) {
                             String newValue = (String) evt.getNewValue();
-//System.out.println("FancyTab.createAdditionalText: newValue = " + newValue);
+                            //System.out.println("FancyTab: main = " + mainButton.getText());
+                            //System.out.println("FancyTab: newValue = " + newValue);
                             label.setText("(" + newValue + ")");
                             label.setVisible(true);
                         } else {

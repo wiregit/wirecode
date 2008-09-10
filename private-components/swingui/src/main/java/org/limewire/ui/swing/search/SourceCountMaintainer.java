@@ -31,8 +31,10 @@ implements ListEventListener<VisualSearchResult> {
             countList.add(size);
             totalCount += size;
         }
+
         countAction.putValue(Action.NAME,
             totalCount == 0 ? null : String.valueOf(totalCount));
+
         // Then add future listeners.
         source.addListEventListener(this);
     }
