@@ -10,5 +10,5 @@ import com.limegroup.gnutella.FileDetails;
 public interface LocalFileItem extends FileItem {
     File getFile();
     
-    FileDetails getFileDetails();
+    //FileDetails getFileDetails();
 }

@@ -9,10 +9,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.swing.BorderFactory;
@@ -24,6 +24,7 @@ import javax.swing.event.HyperlinkEvent.EventType;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.impl.library.CoreLocalFileItem;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -200,7 +201,8 @@ public class ConversationPane extends JPanel implements Displayable {
     }
     
     public void offerFile(LocalFileItem file) {
-        FileDetails details = file.getFileDetails();
+        FileDetails details = ((CoreLocalFileItem)file).getFileDetails();
+        // TODO HACK
         FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
         fileMetaData.setCreateTime(new Date(details.getCreationTime()));
         fileMetaData.setDescription(""); // TODO
