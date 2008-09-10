@@ -41,6 +41,7 @@ public class AppFrame extends SingleFrameApplication {
     private static volatile Injector injector;
 
     private static volatile boolean started;
+    private static List<ApplicationLifecycleListener> lifecycleListeners = new ArrayList<ApplicationLifecycleListener>();
 
     /** Default background color for panels */
     @Resource
@@ -84,6 +85,14 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setSize(new Dimension(1024, 768));
 
         started = true;
+        
+        for(ApplicationLifecycleListener listener : lifecycleListeners) {
+            try {
+                listener.startupComplete();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     @Action
@@ -134,5 +143,13 @@ public class AppFrame extends SingleFrameApplication {
         }
 
         uiDefaults.put("Table.background", bgColorResource);
+    }
+    
+    public static void addApplicationLifecycleListener(ApplicationLifecycleListener listener) {
+        lifecycleListeners.add(listener);
+    }
+    
+    public static void removeApplicationLifecycleListener(ApplicationLifecycleListener listener) {
+        lifecycleListeners.remove(listener);
     }
 }

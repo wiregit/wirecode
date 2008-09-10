@@ -1,14 +1,17 @@
 package org.limewire.ui.swing.mainframe;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
@@ -28,7 +31,10 @@ import org.limewire.ui.swing.friends.Message;
 import org.limewire.ui.swing.friends.MessageReceivedEvent;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
-import static org.limewire.ui.swing.util.I18n.tr;
+import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.ui.swing.tray.Notification;
+import org.limewire.ui.swing.tray.TrayNotifier;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -38,22 +44,27 @@ import com.google.inject.Singleton;
  * TODO: Add Javadocs
  */
 @Singleton
-public class FriendsPanel extends JXPanel implements Resizable{
+public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifecycleListener {
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     private static final Log LOG = LogFactory.getLog(FriendsPanel.class);
     private final LoginPanel loginPanel;
     private final ChatPanel chatPanel;
     private final UnseenMessageListener unseenMessageListener;
+    private final TrayNotifier notifier;
+    private final WindowStateListener windowStateListener;
     //Heavy-weight component so that it can appear above other heavy-weight components
     private final java.awt.Panel mainPanel;
     
     @Inject
-    public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel, UnseenMessageListener unseenMessageListener) {
+    public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel, UnseenMessageListener unseenMessageListener, 
+            TrayNotifier notifier) {
         super(new BorderLayout());
         this.chatPanel = chatPanel;
         this.loginPanel = loginPanel;
+        this.notifier = notifier;
         this.unseenMessageListener = unseenMessageListener;
         this.mainPanel = new java.awt.Panel();
+        this.windowStateListener = new WindowStateListener();
         
         mainPanel.setVisible(false);
         mainPanel.setBackground(getBackground());
@@ -65,7 +76,17 @@ public class FriendsPanel extends JXPanel implements Resizable{
         add(mainPanel);
         setVisible(false);
         
+        AppFrame.addApplicationLifecycleListener(this);
+          
         EventAnnotationProcessor.subscribe(this);
+    }
+
+    @Override
+    public void startupComplete() {
+        JFrame frame = getApplicationFrame();
+        if (frame != null) {
+            frame.addWindowFocusListener(windowStateListener);
+        }
     }
 
     @EventSubscriber
@@ -108,19 +129,34 @@ public class FriendsPanel extends JXPanel implements Resizable{
         if (!isVisible()) {
             LOG.debug("Got an unseen message...");
             unseenMessageListener.unseenMessagesReceived();
-            Component root = SwingUtilities.getRoot(this);
-            if (root instanceof JFrame) {
-                JFrame frame = (JFrame)root;
-                Message message = event.getMessage();
-                StringBuilder builder = new StringBuilder();
-                builder.append(tr("Chat from "))
-                    .append(message.getSenderName())
-                    .append(" - ")
-                    .append(message.getMessageText())
-                    .append(tr(" - LimeWire 5"));
-                frame.setTitle(builder.toString());
+            JFrame frame = getApplicationFrame();
+            if (frame != null) {
+                frame.setTitle(getNoticeForMessage(event));
             }
         }
+        
+        if (event.getMessage().getType() == Type.Received && !windowStateListener.isWindowMainFocus()) {
+            LOG.debug("Sending a message to the tray notifier");
+            notifier.showMessage(new Notification(getNoticeForMessage(event)));
+        } 
+    }
+
+    private String getNoticeForMessage(MessageReceivedEvent event) {
+        Message message = event.getMessage();
+        StringBuilder builder = new StringBuilder();
+        builder.append(tr("Chat from "))
+            .append(message.getSenderName())
+            .append(" - ")
+            .append(tr("LimeWire 5"));
+        return builder.toString();
+    }
+    
+    private JFrame getApplicationFrame() {
+        Window mainFrame = GuiUtils.getMainFrame();
+        if (mainFrame instanceof JFrame) {
+            return (JFrame)mainFrame;
+        }
+        return null;
     }
     
     @EventSubscriber
@@ -155,6 +191,43 @@ public class FriendsPanel extends JXPanel implements Resizable{
     public void resize() {
         if (isVisible()) {
             resetBounds();
+        }
+    }
+    
+    private class WindowStateListener extends WindowAdapter {
+        private WindowEvent lastWindowState;
+        private String originalTitlebarText;
+
+        @Override
+        public void windowGainedFocus(WindowEvent e) {
+            lastWindowState = e;
+            JFrame frame = (JFrame)e.getComponent();
+            if (frame != null) {
+                if (originalTitlebarText != null) {
+                    frame.setTitle(originalTitlebarText);
+                    originalTitlebarText = null;
+                }
+            }
+        }
+
+        @Override
+        public void windowLostFocus(WindowEvent e) {
+            lastWindowState = e;
+            JFrame frame = (JFrame)e.getComponent();
+            if (frame != null) {
+                String title = frame.getTitle();
+                if (title != null) {
+                    originalTitlebarText = title;
+                }
+            }
+        }
+
+        public boolean isWindowMainFocus() {
+            if (lastWindowState != null) {
+                int newState = lastWindowState.getNewState();
+                return newState == WindowEvent.WINDOW_GAINED_FOCUS;
+            }
+            return true;
         }
     }
 }
