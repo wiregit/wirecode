@@ -2,9 +2,11 @@ package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
+
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
@@ -43,4 +45,6 @@ public interface Friend {
     void addPropertyChangeListener(PropertyChangeListener listener);
     
     void removePropertyChangeListener(PropertyChangeListener listener);
+
+    void offerFile(FileMetaData fileMetaData);
 }

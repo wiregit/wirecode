@@ -2,6 +2,7 @@ package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -104,5 +105,9 @@ class MockFriend implements Friend {
     @Override
     public boolean jidBelongsTo(String jid) {
         return false;
+    }
+
+    public void offerFile(FileMetaData fileMetaData) {
+        // TODO
     }
 }

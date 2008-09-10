@@ -10,6 +10,8 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.LocalFileDetailsFactory;
 
 public class CoreLocalFileItem implements LocalFileItem {
 
@@ -22,8 +24,12 @@ public class CoreLocalFileItem implements LocalFileItem {
     private final int numUploads;
     private final Category category;
     private final Map<Keys,Object> map;
-    
-    public CoreLocalFileItem(FileDesc fileDesc) { 
+    private final FileDesc fileDesc;
+    private final LocalFileDetailsFactory detailsFactory;
+
+    public CoreLocalFileItem(FileDesc fileDesc, LocalFileDetailsFactory detailsFactory) {
+        this.fileDesc = fileDesc;
+        this.detailsFactory = detailsFactory;
         this.file = fileDesc.getFile();
         this.name = fileDesc.getFileName();
         this.creationTime = fileDesc.getCreationTime();
@@ -110,4 +116,7 @@ public class CoreLocalFileItem implements LocalFileItem {
         map.put(key, value);
     }
 
+    public FileDetails getFileDetails() {
+        return detailsFactory.create(fileDesc);
+    }
 }

@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.limewire.core.api.library.LocalFileItem;
 
+import com.limegroup.gnutella.FileDetails;
+
 public class MockLocalFileItem implements LocalFileItem {
 
     private final String name;
@@ -75,5 +77,9 @@ public class MockLocalFileItem implements LocalFileItem {
     public void setProperty(Keys key, Object object) {
         // TODO Auto-generated method stub
         
+    }
+
+    public FileDetails getFileDetails() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

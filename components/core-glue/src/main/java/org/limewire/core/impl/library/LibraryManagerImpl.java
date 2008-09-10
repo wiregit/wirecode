@@ -26,6 +26,7 @@ import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileListListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.LocalFileDetailsFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -43,11 +44,13 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     private Map<String, LocalFileList> buddyFileLists;
     
     private Map<String, RemoteFileList> buddyLibraryFileLists;
-    
+    private final LocalFileDetailsFactory detailsFactory;
+
     @Inject
-    LibraryManagerImpl(FileManager fileManager) {
+    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory) {
         this.fileManager = fileManager;
-        
+        this.detailsFactory = detailsFactory;
+
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
         buddyFileLists = new HashMap<String, LocalFileList>();
@@ -222,7 +225,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            FileItem newItem = new CoreLocalFileItem(fileDesc);  
+            FileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
             lookup.put(fileDesc.getFile(), newItem);
             eventList.add(newItem);
         }
@@ -230,7 +233,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
             FileItem old = lookup.remove(oldDesc.getFile());
-            FileItem newItem = new CoreLocalFileItem(newDesc);
+            FileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
             lookup.put(newDesc.getFile(), newItem);
             
             eventList.remove(old);
@@ -280,7 +283,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
                   Iterator<FileDesc> iter = fileList.iterator();
                   while(iter.hasNext()) {
                       FileDesc fileDesc = iter.next();
-                      FileItem newItem = new CoreLocalFileItem(fileDesc);  
+                      FileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
                       lookup.put(fileDesc.getFile(), newItem);
                       eventList.add(newItem);
                   }
@@ -327,7 +330,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            FileItem newItem = new CoreLocalFileItem(fileDesc);  
+            FileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
             lookup.put(fileDesc.getFile(), newItem);
             eventList.add(newItem);
         }
@@ -335,7 +338,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
             FileItem oldItem = lookup.remove(oldDesc.getFile());
-            FileItem newItem = new CoreLocalFileItem(newDesc);
+            FileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
             lookup.put(newDesc.getFile(), newItem);
 
             eventList.remove(oldItem);
@@ -374,7 +377,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         public void handleFileEvent(FileManagerEvent evt) {
             switch(evt.getType()) {
             case ADD_FILE:
-                eventList.add(new CoreLocalFileItem(evt.getNewFileDesc()));
+                eventList.add(new CoreLocalFileItem(evt.getNewFileDesc(), detailsFactory));
                 break;
             case REMOVE_FILE:
                 remove(evt.getNewFile());
