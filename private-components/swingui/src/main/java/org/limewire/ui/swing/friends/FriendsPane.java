@@ -893,4 +893,22 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         }
         return null;
     }
+    
+    public boolean isSharingFilesWithFriends() {
+        for(Friend friend : friends) {
+            if (libraryManager.getBuddy(friend.getID()).size() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean hasFriendsOnLimeWire() {
+        for(Friend friend : friends) {
+            if (friend.isSignedInToLimewire()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

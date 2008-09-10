@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.FriendSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.setting.IntSetting;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
@@ -46,6 +48,8 @@ public class XMPPEventHandler {
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
         new SelfAvailabilityUpdateEvent(Mode.available).publish();
+        IntSetting loginCount = FriendSettings.NUM_LOGINS;
+        loginCount.setValue(loginCount.getValue() + 1);
     }
     
     @EventSubscriber

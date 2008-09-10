@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -7,10 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.limewire.core.settings.FriendSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -43,10 +49,74 @@ public class ChatPanel extends JPanel implements Displayable {
         add(friendsPanel, BorderLayout.WEST);
         add(topPanel, BorderLayout.NORTH);
         conversationPanel = new JPanel(new BorderLayout());
-        conversationPanel.add(new JLabel("This is a placeholder"), BorderLayout.CENTER);
+        setConversationPanel(buildMessagesPane());
         add(conversationPanel, BorderLayout.CENTER);
         
         EventAnnotationProcessor.subscribe(this);
+    }
+
+    private JPanel buildMessagesPane() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JEditorPane pane = new JEditorPane();
+        pane.setEditable(false);
+        pane.setContentType("text/html");
+        pane.setText(getMessagesPaneText());
+        pane.addHyperlinkListener(new HyperlinkHandler());
+        panel.add(pane, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private String getMessagesPaneText() {
+        boolean isSharingWithFriends = friendsPanel.isSharingFilesWithFriends();
+        boolean hasFriendsOnLimeWire = friendsPanel.hasFriendsOnLimeWire();
+        boolean hasLoggedInMoreThan3Times = FriendSettings.NUM_LOGINS.getValue() > 3;
+        LOG.debugf("isSharingWithFriends: {0} hasFriendsOnLimeWire: {1} hasLoggedInMoreThan3Times: {2} totalNumberOfLogins: {3}",
+                isSharingWithFriends, hasFriendsOnLimeWire, hasLoggedInMoreThan3Times, FriendSettings.NUM_LOGINS.getValue());
+        if (isSharingWithFriends && hasFriendsOnLimeWire && hasLoggedInMoreThan3Times) {
+            return getRecentUpdatesText();
+        } else {
+            StringBuilder bldr = new StringBuilder();
+            bldr.append("<html>")
+            .append("<head>")
+            .append("<style>")
+            .append("body { margin-left: 10px;}")
+            .append("h2 { margin-bottom: 25px;}")
+            .append("ul { margin-left: 10px;}")
+            .append("li { margin-bottom: 15px;}")
+            .append("</style>")
+            .append("</head>")
+            .append("<body>")
+            .append("<h2>").append(tr("Now What?")).append("</h2>")
+            .append("<ul>");
+            if (!isSharingWithFriends) {
+                bldr.append("<li>").append(tr("Share files with your friends "))
+                .append("<a href=\"all_friends_share_list\">").append("here").append("</a></li>");
+            }
+            
+            if (!hasFriendsOnLimeWire) {
+                bldr.append("<li>").append(tr("Tell your friends to get the new LimeWire")).append("</li>");
+            }
+            if (!hasLoggedInMoreThan3Times) {
+                bldr.append("<li>").append(tr("Search and download from your friends")).append("</li>");
+            }
+            bldr.append("</ul>")
+            .append("</body>")
+            .append("</html>");
+            return bldr.toString();
+        }
+    }
+    
+    private String getRecentUpdatesText() {
+        return "Replace me with an HTML doc describing recent updates to LimeWire 5";
+    }
+
+    private static class HyperlinkHandler implements HyperlinkListener {
+        @Override
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+            if (EventType.ACTIVATED == e.getEventType()) {
+                LOG.debugf("Hyperlink clicked: {0}", e.getDescription());
+            }
+        }
     }
     
     @EventSubscriber
@@ -72,8 +142,11 @@ public class ChatPanel extends JPanel implements Displayable {
     private void setConversationPanel(JComponent comp) {
         conversationPanel.removeAll();
         conversationPanel.add(comp, BorderLayout.CENTER);
-        //FIXME: Why doesn't add() trigger the repaint that revalidate() does?
-        conversationPanel.revalidate();
+    }
+    
+    @EventSubscriber
+    public void handleSignon(XMPPConnectionEstablishedEvent event) {
+        setConversationPanel(buildMessagesPane());
     }
     
     @EventSubscriber
@@ -89,7 +162,7 @@ public class ChatPanel extends JPanel implements Displayable {
     public void handleCloseChat(CloseChatEvent event) {
         closeChat(event.getFriend().getID());
         
-        setConversationPanel(new JPanel());
+        setConversationPanel(buildMessagesPane());
     }
     
     @EventSubscriber
