@@ -94,7 +94,7 @@ public class ChatPanel extends JPanel implements Displayable {
             }
             
             if (!hasFriendsOnLimeWire) {
-                bldr.append("<li>").append(tr("Tell your friends to get the new LimeWire")).append("</li>");
+                bldr.append("<li>").append(tr("Chat with your friends about getting the new LimeWire")).append("</li>");
             }
             if (!hasLoggedInMoreThan3Times) {
                 bldr.append("<li>").append(tr("Search and download from your friends")).append("</li>");
