@@ -108,7 +108,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         CellConstraints cc = new CellConstraints();
         
         topPanel = new JPanel();
-        topPanel.add(topPanel());
+        topPanel.add(normalTopPanel());
         builder.add(topPanel, cc.xy(2, 2));
         builder.add(getDetailsPanel(), cc.xy(2, 4));
         add(builder.getPanel());
@@ -154,7 +154,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         userNameField.requestFocusInWindow();
     }
 
-    private JPanel topPanel() {
+    private JPanel normalTopPanel() {
         FormLayout layout = new FormLayout("p, 4dlu, p:g", "p, 3dlu, p, p, p");
         PanelBuilder builder = new PanelBuilder(layout);
         CellConstraints cc = new CellConstraints();
@@ -174,13 +174,18 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
                 final LoginErrorState error = errorMsg.contains("authentication failed") ? 
                 LoginErrorState.UsernameOrPasswordError : LoginErrorState.NetworkError;
         
-                topPanel.removeAll();
-                topPanel.add(noConnectionAvailablePanel(error));
+                setTopPanelMessage(noConnectionAvailablePanel(error));
                 if (error == LoginErrorState.UsernameOrPasswordError) {
                     passwordField.setText("");
                 }
             }
+
         });
+    }
+
+    private void setTopPanelMessage(JPanel messagePanel) {
+        topPanel.removeAll();
+        topPanel.add(messagePanel);
     }
     
     private JPanel noConnectionAvailablePanel(LoginErrorState error) {
@@ -269,6 +274,16 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
                         try {
                             xmppEventHandler.login(serviceName, userName, 
                                     new String(passwordField.getPassword()), rememberMeCheckbox.isSelected());
+                            
+                            //Reset the top panel incase the last go-round was a bad password or 
+                            //network error case.
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setTopPanelMessage(normalTopPanel());
+                                }
+                            });
+                            
                         } catch (XMPPException e1) {
                             LOG.error("Unable to login", e1);
                             
