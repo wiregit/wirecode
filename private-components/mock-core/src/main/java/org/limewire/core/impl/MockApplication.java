@@ -9,4 +9,17 @@ public class MockApplication implements Application {
     public String getUniqueUrl(String baseUrl) {
         return baseUrl;
     }
+    
+    @Override
+    public void startCore() {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public void stopCore() {
+        // TODO Auto-generated method stub
+        
+    }
+    
 }

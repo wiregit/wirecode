@@ -8,6 +8,15 @@ public interface Application {
      */
     String getUniqueUrl(String baseUrl);
     
+    /**
+     * Starts the core services of the application.
+     */
+    void startCore();
+    
+    /**
+     * Stops the core services of the application.
+     */
+    void stopCore();
     
 
 }

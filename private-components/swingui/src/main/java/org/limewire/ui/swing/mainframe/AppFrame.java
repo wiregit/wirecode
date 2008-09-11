@@ -18,6 +18,7 @@ import javax.swing.plaf.ColorUIResource;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
+import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
@@ -30,7 +31,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.LifecycleManager;
 
 /**
  * The entry point for the Swing UI.  If the real core is desired,
@@ -75,7 +75,7 @@ public class AppFrame extends SingleFrameApplication {
         LimeWireSwingUI ui = localInjector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
-        addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(LifecycleManager.class)));
+        addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(Application.class)));
         
         show(ui);        
         restoreView();
@@ -154,12 +154,12 @@ public class AppFrame extends SingleFrameApplication {
     
     
     private static class ShutdownListener implements ExitListener {
-        private final LifecycleManager manager;
+        private final Application application;
         private final JFrame mainFrame;
         
-        public ShutdownListener(JFrame mainFrame, LifecycleManager manager) {
+        public ShutdownListener(JFrame mainFrame, Application application) {
             this.mainFrame = mainFrame;
-            this.manager = manager;
+            this.application = application;
         }        
         
         @Override
@@ -171,7 +171,7 @@ public class AppFrame extends SingleFrameApplication {
         public void willExit(EventObject event) {
             mainFrame.setVisible(false);
             System.out.println("Shutting down...");
-            manager.shutdown();
+            application.stopCore();
             System.out.println("Shut down");
         }
         
