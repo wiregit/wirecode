@@ -6,6 +6,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
 import java.awt.Point;
@@ -87,6 +88,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendsPane extends JPanel implements BuddyRemover {
     
+    private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
+    private static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
     private static final int PREFERRED_WIDTH = 120;
     private static final int RIGHT_EDGE_PADDING_PIXELS = 2;
     private static final int RIGHT_ADJUSTED_WIDTH = PREFERRED_WIDTH - RIGHT_EDGE_PADDING_PIXELS;
@@ -518,7 +521,8 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             if (isChatHoveredOver) {
                 Point hoverPoint = mouseHoverFriend.getHoverPoint();
                 Icon closeChatIcon = icons.getEndChat();
-                endChat.setIcon(isOverCloseIcon(hoverPoint, closeChatIcon.getIconWidth()) ? icons.getEndChatOverIcon() : closeChatIcon);
+                boolean overCloseIcon = isOverCloseIcon(hoverPoint);
+                endChat.setIcon(overCloseIcon ? icons.getEndChatOverIcon() : closeChatIcon);
                 panel.add(endChat);
             } else {
                 endChat.setIcon(null);
@@ -574,10 +578,10 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         }
     }
     
-    private boolean isOverCloseIcon(Point point, int closeChatIconWidth) {
+    private boolean isOverCloseIcon(Point point) {
         JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
         int scrollBarWidthAdjustment = verticalScrollBar.isVisible() ? verticalScrollBar.getWidth() : 0;
-        return point.x > RIGHT_ADJUSTED_WIDTH - closeChatIconWidth - ICON_WIDTH_FUDGE_FACTOR - scrollBarWidthAdjustment && 
+        return point.x > RIGHT_ADJUSTED_WIDTH - icons.getEndChat().getIconWidth() - ICON_WIDTH_FUDGE_FACTOR - scrollBarWidthAdjustment && 
                                     point.x < RIGHT_ADJUSTED_WIDTH;
     }
 
@@ -662,7 +666,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                         repaintTableCell(previousMouseHoverFriendIndex);
                     }
                 }
-                
+                setTableCursor(false);
                 return;
             }
             
@@ -670,6 +674,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             if (friendIndex > -1) {
                 mouseHoverFriend.setHoverDetails(friend, e.getPoint());
                 repaintTableCell(friendIndex);
+                setTableCursor(isOverCloseIcon(e.getPoint()) && friend.isChatting());
             }
         }
 
@@ -699,10 +704,11 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (isOverCloseIcon(e.getPoint(), icons.getEndChat().getIconWidth())) {
+            if (isOverCloseIcon(e.getPoint())) {
                 Friend friend = getFriendFromPoint(e);
                 if (e.getClickCount() == 1 && friend != null && friend.isChatting()) {
                     closeChat(friend);
+                    setTableCursor(false);
                 }
             }
         }
@@ -910,5 +916,9 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             }
         }
         return false;
+    }
+
+    private void setTableCursor(boolean useHandCursor) {
+        friendsTable.setCursor(useHandCursor ? HAND_CURSOR : DEFAULT_CURSOR);
     }
 }
