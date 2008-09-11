@@ -294,16 +294,7 @@ public class UDPHostCache {
         return true;
     }
     
-    /**
-     * Notification that all stored UDP host caches have been added.
-     * If none are stored, we load a list of defaults.
-     */
-    public synchronized void hostCachesAdded() {
-        if(udpHostsSet.isEmpty())
-            loadDefaults();
-    }
-    
-    protected void loadDefaults() {
+    public void loadDefaults() {
       // ADD DEFAULT UDP HOST CACHES HERE.
     }
     
