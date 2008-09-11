@@ -6,7 +6,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;

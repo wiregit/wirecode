@@ -4,7 +4,7 @@ import java.io.File;
 
 import ca.odell.glazedlists.EventList;
 
-public interface LocalFileList<LocalFileItem> extends FileList {
+public interface LocalFileList extends FileList<LocalFileItem> {
 
     EventList<LocalFileItem> getModel();
 

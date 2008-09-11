@@ -8,7 +8,6 @@ import javax.swing.Action;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Circle;
 import org.limewire.ui.swing.components.NumberedHyperLinkButton;

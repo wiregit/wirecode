@@ -16,10 +16,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.BuddyFileList;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -41,9 +42,6 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -52,7 +50,9 @@ import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-import net.miginfocom.swing.MigLayout;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class BuddySharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
@@ -164,14 +164,14 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         return list;
     }
     
-    private class BuddySelectionListener implements ListSelectionListener, ListEventListener<FileItem> {
+    private class BuddySelectionListener implements ListSelectionListener, ListEventListener<LocalFileItem> {
 
         private JTable buddy;
         private BuddySharingHeaderPanel headerPanel;
         private SharingBuddyEmptyPanel emptyPanel;
         private JPanel cardPanel;
         
-        private EventList<FileItem> currentList;
+        private EventList<LocalFileItem> currentList;
         
         public BuddySelectionListener(JTable table, BuddySharingHeaderPanel headerPanel, SharingBuddyEmptyPanel emptyPanel, JPanel cardPanel) {
             this.buddy = table;
@@ -217,7 +217,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         }
 
         @Override
-        public void listChanged(ListEvent<FileItem> listChanges) {
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
             if(listChanges.getSourceList().size() > 0) {
                 viewSelectionPanel.setEnabled(true);
             } else {

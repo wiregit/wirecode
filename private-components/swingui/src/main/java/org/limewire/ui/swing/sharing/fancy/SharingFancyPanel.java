@@ -15,7 +15,6 @@ import javax.swing.JScrollPane;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.SharingShortcutPanel;

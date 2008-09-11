@@ -31,7 +31,7 @@ public class FancyPopupMenu extends JWindow {
     private static final Color HIGHLIGHT_COLOR = new Color(220, 220, 255);
     public static final int CORNER_RADIUS = 8;
 
-    private static int instanceCounter;
+//    private static int instanceCounter;
 
     private Border border = new RoundedBorder(CORNER_RADIUS);
     private FancyPopupMenu submenu;
@@ -41,13 +41,13 @@ public class FancyPopupMenu extends JWindow {
     private JPanel panel = new JPanel(new GridLayout(0, 1));
     private Map<JLabel, Action> labelToActionMap =
         new HashMap<JLabel, Action>();
-    private String selectedName;
+//    private String selectedName;
     private Window owner;
-    private int instanceNumber;
+//    private int instanceNumber;
 
     public FancyPopupMenu(Window owner) {
         super(owner);
-        instanceNumber = ++instanceCounter;
+//        instanceNumber = ++instanceCounter;
 
         this.owner = owner;
         panel.setOpaque(false);

@@ -1111,7 +1111,8 @@ public class TestUploader {
 	    public SocketHandler(Socket s) {
 	        mySocket=s;
 	    }
-	    public void run() {  
+	    @SuppressWarnings("unchecked")
+        public void run() {  
 	        LOG.debug(name+" starting to upload.. ");
             try {
                 while(http11 && !stopped) {

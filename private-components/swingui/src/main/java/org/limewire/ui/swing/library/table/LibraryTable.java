@@ -9,10 +9,10 @@ import org.limewire.ui.swing.table.StripedJXTable;
 import ca.odell.glazedlists.EventList;
 
 
-public class LibraryTable extends StripedJXTable {
+public class LibraryTable<T extends FileItem> extends StripedJXTable {
 
-    public LibraryTable(EventList<FileItem> libraryItems) {
-        super(new LibraryTableModel(libraryItems));
+    public LibraryTable(EventList<T> libraryItems) {
+        super(new LibraryTableModel<T>(libraryItems));
         
         setColumnControlVisible(true);
         

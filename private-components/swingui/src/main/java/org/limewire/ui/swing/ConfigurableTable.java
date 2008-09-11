@@ -51,8 +51,8 @@ public class ConfigurableTable<E> extends MouseableTable {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getButton() == 1) {
-                        int col = columnAtPoint(e.getPoint());
-                        String headerName = tableFormat.getColumnName(col);
+//                        int col = columnAtPoint(e.getPoint());
+//                        String headerName = tableFormat.getColumnName(col);
                         // TODO: RMV Need to update the "Sort by" combobox
                         // TODO: RMV to match the new sort order.
                         //sortCombo.setSelectedItem(headerName);
@@ -111,7 +111,7 @@ public class ConfigurableTable<E> extends MouseableTable {
         }
 
         headerPopup = new JPopupMenu();
-        int margin = 5;
+//        int margin = 5;
         headerPopup.setBorder(
             //BorderFactory.createEmptyBorder(margin, margin, margin, margin));
             BorderFactory.createLineBorder(Color.BLACK, 1));
@@ -139,9 +139,11 @@ public class ConfigurableTable<E> extends MouseableTable {
             TableColumnExt column = null;
             for (int i = 0; i < allColumnCount; i++) {
                 column = getColumnExt(i);
-                if (column.isVisible()) break;
+                if (column.isVisible())
+                    break;
             }
-
+            
+            assert column != null;
             String headerName = column.getTitle();
 
             // Find the header popup menu item that matches this name.

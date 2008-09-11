@@ -23,7 +23,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;

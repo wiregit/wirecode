@@ -19,14 +19,14 @@ import ca.odell.glazedlists.FilterList;
 public class SharingAddAction extends AbstractAction {
 
     private LocalFileList userList;
-    private FileList libraryList;
+    private FileList<LocalFileItem> libraryList;
     private Category category;
     
-    public SharingAddAction(FileList libraryList, Category category) {
+    public SharingAddAction(FileList<LocalFileItem> libraryList, Category category) {
         this(null, libraryList, category);
     }
     
-    public SharingAddAction(LocalFileList userList, FileList libraryList, Category category) {
+    public SharingAddAction(LocalFileList userList, FileList<LocalFileItem> libraryList, Category category) {
         this.userList = userList;
         this.libraryList = libraryList;
         this.category = category;

@@ -9,9 +9,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXTable;
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.TextFilterator;

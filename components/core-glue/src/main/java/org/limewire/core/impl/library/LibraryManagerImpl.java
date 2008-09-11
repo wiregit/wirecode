@@ -225,7 +225,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            FileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
+            LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
             lookup.put(fileDesc.getFile(), newItem);
             eventList.add(newItem);
         }
@@ -233,7 +233,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
             FileItem old = lookup.remove(oldDesc.getFile());
-            FileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
+            LocalFileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
             lookup.put(newDesc.getFile(), newItem);
             
             eventList.remove(old);
@@ -283,7 +283,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
                   Iterator<FileDesc> iter = fileList.iterator();
                   while(iter.hasNext()) {
                       FileDesc fileDesc = iter.next();
-                      FileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
+                      LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
                       lookup.put(fileDesc.getFile(), newItem);
                       eventList.add(newItem);
                   }
@@ -330,7 +330,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 
         @Override
         public void addEvent(FileDesc fileDesc) {
-            FileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
+            LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
             lookup.put(fileDesc.getFile(), newItem);
             eventList.add(newItem);
         }
@@ -338,7 +338,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         @Override
         public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
             FileItem oldItem = lookup.remove(oldDesc.getFile());
-            FileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
+            LocalFileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
             lookup.put(newDesc.getFile(), newItem);
 
             eventList.remove(oldItem);
@@ -400,14 +400,14 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
     }
     
     private abstract class LocalFileListImpl implements LocalFileList {
-        final EventList<FileItem> eventList;
+        final EventList<LocalFileItem> eventList;
         
         LocalFileListImpl() {
-            eventList = GlazedLists.threadSafeList(new BasicEventList<FileItem>());
+            eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
         }
         
         @Override
-        public EventList<FileItem> getModel() {
+        public EventList<LocalFileItem> getModel() {
             return eventList;
         }
         

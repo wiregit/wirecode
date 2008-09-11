@@ -6,13 +6,13 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
-public class LibraryTableModel extends EventTableModel<FileItem> {
+public class LibraryTableModel<T extends FileItem>  extends EventTableModel<T> {
 
-    private final EventList<FileItem> libraryItems;
+    private final EventList<? extends FileItem> libraryItems;
     private static final int COLUMN_COUNT = 4;
     
-    public LibraryTableModel(EventList<FileItem> libraryItems) {
-        super(libraryItems, new LibraryTableFormat());
+    public LibraryTableModel(EventList<T> libraryItems) {
+        super(libraryItems, new LibraryTableFormat<T>());
         this.libraryItems = libraryItems;
     }
     
@@ -20,7 +20,7 @@ public class LibraryTableModel extends EventTableModel<FileItem> {
         return libraryItems.get(index);
     }
     
-    private static class LibraryTableFormat implements TableFormat<FileItem> {
+    private static class LibraryTableFormat<T extends FileItem> implements TableFormat<T> {
 
         @Override
         public int getColumnCount() {

@@ -2,8 +2,6 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 
-import org.limewire.util.Objects;
-
 /**
  * Holds the length and the path of a file.
  */

@@ -3,7 +3,6 @@
  */
 package com.limegroup.bittorrent.disk;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

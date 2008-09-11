@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends;
 
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
@@ -74,7 +75,7 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
             name = user.getId();
         }
         RemoteFileList libraryList = libraryManager.getBuddyLibrary(name);
-        BuddyLibrary library = new BuddyLibrary(name, libraryList);
+        BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryList);
         navigator.removeNavigablePanel(NavCategory.LIBRARY, library.getName());
         libraryManager.removeBuddyLibrary(name);
     }
@@ -89,7 +90,7 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
                 libraryManager.addBuddyLibrary(name);  
             }
         }
-        BuddyLibrary library = new BuddyLibrary(name, libraryManager.getBuddyLibrary(name));
+        BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryManager.getBuddyLibrary(name));
         navigator.addNavigablePanel(NavCategory.LIBRARY, library.getName(), library, false);
     }
 

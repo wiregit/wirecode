@@ -1,8 +1,5 @@
 package org.limewire.ui.swing.search;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -19,13 +16,16 @@ import javax.swing.Action;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.util.MediaType;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * This class contains the numbers of different types of files

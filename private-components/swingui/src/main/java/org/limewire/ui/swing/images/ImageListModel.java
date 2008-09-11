@@ -2,7 +2,6 @@ package org.limewire.ui.swing.images;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FileItem;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventListModel;

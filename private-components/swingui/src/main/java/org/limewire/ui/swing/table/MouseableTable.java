@@ -121,7 +121,7 @@ public class MouseableTable extends JXTable {
 					Component componentAtPoint =
                         component.getComponentAt(e.getPoint());
 
-					if (component == null || componentAtPoint != editor) {
+					if (componentAtPoint != editor) {
                         // Mark commented the following line.
 						//editor.cancelCellEditing();
 					}
@@ -270,12 +270,12 @@ public class MouseableTable extends JXTable {
 
         if (usesEventTableModel && usesAdvancedTableFormat) {
             AdvancedTableFormat format = (AdvancedTableFormat) tableFormat;
-            boolean matched = false;
+//            boolean matched = false;
             for (int i = 0; i < getModel().getColumnCount(); i++) {
                 Class columnClass = format.getColumnClass(i);
                 if (columnClass == clazz) {
                     getColumnModel().getColumn(i).setCellRenderer(renderer);
-                    matched = true;
+//                    matched = true;
                     break;
                 }
             }

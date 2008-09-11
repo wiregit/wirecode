@@ -64,11 +64,11 @@ implements TableCellEditor, TableCellRenderer {
     private JLabel subheadingLabel = new JLabel();
     private JXPanel actionPanel = new JXPanel();
     private JXPanel thePanel;
-    private JTable table;
+//    private JTable table;
     private String schema;
     private VisualSearchResult vsr;
     private boolean isShowingSimilar;
-    private int row;
+//    private int row;
     private int similarCount;
 
     public ListViewTableCellEditor(ActionColumnTableCellEditor actionEditor) {
@@ -110,8 +110,8 @@ implements TableCellEditor, TableCellRenderer {
         }
         */
 
-        this.table = table;
-        this.row = row;
+//        this.table = table;
+//        this.row = row;
 
         vsr = (VisualSearchResult) value;
         MediaType mediaType =
@@ -148,7 +148,7 @@ implements TableCellEditor, TableCellRenderer {
         boolean isSelected, boolean hasFocus,
         int row, int column) {
 
-        return (JXPanel) getTableCellEditorComponent(
+        return getTableCellEditorComponent(
             table, value, isSelected, row, column);
     }
 

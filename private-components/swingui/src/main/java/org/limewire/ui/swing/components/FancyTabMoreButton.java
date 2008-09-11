@@ -23,14 +23,13 @@ import javax.swing.GroupLayout.SequentialGroup;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.search.resultpanel.SearchTabPopup;
 import org.limewire.ui.swing.util.I18n;
 
 public class FancyTabMoreButton extends JXButton {
     
     private final FancyTabProperties props;
     private JPopupMenu menu = new JPopupMenu(I18n.tr("more"));
-    private List<FancyTab> tabs;
+//    private List<FancyTab> tabs;
     
     public FancyTabMoreButton(List<FancyTab> tabs,
             Icon triangle,
@@ -38,7 +37,7 @@ public class FancyTabMoreButton extends JXButton {
 
         super(I18n.tr("more"), triangle);
 
-        this.tabs = tabs;
+//        this.tabs = tabs;
         this.props = props;
         
         setContentAreaFilled(false);

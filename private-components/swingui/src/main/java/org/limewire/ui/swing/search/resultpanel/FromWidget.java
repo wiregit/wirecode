@@ -106,12 +106,12 @@ public class FromWidget extends JPanel {
         add(headerPanel, gbc);
     }
 
-    private void setInsets(Component component) {
-        JComponent jc = (JComponent) component;
-        Insets insets = jc.getInsets();
-        insets.left = insets.right = 0;
-        insets.top = insets.bottom = 2;
-    }
+//    private void setInsets(Component component) {
+//        JComponent jc = (JComponent) component;
+//        Insets insets = jc.getInsets();
+//        insets.left = insets.right = 0;
+//        insets.top = insets.bottom = 2;
+//    }
 
     public void setPeople(List<String> people) {
         setPeople(people.toArray(new String[]{}));

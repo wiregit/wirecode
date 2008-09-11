@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.sharing.table;
 
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 
 import ca.odell.glazedlists.gui.TableFormat;

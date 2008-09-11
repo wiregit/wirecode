@@ -24,7 +24,6 @@ import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;

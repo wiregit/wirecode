@@ -26,7 +26,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class ActionButtonPanel extends JPanel {
 
-    private static final Point toolTipOffset = new Point(0, 25);
+//    private static final Point toolTipOffset = new Point(0, 25);
     private static final String[] TOOLTIPS =
         { "Download", "More Info", "Mark as Junk" };
     

@@ -4,7 +4,7 @@ import org.limewire.core.api.search.SearchResult;
 
 import ca.odell.glazedlists.EventList;
 
-public interface RemoteFileList extends FileList {
+public interface RemoteFileList extends FileList<RemoteFileItem> {
     
     public EventList<RemoteFileItem> getModel();
     
