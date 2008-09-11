@@ -21,7 +21,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavigableTarget;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.BuddySharePanel;
@@ -40,18 +39,16 @@ public class ChatPanel extends JPanel implements Displayable {
     private final JPanel conversationPanel;
     private final FriendsPane friendsPanel;
     private final NavigableTree navTree;
-    private final NavigableTarget navTarget;
     private final Map<String, ConversationPane> chats;
     
     @Inject
     public ChatPanel(ConversationPaneFactory conversationFactory, IconLibrary icons, FriendsPane friendsPanel,
-            TopPanel topPanel, NavigableTree navTree, NavigableTarget navTarget) {
+            TopPanel topPanel, NavigableTree navTree) {
         super(new BorderLayout());
         this.conversationFactory = conversationFactory;
         this.friendsPanel = friendsPanel;
         this.chats = new HashMap<String, ConversationPane>();
         this.navTree = navTree;
-        this.navTarget = navTarget;
 
         //Dimensions according to the spec
         setPreferredSize(new Dimension(400, 235));
@@ -70,7 +67,7 @@ public class ChatPanel extends JPanel implements Displayable {
         pane.setEditable(false);
         pane.setContentType("text/html");
         pane.setText(getMessagesPaneText());
-        pane.addHyperlinkListener(new HyperlinkHandler(navTree, navTarget));
+        pane.addHyperlinkListener(new HyperlinkHandler(navTree));
         panel.add(pane, BorderLayout.CENTER);
         return panel;
     }
@@ -121,11 +118,9 @@ public class ChatPanel extends JPanel implements Displayable {
 
     private static class HyperlinkHandler implements HyperlinkListener {
         private final NavigableTree navTree;
-        private final NavigableTarget navTarget;
         
-        public HyperlinkHandler(NavigableTree navTree, NavigableTarget navTarget) {
+        public HyperlinkHandler(NavigableTree navTree) {
             this.navTree = navTree;
-            this.navTarget = navTarget;
         }
 
         @Override
@@ -134,7 +129,7 @@ public class ChatPanel extends JPanel implements Displayable {
                 LOG.debugf("Hyperlink clicked: {0}", e.getDescription());
                 if (e.getDescription().equals("all_friends_share_list")) {
                     NavItem item = navTree.getNavigableItemByName(Navigator.NavCategory.SHARING, BuddySharePanel.NAME);
-                    navTarget.showNavigablePanel(item);
+                    item.select();
                 }
             }
         }
