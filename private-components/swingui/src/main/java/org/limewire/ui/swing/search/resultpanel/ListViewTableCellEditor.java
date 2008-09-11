@@ -92,27 +92,44 @@ implements TableCellEditor, TableCellRenderer {
         // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
 
-        filterText = searchText;
+        filterText = searchText.toLowerCase();
         EventAnnotationProcessor.subscribe(this);
     }
 
     /**
-     * Adds an HTML bold tag around every occurrences of filterText.
+     * Adds an HTML bold tag around every occurrence of filterText.
+     * Note that comparisons are case insensitive.
      * @param text the text to be modified
      * @return the text containing bold tags
      */
     private String boldMatches(String text) {
         if (filterText == null || filterText.length() == 0) return text;
 
-        String[] pieces = text.split(filterText);
-        if (pieces.length == 1) return text;
+        String originalText = text;
+        String lowerText = text.toLowerCase();
 
-        String result = "<html>" + pieces[0];
-        for (int i = 1; i < pieces.length; i++) {
-            result += "<span style='color:red; font-weight:bold'>"
-                + filterText + "</span>" + pieces[i];
+        int index = lowerText.indexOf(filterText);
+        if (index == -1) return text;
+
+        //System.out.println(filterText + " was found in \"" + originalText + "\"");
+
+        int filterLength = filterText.length();
+        String result = "<html>";
+
+        while (index != -1) {
+            String match = originalText.substring(index, index + filterLength);
+
+            result += originalText.substring(0, index);
+            result += "<span style='color:red; font-weight:bold'>";
+            result += match;
+            result += "</span>";
+
+            originalText = originalText.substring(index + filterLength);
+            lowerText = lowerText.substring(index + filterLength);
+            index = lowerText.indexOf(filterText);
         }
-        result += "</html>";
+
+        result += originalText;
         return result;
     }
 
@@ -370,7 +387,7 @@ implements TableCellEditor, TableCellRenderer {
      */
     @EventSubscriber
     public void handleFilter(FilterEvent event) {
-        this.filterText = event.getText();
+        this.filterText = event.getText().toLowerCase();
 
         // Cause the table associated with the renders and editors to repaint
         // so text matching filterText will be highlighted.

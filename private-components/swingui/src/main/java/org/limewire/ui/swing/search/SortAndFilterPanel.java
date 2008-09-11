@@ -487,9 +487,10 @@ public class SortAndFilterPanel extends JXPanel {
             addProperty(PropertyKey.NAME);
             addProperty(PropertyKey.ALBUM_TITLE);
             addProperty(PropertyKey.ARTIST_NAME);
-            addProperty(PropertyKey.OWNER);
+            //addProperty(PropertyKey.OWNER);
             addProperty(PropertyKey.LENGTH);
             addProperty(PropertyKey.FILE_SIZE);
+            //System.out.println();
             list.add(vsr.getMediaType());
             long size = vsr.getSize();
             if (size > 0) list.add(String.valueOf(size));
@@ -499,6 +500,7 @@ public class SortAndFilterPanel extends JXPanel {
             Object value = vsr.getProperty(key);
             if (value != null) {
                 String text = value.toString();
+                //System.out.println("SortAndFilterPanel: filtering on " + text);
                 list.add(text);
             }
         }
