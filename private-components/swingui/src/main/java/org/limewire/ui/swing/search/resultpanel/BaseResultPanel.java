@@ -22,9 +22,11 @@ import java.util.Calendar;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.ConfigurableTable;
+import org.limewire.ui.swing.search.FilterEvent;
 
 public class BaseResultPanel extends JXPanel {
     
@@ -189,7 +191,7 @@ public class BaseResultPanel extends JXPanel {
     public EventList<VisualSearchResult> getResultsEventList() {
         return baseEventList;
     }
-    
+
     /**
      * Changes whether the list view or table view is displayed.
      * @param mode LIST or TABLE

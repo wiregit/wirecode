@@ -49,6 +49,7 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
+import org.limewire.ui.swing.search.resultpanel.ListViewTableCellEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -118,9 +119,11 @@ class TopPanel extends JPanel implements SearchNavigator {
         textField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String searchText = textField.getText();
+                ListViewTableCellEditor.setSearchText(searchText);
+                
                 Search search = searchHandler.doSearch(
-                    new DefaultSearchInfo(
-                        textField.getText(),
+                    new DefaultSearchInfo(searchText,
                         (SearchCategory) combo.getSelectedItem()));
 
                 for (SearchListener listener : listeners) {

@@ -18,7 +18,6 @@ import com.google.inject.assistedinject.FactoryProvider;
 import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
 
-
 public class LimeWireUiSearchModule extends AbstractModule {
     
     @Override

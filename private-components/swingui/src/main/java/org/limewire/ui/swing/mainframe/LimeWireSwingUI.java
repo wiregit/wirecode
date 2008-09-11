@@ -21,6 +21,7 @@ import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
+import javax.swing.BorderFactory;
 
 public class LimeWireSwingUI extends JPanel {
     
@@ -35,9 +36,11 @@ public class LimeWireSwingUI extends JPanel {
     private Color lineColor;
     
 	@Inject
-    public LimeWireSwingUI(TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
-            StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler,
-            FriendsPanel friendsPanel, TrayNotifier trayNotifier, AudioPlayer player) {
+    public LimeWireSwingUI(
+            TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
+            StatusPanel statusPanel, Navigator navigator,
+            SearchHandler searchHandler, FriendsPanel friendsPanel,
+            TrayNotifier trayNotifier, AudioPlayer player) {
     	GuiUtils.assignResources(this);
     	        
     	this.trayNotifier = trayNotifier;

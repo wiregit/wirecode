@@ -23,16 +23,21 @@ import java.util.List;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.search.FilterEvent;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.MediaType;
@@ -51,6 +56,8 @@ implements TableCellEditor, TableCellRenderer {
     public static final int HEIGHT = 50;
     public static final int WIDTH = 740;
 
+    private static String searchText;
+
     @Resource private Icon downloadIcon;
 
     private ActionColumnTableCellEditor actionEditor;
@@ -60,15 +67,19 @@ implements TableCellEditor, TableCellRenderer {
         new HyperLinkButton("Downloading...");
     private JLabel downloadButton;
     private HyperLinkButton similarButton = new HyperLinkButton(null);
+    //private JEditorPane headingLabel = new ReadOnlyEditorPane();
+    //private JEditorPane subheadingLabel = new ReadOnlyEditorPane();
     private JLabel headingLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
     private JXPanel actionPanel = new JXPanel();
     private JXPanel thePanel;
-//    private JTable table;
+    private JTable table;
+    private String filterText;
     private String schema;
+
     private VisualSearchResult vsr;
     private boolean isShowingSimilar;
-//    private int row;
+    private int row;
     private int similarCount;
 
     public ListViewTableCellEditor(ActionColumnTableCellEditor actionEditor) {
@@ -80,6 +91,37 @@ implements TableCellEditor, TableCellRenderer {
         // private-components/swingui/src/main/resources/
         // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
+
+        filterText = searchText;
+        EventAnnotationProcessor.subscribe(this);
+    }
+
+    /**
+     * Adds an HTML bold tag around every occurrences of filterText.
+     * @param text the text to be modified
+     * @return the text containing bold tags
+     */
+    private String boldMatches(String text) {
+        if (filterText == null || filterText.length() == 0) return text;
+
+        String[] pieces = text.split(filterText);
+        if (pieces.length == 1) return text;
+
+        String result = "<html>" + pieces[0];
+        for (int i = 1; i < pieces.length; i++) {
+            result += "<span style='color:red; font-weight:bold'>"
+                + filterText + "</span>" + pieces[i];
+        }
+        result += "</html>";
+        return result;
+    }
+
+    private static void configureEditor(JEditorPane ep) {
+        Dimension dimension = new Dimension(450, 20);
+        ep.setPreferredSize(dimension);
+        ep.setEditable(false);
+        ep.setContentType("text/html");
+        ep.setOpaque(false);
     }
 
     public Object getCellEditorValue() {
@@ -110,8 +152,8 @@ implements TableCellEditor, TableCellRenderer {
         }
         */
 
-//        this.table = table;
-//        this.row = row;
+        this.table = table;
+        this.row = row;
 
         vsr = (VisualSearchResult) value;
         MediaType mediaType =
@@ -224,6 +266,9 @@ implements TableCellEditor, TableCellRenderer {
         downloadPanel.add(downloadButton, gbc);
         downloadPanel.add(downloadingLink, gbc);
 
+        //configureEditor(headingLabel);
+        //configureEditor(subheadingLabel);
+
         JXPanel headingPanel = new JXPanel(new GridBagLayout());
         headingPanel.setOpaque(false);
         gbc.gridx = 0;
@@ -304,12 +349,33 @@ implements TableCellEditor, TableCellRenderer {
             heading = name + "." + vsr.getFileExtension();
         }
 
-        headingLabel.setText(heading);
+        headingLabel.setText(boldMatches(heading));
     }
 
     private String getProperty(VisualSearchResult vsr, PropertyKey key) {
         Object property = vsr.getProperty(key);
         return property == null ? "?" : property.toString();
+    }
+
+    public static void setSearchText(String text) {
+        // Save the text so it can be used for the filterText
+        // of subsequently created instances of this class.
+        searchText = text;
+    }
+
+    /**
+     * This is invoked when the user enters filter text
+     * in the SortAndFilterPanel.
+     * @param event the FilterEvent
+     */
+    @EventSubscriber
+    public void handleFilter(FilterEvent event) {
+        this.filterText = event.getText();
+
+        // Cause the table associated with the renders and editors to repaint
+        // so text matching filterText will be highlighted.
+        AbstractTableModel model = (AbstractTableModel) table.getModel();
+        model.fireTableDataChanged();
     }
 
     private void populatePanel(VisualSearchResult vsr) {
@@ -348,7 +414,7 @@ implements TableCellEditor, TableCellRenderer {
                 + " - " + vsr.getProperty(PropertyKey.FILE_SIZE) + "MB";
         }
 
-        subheadingLabel.setText(subheading);
+        subheadingLabel.setText(boldMatches(subheading));
     }
 
     private void setBackground(boolean isSelected) {

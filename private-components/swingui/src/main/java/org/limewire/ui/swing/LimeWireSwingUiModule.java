@@ -20,5 +20,4 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiFriendsModule());
         install(new LimeWireUiPlayerModule());
     }
-
 }

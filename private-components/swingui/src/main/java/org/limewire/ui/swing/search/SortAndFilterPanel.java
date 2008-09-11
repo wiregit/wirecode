@@ -1,14 +1,15 @@
 package org.limewire.ui.swing.search;
 
-import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import java.util.Date;
 
+import javax.swing.event.DocumentEvent;
 import static org.limewire.core.api.search.SearchResult.PropertyKey;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import ca.odell.glazedlists.matchers.MatcherEditor.Listener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
@@ -30,6 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
+import javax.swing.event.DocumentListener;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
@@ -92,6 +94,23 @@ public class SortAndFilterPanel extends JXPanel {
         setSearchCategory(SearchCategory.ALL);
         configureViewButtons();
         layoutComponents();
+
+        filterBox.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                new FilterEvent(filterBox.getText()).publish();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                new FilterEvent(filterBox.getText()).publish();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                new FilterEvent(filterBox.getText()).publish();
+            }
+        });
 
         editor.addMatcherEditorListener(new Listener<VisualSearchResult>() {
             public void changedMatcher(Event<VisualSearchResult> arg0) {
