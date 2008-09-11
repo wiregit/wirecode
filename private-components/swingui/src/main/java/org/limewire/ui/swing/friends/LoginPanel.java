@@ -18,7 +18,10 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.logging.Log;
@@ -69,10 +72,29 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         
         EventAnnotationProcessor.subscribe(this);
     }
-
+    
     private void initComponents() {
         userNameField = new JTextField(18);
         passwordField = new JPasswordField(18);
+        
+        userNameField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                clearPassword();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                clearPassword();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                clearPassword();
+            }
+            
+            private void clearPassword() { passwordField.setText(""); }
+        });
         
         SignInAction signinAction = new SignInAction();
         passwordField.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "signin");
@@ -119,6 +141,14 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         rememberMeCheckbox.setSelected(true);
     }
     
+    @EventSubscriber
+    public void handleSignoff(SignoffEvent event) {
+        if (!rememberMeCheckbox.isSelected()) {
+            userNameField.setText("");
+            passwordField.setText("");
+        }
+    }
+
     @Override
     public void handleDisplay() {
         userNameField.requestFocusInWindow();

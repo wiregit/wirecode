@@ -40,6 +40,10 @@ public class XMPPEventHandler {
                     configuration.setPassword(password);
                     connection.login();
                     configuration.setAutoLogin(autologin);
+                    if (!autologin) {
+                        configuration.setUsername("");
+                        configuration.setPassword("");
+                    }
                 }
             }
         }
