@@ -89,15 +89,28 @@ public class CoreSearch implements Search {
             PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
                 public void process(PromotionMessageContainer result) {
-                    //TODO: put the proper info in the SponsoredResult
-                    CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(result.getURL(), result.getDescription(),
-                            result.getURL(), result.getURL(), SponsoredResultTarget.STORE);
+                    //TODO: what are we doing with sponsored results?
+                    CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(stripURL(result.getURL()), result.getDescription(),
+                            stripURL(result.getURL()), result.getURL(), SponsoredResultTarget.STORE);
                     handleSponsoredResults(coreSponsoredResult);
                 }           
             };
             
             promotionSearcher.search(searchDetails.getSearchQuery(), callback, geoLocation.getGeocodeInformation());
         }
+    }
+    
+    /**
+     * Strips "http://" and anything after ".com" (or .whatever) from the url
+     */
+    private String stripURL(String url){
+        int dotIndex = url.indexOf('.');
+        int endIndex = url.indexOf('/', dotIndex);
+        endIndex = endIndex == -1 ? url.length() :  endIndex;
+        int startIndex = url.indexOf("//");
+        // this will either be 0 or the first character after "//"
+        startIndex = startIndex == -1 ? 0 :  startIndex + 2;
+        return url.substring(startIndex, endIndex);
     }
     
     @Override

@@ -231,4 +231,31 @@ public class CoreLocalFileItem implements LocalFileItem {
     public FileDetails getFileDetails() {
         return detailsFactory.create(fileDesc);
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((getFile() == null) ? 0 : getFile().hashCode());
+        return result;
+    }
+
+      
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        
+        if (obj == null) {
+            return false;
+        }
+        
+        if (getClass() != obj.getClass()){
+            return false;
+        }
+        
+        return getFile().equals(((CoreLocalFileItem) obj).getFile());
+    }
+    
 }

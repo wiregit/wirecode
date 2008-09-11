@@ -1,27 +1,44 @@
 package org.limewire.ui.swing.library.table;
 
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ListSelectionModel;
 
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.ui.swing.table.StripedJXTable;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 
 import ca.odell.glazedlists.EventList;
 
 
-public class LibraryTable<T extends FileItem> extends StripedJXTable {
+
+public class LibraryTable<T extends FileItem> extends MouseableTable {
+    
+    private LibrarySharePanel librarySharePanel;
+    private MultiButtonTableCellRendererEditor shareEditor;
+
 
     public LibraryTable(EventList<T> libraryItems) {
         super(new LibraryTableModel<T>(libraryItems));
+        
+        
+        setStripesPainted(true);
         
         setColumnControlVisible(true);
         
         setShowHorizontalLines(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        setHighlighters(HighlighterFactory.createSimpleStriping());
+      //  setHighlighters(HighlighterFactory.createSimpleStriping());
         setFillsViewportHeight(true);
         setDragEnabled(true);
         
+       
 //        setTransferHandler(new TransferHandler(){
 //            @Override
 //            public int getSourceActions(JComponent comp) {
@@ -40,5 +57,29 @@ public class LibraryTable<T extends FileItem> extends StripedJXTable {
 //                return new FileTransferable(files);
 //            }
 //        });
+    }
+    
+    public void enableSharing(LibrarySharePanel librarySharePanel){
+        this.librarySharePanel = librarySharePanel;
+        List<Action> actionList = new ArrayList<Action>();
+        actionList.add(new ShareAction("+"));
+        shareEditor = new MultiButtonTableCellRendererEditor(actionList, 20);
+        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellEditor(shareEditor);
+        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellRenderer(new MultiButtonTableCellRendererEditor(actionList, 20));
+        
+    }
+    
+    private class ShareAction extends AbstractAction {
+        
+        public ShareAction(String text){
+            super(text);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            librarySharePanel.setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow())));
+            librarySharePanel.show(shareEditor, 0, 0);
+        }
+        
     }
 }
