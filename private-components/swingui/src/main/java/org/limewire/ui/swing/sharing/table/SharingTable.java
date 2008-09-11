@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.ListSelectionModel;
 
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
@@ -13,6 +12,7 @@ import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
 import org.limewire.ui.swing.table.StripedJXTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
+import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -20,14 +20,18 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingTable extends StripedJXTable {
 
+    private TableColors tableColors;
+    
     public SharingTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
-        super(new SharingTableModel(sharedItems, fileList, tableFormat));
+        super(new SharingTableModel(sharedItems, fileList, tableFormat));       
+        
+        tableColors = new TableColors();
         
         setColumnControlVisible(true);
         setShowHorizontalLines(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        setHighlighters(HighlighterFactory.createSimpleStriping());
-        
+        setHighlighters( tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
+
         final TableDoubleClickHandler doubleClickHandler = new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {

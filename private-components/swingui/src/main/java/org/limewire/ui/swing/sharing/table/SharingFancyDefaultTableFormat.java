@@ -6,7 +6,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 /**
  * Default information to display in a table for what is being shared. 
- * Defaultly only the file name is displayed.
+ * Only the file name is displayed by default.
  */
 public class SharingFancyDefaultTableFormat implements TableFormat<LocalFileItem> {
   
@@ -26,9 +26,9 @@ public class SharingFancyDefaultTableFormat implements TableFormat<LocalFileItem
     }
 
     @Override
-    public Object getColumnValue(LocalFileItem baseObject, int column) {
-        if(column == 0) return baseObject.getName();
-        else if(column == 1) return baseObject;
+    public Object getColumnValue(LocalFileItem fileItem, int column) {
+        if(column == 0) return fileItem.getName();
+        else if(column == 1) return fileItem;
         
         throw new IllegalStateException("Unknown column:" + column);
     }

@@ -24,8 +24,12 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
     private MultiButtonTableCellRendererEditor shareEditor;
 
 
+    private TableColors tableColors;
+    
     public LibraryTable(EventList<T> libraryItems) {
         super(new LibraryTableModel<T>(libraryItems));
+                
+        tableColors = new TableColors();
         
         
         setStripesPainted(true);
@@ -34,7 +38,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         
         setShowHorizontalLines(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      //  setHighlighters(HighlighterFactory.createSimpleStriping());
+        setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
         setFillsViewportHeight(true);
         setDragEnabled(true);
         

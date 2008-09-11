@@ -15,6 +15,12 @@ public class UnshareButton extends JButton {
     @Resource
     Icon removeIcon;
     
+    public UnshareButton() {
+        GuiUtils.assignResources(this); 
+        
+        setIcon(removeIcon);
+    }
+    
     public UnshareButton(Action action) {
         super(action);
         

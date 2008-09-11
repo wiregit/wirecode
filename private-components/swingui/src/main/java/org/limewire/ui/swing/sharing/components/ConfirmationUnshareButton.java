@@ -6,8 +6,6 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -16,47 +14,53 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
+/**
+ * Panel that displays a remove button. When the remove button is pressed, a confirmation
+ * yes/no hyperlink/button is displayed to confirm the remove action.
+ */
 public class ConfirmationUnshareButton extends JPanel {
 
     @Resource
-    Icon removeIcon;
+    Color foregroundColor;
+    @Resource
+    Color mouseOverColor;
     
-    private JButton xButton;
+    private UnshareButton xButton;
     private JLabel divider;
     private HyperLinkButton yesButton;
     private HyperLinkButton noButton;
-    
     
     public ConfirmationUnshareButton(Action confirmAction) {
         
         GuiUtils.assignResources(this); 
         
-        yesButton = new HyperLinkButton("Yes");
+        yesButton = new HyperLinkButton(I18n.tr("Yes"));
         yesButton.setAction(confirmAction);
-        yesButton.setForegroundColor(Color.BLUE);
-        yesButton.setMouseOverColor(Color.BLUE);
+        yesButton.setForegroundColor(foregroundColor);
+        yesButton.setMouseOverColor(mouseOverColor);
         divider = new JLabel("/");
-        noButton = new HyperLinkButton("No");
+        noButton = new HyperLinkButton(I18n.tr("No"));
         noButton.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
-                setConfirmation(false);
+                setConfirmationVisible(false);
                 xButton.setEnabled(true);
             }           
         });
-        noButton.setForegroundColor(Color.BLUE);
-        noButton.setMouseOverColor(Color.BLUE);
-        xButton = new JButton(removeIcon);
+        noButton.setForegroundColor(foregroundColor);
+        noButton.setMouseOverColor(mouseOverColor);
+        xButton = new UnshareButton();
         xButton.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
-                setConfirmation(true);
+                setConfirmationVisible(true);
                 xButton.setEnabled(false);
             }
         });
         
-        setConfirmation(false);
+        setConfirmationVisible(false);
         setBorder(BorderFactory.createEmptyBorder());
         
         setLayout(new MigLayout("insets 0 5 0 0, hidemode 3", "", ""));
@@ -67,7 +71,7 @@ public class ConfirmationUnshareButton extends JPanel {
         add(xButton);
     }
     
-    private void setConfirmation(boolean value) {
+    private void setConfirmationVisible(boolean value) {
         yesButton.setVisible(value);
         divider.setVisible(value);
         noButton.setVisible(value);
@@ -76,7 +80,7 @@ public class ConfirmationUnshareButton extends JPanel {
     @Override
     public void setEnabled(boolean value) {
         if(value == false) 
-            setConfirmation(value);
+            setConfirmationVisible(value);
         xButton.setEnabled(value);
     }
 }

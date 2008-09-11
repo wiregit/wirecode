@@ -22,9 +22,9 @@ public class SharingFancyIconTableFormat implements TableFormat<FileItem> {
     }
 
     @Override
-    public Object getColumnValue(FileItem baseObject, int column) {
-        if(column == 0) return baseObject;
-        else if(column == 1) return baseObject;
+    public Object getColumnValue(FileItem fileItem, int column) {
+        if(column == 0) return fileItem;
+        else if(column == 1) return fileItem;
         
         throw new IllegalStateException("Unknown column:" + column);
     }

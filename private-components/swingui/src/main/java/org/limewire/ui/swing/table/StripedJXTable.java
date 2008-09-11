@@ -10,6 +10,7 @@ import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.CompoundHighlighter;
 
 /**
  * Paints the grid and background colors for empty rows if the the ViewPort
@@ -55,7 +56,7 @@ public class StripedJXTable extends JXTable {
      * Paints fake rows to fill the viewport
      * @param g
      */
-    private void paintEmptyRows(Graphics g) {
+    protected void paintEmptyRows(Graphics g) {
         final int rowCount = getRowCount();
         final Rectangle clip = g.getClipBounds();
         final int height = clip.y + clip.height;
@@ -94,9 +95,26 @@ public class StripedJXTable extends JXTable {
      * @param row - row to paint
      * @return - Color to paint with
      */
-    protected Color colorForRow(int row) { 
-        return (row % 2 == 0) ? getBackground() : 
-            (getHighlighters() == null || getHighlighters().length == 0) ? 
-                    getBackground() : ((ColorHighlighter)getHighlighters()[0]).getBackground();
+    protected Color colorForRow(int row) {
+      return (row % 2 == 0) ? getHighlighterColor(0) : getHighlighterColor(1);
+    }
+        
+    private Color getHighlighterColor(int index){
+        if(getHighlighters() == null || getHighlighters().length == 0)
+            return getBackground();
+        else if(getHighlighters()[0] instanceof CompoundHighlighter) {
+            if( ((CompoundHighlighter)getHighlighters()[0]).getHighlighters().length <= index)
+                return getBackground();
+            else
+                return ((ColorHighlighter)((CompoundHighlighter)getHighlighters()[0]).getHighlighters()[index]).getBackground();
+        }        
+        else if(getHighlighters()[0] instanceof ColorHighlighter) {
+            if(getHighlighters().length <= index)
+                return getBackground();
+            else
+                return ((ColorHighlighter)getHighlighters()[index]).getBackground();
+
+        }
+        return getBackground();
     }
 }

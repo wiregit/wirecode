@@ -26,16 +26,16 @@ public class SharingFancyAudioTableFormat implements TableFormat<LocalFileItem> 
     }
 
     @Override
-    public Object getColumnValue(LocalFileItem baseObject, int column) {
+    public Object getColumnValue(LocalFileItem fileItem, int column) {
         if(column == 0) {
-            String name = (String) baseObject.getProperty(FileItem.Keys.AUTHOR);
+            String name = (String) fileItem.getProperty(FileItem.Keys.AUTHOR);
             if(name != null)
                 return name;
             else 
-                return baseObject.getName();
-        }else if(column == 1) return baseObject.getProperty(FileItem.Keys.TITLE);
-        else if(column == 2) return baseObject.getProperty(FileItem.Keys.ALBUM);
-        else if(column == 3) return baseObject;
+                return fileItem.getName();
+        }else if(column == 1) return fileItem.getProperty(FileItem.Keys.TITLE);
+        else if(column == 2) return fileItem.getProperty(FileItem.Keys.ALBUM);
+        else if(column == 3) return fileItem;
         
         throw new IllegalStateException("Unknown column:" + column);
     }

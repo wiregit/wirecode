@@ -5,22 +5,27 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.ListSelectionModel;
 
-import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
+import org.limewire.ui.swing.table.StripedJXTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
+import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 
-public class SharingFancyTable extends JXTable {
+public class SharingFancyTable extends StripedJXTable {
 
+    private TableColors tableColors;
+    
     public SharingFancyTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
         super(new SharingTableModel(sharedItems, fileList, tableFormat));
+        
+        tableColors = new TableColors();
         
         setColumnControlVisible(false);
         setShowGrid(false, false);
@@ -28,12 +33,13 @@ public class SharingFancyTable extends JXTable {
         setFillsViewportHeight(false);
         getTableHeader().setFocusable(false);
         getTableHeader().setReorderingAllowed(false);
+        setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
         
         final TableDoubleClickHandler doubleClickHandler = new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
                 if( row >= 0 && row < getModel().getRowCount()) {
-                    LocalFileItem item = ((SharingTableModel) getModel()).getFileItem(row); System.out.println(item.getName() + " " + item.getCategory());
+                    LocalFileItem item = ((SharingTableModel) getModel()).getFileItem(row);
                     if(PlayerUtils.isPlayableFile(item.getFile())) {
                         PlayerUtils.play(item.getFile());
                     } else {

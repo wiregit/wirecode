@@ -21,7 +21,6 @@ import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.CompoundHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
@@ -66,16 +65,11 @@ public class CategoryDownloadPanel extends JPanel {
 	    
 	    colors = new TableColors();
 	    
-	    
 	  //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
-        evenTableHighlighter = new CompoundHighlighter(
-                new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
-                new ColorHighlighter(HighlightPredicate.ODD, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground) );//,
-        //new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+        evenTableHighlighter = new CompoundHighlighter(colors.getEvenHighLighter(), colors.getOddHighLighter());
+                //new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
         //oddHighlighter reverses color scheme
-		oddTableHighlighter = new CompoundHighlighter(
-                new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
-                new ColorHighlighter(HighlightPredicate.EVEN, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground) );//,
+		oddTableHighlighter = new CompoundHighlighter(colors.getOddHighLighter(), colors.getEvenHighLighter());
                 //new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 		setLayout(new BorderLayout());
 		add(new JScrollPane(tablePanel));

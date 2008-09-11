@@ -3,20 +3,17 @@ package org.limewire.ui.swing.table;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -26,9 +23,7 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
-//TODO comment this beast
-import javax.swing.ListSelectionModel;
-public class MouseableTable extends JXTable {
+public class MouseableTable extends StripedJXTable {
 
 	private TablePopupHandler popupHandler;
 
@@ -63,10 +58,9 @@ public class MouseableTable extends JXTable {
 		setRowSelectionAllowed(true);
 
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
-		setHighlighters(
-            new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
-            new ColorHighlighter(HighlightPredicate.ODD, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground),
-            new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+		setHighlighters(colors.getEvenHighLighter(), 
+		                colors.getOddHighLighter(),
+		                new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 		
 		//so that mouseovers will work within table
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -239,8 +233,23 @@ public class MouseableTable extends JXTable {
 	    @Resource
 	    public Color selectionForeground;
 	    
+	    private ColorHighlighter evenHighLighter;
+	    
+	    private ColorHighlighter oddHighlighter;
+	    
 	    public TableColors() {
 	        GuiUtils.assignResources(TableColors.this);
+	        
+	        evenHighLighter = new ColorHighlighter(HighlightPredicate.EVEN, evenColor, evenForeground, selectionColor, selectionForeground);
+	        oddHighlighter = new ColorHighlighter(HighlightPredicate.ODD, oddColor, oddForeground, selectionColor, selectionForeground);
+	    }
+	    
+	    public ColorHighlighter getEvenHighLighter() {
+	        return evenHighLighter;
+	    }
+	    
+	    public ColorHighlighter getOddHighLighter() {
+	        return oddHighlighter;
 	    }
 	}
 	
@@ -292,10 +301,6 @@ public class MouseableTable extends JXTable {
         }
     }
     
-    
-    //striping copied and adapted from StripedJXTable
-    //TODO - merge these
-    
     public void setStripesPainted(boolean painted){
         stripesPainted = painted;
     }
@@ -308,60 +313,7 @@ public class MouseableTable extends JXTable {
     public void paint(Graphics g) {
         super.paint(g);
         if (stripesPainted) {
-            paintEmptyRows(g);
+            super.paintEmptyRows(g);
         }
-    }
-    
-    /**
-     * Paints fake rows to fill the viewport
-     * @param g
-     */
-    private void paintEmptyRows(Graphics g) {
-        final int rowCount = getRowCount();
-        final Rectangle clip = g.getClipBounds();
-        final int height = clip.y + clip.height;
-        
-        // paint rows and horizontal lines
-        if (rowCount * rowHeight < height) {
-            for (int i = rowCount; i <= height/rowHeight; ++i) {
-                g.setColor(colorForRow(i));
-                g.fillRect(clip.x, i * rowHeight, clip.width, rowHeight);
-                
-                // paint horizontal rows if they're shown
-                if(getShowHorizontalLines() && i > rowCount) {
-                    g.setColor(gridColor);
-                    g.drawLine(clip.x, i * rowHeight, clip.width, i * rowHeight);
-                }
-            }
-            
-            // paint vertical lines if they're shown
-            if (getShowVerticalLines()) {
-                g.setColor(gridColor);
-                TableColumnModel columnModel = getColumnModel();
-                int x = 0;
-                for (int i = 0; i < columnModel.getColumnCount(); ++i) {
-                    TableColumn column = columnModel.getColumn(i);
-                    x += column.getWidth();
-                    g.drawLine(x - 1, rowCount * rowHeight, x - 1, height);
-                }
-            }
-
-        }
-    }
-    
-    /**
-     * Gets the background color for the row. This is assuming that there are alternating highlighters. 
-     * Anything else and the behaviour is unknown
-     * @param row - row to paint
-     * @return - Color to paint with
-     */
-    protected Color colorForRow(int row) { 
-        return (row % 2 == 0) ? getHighlighterColor(0) : 
-            getHighlighterColor(1);
-    }
-    
-    private Color getHighlighterColor(int index){
-       return (getHighlighters() == null || getHighlighters().length <= index) ? 
-                getBackground() : ((ColorHighlighter)getHighlighters()[index]).getBackground();
     }
 }

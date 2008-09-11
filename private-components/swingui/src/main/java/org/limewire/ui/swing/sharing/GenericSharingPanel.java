@@ -8,9 +8,9 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.FileItem.Keys;
+import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.TextFilterator;
@@ -22,7 +22,7 @@ public abstract class GenericSharingPanel extends JPanel {
     protected static final String TABLE = "TABLE";
     protected static final String LIST = "LIST";
     
-    protected JXTable table;
+    protected SharingTable table;
 
     public GenericSharingPanel() {
         GuiUtils.assignResources(this); 
