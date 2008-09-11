@@ -10,6 +10,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.impl.library.MockLibraryManager;
+import org.limewire.ui.swing.nav.MockNavigableTarget;
+import org.limewire.ui.swing.nav.MockNavigableTree;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
@@ -30,7 +32,7 @@ public class ChatPanelHarness {
                     public ConversationPane create(MessageWriter writer, Friend friend) {
                         return new ConversationPane(writer, friend);
                     }
-                }, icons, friendsPane, new TopPanel(icons, friendsPane)));
+                }, icons, friendsPane, new TopPanel(icons, friendsPane), new MockNavigableTree(), new MockNavigableTarget()));
                 
                 frame.pack();
                 frame.setVisible(true);
