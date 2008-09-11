@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.friends;
 
 import org.jdesktop.beans.AbstractBean;
-import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -135,9 +134,7 @@ public class FriendImpl extends AbstractBean implements Friend {
         return user.jidBelongsTo(jid);
     }
 
-    public void offerFile(FileMetaData fileMetaData) {
-        if(presence instanceof LimePresence) {
-            ((LimePresence)presence).offerFile(fileMetaData);
-        }
+    public Presence getPresence() {
+        return presence;
     }
 }

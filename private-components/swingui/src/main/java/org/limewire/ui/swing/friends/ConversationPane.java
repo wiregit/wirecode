@@ -1,30 +1,14 @@
 package org.limewire.ui.swing.friends;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.awt.*;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
 
-import javax.swing.BorderFactory;
-import javax.swing.JEditorPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.impl.library.CoreLocalFileItem;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -36,15 +20,13 @@ import org.limewire.ui.swing.friends.Message.Type;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.ChatState;
-import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.URN;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -199,122 +181,10 @@ public class ConversationPane extends JPanel implements Displayable {
             }
         }
     }
-    
-    public void offerFile(LocalFileItem file) {
-        FileDetails details = ((CoreLocalFileItem)file).getFileDetails();
-        // TODO HACK
-        FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
-        fileMetaData.setCreateTime(new Date(details.getCreationTime()));
-        fileMetaData.setDescription(""); // TODO
-        fileMetaData.setId(details.getSHA1Urn().toString());
-        fileMetaData.setIndex(details.getIndex());
-        fileMetaData.setName(details.getFileName());
-        fileMetaData.setSize(details.getSize());
-        fileMetaData.setURIs(copy(details.getUrns()));
-        
-        friend.offerFile(fileMetaData);
-    }
 
-    private Set<URI> copy(Set<URN> urns) {
-        Set<URI> uris = new HashSet<URI>();
-        for(URN urn : urns) {
-            try {
-                uris.add(new URI(urn.toString()));
-            } catch (URISyntaxException e) {
-                LOG.debugf(e.getMessage(), e);
-            }
+    public void offerFile(LocalFileItem file) {
+        if(friend.getPresence() instanceof LimePresence) {
+            file.offer((LimePresence)friend.getPresence());
         }
-        return uris;
-    }
-    
-    private static  class FileMetaDataImpl implements FileMetaData {
-        private enum Element {
-            id, name, size, description, index, metadata, uris, createTime
-        }
-    
-        private final Map<Element, String> data = new HashMap<Element, String>();
-        
-        public String getId() {
-            return data.get(Element.id);
-        }
-        
-        public void setId(String id) {
-            data.put(Element.id, id);
-        }
-    
-        public String getName() {
-            return data.get(Element.name);
-        }
-        
-        public void setName(String name) {
-            data.put(Element.name, name);
-        }
-    
-        public long getSize() {
-            return Long.valueOf(data.get(Element.size));
-        }                                                     
-        
-        public void setSize(long size) {
-            data.put(Element.size, Long.toString(size));
-        }
-    
-        public String getDescription() {
-            return data.get(Element.description);
-        }
-        
-        public void setDescription(String description) {
-            data.put(Element.description, description);
-        }
-    
-        public long getIndex() {
-            return Long.valueOf(data.get(Element.index));
-        }
-        
-        public void setIndex(long index) {
-            data.put(Element.index, Long.toString(index));
-        }
-    
-        public Map<String, String> getMetaData() {
-            // TODO
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-    
-        public Set<URI> getURIs() throws URISyntaxException {
-            StringTokenizer st = new StringTokenizer(data.get(Element.uris), " ");
-            HashSet<URI> set = new HashSet<URI>();
-            while(st.hasMoreElements()) {
-                set.add(new URI(st.nextToken()));
-            }
-            return set;
-        }
-        
-        public void setURIs(Set<URI> uris) {
-            String urisString = "";
-            for(URI uri : uris) {
-                urisString += uri  + " ";
-            }
-            data.put(Element.uris, urisString);
-        }
-    
-        public Date getCreateTime() {
-            return new Date(Long.valueOf(data.get(Element.createTime)));
-        }
-        
-        public void setCreateTime(Date date) {
-            data.put(Element.createTime, Long.toString(date.getTime()));
-        }
-    
-        public String toXML() {
-            // TODO StringBuilder instead of concats
-            String fileMetadata = "<file>";
-            for(Element element : data.keySet()) {
-                fileMetadata += "<" + element.toString() + ">";
-                fileMetadata += data.get(element);
-                fileMetadata += "</" + element.toString() + ">";
-            }
-            fileMetadata += "</file>";
-            return fileMetadata;
-        }
-        
     }
 }
