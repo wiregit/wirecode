@@ -350,8 +350,8 @@ public class MouseableTable extends JXTable {
     }
     
     /**
-     * Gets the background color for the row. This is assuming 1) there's no row highlighter or
-     * 2) there's only an alternate row highlighter. Anything else and the behaviour is unknown
+     * Gets the background color for the row. This is assuming that there are alternating highlighters. 
+     * Anything else and the behaviour is unknown
      * @param row - row to paint
      * @return - Color to paint with
      */
