@@ -4,6 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -124,6 +125,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMe
         add(menuPanel);
         
         statusMenu = new JMenu();
+        statusMenu.setCursor(new Cursor(Cursor.HAND_CURSOR));
         statusMenu.setOpaque(true);
         statusMenu.setEnabled(false);
         statusMenu.setIcon(icons.getEndChat());
