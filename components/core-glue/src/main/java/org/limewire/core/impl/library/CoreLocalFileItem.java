@@ -24,13 +24,6 @@ import com.limegroup.gnutella.URN;
 
 public class CoreLocalFileItem implements LocalFileItem {
 
-    private final File file;
-    private final String name;
-    private final long creationTime;
-    private final long modifiedTime;
-    private final long size;
-    private final int numHits;
-    private final int numUploads;
     private final Category category;
     private final Map<Keys,Object> map;
     private final FileDesc fileDesc;
@@ -39,13 +32,6 @@ public class CoreLocalFileItem implements LocalFileItem {
     public CoreLocalFileItem(FileDesc fileDesc, LocalFileDetailsFactory detailsFactory) {
         this.fileDesc = fileDesc;
         this.detailsFactory = detailsFactory;
-        this.file = fileDesc.getFile();
-        this.name = fileDesc.getFileName();
-        this.creationTime = fileDesc.getCreationTime();
-        this.modifiedTime = fileDesc.lastModified();
-        this.size = fileDesc.getFileSize();
-        this.numHits = fileDesc.getHitCount();
-        this.numUploads = fileDesc.getCompletedUploads();
         this.category = getCategory(fileDesc.getFile());
         this.map = Collections.synchronizedMap(new HashMap<Keys,Object>());
         
@@ -54,37 +40,37 @@ public class CoreLocalFileItem implements LocalFileItem {
     
     @Override
     public long getCreationTime() {
-        return creationTime;
+        return fileDesc.getCreationTime();
     }
 
     @Override
     public File getFile() {
-        return file;
+        return fileDesc.getFile();
     }
 
     @Override
     public long getLastModifiedTime() {
-        return modifiedTime;
+        return fileDesc.lastModified();
     }
 
     @Override
     public String getName() {
-        return name;
+        return fileDesc.getFileName();
     }
 
     @Override
     public long getSize() {
-        return size;
+        return fileDesc.getFileSize();
     }
 
     @Override
     public int getNumHits() {
-        return numHits;
+        return fileDesc.getHitCount();
     }
 
     @Override
     public int getNumUploads() {
-        return numUploads;
+        return fileDesc.getCompletedUploads();
     }
 
     @Override
@@ -92,7 +78,7 @@ public class CoreLocalFileItem implements LocalFileItem {
         return category;
     }
     
-    private Category getCategory(File file) {
+    private static Category getCategory(File file) {
         String ext = FileUtils.getFileExtension(file);
         MediaType type = MediaType.getMediaTypeForExtension(ext);
         if (type == MediaType.getAudioMediaType()) {
@@ -151,7 +137,7 @@ public class CoreLocalFileItem implements LocalFileItem {
         return uris;
     }
 
-    private static  class FileMetaDataImpl implements FileMetaData {
+    private static class FileMetaDataImpl implements FileMetaData {
         private enum Element {
             id, name, size, description, index, metadata, uris, createTime
         }

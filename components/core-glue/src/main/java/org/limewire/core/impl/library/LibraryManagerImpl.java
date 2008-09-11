@@ -33,7 +33,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 
 @Singleton
-class LibraryManagerImpl implements LibraryManager, FileEventListener {
+class LibraryManagerImpl implements LibraryManager {
     
     private final FileManager fileManager;
     private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
@@ -164,8 +164,8 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
         return buddyLibraryFileLists.containsKey(name);
     }
 
-    @Override
-    public void handleFileEvent(FileManagerEvent evt) {
+//    @Override
+//    public void handleFileEvent(FileManagerEvent evt) {
 //        switch(evt.getType()) {
 //            case ADD_FILE:
 //                allFileList.add(new CoreFileItem(evt.getNewFileDesc()));
@@ -181,7 +181,7 @@ class LibraryManagerImpl implements LibraryManager, FileEventListener {
 //                removeFileItem(allFileList, evt.getOldFileDesc());
 //                allFileList.add(new CoreFileItem(evt.getNewFileDesc()));
 //        }
-    }
+//    }
     
     private static class Listener implements FileEventListener {
         private final LibraryListListener listener;
