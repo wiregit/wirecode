@@ -129,7 +129,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         case STORE:
             return storeDownloaderFactory;
         case TORRENTFETCHER:
-        case MOZILLA: //the memento sgh
+        case MOZILLA:
         default:
             throw new InvalidDataException("invalid memento type: " + memento.getDownloadType());
         }

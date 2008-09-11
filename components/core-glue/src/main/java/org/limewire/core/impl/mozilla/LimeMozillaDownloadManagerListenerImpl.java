@@ -1,28 +1,35 @@
 package org.limewire.core.impl.mozilla;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.Objects;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDOMDocument;
 import org.mozilla.interfaces.nsIDownload;
 import org.mozilla.interfaces.nsIDownloadManager;
 import org.mozilla.interfaces.nsIRequest;
+import org.mozilla.interfaces.nsISimpleEnumerator;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.xpcom.Mozilla;
+import org.mozilla.xpcom.XPCOMException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 
 /**
- * This is an example of listening to a mozilla download and putting this info
- * into the downloader list for the limewire client.
+ * Provides a means of tracking what downloads have listeners already, and
+ * adding listeners for those downloads which need them.
  */
 @Singleton
-public class LimeMozillaDownloadManagerListenerImpl implements org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener {
+public class LimeMozillaDownloadManagerListenerImpl implements
+        org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener {
+
+    private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadManagerListenerImpl.class);
 
     public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
@@ -33,7 +40,36 @@ public class LimeMozillaDownloadManagerListenerImpl implements org.limewire.core
     @Inject
     public LimeMozillaDownloadManagerListenerImpl(DownloadManager downloadManager) {
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
-        this.listeners = new WeakHashMap<Long, LimeMozillaDownloadProgressListener>();
+        this.listeners = new HashMap<Long, LimeMozillaDownloadProgressListener>();
+        synchronized (this) {
+            addMissingDownloads();
+            resumeDownloads();
+        }
+    }
+
+    private synchronized void resumeDownloads() {
+        nsIDownloadManager downloadManager = getDownloadManager();
+        nsISimpleEnumerator enumerator = downloadManager.getActiveDownloads();
+        while (enumerator.hasMoreElements()) {
+            nsISupports elem = enumerator.getNext();
+            nsIDownload download = XPCOMUtils.proxy(elem, nsIDownload.class);
+            long downloadId = download.getId();
+            try {
+                downloadManager.resumeDownload(downloadId);
+            } catch (XPCOMException e) {
+                LOG.debug(e.getMessage(), e);
+            }
+        }
+    }
+
+    private synchronized void addMissingDownloads() {
+        nsIDownloadManager downloadManager = getDownloadManager();
+        nsISimpleEnumerator enumerator = downloadManager.getActiveDownloads();
+        while (enumerator.hasMoreElements()) {
+            nsISupports elem = enumerator.getNext();
+            nsIDownload download = XPCOMUtils.proxy(elem, nsIDownload.class);
+            addListener(download, nsIDownloadManager.DOWNLOAD_QUEUED);
+        }
     }
 
     private nsIDownloadManager getDownloadManager() {
@@ -44,13 +80,14 @@ public class LimeMozillaDownloadManagerListenerImpl implements org.limewire.core
 
     @Override
     public void onDownloadStateChange(short state, nsIDownload download) {
-        addListener(download, state);
+        addMissingDownloads();
     }
 
     private synchronized boolean addListener(nsIDownload download, short state) {
-        LimeMozillaDownloadProgressListener listener = listeners.get(download.getId());
+        long downloadId = download.getId();
+        LimeMozillaDownloadProgressListener listener = listeners.get(downloadId);
         if (listener == null) {
-            listener = new LimeMozillaDownloadProgressListener(download, state);
+            listener = new LimeMozillaDownloadProgressListener(this, download, state);
             listeners.put(download.getId(), listener);
             getDownloadManager().addListener(listener);
             downloadManager.downloadFromMozilla(listener);
@@ -75,7 +112,7 @@ public class LimeMozillaDownloadManagerListenerImpl implements org.limewire.core
     @Override
     public void onStateChange(nsIWebProgress webProgress, nsIRequest request, long stateFlags,
             long status, nsIDownload download) {
-        // no longer used by mozilla api
+        // don't care about this event.
     }
 
     @Override
@@ -92,6 +129,12 @@ public class LimeMozillaDownloadManagerListenerImpl implements org.limewire.core
     @Override
     public nsISupports queryInterface(String uuid) {
         return Mozilla.queryInterface(this, uuid);
+    }
+
+    @Override
+    public synchronized void remove(
+            LimeMozillaDownloadProgressListener limeMozillaDownloadProgressListener) {
+        listeners.remove(limeMozillaDownloadProgressListener);
     }
 
 }

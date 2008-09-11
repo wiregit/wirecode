@@ -73,7 +73,7 @@ public class LimeMozillaInitializer {
         if (OSUtils.isWindows()) {
             return "xulrunner-win32.zip";
         } else if (OSUtils.isMacOSX()) {
-            return "xulrunner_macosx-universal.zip";
+            return "xulrunner-macosx-i386.zip";
         } else if (OSUtils.isLinux()) {
             return "xulrunner-linux.zip";
         } else {

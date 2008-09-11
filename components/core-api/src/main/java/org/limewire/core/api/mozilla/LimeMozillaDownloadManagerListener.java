@@ -1,5 +1,6 @@
 package org.limewire.core.api.mozilla;
 
+import org.limewire.core.impl.mozilla.LimeMozillaDownloadProgressListener;
 import org.mozilla.interfaces.nsIDownloadProgressListener;
 
 
@@ -8,5 +9,7 @@ import org.mozilla.interfaces.nsIDownloadProgressListener;
  * into the downloader list for the limewire client.
  */
 public interface LimeMozillaDownloadManagerListener extends nsIDownloadProgressListener {
+
+    void remove(LimeMozillaDownloadProgressListener limeMozillaDownloadProgressListener);
 
 }

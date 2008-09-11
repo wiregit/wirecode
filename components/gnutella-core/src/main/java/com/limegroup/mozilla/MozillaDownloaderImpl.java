@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
@@ -21,6 +23,8 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
  * Downloader listening to events from the Mozilla download process.
  */
 public class MozillaDownloaderImpl extends AbstractCoreDownloader {
+
+    private static final Log LOG = LogFactory.getLog(MozillaDownloaderImpl.class);
 
     private final MozillaDownloadListener listener;
 
@@ -267,22 +271,9 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public void finish() {
-        try {
-            pause();
-        } catch (Exception ignored) {
-            // yum
-        }
-
-        try {
-            listener.cancelDownload();
-        } catch (Exception ignored) {
-            // yum
-        }
-        try {
-            listener.removeDownload();
-        } catch (Exception ignored) {
-            // yum
-        }
+        pause();
+        listener.cancelDownload();
+        listener.removeDownload();
         shouldBeRemoved.set(true);
     }
 

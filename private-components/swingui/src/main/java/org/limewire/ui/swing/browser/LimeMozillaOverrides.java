@@ -9,10 +9,14 @@ import org.mozilla.interfaces.nsIPrefService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * This class overrides mozilla defaults with values we want it to run with
+ * inside of limewire.
+ */
 @Singleton
 public class LimeMozillaOverrides {
 
-    public static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
+    private static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
 
     @Inject
     public LimeMozillaOverrides(LimeMozillaDownloadManagerListenerImpl downloadManagerListener) {

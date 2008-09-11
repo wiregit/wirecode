@@ -281,6 +281,10 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
      *  file was successfully written. */
     public void writeSnapshot();
     
+    /**
+     * Creates a Downloader wrapping the MozillaDownloadListener. 
+     * Adds capability to track status of mozilla download.
+     */
     public Downloader downloadFromMozilla(MozillaDownloadListener listener);
 
 }
