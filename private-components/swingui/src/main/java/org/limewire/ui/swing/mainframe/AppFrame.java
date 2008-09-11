@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -29,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.limegroup.gnutella.LifecycleManager;
 
 /**
  * The entry point for the Swing UI.  If the real core is desired,
@@ -73,6 +75,7 @@ public class AppFrame extends SingleFrameApplication {
         LimeWireSwingUI ui = localInjector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
+        addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(LifecycleManager.class)));
         
         show(ui);        
         restoreView();
@@ -87,11 +90,7 @@ public class AppFrame extends SingleFrameApplication {
         started = true;
         
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
-            try {
-                listener.startupComplete();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            listener.startupComplete();
         }
     }
     
@@ -151,5 +150,30 @@ public class AppFrame extends SingleFrameApplication {
     
     public static void removeApplicationLifecycleListener(ApplicationLifecycleListener listener) {
         lifecycleListeners.remove(listener);
+    }
+    
+    
+    private static class ShutdownListener implements ExitListener {
+        private final LifecycleManager manager;
+        private final JFrame mainFrame;
+        
+        public ShutdownListener(JFrame mainFrame, LifecycleManager manager) {
+            this.mainFrame = mainFrame;
+            this.manager = manager;
+        }        
+        
+        @Override
+        public boolean canExit(EventObject event) {
+            return true;
+        }
+        
+        @Override
+        public void willExit(EventObject event) {
+            mainFrame.setVisible(false);
+            System.out.println("Shutting down...");
+            manager.shutdown();
+            System.out.println("Shut down");
+        }
+        
     }
 }

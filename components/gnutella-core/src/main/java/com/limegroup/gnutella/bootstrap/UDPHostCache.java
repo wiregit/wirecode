@@ -294,19 +294,8 @@ public class UDPHostCache {
         return true;
     }
     
-    /**
-     * Notification that all stored UDP host caches have been added.
-     * If none are stored, we load a list of defaults.
-     */
-    public synchronized void hostCachesAdded() {
-        if(udpHostsSet.isEmpty())
-            loadDefaults();
-    }
-    
-    protected void loadDefaults() {
-//        createAndAdd("uhc2.limewire.com", 20181);
-//        createAndAdd("uhc.udp-host-cache.com", 9999);
-//        createAndAdd("uhc3.limewire.com", 51180);
+    public void loadDefaults() {
+        // ADD DEFAULT UDP HOST CACHES HERE.
     }
     
     /**

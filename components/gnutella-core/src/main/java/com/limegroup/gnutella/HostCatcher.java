@@ -551,7 +551,6 @@ public class HostCatcher implements Service {
                 }
             }
         } finally {
-            udpHostCache.hostCachesAdded();
             try {
                 if( in != null )
                     in.close();
@@ -1450,6 +1449,7 @@ public class HostCatcher implements Service {
             _failures = 0;
             FETCHER.resetFetchTime();
             udpHostCache.resetData();
+            udpHostCache.loadDefaults();
             restoredHosts.clear();
             uniqueHostPinger.resetData();
         }
