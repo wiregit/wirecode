@@ -2,6 +2,8 @@ package org.limewire.ui.swing.table;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -9,6 +11,8 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JButton;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.application.Resource;
@@ -31,6 +35,8 @@ public class MouseableTable extends JXTable {
 	private TableDoubleClickHandler doubleClickHandler;
 	
 	private TableColors colors = new TableColors();
+	
+	private boolean stripesPainted = false;
 	
 	public MouseableTable() {
 		initialize();
@@ -105,28 +111,29 @@ public class MouseableTable extends JXTable {
 					}
 				}
 			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-                // clears mouseover color -
-                // necessary for coordinating between multiple tables
-
-				TableCellEditor editor = getCellEditor();
-				Component component = e.getComponent();
-
-				// if component isn't editor we shouldn't be editing
-				if (editor != null && component != editor) {
-					// check subcomponent too - this prevents
-                    // color from flashing when mousing over the buttons
-					Component componentAtPoint =
-                        component.getComponentAt(e.getPoint());
-
-					if (componentAtPoint != editor) {
-                        // Mark commented the following line.
-						//editor.cancelCellEditing();
-					}
-				}
-			}
+			
+//            //This isn't necessary if we aren't doing mouseover highlighting
+//			@Override
+//			public void mouseExited(MouseEvent e) {
+//                // clears mouseover color -
+//                // necessary for coordinating between multiple tables
+//
+//				TableCellEditor editor = getCellEditor();
+//				Component component = e.getComponent();
+//
+//				// if component isn't editor we shouldn't be editing
+//				if (editor != null && component != editor) {
+//					// check subcomponent too - this prevents
+//                    // color from flashing when mousing over the buttons
+//					Component componentAtPoint =
+//                        component.getComponentAt(e.getPoint());
+//
+//					if (componentAtPoint != editor) {
+//                        // Mark commented the following line.
+//						//editor.cancelCellEditing();
+//					}
+//				}
+//			}
 			
 			@Override
             public void mouseReleased(MouseEvent e) {
@@ -184,6 +191,9 @@ public class MouseableTable extends JXTable {
     
     @Override
     public boolean isCellEditable(int row, int col) {
+        if (row >= getRowCount() || col >= getColumnCount()){
+            return false;
+        }
     	return getColumnModel().getColumn(col).getCellEditor() != null;
     }
 
@@ -270,17 +280,88 @@ public class MouseableTable extends JXTable {
 
         if (usesEventTableModel && usesAdvancedTableFormat) {
             AdvancedTableFormat format = (AdvancedTableFormat) tableFormat;
-//            boolean matched = false;
             for (int i = 0; i < getModel().getColumnCount(); i++) {
                 Class columnClass = format.getColumnClass(i);
                 if (columnClass == clazz) {
                     getColumnModel().getColumn(i).setCellRenderer(renderer);
-//                    matched = true;
                     break;
                 }
             }
         } else {
             super.setDefaultRenderer(clazz, renderer);
         }
+    }
+    
+    
+    //striping copied and adapted from StripedJXTable
+    //TODO - merge these
+    
+    public void setStripesPainted(boolean painted){
+        stripesPainted = painted;
+    }
+    /**
+     * The parent paints all the real rows then the remaining space is calculated
+     * and appropriately painted with grid lines and background colors. These 
+     * rows are not selectable.
+     */
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        if (stripesPainted) {
+            paintEmptyRows(g);
+        }
+    }
+    
+    /**
+     * Paints fake rows to fill the viewport
+     * @param g
+     */
+    private void paintEmptyRows(Graphics g) {
+        final int rowCount = getRowCount();
+        final Rectangle clip = g.getClipBounds();
+        final int height = clip.y + clip.height;
+        
+        // paint rows and horizontal lines
+        if (rowCount * rowHeight < height) {
+            for (int i = rowCount; i <= height/rowHeight; ++i) {
+                g.setColor(colorForRow(i));
+                g.fillRect(clip.x, i * rowHeight, clip.width, rowHeight);
+                
+                // paint horizontal rows if they're shown
+                if(getShowHorizontalLines() && i > rowCount) {
+                    g.setColor(gridColor);
+                    g.drawLine(clip.x, i * rowHeight, clip.width, i * rowHeight);
+                }
+            }
+            
+            // paint vertical lines if they're shown
+            if (getShowVerticalLines()) {
+                g.setColor(gridColor);
+                TableColumnModel columnModel = getColumnModel();
+                int x = 0;
+                for (int i = 0; i < columnModel.getColumnCount(); ++i) {
+                    TableColumn column = columnModel.getColumn(i);
+                    x += column.getWidth();
+                    g.drawLine(x - 1, rowCount * rowHeight, x - 1, height);
+                }
+            }
+
+        }
+    }
+    
+    /**
+     * Gets the background color for the row. This is assuming 1) there's no row highlighter or
+     * 2) there's only an alternate row highlighter. Anything else and the behaviour is unknown
+     * @param row - row to paint
+     * @return - Color to paint with
+     */
+    protected Color colorForRow(int row) { 
+        return (row % 2 == 0) ? getHighlighterColor(0) : 
+            getHighlighterColor(1);
+    }
+    
+    private Color getHighlighterColor(int index){
+       return (getHighlighters() == null || getHighlighters().length <= index) ? 
+                getBackground() : ((ColorHighlighter)getHighlighters()[index]).getBackground();
     }
 }
