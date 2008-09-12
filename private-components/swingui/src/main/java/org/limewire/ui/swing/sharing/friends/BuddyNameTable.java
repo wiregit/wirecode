@@ -9,6 +9,7 @@ import javax.swing.ListSelectionModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.sharing.menu.BuddySharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.BuddySharingPopupHandler;
 
@@ -24,7 +25,7 @@ public class BuddyNameTable extends JXTable {
 
     private EventTableModel<BuddyItem> tableModel;
     
-    public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat, LibraryManager libraryManager) {
+    public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat, LibraryManager libraryManager, NavigableTree navTree) {
 //        super(new EventTableModel<BuddyItem>(new SortedList<BuddyItem>(eventList, new BuddyComparator()), tableFormat));
         
         SortedList<BuddyItem> buddyList = new SortedList<BuddyItem>(eventList, new BuddyComparator());       
@@ -48,7 +49,7 @@ public class BuddyNameTable extends JXTable {
         getColumn(1).setWidth(30);
         getColumn(1).setPreferredWidth(30);
         
-        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler(libraryManager), libraryManager);
+        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler(navTree, libraryManager), libraryManager);
         
         addMouseListener(new MouseAdapter() {
             

@@ -64,6 +64,7 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
     @Override
     protected void createComponents() {
         libraryButton = new JButton("Library");
+        libraryButton.setEnabled(false);
         shareButton = new JButton("Share v");       
         shareButton.setVisible(false);
     }

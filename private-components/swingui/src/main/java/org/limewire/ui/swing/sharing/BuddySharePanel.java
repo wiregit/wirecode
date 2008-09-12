@@ -28,6 +28,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
@@ -83,7 +84,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     private BuddySharingHeaderPanel headerPanel;
     
     @Inject
-    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel) {        
+    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, NavigableTree navTree) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
         
@@ -101,7 +102,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         ObservableElementList.Connector<BuddyItem> buddyConnector = GlazedLists.beanConnector(BuddyItem.class);
         eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
        
-        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager);
+        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager, navTree);
         
         headerPanel = createHeader(cardPanel);
 
