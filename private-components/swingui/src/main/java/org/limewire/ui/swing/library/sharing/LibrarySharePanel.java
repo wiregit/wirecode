@@ -251,7 +251,7 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
     @Override
     public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {              
-                    addBuddy(event.getSource().getId());
+            addBuddy(event.getSource().getId());
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
             removeBuddy(event.getSource().getId());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
@@ -289,6 +289,9 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
     }
     
     private void addBuddy(String name) {
+        if(!libraryManager.containsBuddy(name)) {
+            libraryManager.addBuddy(name);
+        }
         BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(name);
         buddyListMap.put(name, fileList);
         loadBuddy(name);
