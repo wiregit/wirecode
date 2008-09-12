@@ -56,21 +56,39 @@ public class SharingAddAllAction extends AbstractAction {
             public void run() {
                 if(selectMusic) {
                     FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
-                    for(LocalFileItem item : audio) {
-                        currentList.addFile(item.getFile());
+                    try {
+                        audio.getReadWriteLock().readLock().lock();
+                        for(LocalFileItem item : audio) {
+                            currentList.addFile(item.getFile());
+                        }
+                    } finally {
+                        audio.getReadWriteLock().readLock().unlock();
                     }
+                    audio.dispose();
                 }
                 if(selectVideo) {
                     FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.VIDEO));
-                    for(LocalFileItem item : video) {
-                        currentList.addFile(item.getFile());
+                    try {
+                        video.getReadWriteLock().readLock().lock();
+                        for(LocalFileItem item : video) {
+                            currentList.addFile(item.getFile());
+                        }
+                    } finally {
+                        video.getReadWriteLock().readLock().unlock();
                     }
+                    video.dispose();
                 }
                 if(selectImage) {
                     FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.IMAGE));
-                    for(LocalFileItem item : image) {
-                        currentList.addFile(item.getFile());
+                    try {
+                        image.getReadWriteLock().readLock().lock();
+                        for(LocalFileItem item : image) {
+                            currentList.addFile(item.getFile());
+                        }
+                    } finally {
+                        image.getReadWriteLock().readLock().unlock();
                     }
+                    image.dispose();
                 }
             }
         });

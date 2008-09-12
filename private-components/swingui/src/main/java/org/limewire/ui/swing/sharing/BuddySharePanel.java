@@ -171,6 +171,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         private BuddySharingHeaderPanel headerPanel;
         private SharingBuddyEmptyPanel emptyPanel;
         private JPanel cardPanel;
+        private String name = "";
         
         private EventList<LocalFileItem> currentList;
         
@@ -188,6 +189,10 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
                 int index = buddy.getSelectedRow();
                 if( index >= 0 && index < buddy.getModel().getRowCount()) {
                     BuddyItem buddyItem = (BuddyItem) buddy.getModel().getValueAt(index, 0);
+                    if(buddyItem.getName().equals(name))
+                        return;
+                    
+                    name = buddyItem.getName();
                     headerPanel.setBuddyName(buddyItem.getName());
                     emptyPanel.setBuddyName(buddyItem.getName());
       

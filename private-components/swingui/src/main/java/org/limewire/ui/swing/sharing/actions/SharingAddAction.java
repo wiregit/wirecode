@@ -36,10 +36,22 @@ public class SharingAddAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         if( userList == null || libraryList == null)
             return; 
-        FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>(libraryList.getModel(), new CategoryFilter(category)); 
-        for(LocalFileItem item : audio) {
-            userList.addFile(item.getFile());
-        }
+        Thread t = new Thread(new Runnable(){
+            public void run() {
+                FilterList<LocalFileItem> filter = new FilterList<LocalFileItem>(libraryList.getModel(), new CategoryFilter(category));
+                try {
+                    filter.getReadWriteLock().readLock().lock();
+                    for(LocalFileItem item : filter) {
+                        userList.addFile(item.getFile());
+                    }
+                } finally {
+                    filter.getReadWriteLock().readLock().unlock();
+                }
+                filter.dispose();
+            }
+        });
+        t.start();
+
     }
     
     public void setUserFileList(LocalFileList userList) {

@@ -31,21 +31,41 @@ public class BuddySharingActionHandler {
                     //TODO: set navigator here
                 } else if(actionCommand == SHARE_ALL_VIDEO) {
                     FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.VIDEO));
-                    for(LocalFileItem fileItem : video) {
-                        fileList.addFile(fileItem.getFile());
+                    try {
+                        video.getReadWriteLock().readLock().lock();
+                        for(LocalFileItem fileItem : video) {
+                            fileList.addFile(fileItem.getFile());
+                        }
+                    } finally {
+                        video.getReadWriteLock().readLock().unlock();
                     }
+                    video.dispose();
                 } else if(actionCommand == SHARE_ALL_AUDIO) {
                     FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.AUDIO));
-                    for(LocalFileItem fileItem : audio) {
-                        fileList.addFile(fileItem.getFile());
+                    try {
+                        audio.getReadWriteLock().readLock().lock();
+                        for(LocalFileItem fileItem : audio) {
+                            fileList.addFile(fileItem.getFile());
+                        }
+                    } finally {
+                        audio.getReadWriteLock().readLock().unlock();
                     }
+                    audio.dispose();
                 } else if(actionCommand == SHARE_ALL_IMAGE) {
-                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.IMAGE));
-                    for(LocalFileItem fileItem : image) {
-                        fileList.addFile(fileItem.getFile());
+                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.IMAGE));                 
+                    
+                    try {
+                        image.getReadWriteLock().readLock().lock();
+                        for(LocalFileItem fileItem : image) {
+                            fileList.addFile(fileItem.getFile());
+                        }
+                    } finally {
+                        image.getReadWriteLock().readLock().unlock();
                     }
+                    image.dispose();
                 } else if(actionCommand == UNSHARE_ALL) {
-                    fileList.clear();
+//                    fileList.clear();
+                    //TODO: implement this correctly;
                 }
             }
         });
