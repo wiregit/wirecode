@@ -20,7 +20,7 @@ public class SwingUtils {
             runnable.run();
         } else {
             try {
-                SwingUtilities.invokeAndWait(runnable);
+                EventQueue.invokeAndWait(runnable);
             } catch (InvocationTargetException ite) {
                 Throwable t = ite.getTargetException();
                 if(t instanceof Error) {
@@ -42,7 +42,7 @@ public class SwingUtils {
         if (EventQueue.isDispatchThread()) {
             runnable.run();
         } else {
-            SwingUtilities.invokeLater(runnable);
+            EventQueue.invokeLater(runnable);
         }
     }
 

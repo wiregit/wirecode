@@ -39,6 +39,7 @@ import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -257,5 +258,27 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         fileList.setFilteredModel(filteredList);
 
         eventList.add(new BuddyItemImpl(name, fileList.getFilteredModel()));
+    }
+    
+    /**
+     * If the buddy name exists in the list, this selects
+     * that buddy in the table and shows the appropriate 
+     * information on the right.
+     * 
+     * @param name - buddy name
+     */
+    public void selectBuddy(String name) {
+        for(int i = 0; i < table.getModel().getRowCount(); i++) {
+            BuddyItem item = (BuddyItem) table.getModel().getValueAt(i, 0);
+            if(item.getName().equals(name)) {
+                final int index = i;
+                SwingUtils.invokeLater(new Runnable(){
+                    public void run() {
+                        table.setRowSelectionInterval(index, index);                        
+                    }
+                });
+                return;
+            }
+        }
     }
 }
