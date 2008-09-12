@@ -113,6 +113,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 rosterListeners.removeListener(addressIQListener.getRosterListener());
                 addressIQListener = null;
                 fileTransferIQListener = null;
+                users.clear();
                 LOG.info("disconnected.");
             }
         }

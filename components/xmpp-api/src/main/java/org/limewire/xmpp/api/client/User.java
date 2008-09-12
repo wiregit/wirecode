@@ -34,7 +34,8 @@ public interface User {
     public boolean jidBelongsTo(String jid);
 
     /**
-     * @return an unmodifiable map of all <code>Presence</code>s for this <code>User</code>
+     * @return an unmodifiable map of all <code>Presence</code>s for this <code>User</code>. 
+     * Keys are fully qualified jids of the form <code>"user@domain.com/resourceXYZ"</code>
      */
     public Map<String, Presence> getPresences();
 }

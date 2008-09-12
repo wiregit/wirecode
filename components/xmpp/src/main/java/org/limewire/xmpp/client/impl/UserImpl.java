@@ -3,7 +3,6 @@ package org.limewire.xmpp.client.impl;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jivesoftware.smack.RosterEntry;
@@ -71,6 +70,9 @@ public class UserImpl implements User {
     }
 
     void removePresense(Presence presence) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debugf("removing presence {0}", presence.getJID());
+        }
         presences.remove(presence.getJID());
         firePresenceListeners(presence);
     }
@@ -87,6 +89,9 @@ public class UserImpl implements User {
     }
 
     void updatePresence(Presence updatedPresence) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debugf("updating presence {0}", updatedPresence.getJID());
+        }
         presences.remove(updatedPresence.getJID());
         presences.put(updatedPresence.getJID(), updatedPresence);
         firePresenceListeners(updatedPresence);
