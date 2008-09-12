@@ -1,5 +1,7 @@
 package org.limewire.xmpp.api.client;
 
+import java.util.Map;
+
 /**
  * Represents a user ("buddy") in a persons roster
  */
@@ -30,4 +32,9 @@ public interface User {
      * @return true if the the jid belongs to this user, otherwise false
      */
     public boolean jidBelongsTo(String jid);
+
+    /**
+     * @return an unmodifiable map of all <code>Presence</code>s for this <code>User</code>
+     */
+    public Map<String, Presence> getPresences();
 }
