@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.sharing.components;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -32,9 +35,27 @@ public class ConfirmationUnshareButton extends JPanel {
     private HyperLinkButton yesButton;
     private HyperLinkButton noButton;
     
+    private AWTEventListener eventListener;
+    
     public ConfirmationUnshareButton(Action confirmAction) {
         
         GuiUtils.assignResources(this); 
+        
+        //listens for clicks anywhere in the application. If clicked outside of the 
+        //component assumes its a "No" operation
+        eventListener = new AWTEventListener(){
+            @Override
+            public void eventDispatched(AWTEvent event) {
+                if ( event.getID() == MouseEvent.MOUSE_PRESSED){
+                    MouseEvent e = (MouseEvent)event;
+                    if(!ConfirmationUnshareButton.this.contains(e.getPoint())) {
+                        setConfirmationVisible(false);
+                        xButton.setEnabled(true);
+                    }
+                    Toolkit.getDefaultToolkit().removeAWTEventListener(eventListener);
+                }
+            }
+        }; 
         
         yesButton = new HyperLinkButton(I18n.tr("Yes"));
         yesButton.setAction(confirmAction);
@@ -55,6 +76,7 @@ public class ConfirmationUnshareButton extends JPanel {
         xButton.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
+                Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK); 
                 setConfirmationVisible(true);
                 xButton.setEnabled(false);
             }
