@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.impl.library.MockLibraryManager;
+import org.limewire.ui.swing.sharing.MockBuddySharingDisplay;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
@@ -21,7 +22,7 @@ public class FriendsPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
 
-                FriendsPane pane = new FriendsPane(new IconLibraryImpl(), new MockFriendsCountUpdater(), new MockLibraryManager());
+                FriendsPane pane = new FriendsPane(new IconLibraryImpl(), new MockFriendsCountUpdater(), new MockLibraryManager(), new MockBuddySharingDisplay());
                 frame.add(pane);
 
                 final ArrayList<Duo> presences = new ArrayList<Duo>();

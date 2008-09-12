@@ -11,7 +11,7 @@ import javax.swing.SwingUtilities;
 
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.ui.swing.nav.MockNavigableTree;
+import org.limewire.ui.swing.sharing.MockBuddySharingDisplay;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
@@ -26,13 +26,14 @@ public class ChatPanelHarness {
                 JFrame frame = new JFrame();
                 final IconLibraryImpl icons = new IconLibraryImpl();
                 final MockLibraryManager libraryManager = new MockLibraryManager();
-                FriendsPane friendsPane = new FriendsPane(icons, new MockFriendsCountUpdater(), libraryManager);
+                MockBuddySharingDisplay buddySharing = new MockBuddySharingDisplay();
+                FriendsPane friendsPane = new FriendsPane(icons, new MockFriendsCountUpdater(), libraryManager, buddySharing);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, Friend friend) {
                         return new ConversationPane(writer, friend);
                     }
-                }, icons, friendsPane, new TopPanel(icons, friendsPane), new MockNavigableTree()));
+                }, icons, friendsPane, new TopPanel(icons, friendsPane), buddySharing));
                 
                 frame.pack();
                 frame.setVisible(true);

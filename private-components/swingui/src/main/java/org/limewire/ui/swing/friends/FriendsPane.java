@@ -33,7 +33,6 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
-import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
@@ -65,6 +64,7 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.ui.swing.sharing.BuddySharingDisplay;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
@@ -114,14 +114,17 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
+    private final BuddySharingDisplay buddySharing;
     private final JScrollPane scrollPane;
     private final Timer idleTimer;
+    private final JLabel unseenMessageCountPopupLabel = new JLabel();
+    private Popup unseenMessageCountPopup;
     private String myID;
     private WeakReference<Friend> activeConversation = new WeakReference<Friend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
 
     @Inject
-    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager) {
+    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager, BuddySharingDisplay buddySharing) {
         super(new BorderLayout());
         this.icons = icons;
         this.friends = new BasicEventList<Friend>();
@@ -129,6 +132,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         this.friendTimerMap = new WeakHashMap<Friend, AlternatingIconTimer>();
         this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
+        this.buddySharing = buddySharing;
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
@@ -136,7 +140,12 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         addPopupMenus(friendsTable);
         
         scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        addUnseenMessagesScrollPaneListener(scrollPane);
+        scrollPane.getViewport().addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                showUnseenMessageCountPopup();
+            }
+        });
         add(scrollPane);
         setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
         
@@ -145,38 +154,6 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         idleTimer = new IdleTimer();
         idleTimer.start();
         
-    }
-
-    private void addUnseenMessagesScrollPaneListener(JScrollPane friendScroll) {
-        final JViewport viewport = friendScroll.getViewport();
-        viewport.addChangeListener(new ChangeListener() {
-            private Popup popup;
-            private JLabel popupLabel = new JLabel();
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if (popup != null) {
-                    popup.hide();
-                }
-
-                int firstVisibleRow = friendsTable.rowAtPoint(new Point(0, viewport.getViewRect().y));
-                int unseenMessageFriendsCount = 0;
-                EventTableModel model = (EventTableModel) friendsTable.getModel();
-                for(int row = 0; row < firstVisibleRow; row++) {
-                    Friend friend = (Friend) model.getElementAt(row);
-                    if (friend.isReceivingUnviewedMessages()) {
-                        unseenMessageFriendsCount++;
-                    }
-                }
-                
-                if (unseenMessageFriendsCount > 0) {
-                    Point location = scrollPane.getLocationOnScreen();
-                    popupLabel.setText("+" + Integer.toString(unseenMessageFriendsCount));
-                    popupLabel.setBackground(MEDIUM_GRAY);
-                    popup = PopupFactory.getSharedInstance().getPopup(friendsTable, popupLabel, location.x + (scrollPane.getWidth() / 2), location.y + 5);
-                    popup.show();
-                }
-            }
-        });
     }
 
     private static class IdleTimer extends Timer {
@@ -431,6 +408,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                 friendTimerMap.put(friend, iconTimer);
                 iconTimer.start();
             }
+            showUnseenMessageCountPopup();
         }
         
         if (message.getType() == Type.Sent) {
@@ -839,8 +817,10 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         public void actionPerformed(ActionEvent e) {
             //minimize chat
             new DisplayFriendsEvent(false).publish();
-            //TODO: How do you view shared files?
-            
+            Friend friend = context.getFriend();
+            if (friend != null) {
+                buddySharing.selectBuddy(friend.getID());
+            }
         }
 
         @Override
@@ -960,5 +940,32 @@ public class FriendsPane extends JPanel implements BuddyRemover {
 
     private void setTableCursor(boolean useHandCursor) {
         friendsTable.setCursor(useHandCursor ? HAND_CURSOR : DEFAULT_CURSOR);
+    }
+
+    private void showUnseenMessageCountPopup() {
+        if (unseenMessageCountPopup != null) {
+            unseenMessageCountPopup.hide();
+        }
+
+        int firstVisibleRow = friendsTable.rowAtPoint(new Point(0, scrollPane.getViewport().getViewRect().y));
+        int unseenMessageFriendsCount = 0;
+        EventTableModel model = (EventTableModel) friendsTable.getModel();
+        for(int row = 0; row < firstVisibleRow; row++) {
+            Friend friend = (Friend) model.getElementAt(row);
+            if (friend.isReceivingUnviewedMessages()) {
+                unseenMessageFriendsCount++;
+            }
+        }
+        
+        if (unseenMessageFriendsCount > 0) {
+            Point location = scrollPane.getLocationOnScreen();
+            unseenMessageCountPopupLabel.setText("+" + Integer.toString(unseenMessageFriendsCount));
+            unseenMessageCountPopupLabel.setBackground(MEDIUM_GRAY);
+            int popupX = location.x + (scrollPane.getWidth() / 2);
+            int popupY = location.y + 5;
+            PopupFactory factory = PopupFactory.getSharedInstance();
+            unseenMessageCountPopup = factory.getPopup(friendsTable, unseenMessageCountPopupLabel, popupX, popupY);
+            unseenMessageCountPopup.show();
+        }
     }
 }

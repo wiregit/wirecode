@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.limewire.xmpp.api.client.XMPPConnectionListener;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
-import org.limewire.xmpp.api.client.FileOfferHandler;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryProvider;
