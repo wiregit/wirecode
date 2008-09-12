@@ -202,7 +202,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
                     TableColumn tc = table.getColumn(6);
                     tc.setCellEditor(editor);
                     tc.setCellRenderer(renderer);
-                    sharingFancyPanel.setModel(fileList.getModel(), fileList);
+                    sharingFancyPanel.setModel(fileList.getFilteredModel(), fileList);
                     headerPanel.setModel(fileList);                
                     
                     if(currentList != null)
