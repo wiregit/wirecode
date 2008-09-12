@@ -15,4 +15,6 @@ public interface NavigableTree {
     void selectNavigableItem(NavCategory category, NavItem navItem);
 
     NavItem getNavigableItemByName(NavCategory category, String name);
+
+    boolean hasNavigableItem(NavCategory category, String name);
 }

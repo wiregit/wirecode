@@ -74,10 +74,12 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
         if(name == null) {
             name = user.getId();
         }
-        RemoteFileList libraryList = libraryManager.getBuddyLibrary(name);
-        BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryList);
-        navigator.removeNavigablePanel(NavCategory.LIBRARY, library.getName());
-        libraryManager.removeBuddyLibrary(name);
+        synchronized (this) {
+            RemoteFileList libraryList = libraryManager.getBuddyLibrary(name);
+            BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryList);
+            navigator.removeNavigablePanel(NavCategory.LIBRARY, library.getName());
+            libraryManager.removeBuddyLibrary(name);
+        }
     }
 
     private void addBuddyLibrary(User user) {
@@ -85,13 +87,15 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
         if(name == null) {
             name = user.getId();
         }
-        synchronized (libraryManager) {
+        synchronized (this) {
             if(!libraryManager.containsBuddyLibrary(name)) {
                 libraryManager.addBuddyLibrary(name);  
+            }       
+            if(!navigator.hasNavigablePanel(NavCategory.LIBRARY, name)) { 
+                BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryManager.getBuddyLibrary(name));
+                navigator.addNavigablePanel(NavCategory.LIBRARY, name, library, false);
             }
         }
-        BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryManager.getBuddyLibrary(name));
-        navigator.addNavigablePanel(NavCategory.LIBRARY, library.getName(), library, false);
     }
 
     public void userUpdated(User user) {

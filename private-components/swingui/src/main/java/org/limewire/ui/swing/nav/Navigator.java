@@ -32,6 +32,8 @@ public interface Navigator {
      */
     public void removeNavigablePanel(NavCategory category, String name);
     
+    boolean hasNavigablePanel(NavCategory category, String name);
+    
     /**
      * Adds a listener that is notified when a {@link NavItem} is selected.
      */

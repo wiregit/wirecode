@@ -36,6 +36,7 @@ public class AddressIQListener implements PacketListener {
     // TODO get rid of subscribedJids, and just use limePresences
     private final Set<String> subscribedJids = new HashSet<String>();
     private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
+    private final RosterEventHandler rosterEventHandler;
 
     public AddressIQListener(XMPPConnection connection,
                              AddressFactory factory,
@@ -43,6 +44,7 @@ public class AddressIQListener implements PacketListener {
         this.connection = connection;
         this.factory = factory;
         this.address = address;
+        this.rosterEventHandler = new RosterEventHandler();
     }
 
     public void processPacket(Packet packet) {
@@ -162,17 +164,7 @@ public class AddressIQListener implements PacketListener {
     }
     
     public EventListener<RosterEvent> getRosterListener() {
-        return new EventListener<RosterEvent>() {
-            public void handleEvent(RosterEvent event) {
-                if(event.getType().equals(User.EventType.USER_ADDED)) {
-                    userAdded(event.getSource());
-                } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-                    userDeleted(event.getSource().getId());
-                } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-                    userUpdated(event.getSource());
-                }
-            }
-        };
+        return rosterEventHandler;
     }
 
     private void userAdded(User user) {
@@ -192,6 +184,18 @@ public class AddressIQListener implements PacketListener {
                 }
             }
         });
+    }
+    
+    private class RosterEventHandler implements EventListener<RosterEvent> {
+        public void handleEvent(RosterEvent event) {
+            if(event.getType().equals(User.EventType.USER_ADDED)) {
+                userAdded(event.getSource());
+            } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+                userDeleted(event.getSource().getId());
+            } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
+                userUpdated(event.getSource());
+            }
+        }
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

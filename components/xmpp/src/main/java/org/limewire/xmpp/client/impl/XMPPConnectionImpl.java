@@ -52,7 +52,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     private final Map<String, UserImpl> users;
     protected volatile AddressIQListener addressIQListener;
     protected FileTransferIQListener fileTransferIQListener;
-    protected volatile AddressEvent queuedEvent;
+    protected volatile AddressEvent lastEvent;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventListener<RosterEvent> rosterListener,
@@ -87,27 +87,34 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     }
 
     public void login() throws XMPPException {
-        try {
-            org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
-            connection = new org.jivesoftware.smack.XMPPConnection(getConnectionConfig(configuration));
-            connection.addRosterListener(new RosterListenerImpl(connection));
-            LOG.info("connecting to " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + "...");
-            connection.connect();
-            LOG.info("connected.");
-            LOG.info("logging in " + configuration.getUsername() + "...");
-            connection.login(configuration.getUsername(), configuration.getPassword(), "limewire");
-            LOG.info("logged in.");
-            service.getConnectionListener().connected(configuration.getUsername());
-        } catch (org.jivesoftware.smack.XMPPException e) {
-            throw new XMPPException(e);
+        synchronized (this) {
+            try {
+                org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
+                connection = new org.jivesoftware.smack.XMPPConnection(getConnectionConfig(configuration));
+                connection.addRosterListener(new RosterListenerImpl(connection));
+                LOG.info("connecting to " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + "...");
+                connection.connect();
+                LOG.info("connected.");
+                LOG.info("logging in " + configuration.getUsername() + "...");
+                connection.login(configuration.getUsername(), configuration.getPassword(), "limewire");
+                LOG.info("logged in.");
+                service.getConnectionListener().connected(configuration.getUsername());
+            } catch (org.jivesoftware.smack.XMPPException e) {
+                throw new XMPPException(e);
+            }
         }
     }
 
     public void logout() {
-        if(isLoggedIn()) {
-            LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
-            connection.disconnect();
-            LOG.info("disconnected.");
+        synchronized (this) {
+            if(isLoggedIn()) {
+                LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
+                connection.disconnect();
+                rosterListeners.removeListener(addressIQListener.getRosterListener());
+                addressIQListener = null;
+                fileTransferIQListener = null;
+                LOG.info("disconnected.");
+            }
         }
     }
 
@@ -139,23 +146,30 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("adding connection listener for "+ connection.toString());
                     }
-                    ChatStateManager.getInstance(connection);
-                    ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
-                    Address address = null;
-                    synchronized (XMPPConnectionImpl.this) {
-                        if(queuedEvent != null) {
-                            address = queuedEvent.getSource();
+                    synchronized (ProviderManager.getInstance()) {
+                        if(ProviderManager.getInstance().getIQProvider("address", "jabber:iq:lw-address") == null) {
+                            ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));    
                         }
+                        if(ProviderManager.getInstance().getIQProvider("file-transfer", "jabber:iq:lw-file-transfer") == null) {
+                            ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());    
+                        }                           
                     }
-                    addressIQListener = new AddressIQListener(connection, addressFactory, address);
-                    queuedEvent = null;
+                    
+                    ChatStateManager.getInstance(connection);
+                    ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);                    
+                    
+                    synchronized (XMPPConnectionImpl.this) {
+                        Address address = null;
+                        if(lastEvent != null) {
+                            address = lastEvent.getSource();
+                        }
+                        addressIQListener = new AddressIQListener(connection, addressFactory, address);     
+                    }                                   
+                    connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());                    
                     XMPPConnectionImpl.this.rosterListeners.addListener(addressIQListener.getRosterListener());
-                    connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
-                    ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
 
                     fileTransferIQListener = new FileTransferIQListener(fileOfferHandler);
-                    connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());
-                    ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());
+                    connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());                    
                 }
             }
         });
@@ -352,10 +366,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     public void handleEvent(AddressEvent event) {
         LOG.debugf("handling address event: {0}", event.getSource().toString());
         synchronized (this) {
+            lastEvent = event;
             if(addressIQListener != null) {
                 addressIQListener.getAddressListener().handleEvent(event);    
-            } else {
-                queuedEvent = event;
             }
         }
     }

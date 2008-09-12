@@ -75,7 +75,11 @@ class NavigatorImpl implements Navigator {
         navTree.removeNavigableItem(category, navItem);
         navTarget.removeNavigablePanel(navItem);
     }
-    
+
+    public boolean hasNavigablePanel(NavCategory category, String name) {
+        return navTree.hasNavigableItem(category, name);
+    }
+
     private void selectNavigablePanel(NavCategory category, NavItem navItem) {
         navTree.selectNavigableItem(category, navItem);
     }

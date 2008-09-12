@@ -137,6 +137,10 @@ class NavList extends JXPanel {
         return (NavItem)listModel.getValueAt(row, 1);
     }
 
+    public boolean hasNavItem(String name) {
+        return getRowForName(name) != -1;
+    }
+
     private class NavListCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table,
