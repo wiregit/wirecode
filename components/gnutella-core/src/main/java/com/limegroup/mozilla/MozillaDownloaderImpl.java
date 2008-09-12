@@ -1,6 +1,7 @@
 package com.limegroup.mozilla;
 
 import java.io.File;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.InvalidDataException;
@@ -8,6 +9,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
@@ -22,17 +24,22 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 /**
  * Downloader listening to events from the Mozilla download process.
  */
-public class MozillaDownloaderImpl extends AbstractCoreDownloader {
+public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
+        EventListener<DownloadStatusEvent> {
 
     private static final Log LOG = LogFactory.getLog(MozillaDownloaderImpl.class);
 
-    private final MozillaDownloadListener listener;
+    private final MozillaDownload download;
 
     private AtomicBoolean shouldBeRemoved = new AtomicBoolean(false);
 
-    public MozillaDownloaderImpl(MozillaDownloadListener listener) {
+    private final DownloadManager downloadManager;
+
+    public MozillaDownloaderImpl(DownloadManager downloadManager, MozillaDownload download) {
         super(new NoOpSaveLocationManager());
-        this.listener = listener;
+        this.downloadManager = downloadManager;
+        this.download = download;
+        this.download.addListener(this);
     }
 
     @Override
@@ -72,7 +79,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public int getAmountPending() {
-        return (int) listener.getAmountPending();
+        return (int) download.getAmountPending();
     }
 
     @Override
@@ -81,7 +88,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     }
 
     private long getAmountDownloaded() {
-        return listener.getAmountDownloaded();
+        return download.getAmountDownloaded();
     }
 
     @Override
@@ -111,7 +118,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public long getContentLength() {
-        return listener.getContentLength();
+        return download.getContentLength();
     }
 
     @Override
@@ -166,7 +173,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public File getSaveFile() {
-        return listener.getSaveFile();
+        return download.getSaveFile();
     }
 
     @Override
@@ -176,7 +183,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public DownloadStatus getState() {
-        return listener.getDownloadStatus();
+        return download.getDownloadStatus();
     }
 
     @Override
@@ -201,12 +208,12 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public boolean isCompleted() {
-        return listener.isCompleted();
+        return download.isCompleted();
     }
 
     @Override
     public boolean isInactive() {
-        return listener.isInactive();
+        return download.isInactive();
     }
 
     @Override
@@ -221,7 +228,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public boolean isPaused() {
-        return listener.isPaused();
+        return download.isPaused();
     }
 
     @Override
@@ -237,14 +244,14 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public void pause() {
         if (!isPaused() && !isInactive() && !isCompleted()) {
-            listener.pauseDownload();
+            download.pauseDownload();
         }
     }
 
     @Override
     public boolean resume() {
         if (isPaused()) {
-            listener.resumeDownload();
+            download.resumeDownload();
         }
         return true;
     }
@@ -252,6 +259,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public void stop() {
         finish();
+        downloadManager.remove(this, isCompleted());
     }
 
     @Override
@@ -272,19 +280,19 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public void finish() {
         pause();
-        listener.cancelDownload();
-        listener.removeDownload();
+        download.cancelDownload();
+        download.removeDownload();
         shouldBeRemoved.set(true);
     }
 
     @Override
     public void addListener(EventListener<DownloadStatusEvent> listener) {
-        // TODO implement
+        this.download.addListener(listener);
     }
 
     @Override
     public boolean removeListener(EventListener<DownloadStatusEvent> listener) {
-        return false;
+        return this.download.removeListener(listener);
     }
 
     @Override
@@ -308,17 +316,17 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
 
     @Override
     public float getAverageBandwidth() {
-        return listener.getAverageBandwidth();
+        return download.getAverageBandwidth();
     }
 
     @Override
     public float getMeasuredBandwidth() throws InsufficientDataException {
-        return listener.getMeasuredBandwidth();
+        return download.getMeasuredBandwidth();
     }
 
     @Override
     public void measureBandwidth() {
-        listener.measureBandwidth();
+        download.measureBandwidth();
     }
 
     @Override
@@ -334,6 +342,17 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader {
     @Override
     public boolean supportsMemento() {
         return false;
+    }
+
+    @Override
+    public void handleEvent(DownloadStatusEvent event) {
+        DownloadStatus status = event.getType();
+
+        if (status == DownloadStatus.COMPLETE) {
+            downloadManager.remove(this, false);//false because we don't want to remove the download from the list
+        } else if (status == DownloadStatus.INVALID) {
+            downloadManager.remove(this, false);
+        }
     }
 
 }

@@ -63,7 +63,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
-import com.limegroup.mozilla.MozillaDownloadListener;
+import com.limegroup.mozilla.MozillaDownload;
 import com.limegroup.mozilla.MozillaDownloaderImpl;
 
 @Singleton
@@ -105,6 +105,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
      * how many downloaders are active
      */
     private int storeDownloadCount = 0;
+    
+    private int mozillaDownloadCount = 0;
     
     /**
      * The number of times we've been bandwidth measures
@@ -489,7 +491,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
      * @see com.limegroup.gnutella.DownloadManager#getNumActiveDownloads()
      */
     public synchronized int getNumActiveDownloads() {
-        return active.size() - innetworkCount - storeDownloadCount;
+        return active.size() - innetworkCount - storeDownloadCount - mozillaDownloadCount;
     }
    
     /* (non-Javadoc)
@@ -795,11 +797,14 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         return ret;
     }
     
-    public synchronized Downloader downloadFromMozilla(MozillaDownloadListener listener) {
-        CoreDownloader downloader = new MozillaDownloaderImpl(listener);
+    public synchronized Downloader downloadFromMozilla(MozillaDownload listener) {
+        
+        CoreDownloader downloader = new MozillaDownloaderImpl(this, listener);
+        
         downloader.initialize();
-        active.add(downloader);
         callback(downloader).addDownload(downloader);
+        active.add(downloader);
+        mozillaDownloadCount++;
         fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
         return downloader;
     }
@@ -982,7 +987,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() - innetworkCount - storeDownloadCount
+        return active.size() - innetworkCount - storeDownloadCount - mozillaDownloadCount
             < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
@@ -997,6 +1002,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         // make sure an active download was removed prior to decrementing this index
         if(downloader.getDownloadType() == DownloaderType.STORE && isRemoved)
             storeDownloadCount--;
+        
+        if(downloader.getDownloadType() == DownloaderType.MOZILLA && isRemoved)
+            mozillaDownloadCount--;
         
         waiting.remove(downloader);
         if(completed)

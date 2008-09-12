@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener;
 import org.limewire.core.api.mozilla.LimeMozillaDownloadProgressListener;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.Objects;
@@ -24,14 +26,15 @@ import org.mozilla.xpcom.XPCOMException;
 import com.limegroup.bittorrent.SimpleBandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
-import com.limegroup.mozilla.MozillaDownloadListener;
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
+import com.limegroup.mozilla.MozillaDownload;
 
 /**
  * This class listens to a specific Mozilla download and tracks some statistics
  * for us.
  */
 public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgressListener,
-        MozillaDownloadListener, LimeMozillaDownloadProgressListener {
+        MozillaDownload, LimeMozillaDownloadProgressListener {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadProgressListenerImpl.class);
 
@@ -46,14 +49,19 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
     private final File saveFile;
 
     private final AtomicLong contentLength;
-    
+
     private final LimeMozillaDownloadManagerListener manager;
 
-    public LimeMozillaDownloadProgressListenerImpl(LimeMozillaDownloadManagerListener manager, nsIDownload download, short state) {
+    private EventListenerList<DownloadStatusEvent> listeners;
+
+    public LimeMozillaDownloadProgressListenerImpl(LimeMozillaDownloadManagerListener manager,
+            nsIDownload download, short state) {
         this.manager = Objects.nonNull(manager, "manager");
         Objects.nonNull(download, "download");
+        this.listeners = new EventListenerList<DownloadStatusEvent>();
         this.downloadId = download.getId();
-        this.state = new AtomicInteger(state);
+        this.state = new AtomicInteger();
+        changeState(state);
         this.totalProgress = new AtomicLong();
         this.down = new SimpleBandwidthTracker();
         this.saveFile = new File(download.getTarget().getPath());
@@ -63,7 +71,18 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
     @Override
     public synchronized void onDownloadStateChange(short state, nsIDownload download) {
         if (downloadId == download.getId()) {
+            changeState(state);
+        }
+    }
+
+    private void changeState(short state) {
+        if (state != this.state.get()) {
             this.state.set(state);
+            DownloadStatus downloadStatus = getDownloadStatus();
+            if (downloadStatus == DownloadStatus.COMPLETE
+                    || downloadStatus == DownloadStatus.INVALID) {
+                listeners.broadcast(new DownloadStatusEvent(null, downloadStatus));
+            }
         }
     }
 
@@ -79,8 +98,8 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
             if (!isPaused()) {
                 // this event might come in after pausing, so we don't want to
                 // change the state in that event
-                int state = download.getState();
-                this.state.set(state);
+                short state = download.getState();
+                changeState(state);
             }
             totalProgress.set(curTotalProgress);
             contentLength.set(download.getSize());
@@ -98,7 +117,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
             long stateFlags, long status, nsIDownload download) {
         if (this.downloadId == download.getId()) {
             // this is my download
-            this.state.set(download.getState());
+            changeState(download.getState());
             if (this.state.get() == nsIDownloadManager.DOWNLOAD_FINISHED) {
                 this.contentLength.set(download.getSize());
                 this.totalProgress.set(this.contentLength.get());
@@ -160,7 +179,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
     }
 
     @Override
-    public synchronized DownloadStatus getDownloadStatus() {
+    public DownloadStatus getDownloadStatus() {
         switch (state.get()) {
         case nsIDownloadManager.DOWNLOAD_SCANNING:
             return DownloadStatus.RESUMING;
@@ -262,7 +281,8 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
                         LOG.debug(e.getMessage(), e);
                     }
                     try {
-                        downloadManager.removeListener(LimeMozillaDownloadProgressListenerImpl.this);
+                        downloadManager
+                                .removeListener(LimeMozillaDownloadProgressListenerImpl.this);
                     } catch (XPCOMException e) {
                         LOG.debug(e.getMessage(), e);
                     }
@@ -294,4 +314,15 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
                 "@mozilla.org/download-manager;1", nsIDownloadManager.class);
         return downloadManager;
     }
+
+    @Override
+    public void addListener(EventListener<DownloadStatusEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    @Override
+    public boolean removeListener(EventListener<DownloadStatusEvent> listener) {
+        return listeners.removeListener(listener);
+    }
+
 }

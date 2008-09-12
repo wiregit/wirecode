@@ -29,7 +29,8 @@ import com.limegroup.gnutella.DownloadManager;
  */
 @Singleton
 public class LimeMozillaDownloadManagerListenerImpl implements
-        org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener, nsIDownloadProgressListener {
+        org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener,
+        nsIDownloadProgressListener {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadManagerListenerImpl.class);
 
@@ -89,7 +90,8 @@ public class LimeMozillaDownloadManagerListenerImpl implements
         long downloadId = download.getId();
         LimeMozillaDownloadProgressListener listener = listeners.get(downloadId);
         if (listener == null) {
-            LimeMozillaDownloadProgressListenerImpl listenerImpl = new LimeMozillaDownloadProgressListenerImpl(this, download, state);
+            LimeMozillaDownloadProgressListenerImpl listenerImpl = new LimeMozillaDownloadProgressListenerImpl(
+                    this, download, state);
             listeners.put(download.getId(), listenerImpl);
             getDownloadManager().addListener(listenerImpl);
             downloadManager.downloadFromMozilla(listenerImpl);
@@ -114,7 +116,7 @@ public class LimeMozillaDownloadManagerListenerImpl implements
     @Override
     public void onStateChange(nsIWebProgress webProgress, nsIRequest request, long stateFlags,
             long status, nsIDownload download) {
-        // don't care about this event.
+        addMissingDownloads();
     }
 
     @Override

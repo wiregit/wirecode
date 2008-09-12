@@ -18,7 +18,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
-import com.limegroup.mozilla.MozillaDownloadListener;
+import com.limegroup.mozilla.MozillaDownload;
 
 
 /** 
@@ -280,11 +280,11 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
      *  at any time for checkpointing purposes.  Returns true if and only if the 
      *  file was successfully written. */
     public void writeSnapshot();
-    
+
     /**
      * Creates a Downloader wrapping the MozillaDownloadListener. 
      * Adds capability to track status of mozilla download.
      */
-    public Downloader downloadFromMozilla(MozillaDownloadListener listener);
+    public Downloader downloadFromMozilla(MozillaDownload listener);
 
 }

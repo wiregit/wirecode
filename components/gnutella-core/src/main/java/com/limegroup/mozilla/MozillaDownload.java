@@ -2,14 +2,17 @@ package com.limegroup.mozilla;
 
 import java.io.File;
 
+import org.limewire.listener.EventListener;
+
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 
 /**
  * Interface to allow access into the state of the nsIDownloadListener.
  * 
  */
-public interface MozillaDownloadListener extends BandwidthTracker {
+public interface MozillaDownload extends BandwidthTracker {
 
     /**
      * Returns the download id this listener is tracking.
@@ -84,5 +87,15 @@ public interface MozillaDownloadListener extends BandwidthTracker {
      * Resumes the current download.
      */
     void resumeDownload();
+
+    /**
+     * Adds listener for this download.
+     */
+    void addListener(EventListener<DownloadStatusEvent> listener);
+
+   /**
+    * Removes listener from this download.
+    */
+    boolean removeListener(EventListener<DownloadStatusEvent> listener);
 
 }
