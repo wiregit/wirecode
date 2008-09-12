@@ -3,6 +3,7 @@ package org.limewire.core.impl.mozilla;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.mozilla.LimeMozillaDownloadProgressListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.Objects;
@@ -10,6 +11,7 @@ import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDOMDocument;
 import org.mozilla.interfaces.nsIDownload;
 import org.mozilla.interfaces.nsIDownloadManager;
+import org.mozilla.interfaces.nsIDownloadProgressListener;
 import org.mozilla.interfaces.nsIRequest;
 import org.mozilla.interfaces.nsISimpleEnumerator;
 import org.mozilla.interfaces.nsISupports;
@@ -27,7 +29,7 @@ import com.limegroup.gnutella.DownloadManager;
  */
 @Singleton
 public class LimeMozillaDownloadManagerListenerImpl implements
-        org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener {
+        org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener, nsIDownloadProgressListener {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadManagerListenerImpl.class);
 
@@ -87,10 +89,10 @@ public class LimeMozillaDownloadManagerListenerImpl implements
         long downloadId = download.getId();
         LimeMozillaDownloadProgressListener listener = listeners.get(downloadId);
         if (listener == null) {
-            listener = new LimeMozillaDownloadProgressListener(this, download, state);
-            listeners.put(download.getId(), listener);
-            getDownloadManager().addListener(listener);
-            downloadManager.downloadFromMozilla(listener);
+            LimeMozillaDownloadProgressListenerImpl listenerImpl = new LimeMozillaDownloadProgressListenerImpl(this, download, state);
+            listeners.put(download.getId(), listenerImpl);
+            getDownloadManager().addListener(listenerImpl);
+            downloadManager.downloadFromMozilla(listenerImpl);
             return true;
         }
         return false;

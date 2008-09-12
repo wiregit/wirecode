@@ -797,7 +797,10 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
     
     public synchronized Downloader downloadFromMozilla(MozillaDownloadListener listener) {
         CoreDownloader downloader = new MozillaDownloaderImpl(listener);
-        initializeDownload(downloader, false);
+        downloader.initialize();
+        active.add(downloader);
+        callback(downloader).addDownload(downloader);
+        fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
         return downloader;
     }
     

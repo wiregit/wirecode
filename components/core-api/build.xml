@@ -19,7 +19,6 @@
                 <path refid="build.limewire.components.xmpp-api.buildpath"/>
                 <pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
 				<pathelement location="${limewire.lib.jars}/glazedlists-1.7.0_java15.jar"/>
-				<pathelement location="${limewire.lib.jars}/MozillaInterfaces-1.9.jar"/>
 			</src-classpath>
         </do.setup-properties>
     </target>

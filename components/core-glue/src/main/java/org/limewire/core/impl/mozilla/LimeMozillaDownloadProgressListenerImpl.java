@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.limewire.core.api.mozilla.LimeMozillaDownloadManagerListener;
+import org.limewire.core.api.mozilla.LimeMozillaDownloadProgressListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.Objects;
@@ -29,10 +30,10 @@ import com.limegroup.mozilla.MozillaDownloadListener;
  * This class listens to a specific Mozilla download and tracks some statistics
  * for us.
  */
-public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressListener,
-        MozillaDownloadListener {
+public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgressListener,
+        MozillaDownloadListener, LimeMozillaDownloadProgressListener {
 
-    private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadProgressListener.class);
+    private static final Log LOG = LogFactory.getLog(LimeMozillaDownloadProgressListenerImpl.class);
 
     private final long downloadId;
 
@@ -48,7 +49,7 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
     
     private final LimeMozillaDownloadManagerListener manager;
 
-    public LimeMozillaDownloadProgressListener(LimeMozillaDownloadManagerListener manager, nsIDownload download, short state) {
+    public LimeMozillaDownloadProgressListenerImpl(LimeMozillaDownloadManagerListener manager, nsIDownload download, short state) {
         this.manager = Objects.nonNull(manager, "manager");
         Objects.nonNull(download, "download");
         this.downloadId = download.getId();
@@ -135,8 +136,6 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
     @Override
     public synchronized float getMeasuredBandwidth() {
         try {
-            down.measureBandwidth();
-            // TODO i shouldn't have to do the above measure bandwidth call.
             return down.getMeasuredBandwidth();
         } catch (InsufficientDataException e) {
             return 0;
@@ -222,7 +221,7 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
             @Override
             public void run() {
                 try {
-                    synchronized (LimeMozillaDownloadProgressListener.this) {
+                    synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
                         getDownloadManager().cancelDownload(downloadId);
                     }
                 } catch (XPCOMException e) {
@@ -238,7 +237,7 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
         MozillaExecutor.mozSyncExec(new Runnable() {
             @Override
             public void run() {
-                synchronized (LimeMozillaDownloadProgressListener.this) {
+                synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
                     try {
                         getDownloadManager().pauseDownload(downloadId);
                     } catch (XPCOMException e) {
@@ -255,7 +254,7 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
         MozillaExecutor.mozSyncExec(new Runnable() {
             @Override
             public void run() {
-                synchronized (LimeMozillaDownloadProgressListener.this) {
+                synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
                     nsIDownloadManager downloadManager = getDownloadManager();
                     try {
                         downloadManager.removeDownload(downloadId);
@@ -263,11 +262,11 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
                         LOG.debug(e.getMessage(), e);
                     }
                     try {
-                        downloadManager.removeListener(LimeMozillaDownloadProgressListener.this);
+                        downloadManager.removeListener(LimeMozillaDownloadProgressListenerImpl.this);
                     } catch (XPCOMException e) {
                         LOG.debug(e.getMessage(), e);
                     }
-                    manager.remove(LimeMozillaDownloadProgressListener.this);
+                    manager.remove(LimeMozillaDownloadProgressListenerImpl.this);
                 }
             }
         });
@@ -278,7 +277,7 @@ public class LimeMozillaDownloadProgressListener implements nsIDownloadProgressL
         MozillaExecutor.mozSyncExec(new Runnable() {
             @Override
             public void run() {
-                synchronized (LimeMozillaDownloadProgressListener.this) {
+                synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
                     try {
                         getDownloadManager().resumeDownload(downloadId);
                     } catch (XPCOMException e) {

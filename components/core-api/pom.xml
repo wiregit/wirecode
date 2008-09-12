@@ -35,10 +35,5 @@
     	<artifactId>glazedlists_java15</artifactId>
     	<version>1.7.0</version>
     </dependency>
-    <dependency>
-	    <groupId>mozilla</groupId>
-	    <artifactId>mozswing-interfaces</artifactId>
-	    <version>1.9</version>
-	</dependency>
   </dependencies>
 </project>
