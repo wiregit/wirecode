@@ -1,22 +1,28 @@
 package org.limewire.ui.swing.friends;
 
 class MessageImpl implements Message {
-    private final Friend friend;
+    private final String friendName;
+    private final String friendID;
     private final String senderName;
     private final String message;
     private final Type type;
     private final long messageTimeMillis;
 
     public MessageImpl(String senderName, Friend friend, String message, Type type) {
-        this.friend = friend;
+        this.friendName = friend.getName();
+        this.friendID = friend.getID();
         this.senderName = senderName;
         this.message = message;
         this.type = type;
         this.messageTimeMillis = System.currentTimeMillis();
     }
     
-    public Friend getFriend() {
-        return friend;
+    public String getFriendName() {
+        return friendName;
+    }
+
+    public String getFriendID() {
+        return friendID;
     }
 
     public String getMessageText() {

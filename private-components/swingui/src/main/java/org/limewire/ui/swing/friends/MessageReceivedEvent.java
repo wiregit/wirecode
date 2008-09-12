@@ -24,6 +24,6 @@ public class MessageReceivedEvent extends AbstractEDTEvent {
     @Override
     public void publish() {
         LOG.debugf("Publishing message: Type: {0} From: {1} Text: {2}", message.getType(), message.getSenderName(), message.getMessageText());
-        super.publish(buildTopic(message.getFriend().getName()));
+        super.publish(buildTopic(message.getFriendName()));
     }
 }

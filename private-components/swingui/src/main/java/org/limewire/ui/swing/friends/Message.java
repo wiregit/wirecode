@@ -9,7 +9,9 @@ public interface Message {
     
     String getSenderName();
     
-    Friend getFriend();
+    String getFriendName();
+    
+    String getFriendID();
     
     String getMessageText();
     

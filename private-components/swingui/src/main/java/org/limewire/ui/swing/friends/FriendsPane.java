@@ -25,6 +25,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -32,8 +33,13 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
+import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
 import javax.swing.Timer;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
@@ -88,6 +94,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendsPane extends JPanel implements BuddyRemover {
     
+    private static final Color MEDIUM_GRAY = new Color(183, 183, 183);
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
     private static final int PREFERRED_WIDTH = 120;
@@ -103,7 +110,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private final EventList<Friend> friends;
     private final JTable friendsTable;
     private final IconLibrary icons;
-    private final WeakHashMap<String, FriendImpl> idToFriendMap;
+    private final WeakHashMap<String, Friend> idToFriendMap;
     private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
@@ -118,7 +125,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         super(new BorderLayout());
         this.icons = icons;
         this.friends = new BasicEventList<Friend>();
-        this.idToFriendMap = new WeakHashMap<String, FriendImpl>();
+        this.idToFriendMap = new WeakHashMap<String, Friend>();
         this.friendTimerMap = new WeakHashMap<Friend, AlternatingIconTimer>();
         this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
@@ -129,6 +136,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         addPopupMenus(friendsTable);
         
         scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        addUnseenMessagesScrollPaneListener(scrollPane);
         add(scrollPane);
         setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
         
@@ -137,6 +145,38 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         idleTimer = new IdleTimer();
         idleTimer.start();
         
+    }
+
+    private void addUnseenMessagesScrollPaneListener(JScrollPane friendScroll) {
+        final JViewport viewport = friendScroll.getViewport();
+        viewport.addChangeListener(new ChangeListener() {
+            private Popup popup;
+            private JLabel popupLabel = new JLabel();
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (popup != null) {
+                    popup.hide();
+                }
+
+                int firstVisibleRow = friendsTable.rowAtPoint(new Point(0, viewport.getViewRect().y));
+                int unseenMessageFriendsCount = 0;
+                EventTableModel model = (EventTableModel) friendsTable.getModel();
+                for(int row = 0; row < firstVisibleRow; row++) {
+                    Friend friend = (Friend) model.getElementAt(row);
+                    if (friend.isReceivingUnviewedMessages()) {
+                        unseenMessageFriendsCount++;
+                    }
+                }
+                
+                if (unseenMessageFriendsCount > 0) {
+                    Point location = scrollPane.getLocationOnScreen();
+                    popupLabel.setText("+" + Integer.toString(unseenMessageFriendsCount));
+                    popupLabel.setBackground(MEDIUM_GRAY);
+                    popup = PopupFactory.getSharedInstance().getPopup(friendsTable, popupLabel, location.x + (scrollPane.getWidth() / 2), location.y + 5);
+                    popup.show();
+                }
+            }
+        });
     }
 
     private static class IdleTimer extends Timer {
@@ -346,7 +386,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
         final Presence presence = event.getPresence();
         final User user = event.getUser();
-        FriendImpl friend = idToFriendMap.get(user.getId());
+        Friend friend = idToFriendMap.get(user.getId());
         switch(presence.getType()) {
             case available:
                 if(friend == null) {
@@ -382,7 +422,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
-        Friend friend = message.getFriend();
+        Friend friend = idToFriendMap.get(message.getFriendID());
         if (!friend.isActiveConversation() && message.getType() == Type.Received) {
             friend.startChat();
             friend.setReceivingUnviewedMessages(true);
@@ -710,7 +750,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                     closeChat(friend);
                     setTableCursor(false);
                 }
-            }
+            } 
         }
     }
     

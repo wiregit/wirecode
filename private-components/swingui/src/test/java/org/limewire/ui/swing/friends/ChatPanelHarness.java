@@ -10,6 +10,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.impl.library.MockLibraryManager;
+import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.nav.MockNavigableTree;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -68,6 +69,27 @@ public class ChatPanelHarness {
             }
         });
         builder.append(addFriend, 3);
+        JButton fillWithMessageBuddies = new JButton("Fill with Message Awaiting Buddies");
+        fillWithMessageBuddies.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fillWithUnseenMessageAwaitingFriends();
+            }
+        });
+        builder.nextLine();
+        builder.append(fillWithMessageBuddies, 3);
         return builder.getPanel();
+    }
+    
+    private static void fillWithUnseenMessageAwaitingFriends() {
+        for(int i = 0; i < 50; i++) {
+            String id = "foo" + i;
+            new PresenceUpdateEvent(new MockUser(id, "foo"), new MockPresence(Mode.available, "hey", id)).publish();
+        }
+        
+        for(int i = 0; i < 50; i++) {
+            String id = "foo" + i;
+            new MessageReceivedEvent(new MockMessage(new MockFriend(id, "hey", Mode.available), "yo", System.currentTimeMillis(), "me", Type.Received)).publish();
+        }
     }
 }

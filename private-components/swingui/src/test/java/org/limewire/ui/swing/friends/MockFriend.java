@@ -8,9 +8,10 @@ import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 class MockFriend implements Friend {
-    private final String name, status;
-    private final Mode state;
+    private String name, status;
+    private Mode state;
     private boolean activeConversation;
+    private boolean receivingUnviewedMessages;
     
     public MockFriend(String name, String status, Mode state) {
         this.name = name;
@@ -69,12 +70,12 @@ class MockFriend implements Friend {
 
     @Override
     public void startChat() {
-        throw new UnsupportedOperationException();
+        //no-op
     }
 
     @Override
     public void stopChat() {
-        throw new UnsupportedOperationException();
+        //no-op
     }
 
     @Override
@@ -94,12 +95,12 @@ class MockFriend implements Friend {
 
     @Override
     public boolean isReceivingUnviewedMessages() {
-        return false;
+        return receivingUnviewedMessages;
     }
 
     @Override
     public void setReceivingUnviewedMessages(boolean hasMessages) {
-        
+        this.receivingUnviewedMessages = hasMessages;
     }
 
     @Override
@@ -109,5 +110,15 @@ class MockFriend implements Friend {
 
     public Presence getPresence() {
         return null;
+    }
+
+    @Override
+    public void setMode(Mode mode) {
+        this.state = mode;
+    }
+
+    @Override
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

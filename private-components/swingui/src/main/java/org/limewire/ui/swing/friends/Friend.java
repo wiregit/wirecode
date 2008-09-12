@@ -16,8 +16,12 @@ public interface Friend {
     
     String getName();
     
+    void setStatus(String status);
+    
     String getStatus();
 
+    void setMode(Mode mode);
+    
     Mode getMode();
     
     boolean jidBelongsTo(String jid);
