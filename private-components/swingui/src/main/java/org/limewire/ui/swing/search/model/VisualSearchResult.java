@@ -18,6 +18,8 @@ public interface VisualSearchResult {
 
     Object getProperty(Object key);
 
+    String getPropertyString(Object key);
+
     Collection<RemoteHost> getSources();
     
     ResultType getCategory();

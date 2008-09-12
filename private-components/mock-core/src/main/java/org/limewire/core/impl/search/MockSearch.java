@@ -155,7 +155,7 @@ public class MockSearch implements Search {
                 msr.addSource("chandler");
                 msr.addSource("joey");
                 msr.setUrn("www.stlzoo.com");
-                //msr.setProperty(PropertyKey.ARTIST_NAME, "St. Louis Zoo");
+                msr.setProperty(PropertyKey.ARTIST_NAME, "St. Louis Zoo");
                 msr.setProperty(PropertyKey.BITRATE, "5000");
                 msr.setProperty(PropertyKey.COMMENTS,
                     "Who knew they could do that?");

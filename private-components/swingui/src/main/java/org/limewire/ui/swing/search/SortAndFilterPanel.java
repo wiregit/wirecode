@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
@@ -54,7 +55,7 @@ public class SortAndFilterPanel extends JXPanel {
     private static final String FRIEND_ITEM = "Friend (a-z)";
     private static final String RELEVANCE_ITEM = "Relevance";
     private static final int FILTER_WIDTH = 10;
-    
+
     private ChatLoginState chatLoginState;
     
     private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
@@ -479,30 +480,37 @@ public class SortAndFilterPanel extends JXPanel {
         private List<String> list;
         private VisualSearchResult vsr;
 
+        private void addProperty(PropertyKey key) {
+            add(list, vsr.getPropertyString(key));
+        }
+
         @Override
         public void getFilterStrings(
                 List<String> list, VisualSearchResult vsr) {
             this.list = list;
             this.vsr = vsr;
-            addProperty(PropertyKey.NAME);
-            addProperty(PropertyKey.ALBUM_TITLE);
-            addProperty(PropertyKey.ARTIST_NAME);
-            //addProperty(PropertyKey.OWNER);
-            addProperty(PropertyKey.LENGTH);
-            addProperty(PropertyKey.FILE_SIZE);
-            //System.out.println();
-            list.add(vsr.getMediaType());
+            
+            add(list, vsr.getDescription());
+
+            // These properties aren't always displayed,
+            // so don't filter on them.
+            //add(list, vsr.getFileExtension());
+            //add(list, vsr.getMediaType());
+
             long size = vsr.getSize();
-            if (size > 0) list.add(String.valueOf(size));
+            if (size > 0) add(list, String.valueOf(size));
+
+            Map<Object, Object> props = vsr.getProperties();
+            for (Object key : props.keySet()) {
+                addProperty((PropertyKey) key);
+            }
         }
 
-        private void addProperty(PropertyKey key) {
-            Object value = vsr.getProperty(key);
-            if (value != null) {
-                String text = value.toString();
-                //System.out.println("SortAndFilterPanel: filtering on " + text);
-                list.add(text);
-            }
+        /**
+         * This was factored into its own method to help with debugging.
+         */
+        private void add(List<String> list, String text) {
+            list.add(text);
         }
     }
 }

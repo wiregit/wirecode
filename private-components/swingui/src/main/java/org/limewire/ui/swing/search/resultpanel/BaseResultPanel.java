@@ -22,11 +22,9 @@ import java.util.Calendar;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.ConfigurableTable;
-import org.limewire.ui.swing.search.FilterEvent;
 
 public class BaseResultPanel extends JXPanel {
     
@@ -210,6 +208,7 @@ public class BaseResultPanel extends JXPanel {
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
                 int row = resultsList.rowAtPoint(e.getPoint());
+                if (row == -1) return;
                 TableModel tm = resultsList.getModel();
                 VisualSearchResult vsr =
                     (VisualSearchResult) tm.getValueAt(row, 0);

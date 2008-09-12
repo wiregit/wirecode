@@ -21,9 +21,9 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
+import java.util.Map;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
@@ -54,6 +54,7 @@ implements TableCellEditor, TableCellRenderer {
     private static final Color SELECTED_COLOR = Color.GREEN;
 
     public static final int HEIGHT = 50;
+    public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
 
     private static String searchText;
@@ -67,10 +68,9 @@ implements TableCellEditor, TableCellRenderer {
         new HyperLinkButton("Downloading...");
     private JLabel downloadButton;
     private HyperLinkButton similarButton = new HyperLinkButton(null);
-    //private JEditorPane headingLabel = new ReadOnlyEditorPane();
-    //private JEditorPane subheadingLabel = new ReadOnlyEditorPane();
     private JLabel headingLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
+    private JLabel otherLabel = new JLabel();
     private JXPanel actionPanel = new JXPanel();
     private JXPanel thePanel;
     private JTable table;
@@ -111,8 +111,6 @@ implements TableCellEditor, TableCellRenderer {
         int index = lowerText.indexOf(filterText);
         if (index == -1) return text;
 
-        //System.out.println(filterText + " was found in \"" + originalText + "\"");
-
         int filterLength = filterText.length();
         String result = "<html>";
 
@@ -133,12 +131,28 @@ implements TableCellEditor, TableCellRenderer {
         return result;
     }
 
-    private static void configureEditor(JEditorPane ep) {
-        Dimension dimension = new Dimension(450, 20);
-        ep.setPreferredSize(dimension);
-        ep.setEditable(false);
-        ep.setContentType("text/html");
-        ep.setOpaque(false);
+    private PropertyMatch getPropertyMatch(VisualSearchResult vsr) {
+        // If any data displayed in the headingLabel or subheadingLabel
+        // matches the search or filter criteria,
+        // then the otherLabel isn't needed.
+        // In this case, return an empty string.
+        if (headingLabel.getText().contains(filterText)) return null;
+        if (subheadingLabel.getText().contains(filterText)) return null;
+
+        // Look for metadata that matches the search criteria.
+        Map<Object, Object> props = vsr.getProperties();
+        for (Object key : props.keySet()) {
+            String value = vsr.getPropertyString(key);
+
+            if (value.toLowerCase().contains(filterText)) {
+                String betterKey = key.toString().toLowerCase();
+                betterKey = betterKey.replace('_', ' ');
+                return new PropertyMatch(betterKey, value);
+            }
+        }
+
+        // No match found.  This should never happen.
+        return null;
     }
 
     public Object getCellEditorValue() {
@@ -150,24 +164,6 @@ implements TableCellEditor, TableCellRenderer {
 
         //System.out.println(
         //    "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
-
-        // Find the SearchResultPanel that the table is nested inside.
-        // TODO: RMV Want this code?
-        /*
-        Container child = table.getParent();
-        while (true) {
-            Container parent = child.getParent();
-            if (parent == null) break;
-            if (parent instanceof SearchResultsPanel) {
-                searchResultsPanel = (SearchResultsPanel) parent;
-                break;
-            }
-
-            //System.out.println("container is a "
-            //    + parent.getClass().getName());
-            child = parent;
-        }
-        */
 
         this.table = table;
         this.row = row;
@@ -283,24 +279,39 @@ implements TableCellEditor, TableCellRenderer {
         downloadPanel.add(downloadButton, gbc);
         downloadPanel.add(downloadingLink, gbc);
 
-        //configureEditor(headingLabel);
-        //configureEditor(subheadingLabel);
-
         JXPanel headingPanel = new JXPanel(new GridBagLayout());
         headingPanel.setOpaque(false);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
+        gbc.weightx = 1;
         headingPanel.add(headingLabel, gbc);
         headingPanel.add(subheadingLabel, gbc);
+        headingPanel.add(otherLabel, gbc);
 
-        JXPanel panel = new JXPanel(new GridBagLayout());
+        JXPanel panel = new JXPanel(new GridBagLayout()) {
+            @Override
+            public Dimension getMinimumSize() {
+                return getPreferredSize();
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width = LEFT_WIDTH;
+                return size;
+            }
+        };
+
         panel.setOpaque(false);
 
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.weightx = 0;
         panel.add(downloadPanel, gbc);
 
         gbc.gridx++;
+        gbc.weightx = 1;
         panel.add(headingPanel, gbc);
 
         return panel;
@@ -310,11 +321,9 @@ implements TableCellEditor, TableCellRenderer {
         final JXPanel panel = new JXPanel(new GridBagLayout()) {
             @Override
             public Dimension getPreferredSize() {
-                Dimension size = super.getPreferredSize();
                 int count = 1;
                 if (isShowingSimilar) count += similarCount;
-                size.height = count * HEIGHT;
-                return size;
+                return new Dimension(WIDTH, count * HEIGHT);
             }
 
             @Override
@@ -326,17 +335,16 @@ implements TableCellEditor, TableCellRenderer {
             }
         };
 
-        panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 0;
         panel.add(makeLeftPanel(), gbc);
 
-        gbc.anchor = GridBagConstraints.EAST;
         gbc.weightx = 1;
         panel.add(makeCenterPanel(), gbc);
 
+        gbc.anchor = GridBagConstraints.EAST;
         gbc.weightx = 0;
         actionPanel.setOpaque(false);
         panel.add(actionPanel, gbc);
@@ -395,6 +403,19 @@ implements TableCellEditor, TableCellRenderer {
         model.fireTableDataChanged();
     }
 
+    private void populateOther(VisualSearchResult vsr) {
+        PropertyMatch pm = getPropertyMatch(vsr);
+        if (pm == null) {
+            otherLabel.setText("");
+        } else {
+            String html = boldMatches(pm.value);
+            String tag = "<html>";
+            // Insert the key, a colon and a space after the html start tag.
+            html = tag + pm.key + ": " + html.substring(tag.length());
+            otherLabel.setText(html);
+        }
+    }
+
     private void populatePanel(VisualSearchResult vsr) {
         boolean downloading = vsr.isDownloading();
         downloadButton.setEnabled(!downloading);
@@ -402,6 +423,7 @@ implements TableCellEditor, TableCellRenderer {
 
         populateHeading(vsr);
         populateSubheading(vsr);
+        populateOther(vsr);
         populateFrom(vsr);
 
         if (similarCount > 0) {
@@ -458,5 +480,14 @@ implements TableCellEditor, TableCellRenderer {
         brp.download(vsr);
         downloadButton.setEnabled(false);
         downloadingLink.setVisible(true);
+    }
+
+    static class PropertyMatch {
+        String key;
+        String value;
+        PropertyMatch(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
     }
 }

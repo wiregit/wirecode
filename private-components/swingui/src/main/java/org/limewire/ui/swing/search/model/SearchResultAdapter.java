@@ -1,8 +1,12 @@
 package org.limewire.ui.swing.search.model;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +105,21 @@ class SearchResultAdapter implements VisualSearchResult {
 
     public Object getProperty(Object key) {
         return getProperties().get(key);
+    }
+
+    public String getPropertyString(Object key) {
+        Object value = getProperty(key);
+        String stringValue = value.toString();
+        
+        if (value instanceof Calendar) {
+            Calendar calendar = (Calendar) value;
+            Date date = calendar.getTime();
+            DateFormat df = SimpleDateFormat.getDateTimeInstance(
+                DateFormat.LONG, DateFormat.LONG);
+            stringValue = df.format(date);
+        }
+
+        return stringValue;
     }
     
     @Override
