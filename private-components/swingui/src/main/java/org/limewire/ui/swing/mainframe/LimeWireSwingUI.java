@@ -21,7 +21,6 @@ import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
-import javax.swing.BorderFactory;
 
 public class LimeWireSwingUI extends JPanel {
     
