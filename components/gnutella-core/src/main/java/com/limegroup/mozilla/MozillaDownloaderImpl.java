@@ -1,13 +1,10 @@
 package com.limegroup.mozilla;
 
 import java.io.File;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -26,8 +23,6 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
  */
 public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
         EventListener<DownloadStatusEvent> {
-
-    private static final Log LOG = LogFactory.getLog(MozillaDownloaderImpl.class);
 
     private final MozillaDownload download;
 
