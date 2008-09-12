@@ -368,6 +368,10 @@ public class SimppManagerImpl implements SimppManager {
             // nothing we can do.
             return false;
         }
+
+        public boolean allowRequest(HttpUriRequest request) {
+            return true;
+        }
     }
     
     /**

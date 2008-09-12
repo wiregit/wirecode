@@ -214,6 +214,10 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                 exe.releaseResources(response);
                 return false;
             }
+
+            public boolean allowRequest(HttpUriRequest request) {
+                return true;
+            }
                     
         });
         

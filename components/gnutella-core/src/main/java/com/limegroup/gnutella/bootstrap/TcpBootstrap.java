@@ -207,7 +207,6 @@ public class TcpBootstrap {
             this.listener = listener;
         }
         
-        @Override
         public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Completed request: " + request.getRequestLine());
@@ -219,7 +218,6 @@ public class TcpBootstrap {
             return totalAdded < WANTED_HOSTS;
         }
         
-        @Override
         public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Failed request: " + request.getRequestLine());
@@ -230,7 +228,6 @@ public class TcpBootstrap {
             return true;
         }
 
-        @Override
         public boolean allowRequest(HttpUriRequest request) {
             // Do not allow the request if we don't know about it or it was already attempted.
             synchronized(TcpBootstrap.this) {

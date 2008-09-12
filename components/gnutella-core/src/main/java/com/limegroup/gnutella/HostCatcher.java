@@ -50,8 +50,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.bootstrap.TcpBootstrap;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
+import com.limegroup.gnutella.bootstrap.TcpBootstrap.TcpBootstrapListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -325,6 +327,7 @@ public class HostCatcher {
     private final NetworkInstanceUtils networkInstanceUtils;
 
     private final PingRequestFactory pingRequestFactory;
+    private final TcpBootstrap tcpBootstrap;
     
     @Inject
 	public HostCatcher(
@@ -338,7 +341,8 @@ public class HostCatcher {
             UniqueHostPinger uniqueHostPinger,
             UDPHostCacheFactory udpHostCacheFactory,
             PingRequestFactory pingRequestFactory,
-            NetworkInstanceUtils networkInstanceUtils) {
+            NetworkInstanceUtils networkInstanceUtils,
+            TcpBootstrap tcpBootstrap) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
@@ -350,6 +354,7 @@ public class HostCatcher {
         this.uniqueHostPinger = uniqueHostPinger;
         this.pingRequestFactory = pingRequestFactory;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.tcpBootstrap = tcpBootstrap;
         
         // TODO: this could also be solved with a named injection to get the
         //       UniqHostPinger and not its super class
@@ -761,10 +766,15 @@ public class HostCatcher {
     /**
      * Adds a collection of addresses to this.
      */
-    public void add(Collection<? extends Endpoint> endpoints) {
+    public int add(Collection<? extends Endpoint> endpoints) {
         rank(endpoints);
-        for(Endpoint e: endpoints)
-            add(e, true);
+        int added = 0;
+        for(Endpoint e: endpoints) {
+            if(add(e, true)) {
+                added++;
+            }
+        }
+        return added;
             
     }
 
@@ -1433,6 +1443,8 @@ public class HostCatcher {
             FETCHER.resetFetchTime();
             udpHostCache.resetData();
             udpHostCache.loadDefaults();
+            tcpBootstrap.resetData();
+            tcpBootstrap.loadDefaults();
             restoredHosts.clear();
             uniqueHostPinger.resetData();
         }
@@ -1475,6 +1487,7 @@ public class HostCatcher {
      * This tries, in order:
      * 1) Multicasting a ping.
      * 2) Sending UDP pings to UDPHostCaches.
+     * 3) Sending TCP pings to TcpHostCaches.
      */
     private class Bootstrapper implements Runnable {
         
@@ -1484,15 +1497,25 @@ public class HostCatcher {
         private long nextAllowedMulticastTime = 0;
         
         /**
-         * The next time we're allowed to fetch.
-         * Incremented after each succesful fetch.
+         * The next time we're allowed to udp fetch.
+         * Incremented after each succesful udp fetch.
          */
-        private long nextAllowedFetchTime = 0;
+        private long nextAllowedUdpTime = 0;
         
         /**
-         * How long we must wait after contacting UDP before we can contact.
+         * The next time we're allowed to tcp fetch.
+         * Incremeneted after each succesful tcp fetch.
          */
+        private long nextAllowedTcpTime = 0;
+        
+        /** How long we must wait after contacting TCP before we can try again. */
+        private static final int POST_TCP_DELAY = 5 * 60 * 1000;        
+        
+        /** How long we must wait after contacting UDP before we can try again. */
         private static final int POST_UDP_DELAY = 30 * 1000;
+        
+        /** The delay after a UDP ping before we can send a TCP ping. */
+        private static final int POST_UDP_PRE_TCP_DELAY = 10 * 1000;
         
         /**
          * How long we must wait after each multicast ping before
@@ -1514,11 +1537,6 @@ public class HostCatcher {
             }
             
             long now = System.currentTimeMillis();
-            
-            if(udpHostCache.getSize() == 0 &&
-               now < nextAllowedFetchTime &&
-               now < nextAllowedMulticastTime)
-                return;
                 
             //if we don't need hosts, exit.
             if(!needsHosts(now))
@@ -1532,7 +1550,9 @@ public class HostCatcher {
          * connection to the internet, we can fetch if needed.
          */
         void resetFetchTime() {
-            nextAllowedFetchTime = 0;
+            nextAllowedUdpTime = 0;
+            nextAllowedMulticastTime = 0;
+            nextAllowedTcpTime = 0;
         }
         
         /**
@@ -1555,6 +1575,10 @@ public class HostCatcher {
                 
             // then try udp host caches.
             if(udpHostCacheFetch(now))
+                return;
+            
+            // then try tcp host caches.
+            if(tcpHostCacheFetch(now))
                 return;
                 
             // :-(
@@ -1582,12 +1606,29 @@ public class HostCatcher {
          */
         private boolean udpHostCacheFetch(long now) {
             // if we had udp host caches to fetch from, use them.
-            if(udpHostCache.fetchHosts()) {
+            if(nextAllowedUdpTime < now && udpHostCache.fetchHosts()) {
                 LOG.trace("Fetching via UDP");
-                nextAllowedFetchTime = now + POST_UDP_DELAY;
+                nextAllowedUdpTime = now + POST_UDP_DELAY;
+                nextAllowedTcpTime = Math.max(nextAllowedTcpTime, nextAllowedUdpTime + POST_UDP_PRE_TCP_DELAY);
                 return true;
             }
             return false;
+        }
+        
+        private boolean tcpHostCacheFetch(long now) {
+            // if we had tcp host caches to fetch from, use them.
+            if(nextAllowedTcpTime < now && tcpBootstrap.fetchHosts(new BootstrapListener())) {
+                LOG.trace("Fetching via TCP");
+                nextAllowedTcpTime = now + POST_TCP_DELAY;
+                return true;
+            }
+            return false;
+        }
+    }
+    
+    private class BootstrapListener implements TcpBootstrapListener {
+        public int handleHosts(Collection<? extends Endpoint> hosts) {
+            return add(hosts);
         }
     }
     

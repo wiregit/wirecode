@@ -926,6 +926,10 @@ public class UpdateHandlerImpl implements UpdateHandler {
             // nothing we can do.
             return false;
         }
+
+        public boolean allowRequest(HttpUriRequest request) {
+            return true;
+        }
     }
     
     /**

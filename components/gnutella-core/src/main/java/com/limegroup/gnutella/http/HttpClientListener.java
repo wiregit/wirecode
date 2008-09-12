@@ -11,6 +11,8 @@ import org.apache.http.client.methods.HttpUriRequest;
  */
 public interface HttpClientListener {
     
+    public boolean allowRequest(HttpUriRequest request);
+    
     /**
      * Notification that the HttpMethod completed.
      * Returns true if more requests should be processed, false otherwise.

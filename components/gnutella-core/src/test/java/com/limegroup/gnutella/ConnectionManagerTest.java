@@ -38,6 +38,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
+import com.limegroup.gnutella.bootstrap.TcpBootstrap;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.ConnectionCapabilitiesDelegator;
@@ -756,11 +757,12 @@ public class ConnectionManagerTest extends LimeTestCase {
                 UniqueHostPinger uniqueHostPinger,
                 UDPHostCacheFactory udpHostCacheFactory,
                 PingRequestFactory pingRequestFactory, 
-                NetworkInstanceUtils networkInstanceUtils) {
+                NetworkInstanceUtils networkInstanceUtils,
+                TcpBootstrap tcpBootstrap) {
             super(backgroundExecutor, connectionServices, connectionManager,
                     udpService, dhtManager, queryUnicaster, ipFilter,
                     multicastService, uniqueHostPinger, udpHostCacheFactory,
-                    pingRequestFactory, networkInstanceUtils);
+                    pingRequestFactory, networkInstanceUtils, tcpBootstrap);
             resetLatches();
         }
         
@@ -832,11 +834,12 @@ public class ConnectionManagerTest extends LimeTestCase {
                 UniqueHostPinger uniqueHostPinger,
                 UDPHostCacheFactory udpHostCacheFactory,
                 PingRequestFactory pingRequestFactory, 
-                NetworkInstanceUtils networkInstanceUtils) {
+                NetworkInstanceUtils networkInstanceUtils,
+                TcpBootstrap tcpBootstrap) {
             super(backgroundExecutor, connectionServices, connectionManager,
                     udpService, dhtManager, queryUnicaster, ipFilter,
                     multicastService, uniqueHostPinger, udpHostCacheFactory,
-                    pingRequestFactory, networkInstanceUtils);
+                    pingRequestFactory, networkInstanceUtils, tcpBootstrap);
         }
         
         final BlockingQueue<EndpointObserver> observers = 
