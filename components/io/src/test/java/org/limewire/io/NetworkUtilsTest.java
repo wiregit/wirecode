@@ -792,4 +792,10 @@ public class NetworkUtilsTest extends BaseTestCase {
         assertEquals(0xFFFFF000, NetworkUtils.getHexMask(20));
         assertEquals(0xFFFFFF00, NetworkUtils.getHexMask(24));
     }
+    
+    public void testToByteAddress() throws Exception {
+        int ineffectiveMask = 0xFFFFFFFF;
+        byte[] address = new byte[] { (byte)191, 45, 33, (byte)0xFF, };
+        assertEquals(address, NetworkUtils.toByteAddress(NetworkUtils.getMaskedIP(InetAddress.getByAddress(address), ineffectiveMask)));
+    }
 }

@@ -2123,16 +2123,26 @@ public abstract class MessageRouterImpl implements MessageRouter {
     /**
      * Returns the appropriate handler from the _pushRouteTable.
      * This enforces that requests for my clientGUID will return
-     * FOR_ME_REPLY_HANDLER, even if it's not in the table.
+     * FOR_ME_REPLY_HANDLER, even if it's not in the table. Will also
+     * iterate through leaves if they are not in the table.
      */
     public ReplyHandler getPushHandler(byte[] guid) {
         ReplyHandler replyHandler = _pushRouteTable.getReplyHandler(guid);
-        if(replyHandler != null)
+        if(replyHandler != null) {
             return replyHandler;
-        else if(Arrays.equals(_clientGUID, guid))
+        } else if(Arrays.equals(_clientGUID, guid)) {
             return forMeReplyHandler;
-        else
+        } else {
+            if (!connectionServices.isSupernode()) {
+                return null;
+            }
+            for (RoutedConnection leaf : connectionManager.getInitializedClientConnections()) {
+                if (leaf.isPushProxyFor() && Arrays.equals(leaf.getClientGUID(), guid)) {
+                    return leaf;
+                }
+            }
             return null;
+        }
     }
 
     /**

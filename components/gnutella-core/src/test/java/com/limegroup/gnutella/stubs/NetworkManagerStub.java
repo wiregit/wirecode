@@ -5,8 +5,9 @@ import java.io.IOException;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
@@ -14,6 +15,13 @@ import com.limegroup.gnutella.NetworkManagerEvent;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
+    
+    public static final Module MODULE = new AbstractModule() {
+        protected void configure() {
+            bind(NetworkManager.class).to(NetworkManagerStub.class);
+        }
+    };
+    
     private boolean acceptedIncomingConnection;
     private byte[] address = new byte[] { 127, 0, 0, 1 };
     private int port = 5555;
@@ -27,8 +35,9 @@ public class NetworkManagerStub implements NetworkManager {
     private boolean oobCapable;
     private int stableUDPPort = 7777;
     private int fwtVersion;
-
-    private EventListenerList<NetworkManagerEvent> listeners = new EventListenerList<NetworkManagerEvent>();
+    private boolean incomingTLS;
+    private boolean outgoingTLS;
+    private boolean tls;
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -41,6 +50,10 @@ public class NetworkManagerStub implements NetworkManager {
     public boolean addressChanged() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    public void externalAddressChanged() {
+        
     }
 
     public boolean canDoFWT() {
@@ -186,16 +199,48 @@ public class NetworkManagerStub implements NetworkManager {
     public void stop(){}
     public void initialize() {}
     
-    
+    public String getServiceName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean isTLSSupported() {
+        return !tls;
+    }
+
+    public boolean isIncomingTLSEnabled() {
+        return incomingTLS;
+    }
+
+    public boolean isOutgoingTLSEnabled() {
+        return outgoingTLS;
+    }
+
+    public void setIncomingTLSEnabled(boolean incomingTLS) {
+        this.incomingTLS = incomingTLS;
+    }
+
+    public void setOutgoingTLSEnabled(boolean outgoingTLS) {
+        this.outgoingTLS = outgoingTLS;
+    }
+
+    public void setTls(boolean tls) {
+        this.tls = tls;
+    }   
+
+    public void portChanged() {
+        
+    }
+
+    public void acceptedIncomingConnectionChanged() {
+        
+    }
+
     public void addListener(EventListener<NetworkManagerEvent> listener) {
-        listeners.addListener(listener);
     }
 
     public boolean removeListener(EventListener<NetworkManagerEvent> listener) {
-        return listeners.removeListener(listener);
+        return false;
     }
-    
-    public void fireEvent(NetworkManagerEvent event) {
-        listeners.broadcast(event);
-    }
+
 }

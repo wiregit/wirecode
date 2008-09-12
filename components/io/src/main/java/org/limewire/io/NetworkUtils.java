@@ -469,6 +469,17 @@ public final class NetworkUtils {
     }
     
     /**
+     * Converts integer <code>ip</code> into byt array.
+     * 
+     * This method is not IPv6 compliant.
+     */
+    public static byte[] toByteAddress(int ip) {
+        byte[] address = new byte[4];
+        ByteUtils.int2beb(ip, address, 0);
+        return address;
+    }
+    
+    /**
      * @param decMask a netmask in decimal, like /24
      * @return an integer that can be and-ed for masking
      */
