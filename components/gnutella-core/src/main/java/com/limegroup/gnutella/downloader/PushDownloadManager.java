@@ -524,6 +524,11 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             
             return true; // try more.
     	}
+
+        @Override
+        public boolean allowRequest(HttpUriRequest request) {
+            return true;
+        }
     }
      
     /** Accepts a socket that has had a GIV read off it already. */

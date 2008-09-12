@@ -937,6 +937,11 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
             // nothing we can do.
             return false;
         }
+
+        @Override
+        public boolean allowRequest(HttpUriRequest request) {
+            return true;
+        }
     }
     
     /**

@@ -87,6 +87,11 @@ public class DefaultHttpExecutor implements HttpExecutor {
      * false if another request should be processed.
      */
 	private boolean performRequest(HttpUriRequest method, HttpParams params, HttpClientListener listener) {
+	    // If we aren't allowed to do this request, skip to the next.
+	    if(!listener.allowRequest(method)) {
+	        return false;
+	    }
+	    
 		LimeHttpClient client = clientProvider.get();
         if(params != null) {
             client.setParams(params);
