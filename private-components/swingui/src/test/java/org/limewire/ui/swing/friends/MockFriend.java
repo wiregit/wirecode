@@ -121,4 +121,9 @@ class MockFriend implements Friend {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    @Override
+    public void releasePresence(Presence presence) {
+        // TODO Auto-generated method stub
+    }
 }

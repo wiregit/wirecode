@@ -388,7 +388,14 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                 break;
             case unavailable:
                 if (friend != null) {
-                    friends.remove(idToFriendMap.remove(user.getId()));
+                    friend.releasePresence(presence);
+                    Presence newPresence = friend.getPresence();
+                    if (newPresence != null) {
+                        friend.setStatus(newPresence.getStatus());
+                        friend.setMode(newPresence.getMode());
+                    } else {
+                        friends.remove(idToFriendMap.remove(user.getId()));
+                    }
                 } 
                 break;
         }

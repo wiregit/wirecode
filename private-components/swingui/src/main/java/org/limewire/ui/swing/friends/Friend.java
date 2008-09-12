@@ -51,4 +51,6 @@ public interface Friend {
     void removePropertyChangeListener(PropertyChangeListener listener);
 
     Presence getPresence();
+    
+    void releasePresence(Presence presence);
 }

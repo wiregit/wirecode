@@ -1,12 +1,17 @@
 package org.limewire.ui.swing.friends;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.jdesktop.beans.AbstractBean;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -16,7 +21,7 @@ public class FriendImpl extends AbstractBean implements Friend {
     private boolean chatting;
     private boolean activeConversation;
     private final User user;
-    private final Presence presence;
+    private Presence presence;
     private String status;
     private Mode mode;
     private long chatStartTime;
@@ -138,5 +143,26 @@ public class FriendImpl extends AbstractBean implements Friend {
 
     public Presence getPresence() {
         return presence;
+    }
+    
+    @Override
+    public void releasePresence(Presence presence) {
+        if (this.presence.getJID().equals(presence.getJID())) {
+            this.presence = getHighestPriorityPresence();
+        }
+    }
+
+    private Presence getHighestPriorityPresence() {
+        Collection<Presence> values = user.getPresences().values();
+        ArrayList<Presence> presences = new ArrayList<Presence>(values);
+        Collections.sort(presences, new PresenceSorter());
+        return presences.size() == 0 ? null : presences.get(0);
+    }
+    
+    private static class PresenceSorter implements Comparator<Presence> {
+        @Override
+        public int compare(Presence o1, Presence o2) {
+            return new Integer(o1.getPriority()).compareTo(new Integer(o2.getPriority()));
+        }
     }
 }

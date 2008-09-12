@@ -1,10 +1,11 @@
 package org.limewire.ui.swing.friends;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.Presence;
 
 public class MockUser implements User {
     private String id;
@@ -37,7 +38,8 @@ public class MockUser implements User {
         return false;
     }
 
+    @Override
     public Map<String, Presence> getPresences() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new HashMap<String, Presence>();
     }
 }
