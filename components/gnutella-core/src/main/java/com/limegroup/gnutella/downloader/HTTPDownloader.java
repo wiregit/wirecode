@@ -1186,7 +1186,14 @@ public class HTTPDownloader implements BandwidthTracker {
         
         if(LOG.isDebugEnabled())
             LOG.debug(_rfd + " Content-Range like #-#/#, " + str);
-        return Range.createRange(numBeforeDash, numBeforeSlash);
+        try {
+            return Range.createRange(numBeforeDash, numBeforeSlash);
+        } catch (IllegalArgumentException iae) {
+            // rethrow with tracking the input string, that caused the illegal range offsets to be parsed, see LWC-1660
+            IllegalArgumentException iaeWithReason = new IllegalArgumentException("invalid range for range header: " + str);
+            iaeWithReason.initCause(iae);
+            throw iaeWithReason;
+        }
     }
 
     /**
