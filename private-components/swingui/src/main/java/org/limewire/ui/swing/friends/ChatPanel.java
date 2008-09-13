@@ -172,7 +172,7 @@ public class ChatPanel extends JPanel implements Displayable {
 
     @EventSubscriber
     public void handleCloseChat(CloseChatEvent event) {
-        closeChat(event.getFriend().getID());
+        chats.get(event.getFriend().getID()).closeChat();
         
         setConversationPanel(buildMessagesPane());
     }
@@ -187,7 +187,9 @@ public class ChatPanel extends JPanel implements Displayable {
 
     private void closeChat(String chatKey) {
         LOG.debugf("Closing chat panel for {0}", chatKey);
-        chats.remove(chatKey).closeChat();
+        ConversationPane conversation = chats.remove(chatKey);
+        conversation.closeChat();
+        conversation.destroy();
     }
 
     @Override

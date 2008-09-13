@@ -1,9 +1,18 @@
 package org.limewire.ui.swing.friends;
 
-import java.awt.*;
+import static org.limewire.ui.swing.util.I18n.tr;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 
@@ -17,7 +26,6 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.LimePresence;
@@ -124,7 +132,9 @@ public class ConversationPane extends JPanel implements Displayable {
         } catch (XMPPException e) {
             LOG.error("Could not set chat state while closing the conversation", e);
         }
-        
+    }
+    
+    public void destroy() {
         EventAnnotationProcessor.unsubscribe(this);
     }
     
@@ -161,7 +171,7 @@ public class ConversationPane extends JPanel implements Displayable {
         panel.add(libraryButton, BorderLayout.NORTH);
         inputPanel = new ResizingInputPanel(writer);
         panel.add(inputPanel, BorderLayout.CENTER);
-
+        
         return panel;
     }
     
