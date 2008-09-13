@@ -6,5 +6,5 @@ package org.limewire.core.api.mozilla;
  * into the downloader list for the limewire client.
  */
 public interface LimeMozillaDownloadManagerListener {
-    public void remove(LimeMozillaDownloadProgressListener limeMozillaDownloadProgressListener);
+    public void removeListener(LimeMozillaDownloadProgressListener limeMozillaDownloadProgressListener);
 }

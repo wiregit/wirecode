@@ -238,14 +238,18 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
 
     @Override
     public void pause() {
-        if (!isPaused() && !isInactive() && !isCompleted()) {
+        if ((!isPaused() && !isInactive() && !isCompleted()) || isQueued()) {
             download.pauseDownload();
         }
     }
 
+    private boolean isQueued() {
+        return download.isQueued();
+    }
+
     @Override
     public boolean resume() {
-        if (isPaused()) {
+        if (isPaused() || isQueued()) {
             download.resumeDownload();
         }
         return true;
@@ -254,7 +258,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     @Override
     public void stop() {
         finish();
-        downloadManager.remove(this, isCompleted());
+        downloadManager.remove(this, true);
     }
 
     @Override
@@ -339,14 +343,19 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
         return false;
     }
 
+    /**
+     * Currently only supporting Complete and Invalid status events.
+     */
     @Override
     public void handleEvent(DownloadStatusEvent event) {
         DownloadStatus status = event.getType();
 
         if (status == DownloadStatus.COMPLETE) {
-            downloadManager.remove(this, false);//false because we don't want to remove the download from the list
+            downloadManager.remove(this, false);// false because we don't want
+            // to remove the download from
+            // the list
         } else if (status == DownloadStatus.INVALID) {
-            downloadManager.remove(this, false);
+            stop();
         }
     }
 

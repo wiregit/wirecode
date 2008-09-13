@@ -93,9 +93,13 @@ public interface MozillaDownload extends BandwidthTracker {
      */
     void addListener(EventListener<DownloadStatusEvent> listener);
 
-   /**
-    * Removes listener from this download.
-    */
+    /**
+     * Removes listener from this download.
+     */
     boolean removeListener(EventListener<DownloadStatusEvent> listener);
 
+    /**
+     * Returns indicator that the download is queued.
+     */
+    boolean isQueued();
 }

@@ -274,19 +274,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
             @Override
             public void run() {
                 synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
-                    nsIDownloadManager downloadManager = getDownloadManager();
-                    try {
-                        downloadManager.removeDownload(downloadId);
-                    } catch (XPCOMException e) {
-                        LOG.debug(e.getMessage(), e);
-                    }
-                    try {
-                        downloadManager
-                                .removeListener(LimeMozillaDownloadProgressListenerImpl.this);
-                    } catch (XPCOMException e) {
-                        LOG.debug(e.getMessage(), e);
-                    }
-                    manager.remove(LimeMozillaDownloadProgressListenerImpl.this);
+                    manager.removeListener(LimeMozillaDownloadProgressListenerImpl.this);
                 }
             }
         });
@@ -323,6 +311,12 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
     @Override
     public boolean removeListener(EventListener<DownloadStatusEvent> listener) {
         return listeners.removeListener(listener);
+    }
+
+    @Override
+    public synchronized boolean isQueued() {
+        boolean queued = state.get() == nsIDownloadManager.DOWNLOAD_QUEUED;
+        return queued;
     }
 
 }

@@ -7,6 +7,7 @@ import org.limewire.core.api.mozilla.LimeMozillaDownloadProgressListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.Objects;
+import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDOMDocument;
 import org.mozilla.interfaces.nsIDownload;
@@ -136,9 +137,21 @@ public class LimeMozillaDownloadManagerListenerImpl implements
     }
 
     @Override
-    public synchronized void remove(
-            LimeMozillaDownloadProgressListener limeMozillaDownloadProgressListener) {
-        listeners.remove(limeMozillaDownloadProgressListener);
+    public synchronized void removeListener(
+            final LimeMozillaDownloadProgressListener limeMozillaDownloadProgressListener) {
+        MozillaExecutor.mozSyncExec(new Runnable() {
+            @Override
+            public void run() {
+                nsIDownloadManager downloadManager = getDownloadManager();
+                try {
+                    long downloadId = limeMozillaDownloadProgressListener.getDownloadId();
+                    downloadManager.removeDownload(downloadId);
+                } catch (XPCOMException e) {
+                    LOG.debug(e.getMessage(), e);
+                }
+                listeners.remove(limeMozillaDownloadProgressListener);
+            }
+        });
     }
 
 }
