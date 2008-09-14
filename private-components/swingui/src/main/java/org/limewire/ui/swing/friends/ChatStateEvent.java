@@ -27,6 +27,6 @@ public class ChatStateEvent extends AbstractEDTEvent {
     
     @Override
     public void publish() {
-        super.publish(buildTopic(friend.getName()));
+        super.publish(buildTopic(friend.getID()));
     }
 }

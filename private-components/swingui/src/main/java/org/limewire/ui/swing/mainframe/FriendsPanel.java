@@ -135,7 +135,7 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
             }
         }
         
-        if (event.getMessage().getType() == Type.Received && !windowStateListener.isWindowMainFocus()) {
+        if (event.getMessage().getType() != Type.Sent && !windowStateListener.isWindowMainFocus()) {
             LOG.debug("Sending a message to the tray notifier");
             notifier.showMessage(new Notification(getNoticeForMessage(event)));
         } 

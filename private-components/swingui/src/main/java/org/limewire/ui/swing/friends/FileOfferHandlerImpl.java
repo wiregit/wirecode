@@ -3,6 +3,7 @@ package org.limewire.ui.swing.friends;
 import com.google.inject.Singleton;
 import com.google.inject.Inject;
 
+import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -16,6 +17,6 @@ class FileOfferHandlerImpl implements FileOfferHandler {
     }
 
     public void fileOfferred(FileMetaData f, String fromJID) {
-        new FileOfferedEvent(f, fromJID).publish();
+        new MessageReceivedEvent(new MessageImpl(null, null, fromJID, null, Type.FileOffer, f)).publish();
     }
 }

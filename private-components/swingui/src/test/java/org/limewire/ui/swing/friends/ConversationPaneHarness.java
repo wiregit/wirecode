@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -35,7 +36,7 @@ public class ConversationPaneHarness {
                     }
                 };
                 friend.writer = writer;
-                ConversationPane pane = new ConversationPane(writer, friend);
+                ConversationPane pane = new ConversationPane(writer, friend, new MockLibraryManager());
                 frame.add(pane);
                 
                 for(int i = 0; i < 10; i++) {

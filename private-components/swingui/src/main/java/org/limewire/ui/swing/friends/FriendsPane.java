@@ -407,7 +407,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
         Friend friend = idToFriendMap.get(message.getFriendID());
-        if (!friend.isActiveConversation() && message.getType() == Type.Received) {
+        if (!friend.isActiveConversation() && message.getType() != Type.Sent) {
             friend.startChat();
             friend.setReceivingUnviewedMessages(true);
             if (!friendTimerMap.containsKey(friend)) {

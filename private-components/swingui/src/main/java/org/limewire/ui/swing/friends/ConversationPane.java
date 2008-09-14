@@ -7,7 +7,10 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.dnd.DropTargetDragEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
@@ -15,9 +18,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.html.FormSubmitEvent;
+import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -26,8 +34,10 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.xmpp.api.client.ChatState;
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
@@ -44,22 +54,25 @@ public class ConversationPane extends JPanel implements Displayable {
     private static final String DISABLED_LIBRARY_TOOLTIP = tr(" isn't using LimeWire. Tell them about it to see their Library");
     private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
+    private static final Color BACKGROUND_COLOR = Color.WHITE;
     private final ArrayList<Message> messages = new ArrayList<Message>();
+    private final Map<String, FileMetaData> idToFileMetaDataMap = new HashMap<String, FileMetaData>();
     private final JEditorPane editor;
     private final String conversationName;
     private final String friendId;
     private final MessageWriter writer;
+    private final LibraryManager libraryManager;
+    private final Friend friend;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
-    private static final Color BACKGROUND_COLOR = Color.WHITE;
-    private final Friend friend;
 
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend) {
+    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, LibraryManager libraryManager) {
         this.friend = friend;
         this.conversationName = friend.getName();
         this.friendId = friend.getID();
         this.writer = writer;
+        this.libraryManager = libraryManager;
         
         setLayout(new BorderLayout());
         
@@ -83,6 +96,8 @@ public class ConversationPane extends JPanel implements Displayable {
         editor.setEditable(false);
         editor.setContentType("text/html");
         editor.addHyperlinkListener(new HyperlinkListener());
+        HTMLEditorKit editorKit = (HTMLEditorKit) editor.getEditorKit();
+        editorKit.setAutoFormSubmission(false);
         
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
         
@@ -97,11 +112,20 @@ public class ConversationPane extends JPanel implements Displayable {
     
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
-        LOG.debugf("Message: from {0} text: {1} topic: {2}", event.getMessage().getSenderName(), event.getMessage().getMessageText(), topic);
-        messages.add(event.getMessage());
-        if (event.getMessage().getType() == Type.Received) {
+        Message message = event.getMessage();
+        LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
+        messages.add(message);
+        Type type = message.getType();
+        
+        if (type != Type.Sent) {
             currentChatState = ChatState.active;
         }
+        
+        if (type == Type.FileOffer) {
+            FileMetaData fileOffer = message.getFileOffer();
+            idToFileMetaDataMap.put(fileOffer.getId(), fileOffer);
+        }
+        
         displayMessages();
     }
     
@@ -139,11 +163,11 @@ public class ConversationPane extends JPanel implements Displayable {
     }
     
     public String getMessageReceivedTopicName() {
-        return MessageReceivedEvent.buildTopic(conversationName);
+        return MessageReceivedEvent.buildTopic(friendId);
     }
 
     public String getChatStateTopicName() {
-        return ChatStateEvent.buildTopic(conversationName);
+        return ChatStateEvent.buildTopic(friendId);
     }
     
     public String getPresenceUpdateTopicName() {
@@ -172,6 +196,10 @@ public class ConversationPane extends JPanel implements Displayable {
         inputPanel = new ResizingInputPanel(writer);
         panel.add(inputPanel, BorderLayout.CENTER);
         
+        JTextComponent inputComponent = inputPanel.getInputComponent();
+        BuddyShareDropTarget buddyShare = new BuddyShareDropTarget(inputComponent, libraryManager.getLibraryList(), friend);
+        inputComponent.setDropTarget(buddyShare.getDropTarget());
+        
         return panel;
     }
     
@@ -185,9 +213,20 @@ public class ConversationPane extends JPanel implements Displayable {
 
         @Override
         public void hyperlinkUpdate(HyperlinkEvent e) {
-            if (EventType.ACTIVATED == e.getEventType()) {
-                LOG.debugf("Hyperlink clicked: {0}", e.getURL());
-                NativeLaunchUtils.openURL(e.getURL().toString());
+            if (e instanceof FormSubmitEvent) {
+                FormSubmitEvent event = (FormSubmitEvent) e;
+                //Just pushed the download the file button...
+                LOG.debugf("File offer download requested. FileId: {0}", event.getData());
+                
+            } else if (EventType.ACTIVATED == e.getEventType()) {
+                if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
+                    LOG.debugf("Opening a view to {0}'s library", friend.getName());
+                    //Open the view for this friends' library
+                    
+                } else {
+                    LOG.debugf("Hyperlink clicked: {0}", e.getURL());
+                    NativeLaunchUtils.openURL(e.getURL().toString());
+                }
             }
         }
     }
@@ -195,6 +234,35 @@ public class ConversationPane extends JPanel implements Displayable {
     public void offerFile(LocalFileItem file) {
         if(friend.getPresence() instanceof LimePresence) {
             file.offer((LimePresence)friend.getPresence());
+        }
+    }
+    
+    private static class BuddyShareDropTarget extends ShareDropTarget {
+        private final Friend friend;
+
+        public BuddyShareDropTarget(JTextComponent component, LocalFileList fileList, Friend friend) {
+            super(component, fileList);
+            this.friend = friend;
+        }
+
+        @Override
+        public void dragEnter(DropTargetDragEvent dtde) {
+            super.dragEnter(dtde);
+
+            checkLimewireConnected(dtde);
+        }
+        
+        @Override
+        public void dragOver(DropTargetDragEvent dtde) {
+            super.dragOver(dtde);
+            
+            checkLimewireConnected(dtde);
+        }
+
+        private void checkLimewireConnected(DropTargetDragEvent dtde) {
+            if (!friend.isSignedInToLimewire()) {
+                dtde.rejectDrag();
+            }
         }
     }
 }

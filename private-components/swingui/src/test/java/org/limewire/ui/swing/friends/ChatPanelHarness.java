@@ -31,7 +31,7 @@ public class ChatPanelHarness {
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, Friend friend) {
-                        return new ConversationPane(writer, friend);
+                        return new ConversationPane(writer, friend, libraryManager);
                     }
                 }, icons, friendsPane, new TopPanel(icons, friendsPane), buddySharing));
                 
@@ -90,7 +90,7 @@ public class ChatPanelHarness {
         
         for(int i = 0; i < 50; i++) {
             String id = "foo" + i;
-            new MessageReceivedEvent(new MockMessage(new MockFriend(id, "hey", Mode.available), "yo", System.currentTimeMillis(), "me", Type.Received)).publish();
+            new MessageReceivedEvent(new MockMessage(new MockFriend(id, "hey", Mode.available), "yo", System.currentTimeMillis(), "me", Type.Received, null)).publish();
         }
     }
 }

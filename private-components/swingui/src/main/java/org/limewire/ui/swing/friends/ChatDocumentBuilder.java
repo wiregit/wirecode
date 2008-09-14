@@ -6,12 +6,15 @@ import java.util.ArrayList;
 
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.ChatState;
+import org.limewire.xmpp.api.client.FileMetaData;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
 class ChatDocumentBuilder {
+    static final String LIBRARY_LINK = "#library";
+
     private static final String LINE_BREAK = "<br/>";
 
     static String TOP = 
@@ -32,6 +35,7 @@ class ChatDocumentBuilder {
                     ".typing { " +
                         "font-size: 90%;" +
                         "color: #646464;}" + 
+                    "form { text-align: center;}" +
                 "</style>" +
             "</head>" +
             "<body>";
@@ -39,10 +43,6 @@ class ChatDocumentBuilder {
     static String BOTTOM = 
         "</body>" +
         "</html>";
-    
-    public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState, String conversationName) {
-        return buildChatText(messages, currentChatState, conversationName, false);
-    }
     
     public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState, 
             String conversationName, boolean friendSignedOff) {
@@ -86,7 +86,7 @@ class ChatDocumentBuilder {
 
     private static StringBuilder appendDiv(StringBuilder builder, Message message) {
         Type type = message.getType();
-        String cssClass = type == Type.Sent ? "me" : type == Type.Received ? "them" : "typing";
+        String cssClass = type == Type.Sent ? "me" : "them";
         String content = message.getSenderName();
         return builder.append("<div class=\"")
         .append(cssClass)
@@ -121,6 +121,21 @@ class ChatDocumentBuilder {
 
     private static String processContent(Message message) {
         String messageText = message.getMessageText();
+        if (message.getType() == Type.FileOffer) {
+            StringBuilder bldr = new StringBuilder();
+            FileMetaData offeredFile = message.getFileOffer();
+            bldr.append(tr("wants to share a file with you")).append("<br/>")
+                .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"")
+                .append(offeredFile.getId())
+                .append("\"/><input type=\"submit\" value=\"")
+                .append(offeredFile.getName())
+                .append("\"/></form><br/>")
+                .append(tr("Download it now, or get it from his")).append(" <a href\"")
+                .append(LIBRARY_LINK)
+                .append("\">").append(tr("Library")).append("</a> ").append(tr("later"));
+                
+            return bldr.toString();
+        }
         messageText = messageText.replace("<", "&lt;").replace(">", "&gt;");
         
         return URLWrapper.wrap(messageText);

@@ -1,13 +1,13 @@
 package org.limewire.ui.swing.friends;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.ChatState;
+import org.limewire.xmpp.api.client.MockFileMetadata;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 public class ChatDocumentBuilderTest extends TestCase {
     public void testBuildChatTextWithLinks() {
@@ -90,11 +90,24 @@ public class ChatDocumentBuilderTest extends TestCase {
         conversation.append("<div class=\"me\">me:</div>heynow<br/><br/>")
         .append("<div class=\"me\">me:</div>yo<br/>");
         
-        List<Message> messages = Arrays.asList(new Message[] {
-          new MockMessage(null, "heynow", 0, "me", Type.Sent),      
-          new MockMessage(null, "yo", 600001, "me", Type.Sent),      
-        });
-        compareOutput(conversation.toString(), null, false, new ArrayList<Message>(messages));
+        MockFriend friend = new MockFriend(null, null, Mode.available);
+        ArrayList<Message> messages = new ArrayList<Message>();
+        messages.add(new MockMessage(friend, "heynow", 0, "me", Type.Sent, null));      
+        messages.add(new MockMessage(friend, "yo", 600001, "me", Type.Sent, null));      
+        compareOutput(conversation.toString(), null, false, messages);
+    }
+    
+    public void testBuildChatTextAfterBeingOfferedAFile() {
+        StringBuilder conversation = new StringBuilder();
+        conversation.append("<div class=\"them\">you:</div>wants to share a file with you<br/>")
+                    .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"heynow-fileid\"/><input type=\"submit\" value=\"Foo doc.doc\"/></form><br/>")
+                    .append("Download it now, or get it from his <a href\"#library\">Library</a> later<br/>");
+        
+        MockFriend friend = new MockFriend(null, null, Mode.available);
+        ArrayList<Message> messages = new ArrayList<Message>();
+        messages.add(new MockMessage(friend, null, 0, "you", Type.FileOffer, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
+        
+        compareOutput(conversation.toString(), ChatState.active, false, messages);
     }
 
     private void compareOutput(String input, String expected) {
@@ -125,7 +138,7 @@ public class ChatDocumentBuilderTest extends TestCase {
         ArrayList<Message> list = new ArrayList<Message>();
         for(int i = 0; i < messages.length; i++) {
             Type type = types[i];
-            list.add(new MessageImpl(type == Type.Sent ? "me" : "you", null, messages[i], type));
+            list.add(new MessageImpl(type == Type.Sent ? "me" : "you", null, null, messages[i], type, null));
         }
         return list;
     }
