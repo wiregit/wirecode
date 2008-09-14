@@ -25,6 +25,9 @@ public class ChatDocumentBuilderTest extends TestCase {
 
         compareOutput("hey www.foo there", 
                       "<div class=\"me\">me:</div>hey www.foo there<br/>");
+
+        compareOutput("hey magnet://foo.bar now", 
+        "<div class=\"me\">me:</div>hey <a href=\"magnet://foo.bar\">magnet://foo.bar</a> now<br/>");
     }
     
     public void testBuildChatTextWithMarkup() {

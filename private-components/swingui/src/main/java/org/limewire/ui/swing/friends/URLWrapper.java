@@ -53,7 +53,7 @@ class URLWrapper {
           "  \\b                                                 \n"+
           "  ## match the hostname part                          \n"+
           "  (                                                   \n"+
-          "     (?: ftp | http s? ): // [-\\w]+(\\.\\w[-\\w]*)+  \n"+
+          "     (?: magnet | ftp | http s? ): // [-\\w]+(\\.\\w[-\\w]*)+  \n"+
           "   |                                                  \n"+
           "     " + Hostname + "                                 \n"+
           "  )                                                   \n"+
@@ -75,7 +75,9 @@ class URLWrapper {
             bldr.append(input.substring(index, startIndex));
             String url = result.group();
             bldr.append("<a href=\"");
-            if (!url.matches("http[s]?://.*")) {
+            if (url.matches("magnet://.*")) {
+                //no-op guard to prevent appending http://
+            } else if (!url.matches("http[s]?://.*")) {
                 bldr.append("http://");
             }
             bldr.append(url).append("\">");

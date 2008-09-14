@@ -217,15 +217,22 @@ public class ConversationPane extends JPanel implements Displayable {
                 FormSubmitEvent event = (FormSubmitEvent) e;
                 //Just pushed the download the file button...
                 LOG.debugf("File offer download requested. FileId: {0}", event.getData());
+                //TODO: Initiate download of shared file from friend
                 
             } else if (EventType.ACTIVATED == e.getEventType()) {
                 if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
                     LOG.debugf("Opening a view to {0}'s library", friend.getName());
-                    //Open the view for this friends' library
+                    //TODO: Open the view for this friends' library
                     
                 } else {
-                    LOG.debugf("Hyperlink clicked: {0}", e.getURL());
-                    NativeLaunchUtils.openURL(e.getURL().toString());
+                    String linkDescription = e.getDescription();
+                    LOG.debugf("Hyperlink clicked: {0}", linkDescription);
+                    if (linkDescription.startsWith("magnet")) {
+                        //TODO: Need to do something with magnet links
+                        
+                    } else {
+                        NativeLaunchUtils.openURL(e.getURL().toString());
+                    }
                 }
             }
         }
