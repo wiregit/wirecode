@@ -410,6 +410,18 @@ public class SharingSettings extends LimeProps {
     }
     
     /**
+     * Whether to allow Documents to be shared.
+     */
+    public static final BooleanSetting DOCUMENT_SHARING_ENABLED =
+        FACTORY.createBooleanSetting("DOCUMENT_SHARING_ENABLED", false);
+    
+    /**
+     * Whether to allow Programs to be shared.
+     */
+    public static final BooleanSetting PROGRAM_SHARING_ENABLED =
+        FACTORY.createBooleanSetting("PROGRAM_SHARING_ENABLED", false);
+    
+    /**
 	 * The shared directories. 
 	 */
     public static final FileSetSetting DIRECTORIES_TO_SHARE =

@@ -6,7 +6,9 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.Action;
 
+import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * Creates a button that is undecorated and its text behaves like a hyperlink.
@@ -16,9 +18,14 @@ import org.limewire.ui.swing.util.FontUtils;
  */
 public class NumberedHyperLinkButton extends HyperLinkButton {
     
-    private int displayNumber = 0;
+    @Resource
+    Color numberedForeGroundColor;
+    @Resource
+    Color mouseOverColor;
+    @Resource
+    Color disabledColor;
     
-    private Color disabledColor;
+    private int displayNumber = 0;
     
     public NumberedHyperLinkButton(String text) {
         super(text);
@@ -26,6 +33,14 @@ public class NumberedHyperLinkButton extends HyperLinkButton {
     
     public NumberedHyperLinkButton(String text, Action action) {
         super(text, action);
+        
+        GuiUtils.assignResources(this); 
+
+		//need to set these values in super even though they've been
+		//injected
+        setForegroundColor(numberedForeGroundColor);
+        setMouseOverColor(mouseOverColor);
+        setDisabledColor(disabledColor);
     }
     
     public void setDisplayNumber(int value) {

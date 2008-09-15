@@ -1,10 +1,10 @@
 package org.limewire.ui.swing.sharing.table;
 
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 
 import ca.odell.glazedlists.gui.TableFormat;
 
-public class SharingFancyIconTableFormat implements TableFormat<FileItem> {
+public class SharingFancyIconTableFormat implements TableFormat<LocalFileItem> {
   
     public static final String[] columnLabels = new String[] {"Name", ""};
     
@@ -22,7 +22,7 @@ public class SharingFancyIconTableFormat implements TableFormat<FileItem> {
     }
 
     @Override
-    public Object getColumnValue(FileItem fileItem, int column) {
+    public Object getColumnValue(LocalFileItem fileItem, int column) {
         if(column == 0) return fileItem;
         else if(column == 1) return fileItem;
         

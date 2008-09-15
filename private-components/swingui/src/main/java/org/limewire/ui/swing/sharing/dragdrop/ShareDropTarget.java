@@ -13,15 +13,24 @@ import java.io.File;
 import java.util.List;
 
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 public class ShareDropTarget implements DropTargetListener {
 
     private DropTarget dropTarget;
     private LocalFileList fileList;
+    private boolean alwaysShareDocuments;
     
     public ShareDropTarget(Component component, LocalFileList fileList) {
+        this(component, fileList, true);
+    }
+    
+    public ShareDropTarget(Component component, LocalFileList fileList, boolean alwaysShareDocuments) {
         dropTarget = new DropTarget(component, DnDConstants.ACTION_COPY, this, true, null);
         this.fileList = fileList;
+        this.alwaysShareDocuments = alwaysShareDocuments;
     }
     
     
@@ -51,9 +60,10 @@ public class ShareDropTarget implements DropTargetListener {
             try {
                 List filesList = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                 for(int i = 0; i < filesList.size(); i++) {
-                    fileList.addFile((File)filesList.get(i));
+                    if(isAllowed(FileUtils.getFileExtension( ((File)filesList.get(i)).getName())))               
+                        fileList.addFile((File)filesList.get(i));
                 }
-              dtde.dropComplete(true);
+                dtde.dropComplete(true);
             } catch (Exception e) { 
             	dtde.dropComplete(false);
             }
@@ -64,6 +74,23 @@ public class ShareDropTarget implements DropTargetListener {
 
     @Override
     public void dropActionChanged(DropTargetDragEvent dtde) {
+    }
+    
+    //TODO: this does't provide feedback to the user as to when documents/programs were
+    //  rejected
+    private boolean isAllowed(String fileName) {
+        if(!alwaysShareDocuments && !SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
+            MediaType type = MediaType.getMediaTypeForExtension(fileName);
+            if(type.getMimeType().equals(MediaType.SCHEMA_DOCUMENTS)) {
+                return false;
+            }
+        }
+        if(!SharingSettings.PROGRAM_SHARING_ENABLED.getValue()) {
+            MediaType type = MediaType.getMediaTypeForExtension(fileName);
+            if(type.getMimeType().equals(MediaType.SCHEMA_PROGRAMS))
+                return false;
+        }
+        return true;
     }
 
 }

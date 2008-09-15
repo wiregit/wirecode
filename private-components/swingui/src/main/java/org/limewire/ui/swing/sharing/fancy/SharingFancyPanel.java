@@ -64,7 +64,7 @@ public class SharingFancyPanel extends JPanel {
         
         this.scrollPane = scrollPane;
         
-        ShareDropTarget drop = new ShareDropTarget(this, originalList);
+        ShareDropTarget drop = new ShareDropTarget(this, originalList, false);
 
         List<EventList<LocalFileItem>> list = new ArrayList<EventList<LocalFileItem>>();
         list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.AUDIO)));
@@ -90,7 +90,8 @@ public class SharingFancyPanel extends JPanel {
                              new BookmarkJumpAction(this, documentTable),
                              new BookmarkJumpAction(this, programTable),
                              new BookmarkJumpAction(this, otherTable)},
-                list);
+                list,
+                new boolean[]{true,true,true,true,false,false});
 
        setLayout(new VerticalLayout());
         
