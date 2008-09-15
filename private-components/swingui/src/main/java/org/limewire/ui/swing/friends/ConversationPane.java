@@ -4,6 +4,8 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -13,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -35,7 +39,9 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
@@ -61,18 +67,21 @@ public class ConversationPane extends JPanel implements Displayable {
     private final String conversationName;
     private final String friendId;
     private final MessageWriter writer;
-    private final LibraryManager libraryManager;
     private final Friend friend;
+    private final LibraryManager libraryManager;
+    private final IconManager iconManager;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
 
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, LibraryManager libraryManager) {
+    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, 
+            LibraryManager libraryManager, IconManager iconManager) {
+        this.writer = writer;
         this.friend = friend;
         this.conversationName = friend.getName();
         this.friendId = friend.getID();
-        this.writer = writer;
         this.libraryManager = libraryManager;
+        this.iconManager = iconManager;
         
         setLayout(new BorderLayout());
         
@@ -182,8 +191,31 @@ public class ConversationPane extends JPanel implements Displayable {
         String chatDoc = ChatDocumentBuilder.buildChatText(messages, currentChatState, conversationName, friendSignedOff);
         LOG.debugf("Chat doc: {0}", chatDoc);
         editor.setText(chatDoc);
+        decorateFileOfferButtons();
     }
     
+    private void decorateFileOfferButtons() {
+        //This is a hack to set the file mime-type icon for file offer buttons that may appear in the conversation
+        recursiveButtonSearch(editor);
+    }
+
+    private void recursiveButtonSearch(Container container) {
+        for(Component component : container.getComponents()) {
+            if (component instanceof Container) {
+                recursiveButtonSearch((Container)component);
+            }
+            if (component instanceof JButton) {
+                JButton button = (JButton)component;
+                String buttonText = button.getText();
+                String extension = FileUtils.getFileExtension(buttonText);
+                if (extension != null) {
+                    Icon icon = iconManager.getIconForExtension(extension);
+                    button.setIcon(icon);
+                }
+            }
+        }
+    }
+
     private JPanel footerPanel(MessageWriter writer, Friend friend) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);

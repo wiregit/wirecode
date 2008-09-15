@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.MockBuddySharingDisplay;
+import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
@@ -31,7 +32,7 @@ public class ChatPanelHarness {
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, Friend friend) {
-                        return new ConversationPane(writer, friend, libraryManager);
+                        return new ConversationPane(writer, friend, libraryManager, new IconManagerStub());
                     }
                 }, icons, friendsPane, new TopPanel(icons, friendsPane), buddySharing));
                 
