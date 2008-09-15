@@ -11,11 +11,13 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -40,6 +42,7 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
+import org.limewire.ui.swing.sharing.BuddySharingDisplay;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -76,18 +79,20 @@ public class ConversationPane extends JPanel implements Displayable {
     private final Friend friend;
     private final LibraryManager libraryManager;
     private final IconManager iconManager;
+    private final BuddySharingDisplay buddySharingDisplay;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, 
-            LibraryManager libraryManager, IconManager iconManager) {
+            LibraryManager libraryManager, IconManager iconManager, BuddySharingDisplay buddySharingDisplay) {
         this.writer = writer;
         this.friend = friend;
         this.conversationName = friend.getName();
         this.friendId = friend.getID();
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
+        this.buddySharingDisplay = buddySharingDisplay;
         
         setLayout(new BorderLayout());
         
@@ -225,7 +230,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private JPanel footerPanel(MessageWriter writer, Friend friend) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
-        JXButton libraryButton = new JXButton(tr("Library"));
+        JXButton libraryButton = new JXButton(new LibraryAction());
         if (!friend.isSignedInToLimewire()) {
             libraryButton.setEnabled(false);
             libraryButton.setToolTipText(friend.getName() + DISABLED_LIBRARY_TOOLTIP);
@@ -245,6 +250,17 @@ public class ConversationPane extends JPanel implements Displayable {
     public void handleDisplay() {
         editor.repaint();
         inputPanel.handleDisplay();
+    }
+    
+    private class LibraryAction extends AbstractAction {
+        public LibraryAction() {
+            super(tr("Library"));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            buddySharingDisplay.selectBuddyLibrary(friend.getName());            
+        }
     }
 
     private class HyperlinkListener implements javax.swing.event.HyperlinkListener {

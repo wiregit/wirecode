@@ -9,7 +9,13 @@ public class MockBuddySharingDisplay implements BuddySharingDisplay {
     }
 
     @Override
-    public void selectBuddy(String buddyName) {
+    public void selectBuddyInFileSharingList(String buddyName) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void selectBuddyLibrary(String buddyName) {
         // TODO Auto-generated method stub
         
     }

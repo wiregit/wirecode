@@ -796,7 +796,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         }
     }
     
-    private static class ViewLibrary extends AbstractContextAction {
+    private class ViewLibrary extends AbstractContextAction {
         public ViewLibrary(FriendContext context) {
             super("View Library", context);
         }
@@ -809,9 +809,12 @@ public class FriendsPane extends JPanel implements BuddyRemover {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            //minimize chat
-            new DisplayFriendsEvent(false).publish();
-            //TODO: How do you switch to library view?
+            Friend friend = context.getFriend();
+            if (friend != null) {
+                //minimize chat
+                new DisplayFriendsEvent(false).publish();
+                buddySharing.selectBuddyLibrary(friend.getName());
+            }
         }
     }
     
@@ -826,7 +829,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             new DisplayFriendsEvent(false).publish();
             Friend friend = context.getFriend();
             if (friend != null) {
-                buddySharing.selectBuddy(friend.getID());
+                buddySharing.selectBuddyInFileSharingList(friend.getID());
             }
         }
 
