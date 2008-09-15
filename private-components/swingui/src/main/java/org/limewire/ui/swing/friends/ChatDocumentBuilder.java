@@ -130,7 +130,7 @@ class ChatDocumentBuilder {
                 .append("\"/><input type=\"submit\" value=\"")
                 .append(offeredFile.getName())
                 .append("\"/></form><br/>")
-                .append(tr("Download it now, or get it from his")).append(" <a href\"")
+                .append(tr("Download it now, or get it from his")).append(" <a href=\"")
                 .append(LIBRARY_LINK)
                 .append("\">").append(tr("Library")).append("</a> ").append(tr("later"));
                 
