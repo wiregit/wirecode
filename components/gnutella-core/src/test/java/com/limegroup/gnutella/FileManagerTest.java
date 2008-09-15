@@ -939,10 +939,10 @@ public class FileManagerTest extends FileManagerTestCase {
     }
     
     /**
-     * Tests {@link FileManager#addPendingFileAlways(File)}.
+     * Tests {@link FileManager#addSharedFileAlways(File)}.
      * @throws Exception
      */
-    public void testAddFileAlways() throws Exception {
+    public void testAddSharedFileAlways() throws Exception {
         assertFalse(fman.isLoadFinished());
         waitForLoad(); // ensure it's loaded with 0 files.
         assertEquals(0, fman.getSharedFileList().size());
@@ -1013,12 +1013,12 @@ public class FileManagerTest extends FileManagerTestCase {
     }
     
     /**
-     * Tests {@link FileManager#addFileIfShared(File)}.
+     * Tests {@link FileManager#addSharedFile(File)}.
      * <p>
      * Basically files should be added when they are shareable.
      * @throws Exception
      */
-    public void testAddFileIfShared() throws Exception {
+    public void testAddSharedFile() throws Exception {
         // non shareable files:
         
         // too large tested above
