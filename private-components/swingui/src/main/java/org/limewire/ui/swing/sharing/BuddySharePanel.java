@@ -38,8 +38,10 @@ import org.limewire.ui.swing.sharing.friends.BuddyTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
+import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
@@ -70,26 +72,31 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     private CardLayout viewCardLayout;
 
     private BuddyNameTable buddyTable;
-    SharingFancyPanel sharingFancyPanel;
+    private SharingFancyPanel sharingFancyPanel;
 
-    MultiButtonTableCellRendererEditor editor;
-    MultiButtonTableCellRendererEditor renderer;
+    private MultiButtonTableCellRendererEditor editor;
+    private MultiButtonTableCellRendererEditor renderer;
 
-    EventList<BuddyItem> eventList;
+    private EventList<BuddyItem> eventList;
     
     private Map<String, FileList> buddyLists;
     
     private LibraryManager libraryManager;
+    private IconManager iconManager;
     
     private BuddySharingHeaderPanel headerPanel;
     
+    private SharingTableFormat sharingTableFormat;
+    private IconLabelRenderer iconLabelRenderer;
+    
     @Inject
-    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, NavigableTree navTree) {        
+    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, NavigableTree navTree, IconManager iconManager) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
         
         this.libraryManager = libraryManager;
-
+        this.iconManager = iconManager;
+        
         buddyLists = new HashMap<String,FileList>();
 
         viewCardLayout = new CardLayout();
@@ -134,7 +141,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         createTable(tempList);
         
         JScrollPane scrollPane = new JScrollPane();
-        sharingFancyPanel = new SharingFancyPanel(tempList, scrollPane, null);
+        sharingFancyPanel = new SharingFancyPanel(tempList, scrollPane, null, iconManager);
         scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),TABLE);
@@ -144,7 +151,8 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     }
     
     private void createTable(EventList<LocalFileItem> eventList) {
-        table = new SharingTable(eventList, null, new SharingTableFormat());
+        sharingTableFormat = new SharingTableFormat();
+        table = new SharingTable(eventList, null, sharingTableFormat);
 //        table.setTransferHandler(new SharingTransferHandler(fileList));
         table.setDropMode(DropMode.ON);
         
@@ -158,6 +166,10 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         TableColumn tc = table.getColumn(6);
         tc.setCellEditor(editor);
         tc.setCellRenderer(renderer);
+        
+        tc = table.getColumn(0);
+        iconLabelRenderer = new IconLabelRenderer(iconManager);
+        tc.setCellRenderer(iconLabelRenderer);
     }
     
     private List<Action> createActions() {
@@ -199,10 +211,12 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
       
                     BuddyFileList fileList = (BuddyFileList) buddyLists.get(buddyItem.getName());
                     emptyPanel.setUserFileList(fileList);
-                    table.setModel(new SharingTableModel(fileList.getFilteredModel(), fileList, new SharingTableFormat()));
+                    table.setModel(new SharingTableModel(fileList.getFilteredModel(), fileList,sharingTableFormat));
                     TableColumn tc = table.getColumn(6);
                     tc.setCellEditor(editor);
                     tc.setCellRenderer(renderer);
+                    tc = table.getColumn(0);
+                    tc.setCellRenderer(iconLabelRenderer);
                     sharingFancyPanel.setModel(fileList.getFilteredModel(), fileList);
                     headerPanel.setModel(fileList);                
                     

@@ -134,6 +134,10 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         tc.setCellRenderer(renderer);
     }
     
+    public SharingFancyTable getTable() {
+        return table;
+    }
+    
     public void setModel(EventList<LocalFileItem> eventList, LocalFileList fileList) {
         currentEventList.removeListEventListener(this);
         currentEventList = eventList;
