@@ -69,9 +69,9 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
         for (String extension : reader.getSupportedExtensions()) {
             MetaReader existingReader = readerByExtension.put(extension, reader);
             if (existingReader != null) {
+		readerByExtension.put(extension, existingReader);
                 throw new IllegalArgumentException("factory: " + existingReader.getClass() + " already resistered for: " + extension);
             }
-            readerByExtension.put(extension, existingReader);
         }
     }
     
