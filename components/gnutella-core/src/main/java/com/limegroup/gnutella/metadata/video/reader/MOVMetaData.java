@@ -47,7 +47,6 @@ public class MOVMetaData implements MetaReader {
     
     /**
      * Entry point for the parser
-     * @param videoData 
      */
     private void parseAtoms(VideoMetaData videoData, DataInput in) throws IOException {
         Atom atom = null;
@@ -88,7 +87,6 @@ public class MOVMetaData implements MetaReader {
      * 
      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
      * chapter_3_section_2.html#//apple_ref/doc/uid/TP40000939-CH204-25527">MVHD</a>}
-     * @param videoData 
      */
     private void mvhd(VideoMetaData videoData, Atom mvhd, DataInput in) throws IOException {
         assert (mvhd.remaining == 100L);

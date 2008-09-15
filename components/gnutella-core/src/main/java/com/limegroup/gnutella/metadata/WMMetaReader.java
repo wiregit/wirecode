@@ -9,6 +9,10 @@ import com.limegroup.gnutella.metadata.video.reader.WMVMetaData;
 
 public class WMMetaReader implements MetaReader {
 
+    private final WMVMetaData wmvMetaData = new WMVMetaData();
+    
+    private final WMAMetaData wmaMetaData = new WMAMetaData();
+    
     @Override
     public String[] getSupportedExtensions() {
         return new String[] { "asf", "wm" };
@@ -18,9 +22,9 @@ public class WMMetaReader implements MetaReader {
     public MetaData parse(File file) throws IOException {
         ASFParser p = new ASFParser(file);
         if (p.hasVideo())
-            return new WMVMetaData().parse(p);
+            return wmvMetaData.parse(p);
         else if(p.hasAudio())
-            return new WMAMetaData().parse(p);
+            return wmaMetaData.parse(p);
         else 
             throw new IOException("could not parse file");
     }

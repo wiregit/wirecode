@@ -48,7 +48,7 @@ import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTContextFactoryImpl;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
-import com.limegroup.bittorrent.BittorrentModule;
+import com.limegroup.bittorrent.LimeWireBittorrentModule;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.BTUploaderFactoryImpl;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
@@ -236,7 +236,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGeocodeGlueModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
-        binder().install(new BittorrentModule());
+        binder().install(new LimeWireBittorrentModule());
         
         binder().install(ProviderMethods.from(new FileEventListenerProvider()));
         

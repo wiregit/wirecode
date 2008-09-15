@@ -401,11 +401,8 @@ public class UDPHostCache {
                     ep.recordUDPHostCacheFailure();
                     dirty = true;
                     writeDirty = true;
-                    if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES) {
-                        LOG.debug("maximum failures reached: " + ep);
-                        LOG.debug("failures: " + ep.getUDPHostCacheFailures());
+                    if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
                         remove(ep);
-                    }
                 }
                 // Then record the successes...
                 allHosts.removeAll(hosts);
