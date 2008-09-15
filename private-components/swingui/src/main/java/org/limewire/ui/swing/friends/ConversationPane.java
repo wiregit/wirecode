@@ -10,6 +10,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +50,10 @@ import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -229,7 +235,7 @@ public class ConversationPane extends JPanel implements Displayable {
         panel.add(inputPanel, BorderLayout.CENTER);
         
         JTextComponent inputComponent = inputPanel.getInputComponent();
-        BuddyShareDropTarget buddyShare = new BuddyShareDropTarget(inputComponent, libraryManager.getLibraryList(), friend);
+        BuddyShareDropTarget buddyShare = new BuddyShareDropTarget(inputComponent, new ShareLocalFileList());
         inputComponent.setDropTarget(buddyShare.getDropTarget());
         
         return panel;
@@ -276,12 +282,12 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
     
-    private static class BuddyShareDropTarget extends ShareDropTarget {
-        private final Friend friend;
+    private class BuddyShareDropTarget extends ShareDropTarget {
+        private final ShareLocalFileList fileList;
 
-        public BuddyShareDropTarget(JTextComponent component, LocalFileList fileList, Friend friend) {
+        public BuddyShareDropTarget(JTextComponent component, ShareLocalFileList fileList) {
             super(component, fileList);
-            this.friend = friend;
+            this.fileList = fileList;
         }
 
         @Override
@@ -303,5 +309,56 @@ public class ConversationPane extends JPanel implements Displayable {
                 dtde.rejectDrag();
             }
         }
+
+        @Override
+        public void drop(DropTargetDropEvent dtde) {
+            super.drop(dtde);
+            if (fileList.size() > 0) {
+                for(LocalFileItem item : fileList.getModel()) {
+                    offerFile(item);
+                }
+                fileList.clear();
+            }
+        }
+    }
+    
+    private class ShareLocalFileList implements LocalFileList {
+        private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
+        
+        @Override
+        public EventList<LocalFileItem> getModel() {
+            return eventList;
+        }
+        
+        @Override
+        public void addFile(File file) {
+            LocalFileList friendList = libraryManager.getBuddy(friend.getID());
+            friendList.addFile(file);
+            for (LocalFileItem item : friendList.getModel()) {
+                if (file.getPath().equals(item.getFile().getPath())) {
+                    eventList.add(item);
+                }
+            }
+        }
+
+        @Override
+        public void removeFile(File file) {
+            //TODO: how do you convert a File into a LocalFileItem?
+        }
+        
+        @Override
+        public String getName() {
+            return "Files shared via chat";
+        }
+
+        @Override
+        public int size() {
+            return eventList.size();
+        }
+
+        @Override
+        public void clear() {
+            eventList.clear();
+        }    
     }
 }
