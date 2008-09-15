@@ -278,10 +278,6 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
 
     @Override
     public void finish() {
-        cleanup();
-    }
-
-    private void cleanup() {
         pause();
         download.cancelDownload();
         download.removeDownload();
