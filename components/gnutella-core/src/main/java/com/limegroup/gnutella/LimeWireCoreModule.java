@@ -36,7 +36,6 @@ import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.ProviderMethods;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
@@ -236,8 +235,6 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
         
-        binder().install(ProviderMethods.from(new FileEventListenerProvider()));
-        
         bind(LimeWireCore.class);
         
         if(activityCallbackClass != null) {
@@ -392,6 +389,20 @@ public class LimeWireCoreModule extends AbstractModule {
     }
     
     @Singleton
+    @Provides
+    CopyOnWriteArrayList<FileEventListener> fileEventListener() {
+        return new CopyOnWriteArrayList<FileEventListener>();
+    }
+
+    @Singleton
+    @Provides
+    List<FileEventListener> fileEventListener(
+            CopyOnWriteArrayList<FileEventListener> listener) {
+        return listener;
+    }
+    
+    
+    @Singleton
     private static class SecureMessageVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
         @Override
         protected SecureMessageVerifier createObject() {
@@ -440,21 +451,6 @@ public class LimeWireCoreModule extends AbstractModule {
             return ExecutorsHelper.newProcessingQueue("DHT-Executor");
         }
     }    
-    
-    @Singleton
-    public static class FileEventListenerProvider {
-        @Singleton
-        @Provides
-        public CopyOnWriteArrayList<FileEventListener> fileEventListener() {
-            return new CopyOnWriteArrayList<FileEventListener>();
-        }
-        
-        @Singleton
-        @Provides
-        public List<FileEventListener> fileEventListener(CopyOnWriteArrayList<FileEventListener> listener) {
-            return listener;
-        }
-    }
     
     ///////////////////////////////////////////////////////////////////////////
     /// BELOW ARE ALL HACK PROVIDERS THAT NEED TO BE UPDATED TO CONSTRUCT OBJECTS!

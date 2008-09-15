@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
@@ -27,8 +28,8 @@ import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.LimeWireCoreModule.FileEventListenerProvider;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -902,7 +903,8 @@ public class FileManagerTest extends FileManagerTestCase {
                 injector.getProvider(ActivityCallback.class), 
                 injector.getInstance(
                         Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor"))),
-                injector.getInstance(FileEventListenerProvider.class).fileEventListener());
+                injector.getInstance(
+                        Key.get(new TypeLiteral<CopyOnWriteArrayList<FileEventListener>>(){})));
         waitForLoad();
         
         //  assert that "shared" is shared

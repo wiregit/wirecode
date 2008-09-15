@@ -20,7 +20,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.inject.Modules;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
@@ -31,6 +30,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.util.Modules;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -161,7 +161,7 @@ public class LimeTestUtils {
     public static Injector createInjector(Stage stage, Class<? extends ActivityCallback> callbackClass, Module...modules) {
         Module combinedReplacements = Modules.combine(modules);
         Module combinedOriginals = Modules.combine(new LimeWireCoreModule(callbackClass), new BlockingConnectionFactoryModule());
-        Module replaced = Guice.overrideModule(combinedOriginals, combinedReplacements);
+        Module replaced = Modules.override(combinedOriginals).with(combinedReplacements);
         return Guice.createInjector(stage, replaced);
     }
 
