@@ -35,15 +35,5 @@
       <version>${limewire.version}</version>
 	  <scope>test</scope>
     </dependency>
-	<dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>2.0-rc2-lw-1</version>
-    </dependency>
-	<dependency>
-      <groupId>com.google.code.guice</groupId>
-      <artifactId>guice</artifactId>
-      <version>1.0</version>
-    </dependency> 
   </dependencies>
 </project>

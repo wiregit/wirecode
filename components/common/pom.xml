@@ -48,6 +48,11 @@
       <version>2.0-snapshot-20080915</version>
     </dependency>
     <dependency>
+      <groupId>com.google.code.guice</groupId>
+      <artifactId>assistedinject</artifactId>
+      <version>2.0-snapshot-20080523</version>
+    </dependency>    
+    <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>

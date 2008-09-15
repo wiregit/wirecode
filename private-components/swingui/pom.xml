@@ -66,16 +66,6 @@
 	        <version>1.0.4</version>
 	    </dependency>
 		<dependency>
-			<groupId>com.google.code.guice</groupId>
-			<artifactId>guice</artifactId>
-			<version>2.0-snapshot-20080523</version>
-		</dependency>
-	    <dependency>
-	      <groupId>com.google.code.guice</groupId>
-	      <artifactId>assistedinject</artifactId>
-	      <version>2.0-snapshot-20080523</version>
-	    </dependency>
-		<dependency>
 			<groupId>org.jdesktop</groupId>
 			<artifactId>appframework</artifactId>
 			<version>1.0.3</version>
