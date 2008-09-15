@@ -1,6 +1,9 @@
 package org.limewire.core.impl.mozilla;
 
 import java.io.File;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -54,18 +57,25 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
 
     private EventListenerList<DownloadStatusEvent> listeners;
 
+    private final BlockingQueue<DownloadStatusEvent> statusEvents;
+
+    private final ScheduledExecutorService backgroundExecutor;
+
     public LimeMozillaDownloadProgressListenerImpl(LimeMozillaDownloadManagerListener manager,
-            nsIDownload download, short state) {
+            ScheduledExecutorService backgroundExecutor, nsIDownload download, short state) {
         this.manager = Objects.nonNull(manager, "manager");
+        this.backgroundExecutor = Objects.nonNull(backgroundExecutor, "backgroundExecutor");
         Objects.nonNull(download, "download");
         this.listeners = new EventListenerList<DownloadStatusEvent>();
         this.downloadId = download.getId();
         this.state = new AtomicInteger();
+        this.statusEvents = new LinkedBlockingQueue<DownloadStatusEvent>();
         changeState(state);
         this.totalProgress = new AtomicLong();
         this.down = new SimpleBandwidthTracker();
         this.saveFile = new File(download.getTarget().getPath());
         this.contentLength = new AtomicLong(download.getSize());
+
     }
 
     @Override
@@ -75,14 +85,23 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
         }
     }
 
-    private void changeState(short state) {
+    private synchronized void changeState(short state) {
         if (state != this.state.get()) {
             this.state.set(state);
             DownloadStatus downloadStatus = getDownloadStatus();
-            if (downloadStatus == DownloadStatus.COMPLETE
-                    || downloadStatus == DownloadStatus.INVALID) {
-                listeners.broadcast(new DownloadStatusEvent(null, downloadStatus));
-            }
+            DownloadStatusEvent downloadStatusEvent = new DownloadStatusEvent(null, downloadStatus);
+            statusEvents.add(downloadStatusEvent);
+            backgroundExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (listeners) {
+                        DownloadStatusEvent event = statusEvents.poll();
+                        if (event != null) {
+                            listeners.broadcast(event);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -179,7 +198,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
     }
 
     @Override
-    public DownloadStatus getDownloadStatus() {
+    public synchronized DownloadStatus getDownloadStatus() {
         switch (state.get()) {
         case nsIDownloadManager.DOWNLOAD_SCANNING:
             return DownloadStatus.RESUMING;
@@ -262,7 +281,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
                     } catch (XPCOMException e) {
                         LOG.debug(e.getMessage(), e);
                     }
-                    state.set(nsIDownloadManager.DOWNLOAD_PAUSED);
+                    changeState(nsIDownloadManager.DOWNLOAD_PAUSED);
                 }
             }
         });
@@ -275,6 +294,12 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
             public void run() {
                 synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
                     manager.removeListener(LimeMozillaDownloadProgressListenerImpl.this);
+                    if (state.get() != nsIDownloadManager.DOWNLOAD_FINISHED) {
+                        // overriding state to canceled so ti will be removed
+                        // from the download list, gui code checks for aborted
+                        // state.
+                        changeState(nsIDownloadManager.DOWNLOAD_CANCELED);
+                    }
                 }
             }
         });
@@ -291,7 +316,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
                     } catch (XPCOMException e) {
                         LOG.debug(e.getMessage(), e);
                     }
-                    state.set(nsIDownloadManager.DOWNLOAD_QUEUED);
+                    changeState(nsIDownloadManager.DOWNLOAD_QUEUED);
                 }
             }
         });

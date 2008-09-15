@@ -2,6 +2,7 @@ package org.limewire.core.impl.mozilla;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.core.api.mozilla.LimeMozillaDownloadProgressListener;
 import org.limewire.logging.Log;
@@ -22,6 +23,7 @@ import org.mozilla.xpcom.XPCOMException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadManager;
 
 /**
@@ -41,8 +43,13 @@ public class LimeMozillaDownloadManagerListenerImpl implements
 
     private final DownloadManager downloadManager;
 
+    private final ScheduledExecutorService backgroundExecutor;
+
     @Inject
-    public LimeMozillaDownloadManagerListenerImpl(DownloadManager downloadManager) {
+    public LimeMozillaDownloadManagerListenerImpl(
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            DownloadManager downloadManager) {
+        this.backgroundExecutor = Objects.nonNull(backgroundExecutor, "backgroundExecutor");
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.listeners = new HashMap<Long, LimeMozillaDownloadProgressListener>();
         synchronized (this) {
@@ -92,7 +99,7 @@ public class LimeMozillaDownloadManagerListenerImpl implements
         LimeMozillaDownloadProgressListener listener = listeners.get(downloadId);
         if (listener == null) {
             LimeMozillaDownloadProgressListenerImpl listenerImpl = new LimeMozillaDownloadProgressListenerImpl(
-                    this, download, state);
+                    this, backgroundExecutor, download, state);
             listeners.put(download.getId(), listenerImpl);
             getDownloadManager().addListener(listenerImpl);
             downloadManager.downloadFromMozilla(listenerImpl);
