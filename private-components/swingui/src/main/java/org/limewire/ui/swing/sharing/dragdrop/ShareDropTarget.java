@@ -33,6 +33,9 @@ public class ShareDropTarget implements DropTargetListener {
         this.alwaysShareDocuments = alwaysShareDocuments;
     }
     
+    public void setModel(LocalFileList fileList) {
+        this.fileList = fileList;
+    }
     
     public DropTarget getDropTarget() {
         return dropTarget;
@@ -59,9 +62,13 @@ public class ShareDropTarget implements DropTargetListener {
 
             try {
                 List filesList = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                //if drop contains a file type we aren't defaultly sharing, reject the drop
                 for(int i = 0; i < filesList.size(); i++) {
-                    if(isAllowed(FileUtils.getFileExtension( ((File)filesList.get(i)).getName())))               
-                        fileList.addFile((File)filesList.get(i));
+                    if(!isAllowed(FileUtils.getFileExtension(((File)filesList.get(i)).getName())))  
+                        dtde.rejectDrop();
+                }
+                for(int i = 0; i < filesList.size(); i++) {       
+                    fileList.addFile((File)filesList.get(i));
                 }
                 dtde.dropComplete(true);
             } catch (Exception e) { 
@@ -76,8 +83,6 @@ public class ShareDropTarget implements DropTargetListener {
     public void dropActionChanged(DropTargetDragEvent dtde) {
     }
     
-    //TODO: this does't provide feedback to the user as to when documents/programs were
-    //  rejected
     private boolean isAllowed(String fileName) {
         if(!alwaysShareDocuments && !SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
             MediaType type = MediaType.getMediaTypeForExtension(fileName);

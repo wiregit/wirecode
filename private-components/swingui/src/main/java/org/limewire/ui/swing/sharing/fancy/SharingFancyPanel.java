@@ -64,13 +64,15 @@ public class SharingFancyPanel extends JPanel {
     
     private IconLabelRenderer iconLabelRenderer;
     
+    private ShareDropTarget drop;
+    
     public SharingFancyPanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, LocalFileList originalList, IconManager iconManager) {
 
         GuiUtils.assignResources(this); 
         
         this.scrollPane = scrollPane;
         
-        ShareDropTarget drop = new ShareDropTarget(this, originalList, false);
+        drop = new ShareDropTarget(this, originalList, false);
 
         List<EventList<LocalFileItem>> list = new ArrayList<EventList<LocalFileItem>>();
         list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.AUDIO)));
@@ -136,6 +138,8 @@ public class SharingFancyPanel extends JPanel {
         
         TableColumn tc = documentTable.getTable().getColumn(0);
         tc.setCellRenderer(iconLabelRenderer);
+        
+        drop.setModel(fileList);
         
         shortcuts.setModel(list);
     }

@@ -30,6 +30,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
+import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
 import org.limewire.ui.swing.sharing.friends.BuddyItemImpl;
@@ -108,7 +109,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         //  however it is making dynamic filtering of multiple lists very slow
         ObservableElementList.Connector<BuddyItem> buddyConnector = GlazedLists.beanConnector(BuddyItem.class);
         eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
-       
+               
         buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager, navTree);
         
         headerPanel = createHeader(cardPanel);
@@ -186,6 +187,9 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         private JPanel cardPanel;
         private String name = "";
         
+        private ShareDropTarget emptyDropTarget;
+        private ShareDropTarget dropTarget;
+        
         private EventList<LocalFileItem> currentList;
         
         public BuddySelectionListener(JTable table, BuddySharingHeaderPanel headerPanel, SharingBuddyEmptyPanel emptyPanel, JPanel cardPanel) {
@@ -218,7 +222,16 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
                     tc = table.getColumn(0);
                     tc.setCellRenderer(iconLabelRenderer);
                     sharingFancyPanel.setModel(fileList.getFilteredModel(), fileList);
-                    headerPanel.setModel(fileList);                
+                    headerPanel.setModel(fileList);           
+                    
+                    if(dropTarget == null) {
+                        dropTarget = new ShareDropTarget(BuddySharePanel.this, fileList, true);
+                        emptyDropTarget = new ShareDropTarget(emptyPanel, fileList, true);
+                        
+                    } else {
+                        dropTarget.setModel(fileList);
+                        emptyDropTarget.setModel(fileList);
+                    }
                     
                     if(currentList != null)
                         currentList.removeListEventListener(this);

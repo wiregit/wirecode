@@ -10,6 +10,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -18,11 +20,10 @@ import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
 import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import ca.odell.glazedlists.EventList;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import ca.odell.glazedlists.EventList;
-import net.miginfocom.swing.MigLayout;
 
 @Singleton
 public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
