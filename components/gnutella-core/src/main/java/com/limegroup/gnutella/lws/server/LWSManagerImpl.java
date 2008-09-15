@@ -2,7 +2,6 @@ package com.limegroup.gnutella.lws.server;
 
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,15 +170,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         if (LOG.isDebugEnabled()) {
             LOG.debug("sending URL " + url);
         }
-        final HttpGet get;
-        try {
-            get = new HttpGet(url);
-        } catch (URISyntaxException e) {
-            LOG.error("Making HTTP Get", e);
-            IOException ioe = new IOException();
-            ioe.initCause(e);
-            throw ioe;
-        }
+        final HttpGet get = new HttpGet(url);
         
         if(get.getURI().getHost() == null) {
             LOG.error("null host!");

@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import junit.framework.Test;
 
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
@@ -117,7 +117,7 @@ public class HttpClientManagerTest extends LimeTestCase {
             client.getParams().setIntParameter(ClientPNames.MAX_REDIRECTS, 1);
             client.execute(get);
             fail("Should have thrown redirect failure");
-        } catch(HttpException he) {
+        } catch(ClientProtocolException he) {
             assertNotNull(servers[0].getRequest());
             assertNotNull(servers[1].getRequest());
             assertNull(servers[2].getRequest()); // should have stopped after 1 & 2 tried.
@@ -180,7 +180,7 @@ public class HttpClientManagerTest extends LimeTestCase {
                     nioLock.notify();
                 }
             }
-        } catch(HttpException he) {
+        } catch(ClientProtocolException he) {
             assertNotNull(servers[0].getRequest());
             assertNotNull(servers[1].getRequest());
             assertNull(servers[2].getRequest()); // should have stopped after 1 & 2 tried.

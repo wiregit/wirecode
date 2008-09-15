@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -423,15 +422,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             }
             String connectTo =  protocol + ppi.getAddress() + ":" + ppi.getPort() + request;
             HttpHead head = null;
-            try {
-                head = new HttpHead(connectTo);
-                head.addHeader(nodeString, nodeValue);
-                head.addHeader("Cache-Control", "no-cache");
-                methods.add(head);
-            } catch (URISyntaxException e) {
-                LOG.error("invlaid URI", e);
-                removePushProxy(data.file.getClientGUID(), ppi);
-            }            
+            head = new HttpHead(connectTo);
+            head.addHeader(nodeString, nodeValue);
+            head.addHeader("Cache-Control", "no-cache");
+            methods.add(head);
         }        
         
         if(!methods.isEmpty()) {

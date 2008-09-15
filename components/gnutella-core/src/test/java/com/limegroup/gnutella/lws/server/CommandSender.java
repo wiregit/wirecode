@@ -2,14 +2,12 @@ package com.limegroup.gnutella.lws.server;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
@@ -55,11 +53,7 @@ final class CommandSender {
                 result = null;
             }
             return result;
-        } catch (HttpException e) {
-            LOG.warn("exception when sending " + url, e);
         } catch (IOException e) {
-            LOG.warn("exception when sending " + url, e);
-        } catch (URISyntaxException e) {
             LOG.warn("exception when sending " + url, e);
         } finally {
             client.releaseConnection(response);

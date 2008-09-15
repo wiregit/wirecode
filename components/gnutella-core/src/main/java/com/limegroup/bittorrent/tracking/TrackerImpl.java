@@ -8,7 +8,6 @@ import java.net.URLEncoder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpConnectionParams;
@@ -195,8 +194,6 @@ public class TrackerImpl implements Tracker {
             }
             return null;
         } catch (IOException e) {
-            return null;
-        } catch (HttpException e) {
             return null;
         } catch (URISyntaxException e) {
             return null;

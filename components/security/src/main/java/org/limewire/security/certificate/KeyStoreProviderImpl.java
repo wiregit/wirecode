@@ -14,7 +14,6 @@ import java.security.cert.CertificateException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -100,11 +99,7 @@ class KeyStoreProviderImpl implements KeyStoreProvider {
         }
         HttpResponse response = null;
         try {
-            try {
-                response = client.execute(get);
-            } catch(HttpException httpX) {
-                throw (IOException)new IOException().initCause(httpX);
-            }
+            response = client.execute(get);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 try {
                     newKeyStore.load(response.getEntity().getContent(), keyStorePassword);

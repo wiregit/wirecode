@@ -1,12 +1,10 @@
 package org.limewire.ui.support;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -116,10 +114,6 @@ final class ServletAccessor {
                 remoteInfo.connectFailed();
             }
 		} catch(IOException e) {
-            fail(remoteInfo, e);
-        } catch (HttpException e) {
-            fail(remoteInfo, e);
-        } catch (URISyntaxException e) {
             fail(remoteInfo, e);
         } finally {
             client.releaseConnection(response);

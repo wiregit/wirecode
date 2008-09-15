@@ -23,6 +23,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
@@ -1252,7 +1253,7 @@ public class UploadTest extends LimeTestCase {
             // since this is actually a GET request and not a POST 
             // the Expect header should be ignored
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
-        } catch (HttpException expected) {
+        } catch (ClientProtocolException expected) {
             // expected result
         } finally {
             HttpClientUtils.releaseConnection(response);
@@ -1570,7 +1571,7 @@ public class UploadTest extends LimeTestCase {
         HttpRoute route = new HttpRoute(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
         ManagedClientConnection connection = client.getConnectionManager().requestConnection(route, null).getConnection(0, null);
         assertEquals(open, connection.isOpen());
-        client.getConnectionManager().releaseConnection(connection);
+        client.getConnectionManager().releaseConnection(connection, -1, null);
     }
 
     private HashTree getThexTree(HashTreeCache tigerTreeCache) throws Exception {

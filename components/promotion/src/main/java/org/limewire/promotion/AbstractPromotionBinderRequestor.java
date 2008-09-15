@@ -3,7 +3,6 @@ package org.limewire.promotion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,13 +61,8 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
             i++;
         }
         HttpPost tmp = null;
-        try {
-            String alteredUrl = alterUrl(url);
-            tmp = new HttpPost(alteredUrl);
-        } catch (URISyntaxException e) {
-            error(e);
-            return null;
-        }
+        String alteredUrl = alterUrl(url);
+        tmp = new HttpPost(alteredUrl);
         final HttpPost request = tmp;
         try {
             request.setEntity(new UrlEncodedFormEntity(nameValuePairs));

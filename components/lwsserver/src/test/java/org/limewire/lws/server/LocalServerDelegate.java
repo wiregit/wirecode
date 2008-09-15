@@ -3,11 +3,9 @@ package org.limewire.lws.server;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
@@ -170,10 +168,6 @@ public final class LocalServerDelegate {
             }
             cb.process(res);
         } catch (IOException e) {
-            fail(e);
-        } catch (HttpException e) {
-            fail(e);
-        } catch (URISyntaxException e) {
             fail(e);
         }
     }

@@ -1,12 +1,8 @@
 package com.limegroup.gnutella.geocode;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -19,7 +15,7 @@ import com.google.inject.Provider;
 
 final class GeocoderImpl extends AbstractGeocoder {
     
-    private static final Log LOG = LogFactory.getLog(GeocoderImpl.class);
+  //  private static final Log LOG = LogFactory.getLog(GeocoderImpl.class);
     
     private final Provider<LimeHttpClient> httpClient;
     
@@ -35,17 +31,7 @@ final class GeocoderImpl extends AbstractGeocoder {
             return;
         }
         
-        HttpGet get;
-        try {
-            get = new HttpGet(url);
-        } catch(URISyntaxException muri) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("url invalid: " + url, muri);
-            }
-            setInvalid(muri);
-            return;
-        }
-        
+        HttpGet get = new HttpGet(url);        
         LimeHttpClient client = httpClient.get();
         HttpResponse response = null;
         try {
@@ -61,8 +47,6 @@ final class GeocoderImpl extends AbstractGeocoder {
                 }
             }            
             setInvalid(new IOException("invalid response"));
-        } catch (HttpException e) {
-            setInvalid(e);
         } catch (IOException e) {
             setInvalid(e);
         } finally {

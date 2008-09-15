@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,7 +12,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
@@ -113,10 +111,6 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
             }
             return result;
         } catch (IOException e) {
-            LOG.warn("Can't contact license server: " + url, e);
-        } catch (HttpException e) {
-            LOG.warn("Can't contact license server: " + url, e);
-        } catch (URISyntaxException e) {
             LOG.warn("Can't contact license server: " + url, e);
         } finally {
             httpClient.releaseConnection(response);

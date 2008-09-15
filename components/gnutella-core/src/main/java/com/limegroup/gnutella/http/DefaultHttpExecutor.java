@@ -3,7 +3,6 @@ package com.limegroup.gnutella.http;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.AbortableHttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -102,12 +101,7 @@ public class DefaultHttpExecutor implements HttpExecutor {
 			response = client.execute(method);
 		} catch (IOException failed) {
 			return !listener.requestFailed(method, null, failed);
-		} catch (HttpException e) {
-            IOException ioe = new IOException();
-            ioe.initCause(e);
-            return !listener.requestFailed(method, null, ioe);
-        }
-
+		}
         return !listener.requestComplete(method, response);
 	}
 	

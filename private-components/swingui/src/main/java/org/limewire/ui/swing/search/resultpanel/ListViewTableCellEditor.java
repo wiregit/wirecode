@@ -1,9 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import java.awt.event.ItemEvent;
-import java.awt.event.MouseEvent;
-import static org.limewire.core.api.search.SearchResult.PropertyKey;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -13,15 +9,17 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-
 import java.util.Map;
+
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -35,6 +33,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.search.FilterEvent;
@@ -79,7 +78,7 @@ implements TableCellEditor, TableCellRenderer {
 
     private VisualSearchResult vsr;
     private boolean isShowingSimilar;
-    private int row;
+   // private int row;
     private int similarCount;
 
     public ListViewTableCellEditor(ActionColumnTableCellEditor actionEditor) {
@@ -166,7 +165,7 @@ implements TableCellEditor, TableCellRenderer {
         //    "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
 
         this.table = table;
-        this.row = row;
+   //     this.row = row;
 
         vsr = (VisualSearchResult) value;
         MediaType mediaType =
