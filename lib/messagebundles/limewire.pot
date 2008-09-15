@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-08 11:30-0400\n"
+"POT-Creation-Date: 2008-09-15 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -250,7 +250,7 @@ msgstr ""
 msgid "Upload Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/HostCatcher.java:375
+#: core/com/limegroup/gnutella/HostCatcher.java:380
 msgid "Peer Locator"
 msgstr ""
 
@@ -384,7 +384,7 @@ msgstr ""
 msgid "Spam Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:991
+#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:996
 msgid "Update Checks"
 msgstr ""
 
