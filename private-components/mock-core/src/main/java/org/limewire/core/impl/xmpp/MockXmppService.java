@@ -3,7 +3,6 @@ package org.limewire.core.impl.xmpp;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionListener;
@@ -27,12 +26,6 @@ class MockXmppService implements XMPPService {
 
     @Override
     public void setXmppErrorListener(XMPPErrorListener errorListener) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void setFileOfferHandler(FileOfferHandler offerHandler) {
         // TODO Auto-generated method stub
         
     }

@@ -23,7 +23,7 @@ import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
-import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -43,7 +43,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     
     private final XMPPConnectionConfiguration configuration;
-    private final FileOfferHandler fileOfferHandler;
+    private final EventListener<FileOfferEvent> fileOfferListener;
     private final XMPPService service;
     private final AddressFactory addressFactory;
     private volatile org.jivesoftware.smack.XMPPConnection connection;
@@ -56,11 +56,11 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventListener<RosterEvent> rosterListener,
-                       FileOfferHandler fileOfferHandler,
+                       EventListener<FileOfferEvent> fileOfferListener,
                        XMPPService service,
                        AddressFactory addressFactory) {
         this.configuration = configuration;
-        this.fileOfferHandler = fileOfferHandler;
+        this.fileOfferListener = fileOfferListener;
         this.service = service;
         this.addressFactory = addressFactory;
         this.rosterListeners = new EventListenerList<RosterEvent>();
@@ -96,7 +96,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 connection.connect();
                 LOG.info("connected.");
                 LOG.info("logging in " + configuration.getUsername() + "...");
-                connection.login(configuration.getUsername(), configuration.getPassword(), "limewire");
+                connection.login(configuration.getUsername(), configuration.getPassword());
                 LOG.info("logged in.");
                 service.getConnectionListener().connected(configuration.getUsername());
             } catch (org.jivesoftware.smack.XMPPException e) {
@@ -169,7 +169,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());                    
                     XMPPConnectionImpl.this.rosterListeners.addListener(addressIQListener.getRosterListener());
 
-                    fileTransferIQListener = new FileTransferIQListener(fileOfferHandler);
+                    fileTransferIQListener = new FileTransferIQListener(fileOfferListener);
                     connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());                    
                 }
             }
@@ -239,25 +239,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
             if(!presence.getFrom().equals(connection.getUser())) {
                 Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
                     public void run() {
-                        UserImpl user;
-                        synchronized (users) {
-                            user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
-                            while(user == null) {
-                                try {
-                                    LOG.debugf("presence {0} waiting for roster entry for user {1} ...",
-                                            presence.getFrom(), StringUtils.parseBareAddress(presence.getFrom()));
-                                    users.wait();
-                                } catch (InterruptedException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
-                                if(user != null) {
-                                    LOG.debugf("found user {0} for presence {1}",
-                                            StringUtils.parseBareAddress(presence.getFrom()), presence.getFrom());    
-                                }
-                            }
-                            
-                        }
+                        UserImpl user = getUser(presence);
                         if(LOG.isDebugEnabled()) {
                             LOG.debug("user " + user + " presence changed to " + presence.getType());
                         }
@@ -283,6 +265,29 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 }), "presence-thread-" + presence.getFrom());
                 t.start();
             }
+        }
+
+        private UserImpl getUser(org.jivesoftware.smack.packet.Presence presence) {
+            UserImpl user;
+            synchronized (users) {
+                user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                while(user == null) {
+                    try {
+                        LOG.debugf("presence {0} waiting for roster entry for user {1} ...",
+                                presence.getFrom(), StringUtils.parseBareAddress(presence.getFrom()));
+                        users.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                    if(user != null) {
+                        LOG.debugf("found user {0} for presence {1}",
+                                StringUtils.parseBareAddress(presence.getFrom()), presence.getFrom());    
+                    }
+                }
+                
+            }
+            return user;
         }
 
         private void addNewPresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {

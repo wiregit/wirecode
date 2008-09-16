@@ -1,23 +1,26 @@
 package org.limewire.xmpp.client.impl.messages.filetransfer;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.listener.EventListener;
+import org.limewire.xmpp.api.client.FileOffer;
+import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 
 public class FileTransferIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(FileTransferIQListener.class);
 
-    private final FileOfferHandler fileOfferHandler;
+    private final EventListener<FileOfferEvent> fileOfferListener;
 
-    public FileTransferIQListener(FileOfferHandler fileOfferHandler) {
-        this.fileOfferHandler = fileOfferHandler;
+    public FileTransferIQListener(EventListener<FileOfferEvent> fileOfferListener) {
+        this.fileOfferListener = fileOfferListener;
     }
 
     public void processPacket(Packet packet) {
@@ -48,7 +51,8 @@ public class FileTransferIQListener implements PacketListener {
             LOG.debug("handling file transfer get " + packet.getPacketID());
         }
         // TODO async?
-        fileOfferHandler.fileOfferred(packet.getFileMetaData(), packet.getFrom());
+        String userID = StringUtils.parseBareAddress(packet.getFrom());
+        fileOfferListener.handleEvent(new FileOfferEvent(new FileOffer(packet.getFileMetaData(), userID), FileOffer.EventType.OFFER));
         // TODO send acceptance or rejection;
         // TODO only needed for user feedback
     }

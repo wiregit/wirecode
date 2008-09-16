@@ -26,7 +26,6 @@ import org.limewire.net.address.DirectConnectionAddress;
 import org.limewire.net.address.DirectConnectionAddressImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.FileOfferHandler;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
@@ -51,6 +50,7 @@ public class XMPPServiceTest extends BaseTestCase {
     protected RosterListenerMock rosterListener;
     protected RosterListenerMock rosterListener2;
     protected AddressEventTestBroadcaster addressEventBroadcaster;
+    private FileOfferHandlerMock fileOfferHandler;
 
     public XMPPServiceTest(String name) {
         super(name);
@@ -92,11 +92,12 @@ public class XMPPServiceTest extends BaseTestCase {
                 "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2);
         Module xmppModule = new LimeWireXMPPModule();
         addressEventBroadcaster = new AddressEventTestBroadcaster();
+        fileOfferHandler = new FileOfferHandlerMock();
         Module m = new AbstractModule() {
             protected void configure() {
                 bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(addressEventBroadcaster);
-                bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(new XMPPConnectionConfigurationListProvider(configuration, configuration2));
-                bind(FileOfferHandler.class).to(FileOfferHandlerMock.class);
+                bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(new XMPPConnectionConfigurationListProvider(configuration, configuration2));                
+                bind(FileOfferHandlerMock.class).toInstance(fileOfferHandler);
                 bind(XMPPConnectionListener.class).to(XMPPConnectionListenerMock.class);
             }
         };
@@ -235,8 +236,8 @@ public class XMPPServiceTest extends BaseTestCase {
         limebuddy2.offerFile(metaData);
         
         Thread.sleep(1000);
-        
-        List<FileMetaData> offers = ((FileOfferHandlerMock) injector.getInstance(FileOfferHandler.class)).offers;
+
+        List<FileMetaData> offers = fileOfferHandler.offers;
         assertEquals(1, offers.size());
         assertEquals("a_cool_file.txt", offers.get(0).getName());
     }

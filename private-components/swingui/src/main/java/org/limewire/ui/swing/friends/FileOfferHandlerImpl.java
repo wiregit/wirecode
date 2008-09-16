@@ -1,22 +1,23 @@
 package org.limewire.ui.swing.friends;
 
-import com.google.inject.Singleton;
-import com.google.inject.Inject;
-
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.FileOfferHandler;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.FileOfferEvent;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
-class FileOfferHandlerImpl implements FileOfferHandler {
+class FileOfferHandlerImpl implements RegisteringEventListener<FileOfferEvent> {
     
     @Inject
-    public void register(XMPPService xmppService) {
-        xmppService.setFileOfferHandler(this);
+    public void register(ListenerSupport<FileOfferEvent> fileOfferEventListenerSupport) {
+        fileOfferEventListenerSupport.addListener(this);
     }
 
-    public void fileOfferred(FileMetaData f, String fromJID) {
-        new MessageReceivedEvent(new MessageImpl(null, null, fromJID, null, Type.FileOffer, f)).publish();
+    public void handleEvent(FileOfferEvent event) {
+        new MessageReceivedEvent(new MessageImpl(null, null, event.getSource().getFromJID(),
+                null, Type.FileOffer, event.getSource().getFile())).publish();
     }
 }

@@ -13,7 +13,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.api.client.FileOfferHandler;
+import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
@@ -35,8 +35,8 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     
     private final CopyOnWriteArrayList<XMPPConnectionImpl> connections;
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
-    private FileOfferHandler fileOfferHandler;
     private final Provider<EventListener<RosterEvent>> rosterListener;
+    private final Provider<EventListener<FileOfferEvent>> fileOfferListener;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
     private XMPPConnectionListener connectionListener;
@@ -44,10 +44,12 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
-                    Provider<EventListener<RosterEvent>> rosterListener, 
+                    Provider<EventListener<RosterEvent>> rosterListener,
+                    Provider<EventListener<FileOfferEvent>> fileOfferListener,
                     AddressFactory addressFactory) {
         this.configurations = configurations;
         this.rosterListener = rosterListener;
+        this.fileOfferListener = fileOfferListener;
         this.addressFactory = addressFactory;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
     }
@@ -80,10 +82,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     @Override
     public XMPPConnectionListener getConnectionListener() {
         return connectionListener;
-    }
-
-    public void setFileOfferHandler(FileOfferHandler offerHandler) {
-        this.fileOfferHandler = offerHandler;
     }
 
     public void initialize() {
@@ -138,7 +136,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
         synchronized (this) {
-            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferHandler, this, addressFactory);
+            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferListener.get(), this, addressFactory);
             connection.initialize();
             connections.add(connection);
             if(lastEvent != null) {
