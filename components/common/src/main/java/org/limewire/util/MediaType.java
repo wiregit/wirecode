@@ -267,7 +267,7 @@ public class MediaType implements Serializable {
     /**
      * Returns the MIME-Type of this.
      */
-    public String getMimeType() {
+    public String getSchema() {
         return schema;
     }
     

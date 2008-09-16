@@ -13,6 +13,9 @@ import java.util.zip.Inflater;
 
 import org.limewire.io.IOUtils;
 
+import com.limegroup.gnutella.metadata.MetaReader;
+import com.limegroup.gnutella.metadata.video.VideoMetaData;
+
 
 
 
@@ -23,23 +26,20 @@ import org.limewire.io.IOUtils;
  *  
  * http://developer.apple.com/documentation/QuickTime/QTFF/index.html
  */
-public class MOVMetaData extends VideoDataReader {
+public class MOVMetaData implements MetaReader {
     
     /** Length of File */
     private long length = -1;
     
-    public MOVMetaData(File f) throws IOException {
-        super(f);
-    }
-
     @Override
-    protected void parseFile(File f) throws IOException {
+    public VideoMetaData parse(File f) throws IOException {
         RandomAccessFile in = null;
-        
         try {
             length = f.length();
             in = new RandomAccessFile(f, "r");
-            parseAtoms(in);
+            VideoMetaData videoData = new VideoMetaData();
+            parseAtoms(videoData, in);
+            return videoData;
         } finally {
             IOUtils.close(in); 
         }
@@ -48,11 +48,11 @@ public class MOVMetaData extends VideoDataReader {
     /**
      * Entry point for the parser
      */
-    private void parseAtoms(DataInput in) throws IOException {
+    private void parseAtoms(VideoMetaData videoData, DataInput in) throws IOException {
         Atom atom = null;
         while((atom = nextAtom(in)) != null) {
             if (atom.isType("moov")) {
-                moov(atom, in);
+                moov(videoData, atom, in);
                 break;
             }
             skip(atom.remaining, in);
@@ -65,16 +65,16 @@ public class MOVMetaData extends VideoDataReader {
      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
      * chapter_3_section_2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCGDJID">MOOV</a>}
      */
-    private void moov(Atom moov, DataInput in) throws IOException {
+    private void moov(VideoMetaData videoData, Atom moov, DataInput in) throws IOException {
         long length = 0L;
         Atom atom = null;
         while(length < moov.remaining && (atom = nextAtom(in)) != null) {
             if (atom.isType("mvhd")) {
-                mvhd(atom, in);
+                mvhd(videoData, atom, in);
             } else if (atom.isType("cmov")) {
-                cmov(atom, in);
+                cmov(videoData, atom, in);
             } else if (atom.isType("trak")) {
-                trak(atom, in);
+                trak(videoData, atom, in);
             } else {
                 skip(atom.remaining, in);
             }
@@ -88,7 +88,7 @@ public class MOVMetaData extends VideoDataReader {
      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
      * chapter_3_section_2.html#//apple_ref/doc/uid/TP40000939-CH204-25527">MVHD</a>}
      */
-    private void mvhd(Atom mvhd, DataInput in) throws IOException {
+    private void mvhd(VideoMetaData videoData, Atom mvhd, DataInput in) throws IOException {
         assert (mvhd.remaining == 100L);
         
         in.skipBytes(12);
@@ -112,12 +112,12 @@ public class MOVMetaData extends VideoDataReader {
      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
      * chapter_3_section_6.html#//apple_ref/doc/uid/TP40000939-CH204-BBCDACCD">CMOV</a>}
      */
-    private void cmov(Atom cmov, DataInput in) throws IOException {
+    private void cmov(VideoMetaData videoData, Atom cmov, DataInput in) throws IOException {
         long length = 0L;
         Atom atom = null;
         while(length < cmov.remaining && (atom = nextAtom(in)) != null) {
             if (atom.isType("cmvd")) {
-                cmvd(atom, in);
+                cmvd(videoData, atom, in);
             } else {
                 skip(atom.remaining, in);
             }
@@ -134,7 +134,7 @@ public class MOVMetaData extends VideoDataReader {
      * 
      * @see #cmov(com.limegroup.gnutella.metadata.MOVMetaData.Atom, DataInput)
      */
-    private void cmvd(Atom cmvd, DataInput in) throws IOException {
+    private void cmvd(VideoMetaData videoData, Atom cmvd, DataInput in) throws IOException {
         int decompressedSize = in.readInt();
         
         if( cmvd == null || cmvd.remaining - 4 > Integer.MAX_VALUE || cmvd.remaining < 4 )
@@ -168,7 +168,7 @@ public class MOVMetaData extends VideoDataReader {
             ByteArrayInputStream bais = new ByteArrayInputStream(decompressed);
             DataInputStream dis = new DataInputStream(bais);
             try {
-                parseAtoms(dis);
+                parseAtoms(videoData, dis);
             } finally {
                 dis.close();
             }
@@ -183,13 +183,13 @@ public class MOVMetaData extends VideoDataReader {
      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
      * chapter_3_section_3.html#//apple_ref/doc/uid/TP40000939-CH204-BBCBEAIF">TRAK</a>}
      */
-    private void trak(Atom trak, DataInput in) throws IOException {
+    private void trak(VideoMetaData videoData, Atom trak, DataInput in) throws IOException {
         long length = 0L;
         Atom atom = null;
         while(length < trak.remaining && (atom = nextAtom(in)) != null) {
             
             if (atom.isType("tkhd")) {
-                tkhd(atom, in);
+                tkhd(videoData, atom, in);
             } else {
                 skip(atom.remaining, in);
             }
@@ -204,7 +204,7 @@ public class MOVMetaData extends VideoDataReader {
      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
      * chapter_3_section_3.html#//apple_ref/doc/uid/TP40000939-CH204-25550">TKHD</a>}
      */
-    private void tkhd(Atom tkhd, DataInput in) throws IOException {
+    private void tkhd(VideoMetaData videoData, Atom tkhd, DataInput in) throws IOException {
         
         assert (tkhd.remaining == 84);
         skip(76, in);
@@ -321,5 +321,10 @@ public class MOVMetaData extends VideoDataReader {
         public String toString() {
             return name + "/" + size + "/" + Long.toHexString(size);
         }
+    }
+
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "mov", "m4v", "mp4", "3gp" };
     }
 }

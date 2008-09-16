@@ -2,11 +2,7 @@ package com.limegroup.gnutella.metadata.video.reader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
-import org.limewire.util.NameValue;
-
-import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
 import com.limegroup.gnutella.metadata.video.VideoMetaData;
@@ -18,28 +14,20 @@ import com.limegroup.gnutella.metadata.video.VideoMetaData;
  */
 public class WMVMetaData implements MetaReader {
     
-    private final VideoMetaData videoData;
-    
-    /** Sets WMV data. */
-    public WMVMetaData(File f) throws IOException {
-        videoData = new VideoMetaData();
-        parseFile(f);
-    }
-    
-    /** Constructs a WMVMetadata from a parser. */
-    public WMVMetaData(ASFParser p) throws IOException {
-        videoData = new VideoMetaData();
-        set(p);
-    }
-    
     /** Parse using the ASF Parser. */
-    protected void parseFile(File f) throws IOException {
-        ASFParser data = new ASFParser(f);
-        set(data);
+    @Override
+    public VideoMetaData parse(File f) throws IOException {
+        return parse(new ASFParser(f));
+    }
+    
+    public VideoMetaData parse(ASFParser parser) throws IOException {
+        VideoMetaData videoData = new VideoMetaData();
+        set(videoData, parser);
+        return videoData;
     }
     
     /** Sets data based on an ASF Parser. */
-    private void set(ASFParser data) throws IOException {
+    private void set(VideoMetaData videoData, ASFParser data) throws IOException {
         if(!data.hasVideo())
             throw new IOException("no video data!");
             
@@ -54,15 +42,9 @@ public class WMVMetaData implements MetaReader {
             videoData.setLicenseType(data.getLicenseInfo());
     }
 
-    public MetaData getMetaData() {
-        return videoData;
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "wmv" };
     }
 
-    public String getSchemaURI() {
-        return videoData.getSchemaURI();
-    }
-
-    public List<NameValue<String>> toNameValueList() {
-        return videoData.toNameValueList();
-    }
 }

@@ -14,7 +14,6 @@ import org.limewire.util.TestUtils;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
-import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -51,12 +50,11 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = metaDataFactory.parse(f);
-	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
-	    assertNotNull(data);
+	    AudioMetaData amd= (AudioMetaData) metaDataFactory.parse(f);
+	    assertNotNull(amd);
 	    
 	    boolean foundLicense = false;
-	    List<NameValue<String>> nvList = data.toNameValueList();
+	    List<NameValue<String>> nvList = amd.toNameValueList();
 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
 	        NameValue nv = (NameValue)i.next();
 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
@@ -110,12 +108,11 @@ public final class LicenseReadingTest extends LimeTestCase {
  	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = metaDataFactory.parse(f);
-	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
-	    assertNotNull(data);
-	    
+	    AudioMetaData amd= (AudioMetaData) metaDataFactory.parse(f);
+        assertNotNull(amd);
+        
 	    boolean foundLicense = false;
-	    List nvList = data.toNameValueList();
+	    List nvList = amd.toNameValueList();
 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
 	        NameValue nv = (NameValue)i.next();
 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
@@ -131,12 +128,11 @@ public final class LicenseReadingTest extends LimeTestCase {
  	    f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.ogg");
 	    assertTrue(f.exists());
 	    
-	    data = metaDataFactory.parse(f);
-	    amd = (AudioMetaData)data.getMetaData();
-	    assertNotNull(data);
+	    amd = (AudioMetaData) metaDataFactory.parse(f);
+	    assertNotNull(amd);
 	    
 	    foundLicense = false;
-	    nvList = data.toNameValueList();
+	    nvList = amd.toNameValueList();
 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
 	        NameValue nv = (NameValue)i.next();
 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
@@ -153,10 +149,10 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = metaDataFactory.parse(f);
-	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
-	    assertNotNull(data);
-	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(data.toNameValueList(), data.getSchemaURI());
+	    AudioMetaData amd= (AudioMetaData) metaDataFactory.parse(f);
+        assertNotNull(amd);
+	    
+	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicenseType(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +

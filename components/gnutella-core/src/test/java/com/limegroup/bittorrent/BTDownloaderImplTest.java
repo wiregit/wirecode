@@ -14,7 +14,6 @@ import org.limewire.util.TestUtils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import com.limegroup.bittorrent.swarm.BTSwarmCoordinatorTest;
 import com.limegroup.gnutella.ActivityCallbackAdapter;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
@@ -322,9 +321,9 @@ public class BTDownloaderImplTest extends LimeTestCase {
 
     private BTDownloaderImpl createBTDownloader(File torrentFile) throws IOException {
         AssertComparisons.assertTrue(torrentFile.exists());
-        final BTMetaInfo metaInfo = BTSwarmCoordinatorTest.createMetaInfo(torrentFile);
         Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(
                 ActivityCallbackAdapter.class));
+        final BTMetaInfo metaInfo  = injector.getInstance(BTMetaInfoFactory.class).createMetaInfo(torrentFile);
 
         CoreDownloaderFactory coreDownloaderFactory = injector
                 .getInstance(CoreDownloaderFactory.class);

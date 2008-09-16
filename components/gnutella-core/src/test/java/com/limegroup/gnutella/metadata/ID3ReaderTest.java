@@ -44,8 +44,8 @@ public class ID3ReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"ID3V1.mp3");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
     }
 
     /**
@@ -55,8 +55,8 @@ public class ID3ReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"ID3V11.mp3");
         assertTrue("file should exist", file.exists());
 
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
     }
     
     /**
@@ -66,8 +66,8 @@ public class ID3ReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"ID3V22.mp3");
         assertTrue("file should exist", file.exists());
 
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
      }
  
      /**
@@ -77,8 +77,8 @@ public class ID3ReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"ID3V23.mp3");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
     }
 
     /**
@@ -88,8 +88,8 @@ public class ID3ReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"ID3V24.mp3");
         assertTrue("file should exist", file.exists());
 
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
      }
      
     /**
@@ -100,8 +100,8 @@ public class ID3ReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"ID3All.mp3");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
+        validateTag(data);
     }
         
     public void testBadTag() throws Exception {

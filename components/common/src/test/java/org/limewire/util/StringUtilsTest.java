@@ -276,8 +276,8 @@ public class StringUtilsTest extends BaseTestCase {
         assertEquals("ab", StringUtils.explode(in, ""));
     }
     
-    public void testCollectionExplode() {
-        Collection<String> in = Arrays.asList("a" , "b", " c "); 
+    public void testIterableExplode() {
+        Collection<?> in = Arrays.asList("a" , "b", " c "); 
         assertEquals("a/b/ c ", StringUtils.explode(in, "/"));
 
         in = Collections.emptyList(); 
@@ -295,6 +295,9 @@ public class StringUtilsTest extends BaseTestCase {
         // single element
         in = Collections.singletonList("h");
         assertEquals("h", StringUtils.explode(in, "kfkdf"));
+        
+        in = Arrays.asList(5, 4, 4, 4);
+        assertEquals("5,4,4,4", StringUtils.explode(in, ","));
     }
     
     public void testToString() {

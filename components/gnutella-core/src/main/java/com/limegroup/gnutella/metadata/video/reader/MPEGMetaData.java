@@ -8,6 +8,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 
+import com.limegroup.gnutella.metadata.MetaReader;
+import com.limegroup.gnutella.metadata.video.VideoMetaData;
+
 
 
 
@@ -17,7 +20,7 @@ import org.limewire.io.IOUtils;
  * This is based off the work of XNap, at: 
  * http://xnap.sourceforge.net/xref/org/xnap/plugin/viewer/videoinfo/VideoFile.html
  */
-public class MPEGMetaData extends VideoDataReader {
+public class MPEGMetaData implements MetaReader {
     
     private static final Log LOG = LogFactory.getLog(MPEGMetaData.class);
     
@@ -27,22 +30,20 @@ public class MPEGMetaData extends VideoDataReader {
     private static final int MAX_BACKWARD_READ_LENGTH = 3000000;
 
 
-    public MPEGMetaData(File f) throws IOException {
-        super(f);
-    }
-
     @Override
-    protected void parseFile(File f) throws IOException {
+    public VideoMetaData parse(File f) throws IOException {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(f, "r");
-            parseMPEG(raf);
+            VideoMetaData videoData = new VideoMetaData();
+            parseMPEG(videoData, raf);
+            return videoData;
         } finally {
             IOUtils.close(raf);
         }
     }
 
-    private void parseMPEG(RandomAccessFile raf) throws IOException {
+    private void parseMPEG(VideoMetaData videoData, RandomAccessFile raf) throws IOException {
         boolean firstGOP = false;
         boolean firstSEQ = false;
         boolean lastGOP = false;
@@ -186,6 +187,11 @@ public class MPEGMetaData extends VideoDataReader {
         } else {
             return -1;
         }
+    }
+
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "mpg", "mpeg" };
     }
 
 

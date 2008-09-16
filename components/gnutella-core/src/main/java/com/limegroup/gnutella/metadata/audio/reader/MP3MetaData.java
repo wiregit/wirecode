@@ -1,7 +1,5 @@
 
 package com.limegroup.gnutella.metadata.audio.reader;
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
@@ -13,6 +11,8 @@ import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.ID3v1Tag;
 import org.jaudiotagger.tag.id3.ID3v24Frames;
 
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+
 /**
  *  Reads MetaData from MP3 files. This extends AudioDataReader which also
  *  handles this format. However, store files need to get checked and parsed
@@ -20,12 +20,9 @@ import org.jaudiotagger.tag.id3.ID3v24Frames;
  */
 public class MP3MetaData extends AudioDataReader {
 	
-	public MP3MetaData(File f) throws IOException, IllegalArgumentException {
-		super(f);
-	}
 	
     @Override
-    protected void readTag(AudioFile audioFile, Tag tag) {
+    protected void readTag(AudioMetaData audioData, AudioFile audioFile, Tag tag) {
         
         MP3File mp3File = ((MP3File)audioFile);
         mp3File.getID3v1Tag();
@@ -35,18 +32,18 @@ public class MP3MetaData extends AudioDataReader {
 
         // check v2 tags first if they exist
         if( v2Tag != null )
-            readV2Tag(v2Tag);
+            readV2Tag(audioData, v2Tag);
 
         // check v1 tags next
         if( v1Tag != null )
-            readV1Tag(v1Tag);
+            readV1Tag(audioData, v1Tag);
     }
     
     /**
      * Reads v1 tags from the mp3. Only writes the field to the AudioData if
      * it has not been filled in by v2 tags
      */
-    private void readV1Tag(ID3v1Tag tag){
+    private void readV1Tag(AudioMetaData audioData, ID3v1Tag tag){
         if( audioData.getTitle() == null || audioData.getTitle().length() == 0)
             audioData.setTitle(tag.getFirstTitle());
         if( audioData.getArtist() == null || audioData.getArtist().length() == 0)
@@ -72,7 +69,7 @@ public class MP3MetaData extends AudioDataReader {
     /**
      * Reads v2 tags from the mp3. 
      */
-    private void readV2Tag(AbstractID3v2Tag tag){
+    private void readV2Tag(AudioMetaData audioData, AbstractID3v2Tag tag){
         audioData.setTitle(tag.getFirstTitle());
         audioData.setArtist(tag.getFirstArtist());
         audioData.setAlbum(tag.getFirstAlbum());
@@ -98,9 +95,9 @@ public class MP3MetaData extends AudioDataReader {
                     || o.getId().equals("TPE3") || o.getId().equals("TPE4")) )
             
             if( o.getBody().getObject("Text") != null )
-                checkLWS(o.getBody().getObject("Text").toString());
+                checkLWS(audioData, o.getBody().getObject("Text").toString());
             else 
-                isRawCheck(o.getRawContent());
+                isRawCheck(audioData, o.getRawContent());
         }
     }
        
@@ -108,10 +105,10 @@ public class MP3MetaData extends AudioDataReader {
      * Checks a raw content field for the magic String. This is always in UTF-8 encoding so use the 
      * content byte array instead. 
      */
-    private void isRawCheck(byte[] contentBytes) {
+    private void isRawCheck(AudioMetaData audioDatas, byte[] contentBytes) {
         try {
             String content = new String(contentBytes,"UTF-8"); 
-            checkLWS(content);
+            checkLWS(audioDatas, content);
         } catch (UnsupportedEncodingException e) {
         }
     }
@@ -121,7 +118,7 @@ public class MP3MetaData extends AudioDataReader {
      * it is a LWS song
      * @param content - ID3 tag to scan for a substring
      */
-    private void checkLWS(String content) { 
+    private void checkLWS(AudioMetaData audioData, String content) { 
         if( audioData.getLicenseType() == null || !audioData.getLicenseType().equals(MAGIC_KEY))
             if( content.indexOf(MAGIC_KEY) != -1) { 
                 audioData.setLicenseType(MAGIC_KEY);
@@ -147,5 +144,10 @@ public class MP3MetaData extends AudioDataReader {
         }
         return cleanGenre;
         
+    }
+    
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "mp3" };
     }
 }

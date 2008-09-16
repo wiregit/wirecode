@@ -29,7 +29,6 @@ import com.google.inject.Injector;
 import com.limegroup.bittorrent.BTContext;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
-import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
 import com.limegroup.bittorrent.FileServer;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFileSystem;
@@ -64,6 +63,8 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
     private Injector injector;
 
+    private BTMetaInfoFactory metaInfoFactory;
+
     public BTSwarmCoordinatorTest(String name) {
         super(name);
     }
@@ -75,6 +76,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         injector = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class));
+        metaInfoFactory = injector.getInstance(BTMetaInfoFactory.class);
         fileServer = new FileServer(TEST_PORT, FILE_DIR);
         fileServer.start();
     }
@@ -89,7 +91,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
         File torrentFile = getFile("test-single-webseed-single-file-no-peer.torrent");
 
-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         File completeFile = torrentFileSystem.getCompleteFile();
@@ -113,7 +115,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         File completeFile = torrentFileSystem.getCompleteFile();
@@ -142,7 +144,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         File completeFile = torrentFileSystem.getCompleteFile();
@@ -172,7 +174,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
 
-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         File completeFile = torrentFileSystem.getCompleteFile();
@@ -203,7 +205,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
         File torrentFile = getFile("test_vuze_getright.torrent");
 
-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         File completeFile = torrentFileSystem.getCompleteFile();
@@ -233,7 +235,7 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
 
         File torrentFile = getFile("test-multiple-webseed-single-file-no-peer.torrent");
 
-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
+        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
         File completeFile = torrentFileSystem.getCompleteFile();
@@ -264,13 +266,6 @@ public class BTSwarmCoordinatorTest extends LimeTestCase {
     private File getFile(String fileName) {
         File torrentFile = new File(TORRENT_DIR.getAbsoluteFile() + "/" + fileName);
         return torrentFile;
-    }
-
-    public static BTMetaInfo createMetaInfo(File torrentFile) throws IOException {
-        byte[] torrentBytes = FileUtils.readFileFully(torrentFile);
-        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
-        final BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(torrentBytes);
-        return metaInfo;
     }
 
     private Swarmer createSwarmer(TorrentContext torrentContext, PieceStrategy pieceStrategy)

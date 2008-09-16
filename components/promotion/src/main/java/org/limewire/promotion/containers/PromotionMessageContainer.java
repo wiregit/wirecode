@@ -213,7 +213,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         List<Locale> territoryList = new ArrayList<Locale>();
         String territories;
         try {
-            territories = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_TERRITORIES));
+            territories = StringUtils.toUTF8String(payload.getBytes(KEY_TERRITORIES));
         } catch (BadGGEPPropertyException ex) {
             throw new RuntimeException("GGEP exception parsing territories.", ex);
         }
@@ -358,7 +358,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     public Map<String, String> getProperties() {
         Map<String, String> properties = new HashMap<String, String>();
         try {
-            String encoded = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_PROPERTIES));
+            String encoded = StringUtils.toUTF8String(payload.getBytes(KEY_PROPERTIES));
             StringTokenizer tokens = new StringTokenizer(encoded, "\t");
             while (tokens.hasMoreTokens()) {
                 String token = tokens.nextToken();
@@ -491,7 +491,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         try {
             if (!payload.hasKey(key))
                 return "";
-            return StringUtils.toStringFromUTF8Bytes(payload.getBytes(key));
+            return StringUtils.toUTF8String(payload.getBytes(key));
         } catch (BadGGEPPropertyException ex) {
             throw new RuntimeException("GGEP exception parsing value." + ex.getMessage());
         }

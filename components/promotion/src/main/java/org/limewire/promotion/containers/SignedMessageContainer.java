@@ -89,7 +89,7 @@ public class SignedMessageContainer implements MessageContainer {
     public MessageContainer getAndVerifyWrappedMessage(CipherProvider cipherProvider,
             KeyStoreProvider keyStore, CertificateVerifier certificateVerifier) throws IOException {
         try {
-            String keyAlias = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_ALIAS));
+            String keyAlias = StringUtils.toUTF8String(payload.getBytes(KEY_ALIAS));
             Certificate cert = keyStore.getKeyStore().getCertificate(keyAlias);
             if (!certificateVerifier.isValid(cert))
                 throw new IOException("Invalid certificate retrieved.");

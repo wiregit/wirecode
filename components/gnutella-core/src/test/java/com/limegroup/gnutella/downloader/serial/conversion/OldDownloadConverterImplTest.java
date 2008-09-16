@@ -177,7 +177,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             
             Map<String, Object> attributes = mem.getAttributes();
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
-            assertEquals("*", so.getMediaType().getMimeType());
+            assertEquals("*", so.getMediaType().getSchema());
             assertEquals("limewire", so.getQuery());
             assertEquals(null, so.getXML());
             assertTrue(so.isKeywordSearch());
@@ -242,7 +242,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             
             Map<String, Object> attributes = mem.getAttributes();
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
-            assertEquals("*", so.getMediaType().getMimeType());
+            assertEquals("*", so.getMediaType().getSchema());
             assertEquals("limewire", so.getQuery());
             assertEquals(null, so.getXML());
             assertTrue(so.isKeywordSearch());
@@ -268,7 +268,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             
             Map<String, Object> attributes = mem.getAttributes();
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
-            assertEquals("*", so.getMediaType().getMimeType());
+            assertEquals("*", so.getMediaType().getSchema());
             assertEquals("limewire", so.getQuery());
             assertEquals(null, so.getXML());
             assertTrue(so.isKeywordSearch());
@@ -292,7 +292,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             
             Map<String, Object> attributes = mem.getAttributes();
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
-            assertEquals("*", so.getMediaType().getMimeType());
+            assertEquals("*", so.getMediaType().getSchema());
             assertEquals("limewire", so.getQuery());
             assertEquals(null, so.getXML());
             assertTrue(so.isKeywordSearch());
@@ -317,7 +317,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             
             Map<?, ?> attributes = mem.getAttributes();
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
-            assertEquals("*", so.getMediaType().getMimeType());
+            assertEquals("*", so.getMediaType().getSchema());
             assertEquals("limewire", so.getQuery());
             assertEquals(null, so.getXML());
             assertTrue(so.isKeywordSearch());
@@ -340,7 +340,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             
             Map<String, Object> attributes = mem.getAttributes();
             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
-            assertEquals("*", so.getMediaType().getMimeType());
+            assertEquals("*", so.getMediaType().getSchema());
             assertEquals("limewire", so.getQuery());
             assertEquals(null, so.getXML());
             assertTrue(so.isKeywordSearch());

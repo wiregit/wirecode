@@ -39,16 +39,16 @@ public class OGGReaderTest extends AudioTestBase {
         File file = TestUtils.getResourceFile(dir+"oggAll.ogg");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = metaDataFactory.parse(file);
-        validateTag((AudioMetaData) data.getMetaData());
+        MetaData data = metaDataFactory.parse(file);
+        validateTag((AudioMetaData) data);
     }
     
     public void testNoFieldsOgg() throws Exception {
         File file = TestUtils.getResourceFile(dir+"oggNone.ogg");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = metaDataFactory.parse(file);
-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
+        MetaData data = metaDataFactory.parse(file);
+        AudioMetaData amd = (AudioMetaData) data;
         assertEquals("", amd.getTitle());
         assertEquals("", amd.getArtist());
         assertEquals("", amd.getAlbum());

@@ -60,9 +60,9 @@ public class OGGWriterTest extends AudioTestBase {
         
         
         // read the meta data from the current audio file
-        MetaReader data = metaDataFactory.parse(TEST_FILE);
+        MetaData data = metaDataFactory.parse(TEST_FILE);
         // test the contents to be sure its valid
-        validateTag((AudioMetaData) data.getMetaData());
+        validateTag((AudioMetaData) data);
         
         // get the meta-data and update some of the values
         List<NameValue<String>> nameValList = data.toNameValueList();
@@ -84,7 +84,7 @@ public class OGGWriterTest extends AudioTestBase {
         assertTrue(TEST_FILE.canRead());
         // read the file again
         data = metaDataFactory.parse(TEST_FILE);
-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
+        AudioMetaData amd = (AudioMetaData) data;
         
         // test the values, chanages values should be read
         assertEquals(newTitle, amd.getTitle());

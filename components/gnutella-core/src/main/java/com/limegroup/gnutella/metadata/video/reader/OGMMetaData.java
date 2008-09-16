@@ -11,10 +11,13 @@ import java.util.Set;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteUtils;
 
+import com.limegroup.gnutella.metadata.MetaReader;
+import com.limegroup.gnutella.metadata.video.VideoMetaData;
+
 /**
  * Reads MetaData from Ogg Media Formats
  */
-public class OGMMetaData extends VideoDataReader {
+public class OGMMetaData implements MetaReader {
 
 	public static final String TITLE_TAG = "title";
 
@@ -26,18 +29,16 @@ public class OGMMetaData extends VideoDataReader {
 
 	private static final String LANGUAGE_TAG = "language";
 
-	public OGMMetaData(File f) throws IOException {
-		super(f);
-	}
-
 	@Override
-    protected void parseFile(File file) throws IOException {
+    public VideoMetaData parse(File file) throws IOException {
 		InputStream is = null;
 		try {
 			is = new FileInputStream(file);
 			DataInputStream dis = new DataInputStream(is);
 			Set<String> set = readMetaData(dis);
-			parseMetaData(set);
+			VideoMetaData videoData = new VideoMetaData();
+			parseMetaData(videoData, set);
+			return videoData;
 		} finally {
 			IOUtils.close(is);
 		}
@@ -156,7 +157,7 @@ public class OGMMetaData extends VideoDataReader {
 	 * @param data
 	 *            a Set of String containing Vorbis comments
 	 */
-	private void parseMetaData(Set<String> data) {
+	private void parseMetaData(VideoMetaData videoData, Set<String> data) {
         for(String comment : data) {
 			int index = comment.indexOf('=');
 			if (index <= 0)
@@ -183,4 +184,11 @@ public class OGMMetaData extends VideoDataReader {
 			}
 		}
 	}
+
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "ogm" };
+    }
+
+
 }

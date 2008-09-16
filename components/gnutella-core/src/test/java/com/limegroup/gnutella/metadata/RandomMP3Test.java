@@ -59,8 +59,8 @@ public class RandomMP3Test extends LimeTestCase {
     private AudioMetaData newMP3Info(String resource) throws Exception {
         MetaDataFactory factory = new MetaDataFactoryImpl();
         File file = TestUtils.getResourceInPackage(resource, RandomMP3Test.class);
-        MetaReader reader = factory.parse(file);
-        return (AudioMetaData)reader.getMetaData();
+        MetaData data = factory.parse(file);
+        return (AudioMetaData)data;
     }
     
     /**

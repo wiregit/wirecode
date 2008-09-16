@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -416,9 +415,9 @@ public class StringUtils {
 	 * <pre>
      *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot; &quot;) == &quot;a b&quot;
      *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot;&quot;) == &quot;ab&quot;
-	 * </pre>
+	 * </pre> 
 	 */
-    public static String explode(String[] array, String delimeter) {
+    public static String explode(Object[] array, String delimeter) {
 		StringBuilder sb = new StringBuilder();
 		if (array.length > 0) {
 			sb.append(array[0]);
@@ -431,24 +430,29 @@ public class StringUtils {
     }
     
     /**
-     * Returns the tokens of a collection concanated to a delimited by the given
-     * delimiter.
+     * Concatenates/joins the elements of <code>iteratble</code> together, 
+     * separated by <code>delimiter</code>
+     * 
+     * <pre>
+     *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot; &quot;) == &quot;a b&quot;
+     *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot;&quot;) == &quot;ab&quot;
+     * </pre>
+     * @return "" if iterable doesn't have elements
      */
-    public static String explode(Collection<String> collection, String delimiter) {
-        StringBuilder sb = new StringBuilder();
-        if (!collection.isEmpty()) {
-            Iterator<String> i = collection.iterator(); 
-            sb.append(i.next());
-            while (i.hasNext()) {
-                sb.append(delimiter);
-                sb.append(i.next());
-            }
+    public static <T> String explode(Iterable<T> iterable, String delimiter) {
+        Iterator<T> iterator = iterable.iterator();
+        if (!iterator.hasNext()) {
+            return "";
         }
-        return sb.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append(iterator.next());
+        while (iterator.hasNext()) {
+            builder.append(delimiter);
+            builder.append(iterator.next());
+        }
+        return builder.toString();
     }
     
-    //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
-
     /**
      * A wrapped version of {@link String#getBytes(String)} that changes the
      * unlikely encoding exception into a runtime exception. Returns empty array
@@ -479,7 +483,7 @@ public class StringUtils {
      * the unlikely encoding exception into a runtime exception. Returns null if
      * the passed in array is null.
      */
-    public static String toStringFromUTF8Bytes(byte[] bytes) {
+    public static String toUTF8String(byte[] bytes) {
         if (bytes == null)
             return null;
         try {

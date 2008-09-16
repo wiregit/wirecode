@@ -60,9 +60,9 @@ public class FLACWriterTest extends AudioTestBase {
         
         
         // read the meta data from the current audio file
-        MetaReader data = metaDataFactory.parse(TEST_FILE);
+        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
         // test the contents to be sure its valid
-        validateTag((AudioMetaData) data.getMetaData());
+        validateTag(data);
         
         // get the meta-data and update some of the values
         List<NameValue<String>> nameValList = data.toNameValueList();
@@ -82,9 +82,8 @@ public class FLACWriterTest extends AudioTestBase {
         assertEquals(MetaDataState.NORMAL,retVal);
         
         // read the file again
-        data = metaDataFactory.parse(TEST_FILE);
-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
-        
+        AudioMetaData amd = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+                
         // test the values, changes values should be read
         assertEquals(newTitle, amd.getTitle());
         assertEquals(newArtist, amd.getArtist());

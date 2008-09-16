@@ -2,14 +2,9 @@ package com.limegroup.gnutella.metadata.audio.reader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
-import org.limewire.util.NameValue;
-
-import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
-import com.limegroup.gnutella.xml.LimeXMLNames;
 
 
 /**
@@ -17,29 +12,19 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
  */
 public class WMAMetaData implements MetaReader {
     
-    //private static final Log LOG = LogFactory.getLog(WMAMetaData.class);
-    protected final AudioMetaData audioData;
-    
-    /** Sets WMA data. */
-    public WMAMetaData(File f) throws IOException {
-        audioData = new AudioMetaData();
-        parseFile(f);
+    @Override
+    public AudioMetaData parse(File f) throws IOException {
+        return parse(new ASFParser(f));
     }
     
-    /** Constructs a WMAMetadata from a parser. */
-    public WMAMetaData(ASFParser p) throws IOException {
-        audioData = new AudioMetaData();
-        set(p);
-    }
-    
-    /** Parse using the ASF Parser. */
-    private void parseFile(File f) throws IOException {
-        ASFParser data = new ASFParser(f);
-        set(data);
+    public AudioMetaData parse(ASFParser parser) throws IOException {
+        AudioMetaData audioData = new AudioMetaData();
+        set(audioData, parser);
+        return audioData;
     }
     
     /** Sets data based on an ASF Parser. */
-    private void set(ASFParser data) throws IOException {
+    private void set(AudioMetaData audioData, ASFParser data) throws IOException {
         if(data.hasVideo())
             throw new IOException("use WMV instead!");
         if(!data.hasAudio())
@@ -60,18 +45,9 @@ public class WMAMetaData implements MetaReader {
             audioData.setLicenseType(data.getLicenseInfo());
     }
 
-    public MetaData getMetaData() {
-        return audioData;
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "wma" };
     }
 
-    /**
-     * @return the XML schema for this file
-     */
-    public String getSchemaURI() {
-        return LimeXMLNames.AUDIO_SCHEMA;
-    }
-
-    public List<NameValue<String>> toNameValueList() {
-        return audioData.toNameValueList();
-    }
 }

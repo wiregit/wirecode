@@ -2,7 +2,6 @@ package com.limegroup.gnutella.metadata.audio.reader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -12,12 +11,9 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
-import org.limewire.util.NameValue;
 
-import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
-import com.limegroup.gnutella.xml.LimeXMLNames;
 
 /**
  *  Handles the reading of most audio files. All file types supported by 
@@ -28,20 +24,13 @@ public class AudioDataReader implements MetaReader {
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
     public static final String MAGIC_KEY = "NOT CLEARED";
-    
-    protected final AudioMetaData audioData;
-    
-    public AudioDataReader(File f) throws IOException, IllegalArgumentException {
-        audioData = new AudioMetaData();
-        parseFile(f);
-    }
-    
+   
     /**
      * Reads header information about the file. All audio formats contain
      * some sort of header information to describe how the audio file is encoded.
      * This typically includes sample rate, bit rate, length, encoding scheme, etc..
      */
-    private void readHeader(AudioHeader header) {
+    private void readHeader(AudioMetaData audioData, AudioHeader header) {
         audioData.setVBR(header.isVariableBitRate());
         audioData.setSampleRate(header.getSampleRateAsNumber());
         audioData.setBitrate((int)header.getBitRateAsNumber());
@@ -52,7 +41,7 @@ public class AudioDataReader implements MetaReader {
      * Reads any metadata the user may have added to this audio format. Each audio
      * type has its own format for describing the audio file. 
      */
-    protected void readTag(AudioFile audioFile, Tag tag){
+    protected void readTag(AudioMetaData audioData, AudioFile audioFile, Tag tag){
         audioData.setTitle(tag.getFirstTitle());
         audioData.setArtist(tag.getFirstArtist());
         audioData.setAlbum(tag.getFirstAlbum());
@@ -67,11 +56,14 @@ public class AudioDataReader implements MetaReader {
      * @param file - file to read
      * @throws IOException - thrown if the file can't be read, is corrupted, etc..
      */
-    private void parseFile(File file) throws IOException, IllegalArgumentException { 
-        try { 
+    @Override
+    public AudioMetaData parse(File file) throws IOException { 
+        try {
+            AudioMetaData audioData = new AudioMetaData();
             AudioFile audioFile = AudioFileIO.read(file);
-            readHeader(audioFile.getAudioHeader());          
-            readTag(audioFile, audioFile.getTag());
+            readHeader(audioData, audioFile.getAudioHeader());          
+            readTag(audioData, audioFile, audioFile.getTag());
+            return audioData;
         } catch (CannotReadException e) { 
             throw (IOException)new IOException().initCause(e);
         } catch (TagException e) {
@@ -83,25 +75,9 @@ public class AudioDataReader implements MetaReader {
         }
     }
 
-    /**
-     * @return the MetaData of this file
-     */
-    public MetaData getMetaData() {
-        return audioData;
+    @Override
+    public String[] getSupportedExtensions() {
+        return new String[] { "fla", "flac", "m4a", "m4p" };
     }
 
-    /**
-     * @return the XML schema of this file
-     */
-    public String getSchemaURI() {
-        return LimeXMLNames.AUDIO_SCHEMA;
-    }
-
-    /**
-     * @return the MetaData of this file in a NameValue 
-     * List representation
-     */
-    public List<NameValue<String>> toNameValueList() {
-        return audioData.toNameValueList();
-    }
 }
