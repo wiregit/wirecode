@@ -57,6 +57,13 @@ public class GGEPKeys {
      * This is 'WH' for legacy reasons, because 'What is New' was the first.
      */
     public static final String GGEP_HEADER_FEATURE_QUERY = "WH";
+
+    /**
+     * To support queries longer than previous length limit
+     * on query string fields
+     */
+    public static final String GGEP_HEADER_EXTENDED_QUERY = "XQ";
+
     /** The extension header disabling OOB proxying. */
     public static final String GGEP_HEADER_NO_PROXY = "NP";
     /** The extension header (key) for MetaType query support */

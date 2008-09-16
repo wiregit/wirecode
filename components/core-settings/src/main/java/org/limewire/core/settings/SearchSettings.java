@@ -273,10 +273,20 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createCharArraySetting("ILLEGAL_CHARS", BAD_CHARS);
 
     /**
-     * Setting for the maximum number of bytes to allow in queries.
+     * Setting for the maximum number of characters to allow in queries.
      */
     public static final IntSetting MAX_QUERY_LENGTH =
-        FACTORY.createIntSetting("MAX_QUERY_LENGTH", 30);
+        FACTORY.createIntSetting("MAX_QUERY_LENGTH", 256);
+
+    /**
+     * Setting for maximum allowable length of query string
+     * (Search Criteria field) in Query message.
+     *
+     * Backward compatibility setting
+     * 
+     */
+    public static final IntSetting OLD_LW_MAX_QUERY_FIELD_LEN =
+        FACTORY.createIntSetting("OLD_LW_MAX_QUERY_FIELD_LEN", 30);
 
     /**
      * Setting for the maximum number of bytes to allow in XML queries.

@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
@@ -1487,6 +1488,191 @@ public final class QueryRequestTest extends LimeTestCase {
             queryRequest = new QueryRequestImpl(GUID.makeGuid(), (byte)1, 1, "limewire", null, null, null, false, Network.TCP, true, 0, true, 0, false, true, null);
             assertTrue("Failed for locale: " + locale, queryRequest.isQueryForLW());
         }
+    }
+
+    public void testCreateQueryWithExcessivelyLongQueryString() {
+        String queryTooLong = "test test test test test test test test " +
+                "test test test test test test test test test test test test test test test " +
+                "test test test test test test test test test test test test test test test " +
+                "test test test test test test test test test test test test test test";
+
+        try {
+            queryRequestFactory.createQuery(queryTooLong);
+            fail("Did not receive expected exception regarding excessively long query!");
+        } catch (IllegalArgumentException e) {
+            String errMsg = e.getMessage();
+
+            // received expected exception
+            assertTrue(errMsg.startsWith("query too big:"));
+        }
+    }
+
+    /**
+     * testExtendedQueryString*Tests added for LWC-1744 - Since LW will no longer be sending out rich queries, the
+     * projected length of the query string will likely exceed the limit set in older LW clients.
+     * However, older LW clients will still need to handle these newer queries.
+     * What this means is that the query string for the new queries will be split up,
+     * and the query string field will contain all words that fit into the limit (30 chars).
+     * A new GGEP will be introduced (ignored by older LW clients) that will contain the entire
+     * query string.
+     *
+     */
+
+    /**
+     * Test creating a QueryRequest with a query string where the last word makes the
+     * query string exceed the old LW limit (30 chars). Given the following Query string:
+     * <p/>
+     * "test testa teste testi testo testu rest" (length = 40 chars, exceeds old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be "test testa teste testi testo"
+     */
+    public void testExtendedQueryStringFieldLastWordPushesPastOldLwLimit() throws Exception {
+        extendedQueryStringTest("test testa teste testi testo testu rest",
+                                "test testa teste testi testo");
+    }
+
+    /**
+     * Test creating a QueryRequest with a query string where the first word itself
+     * exceeds the old LW limit (30 chars). Given the following Query string:
+     * <p/>
+     * "testonetestatestetestitestotestu test rest" (length 43, 1st word exceeds old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be "test rest"
+     */
+    public void testExtendedQueryStringFirstWordExceedsOldLwLimit() throws Exception {
+        extendedQueryStringTest("testonetestatestetestitestotestu test rest",
+                                "test rest");
+    }
+
+    /**
+     * Test creating a QueryRequest with a query string where a word in the middle
+     * exceeds the old LW limit (30 chars). Given the following Query string:
+     * <p/>
+     * "testa testy testonetestatestetestitestotestu test rest" (word in the middle exceeds old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be "testa testy test rest"
+     */
+    public void testExtendedQueryStringMiddleWordExceedsOldLwLimit() throws Exception {
+        extendedQueryStringTest("testa testy testonetestatestetestitestotestu test rest",
+                                "testa testy test rest");
+    }
+
+    /**
+     * Test creating a QueryRequest with a query string where multiple words in the middle
+     * exceed the old LW limit (30 chars). Given the following Query string:
+     * <p/>
+     * "testa testy testonetestatestetestitestotestu tentonetentatestetestitestotestu test rest"
+     * (Multiple words in the middle exceed old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be "testa testy test rest"
+     */
+    public void testExtendedQueryStringMultipleMiddleWordsExceedOldLwLimit() throws Exception {
+        extendedQueryStringTest(
+            "testa testy testonetestatestetestitestotestu tentonetentatestetestitestotestu test rest", 
+            "testa testy test rest");
+    }
+
+    /**
+     * Test creating a QueryRequest with a query string where the entire string is 1 long word
+     * from which keywords cannot be extracted. Given the following Query string:
+     * <p/>
+     * "testonetestatestetestitestotestu" (exceeds old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be "testonetestatestetestitestotes"
+     * (truncation of the original query string to the length of the old LW limit)
+     */
+    public void testExtendedQueryStringExceedsOldLwLimitOnlyOneWord() throws Exception {
+        extendedQueryStringTest("testonetestatestetestitestotestu",
+                                "testonetestatestetestitestotes");
+    }
+
+    /**
+     * Test creating a QueryRequest with a query string where the entire string consists of long words
+     * all of which exceed the old LW limit (30 chars). Given the following Query string:
+     * <p/>
+     * "testonetestatestetestitestotestu bestonetestatestetestitestotestu xestonetestatestetestitestotestu"
+     * (each keyword exceeds old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be "testonetestatestetestitestotes"
+     * (truncation of the 1st keyword to the length of the old LW limit)
+     */
+    public void testExtendedQueryStringAllKeywordsExceedOldLwLimit() throws Exception {
+        extendedQueryStringTest("testonetestatestetestitestotestu " +
+                                "bestonetestatestetestitestotestu " +
+                                "xestonetestatestetestitestotestu",
+                                "testonetestatestetestitestotes");
+    }
+
+    /**
+     * Test creating a QueryRequest with a query string that has 1 keyword that is exactly at the old LW limit.
+     * Given the following Query string:
+     * <p/>
+     * "abcdefghijklmnopqrstuvwxyz1234"
+     * (The entire query string is at the old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be "abcdefghijklmnopqrstuvwxyz1234"
+     * (no change whatsoever)
+     */
+    public void testExtendedQueryStringExactlyAtOldLwLimit() throws Exception {
+        extendedQueryStringTest("abcdefghijklmnopqrstuvwxyz1234",
+                                "abcdefghijklmnopqrstuvwxyz1234");
+    }
+
+    /**
+     * Test creating a QueryRequest with a query string where the old LW limit is not exceeded
+     * Given the following Query string:
+     * <p/>
+     * "testa testy test rest" (Within old LW limit)
+     * <p/>
+     * The QueryRequest's query string field should be the same ("testa testy test rest")
+     */
+    public void testQueryStringOldLwLimitNotExceeded() throws Exception {
+        extendedQueryStringTest("testa testy test rest",
+                                "testa testy test rest");
+    }
+
+    /**
+     * This method creates a {@link QueryRequest} message from the queryString parameter.
+     * <p/>
+     * 1. Tests that the QueryRequest message's query field matches the passed in expected value.
+     * 2. Tests that calling {@link QueryRequest#getQuery()} returns the original query string.  Write message out
+     *    to bytes, and read it back in to another {@link QueryRequest} message.
+     *    Test that {@link QueryRequest#getQuery()} returns the same original query string.
+     *
+     * @param queryString query string used for creating QueryRequest message
+     * @param expectedQueryFieldValue Expected value of the query field in the created QueryRequest
+     */
+    private void extendedQueryStringTest(String queryString, String expectedQueryFieldValue) throws Exception {
+
+        final int queryFieldOffset = 2;
+
+        QueryRequest query = queryRequestFactory.createQuery(queryString);
+        byte[] queryField =
+                Arrays.copyOfRange(query.getPayload(), queryFieldOffset,
+                        queryFieldOffset + expectedQueryFieldValue.getBytes("UTF-8").length);
+        String actualQueryFieldValue = new String(queryField, "UTF-8");
+
+        assertEquals(expectedQueryFieldValue, actualQueryFieldValue);
+
+        // test that this is the end of the query string field of the message
+        assertEquals(0x00, query.getPayload()[queryField.length + queryFieldOffset]);
+
+        extendedQueryStringTestReadingFromNetwork(query, queryString);
+    }
+
+    private void extendedQueryStringTestReadingFromNetwork(QueryRequest query, String expectedQueryString) throws Exception {
+
+        assertEquals(expectedQueryString, query.getQuery());
+
+        // create the QueryRequest from bytes, as if from network
+        // Test that getQuery returns the same result.
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        query.write(baos);
+        byte[] messageAsBytes = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(messageAsBytes);
+
+        QueryRequest readInRequestFromBytes = (QueryRequest) messageFactory.read(bais, Network.TCP);
+        assertEquals(query.getQuery(), readInRequestFromBytes.getQuery());
     }
     
     private void assertDesiresOutOfBand(QueryRequest query) {

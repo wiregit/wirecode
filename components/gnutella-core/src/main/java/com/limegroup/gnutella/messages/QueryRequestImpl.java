@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -134,6 +135,11 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     private static final int MAX_XML_QUERY_LENGTH =
         SearchSettings.MAX_XML_QUERY_LENGTH.getValue();
 
+    /**
+     * Cache the max length for query string message field
+     */
+    private static final int OLD_LW_MAX_QUERY_FIELD_LEN =
+        SearchSettings.OLD_LW_MAX_QUERY_FIELD_LEN.getValue();
  
     
     /** Constructs a query. */
@@ -243,7 +249,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ByteUtils.short2leb((short)MIN_SPEED,baos); // write minspeed
-            baos.write(QUERY.getBytes("UTF-8"));              // write query
+            baos.write(getQueryFieldValue().getBytes("UTF-8"));              // write query
             baos.write(0);                             // null
 
 			
@@ -308,6 +314,10 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                 _partialResultsDesired = true;
                 ggepBlock.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
             }
+
+            if (QUERY.length() > OLD_LW_MAX_QUERY_FIELD_LEN) {
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_EXTENDED_QUERY, QUERY);
+            }
             
             // if there are GGEP headers, write them out...
             if (!ggepBlock.isEmpty()) {
@@ -339,6 +349,45 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 		updateLength(PAYLOAD.length);
 
 		this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
+    }
+
+    /**
+     * Generate query string field based on query string ({@link #QUERY} value
+     *
+     * Assumptions:
+     * 1. {@link #QUERY} is already set prior to this method getting called
+     *
+     * @return String representing the query field in the message
+     */
+    private String getQueryFieldValue() {
+        
+        // extract keywords from query
+        String[] keywords = StringUtils.split(QUERY, QueryUtils.DELIMITERS);
+
+        // conditions for which the query field will be identical to the query string
+        if ((QUERY.length() <= OLD_LW_MAX_QUERY_FIELD_LEN) || (keywords.length == 0)) {
+            return QUERY;
+        }
+
+        // adding keywords that fit when appended to query string field, skipping keywords that do not fit.
+        StringBuilder queryFieldValue = new StringBuilder();
+        for (String keyword : keywords) {
+            String delimIncl = (queryFieldValue.length() == 0) ? "" : " ";
+
+            if ((queryFieldValue.length() + keyword.length() + delimIncl.length())
+                    <= OLD_LW_MAX_QUERY_FIELD_LEN) {
+                queryFieldValue.append(delimIncl);
+                queryFieldValue.append(keyword);
+            }
+        }
+
+        // in case the query string field is blank
+        // All keywords are longer than queryField_LIMIT,
+        // query string field would use 1st 30 chars of 1st keyword
+        if (queryFieldValue.length() == 0) {
+            queryFieldValue.append(QUERY.substring(0, OLD_LW_MAX_QUERY_FIELD_LEN));
+        }
+        return queryFieldValue.toString();
     }
 
 
@@ -1012,6 +1061,10 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                         
                         if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX))
                             partialResultsDesired = true;
+
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_EXTENDED_QUERY)) {
+                            this.query = ggep.getString(GGEPKeys.GGEP_HEADER_EXTENDED_QUERY);
+                        }
                         
                     } catch (BadGGEPPropertyException ignored) {}
                 }
