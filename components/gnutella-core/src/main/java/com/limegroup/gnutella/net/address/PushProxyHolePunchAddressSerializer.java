@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.net.address.gnutella;
+package com.limegroup.gnutella.net.address;
 
 import java.io.IOException;
 

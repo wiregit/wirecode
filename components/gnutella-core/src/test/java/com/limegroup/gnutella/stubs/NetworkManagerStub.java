@@ -13,7 +13,7 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {

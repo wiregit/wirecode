@@ -37,9 +37,9 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddress;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
+import com.limegroup.gnutella.net.address.PushProxyHolePunchAddress;
+import com.limegroup.gnutella.net.address.PushProxyHolePunchAddressImpl;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton

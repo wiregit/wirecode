@@ -67,7 +67,7 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddress;
+import com.limegroup.gnutella.net.address.PushProxyHolePunchAddress;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 

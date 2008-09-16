@@ -36,8 +36,8 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
+import com.limegroup.gnutella.net.address.PushProxyHolePunchAddressImpl;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 

@@ -18,9 +18,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
+import com.limegroup.gnutella.net.address.PushProxyHolePunchAddressImpl;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NetworkManagerImplTest extends LimeTestCase {

@@ -66,7 +66,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.StrictIpPortSet;

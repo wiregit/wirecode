@@ -7,7 +7,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
 
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 
 public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, TLSManager {
 
