@@ -93,7 +93,6 @@ public class MockSearch implements Search {
                     MockSearchResult similarResult =
                         (MockSearchResult) msr.clone();
                     similarResult.setProperty(PropertyKey.NAME, name + "_2");
-                    msr.addSimilarResult(similarResult);
                 } catch (CloneNotSupportedException e) {
                     // This should never happen.
                     System.err.println("MockSearch: clone problem!");
@@ -256,9 +255,6 @@ public class MockSearch implements Search {
 
         private List<RemoteHost> sources = new ArrayList<RemoteHost>();
 
-        private List<SearchResult> similarResults =
-            new ArrayList<SearchResult>();
-
         private Map<PropertyKey, Object> properties =
             new HashMap<PropertyKey, Object>();
 
@@ -267,11 +263,6 @@ public class MockSearch implements Search {
         private String urn;
         private ResultType resultType;
         private long size;
-
-        @Override
-        public void addSimilarResult(SearchResult result) {
-            similarResults.add(result);
-        }
 
         public void addSource(String host) {
             sources.add(new MockRemoteHost(host));
@@ -285,9 +276,6 @@ public class MockSearch implements Search {
 
             copy.sources = new ArrayList<RemoteHost>();
             for (RemoteHost rh : sources) copy.sources.add(rh);
-
-            copy.similarResults = new ArrayList<SearchResult>();
-            for (SearchResult sr : similarResults) copy.similarResults.add(sr);
 
             copy.properties = new HashMap<PropertyKey, Object>();
             for (PropertyKey key : properties.keySet()) {
@@ -320,10 +308,6 @@ public class MockSearch implements Search {
         @Override
         public ResultType getResultType() {
             return resultType;
-        }
-
-        public List<SearchResult> getSimiliarResults() {
-            return similarResults;
         }
 
         @Override

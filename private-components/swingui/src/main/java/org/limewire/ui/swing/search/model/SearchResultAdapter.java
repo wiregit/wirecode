@@ -2,9 +2,9 @@ package org.limewire.ui.swing.search.model;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -125,20 +125,7 @@ class SearchResultAdapter implements VisualSearchResult {
     
     @Override
     public List<VisualSearchResult> getSimilarResults() {
-        SearchResult result = coreResults.get(0);
-
-        List<VisualSearchResult> list = new ArrayList<VisualSearchResult>();
-
-        for (SearchResult similarResult : result.getSimiliarResults()) {
-            // Create a SearchResultAdapter for each similar result.
-            List<SearchResult> innerList = new ArrayList<SearchResult>();
-            innerList.add(similarResult);
-            VisualSearchResult vsr = new SearchResultAdapter(innerList);
-
-            list.add(vsr);
-        }
-
-        return list;
+        return Collections.emptyList();
     }
     
     @Override

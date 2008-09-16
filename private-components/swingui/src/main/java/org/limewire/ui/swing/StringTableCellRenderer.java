@@ -1,11 +1,12 @@
 package org.limewire.ui.swing;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
+
 import org.jdesktop.swingx.JXPanel;
 
 /**

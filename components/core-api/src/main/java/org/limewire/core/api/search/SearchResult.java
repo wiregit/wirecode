@@ -34,8 +34,6 @@ public interface SearchResult {
         YEAR
     }
 
-    void addSimilarResult(SearchResult result);
-
     String getDescription();
     
     String getFileExtension();
@@ -45,8 +43,6 @@ public interface SearchResult {
     Object getProperty(PropertyKey key);
     
     ResultType getResultType();
-    
-    List<SearchResult> getSimiliarResults();
 
     long getSize();
     

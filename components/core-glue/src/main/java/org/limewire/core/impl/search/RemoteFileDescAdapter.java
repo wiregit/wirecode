@@ -128,11 +128,6 @@ public class RemoteFileDescAdapter implements SearchResult {
     public RemoteFileDesc getRfd() {
         return rfd;
     }
-
-    // TODO: RMV Need to implement this still!
-    public List<SearchResult> getSimiliarResults() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
     
     @Override
     public long getSize() {
