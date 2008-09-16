@@ -92,8 +92,8 @@ class SearchTabItems {
 
         // Make all the tabs except "All" invisible
         // until we get a matching search result.
-        searchTab.setTabsVisible(false);
         if(category == SearchCategory.ALL) {
+            searchTab.setTabsVisible(false);
             for(FancyTab tab : searchTab.getTabs()) {
                 if(((SearchTabAction)tab.getTabActionMap().getMainAction()).getCategory() == SearchCategory.ALL) {
                     tab.setVisible(true);

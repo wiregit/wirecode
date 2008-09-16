@@ -4,33 +4,32 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.beans.PropertyChangeEvent;
-import javax.swing.Scrollable;
-
-import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.SearchResultDownloader;
-import org.limewire.core.api.search.Search;
-import org.limewire.ui.swing.search.ModeListener.Mode;
-import org.limewire.ui.swing.search.ModeListener;
-import org.limewire.ui.swing.search.model.BasicDownloadState;
-import org.limewire.ui.swing.search.model.VisualSearchResult;
-
-import ca.odell.glazedlists.EventList;
 import java.beans.PropertyChangeListener;
 import java.util.Calendar;
+
 import javax.swing.JComponent;
-import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SearchResultDownloader;
+import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.ConfigurableTable;
 import org.limewire.ui.swing.StringTableCellRenderer;
 import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.search.ModeListener;
+import org.limewire.ui.swing.search.ModeListener.Mode;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
+
+import ca.odell.glazedlists.EventList;
 
 public abstract class BaseResultPanel extends JXPanel {
     public static final int TABLE_ROW_HEIGHT = 26;

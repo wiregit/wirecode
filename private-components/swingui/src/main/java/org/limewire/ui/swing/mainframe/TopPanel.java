@@ -1,8 +1,5 @@
 package org.limewire.ui.swing.mainframe;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -13,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,9 +45,11 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
-import org.limewire.ui.swing.search.resultpanel.ListViewTableCellEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 class TopPanel extends JPanel implements SearchNavigator {
@@ -66,8 +64,6 @@ class TopPanel extends JPanel implements SearchNavigator {
     @Resource private Icon enterUpIcon;
     @Resource private Icon enterOverIcon;
     @Resource private Icon enterDownIcon;
-
-    private List<SearchListener> listeners = new ArrayList<SearchListener>();
     
     @Inject
     public TopPanel(final SearchHandler searchHandler, Navigator navigator) {
@@ -79,7 +75,7 @@ class TopPanel extends JPanel implements SearchNavigator {
         
 	    GuiUtils.assignResources(this);
         textField = new TextFieldWithEnterButton(
-            15, "Search...", enterUpIcon, enterOverIcon, enterDownIcon);
+            15, I18n.tr("Search..."), enterUpIcon, enterOverIcon, enterDownIcon);
         textField.setMaximumSize(120);
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
@@ -120,15 +116,9 @@ class TopPanel extends JPanel implements SearchNavigator {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String searchText = textField.getText();
-                ListViewTableCellEditor.setSearchText(searchText);
-                
-                Search search = searchHandler.doSearch(
+                searchHandler.doSearch(
                     new DefaultSearchInfo(searchText,
                         (SearchCategory) combo.getSelectedItem()));
-
-                for (SearchListener listener : listeners) {
-                    search.addSearchListener(listener);
-                }
             }
         });
         
@@ -167,14 +157,6 @@ class TopPanel extends JPanel implements SearchNavigator {
         searchList.setName("TopPanel.SearchList");
         add(searchList, gbc);
     };
-    
-    /**
-     * Adds a listener that will be notified as each search result comes in.
-     * @param listener the SearchListener
-     */
-    public void addSearchListener(SearchListener listener) {
-        listeners.add(listener);
-    }
 
     @Override
     public boolean requestFocusInWindow() {
@@ -266,10 +248,6 @@ class TopPanel extends JPanel implements SearchNavigator {
 
         @Override
         public void handleSearchResult(SearchResult searchResult) {
-            // TODO: RMV Should this method do anything?
-            //System.out.println(
-            //    "TopPanel.SearchAction.handleSearchResult: searchResult = "
-            //    + searchResult);
         }
         
         @Override

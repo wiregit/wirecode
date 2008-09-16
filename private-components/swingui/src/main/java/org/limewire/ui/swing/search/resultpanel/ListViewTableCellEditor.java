@@ -55,18 +55,18 @@ public class ListViewTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
-    private static final Color SELECTED_COLOR = Color.GREEN;
+    private final Color SELECTED_COLOR = Color.GREEN;
 
-    private static final String SEARCH_TEXT_COLOR = "red";
+    private final String SEARCH_TEXT_COLOR = "red";
 
     // TODO: Change this to black to avoid seeing filter matches.
-    private static final String FILTER_TEXT_COLOR = "blue";
+    private final String FILTER_TEXT_COLOR = "blue";
 
     public static final int HEIGHT = 50;
     public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
 
-    private static String searchText;
+    private String searchText;
 
     @Resource private Icon downloadIcon;
 
@@ -443,12 +443,6 @@ implements TableCellEditor, TableCellRenderer {
     private String getProperty(VisualSearchResult vsr, PropertyKey key) {
         Object property = vsr.getProperty(key);
         return property == null ? "?" : property.toString();
-    }
-
-    public static void setSearchText(String text) {
-        // Save the text so it can be used for the highlightText
-        // of subsequently created instances of this class.
-        searchText = text;
     }
 
     /**

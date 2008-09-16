@@ -9,16 +9,13 @@ import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
-import org.limewire.core.api.search.ResultType;
-import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 
-public class SearchHandlerImpl implements SearchHandler {
+class SearchHandlerImpl implements SearchHandler {
     
-    public BasicSearchResultsModel model = new BasicSearchResultsModel();
-
     private final SearchFactory searchFactory;
     private final SearchResultsPanelFactory panelFactory;
     private final SearchNavigator searchNavigator;
@@ -33,7 +30,7 @@ public class SearchHandlerImpl implements SearchHandler {
     }
 
     @Override
-    public Search doSearch(final SearchInfo info) {        
+    public void doSearch(final SearchInfo info) {        
         final SearchCategory searchCategory = info.getSearchCategory();
 
         Search search = searchFactory.createSearch(new SearchDetails() {
@@ -49,6 +46,7 @@ public class SearchHandlerImpl implements SearchHandler {
         });
         
         String panelTitle = info.getTitle();
+        final BasicSearchResultsModel model = new BasicSearchResultsModel();
         final SearchResultsPanel searchPanel =
             panelFactory.createSearchResultsPanel(
                 info, model.getVisualSearchResults(), search);
@@ -62,31 +60,17 @@ public class SearchHandlerImpl implements SearchHandler {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        ResultType resultType = searchResult.getResultType();
-
-                        // If the result is the type we are looking for ...
-                        if (searchCategory == SearchCategory.ALL
-                            || resultType.name().equals(searchCategory.name())) {
-
-                            model.addSearchResult(searchResult);
-
-                            // We can update the source count here because
-                            // we never expect things to be removed.
-                            // Changes only happen on insertion.
-                            // If removes ever happen, we'll need to switch
-                            // to adding a ListEventListener to
-                            // model.getVisualSearchResults.
-
-                            // Which of the following two lines is correct?
-                            // See JIRA LWC-1757.
-                            int count = model.getResultCount();
-                            //int count = model.getVisualSearchResults().size();
-
-                            // This sets the number displayed in parens
-                            // after the search string in the associated
-                            // tab at the top of the UI.
-                            item.sourceCountUpdated(count);
-                        }
+                        // Expect that the core properly filtered the result.
+                        // That is, we won't see it if we didn't want to.
+                        model.addSearchResult(searchResult);
+                        
+                        // We can update the source count here because
+                        // we never expect things to be removed.
+                        // Changes only happen on insertion.
+                        // If removes ever happen, we'll need to switch
+                        // to adding a ListEventListener to
+                        // model.getVisualSearchResults.
+                        item.sourceCountUpdated(model.getResultCount());
                     }
                 });
             }
@@ -111,7 +95,5 @@ public class SearchHandlerImpl implements SearchHandler {
         });
         
         search.start();
-
-        return search;
     }
 }
