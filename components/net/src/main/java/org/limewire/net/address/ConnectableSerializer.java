@@ -13,6 +13,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,9 +38,9 @@ public class ConnectableSerializer implements AddressSerializer{
     }
     
     public Connectable deserialize(InputStream in) throws IOException {
-        int hostPortLength = (in.read() == IP_V4 ? 4 : 16) + 2;
+        int hostPortLength = (ByteUtils.readByte(in) == IP_V4 ? 4 : 16) + 2;
         byte[] hostPort = new byte[hostPortLength];
-        in.read(hostPort);
+        ByteUtils.readFully(in, hostPort);
         try {
             IpPort ipPort = NetworkUtils.getIpPort(hostPort, ByteOrder.BIG_ENDIAN);
             boolean supportsTLS = in.read() == (byte)1;

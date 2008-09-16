@@ -27,11 +27,25 @@ public class ByteUtils {
         return x;
     }
 
-    private static int readByte(InputStream is) throws IOException{
+    /**
+     * Reads a byte from input stream and throws {@link EOFException} if
+     * the end of the stream was reached. 
+     */
+    public static int readByte(InputStream is) throws IOException{
         int ret = is.read();
         if (ret == -1)
             throw new EOFException();
         return ret;
+    }
+    
+    /**
+     * Fills array with bytes from input stream and throws {@link EOFException}
+     * if it couldn't be fully read. 
+     */
+    public static void readFully(InputStream in, byte[] array) throws IOException {
+        if (in.read(array) != array.length) {
+            throw new EOFException();
+        }
     }
     
     /**

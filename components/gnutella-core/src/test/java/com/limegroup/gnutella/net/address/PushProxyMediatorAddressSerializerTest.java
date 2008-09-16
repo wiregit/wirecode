@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.net.address;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -74,6 +75,19 @@ public class PushProxyMediatorAddressSerializerTest extends BaseTestCase {
         assertEquals(guid, mediatorAddress.getClientID());
         assertContains(mediatorAddress.getPushProxies(), proxy1);
         assertContains(mediatorAddress.getPushProxies(), proxy2);
+    }
+    
+    public void testDeserializeNotEnoughData() {
+        try {
+            serializer.deserialize(new byte[0]);
+            fail("io exception excepted, because of end of stream");
+        } catch (IOException ie) {
+        }
+        try {
+            serializer.deserialize(new byte[1]);
+            fail("io exception excepted, because of end of stream");
+        } catch (IOException ie) {
+        }
     }
 
 }

@@ -3,7 +3,6 @@ package com.limegroup.gnutella.net.address;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
 
 import org.limewire.io.Address;
@@ -11,6 +10,7 @@ import org.limewire.io.Connectable;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.net.address.ConnectableSerializer;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,9 +41,11 @@ public class PushProxyMediatorAddressSerializer implements AddressSerializer {
     }
 
     public Address deserialize(byte[] serializedAddress) throws IOException {
-        final GUID guid = new GUID(Arrays.copyOf(serializedAddress, 16)); 
+        ByteArrayInputStream in = new ByteArrayInputStream(serializedAddress);
+        byte[] guidBytes = new byte[16];
+        ByteUtils.readFully(in, guidBytes);
+        final GUID guid = new GUID(guidBytes); 
         final Set<Connectable> pushProxyAddresses = new StrictIpPortSet<Connectable>();
-        ByteArrayInputStream in = new ByteArrayInputStream(serializedAddress, 16, serializedAddress.length - 16);
         while (in.available() > 0) {
             pushProxyAddresses.add(proxySerializer.deserialize(in));    
         }

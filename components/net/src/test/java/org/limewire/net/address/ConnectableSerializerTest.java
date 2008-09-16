@@ -1,5 +1,6 @@
 package org.limewire.net.address;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -71,5 +72,18 @@ public class ConnectableSerializerTest extends BaseTestCase {
         Connectable connectable = new ConnectableImpl("192.168.0.1", 5555, false);
         byte[] data = serializer.serialize(connectable);
         assertEquals(0, Connectable.COMPARATOR.compare(connectable, serializer.deserialize(data)));
+    }
+    
+    public void testDeserializeNotEnoughData() {
+        try {
+            serializer.deserialize(new byte[0]);
+            fail("io exception excepted, because of end of stream");
+        } catch (IOException ie) {
+        }
+        try {
+            serializer.deserialize(new byte[1]);
+            fail("io exception excepted, because of end of stream");
+        } catch (IOException ie) {
+        }
     }
 }
