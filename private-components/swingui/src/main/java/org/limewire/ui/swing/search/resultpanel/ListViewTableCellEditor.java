@@ -1,8 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.core.api.search.SearchResult.PropertyKey;
+import static org.limewire.ui.swing.util.I18n.tr;
 
-import com.google.inject.Inject;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -37,6 +36,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.library.MyLibraryPanel;
@@ -47,6 +47,8 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.MediaType;
+
+import com.google.inject.Inject;
 
 /**
  * This class is responsible for rendering an individual SearchResult
@@ -77,7 +79,7 @@ implements TableCellEditor, TableCellRenderer {
     private FromWidget fromWidget = new FromWidget();
     private JLabel downloadButton;
     private JXHyperlink downloadingLink = new JXHyperlink();
-    private JXHyperlink similarButton = new JXHyperlink(null);
+    private JXHyperlink similarButton = new JXHyperlink();
     private JLabel headingLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
     private JLabel otherLabel = new JLabel();
@@ -266,14 +268,23 @@ implements TableCellEditor, TableCellRenderer {
         return getTableCellEditorComponent(
             table, value, isSelected, row, column);
     }
+    
+    private String hyperlinkText(Object...pieces ) {
+        StringBuilder bldr = new StringBuilder();
+        bldr.append("<html><u>");
+        for(Object s : pieces) {
+            bldr.append(s);
+        }
+        bldr.append("</u></html>");
+        return bldr.toString();
+    }
 
-    @SuppressWarnings("unchecked")
     private Component makeCenterPanel() {
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 isShowingSimilar = !isShowingSimilar;
-                String text = (isShowingSimilar ? "Hide" : "Show")
-                    + ' ' + similarCount + " similar files";
+                String text = hyperlinkText(tr(isShowingSimilar ? "Hide" : "Show"), 
+                        " ", similarCount, tr(" similar files"));
                 similarButton.setText(text);
 
                 // TODO: RMV Need code here to display similar results.
@@ -493,12 +504,12 @@ implements TableCellEditor, TableCellRenderer {
                 break;
             case DOWNLOADING:
                 downloadButton.setEnabled(false);
-                downloadingLink.setText("<html><u>Downloading...</u></html>");
+                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
                 downloadingLink.setVisible(true);
                 break;
             case DOWNLOADED:
                 downloadButton.setEnabled(false);
-                downloadingLink.setText("<html><u>Download Complete</u></html>");
+                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
                 downloadingLink.setVisible(true);
                 break;
         }
