@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.search.Search;
@@ -20,6 +21,7 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
@@ -36,18 +38,20 @@ public class CoreSearch implements Search {
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
     private final QrListener qrListener = new QrListener();
+    private final ScheduledExecutorService backgroundExecutor;
     
     private volatile byte[] searchGuid;
 
     @AssistedInject
     public CoreSearch(@Assisted
     SearchDetails searchDetails, SearchServices searchServices,
-            QueryReplyListenerList listenerList, PromotionSearcher promotionSearcher, CachedGeoLocation geoLocation) {
+            QueryReplyListenerList listenerList, PromotionSearcher promotionSearcher, CachedGeoLocation geoLocation, @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
         this.promotionSearcher = promotionSearcher;
         this.geoLocation = geoLocation;
+        this.backgroundExecutor = backgroundExecutor;
     }
     
     @Override
@@ -85,18 +89,28 @@ public class CoreSearch implements Search {
         searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
                 MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
         
-        if(initial) {
-            PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
+        if (initial) {
+            
+            final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
                 public void process(PromotionMessageContainer result) {
-                    //TODO: what are we doing with sponsored results?
-                    CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(stripURL(result.getURL()), result.getDescription(),
-                            stripURL(result.getURL()), result.getURL(), SponsoredResultTarget.STORE);
+                    // TODO: what are we doing with sponsored results?
+                    CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(
+                            stripURL(result.getURL()), result.getDescription(),
+                            stripURL(result.getURL()), result.getURL(),
+                            SponsoredResultTarget.STORE);
                     handleSponsoredResults(coreSponsoredResult);
-                }           
+                }
             };
             
-            promotionSearcher.search(searchDetails.getSearchQuery(), callback, geoLocation.getGeocodeInformation());
+            backgroundExecutor.execute(new Runnable() {
+                @Override
+                public void run() { 
+                    promotionSearcher.search(searchDetails.getSearchQuery(), callback, geoLocation
+                            .getGeocodeInformation());
+                }
+            });
+            
         }
     }
     
