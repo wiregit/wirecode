@@ -25,6 +25,7 @@ public class FromWidget extends JPanel {
 
     private Border border = new RoundedBorder(R);
     private Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
+    private FromActions fromActions = new FromActionsMockImpl();
     private JLabel headerLabel = new JLabel();
     private JPanel headerPanel =
         new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -70,7 +71,7 @@ public class FromWidget extends JPanel {
         return new AbstractAction("Chat") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("starting chat with " + person);
+                fromActions.chatWith(person);
             }
         };
     }
@@ -79,7 +80,7 @@ public class FromWidget extends JPanel {
         return new AbstractAction("View library") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("viewing library of " + person);
+                fromActions.viewLibraryOf(person);
             }
         };
     }
@@ -88,7 +89,7 @@ public class FromWidget extends JPanel {
         return new AbstractAction("Files I'm Sharing") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("showing files shared by " + person);
+                fromActions.showFilesSharedBy(person);
             }
         };
     }
