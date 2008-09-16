@@ -10,15 +10,16 @@ import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.EmptyBorder;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
+import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.ImageLocalFileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -31,22 +32,31 @@ public class ImageList extends JXList {
    
     @Resource
     private Icon loadIcon;
-   
     @Resource
     private Icon errorIcon; 
+    @Resource
+    private Color selectionCellColor;
+    @Resource
+    private Color nonSelectionCellColor;   
+    @Resource
+    private Color backgroundListcolor;
+    
+    private static final int selectionBorderWidth = 4;
+    private static final int insetCellSize = 20;
     
     public ImageList(EventList<LocalFileItem> eventList, LocalFileList fileList) {
         super(new ImageListModel(eventList, fileList));
 
         GuiUtils.assignResources(this); 
         
+        setBackground(backgroundListcolor);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setLayoutOrientation(JList.HORIZONTAL_WRAP);
         //this must be set to negative 1 to get horizontal line wrap
         setVisibleRowCount(-1);
         setCellRenderer(new ImageCellRenderer());
-        setFixedCellHeight(190);
-        setFixedCellWidth(190);
+        setFixedCellHeight(ImageLocalFileItem.HEIGHT + insetCellSize + insetCellSize);
+        setFixedCellWidth(ImageLocalFileItem.WIDTH + insetCellSize + insetCellSize);
         setRolloverEnabled(true);
         
         final SharingPopupHandler handler = new SharingPopupHandler(this, new SharingActionHandler());
@@ -73,9 +83,7 @@ public class ImageList extends JXList {
     
     private class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
         public ImageCellRenderer() {
-            super(4);
-            setOpaque(true);
-            setBorder(new EmptyBorder(20,20,20,20));
+            super(selectionBorderWidth, insetCellSize);
         }
         
         @Override
@@ -89,11 +97,12 @@ public class ImageList extends JXList {
             } else {
                 setIcon(loadIcon);
                 item.setProperty(FileItem.Keys.IMAGE, loadIcon);
-                (new ImageLoader(list, item, errorIcon)).execute();
+                ImageLoader imageLoader = new ImageLoader(list, item, errorIcon);
+                BackgroundExecutorService.schedule(imageLoader);
             }
             
-            this.setBackground(isSelected ? Color.BLUE : Color.WHITE);
-            this.setForeground(isSelected ? Color.WHITE : Color.WHITE );
+            this.setBackground(isSelected ? selectionCellColor : nonSelectionCellColor);
+            this.setForeground(list.getBackground());
             
             return this;
         }

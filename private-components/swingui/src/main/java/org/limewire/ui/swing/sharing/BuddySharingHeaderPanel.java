@@ -12,12 +12,13 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
+import org.limewire.ui.swing.util.I18n;
 
 import net.miginfocom.swing.MigLayout;
 
 public class BuddySharingHeaderPanel extends SharingHeaderPanel {
     
-    private JButton libraryButton;
+    private LibraryButton libraryButton;
     private JButton shareButton;
     
     private SharingAddAction musicAction;
@@ -38,13 +39,13 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
         videoAction = new SharingAddAction(libraryManager.getLibraryList(), Category.VIDEO);
         imageAction = new SharingAddAction(libraryManager.getLibraryList(), Category.IMAGE);
         
-        JMenuItem audioMenu = new JMenuItem("All music in My Library");
+        JMenuItem audioMenu = new JMenuItem(I18n.tr("All music in My Library"));
         audioMenu.addActionListener(musicAction);
         
-        JMenuItem videoMenu = new JMenuItem("All videos in My Library");
+        JMenuItem videoMenu = new JMenuItem(I18n.tr("All videos in My Library"));
         videoMenu.addActionListener(videoAction);
         
-        JMenuItem imageMenu = new JMenuItem("All images in My Library");
+        JMenuItem imageMenu = new JMenuItem(I18n.tr("All images in My Library"));
         imageMenu.addActionListener(imageAction);
         
         popup = new JPopupMenu();
@@ -63,7 +64,7 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
     
     @Override
     protected void createComponents() {
-        libraryButton = new JButton("Library");
+        libraryButton = new LibraryButton(I18n.tr("Library"));
         libraryButton.setEnabled(false);
         shareButton = new JButton("Share v");       
         shareButton.setVisible(false);
@@ -77,7 +78,6 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
         } else {
             shareButton.setVisible(false);
         }
-            
     }
     
     @Override
@@ -96,5 +96,38 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
         musicAction.setUserFileList(fileList);
         videoAction.setUserFileList(fileList);
         imageAction.setUserFileList(fileList);
+    }
+    
+    @Override
+    public void setBuddyName(String name) {
+        super.setBuddyName(name);
+        libraryButton.setFriend(name);
+    }
+    
+    private class LibraryButton extends JButton {
+        private String friend;
+        
+        public LibraryButton(String text) {
+            super(text);
+        }
+        
+        @Override
+        public void setEnabled(boolean value) {
+            super.setEnabled(value);
+            setTooltip();
+        }
+        
+        public void setFriend(String friend) {
+            this.friend = friend;
+            setTooltip();
+        }
+        
+        private void setTooltip() {
+            if(isEnabled()) {
+                setToolTipText(I18n.tr("View the files {0} is sharing with you.",friend));
+            } else {
+                setToolTipText(I18n.tr("{0} isn't logged in through LimeWire.",friend));
+            }
+        }
     }
 }

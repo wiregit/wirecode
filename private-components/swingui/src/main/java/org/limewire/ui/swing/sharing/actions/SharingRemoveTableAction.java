@@ -24,7 +24,7 @@ public class SharingRemoveTableAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        int index = table.getEditingRow();
+        final int index = table.getEditingRow();
         table.getCellEditor().cancelCellEditing();
 
         if(index > -1) { 

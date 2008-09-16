@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
@@ -61,15 +62,24 @@ public class ShareDropTarget implements DropTargetListener {
             Transferable transferable = dtde.getTransferable();
 
             try {
-                List filesList = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                final LocalFileList currentModel = fileList;
+                final List filesList = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                 //if drop contains a file type we aren't defaultly sharing, reject the drop
+                
+                //TODO: this is still doing fileIO on the SwingThread. Its relatively light weight
+                // stuff but could cause problems.
                 for(int i = 0; i < filesList.size(); i++) {
                     if(!isAllowed(FileUtils.getFileExtension(((File)filesList.get(i)).getName())))  
                         dtde.rejectDrop();
                 }
-                for(int i = 0; i < filesList.size(); i++) {       
-                    fileList.addFile((File)filesList.get(i));
-                }
+                BackgroundExecutorService.schedule(new Runnable(){
+                    public void run() {
+                        for(int i = 0; i < filesList.size(); i++) {       
+                            currentModel.addFile((File)filesList.get(i));
+                        }
+                    }
+                });
+
                 dtde.dropComplete(true);
             } catch (Exception e) { 
             	dtde.dropComplete(false);

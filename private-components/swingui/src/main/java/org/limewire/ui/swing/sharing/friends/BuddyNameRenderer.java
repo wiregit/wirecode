@@ -10,7 +10,9 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 
+import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * Renders buddy names in the sharing panel. Buddys that you have shared files
@@ -20,15 +22,20 @@ import org.limewire.ui.swing.util.FontUtils;
  */
 public class BuddyNameRenderer extends JLabel implements TableCellRenderer {
 
-    private Color selectionColor = Color.gray.brighter().brighter();
-    private Color onlineColor = Color.LIGHT_GRAY;
+    @Resource
+    Color selectionColor;
+    @Resource
+    Color onlineColor;
+    @Resource
+    Color seperatorColor;
     
     private Border emptyBorder;
     private Border compoundBorder;
 
     public BuddyNameRenderer() {
+        GuiUtils.assignResources(this);
         emptyBorder = BorderFactory.createEmptyBorder(0,10,0,10);
-        compoundBorder = BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.BLACK),
+        compoundBorder = BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, seperatorColor),
                 emptyBorder);
         setBorder(emptyBorder);
     }

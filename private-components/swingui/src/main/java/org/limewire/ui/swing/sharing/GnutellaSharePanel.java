@@ -10,7 +10,6 @@ import javax.swing.DropMode;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
@@ -27,6 +26,7 @@ import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -71,7 +71,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
             @Override
             public void listChanged(ListEvent<LocalFileItem> listChanges) {
                 final int size = listChanges.getSourceList().size();
-                SwingUtilities.invokeLater(new Runnable(){
+                SwingUtils.invokeLater(new Runnable(){
                     public void run() {
                         if( size == 0) {
                             overviewCardLayout.show(GnutellaSharePanel.this,EMPTY);
@@ -131,7 +131,6 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         
         createTable(filteredList);
         
-        JScrollPane scrollPane = new JScrollPane();
         SharingFancyPanel sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList, iconManager);
         scrollPane.setViewportView(sharingFancyPanel);
         
@@ -165,5 +164,4 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         list.add(new SharingRemoveTableAction(table, cancelIcon ));
         return list;
     }
-
 }

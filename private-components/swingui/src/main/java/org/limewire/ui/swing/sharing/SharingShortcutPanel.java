@@ -5,13 +5,13 @@ import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Circle;
 import org.limewire.ui.swing.components.NumberedHyperLinkButton;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -45,7 +45,6 @@ public class SharingShortcutPanel extends JPanel {
             
             buttons.add(buttonCircle);
             add(buttonCircle, "gapx 0");
-            
         }
     }
     
@@ -73,7 +72,7 @@ public class SharingShortcutPanel extends JPanel {
         @Override
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
             final int size = listChanges.getSourceList().size();
-            SwingUtilities.invokeLater(new Runnable(){
+            SwingUtils.invokeLater(new Runnable(){
                 public void run() {
                     button.setNumberLabel(size);  
                     if(!alwaysShow) {

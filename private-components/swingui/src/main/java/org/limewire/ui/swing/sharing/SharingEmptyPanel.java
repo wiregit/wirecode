@@ -10,6 +10,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Singleton;
 
@@ -29,10 +30,10 @@ public class SharingEmptyPanel extends JPanel {
         setBackground(Color.WHITE);
         
         title = new JLabel(gnutellaIcon);
-        title.setText("You are not sharing anything with the LimeWire Network");
+        title.setText(I18n.tr("You are not sharing anything with the LimeWire Network"));
         
         text = new JLabel();
-        text.setText("To share with the LimeWire Network, go to My Library");
+        text.setText(I18n.tr("To share with the LimeWire Network, go to My Library"));
         
         setLayout(new MigLayout("", "[grow]", "[][]"));
         

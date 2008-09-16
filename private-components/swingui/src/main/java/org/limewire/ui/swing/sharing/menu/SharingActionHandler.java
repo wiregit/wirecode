@@ -4,6 +4,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 public class SharingActionHandler {
@@ -14,8 +15,7 @@ public class SharingActionHandler {
     public static final String LAUNCH = "LAUNCH";
     
     public void performAction(final String actionCommand, final LocalFileList fileList, final LocalFileItem item) {
-        //TODO: move this to a background executor
-        Thread t = new Thread(new Runnable(){
+        BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == UNSHARE) {
                     fileList.removeFile(item.getFile());
@@ -28,7 +28,6 @@ public class SharingActionHandler {
                 }     
             }
         });
-        t.start();
     }
     
     private void launch(LocalFileItem item) {

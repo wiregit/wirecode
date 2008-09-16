@@ -8,7 +8,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.IconManager;
 
-
+/**
+ * Renders a table cell with a string and the system icon representing that
+ * file type.
+ */
 public class IconLabelRenderer extends DefaultTableCellRenderer {
 
     IconManager iconManager;

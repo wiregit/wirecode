@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.sharing.table;
 
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.gui.TableFormat;
 
@@ -9,7 +10,7 @@ import ca.odell.glazedlists.gui.TableFormat;
  */
 public class SharingTableFormat implements TableFormat<LocalFileItem> {
 
-    public static final String[] columnLabels = new String[] {"Name", "Size", "Created", "Modified", "Hits", "Uploads", "Actions"};
+    public static final String[] columnLabels = new String[] {I18n.tr("Name"), I18n.tr("Size"), I18n.tr("Created"), I18n.tr("Modified"), I18n.tr("Hits"), I18n.tr("Uploads"), I18n.tr("Actions")};
         
     @Override
     public int getColumnCount() {

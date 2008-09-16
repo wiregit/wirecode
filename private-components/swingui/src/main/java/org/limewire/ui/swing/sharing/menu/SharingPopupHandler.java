@@ -89,12 +89,10 @@ public class SharingPopupHandler implements TablePopupHandler {
             fileItem = ((ImageListModel) list.getModel()).getFileItem(popupRow);
             fileList = ((ImageListModel)list.getModel()).getFileList();
         }
-        
         popupMenu.show(component, x, y);
     }
 
     private class MenuListener implements ActionListener {
-
         public void actionPerformed(ActionEvent e) {
             actionHandler.performAction(e.getActionCommand(), fileList, fileItem);
         }

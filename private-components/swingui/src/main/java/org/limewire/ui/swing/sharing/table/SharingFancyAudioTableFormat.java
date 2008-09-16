@@ -2,6 +2,7 @@ package org.limewire.ui.swing.sharing.table;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.gui.TableFormat;
 
@@ -10,7 +11,7 @@ import ca.odell.glazedlists.gui.TableFormat;
  */
 public class SharingFancyAudioTableFormat implements TableFormat<LocalFileItem> {
 
-    public static final String[] columnLabels = new String[] {"Artist", "Song", "Album",""};
+    public static final String[] columnLabels = new String[] {I18n.tr("Artist"), I18n.tr("Song"), I18n.tr("Album"),""};
     
     @Override
     public int getColumnCount() {

@@ -6,6 +6,8 @@ import javax.swing.AbstractAction;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 
@@ -18,7 +20,7 @@ public class SharingRemoveAllAction extends AbstractAction {
     private EventList<LocalFileItem> eventList;
     
     public SharingRemoveAllAction(LocalFileList fileList, EventList<LocalFileItem> eventList) {
-        super("Yes");
+        super(I18n.tr("Yes"));
         this.fileList = fileList;
         this.eventList = eventList;
     }
@@ -33,10 +35,13 @@ public class SharingRemoveAllAction extends AbstractAction {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        //TODO: this needs to be moved off the swing thread
-        LocalFileItem[] items = eventList.toArray(new LocalFileItem[eventList.size()]);
-        for(LocalFileItem item : items) {
-            fileList.removeFile(item.getFile());
-        }            
+        final LocalFileItem[] items = eventList.toArray(new LocalFileItem[eventList.size()]);
+        BackgroundExecutorService.schedule(new Runnable(){
+            public void run() {
+                for(LocalFileItem item : items) {
+                    fileList.removeFile(item.getFile());
+                }             
+            }
+        });    
     }
 }

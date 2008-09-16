@@ -41,7 +41,6 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem
 
     @Override
     public int size() {
-//        return size;
         return eventList.size();
     }
 
@@ -49,7 +48,6 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem
     public void listChanged(ListEvent<LocalFileItem> listChanges) {
         int newSize = listChanges.getSourceList().size();
         if(newSize != size) {
-//        if((newSize > 0 && size == 0) || (newSize == 0 && size > 0) ) {
             int oldSize = size;
             this.size = newSize;
             support.firePropertyChange("size", oldSize, newSize);

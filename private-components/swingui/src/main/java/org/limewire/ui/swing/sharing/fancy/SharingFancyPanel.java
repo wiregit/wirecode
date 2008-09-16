@@ -26,6 +26,7 @@ import org.limewire.ui.swing.sharing.table.SharingFancyDefaultTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingFancyIconTableFormat;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 
 import ca.odell.glazedlists.EventList;
@@ -44,12 +45,12 @@ public class SharingFancyPanel extends JPanel {
     @Resource
     private Icon imageIcon;
     
-    private static final String music = "Music";
-    private static final String video = "Videos";
-    private static final String image = "Images";
-    private static final String doc = "Documents";
-    private static final String program = "Program";
-    private static final String other = "Other";
+    private static final String music = I18n.tr("Music");
+    private static final String video = I18n.tr("Videos");
+    private static final String image = I18n.tr("Images");
+    private static final String doc = I18n.tr("Documents");
+    private static final String program = I18n.tr("Program");
+    private static final String other = I18n.tr("Other");
     
     private SharingFancyTablePanel musicTable;
     private SharingFancyTablePanel videoTable;
@@ -140,7 +141,8 @@ public class SharingFancyPanel extends JPanel {
         tc.setCellRenderer(iconLabelRenderer);
         
         drop.setModel(fileList);
-        
+        //TODO: this probably isn't the EDT
+        scrollPane.getViewport().setViewPosition(new Point(0, 0));
         shortcuts.setModel(list);
     }
     

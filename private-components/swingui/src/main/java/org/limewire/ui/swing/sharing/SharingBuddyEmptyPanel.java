@@ -19,6 +19,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
 import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 
@@ -59,16 +60,16 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
         
         text = new JLabel();
 
-        audioCheckBox = new SharingCheckBox("All my music");
-        videoCheckBox = new SharingCheckBox("All my video");
-        imageCheckBox = new SharingCheckBox("All my images");
+        audioCheckBox = new SharingCheckBox(I18n.tr("All my music"));
+        videoCheckBox = new SharingCheckBox(I18n.tr("All my video"));
+        imageCheckBox = new SharingCheckBox(I18n.tr("All my images"));
         
         addAllAction = new SharingAddAllAction(audioCheckBox, videoCheckBox, imageCheckBox);
         addAllAction.setLibrary(libraryManager.getLibraryList());
         shareButton = new JButton(addAllAction);
         shareButton.setFocusable(false);
         shareButton.setEnabled(false);
-        shareButton.setToolTipText("Use the checkboxes above to choose items to share");
+        shareButton.setToolTipText(I18n.tr("Use the checkboxes above to choose items to share"));
         
         
         new BoxChangeListener(shareButton, audioCheckBox, videoCheckBox, imageCheckBox);
@@ -143,13 +144,10 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-
             if(audioBox.isSelected() || videoBox.isSelected() || imageBox.isSelected())
                 button.setEnabled(true);
             else
                 button.setEnabled(false);
         }
-        
-    }
-    
+    }   
 }

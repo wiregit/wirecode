@@ -16,7 +16,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -31,6 +30,8 @@ import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
 import org.limewire.ui.swing.sharing.components.UnshareButton;
+import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -51,13 +52,15 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     private SharingRemoveAllAction removeAction;
     private EventList<LocalFileItem> currentEventList;
     
+    private static final String unshareAll = I18n.tr("Unshare All");
+    
     public SharingFancyListPanel(String name, EventList<LocalFileItem> eventList, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon) {       
         setBackground(Color.WHITE);
         
         this.currentEventList = eventList;
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
-        JLabel unShareButtonLabel = new JLabel("Unshare All");
+        JLabel unShareButtonLabel = new JLabel(unshareAll);
         removeAction = new SharingRemoveAllAction(fileList, eventList);
         unShareButton = new ConfirmationUnshareButton(removeAction);
         unShareButton.setEnabled(false);
@@ -75,7 +78,6 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         layerButton.setSize(60, 30);
         layerButton.setVisible(false);
         layerButton.addMouseListener(new MouseListener(){
-
             @Override
             public void mouseClicked(MouseEvent e) {
                 e.getComponent().setVisible(false);
@@ -138,7 +140,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     @Override
     public void listChanged(ListEvent<LocalFileItem> listChanges) {
         final int size = listChanges.getSourceList().size();
-        SwingUtilities.invokeLater(new Runnable(){
+        SwingUtils.invokeLater(new Runnable(){
             public void run() {
                 if(size == 0 ) {
                     unShareButton.setEnabled(false);
@@ -198,7 +200,5 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
                        bounds.y + 25);
             }
         }
-        
     }
-
 }

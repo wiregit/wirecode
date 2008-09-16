@@ -9,6 +9,7 @@ import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.FilterList;
 
@@ -29,8 +30,7 @@ public class BuddySharingActionHandler {
     }
     
     public void performAction(final String actionCommand, final LocalFileList fileList, final BuddyItem item) {
-        //TODO: background executor
-        Thread t = new Thread(new Runnable(){
+        BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {
                     NavItem navItem = navTree.getNavigableItemByName(Navigator.NavCategory.LIBRARY, item.getName());
@@ -75,6 +75,5 @@ public class BuddySharingActionHandler {
                 }
             }
         });
-        t.start();
     }
 }

@@ -31,6 +31,7 @@ import org.limewire.ui.swing.sharing.table.SharingFancyMultiButtonTableCellRende
 import org.limewire.ui.swing.sharing.table.SharingFancyTable;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -71,7 +72,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
-        JLabel unShareButtonLabel = new JLabel("Unshare All");
+        JLabel unShareButtonLabel = new JLabel(I18n.tr("Unshare All"));
         removeAction = new SharingRemoveAllAction(fileList, eventList);
         unShareAllButton = new ConfirmationUnshareButton(removeAction);
         unShareAllButton.setEnabled(false);
@@ -244,17 +245,6 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         }
         
     }
-//    
-//    private class EmptyTableHeaderRenderer extends JLabel implements TableCellRenderer {
-//
-//        @Override
-//        public Component getTableCellRendererComponent(JTable table, Object value,
-//                boolean isSelected, boolean hasFocus, int row, int column) {
-//            setBackground(Color.WHITE);
-//            return this;
-//        }
-//        
-//    }
     
     private List<Action> createActions() {
         List<Action> list = new ArrayList<Action>();

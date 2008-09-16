@@ -37,24 +37,23 @@ public class SharingTransferHandler extends TransferHandler {
      * Performs the actual importing of the files. Note the files are not
      * directly added to the Model but rather added to the FileMananager first.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean importData(TransferHandler.TransferSupport info) {
         if(!info.isDrop())
             return false;
         
         Transferable transferable = info.getTransferable();
-        List<File> list;
+        List list;
         try {
-            list = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+            list = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
         } catch (UnsupportedFlavorException e) {
             return false;
         } catch (IOException e) {
             return false;
         }
         
-        for(File f : list) {
-            fileList.addFile(f);
+        for(int i = 0; i < list.size(); i++) {
+            fileList.addFile((File)list.get(i));
         }
         
         return true;

@@ -20,8 +20,12 @@ public class ImageLabel extends JLabel {
     }
     
     public ImageLabel(int selectedBorderWidth) {
+        this(3,20);
+    }
+    
+    public ImageLabel(int selectedBorderWidth, int insetWidth) {
         setOpaque(true);
-        setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+        setBorder(BorderFactory.createEmptyBorder(insetWidth,insetWidth,insetWidth,insetWidth));
         this.selectionBorderWidth = selectedBorderWidth;
     }
     

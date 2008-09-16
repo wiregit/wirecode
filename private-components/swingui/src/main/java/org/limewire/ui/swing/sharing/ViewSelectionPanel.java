@@ -30,7 +30,6 @@ public class ViewSelectionPanel extends JPanel {
     private final SelectionButton tableViewToggleButton;
     
     public ViewSelectionPanel(ItemListener list, ItemListener table) {
-        
         GuiUtils.assignResources(this);
         
         listViewToggleButton = new SelectionButton(listViewUnpressedIcon, listViewPressedIcon, true, "List View", list);
@@ -77,5 +76,4 @@ public class ViewSelectionPanel extends JPanel {
             addItemListener(listener);
         }
     }
-    
 }

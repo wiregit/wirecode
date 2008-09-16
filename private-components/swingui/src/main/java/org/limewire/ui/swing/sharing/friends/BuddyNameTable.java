@@ -7,11 +7,13 @@ import java.util.Comparator;
 
 import javax.swing.ListSelectionModel;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.sharing.menu.BuddySharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.BuddySharingPopupHandler;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -23,20 +25,20 @@ import ca.odell.glazedlists.swing.EventTableModel;
  */
 public class BuddyNameTable extends JXTable {
 
+    @Resource
+    Color tableBackgroundColor;
+    
     private EventTableModel<BuddyItem> tableModel;
     
     public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat, LibraryManager libraryManager, NavigableTree navTree) {
-//        super(new EventTableModel<BuddyItem>(new SortedList<BuddyItem>(eventList, new BuddyComparator()), tableFormat));
+        GuiUtils.assignResources(this);
         
         SortedList<BuddyItem> buddyList = new SortedList<BuddyItem>(eventList, new BuddyComparator());       
         tableModel = new EventTableModel<BuddyItem>(buddyList, tableFormat);
         
         setModel(tableModel);
-//        EventSelectionModel model = new EventSelectionModel<BuddyItem>(buddyList);
-//        setSelectionModel(model);
-//        buddyList.setMode(SortedList.STRICT_SORT_ORDER);
         
-        setBackground(Color.GRAY);
+        setBackground(tableBackgroundColor);
         setColumnControlVisible(false);
         setTableHeader(null);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -84,7 +86,6 @@ public class BuddyNameTable extends JXTable {
     }
     
     private static class BuddyComparator implements Comparator<BuddyItem> {
-
         @Override
         public int compare(BuddyItem o1, BuddyItem o2) {
             if(o1.size() > 0 && o2.size() > 0) { 
@@ -98,5 +99,4 @@ public class BuddyNameTable extends JXTable {
             }
         }
     }
-
 }

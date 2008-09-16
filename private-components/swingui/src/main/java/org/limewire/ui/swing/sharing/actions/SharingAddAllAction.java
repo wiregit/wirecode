@@ -9,6 +9,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.FilterList;
 
@@ -51,8 +52,7 @@ public class SharingAddAllAction extends AbstractAction {
         final boolean selectVideo = videoBox.isSelected();
         final boolean selectImage = imageBox.isSelected();
         
-        //TODO: convert this to an executor service
-        Thread t = new Thread(new Runnable(){
+        BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(selectMusic) {
                     FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
@@ -92,8 +92,6 @@ public class SharingAddAllAction extends AbstractAction {
                 }
             }
         });
-        t.start();
-
         reset();
     }
 }

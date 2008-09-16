@@ -4,11 +4,12 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.FilterList;
 
@@ -36,7 +37,7 @@ public class SharingAddAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         if( userList == null || libraryList == null)
             return; 
-        Thread t = new Thread(new Runnable(){
+        BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 FilterList<LocalFileItem> filter = new FilterList<LocalFileItem>(libraryList.getModel(), new CategoryFilter(category));
                 try {
@@ -50,8 +51,6 @@ public class SharingAddAction extends AbstractAction {
                 filter.dispose();
             }
         });
-        t.start();
-
     }
     
     public void setUserFileList(LocalFileList userList) {
