@@ -2,9 +2,9 @@ package com.limegroup.gnutella.net.address.gnutella;
 
 import java.io.IOException;
 
-import org.limewire.net.address.Address;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.net.address.DirectConnectionAddress;
 import org.limewire.net.address.HolePunchAddress;
 import org.limewire.net.address.HolePunchAddressSerializer;
 
@@ -33,7 +33,7 @@ public class PushProxyHolePunchAddressSerializer extends HolePunchAddressSeriali
         final HolePunchAddress address = (HolePunchAddress)super.deserialize(serializedAddress);
         byte [] directConnectBytes = new byte[7];
         System.arraycopy(serializedAddress, 1, directConnectBytes, 0, directConnectBytes.length);
-        final DirectConnectionAddress directConnect = (DirectConnectionAddress)factory.deserialize("direct-connect", directConnectBytes);
+        final Connectable directConnect = (Connectable)factory.deserialize("direct-connect", directConnectBytes);
         byte [] pushProxyBytes = new byte[serializedAddress.length - 8];
         System.arraycopy(serializedAddress, 8, pushProxyBytes, 0, pushProxyBytes.length);
         final PushProxyMediatorAddress pushProxy = (PushProxyMediatorAddress)factory.deserialize("push-proxy", pushProxyBytes);

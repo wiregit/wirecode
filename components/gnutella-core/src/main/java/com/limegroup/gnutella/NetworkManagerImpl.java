@@ -7,28 +7,27 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.LimeProps;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
-import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.DirectConnectionAddress;
-import org.limewire.net.address.DirectConnectionAddressImpl;
 import org.limewire.net.address.HolePunchAddress;
-import org.limewire.net.address.MediatorAddress;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
-import org.limewire.setting.BooleanSetting;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -40,6 +39,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddress;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
@@ -57,8 +57,8 @@ public class NetworkManagerImpl implements NetworkManager {
     private final Provider<ByteBufferCache> bbCache;
     
     private final Object addressLock = new Object();
-    private volatile DirectConnectionAddress directAddress;
-    private volatile MediatorAddress mediatedAddress;
+    private volatile Connectable directAddress;
+    private volatile PushProxyMediatorAddress mediatedAddress;
     private volatile HolePunchAddress holePunchAddress;
     
     
@@ -246,7 +246,7 @@ public class NetworkManagerImpl implements NetworkManager {
 
     private PushProxyHolePunchAddress getPushProxyHolePunchAddress() {
         try {
-            DirectConnectionAddress directAddress = new DirectConnectionAddressImpl(NetworkUtils.ip2string(getExternalAddress()),
+            Connectable directAddress = new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
                     getStableUDPPort(), isIncomingTLSEnabled()); // TODO is that the right port method?
             return new PushProxyHolePunchAddressImpl(supportsFWTVersion(), directAddress, mediatedAddress);
         } catch (UnknownHostException e) {
@@ -303,7 +303,7 @@ public class NetworkManagerImpl implements NetworkManager {
 
     private void maybeFireNewDirectConnectionAddress() {
         if(isDirectConnectionCapable()) {
-            DirectConnectionAddress newDirectAddress = getDirectConnectionAddress();
+            Connectable newDirectAddress = getDirectConnectionAddress();
             if(directAddress == null || !directAddress.equals(newDirectAddress)) {
                 fireDirectConnectionAddressEvent(newDirectAddress); 
             }
@@ -330,9 +330,9 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
 
-    private DirectConnectionAddress getDirectConnectionAddress() {
+    private Connectable getDirectConnectionAddress() {
         try {
-            return new DirectConnectionAddressImpl(NetworkUtils.ip2string(getExternalAddress()),
+            return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
                     getNonForcedPort(), isIncomingTLSEnabled()); // TODO is that the right port method?
         } catch (UnknownHostException e) {
             // TODO does this warrant ErrorService?
@@ -341,12 +341,12 @@ public class NetworkManagerImpl implements NetworkManager {
         }                                  
     }
     
-    private void fireDirectConnectionAddressEvent(DirectConnectionAddress address) {
+    private void fireDirectConnectionAddressEvent(Connectable address) {
         directAddress = address;
         fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
     }
 
-    public void newMediatedConnectionAddress(MediatorAddress newMediatorAddress) { 
+    public void newMediatedConnectionAddress(PushProxyMediatorAddress newMediatorAddress) { 
         synchronized (addressLock) {
             if(supportsFWTVersion() > 0) {
                 mediatedAddress = newMediatorAddress;
@@ -360,7 +360,7 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
     
-    private void fireMediatedConenctionAddressEvent(MediatorAddress address) {
+    private void fireMediatedConenctionAddressEvent(PushProxyMediatorAddress address) {
         mediatedAddress = address;
         fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
     }

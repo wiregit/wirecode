@@ -190,4 +190,16 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
         }
     }
 
+    @Override
+    public BrowseHostHandler createBrowseHostHandler(GUID guid) {
+        return new BrowseHostHandler(guid, null, 
+                new BrowseHostCallback() {
+                    public void putInfo(GUID serventId, PushRequestDetails details) {
+                    }
+                },
+                activityCallback.get(), socketsManager, pushDownloadManager,
+                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider, networkInstanceUtils,
+                networkManager, pushEndpointFactory);
+    }
+
 }

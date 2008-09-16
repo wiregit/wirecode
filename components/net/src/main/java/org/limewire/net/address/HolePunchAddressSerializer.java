@@ -3,6 +3,9 @@ package org.limewire.net.address;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -28,7 +31,7 @@ public class HolePunchAddressSerializer implements AddressSerializer {
                 return version;
             }
 
-            public DirectConnectionAddress getDirectConnectionAddress() {
+            public Connectable getDirectConnectionAddress() {
                 return null;
             }
 

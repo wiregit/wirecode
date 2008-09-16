@@ -6,7 +6,7 @@ import java.util.Set;
 
 /** Exposes all information necessary for connecting to a host. */
 // TODO push up into IpPort?
-public interface Connectable extends IpPort {
+public interface Connectable extends IpPort, Address {
     
     /** Determines if the host is capable of receiving incoming TLS connections. */
     boolean isTLSCapable();

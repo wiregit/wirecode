@@ -6,9 +6,16 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.io.Address;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
+import org.limewire.net.address.AddressConnector;
+import org.limewire.net.address.AddressResolutionObserver;
+import org.limewire.net.address.AddressResolver;
+import org.limewire.net.address.ConnectableConnector;
 import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
@@ -23,6 +30,10 @@ public class SocketsManagerImpl implements SocketsManager {
     
     private final SocketController socketController;
     
+    private final List<AddressResolver> addressResolvers = new CopyOnWriteArrayList<AddressResolver>();
+    
+    private final List<AddressConnector> addressConnectors = new CopyOnWriteArrayList<AddressConnector>();
+    
     public SocketsManagerImpl() {
         this(new SimpleSocketController(new ProxyManagerImpl(new EmptyProxySettings(), new SimpleNetworkInstanceUtils()), new EmptySocketBindingSettings()));
     }
@@ -30,6 +41,7 @@ public class SocketsManagerImpl implements SocketsManager {
     @Inject
     public SocketsManagerImpl(SocketController socketController) {
         this.socketController = socketController;
+        addressConnectors.add(new ConnectableConnector(this));
     }
 
     public Socket create(ConnectType type) throws IOException {
@@ -109,5 +121,108 @@ public class SocketsManagerImpl implements SocketsManager {
 
     public int getNumWaitingSockets() {
         return socketController.getNumWaitingSockets();
+    }
+
+    private AddressResolver getResolver(Address address) {
+        for (AddressResolver resolver : addressResolvers) {
+            if (resolver.canResolve(address)) {
+                return resolver;
+            }
+        }
+        return null;
+    }
+    
+    private AddressConnector getConnector(Address address) {
+        for (AddressConnector connector : addressConnectors) {
+            if (connector.canConnect(address)) {
+                return connector;
+            }
+        }
+        throw new IllegalArgumentException("no connector registered for: " + address);
+    }
+    
+    @Override
+    public void connect(Address address, final int timeout, final ConnectObserver observer) {
+        AddressResolutionObserver proxy = new AddressResolutionObserver() {
+            @Override
+            public void resolved(Address... addresses) {
+                MultiAddressConnector connector = new MultiAddressConnector(addresses, timeout, observer);
+                connector.connectNext();
+            }
+            @Override
+            public void handleIOException(IOException iox) {
+                observer.handleIOException(iox);
+            }
+            @Override
+            public void shutdown() {
+                observer.shutdown();
+            }
+        };
+        resolve(address, timeout, proxy);
+    }
+    
+    private void connectUnresolved(Address address, int timeout, ConnectObserver observer) {
+        AddressConnector connector = getConnector(address);
+        connector.connect(address, timeout, observer);
+    }
+
+    @Override
+    public void resolve(Address address, int timeout, AddressResolutionObserver observer) {
+        // this can also be changed to allow multiple resolvers to resolve the same
+        // address and re-resolve the resolved addresses too
+        AddressResolver resolver = getResolver(address);
+        if (resolver != null) {
+            resolver.resolve(address, timeout, observer);
+        } else {
+            observer.resolved(address);
+        }
+    }
+    
+    private class MultiAddressConnector implements ConnectObserver {
+
+        private final ConnectObserver delegate;
+        private final Address[] addresses;
+        private int index = 0;
+        private final int timeout;
+
+        public MultiAddressConnector(Address[] addresses, int timeout, ConnectObserver delegate) {
+            this.addresses = addresses;
+            this.timeout = timeout;
+            this.delegate = delegate;
+        }
+        
+        public void connectNext() {
+            connectUnresolved(addresses[index++], timeout, this);
+        }
+        
+        @Override
+        public void handleConnect(Socket socket) throws IOException {
+            delegate.handleConnect(socket);
+        }
+
+        @Override
+        public void handleIOException(IOException iox) {
+            if (index < addresses.length) {
+                connectNext();
+            } else {
+                delegate.handleIOException(iox);
+            }
+        }
+
+        @Override
+        public void shutdown() {
+            delegate.shutdown();
+        }
+        
+    }
+
+    @Override
+    public void registerConnector(AddressConnector connector) {
+        addressConnectors.add(connector);
+    }
+
+    @Override
+    public void registerResolver(AddressResolver resolver) {
+        addressResolvers.add(resolver);
     }
 }

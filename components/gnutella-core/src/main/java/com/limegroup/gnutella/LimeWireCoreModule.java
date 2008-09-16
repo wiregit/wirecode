@@ -161,7 +161,6 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressSerializer;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressSerializer;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressSerializer;
 import com.limegroup.gnutella.routing.QRPUpdater;
@@ -385,7 +384,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(DaapManager.class);
         bind(PushProxyMediatorAddressSerializer.class);
         bind(PushProxyHolePunchAddressSerializer.class);
-        bind(PushProxyAddressSerializer.class);
         
         bind(FileManager.class).to(FileManagerImpl.class);
     }

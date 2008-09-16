@@ -2,7 +2,7 @@ package org.limewire.xmpp.api.client;
 
 import java.util.List;
 
-import org.limewire.net.address.Address;
+import org.limewire.io.Address;
 
 /**
  * Marks a presence as running in limewire.  Allows for additional limewire

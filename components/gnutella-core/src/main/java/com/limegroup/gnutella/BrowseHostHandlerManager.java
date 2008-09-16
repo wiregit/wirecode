@@ -13,4 +13,6 @@ public interface BrowseHostHandlerManager extends PushedSocketHandler {
 
     public void initialize();
 
+    public BrowseHostHandler createBrowseHostHandler(GUID guid);
+
 }

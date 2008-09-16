@@ -1,5 +1,6 @@
 package org.limewire.net.address;
 
+import org.limewire.io.Address;
 import org.limewire.listener.DefaultEvent;
 
 public class AddressEvent extends DefaultEvent<Address, Address.EventType> {

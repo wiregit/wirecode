@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.packet.IQ;
-import org.limewire.net.address.Address;
+import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.xmlpull.v1.XmlPullParser;

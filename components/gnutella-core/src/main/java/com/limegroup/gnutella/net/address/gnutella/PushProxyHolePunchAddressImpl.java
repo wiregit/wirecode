@@ -1,14 +1,14 @@
 package com.limegroup.gnutella.net.address.gnutella;
 
-import org.limewire.net.address.DirectConnectionAddress;
-import org.limewire.net.address.MediatorAddress;
+import org.limewire.io.Connectable;
 
 public class PushProxyHolePunchAddressImpl implements PushProxyHolePunchAddress{
+    
     private final int version;
-    private final DirectConnectionAddress directConnectionAddress;
-    private final MediatorAddress mediatorAddress;
+    private final Connectable directConnectionAddress;
+    private final PushProxyMediatorAddress mediatorAddress;
 
-    public PushProxyHolePunchAddressImpl(int version, DirectConnectionAddress directConnectionAddress, MediatorAddress mediatorAddress) {
+    public PushProxyHolePunchAddressImpl(int version, Connectable directConnectionAddress, PushProxyMediatorAddress mediatorAddress) {
         this.version = version;
         this.directConnectionAddress = directConnectionAddress;
         this.mediatorAddress = mediatorAddress;
@@ -18,11 +18,11 @@ public class PushProxyHolePunchAddressImpl implements PushProxyHolePunchAddress{
         return version;
     }
 
-    public DirectConnectionAddress getDirectConnectionAddress() {
+    public Connectable getDirectConnectionAddress() {
         return directConnectionAddress;
     }
 
-    public MediatorAddress getMediatorAddress() {
+    public PushProxyMediatorAddress getMediatorAddress() {
         return mediatorAddress;
     }
     

@@ -1,13 +1,17 @@
 package com.limegroup.gnutella.net.address.gnutella;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.net.address.Address;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
+import org.limewire.net.address.ConnectableSerializer;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -16,11 +20,11 @@ import com.limegroup.gnutella.GUID;
 @Singleton
 public class PushProxyMediatorAddressSerializer implements AddressSerializer {
     
-    private final AddressFactory factory;
-    
+    private final ConnectableSerializer proxySerializer;
+
     @Inject
-    PushProxyMediatorAddressSerializer(AddressFactory factory) {
-        this.factory = factory;
+    PushProxyMediatorAddressSerializer(ConnectableSerializer proxySerializer) {
+        this.proxySerializer = proxySerializer;
     }   
 
     @Inject
@@ -37,14 +41,11 @@ public class PushProxyMediatorAddressSerializer implements AddressSerializer {
     }
 
     public Address deserialize(byte[] serializedAddress) throws IOException {
-        byte [] guidBytes = new byte[16];
-        System.arraycopy(serializedAddress, 0, guidBytes, 0, 16);
-        final GUID guid = new GUID(guidBytes);
-        final Set<PushProxyAddress> pushProxyAddresses = new HashSet<PushProxyAddress>();
-        for(int i = 0; i < (serializedAddress.length - 16) / 7; i++) {
-            byte [] pushProxy = new byte[7];
-            System.arraycopy(serializedAddress, (i * 7) + 16, pushProxy, 0, 7);
-            pushProxyAddresses.add((PushProxyAddress)factory.deserialize("push-proxy-info", pushProxy));    
+        final GUID guid = new GUID(Arrays.copyOf(serializedAddress, 16)); 
+        final Set<Connectable> pushProxyAddresses = new HashSet<Connectable>();
+        ByteArrayInputStream in = new ByteArrayInputStream(serializedAddress, 16, serializedAddress.length - 16);
+        while (in.available() > 0) {
+            pushProxyAddresses.add(proxySerializer.deserialize(in));    
         }
         return new PushProxyMediatorAddressImpl(guid, pushProxyAddresses);
     }
@@ -53,9 +54,9 @@ public class PushProxyMediatorAddressSerializer implements AddressSerializer {
         PushProxyMediatorAddress mediatorAddress = (PushProxyMediatorAddress)address;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bos.write(mediatorAddress.getClientID().bytes());
-        Set<PushProxyAddress> pushProxyAddresses = mediatorAddress.getPushProxies();
-        for(PushProxyAddress pushProxyAddress : pushProxyAddresses) {
-            bos.write(factory.serialize(pushProxyAddress));
+        Set<Connectable> pushProxyAddresses = mediatorAddress.getPushProxies();
+        for(Connectable pushProxyAddress : pushProxyAddresses) {
+            bos.write(proxySerializer.serialize(pushProxyAddress));
         }
         return bos.toByteArray();
     }

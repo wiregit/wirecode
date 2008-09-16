@@ -2,13 +2,16 @@ package com.limegroup.gnutella.net.address.gnutella;
 
 import java.util.Set;
 
+import org.limewire.io.Connectable;
+
 import com.limegroup.gnutella.GUID;
 
-public class PushProxyMediatorAddressImpl implements PushProxyMediatorAddress{
+public class PushProxyMediatorAddressImpl implements PushProxyMediatorAddress {
+    
     private final GUID guid;
-    private final Set<PushProxyAddress> proxies;
+    private final Set<Connectable> proxies;
 
-    public PushProxyMediatorAddressImpl(GUID guid, Set<PushProxyAddress> proxies) {
+    public PushProxyMediatorAddressImpl(GUID guid, Set<Connectable> proxies) {
         this.guid = guid;
         this.proxies = proxies;
     }
@@ -17,7 +20,7 @@ public class PushProxyMediatorAddressImpl implements PushProxyMediatorAddress{
         return guid;
     }
 
-    public Set<PushProxyAddress> getPushProxies() {
+    public Set<Connectable> getPushProxies() {
         return proxies;
     }
     

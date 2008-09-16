@@ -5,6 +5,7 @@ import java.util.Set;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.util.DebugRunnable;
@@ -211,5 +212,16 @@ public class SearchServicesImpl implements SearchServices {
         if (MessageSettings.STAMP_QUERIES.getValue())
             GUID.timeStampGuid(ret);
         return ret;
+    }
+
+    @Override
+    public BrowseHostHandler doAsynchronousBrowseHost(final Address address, GUID guid) {
+        final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid);
+        ThreadExecutor.startThread(new DebugRunnable(new Runnable() {
+            public void run() {
+                handler.browseHost(address);
+            }
+        }), "BrowseHoster" );
+        return handler;
     }
 }

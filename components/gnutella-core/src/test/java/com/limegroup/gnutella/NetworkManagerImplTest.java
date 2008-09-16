@@ -8,18 +8,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.DirectConnectionAddress;
-import org.limewire.net.address.DirectConnectionAddressImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddress;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressImpl;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
@@ -64,7 +62,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         acceptor.setIncoming(true);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
     }
     
@@ -76,7 +74,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         acceptor.setIncoming(true);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
     }
     
@@ -88,7 +86,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         acceptor.setExternalAddress(InetAddress.getByName("199.199.199.199"));
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
     }
     
@@ -100,7 +98,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         acceptor.setListeningPort(5000);        
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
     }    
     
@@ -111,7 +109,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setListeningPort(5000);
         acceptor.setIncoming(true);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
         acceptor.setExternalAddress(InetAddress.getByName("199.199.199.199"));
         assertEquals(0, addressChangedListener.events.size());
@@ -128,11 +126,11 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setListeningPort(5000);
         acceptor.setIncoming(true);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
         acceptor.setIncoming(false);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("200.200.200.200", 5001, true), addressChangedListener.events.get(0).getSource());        
+        assertEquals(new ConnectableImpl("200.200.200.200", 5001, true), addressChangedListener.events.get(0).getSource());        
     }
     
     public void testDirectConnectionAddressChangedExternalAddressTrigger() throws IOException {
@@ -142,11 +140,11 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setListeningPort(5000);
         acceptor.setIncoming(true);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("200.200.200.200", 5000, true), addressChangedListener.events.get(0).getSource());        
+        assertEquals(new ConnectableImpl("200.200.200.200", 5000, true), addressChangedListener.events.get(0).getSource());        
     }
     
     public void testDirectConnectionAddressChangedEventPortTrigger() throws IOException {
@@ -156,20 +154,19 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setListeningPort(5000);
         acceptor.setIncoming(true);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
+        assertEquals(new ConnectableImpl("199.199.199.199", 5000, true), addressChangedListener.events.get(0).getSource());
         addressChangedListener.events.clear();
         acceptor.setListeningPort(5001);
         assertEquals(1, addressChangedListener.events.size());
-        assertEquals(new DirectConnectionAddressImpl("199.199.199.199", 5001, true), addressChangedListener.events.get(0).getSource());        
+        assertEquals(new ConnectableImpl("199.199.199.199", 5001, true), addressChangedListener.events.get(0).getSource());        
     }
     
     public void testPushProxyAddressEvent() throws IOException {
         ApplicationServices applicationServices = injector.getInstance(ApplicationServices.class);
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
         assertEquals(0, addressChangedListener.events.size());
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         PushProxyMediatorAddress address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(address);
@@ -181,9 +178,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         ApplicationServices applicationServices = injector.getInstance(ApplicationServices.class);
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
         assertEquals(0, addressChangedListener.events.size());
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        Set<Connectable> proxies = new HashSet<Connectable>();
         PushProxyMediatorAddress address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(address);
@@ -191,9 +186,9 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(address, addressChangedListener.events.get(0).getSource()); 
         addressChangedListener.events.clear();
         
-        proxies = new HashSet<PushProxyAddress>();
-        proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        PushProxyAddressImpl proxyAddress2 = new PushProxyAddressImpl("200.200.200.200", 5001, false);
+        proxies = new HashSet<Connectable>();
+        Connectable proxyAddress = new ConnectableImpl("199.199.199.199", 5000, true);
+        Connectable proxyAddress2 = new ConnectableImpl("200.200.200.200", 5001, false);
         proxies.add(proxyAddress);
         proxies.add(proxyAddress2);
         address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
@@ -207,9 +202,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         ApplicationServices applicationServices = injector.getInstance(ApplicationServices.class);
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
         assertEquals(0, addressChangedListener.events.size());
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         PushProxyMediatorAddress address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(address);
@@ -217,9 +211,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(address, addressChangedListener.events.get(0).getSource()); 
         addressChangedListener.events.clear();
         
-        proxies = new HashSet<PushProxyAddress>();
-        proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(address);
@@ -231,9 +224,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
         AcceptorImpl acceptor = (AcceptorImpl)injector.getInstance(Acceptor.class);
         assertEquals(0, addressChangedListener.events.size());
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(mediatorAddress);
@@ -254,7 +246,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         networkManager.incomingStatusChanged();
         assertEquals(1, addressChangedListener.events.size());
         
-        DirectConnectionAddress directAddress = new DirectConnectionAddressImpl("200.200.200.200", 5001, true);
+        Connectable directAddress = new ConnectableImpl("200.200.200.200", 5001, true);
         PushProxyHolePunchAddressImpl holePunch = new PushProxyHolePunchAddressImpl(networkManager.supportsFWTVersion(), 
                 directAddress, mediatorAddress);
         assertEquals(holePunch, addressChangedListener.events.get(0).getSource()); 
@@ -275,16 +267,15 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
         
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(mediatorAddress);
         
         assertEquals(1, addressChangedListener.events.size());
         
-        DirectConnectionAddress directAddress = new DirectConnectionAddressImpl("200.200.200.200", 5001, true);
+        Connectable directAddress = new ConnectableImpl("200.200.200.200", 5001, true);
         PushProxyHolePunchAddressImpl holePunch = new PushProxyHolePunchAddressImpl(networkManager.supportsFWTVersion(), 
                 directAddress, mediatorAddress);
         assertEquals(holePunch, addressChangedListener.events.get(0).getSource()); 
@@ -302,15 +293,14 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
+        Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
         PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(mediatorAddress);
         
-        DirectConnectionAddress directAddress = new DirectConnectionAddressImpl("200.200.200.200", 5001, true);
+        Connectable directAddress = new ConnectableImpl("200.200.200.200", 5001, true);
         PushProxyHolePunchAddressImpl holePunch = new PushProxyHolePunchAddressImpl(networkManager.supportsFWTVersion(), 
                 directAddress, mediatorAddress);
         
@@ -318,11 +308,9 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(holePunch, addressChangedListener.events.get(0).getSource()); 
         addressChangedListener.events.clear();
         
-        proxies = new HashSet<PushProxyAddress>();
-        proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        PushProxyAddressImpl proxyAddress2 = new PushProxyAddressImpl("201.201.201.201", 5002, false);
-        proxies.add(proxyAddress);
-        proxies.add(proxyAddress2);
+        proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
+        proxies.add(new ConnectableImpl("201.201.201.201", 5002, false));
         mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(mediatorAddress);
@@ -347,14 +335,13 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
         
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(mediatorAddress);
         
-        DirectConnectionAddress directAddress = new DirectConnectionAddressImpl("200.200.200.200", 5001, true);
+        Connectable directAddress = new ConnectableImpl("200.200.200.200", 5001, true);
         PushProxyHolePunchAddressImpl holePunch = new PushProxyHolePunchAddressImpl(networkManager.supportsFWTVersion(), 
                 directAddress, mediatorAddress);
         
@@ -386,14 +373,13 @@ public class NetworkManagerImplTest extends LimeTestCase {
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
         
-        Set<PushProxyAddress> proxies = new HashSet<PushProxyAddress>();
-        PushProxyAddressImpl proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        Set<Connectable> proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(mediatorAddress);
         
-        DirectConnectionAddress directAddress = new DirectConnectionAddressImpl("200.200.200.200", 5001, true);
+        Connectable directAddress = new ConnectableImpl("200.200.200.200", 5001, true);
         PushProxyHolePunchAddressImpl holePunch = new PushProxyHolePunchAddressImpl(networkManager.supportsFWTVersion(), 
                 directAddress, mediatorAddress);
         
@@ -404,9 +390,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         networkManager.incomingStatusChanged();
         assertEquals(0, addressChangedListener.events.size());
         
-        proxies = new HashSet<PushProxyAddress>();
-        proxyAddress = new PushProxyAddressImpl("199.199.199.199", 5000, true);
-        proxies.add(proxyAddress);
+        proxies = new HashSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
                 proxies);
         networkManager.newMediatedConnectionAddress(mediatorAddress);

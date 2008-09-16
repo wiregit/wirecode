@@ -8,7 +8,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,26 +48,24 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.GnutellaConnectionEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddress;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressImpl;
 import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -2611,10 +2608,6 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     
     public void handleEvent(final GnutellaConnectionEvent event) {
         Set<Connectable> pushProxies = getPushProxies();
-        final Set<PushProxyAddress> pushProxyAddresses = new HashSet<PushProxyAddress>();
-        for(Connectable proxy : pushProxies) {
-            pushProxyAddresses.add(new PushProxyAddressImpl(proxy));
-        }
-        networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxyAddresses));
+        networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxies));
     }
 }

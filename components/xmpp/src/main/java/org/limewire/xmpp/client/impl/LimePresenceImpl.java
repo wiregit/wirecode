@@ -9,7 +9,7 @@ import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
-import org.limewire.net.address.Address;
+import org.limewire.io.Address;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQ;

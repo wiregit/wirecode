@@ -2,7 +2,7 @@ package org.limewire.net;
 
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressFactoryImpl;
-import org.limewire.net.address.DirectConnectionAddressSerializer;
+import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.net.address.HolePunchAddressSerializer;
 import org.limewire.util.OSUtils;
 
@@ -42,7 +42,7 @@ public class LimeWireNetModule extends AbstractModule {
         bind(WhoIsRequestFactory.class).to(WhoIsRequestFactoryImpl.class);
         bind(FirewallService.class).to(FirewallServiceImpl.class);
         bind(AddressFactory.class).to(AddressFactoryImpl.class);
-        bind(DirectConnectionAddressSerializer.class);
+        bind(ConnectableSerializer.class);
         bind(HolePunchAddressSerializer.class);
         
         

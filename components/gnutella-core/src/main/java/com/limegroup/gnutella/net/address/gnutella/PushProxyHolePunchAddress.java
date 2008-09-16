@@ -7,4 +7,7 @@ import org.limewire.net.address.HolePunchAddress;
  * transfer, using push-proxies as the signaling channel.
  */
 public interface PushProxyHolePunchAddress extends HolePunchAddress {
+    
+    @Override
+    public PushProxyMediatorAddress getMediatorAddress();
 }

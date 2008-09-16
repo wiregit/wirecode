@@ -7,13 +7,13 @@ import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.MediatorAddress;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
@@ -253,7 +253,8 @@ public class NetworkManagerStub implements NetworkManager {
         
     }
 
-    public void newMediatedConnectionAddress(MediatorAddress address) {
-        
+    @Override
+    public void newMediatedConnectionAddress(PushProxyMediatorAddress address) {
     }
+
 }

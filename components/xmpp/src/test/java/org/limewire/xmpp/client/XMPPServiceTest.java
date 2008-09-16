@@ -11,6 +11,9 @@ import java.util.Random;
 
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.inject.AbstractModule;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.lifecycle.ServiceRegistry;
@@ -20,10 +23,7 @@ import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.ProxySettings;
 import org.limewire.net.SocketBindingSettings;
-import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.DirectConnectionAddress;
-import org.limewire.net.address.DirectConnectionAddressImpl;
 import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.FileOfferHandler;
@@ -123,7 +123,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
         assertEquals(0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
         
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
@@ -133,7 +133,7 @@ public class XMPPServiceTest extends BaseTestCase {
         LimePresence buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
         assertEquals(Presence.Mode.available, buddy2.getMode());
-        DirectConnectionAddress address = (DirectConnectionAddress)buddy2.getAddress();
+        Connectable address = (Connectable)buddy2.getAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -143,7 +143,7 @@ public class XMPPServiceTest extends BaseTestCase {
         LimePresence buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
         assertEquals(Presence.Mode.available, buddy2.getMode());
-        address = (DirectConnectionAddress)buddy1.getAddress();
+        address = (Connectable)buddy1.getAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -166,7 +166,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
         assertEquals(0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
         
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000); 
@@ -190,7 +190,7 @@ public class XMPPServiceTest extends BaseTestCase {
     }
     
     public void testChat() throws InterruptedException, XMPPException, IOException {
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
@@ -220,7 +220,7 @@ public class XMPPServiceTest extends BaseTestCase {
         
         HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
         
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
@@ -250,7 +250,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
         assertEquals(0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
         
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
@@ -259,7 +259,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
         LimePresence buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
-        DirectConnectionAddress address = (DirectConnectionAddress)buddy2.getAddress();
+        Connectable address = (Connectable)buddy2.getAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -268,12 +268,12 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
         LimePresence buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
-        address = (DirectConnectionAddress)buddy1.getAddress();
+        address = (Connectable)buddy1.getAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
 
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("200.200.200.200", 5000, false),
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("200.200.200.200", 5000, false),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
@@ -282,7 +282,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
         buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
-        address = (DirectConnectionAddress)buddy2.getAddress();
+        address = (Connectable)buddy2.getAddress();
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
@@ -291,7 +291,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
         buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
-        address = (DirectConnectionAddress)buddy1.getAddress();
+        address = (Connectable)buddy1.getAddress();
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());

@@ -6,7 +6,8 @@ import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.MediatorAddress;
+
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 
 public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, TLSManager {
 
@@ -97,7 +98,7 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
      * used to notify the <code>NetworkManager</code> of a new
      * <code>MediatorAddress</code> (i.e., push proxy)
      */
-    public void newMediatedConnectionAddress(MediatorAddress address);
+    public void newMediatedConnectionAddress(PushProxyMediatorAddress address);
 
     /** 
      * Returns true if this has accepted an incoming connection, and hence

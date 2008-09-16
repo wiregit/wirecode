@@ -365,6 +365,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             }
             
             public void start() {
+                System.err.println("starting lifecycle");
                 bindAndStartUpnp();
             }
             
@@ -379,6 +380,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * @see com.limegroup.gnutella.Acceptor#start()
      */
 	public void start() {
+	    System.out.println("started");
         multicastService.get().start();
         udpService.get().start();
         connectionDispatcher.get().addConnectionAcceptor(this, false, "CONNECT", "\n\n");
@@ -534,6 +536,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             ServerSocket newSocket=null;
             try {
                 newSocket = SocketFactory.newServerSocket(port, new SocketListener());
+                System.out.println("bound to port: " + port);
             } catch (IOException e) {
                 LOG.warn("can't create ServerSocket", e);
                 udpServiceSocket.close();
@@ -641,6 +644,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         }
         
         public void handleAccept(Socket client) {
+            System.out.println("getting socket: " + client);
             processSocket(client);
         }
     }

@@ -1,6 +1,8 @@
 package org.limewire.net.address;
 
 import com.google.inject.Singleton;
+
+import org.limewire.io.Address;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
