@@ -9,6 +9,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -155,16 +156,10 @@ public class FancyTabList extends JXPanel {
     }
 
     /**
-     * Gets the FancyTab with a given title.
-     * @param title the title
-     * @return the FancyTab
+     * Returns all tabs.
      */
-    public FancyTab getTab(String title) {
-        for (FancyTab tab : tabs) {
-            String tabTitle = tab.getTitle();
-            if (tabTitle.equals(title)) return tab;
-        }
-        return null;
+    public List<FancyTab> getTabs() {
+        return Collections.unmodifiableList(tabs);
     }
     
     /**

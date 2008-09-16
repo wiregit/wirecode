@@ -6,9 +6,9 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -21,7 +21,7 @@ import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.util.MediaType;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -33,160 +33,157 @@ import ca.odell.glazedlists.event.ListEventListener;
  * 
  * @see org.limewire.ui.swing.search.SearchResultsPanel.
  */
-class SearchTabItems extends FancyTabList
-implements ListEventListener<VisualSearchResult> {
-
-    private static final Map<String, String> schemaToTitleMap =
-        new HashMap<String, String>();
-
-    private boolean isAll;
-
-    static {
-        schemaToTitleMap.put("audio", "Music");
-        schemaToTitleMap.put("image", "Images");
-        schemaToTitleMap.put("document", "Documents");
-        schemaToTitleMap.put("video", "Videos");
-        schemaToTitleMap.put("application", "Programs");
-        schemaToTitleMap.put("custom", "Other");
-        schemaToTitleMap.put("other", "Other");
-    }
-
+class SearchTabItems {
+    
     private final List<TabActionMap> searchActionMaps;
 
-    private final SearchTabListener listener;
+    private final List<SearchTabListener> listeners;
     
-    private EventList<VisualSearchResult> eventList;
+    private final FancyTabList searchTab;
 
-    SearchTabItems(SearchCategory category, SearchTabListener listener) {
-        isAll = category == SearchCategory.ALL;
-
-        this.listener = listener;
+    SearchTabItems(SearchCategory category, EventList<VisualSearchResult> resultsList) {
+        this.listeners = new CopyOnWriteArrayList<SearchTabListener>();
         
         this.searchActionMaps = new ArrayList<TabActionMap>();
-        if (isAll) {
-            searchActionMaps.add(
-                newTabActionMap(new SearchTabAction("All", SearchCategory.ALL)));
-            searchActionMaps.add(
-                newTabActionMap(new SearchTabAction("Music", SearchCategory.AUDIO)));
-            searchActionMaps.add(
-                newTabActionMap(new SearchTabAction("Videos", SearchCategory.VIDEO)));
-            searchActionMaps.add(
-                newTabActionMap(new SearchTabAction("Images", SearchCategory.IMAGE)));
-            searchActionMaps.add(
-                newTabActionMap(new SearchTabAction("Documents", SearchCategory.DOCUMENT)));
-            searchActionMaps.add(
-                newTabActionMap(new SearchTabAction("Programs", SearchCategory.PROGRAM)));
-            searchActionMaps.add(
-                newTabActionMap(new SearchTabAction("Other", SearchCategory.OTHER)));
-        } else if (category == SearchCategory.AUDIO) {
-            searchActionMaps.add(newTabActionMap(
-                new SearchTabAction("Music results ", SearchCategory.AUDIO)));
-        } else if (category == SearchCategory.VIDEO) {
-            searchActionMaps.add(newTabActionMap(
-                new SearchTabAction("Video results ", SearchCategory.VIDEO)));
-        } else if (category == SearchCategory.IMAGE) {
-            searchActionMaps.add(newTabActionMap(
-                new SearchTabAction("Image results ", SearchCategory.IMAGE)));
-        } else if (category == SearchCategory.DOCUMENT) {
-            searchActionMaps.add(newTabActionMap(
-                new SearchTabAction("Document results ", SearchCategory.DOCUMENT)));
-        } else if (category == SearchCategory.PROGRAM) {
-            searchActionMaps.add(newTabActionMap(
-                new SearchTabAction("Program results ", SearchCategory.PROGRAM)));
+        switch(category) {
+        case ALL:
+            addCategory(I18n.tr("All"), SearchCategory.ALL);
+            addCategory(I18n.tr("Music"), SearchCategory.AUDIO);
+            addCategory(I18n.tr("Videos"), SearchCategory.VIDEO);
+            addCategory(I18n.tr("Images"), SearchCategory.IMAGE);
+            addCategory(I18n.tr("Documents"), SearchCategory.DOCUMENT);
+            addCategory(I18n.tr("Programs"), SearchCategory.PROGRAM);
+            addCategory(I18n.tr("Other"), SearchCategory.OTHER);
+            break;
+        case AUDIO:
+            addCategory(I18n.tr("Music results"), SearchCategory.AUDIO);
+            break;
+        case VIDEO:
+            addCategory(I18n.tr("Video results"), SearchCategory.VIDEO);
+            break;
+        case IMAGE:
+            addCategory(I18n.tr("Image results"), SearchCategory.IMAGE);
+            break;
+        case DOCUMENT:
+            addCategory(I18n.tr("Document results"), SearchCategory.DOCUMENT);
+            break;
+        case PROGRAM:
+            addCategory(I18n.tr("Program results"), SearchCategory.PROGRAM);
+            break;
+        default:
+            throw new IllegalArgumentException("invalid category: " + category);
         }
 
+        // Select the appropriate one.
         for (TabActionMap map : searchActionMaps) {
             SearchTabAction action = (SearchTabAction) map.getMainAction();
             if (category == action.getCategory()) {
                 action.putValue(Action.SELECTED_KEY, true);
-                listener.categorySelected(category);
             } else if (category != SearchCategory.ALL) {
                 action.setEnabled(false);
             }
         }
 
-        setFlowedLayout();
-        setHighlightPainter(new RectanglePainter<JXButton>(
+        searchTab = new FancyTabList(searchActionMaps);
+        searchTab.setFlowedLayout();
+        searchTab.setHighlightPainter(new RectanglePainter<JXButton>(
             2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
-        setTabActionMaps(searchActionMaps);
+        
 
         // Make all the tabs except "All" invisible
         // until we get a matching search result.
-        setTabsVisible(false);
-        if (isAll) getTab("All").setVisible(true);
+        searchTab.setTabsVisible(false);
+        if(category == SearchCategory.ALL) {
+            for(FancyTab tab : searchTab.getTabs()) {
+                if(((SearchTabAction)tab.getTabActionMap().getMainAction()).getCategory() == SearchCategory.ALL) {
+                    tab.setVisible(true);
+                }
+            }
+        }
 
-        Font font = getFont().deriveFont(12.0f);
-        font.deriveFont(Font.BOLD); // TODO: RMV This doesn't work!
-        setTextFont(font);
+        Font font = searchTab.getFont().deriveFont(12.0f);
+        font = font.deriveFont(Font.BOLD);
+        searchTab.setTextFont(font);
+        
+        // Make sure that we make tabs visible as time goes by.
+        if(category == SearchCategory.ALL) {
+            resultsList.addListEventListener(new TabMaintainer(searchTab.getTabs()));
+        }
     }
-
+    
+    void addSearchTabListener(SearchTabListener listener) {
+        listeners.add(listener);
+        listener.categorySelected(getSelectedCategory());
+    }
+    
+    private void addCategory(String title, SearchCategory category) {
+        TabActionMap map = newTabActionMap(new SearchTabAction(title, category));
+        searchActionMaps.add(map);
+    }
+    
     public Collection<Map.Entry<SearchCategory, Action>> getResultCountActions() {
         Map<SearchCategory, Action> counts =
             new EnumMap<SearchCategory, Action>(SearchCategory.class);
 
         for (TabActionMap map : searchActionMaps) {
-            SearchCategory category =
-                ((SearchTabAction) map.getMainAction()).getCategory();
-            if (category != SearchCategory.ALL) {
-                counts.put(category, map.getMoreTextAction());
-            }
+            SearchCategory category =((SearchTabAction) map.getMainAction()).getCategory();
+            counts.put(category, map.getMoreTextAction());
         }
 
         return counts.entrySet();
     }
-
-    public void listChanged(ListEvent event) {
-        // Get the most recent search result.
-        EventList list = event.getSourceList();
-        VisualSearchResult vsr = (VisualSearchResult) list.get(list.size() - 1);
-
-        // Determine its media type.
-        String extension = vsr.getFileExtension();
-        MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
-
-        // Find the "tab" for the media type.
-        String schema = mediaType == null ? "other" : mediaType.toString();
-
-        // Uncomment to output the name and schema type of each result.
-        //Object property = vsr.getProperty(PropertyKey.NAME);
-        //String name = property == null ? "unknown" : property.toString();
-        //System.out.println("SearchTabItems.listChanged: name = " + name);
-        //System.out.println("SearchTabItems.listChanged: schema = " + schema);
-
-        String title = schemaToTitleMap.get(schema);
-        if (!isAll) {
-            if (title.endsWith("s")) {
-                title = title.substring(0, title.length() - 1);
+    
+    private class TabMaintainer implements ListEventListener<VisualSearchResult> {
+        private final EnumMap<SearchCategory, FancyTab> categoryToMap;
+        
+        public TabMaintainer(List<FancyTab> tabs) {
+            categoryToMap = new EnumMap<SearchCategory, FancyTab>(SearchCategory.class);
+            // Synchronize the categoryToTab list.
+            for(FancyTab tab : tabs) {
+                SearchTabAction action = (SearchTabAction)tab.getTabActionMap().getMainAction();
+                if(action.getCategory() != SearchCategory.ALL) {
+                    categoryToMap.put(action.getCategory(), tab);
+                }
             }
-            title += " results ";
         }
-        FancyTab tab = getTab(title);
 
-        if (tab == null) {
-            // This should never happen!
-            System.err.println(
-                "SearchTabItems.listChanged: no tab found with title \""
-                + title + '"');
-        } else {
-            // Make that tab visible if it isn't already.
-            tab.underline();
-            tab.setVisible(true);
+        
+        @Override
+        public void listChanged(ListEvent<VisualSearchResult> listChanges) {
+            EventList<VisualSearchResult> source = listChanges.getSourceList();
+            if (!listChanges.isReordering()) {                
+                while (listChanges.next()) {                    
+                    if(listChanges.getType() == ListEvent.INSERT) {
+                        VisualSearchResult added = source.get(listChanges.getIndex());
+                        SearchCategory searchCategory = added.getCategory().toSearchCategory();
+                        FancyTab tab = categoryToMap.remove(searchCategory);
+                        if(tab != null && !tab.isVisible()) {
+                            tab.underline();
+                            tab.setVisible(true);
+                        }
+                    }
+                    // If no more categories to scan for, exit & be done with.
+                    if(categoryToMap.isEmpty()) {
+                        source.removeListEventListener(this);
+                        break;
+                    }
+                }
+            }
         }
+    }
+    
+    public FancyTabList getSearchTab() {
+        return searchTab;
+    }
+    
+    public SearchCategory getSelectedCategory() {
+        return ((SearchTabAction)searchTab.getSelectedTab().getTabActionMap().getMainAction()).getCategory();
     }
     
     private TabActionMap newTabActionMap(SearchTabAction action) {
         Action moreText = new NoOpAction();
         moreText.putValue(Action.NAME, "");
         return new TabActionMap(action, null, moreText, null);
-    }
-
-    public void setEventList(EventList<VisualSearchResult> eventList) {
-        if (this.eventList != null) {
-            this.eventList.removeListEventListener(this);
-        }
-
-        this.eventList = eventList;
-        eventList.addListEventListener(this);
     }
 
     private class SearchTabAction extends AbstractAction {
@@ -203,7 +200,9 @@ implements ListEventListener<VisualSearchResult> {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            listener.categorySelected(category);
+            for(SearchTabListener listener : listeners) {
+                listener.categorySelected(category);
+            }
         }
     }
 
