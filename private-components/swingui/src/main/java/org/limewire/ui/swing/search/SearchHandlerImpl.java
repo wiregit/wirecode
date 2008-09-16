@@ -17,9 +17,7 @@ import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 
 public class SearchHandlerImpl implements SearchHandler {
     
-    // TODO: RMV This shouldn't be static. I'm just testing a bug fix.
-    public static BasicSearchResultsModel model = new BasicSearchResultsModel();
-
+    public BasicSearchResultsModel model = new BasicSearchResultsModel();
 
     private final SearchFactory searchFactory;
     private final SearchResultsPanelFactory panelFactory;

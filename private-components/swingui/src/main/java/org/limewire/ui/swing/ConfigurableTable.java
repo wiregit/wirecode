@@ -19,6 +19,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.ui.swing.table.MouseableTable;
 
@@ -244,4 +246,21 @@ public class ConfigurableTable<E> extends MouseableTable {
     @Override
     public void setValueAt(Object aValue, int row, int column) {
     }
+
+    @Override
+    public void setDefaultEditor(Class clazz, TableCellEditor editor) {
+        super.setDefaultEditor(clazz, editor);
+        if (clazz != String.class) return;
+        System.out.println("ConfigurableTable: editor for " + clazz.getName()
+            + " is now " + editor.getClass().getName());
+    }
+
+    @Override
+    public void setDefaultRenderer(Class clazz, TableCellRenderer renderer) {
+        super.setDefaultRenderer(clazz, renderer);
+        if (clazz != String.class) return;
+        System.out.println("ConfigurableTable: renderer for " + clazz.getName()
+            + " is now " + renderer.getClass().getName());
+    }
+    
 }

@@ -12,8 +12,9 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
-import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.ModeListener.Mode;
+import org.limewire.ui.swing.search.ModeListener;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
@@ -21,12 +22,17 @@ import java.beans.PropertyChangeListener;
 import java.util.Calendar;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.ConfigurableTable;
+import org.limewire.ui.swing.StringTableCellRenderer;
 
 public class BaseResultPanel extends JXPanel {
+    public static final int TABLE_ROW_HEIGHT = 26;
     
     private ActionColumnTableCellEditor actionEditor =
         new ActionColumnTableCellEditor();
@@ -79,10 +85,12 @@ public class BaseResultPanel extends JXPanel {
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
 
+        // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor renderer =
             new ListViewTableCellEditor(actionRenderer);
         resultsList.setDefaultRenderer(VisualSearchResult.class, renderer);
 
+        // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor editor =
             new ListViewTableCellEditor(actionEditor);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
@@ -121,15 +129,48 @@ public class BaseResultPanel extends JXPanel {
 
     private void configureTable(EventList<VisualSearchResult> eventList,
         final ResultsTableFormat<VisualSearchResult> tableFormat) {
+        //System.out.println("BaseResultPanel.configureTable: tableFormat is a "
+        //    + tableFormat.getClass().getName());
         resultsTable = new ConfigurableTable<VisualSearchResult>(true);
 
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
 
+        CalendarTableCellRenderer calendarRenderer =
+            new CalendarTableCellRenderer();
+        ComponentTableCellRenderer componentRenderer =
+            new ComponentTableCellRenderer();
+        StringTableCellRenderer stringRenderer =
+            new StringTableCellRenderer();
+
+        // TODO: RMV Don't know why this approach of registering renderers
+        // TODO: RMV by class didn't work.
+        /*
+        resultsTable.setDefaultRenderer(Integer.class, stcr);
+        resultsTable.setDefaultRenderer(Long.class, stcr);
+        resultsTable.setDefaultRenderer(String.class, stcr);
         resultsTable.setDefaultRenderer(
             Calendar.class, new CalendarTableCellRenderer());
         resultsTable.setDefaultRenderer(
             Component.class, new ComponentTableCellRenderer());
+        */
+
+        // TODO: RMV But this way works.
+        TableColumnModel tcm = resultsTable.getColumnModel();
+        int columnCount = tableFormat.getColumnCount();
+        for (int i = 0; i < columnCount; i++) {
+            TableColumn tc = tcm.getColumn(i);
+            Class clazz = tableFormat.getColumnClass(i);
+            if (clazz == String.class
+                || clazz == Integer.class
+                || clazz == Long.class) {
+                tc.setCellRenderer(stringRenderer);
+            } else if (clazz == Calendar.class) {
+                tc.setCellRenderer(calendarRenderer);
+            } else if (clazz == Component.class) {
+                tc.setCellRenderer(componentRenderer);
+            }
+        }
 
         resultsTable.setDefaultRenderer(
             VisualSearchResult.class, actionRenderer);
@@ -148,17 +189,32 @@ public class BaseResultPanel extends JXPanel {
         }
 
         // Make some columns invisible by default.
-        int columnCount = resultsTable.getColumnCount();
         // We have to loop backwards because making a column invisible
         // changes the index of the columns after it.
         for (int i = columnCount - 1; i > lastVisibleColumnIndex; i--) {
             resultsTable.setColumnVisible(i, false);
         }
 
-        resultsTable.setRowHeight(26);
+        resultsTable.setRowHeight(TABLE_ROW_HEIGHT);
+
+        // TODO: RMV Just for debugging.
+        // Dump the name of the renderer for each column in the table.
+        /*
+        if (tableFormat instanceof ImageTableFormat) {
+            for (int i = 0; i < tcm.getColumnCount(); i++) {
+                TableColumn tc = tcm.getColumn(i);
+                TableCellRenderer tcr = tc.getCellRenderer();
+                String className = tcr == null ? "none" :
+                    tcr.getClass().getName();
+                System.out.println(
+                    "renderer for column " + i + " is a " + className);
+            }
+        }
+        */
     }
 
     public void download(final VisualSearchResult vsr) {
+        System.out.println("BaseResultPanel.download entered");
         try {
             // TODO: Need to go through some of the rigor that
             // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
@@ -169,17 +225,30 @@ public class BaseResultPanel extends JXPanel {
                 public void propertyChange(PropertyChangeEvent evt) {
                     if ("state".equals(evt.getPropertyName())) {
                         DownloadState state = (DownloadState) evt.getNewValue();
-                        if (state == DownloadState.CANCELLED
-                            || state == DownloadState.DONE
-                            || state == DownloadState.ERROR) {
-                            vsr.setDownloading(false);
-                            // TODO: RMV Need to trigger a re-render of the corresponding list row.
+                        switch (state) {
+                            case CANCELLED:
+                            case ERROR:
+                                vsr.setDownloadState(
+                                    BasicDownloadState.NOT_STARTED);
+                                break;
+                            case DONE:
+                                vsr.setDownloadState(
+                                    BasicDownloadState.DOWNLOADED);
+                                break;
                         }
+
+                        // Trigger a re-render of the corresponding list row.
+                        AbstractTableModel tm =
+                            (AbstractTableModel) resultsList.getModel();
+                        
+                        // We don't know the row number,
+                        // so can't make this more specific.
+                        tm.fireTableDataChanged();
                     }
                 }
             });
              
-            vsr.setDownloading(true);
+            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
         } catch (SaveLocationException sle) {
             // TODO: Do something!
             sle.printStackTrace();

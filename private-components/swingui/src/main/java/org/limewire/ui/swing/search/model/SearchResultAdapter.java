@@ -23,7 +23,8 @@ class SearchResultAdapter implements VisualSearchResult {
     private final List<SearchResult> coreResults;
     private Map<Object, Object> properties;
     private final Set<RemoteHost> remoteHosts;
-    private boolean downloading;
+    private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
+    private boolean junk;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
@@ -165,13 +166,23 @@ class SearchResultAdapter implements VisualSearchResult {
     }
 
     @Override
-    public boolean isDownloading() {
-        return downloading;
+    public BasicDownloadState getDownloadState() {
+        return downloadState;
     }
 
     @Override
-    public void setDownloading(boolean downloading) {
-        this.downloading = downloading;
+    public boolean isMarkedAsJunk() {
+        return junk;
+    }
+
+    @Override
+    public void setDownloadState(BasicDownloadState downloadState) {
+        this.downloadState = downloadState;
+    }
+
+    @Override
+    public void setJunk(boolean junk) {
+        this.junk = junk;
     }
 
     @Override

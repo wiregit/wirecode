@@ -13,10 +13,10 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.ToolTipManager;
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
@@ -24,7 +24,7 @@ import org.limewire.ui.swing.util.GuiUtils;
  * for the actions "download", "more info" and "mark as junk".
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ActionButtonPanel extends JPanel {
+public class ActionButtonPanel extends JXPanel {
 
 //    private static final Point toolTipOffset = new Point(0, 25);
     private static final String[] TOOLTIPS =

@@ -23,6 +23,10 @@ public class HyperLinkButton extends JButton implements MouseListener {
     
     protected Cursor oldCursor;
     
+    public HyperLinkButton() {
+        this(null);
+    }
+
     public HyperLinkButton(String text) {
         this.text = text;
         FontUtils.underline(this);

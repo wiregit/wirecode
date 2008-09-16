@@ -3,10 +3,13 @@ package org.limewire.ui.swing.search.resultpanel;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import com.google.inject.Inject;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.Comparator;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.IconManager;
@@ -55,7 +58,7 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
         return columnNames[index];
     }
 
-    protected JLabel getIconLabel(VisualSearchResult vsr) {
+    protected Component getIconLabel(VisualSearchResult vsr) {
         String ext = vsr.getFileExtension();
         Icon icon = iconManager.getIconForExtension(ext);
 
@@ -66,9 +69,14 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
         Font font = label.getFont().deriveFont(Font.PLAIN);
         label.setFont(font);
 
-        label.setOpaque(true);
+        label.setOpaque(false);
 
-        return label;
+        JXPanel panel = new JXPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.add(label);
+
+        panel.setAlpha(vsr.isMarkedAsJunk() ? 0.2f : 1.0f);
+
+        return panel;
     }
 
     /**

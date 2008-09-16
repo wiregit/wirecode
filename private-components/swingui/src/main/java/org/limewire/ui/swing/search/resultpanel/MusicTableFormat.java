@@ -33,11 +33,15 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     @Override
     public Class getColumnClass(int index) {
-        return index == BITRATE_INDEX ? Integer.class :
+        Class clazz =
+            index == BITRATE_INDEX ? Integer.class :
             index == NUM_SOURCES_INDEX ? Integer.class :
             index == RELEVANCE_INDEX ? Integer.class :
             index == TRACK_INDEX ? Integer.class :
             super.getColumnClass(index);
+        //System.out.println("MusicTableFormat: index = " + index);
+        //System.out.println("MusicTableFormat: clazz = " + clazz.getName());
+        return clazz;
     }
 
     public Object getColumnValue(VisualSearchResult vsr, int index) {

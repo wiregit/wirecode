@@ -4,8 +4,6 @@ import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.EventObject;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
@@ -25,9 +23,6 @@ public class ActionColumnTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
         
-    private static Map<VisualSearchResult, Boolean> junkMap =
-        new WeakHashMap<VisualSearchResult, Boolean>();
-    
     private ActionButtonPanel panel;
     private VisualSearchResult vsr;
     
@@ -47,7 +42,7 @@ implements TableCellEditor, TableCellRenderer {
             @Override
             public void itemStateChanged(ItemEvent event) {
                 boolean junk = event.getStateChange() == ItemEvent.SELECTED;
-                junkMap.put(vsr, junk);
+                vsr.setJunk(junk);
             }
         });
         
@@ -61,11 +56,12 @@ implements TableCellEditor, TableCellRenderer {
         
         panel = getPanel(table);
         vsr = (VisualSearchResult) value;
+        panel.setAlpha(vsr.isMarkedAsJunk() ? 0.2f : 1.0f);
 
         // If the VisualSearchResult for the current row is currently
         // marked as junk then display the junkButton as pressed.
         JToggleButton junkButton = panel.getJunkButton();
-        boolean junk = isJunk(vsr);
+        boolean junk = vsr.isMarkedAsJunk(); // isJunk(vsr);
         junkButton.setSelected(junk);
 
         return panel;
@@ -83,11 +79,5 @@ implements TableCellEditor, TableCellRenderer {
     @Override
     public boolean isCellEditable(EventObject event) {
         return true;
-    }
-    
-    private boolean isJunk(VisualSearchResult vsr) {
-        Boolean junk = junkMap.get(vsr);
-        if (junk == null) junk = false;
-        return junk;
     }
 }

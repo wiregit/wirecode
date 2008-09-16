@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import com.google.inject.Inject;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -36,7 +37,9 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.search.FilterEvent;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.MediaType;
@@ -52,6 +55,11 @@ implements TableCellEditor, TableCellRenderer {
 
     private static final Color SELECTED_COLOR = Color.GREEN;
 
+    private static final String SEARCH_TEXT_COLOR = "red";
+
+    // TODO: Change this to black to avoid seeing filter matches.
+    private static final String FILTER_TEXT_COLOR = "blue";
+
     public static final int HEIGHT = 50;
     public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
@@ -63,8 +71,7 @@ implements TableCellEditor, TableCellRenderer {
     private ActionColumnTableCellEditor actionEditor;
     private ActionButtonPanel actionButtonPanel;
     private FromWidget fromWidget = new FromWidget();
-    private HyperLinkButton downloadingLink =
-        new HyperLinkButton("Downloading...");
+    private HyperLinkButton downloadingLink = new HyperLinkButton();
     private JLabel downloadButton;
     private HyperLinkButton similarButton = new HyperLinkButton(null);
     private JLabel headingLabel = new JLabel();
@@ -73,7 +80,8 @@ implements TableCellEditor, TableCellRenderer {
     private JXPanel actionPanel = new JXPanel();
     private JXPanel thePanel;
     private JTable table;
-    private String filterText;
+    private NavigableTree navTree;
+    private String filterText = "";
     private String schema;
 
     private VisualSearchResult vsr;
@@ -81,8 +89,14 @@ implements TableCellEditor, TableCellRenderer {
    // private int row;
     private int similarCount;
 
-    public ListViewTableCellEditor(ActionColumnTableCellEditor actionEditor) {
+    @Inject
+    public ListViewTableCellEditor(
+        ActionColumnTableCellEditor actionEditor) {
+        //NavigableTree navTree) {
+
         this.actionEditor = actionEditor;
+        // TODO: RMV Uncomment after you get a NavigableTree.
+        //this.navTree = navTree;
 
         // Cause the @Resource fields to be injected
         // using properties in AppFrame.properties.
@@ -91,46 +105,85 @@ implements TableCellEditor, TableCellRenderer {
         // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
 
-        filterText = searchText.toLowerCase();
         EventAnnotationProcessor.subscribe(this);
     }
 
     /**
-     * Adds an HTML bold tag around every occurrence of filterText.
+     * Adds an HTML bold tag around every occurrence of highlightText.
      * Note that comparisons are case insensitive.
      * @param text the text to be modified
      * @return the text containing bold tags
      */
-    private String boldMatches(String text) {
-        if (filterText == null || filterText.length() == 0) return text;
+    private String highlightMatches(String sourceText) {
+        // If there is no search or filter text then return sourceText as is.
+        boolean haveSearchText = searchText != null && searchText.length() > 0;
+        boolean haveFilterText = filterText != null && filterText.length() > 0;
+        if (!haveSearchText && !haveFilterText) return sourceText;
 
-        String originalText = text;
-        String lowerText = text.toLowerCase();
+        String lowerText = sourceText.toLowerCase();
+        if (haveSearchText) searchText = searchText.toLowerCase();
+        if (haveFilterText) filterText = filterText.toLowerCase();
 
-        int index = lowerText.indexOf(filterText);
-        if (index == -1) return text;
+        int searchIndex = haveSearchText ? lowerText.indexOf(searchText) : -1;
+        int filterIndex = haveFilterText ? lowerText.indexOf(filterText) : -1;
 
-        int filterLength = filterText.length();
+        boolean foundSearchText = searchIndex != -1;
+        boolean foundFilterText = filterIndex != -1;
+
+        // If sourceText doesn't contains searchText or filterText
+        // then return sourceText as is.
+        if (!foundSearchText && !foundFilterText) return sourceText;
+
+        // We know that either the search text or the filter text was found
+        // at this point.
+        // Get the index of the first one found.
+        int index =
+            foundSearchText && !foundFilterText ? searchIndex :
+            foundFilterText && !foundSearchText ? filterIndex :
+            Math.min(searchIndex, filterIndex);
+
         String result = "<html>";
 
         while (index != -1) {
-            String match = originalText.substring(index, index + filterLength);
+            // Which one was found first?
+            boolean useSearchText = index == searchIndex;
 
-            result += originalText.substring(0, index);
-            result += "<span style='color:red; font-weight:bold'>";
+            int matchLength =
+                useSearchText ? searchText.length() : filterText.length();
+            String match = sourceText.substring(index, index + matchLength);
+            String color =
+                useSearchText ? SEARCH_TEXT_COLOR : FILTER_TEXT_COLOR;
+
+            result += sourceText.substring(0, index);
+            result += "<span style='color:" + color + "; font-weight:bold'>";
             result += match;
             result += "</span>";
 
-            originalText = originalText.substring(index + filterLength);
-            lowerText = lowerText.substring(index + filterLength);
-            index = lowerText.indexOf(filterText);
+            // Find the next occurrences.
+
+            sourceText = sourceText.substring(index + matchLength);
+            lowerText = lowerText.substring(index + matchLength);
+
+            searchIndex = haveSearchText ? lowerText.indexOf(searchText) : -1;
+            filterIndex = haveFilterText ? lowerText.indexOf(filterText) : -1;
+
+            foundSearchText = searchIndex != -1;
+            foundFilterText = filterIndex != -1;
+
+            index =
+                !foundSearchText && !foundFilterText ? -1 :
+                foundSearchText && !foundFilterText ? searchIndex :
+                foundFilterText && !foundSearchText ? filterIndex :
+                Math.min(searchIndex, filterIndex);
         }
 
-        result += originalText;
+        result += sourceText; // tack on the remaining sourceText
         return result;
     }
 
     private PropertyMatch getPropertyMatch(VisualSearchResult vsr) {
+        if (filterText == null) return null;
+
         // If any data displayed in the headingLabel or subheadingLabel
         // matches the search or filter criteria,
         // then the otherLabel isn't needed.
@@ -150,7 +203,7 @@ implements TableCellEditor, TableCellRenderer {
             }
         }
 
-        // No match found.  This should never happen.
+        // No match found.
         return null;
     }
 
@@ -161,11 +214,7 @@ implements TableCellEditor, TableCellRenderer {
     public Component getTableCellEditorComponent(
         JTable table, Object value, boolean isSelected, int row, int column) {
 
-        //System.out.println(
-        //    "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
-
         this.table = table;
-   //     this.row = row;
 
         vsr = (VisualSearchResult) value;
         MediaType mediaType =
@@ -266,6 +315,19 @@ implements TableCellEditor, TableCellRenderer {
             @Override
             public void mousePressed(MouseEvent e) {
                 startDownload();
+            }
+        });
+
+        downloadingLink.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
+                    System.out.println("should navigate to MyLibraryPanel");
+                    // TODO: RMV Uncommented the following after you figure out how to get a NavigableTree.
+                    //navTree.getNavigableItemByName(
+                    //    Navigator.NavCategory.LIBRARY,
+                    //    MyLibraryPanel.NAME).select();
+                }
             }
         });
 
@@ -373,7 +435,7 @@ implements TableCellEditor, TableCellRenderer {
             heading = name + "." + vsr.getFileExtension();
         }
 
-        headingLabel.setText(boldMatches(heading));
+        headingLabel.setText(highlightMatches(heading));
     }
 
     private String getProperty(VisualSearchResult vsr, PropertyKey key) {
@@ -382,7 +444,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     public static void setSearchText(String text) {
-        // Save the text so it can be used for the filterText
+        // Save the text so it can be used for the highlightText
         // of subsequently created instances of this class.
         searchText = text;
     }
@@ -394,10 +456,13 @@ implements TableCellEditor, TableCellRenderer {
      */
     @EventSubscriber
     public void handleFilter(FilterEvent event) {
-        this.filterText = event.getText().toLowerCase();
-
+        // Change the text that is highlighted in search results
+        // to be the filter text.
+        // At least for now this functionality isn't desired.
+        filterText = event.getText().toLowerCase();
+    
         // Cause the table associated with the renders and editors to repaint
-        // so text matching filterText will be highlighted.
+        // so text matching highlightText will be displayed/highlighted.
         AbstractTableModel model = (AbstractTableModel) table.getModel();
         model.fireTableDataChanged();
     }
@@ -407,7 +472,7 @@ implements TableCellEditor, TableCellRenderer {
         if (pm == null) {
             otherLabel.setText("");
         } else {
-            String html = boldMatches(pm.value);
+            String html = highlightMatches(pm.value);
             String tag = "<html>";
             // Insert the key, a colon and a space after the html start tag.
             html = tag + pm.key + ": " + html.substring(tag.length());
@@ -416,9 +481,24 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populatePanel(VisualSearchResult vsr) {
-        boolean downloading = vsr.isDownloading();
-        downloadButton.setEnabled(!downloading);
-        downloadingLink.setVisible(downloading);
+        if (vsr == null) return;
+
+        switch (vsr.getDownloadState()) {
+            case NOT_STARTED:
+                downloadButton.setEnabled(true);
+                downloadingLink.setVisible(false);
+                break;
+            case DOWNLOADING:
+                downloadButton.setEnabled(false);
+                downloadingLink.setText("Downloading...");
+                downloadingLink.setVisible(true);
+                break;
+            case DOWNLOADED:
+                downloadButton.setEnabled(false);
+                downloadingLink.setText("Download Complete");
+                downloadingLink.setVisible(true);
+                break;
+        }
 
         populateHeading(vsr);
         populateSubheading(vsr);
@@ -452,7 +532,7 @@ implements TableCellEditor, TableCellRenderer {
                 + " - " + vsr.getProperty(PropertyKey.FILE_SIZE) + "MB";
         }
 
-        subheadingLabel.setText(boldMatches(subheading));
+        subheadingLabel.setText(highlightMatches(subheading));
     }
 
     private void setBackground(boolean isSelected) {
@@ -476,9 +556,9 @@ implements TableCellEditor, TableCellRenderer {
         }
         BaseResultPanel brp = (BaseResultPanel) parent;
 
-        brp.download(vsr);
         downloadButton.setEnabled(false);
         downloadingLink.setVisible(true);
+        brp.download(vsr);
     }
 
     static class PropertyMatch {
