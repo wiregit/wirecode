@@ -65,10 +65,8 @@ public abstract class BaseResultPanel extends JXPanel {
         configureList(eventList);
         configureTable(eventList, tableFormat);
  
-        // TODO: RMV I think these JScrollPanes are fighting with the ones
-        // TODO: RMV that Sam added outside that include Sponsored Results.
-        add(new JScrollPane(resultsList), ModeListener.Mode.LIST.name());
-        add(new JScrollPane(resultsTable), ModeListener.Mode.TABLE.name());
+        add(resultsList, ModeListener.Mode.LIST.name());
+        add(resultsTable, ModeListener.Mode.TABLE.name());
         setMode(ModeListener.Mode.LIST);
     }
     
