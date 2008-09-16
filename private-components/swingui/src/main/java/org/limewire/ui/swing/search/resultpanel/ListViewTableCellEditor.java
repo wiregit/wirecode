@@ -193,8 +193,8 @@ implements TableCellEditor, TableCellRenderer {
         if (subheadingLabel.getText().contains(filterText)) return null;
 
         // Look for metadata that matches the search criteria.
-        Map<Object, Object> props = vsr.getProperties();
-        for (Object key : props.keySet()) {
+        Map<PropertyKey, Object> props = vsr.getProperties();
+        for (PropertyKey key : props.keySet()) {
             String value = vsr.getPropertyString(key);
 
             if (value.toLowerCase().contains(filterText)) {

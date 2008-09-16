@@ -1,19 +1,5 @@
 package org.limewire.ui.swing.search;
 
-import java.util.Date;
-
-import javax.swing.event.DocumentEvent;
-import static org.limewire.core.api.search.SearchResult.PropertyKey;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.matchers.MatcherEditor.Event;
-import ca.odell.glazedlists.matchers.MatcherEditor.Listener;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-
-import com.google.inject.Inject;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,9 +8,10 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
-
 import java.util.Map;
+
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
@@ -32,17 +19,25 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
-import javax.swing.event.DocumentListener;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.friends.ChatLoginState;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+
+import com.google.inject.Inject;
 
 /**
  * This class is a panel that contains components for filtering and sorting
@@ -60,8 +55,8 @@ public class SortAndFilterPanel extends JXPanel {
     
     private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
     
-    private final List<SearchFilterListener> filterListeners =
-        new ArrayList<SearchFilterListener>();
+//    private final List<SearchFilterListener> filterListeners =
+//        new CopyOnWriteArrayList<SearchFilterListener>();
 
     @Resource private Icon listViewPressedIcon;
     @Resource private Icon listViewUnpressedIcon;
@@ -96,49 +91,43 @@ public class SortAndFilterPanel extends JXPanel {
         configureViewButtons();
         layoutComponents();
 
-        filterBox.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                new FilterEvent(filterBox.getText()).publish();
-            }
+//        filterBox.getDocument().addDocumentListener(new DocumentListener() {
+//            @Override
+//            public void insertUpdate(DocumentEvent e) {
+//                new FilterEvent(filterBox.getText()).publish();
+//            }
+//
+//            @Override
+//            public void removeUpdate(DocumentEvent e) {
+//                new FilterEvent(filterBox.getText()).publish();
+//            }
+//
+//            @Override
+//            public void changedUpdate(DocumentEvent e) {
+//                new FilterEvent(filterBox.getText()).publish();
+//            }
+//        });
 
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                new FilterEvent(filterBox.getText()).publish();
-            }
+//        editor.addMatcherEditorListener(new Listener<VisualSearchResult>() {
+//            public void changedMatcher(Event<VisualSearchResult> arg0) {
+//                for (SearchFilterListener listener : filterListeners) {
+//                    listener.searchFiltered();
+//                }
+//            }
+//        });
 
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                new FilterEvent(filterBox.getText()).publish();
-            }
-        });
-
-        editor.addMatcherEditorListener(new Listener<VisualSearchResult>() {
-            public void changedMatcher(Event<VisualSearchResult> arg0) {
-                synchronized (filterListeners) {
-                    for (SearchFilterListener listener : filterListeners) {
-                        listener.searchFiltered();
-                    }
-                }
-            }
-        });
-
-        EventAnnotationProcessor.subscribe(this);
+//        EventAnnotationProcessor.subscribe(this);
     }
 
-    public void addFilterListener(SearchFilterListener listener) {
-        synchronized (filterListeners) {
-            filterListeners.add(listener);
-        }
-    }
-
-    public void removeFilterListener(SearchFilterListener listener) {
-        synchronized (filterListeners) {
-            filterListeners.remove(listener);
-        }
-    }
+//    public void addFilterListener(SearchFilterListener listener) {
+//        filterListeners.add(listener);
+//    }
+//
+//    public void removeFilterListener(SearchFilterListener listener) {
+//        filterListeners.remove(listener);
+//    }
     
-    public synchronized void addModeListener(ModeListener listener) {
+    public void addModeListener(ModeListener listener) {
         modeListeners.add(listener);
     }
     
@@ -383,13 +372,13 @@ public class SortAndFilterPanel extends JXPanel {
         add(tableViewToggleButton, gbc);
     }
 
-    private synchronized void notifyModeListeners(ModeListener.Mode mode) {
+    private void notifyModeListeners(ModeListener.Mode mode) {
         for (ModeListener listener : modeListeners) {
             listener.setMode(mode);
         }
     }
 
-    public synchronized void removeModeListener(ModeListener listener) {
+    public void removeModeListener(ModeListener listener) {
         modeListeners.remove(listener);
     }
 
@@ -477,40 +466,22 @@ public class SortAndFilterPanel extends JXPanel {
     
     private static class VisualSearchResultTextFilterator
     implements TextFilterator<VisualSearchResult> {
-        private List<String> list;
-        private VisualSearchResult vsr;
-
-        private void addProperty(PropertyKey key) {
-            add(list, vsr.getPropertyString(key));
-        }
-
         @Override
         public void getFilterStrings(
                 List<String> list, VisualSearchResult vsr) {
-            this.list = list;
-            this.vsr = vsr;
+            list.add(vsr.getDescription());
+            list.add(vsr.getFileExtension());
+            list.add(String.valueOf(vsr.getSize()));
             
-            add(list, vsr.getDescription());
-
-            // These properties aren't always displayed,
-            // so don't filter on them.
-            //add(list, vsr.getFileExtension());
             //add(list, vsr.getMediaType());
 
-            long size = vsr.getSize();
-            if (size > 0) add(list, String.valueOf(size));
-
-            Map<Object, Object> props = vsr.getProperties();
-            for (Object key : props.keySet()) {
-                addProperty((PropertyKey) key);
+            Map<SearchResult.PropertyKey, Object> props = vsr.getProperties();
+            for (SearchResult.PropertyKey key : props.keySet()) {
+                String value = vsr.getPropertyString(key);
+                if(value != null) {
+                    list.add(value);
+                }
             }
-        }
-
-        /**
-         * This was factored into its own method to help with debugging.
-         */
-        private void add(List<String> list, String text) {
-            list.add(text);
         }
     }
 }

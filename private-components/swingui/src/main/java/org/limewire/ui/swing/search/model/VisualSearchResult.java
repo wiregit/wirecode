@@ -7,6 +7,7 @@ import java.util.Map;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 
 public interface VisualSearchResult {
 
@@ -22,11 +23,11 @@ public interface VisualSearchResult {
 
     String getMediaType();
     
-    Map<Object, Object> getProperties();
+    Map<PropertyKey, Object> getProperties();
 
-    Object getProperty(Object key);
+    Object getProperty(PropertyKey key);
 
-    String getPropertyString(Object key);
+    String getPropertyString(PropertyKey key);
 
     Collection<RemoteHost> getSources();
     

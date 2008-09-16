@@ -21,7 +21,7 @@ import org.limewire.util.MediaType;
 class SearchResultAdapter implements VisualSearchResult {
     
     private final List<SearchResult> coreResults;
-    private Map<Object, Object> properties;
+    private Map<SearchResult.PropertyKey, Object> properties;
     private final Set<RemoteHost> remoteHosts;
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private boolean junk;
@@ -93,9 +93,9 @@ class SearchResultAdapter implements VisualSearchResult {
     }
 
     @Override
-    public Map<Object, Object> getProperties() {
+    public Map<SearchResult.PropertyKey, Object> getProperties() {
         if (properties == null) {
-            properties = new HashMap<Object, Object>();
+            properties = new HashMap<SearchResult.PropertyKey, Object>();
             for (SearchResult result : coreResults) {
                 properties.putAll(result.getProperties());
             }
@@ -104,23 +104,27 @@ class SearchResultAdapter implements VisualSearchResult {
         return properties;
     }
 
-    public Object getProperty(Object key) {
+    public Object getProperty(SearchResult.PropertyKey key) {
         return getProperties().get(key);
     }
 
-    public String getPropertyString(Object key) {
+    public String getPropertyString(SearchResult.PropertyKey key) {
         Object value = getProperty(key);
-        String stringValue = value.toString();
-        
-        if (value instanceof Calendar) {
-            Calendar calendar = (Calendar) value;
-            Date date = calendar.getTime();
-            DateFormat df = SimpleDateFormat.getDateTimeInstance(
-                DateFormat.LONG, DateFormat.LONG);
-            stringValue = df.format(date);
+        if(value != null) {
+            String stringValue = value.toString();
+            
+            if (value instanceof Calendar) {
+                Calendar calendar = (Calendar) value;
+                Date date = calendar.getTime();
+                DateFormat df = SimpleDateFormat.getDateTimeInstance(
+                    DateFormat.LONG, DateFormat.LONG);
+                stringValue = df.format(date);
+            }
+    
+            return stringValue;
+        } else {
+            return null;
         }
-
-        return stringValue;
     }
     
     @Override
