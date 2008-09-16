@@ -33,6 +33,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -68,6 +69,7 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.net.address.PushProxyHolePunchAddress;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -176,19 +178,50 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     
     @Override
     public void connect(Address addr, int timeout, ConnectObserver observer) {
-        PushProxyHolePunchAddress address = (PushProxyHolePunchAddress)addr;
-        Connectable directAddress = address.getDirectConnectionAddress();
-        GUID clientGuid = address.getMediatorAddress().getClientID(); 
+        if (addr instanceof PushProxyHolePunchAddress) {
+            PushProxyHolePunchAddress holePunchAddress = (PushProxyHolePunchAddress)addr;
+            connect(holePunchAddress.getDirectConnectionAddress(), holePunchAddress.getMediatorAddress(), holePunchAddress.getVersion(), timeout, observer);
+        } else if (addr instanceof PushProxyMediatorAddress) {
+            connect(null, (PushProxyMediatorAddress)addr, 0, timeout, observer);
+        } else {
+            throw new IllegalArgumentException("should not have been called with address type: " + addr.getClass());
+        }
+    } 
+    
+    /**
+     * Connects to a firewalled <code>target</code>.
+     * 
+     * @param target can be null if target host's ip is not known and the only way is
+     * for them to connect back to this client
+     * @param mediator mediator address that contains push proxy information
+     * @param rudpVersion the version of firewalled transfers that is supported
+     * @param timeout connect timeout in milliseconds
+     * @param observer connect observer to be notified of success or failure
+     */
+    private void connect(Connectable target, PushProxyMediatorAddress mediator, int rudpVersion, int timeout, ConnectObserver observer) {
+        GUID clientGuid = mediator.getClientID();
+        target = target != null ? target : createInvalidHost();
         RemoteFileDesc fakeRFD = 
-            remoteFileDescFactory.createRemoteFileDesc(directAddress.getAddress(), directAddress.getPort(), SPECIAL_INDEX, "fake",
-                0, clientGuid.bytes(), 0, false, 0, false, null, null, false, true, "", address.getMediatorAddress().getPushProxies(),
-                -1, address.getVersion(), directAddress.isTLSCapable());
+            remoteFileDescFactory.createRemoteFileDesc(target.getAddress(), target.getPort(), SPECIAL_INDEX, "fake",
+                0, clientGuid.bytes(), 0, false, 0, false, null, null, false, true, "", mediator.getPushProxies(),
+                -1, rudpVersion, target.isTLSCapable());
         PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(clientGuid, observer);
         pushHandlers.add(handlerAdapter);
         sendPush(fakeRFD);
         scheduleExpirerFor(handlerAdapter, (int)(timeout * 1.5));
-    } 
+    }
     
+    
+    /**
+     * Creates an invalid host for pushes.
+     */
+    static Connectable createInvalidHost() {
+        try {
+            return new ConnectableImpl("0.0.0.0", 1, false);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void scheduleExpirerFor(final PushedSocketHandlerAdapter handlerAdapter, int timeout) {
         backgroundExecutor.schedule(new Runnable() {
@@ -742,7 +775,6 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         }
         
         private GIVLine parseLine(String command) throws IOException{
-            System.out.println("parsing line: " + command);
             //2. Parse and return the fields.
             try {
                 //a) Extract file index.  IndexOutOfBoundsException
@@ -814,7 +846,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
 
     @Override
     public boolean canConnect(Address address) {
-        return address instanceof PushProxyHolePunchAddress;
+        return address instanceof PushProxyHolePunchAddress || address instanceof PushProxyMediatorAddress;
     }
 
     /**

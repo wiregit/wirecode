@@ -373,6 +373,8 @@ public interface ConnectionManager extends ConnectionAcceptor,
      * Accessor for the <tt>Set</tt> of push proxies for this node.  If
      * there are no push proxies available, this will return an empty <tt>Set</tt>.
      *
+     * Callers can take ownership of the returned set, the set might be immutable.
+     *
      * @return a <tt>Set</tt> of push proxies with a maximum size of 4
      *
      *  TODO: should the set of pushproxy UPs be cached and updated as
