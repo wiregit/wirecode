@@ -77,7 +77,7 @@ public class WhoIsRequestFactoryImpl implements WhoIsRequestFactory {
         this.defaultServers.put("ck", "whois.nic.ck");
         this.defaultServers.put("cl", "nic.cl");
         this.defaultServers.put("cn", "whois.apnic.net");
-        this.defaultServers.put("com", "rs.internic.net");
+        this.defaultServers.put("com", "whois.verisign-grs.com");
         this.defaultServers.put("corp", "rs.mcs.net");
         this.defaultServers.put("cx", "whois.nic.cx");
         this.defaultServers.put("cy", "whois.ripe.net");
@@ -155,7 +155,7 @@ public class WhoIsRequestFactoryImpl implements WhoIsRequestFactory {
         this.defaultServers.put("mt", "whois.ripe.net");
         this.defaultServers.put("music", "whois.skyscape.net");
         this.defaultServers.put("mx", "nic.mx");
-        this.defaultServers.put("net", "rs.internic.net");
+        this.defaultServers.put("net", "whois.verisign-grs.com");
         this.defaultServers.put("nic", "whois.vrx.net");
         this.defaultServers.put("nl", "whois.nic.nl");
         this.defaultServers.put("no", "whois.norid.no");
