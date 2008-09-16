@@ -37,7 +37,9 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.FilterEvent;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -91,12 +93,11 @@ implements TableCellEditor, TableCellRenderer {
 
     @Inject
     public ListViewTableCellEditor(
-        ActionColumnTableCellEditor actionEditor) {
-        //NavigableTree navTree) {
+        ActionColumnTableCellEditor actionEditor,
+        NavigableTree navTree) {
 
         this.actionEditor = actionEditor;
-        // TODO: RMV Uncomment after you get a NavigableTree.
-        //this.navTree = navTree;
+        this.navTree = navTree;
 
         // Cause the @Resource fields to be injected
         // using properties in AppFrame.properties.
@@ -213,6 +214,8 @@ implements TableCellEditor, TableCellRenderer {
 
     public Component getTableCellEditorComponent(
         JTable table, Object value, boolean isSelected, int row, int column) {
+        System.out.println(
+            "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
 
         this.table = table;
 
@@ -314,7 +317,8 @@ implements TableCellEditor, TableCellRenderer {
         downloadButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                startDownload();
+                int row = table.rowAtPoint(e.getPoint());
+                startDownload(row);
             }
         });
 
@@ -322,11 +326,9 @@ implements TableCellEditor, TableCellRenderer {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
-                    System.out.println("should navigate to MyLibraryPanel");
-                    // TODO: RMV Uncommented the following after you figure out how to get a NavigableTree.
-                    //navTree.getNavigableItemByName(
-                    //    Navigator.NavCategory.LIBRARY,
-                    //    MyLibraryPanel.NAME).select();
+                    navTree.getNavigableItemByName(
+                        Navigator.NavCategory.LIBRARY,
+                        MyLibraryPanel.NAME).select();
                 }
             }
         });
@@ -486,6 +488,7 @@ implements TableCellEditor, TableCellRenderer {
         switch (vsr.getDownloadState()) {
             case NOT_STARTED:
                 downloadButton.setEnabled(true);
+                downloadingLink.setText("");
                 downloadingLink.setVisible(false);
                 break;
             case DOWNLOADING:
@@ -548,7 +551,7 @@ implements TableCellEditor, TableCellRenderer {
         }
     }
 
-    private void startDownload() {
+    private void startDownload(int row) {
         // Find the BaseResultPanel this is inside.
         Container parent = thePanel.getParent();
         while (!(parent instanceof BaseResultPanel)) {
@@ -558,7 +561,7 @@ implements TableCellEditor, TableCellRenderer {
 
         downloadButton.setEnabled(false);
         downloadingLink.setVisible(true);
-        brp.download(vsr);
+        brp.download(vsr, row);
     }
 
     static class PropertyMatch {

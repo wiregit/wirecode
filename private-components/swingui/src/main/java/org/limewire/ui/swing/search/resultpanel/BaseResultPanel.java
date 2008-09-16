@@ -30,8 +30,9 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.ConfigurableTable;
 import org.limewire.ui.swing.StringTableCellRenderer;
+import org.limewire.ui.swing.nav.NavigableTree;
 
-public class BaseResultPanel extends JXPanel {
+public abstract class BaseResultPanel extends JXPanel {
     public static final int TABLE_ROW_HEIGHT = 26;
     
     private ActionColumnTableCellEditor actionEditor =
@@ -42,6 +43,7 @@ public class BaseResultPanel extends JXPanel {
     private final EventList<VisualSearchResult> baseEventList;
     private ConfigurableTable<VisualSearchResult> resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
+    private NavigableTree navTree;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -51,10 +53,12 @@ public class BaseResultPanel extends JXPanel {
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
             SearchResultDownloader searchResultDownloader,
-            Search search) {
+            Search search,
+            NavigableTree navTree) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
+        this.navTree = navTree;
         
         setLayout(layout);
                 
@@ -87,12 +91,12 @@ public class BaseResultPanel extends JXPanel {
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor renderer =
-            new ListViewTableCellEditor(actionRenderer);
+            new ListViewTableCellEditor(actionRenderer, navTree);
         resultsList.setDefaultRenderer(VisualSearchResult.class, renderer);
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor editor =
-            new ListViewTableCellEditor(actionEditor);
+            new ListViewTableCellEditor(actionEditor, navTree);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         int columnIndex = 0;
@@ -120,7 +124,7 @@ public class BaseResultPanel extends JXPanel {
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
                     SearchResultMenu menu =
-                        new SearchResultMenu(BaseResultPanel.this, vsr);
+                        new SearchResultMenu(BaseResultPanel.this, vsr, row);
                     menu.show(component, e.getX(), e.getY());
                 }
             }
@@ -129,8 +133,6 @@ public class BaseResultPanel extends JXPanel {
 
     private void configureTable(EventList<VisualSearchResult> eventList,
         final ResultsTableFormat<VisualSearchResult> tableFormat) {
-        //System.out.println("BaseResultPanel.configureTable: tableFormat is a "
-        //    + tableFormat.getClass().getName());
         resultsTable = new ConfigurableTable<VisualSearchResult>(true);
 
         resultsTable.setEventList(eventList);
@@ -213,8 +215,7 @@ public class BaseResultPanel extends JXPanel {
         */
     }
 
-    public void download(final VisualSearchResult vsr) {
-        System.out.println("BaseResultPanel.download entered");
+    public void download(final VisualSearchResult vsr, final int row) {
         try {
             // TODO: Need to go through some of the rigor that
             // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
@@ -241,9 +242,10 @@ public class BaseResultPanel extends JXPanel {
                         AbstractTableModel tm =
                             (AbstractTableModel) resultsList.getModel();
                         
-                        // We don't know the row number,
-                        // so can't make this more specific.
-                        tm.fireTableDataChanged();
+                        // TODO: Why doesn't this cause the row to be repainted?
+                        System.out.println(
+                            "BaseResultPanel: firing row " + row + " update");
+                        tm.fireTableRowsUpdated(row, row);
                     }
                 }
             });
@@ -281,7 +283,7 @@ public class BaseResultPanel extends JXPanel {
                 TableModel tm = resultsList.getModel();
                 VisualSearchResult vsr =
                     (VisualSearchResult) tm.getValueAt(row, 0);
-                download(vsr);
+                download(vsr, row);
             }
         }
     }

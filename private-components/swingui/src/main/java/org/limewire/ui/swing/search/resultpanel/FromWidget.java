@@ -34,7 +34,6 @@ public class FromWidget extends JPanel {
     public FromWidget() {
         menu = new JPopupMenu();
         menu.setBorder(border);
-        //setInsets(menu);
 
         configureHeader();
         layoutComponents();
@@ -105,13 +104,6 @@ public class FromWidget extends JPanel {
         gbc.insets.top = 0;
         add(headerPanel, gbc);
     }
-
-//    private void setInsets(Component component) {
-//        JComponent jc = (JComponent) component;
-//        Insets insets = jc.getInsets();
-//        insets.left = insets.right = 0;
-//        insets.top = insets.bottom = 2;
-//    }
 
     public void setPeople(List<String> people) {
         setPeople(people.toArray(new String[]{}));

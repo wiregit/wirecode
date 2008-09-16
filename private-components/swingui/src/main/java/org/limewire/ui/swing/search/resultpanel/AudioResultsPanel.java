@@ -7,14 +7,17 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import org.limewire.ui.swing.nav.NavigableTree;
 
 public class AudioResultsPanel extends BaseResultPanel {
     
-    @AssistedInject public AudioResultsPanel(
+    @AssistedInject
+    public AudioResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
         SearchResultDownloader searchResultDownloader,
-        @Assisted Search search) {
+        @Assisted Search search,
+        NavigableTree navTree) {
         super("Audio from Everyone", eventList, new MusicTableFormat(),
-            searchResultDownloader, search);
+            searchResultDownloader, search, navTree);
     }
 }
