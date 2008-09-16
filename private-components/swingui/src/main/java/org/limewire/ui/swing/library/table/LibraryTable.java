@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 
 import org.limewire.core.api.library.FileItem;
@@ -67,10 +68,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         this.librarySharePanel = librarySharePanel;
         List<Action> actionList = new ArrayList<Action>();
         actionList.add(new ShareAction("+"));
-        shareEditor = new MultiButtonTableCellRendererEditor(actionList, 20);
+        shareEditor = new MultiButtonTableCellRendererEditor(actionList);
         getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellEditor(shareEditor);
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellRenderer(new MultiButtonTableCellRendererEditor(actionList, 20));
-        
+        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellRenderer(new MultiButtonTableCellRendererEditor(actionList));
+        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setPreferredWidth(shareEditor.getPreferredSize().width);
+        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setWidth(shareEditor.getPreferredSize().width);
     }
     
     private class ShareAction extends AbstractAction {
@@ -82,7 +84,16 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         @Override
         public void actionPerformed(ActionEvent e) {
             librarySharePanel.setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow())));
-            librarySharePanel.show(shareEditor, 0, 0);
+            //adjust y for header height
+            int headerAdjust = 0;
+            if(getTableHeader() != null && getTableHeader().isVisible()){
+                headerAdjust = getTableHeader().getHeight();
+                if(getParent() instanceof JViewport){
+                    headerAdjust -= ((JViewport)getParent()).getViewPosition().y;
+                }
+            }
+            librarySharePanel.show(shareEditor, 0, headerAdjust);       
+            shareEditor.cancelCellEditing();
         }
         
     }

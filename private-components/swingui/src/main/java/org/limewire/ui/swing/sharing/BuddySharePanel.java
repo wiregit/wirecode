@@ -157,11 +157,11 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
 //        table.setTransferHandler(new SharingTransferHandler(fileList));
         table.setDropMode(DropMode.ON);
         
-        editor = new MultiButtonTableCellRendererEditor(20);
+        editor = new MultiButtonTableCellRendererEditor();
         editor.addActions(createActions());
-        renderer = new MultiButtonTableCellRendererEditor(20);
+        renderer = new MultiButtonTableCellRendererEditor();
         renderer.addActions(createActions());
-        
+        table.setRowHeight(20);
         //TODO: this needs to be fixed, if rows are columns or rows
         //  are removed this stops working
         TableColumn tc = table.getColumn(6);

@@ -1,27 +1,38 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.util.HashMap;
+import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.painter.ShapePainter;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.core.api.library.BuddyFileList;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
@@ -29,7 +40,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.ui.swing.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -52,18 +62,21 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class LibrarySharePanel extends JPopupMenu implements RegisteringEventListener<RosterEvent>{
+public class LibrarySharePanel extends JXPanel implements RegisteringEventListener<RosterEvent>{
 
 
 
     private static final int BUDDY_ROW_COUNT = 4;
     private static final int SHARED_ROW_COUNT = 20;
     private static final int BORDER_INSETS = 10;
+    private static final int HGAP = 5;
+    
+    private  final SharingTarget GNUTELLA_SHARE = new SharingTarget(I18n.tr("Gnutella Network"));
 
     private JTextField inputField;
 
-    private EventList<String> noShareBuddyList;
-    private EventList<String> shareBuddyList;
+    private EventList<SharingTarget> noShareBuddyList;
+    private EventList<SharingTarget> shareBuddyList;
 
     private JScrollPane shareScroll;
     private JScrollPane buddyScroll;
@@ -74,10 +87,19 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
     private JLabel buddyLabel;
     private JLabel shareLabel;
     
+    private JXPanel mainPanel;
+    
     private LibraryManager libraryManager;
     
-    private Map<String, LocalFileList> buddyListMap;
+    private LocalFileList gnutellaList;
+    
+    private ShapePainter shapePainter;
+    
+    private Map<SharingTarget, LocalFileList> buddyListMap;
     private LocalFileItem fileItem;
+    
+    private int ledgeWidth;
+    private int ledgeHeight;
     
     @Resource
     private Icon removeIcon;
@@ -95,29 +117,42 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
     
     @Inject
     public LibrarySharePanel(LibraryManager libraryManager) {
-        EventAnnotationProcessor.subscribe(this);   
         GuiUtils.assignResources(this);
-
-        setLayout(new GridBagLayout());
         
-        setBorder(new RoundedBorder(BORDER_INSETS));
+        
         this.libraryManager = libraryManager;
-        buddyListMap = new HashMap<String,LocalFileList>();        
+        buddyListMap = new ConcurrentHashMap<SharingTarget, LocalFileList>();   
+        gnutellaList = libraryManager.getGnutellaList();
+        
+        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        setOpaque(false);
+        
+        shapePainter = new ShapePainter();
+        shapePainter.setFillPaint(getBackground());        
+        shapePainter.setBorderPaint(Color.BLACK);
+        shapePainter.setBorderWidth(2);
+        shapePainter.setHorizontalAlignment(HorizontalAlignment.LEFT);
+        shapePainter.setVerticalAlignment(VerticalAlignment.TOP);
+        setBackgroundPainter(shapePainter);
+        
+        mainPanel = new JXPanel(new GridBagLayout());
+        mainPanel.setOpaque(false);
+      
         
         inputField = new JTextField(12);
         
         shareLabel = new JLabel(I18n.tr("Currently sharing with"));
         
-        shareBuddyList = GlazedLists.threadSafeList(new SortedList<String>(new BasicEventList<String>()));
+        shareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
        
-        shareTable = new MouseableTable(new EventTableModel<String>(shareBuddyList, new LibraryShareTableFormat(1)));
-        shareTable.setOpaque(false);
+        shareTable = new MouseableTable(new EventTableModel<SharingTarget>(shareBuddyList, new LibraryShareTableFormat(1)));
         shareTable.setTableHeader(null);
         final ShareRendererEditor removeEditor = new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed);
         removeEditor.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                unshareBuddy(removeEditor.getBuddy());
+               removeEditor.cancelCellEditing();
             }            
         });
         //do nothing ColorHighlighter eliminates default striping
@@ -131,17 +166,18 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
         shareTable.setBorder(null);
         shareTable.setOpaque(false);
   
-        noShareBuddyList = GlazedLists.threadSafeList(new SortedList<String>(new FilterList<String>(new BasicEventList<String>(),
-                new TextComponentMatcherEditor<String>(inputField,
-                        new TextFilterator<String>() {
-                            @Override
-                            public void getFilterStrings(List<String> baseList, String element) {
-                                baseList.add(element);
-                            }
-                        }
-                ))));
+        noShareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
         
-        buddyTable = new MouseableTable(new EventTableModel<String>(noShareBuddyList, new LibraryShareTableFormat(0)));
+        TextFilterator<SharingTarget> textFilter = new TextFilterator<SharingTarget>() {
+            @Override
+            public void getFilterStrings(List<String> baseList, SharingTarget element) {
+                baseList.add(element.getName());
+            }
+        };
+        EventList<SharingTarget> noShareSortedList = new FilterList<SharingTarget>(noShareBuddyList, 
+                new TextComponentMatcherEditor<SharingTarget>(inputField, textFilter));
+        
+        buddyTable = new MouseableTable(new EventTableModel<SharingTarget>(noShareSortedList, new LibraryShareTableFormat(0)));
         //do nothing ColorHighlighter eliminates default striping
         buddyTable.setHighlighters(new ColorHighlighter());
         buddyTable.setTableHeader(null);
@@ -153,6 +189,7 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
             @Override
             public void actionPerformed(ActionEvent e) {
                shareBuddy(addEditor.getBuddy());
+               addEditor.cancelCellEditing();
             }            
         });
         
@@ -169,30 +206,39 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
         shareScroll.setBorder(null);
         shareScroll.setOpaque(false);
         
+
+        buddyLabel = new JLabel(I18n.tr("To share, type name below"));
+        
+        Dimension labelSize = buddyLabel.getPreferredSize().width > shareLabel.getPreferredSize().width ? 
+                buddyLabel.getPreferredSize() : shareLabel.getPreferredSize();
+        buddyLabel.setPreferredSize(labelSize);
+        shareLabel.setPreferredSize(labelSize);
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.BOTH;
-        buddyLabel = new JLabel(I18n.tr("To share, type name below"));
-        add(buddyLabel, gbc);
+        gbc.insets = new Insets(0, HGAP, 0, HGAP);
+        mainPanel.add(buddyLabel, gbc);
         
         gbc.gridy++;
         gbc.weighty = 0;
-        add(inputField, gbc);
+        mainPanel.add(inputField, gbc);
         gbc.gridy++;
         gbc.weighty = 1.0;
-        add(buddyScroll, gbc);
+        mainPanel.add(buddyScroll, gbc);
         gbc.gridy++;
         gbc.weighty = 0;
-        add(new JSeparator(), gbc);   
+        mainPanel.add(new JSeparator(), gbc);   
         gbc.gridy++;
         gbc.weighty = 0;
-        add(shareLabel, gbc);
+        mainPanel.add(shareLabel, gbc);
         gbc.gridy++;
         gbc.weighty = 1.0;
-        add(shareScroll, gbc);
+        mainPanel.add(shareScroll, gbc);
+                
+        add(mainPanel);
 
         adjustSize();
         addFocusListener(new FocusAdapter() {
@@ -202,35 +248,64 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
             }
         });        
 
+
+        EventAnnotationProcessor.subscribe(this);   
+        
     }
     
-    @Override
+    //@Override
     public void show(Component c, int x, int y){
-        super.show(c, x, y);
+       // super.show(c, x, y);
+        ledgeWidth = c.getWidth();
+        ledgeHeight = c.getHeight();
         adjustSize();
+        setBounds(x + c.getX() - mainPanel.getWidth() - HGAP * 2,y + c.getY(), getWidth(), getHeight());
+        getParent().validate();
+        setVisible(true);
     }
 
-    private void shareBuddy(String buddy){
+    //TODO: clean this up
+    private void adjustPainter(){
+        Area area = new Area(new RoundRectangle2D.Float(1, 1, mainPanel.getWidth() + HGAP * 2-1, getHeight()-2, BORDER_INSETS, BORDER_INSETS));
+        Area area2 = new Area(new RoundRectangle2D.Float(mainPanel.getWidth() + HGAP * 2, 1, ledgeWidth-1, ledgeHeight, BORDER_INSETS, BORDER_INSETS));
+        area.exclusiveOr(area2);
+        Area area3 = new Area(new Rectangle2D.Float(mainPanel.getWidth() + HGAP, 1, BORDER_INSETS * 2, ledgeHeight));
+        area.add(area3);
+        shapePainter.setShape(area);
+    }
+
+    private void shareBuddy(SharingTarget buddy) {
         shareBuddyList.add(buddy);
         noShareBuddyList.remove(buddy);
-        buddyListMap.get(buddy).addFile(fileItem.getFile());
+
+        if (buddy == GNUTELLA_SHARE) {
+            gnutellaList.addFile(fileItem.getFile());
+        } else {
+            buddyListMap.get(buddy).addFile(fileItem.getFile());
+        }
         adjustSize();
     }
     
     
-    private void unshareBuddy(String buddy){
-        shareBuddyList.remove(buddy); 
+    private void unshareBuddy(SharingTarget buddy) {
+        shareBuddyList.remove(buddy);
         noShareBuddyList.add(buddy);
-        buddyListMap.get(buddy).removeFile(fileItem.getFile());
+        
+        if (buddy == GNUTELLA_SHARE) {
+            gnutellaList.removeFile(fileItem.getFile());
+        } else {
+            buddyListMap.get(buddy).removeFile(fileItem.getFile());
+        }
         adjustSize();
     }
     
+    //TODO: clean this up
     private void adjustSize(){
-        int visibleRows = (buddyTable.getRowCount() < BUDDY_ROW_COUNT) ? buddyTable.getRowCount() : BUDDY_ROW_COUNT;
+        int visibleRows = (noShareBuddyList.size() < BUDDY_ROW_COUNT) ? noShareBuddyList.size() : BUDDY_ROW_COUNT;
         buddyTable.setVisibleRowCount(visibleRows);
-        buddyScroll.setVisible(visibleRows > 0);
-        buddyLabel.setVisible(visibleRows > 0);
-        inputField.setVisible(visibleRows > 0);
+        buddyScroll.setVisible(noShareBuddyList.size() > 0);
+        buddyLabel.setVisible(noShareBuddyList.size() > 0);
+        inputField.setVisible(noShareBuddyList.size() > 0);
         
         visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
@@ -238,22 +313,28 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
         shareLabel.setVisible(visibleRows > 0);
         
         int height = 0;
+        int prefWidth = 0;
         for(Component c : getComponents()){
             if (c.isVisible()) {
                 height += c.getPreferredSize().height;
             }
+            prefWidth = Math.max(prefWidth, c.getPreferredSize().width);
         }
-        setPopupSize(190, height + 2 * BORDER_INSETS);
-        revalidate();
+        
+        mainPanel.setSize(prefWidth, height);
+        setSize(mainPanel.getSize().width + ledgeWidth + 2 * HGAP, mainPanel.getSize().height + 2 * BORDER_INSETS);
+        revalidate();       
+        adjustPainter(); 
+        repaint();
     }
     
     
     @Override
     public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {              
-            addBuddy(event.getSource().getId());
+            addBuddy(new SharingTarget(event.getSource().getId()));
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            removeBuddy(event.getSource().getId());
+            removeBuddy(new SharingTarget(event.getSource().getId()));
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
@@ -281,44 +362,64 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
         loadSharedBuddies();
     }
     
-    private void removeBuddy(String name) {
-        buddyListMap.remove(name);
-        shareBuddyList.remove(name);
-        noShareBuddyList.remove(name);
-        loadBuddy(name);
+    //true if it is inside our funky shape
+    @Override
+    public boolean contains(int x, int y){
+        return shapePainter.getShape().contains(x, y);
     }
     
-    private void addBuddy(String name) {
-        if(!libraryManager.containsBuddy(name)) {
-            libraryManager.addBuddy(name);
+    public boolean contains(Component c) {
+        for (; c != null; c = c.getParent()) {
+            if (c == this) {
+                return true;
+            }
         }
-        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(name);
-        buddyListMap.put(name, fileList);
-        loadBuddy(name);
+        return false;
+    }
+    
+    private void removeBuddy(SharingTarget buddy) {
+        buddyListMap.remove(buddy);
+        shareBuddyList.remove(buddy);
+        noShareBuddyList.remove(buddy);
+    }
+    
+    private void addBuddy(SharingTarget buddy) {
+        if(!libraryManager.containsBuddy(buddy.getName())) {
+            libraryManager.addBuddy(buddy.getName());
+        }
+        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(buddy.getName());
+        buddyListMap.put(buddy, fileList);
+        loadBuddy(buddy);
     }
     
     private void loadSharedBuddies() {
         shareBuddyList.clear();
         noShareBuddyList.clear();
-        for (String name : buddyListMap.keySet()) {
-            loadBuddy(name);
+        
+        loadBuddy(GNUTELLA_SHARE);
+        
+        for (SharingTarget buddy : buddyListMap.keySet()) {
+            loadBuddy(buddy);
         }
     }
     
-    private void loadBuddy(String name){
-        if (isShared(fileItem, name)){
-            shareBuddyList.add(name);
+    private void loadBuddy(SharingTarget buddy){
+        if (isShared(fileItem, buddy)){
+            shareBuddyList.add(buddy);
         } else {
-            noShareBuddyList.add(name);
+            noShareBuddyList.add(buddy);
         }
     
     }
     
-    private boolean isShared(FileItem fileItem, String buddy){
+    private boolean isShared(FileItem fileItem, SharingTarget buddy){
+        if(buddy == GNUTELLA_SHARE){
+            return gnutellaList.getModel().contains(fileItem);
+        }
         return buddyListMap.get(buddy).getModel().contains(fileItem);
     }   
     
-    private static class LibraryShareTableFormat implements WritableTableFormat<String> {
+    private static class LibraryShareTableFormat implements WritableTableFormat<SharingTarget> {
         private int editColumn;
         
         public LibraryShareTableFormat(int editedColumn){
@@ -336,12 +437,15 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
         }
 
         @Override
-        public Object getColumnValue(String baseObject, int column) {
-            return baseObject;
+        public Object getColumnValue(SharingTarget baseObject, int column) {
+            if(column == editColumn){
+                return baseObject;
+            }
+            return baseObject.getName();
         }
 
         @Override
-        public boolean isEditable(String baseObject, int column) {
+        public boolean isEditable(SharingTarget baseObject, int column) {
             if (column == editColumn) {
                 return true;
             }
@@ -350,10 +454,28 @@ public class LibrarySharePanel extends JPopupMenu implements RegisteringEventLis
         }
 
         @Override
-        public String setColumnValue(String baseObject, Object editedValue, int column) {
+        public SharingTarget setColumnValue(SharingTarget baseObject, Object editedValue, int column) {
             return baseObject;
         }
 
+    }
+    
+    private class SharingTargetComparator implements Comparator<SharingTarget>{
+
+        @Override
+        public int compare(SharingTarget o1, SharingTarget o2) {
+            if (o1 == o2){
+                return 0;
+            }
+            if(o1 == GNUTELLA_SHARE){
+                return -1;
+            }
+            if(o2 == GNUTELLA_SHARE){
+                return 1;
+            }
+            return o1.getName().compareTo(o2.getName());
+        }
+        
     }
  
 }

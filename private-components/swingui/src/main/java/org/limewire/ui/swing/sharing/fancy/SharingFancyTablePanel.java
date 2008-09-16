@@ -114,11 +114,11 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
             TableMouseListener tableMouseListener = new TableMouseListener(table);
             fancyRenderer = new FancyCellRenderer(tableMouseListener);
             
-            editor = new SharingFancyMultiButtonTableCellRendererEditor(20, tableMouseListener);
+            editor = new SharingFancyMultiButtonTableCellRendererEditor(tableMouseListener);
             editor.addActions(createActions());
-            renderer = new SharingFancyMultiButtonTableCellRendererEditor(20, tableMouseListener);
+            renderer = new SharingFancyMultiButtonTableCellRendererEditor(tableMouseListener);
             renderer.addActions(createActions());
-            
+            table.setRowHeight(20);
             setRenderers();
         }
         return table;

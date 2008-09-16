@@ -12,8 +12,8 @@ public class SharingFancyMultiButtonTableCellRendererEditor extends MultiButtonT
     
     private final TableMouseListener tableListener;
     
-    public SharingFancyMultiButtonTableCellRendererEditor(int minRowHeight, TableMouseListener tableListener) {
-        super(minRowHeight);
+    public SharingFancyMultiButtonTableCellRendererEditor(TableMouseListener tableListener) {
+        super();
         setOpaque(true);
         
         this.tableListener = tableListener;

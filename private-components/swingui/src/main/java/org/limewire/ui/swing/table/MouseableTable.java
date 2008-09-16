@@ -212,7 +212,6 @@ public class MouseableTable extends StripedJXTable {
 	}
 	
 	public static class TableColors {
-	    //TODO: inject these
 	    /**
 	     * these consider the first element even (zero based)
 	     */

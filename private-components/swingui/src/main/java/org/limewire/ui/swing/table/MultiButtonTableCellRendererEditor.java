@@ -42,23 +42,16 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
      */
     private final static int VGAP = 1;
 
-    /**
-     * Height for the rows
-     */
-    protected int height;
-    
+     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
-    public MultiButtonTableCellRendererEditor(int minRowHeight) {
-        this(new ArrayList<Action>(), minRowHeight);
+    public MultiButtonTableCellRendererEditor() {
+        this(new ArrayList<Action>());
     }
     
-    public MultiButtonTableCellRendererEditor(List<Action> actions, int minRowHeight) {
+    public MultiButtonTableCellRendererEditor(List<Action> actions) {
         setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
-        
-        //default size paint the rows
-        height = minRowHeight;
-        
+     
         addActions(actions);
     }
     
@@ -68,10 +61,7 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
             button.setBorder(null);
             button.setFocusable(false);
             button.setBorderPainted(false);
-            
-            if(button.getIcon() != null)
-                height = Math.max(height, button.getHeight());
-            
+                    
             add(button);
         }
     }
@@ -89,7 +79,6 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
             this.setForeground(table.getForeground());
         }
         
-        table.setRowHeight(height + 2 * table.getRowMargin());
 
         return this;
     }
@@ -99,7 +88,6 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
             int row, int column) {
         this.setBackground(table.getSelectionBackground());
         this.setForeground(table.getSelectionForeground());
-        table.setRowHeight(height + 2 * table.getRowMargin());
         return this;
     }
 
