@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.core.api.search.SearchResult.PropertyKey;
+
 import com.google.inject.Inject;
 import java.awt.Color;
 import java.awt.Component;
@@ -32,10 +34,10 @@ import javax.swing.table.TableCellRenderer;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
-import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.nav.NavigableTree;
@@ -59,8 +61,8 @@ implements TableCellEditor, TableCellRenderer {
 
     private final String SEARCH_TEXT_COLOR = "red";
 
-    // TODO: Change this to black to avoid seeing filter matches.
-    private final String FILTER_TEXT_COLOR = "blue";
+    // Change this null to avoid seeing filter matches.
+    private final String FILTER_TEXT_COLOR = null; // "blue";
 
     public static final int HEIGHT = 50;
     public static final int LEFT_WIDTH = 440;
@@ -73,9 +75,9 @@ implements TableCellEditor, TableCellRenderer {
     private ActionColumnTableCellEditor actionEditor;
     private ActionButtonPanel actionButtonPanel;
     private FromWidget fromWidget = new FromWidget();
-    private HyperLinkButton downloadingLink = new HyperLinkButton();
     private JLabel downloadButton;
-    private HyperLinkButton similarButton = new HyperLinkButton(null);
+    private JXHyperlink downloadingLink = new JXHyperlink();
+    private JXHyperlink similarButton = new JXHyperlink(null);
     private JLabel headingLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
     private JLabel otherLabel = new JLabel();
@@ -116,9 +118,11 @@ implements TableCellEditor, TableCellRenderer {
      * @return the text containing bold tags
      */
     private String highlightMatches(String sourceText) {
-        // If there is no search or filter text then return sourceText as is.
         boolean haveSearchText = searchText != null && searchText.length() > 0;
+        System.out.println("haveSearchText = " + haveSearchText);
         boolean haveFilterText = filterText != null && filterText.length() > 0;
+
+        // If there is no search or filter text then return sourceText as is.
         if (!haveSearchText && !haveFilterText) return sourceText;
 
         String lowerText = sourceText.toLowerCase();
@@ -156,9 +160,13 @@ implements TableCellEditor, TableCellRenderer {
                 useSearchText ? SEARCH_TEXT_COLOR : FILTER_TEXT_COLOR;
 
             result += sourceText.substring(0, index);
-            result += "<span style='color:" + color + "; font-weight:bold'>";
-            result += match;
-            result += "</span>";
+            if (color == null) {
+                result += match;
+            } else {
+                result += "<span style='color:" + color + "; font-weight:bold'>";
+                result += match;
+                result += "</span>";
+            }
 
             // Find the next occurrences.
 
@@ -179,6 +187,7 @@ implements TableCellEditor, TableCellRenderer {
         }
 
         result += sourceText; // tack on the remaining sourceText
+        System.out.println("highlighted text is " + result);
         return result;
     }
 
@@ -214,8 +223,8 @@ implements TableCellEditor, TableCellRenderer {
 
     public Component getTableCellEditorComponent(
         JTable table, Object value, boolean isSelected, int row, int column) {
-        System.out.println(
-            "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
+        //System.out.println(
+        //    "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
 
         this.table = table;
 
@@ -238,8 +247,8 @@ implements TableCellEditor, TableCellRenderer {
         final JToggleButton junkButton = actionButtonPanel.getJunkButton();
         junkButton.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
-                float opacity = junkButton.isSelected() ? 0.2f : 1.0f;
-                thePanel.setAlpha(opacity);
+                JToggleButton junkButton = actionButtonPanel.getJunkButton();
+                markAsJunk(junkButton.isSelected());
             }
         });
 
@@ -267,22 +276,7 @@ implements TableCellEditor, TableCellRenderer {
                     + ' ' + similarCount + " similar files";
                 similarButton.setText(text);
 
-                // TODO: RMV Waiting for feedback on replacing use of
-                // TODO: RMV VisualSearchResult with SearchResult.
-                /*
-                BasicSearchResultsModel model = SearchHandlerImpl.model;
-                List<VisualSearchResult> list = vsr.getSimilarResults();
-                for (VisualSearchResult similarVSR : list) {
-                    // TODO: RMV PROBLEM!  The model holds objects that
-                    // TODO: RMV implement SearchResult, not VisualSearchResult!
-                    // TODO: RMV Why are both interfaces needed?
-                    if (isShowingSimilar) {
-                        model.addSearchResult(similarVSR); //, list.size() - 1);
-                    } else {
-                        model.removeSearchResult(similarVSR);
-                    }
-                }
-                */
+                // TODO: RMV Need code here to display similar results.
             }
         });
 
@@ -325,7 +319,11 @@ implements TableCellEditor, TableCellRenderer {
         downloadingLink.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
+                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+                    navTree.getNavigableItemByName(
+                        Navigator.NavCategory.DOWNLOAD,
+                        MainDownloadPanel.NAME).select();
+                } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
                     navTree.getNavigableItemByName(
                         Navigator.NavCategory.LIBRARY,
                         MyLibraryPanel.NAME).select();
@@ -415,6 +413,14 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
+    private void markAsJunk(boolean junk) {
+        JToggleButton junkButton = actionButtonPanel.getJunkButton();
+        junkButton.setSelected(junk);
+
+        float opacity = junk ? 0.2f : 1.0f;
+        thePanel.setAlpha(opacity);
+    }
+
     private void populateFrom(VisualSearchResult vsr) {
         List<String> people = new ArrayList<String>();
         Collection<RemoteHost> sources = vsr.getSources();
@@ -487,12 +493,12 @@ implements TableCellEditor, TableCellRenderer {
                 break;
             case DOWNLOADING:
                 downloadButton.setEnabled(false);
-                downloadingLink.setText("Downloading...");
+                downloadingLink.setText("<html><u>Downloading...</u></html>");
                 downloadingLink.setVisible(true);
                 break;
             case DOWNLOADED:
                 downloadButton.setEnabled(false);
-                downloadingLink.setText("Download Complete");
+                downloadingLink.setText("<html><u>Download Complete</u></html>");
                 downloadingLink.setVisible(true);
                 break;
         }

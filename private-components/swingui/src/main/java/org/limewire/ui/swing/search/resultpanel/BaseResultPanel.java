@@ -120,8 +120,8 @@ public abstract class BaseResultPanel extends JXPanel {
 
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
-                    SearchResultMenu menu =
-                        new SearchResultMenu(BaseResultPanel.this, vsr, row);
+                    SearchResultMenu menu = new SearchResultMenu(
+                        BaseResultPanel.this, navTree, vsr, row);
                     menu.show(component, e.getX(), e.getY());
                 }
             }
@@ -195,21 +195,6 @@ public abstract class BaseResultPanel extends JXPanel {
         }
 
         resultsTable.setRowHeight(TABLE_ROW_HEIGHT);
-
-        // TODO: RMV Just for debugging.
-        // Dump the name of the renderer for each column in the table.
-        /*
-        if (tableFormat instanceof ImageTableFormat) {
-            for (int i = 0; i < tcm.getColumnCount(); i++) {
-                TableColumn tc = tcm.getColumn(i);
-                TableCellRenderer tcr = tc.getCellRenderer();
-                String className = tcr == null ? "none" :
-                    tcr.getClass().getName();
-                System.out.println(
-                    "renderer for column " + i + " is a " + className);
-            }
-        }
-        */
     }
 
     public void download(final VisualSearchResult vsr, final int row) {
@@ -240,8 +225,8 @@ public abstract class BaseResultPanel extends JXPanel {
                             (AbstractTableModel) resultsList.getModel();
                         
                         // TODO: Why doesn't this cause the row to be repainted?
-                        System.out.println(
-                            "BaseResultPanel: firing row " + row + " update");
+                        //System.out.println(
+                        //    "BaseResultPanel: firing row " + row + " update");
                         tm.fireTableRowsUpdated(row, row);
                     }
                 }

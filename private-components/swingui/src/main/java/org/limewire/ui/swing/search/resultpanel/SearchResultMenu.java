@@ -6,6 +6,9 @@ import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.ui.swing.library.MyLibraryPanel;
+import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -16,9 +19,14 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class SearchResultMenu extends JPopupMenu {
 
+    private NavigableTree navTree;
+
     public SearchResultMenu(final BaseResultPanel brp,
+        final NavigableTree navTree,
         final VisualSearchResult vsr,
         final int row) {
+
+        this.navTree = navTree;
 
         add(new AbstractAction("Download") {
             public void actionPerformed(ActionEvent e) {
@@ -28,13 +36,14 @@ public class SearchResultMenu extends JPopupMenu {
 
         add(new AbstractAction("Mark as junk") {
             public void actionPerformed(ActionEvent e) {
-                // TODO: RMV Implement this!
+                vsr.setJunk(true);
             }
         });
 
         add(new AbstractAction("Copy link to clipboard") {
             public void actionPerformed(ActionEvent e) {
                 // TODO: RMV Implement this!
+                System.out.println("not implemented yet");
             }
         });
 
@@ -58,6 +67,7 @@ public class SearchResultMenu extends JPopupMenu {
         add(new AbstractAction("Properties") {
             public void actionPerformed(ActionEvent e) {
                 // TODO: RMV Implement this!
+                System.out.println("not implemented yet");
             }
         });
     }
@@ -67,13 +77,16 @@ public class SearchResultMenu extends JPopupMenu {
 
         menu.add(new AbstractAction("View library") {
             public void actionPerformed(ActionEvent e) {
-                // TODO: RMV Implement this!
+                navTree.getNavigableItemByName(
+                    Navigator.NavCategory.LIBRARY,
+                    MyLibraryPanel.NAME).select();
             }
         });
 
         menu.add(new AbstractAction("Chat") {
             public void actionPerformed(ActionEvent e) {
                 // TODO: RMV Implement this!
+                System.out.println("not implemented yet");
             }
         });
 
