@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jivesoftware.smack.RosterEntry;
 import org.limewire.concurrent.ThreadExecutor;
@@ -19,13 +20,13 @@ public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
 
     private final String id;
-    private String name;
+    private AtomicReference<String> name;
     private final ConcurrentHashMap<String, Presence> presences;
     private final CopyOnWriteArrayList<PresenceListener> presenceListeners;
 
     UserImpl(String id, RosterEntry rosterEntry) {
         this.id = id;
-        this.name = rosterEntry.getName();
+        this.name = new AtomicReference<String>(rosterEntry.getName());
         this.presences = new ConcurrentHashMap<String, Presence>(); 
         this.presenceListeners = new CopyOnWriteArrayList<PresenceListener>();
     }
@@ -35,15 +36,11 @@ public class UserImpl implements User {
     }
 
     public String getName() {
-        synchronized (this) {
-            return name;
-        }
+        return name.get();
     }
     
     void setRosterEntry(RosterEntry rosterEntry) {
-        synchronized (this) {
-            this.name = rosterEntry.getName();
-        }
+        name.set(rosterEntry.getName());
     }
 
     public Map<String, Presence> getPresences() {
