@@ -7,11 +7,14 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
 
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
@@ -35,12 +38,29 @@ public class MyLibraryPanel extends JPanel {
 
         table = new LibraryTable<LocalFileItem>(libraryManager.getLibraryList().getModel()); 
         table.enableSharing(sharePanel);
+                
+        final JXLayer<JTable> layer = new JXLayer<JTable>(table);
+        final JScrollPane scrollPane = new JScrollPane(layer);
+        scrollPane.setColumnHeaderView(table.getTableHeader());
+        if(table.isColumnControlVisible()){
+            scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
+            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        }
         
-        JScrollPane scrollPane = new JScrollPane(table);
+        //necessary to fill table with stripes and have scrollbar appear properly
+        scrollPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (table.getPreferredSize().height < scrollPane.getViewport().getSize().height) {
+                    layer.setPreferredSize(scrollPane.getViewport().getSize());
+                } else {
+                    layer.setPreferredSize(table.getPreferredSize());
+                }
+            }
+        });
         
-        JXLayer<JComponent> layer = new JXLayer<JComponent>(scrollPane);
         //necessary if the layer is to paint 
-        layer.setUI(new AbstractLayerUI<JComponent>() {});
+        layer.setUI(new AbstractLayerUI<JTable>() {});
         
         //for absolute positioning of LibrarySharePanel
         layer.getGlassPane().setLayout(null);
@@ -54,16 +74,13 @@ public class MyLibraryPanel extends JPanel {
             public void eventDispatched(AWTEvent event) {
                 if (sharePanel.isVisible() && (event.getID() == MouseEvent.MOUSE_PRESSED)){
                     MouseEvent e = (MouseEvent)event;
-                    if (!sharePanel.contains(e.getComponent())) {
+                    if (sharePanel != e.getComponent() && !sharePanel.contains(e.getComponent()) && !scrollPane.getVerticalScrollBar().contains(e.getPoint())) {
                         sharePanel.setVisible(false);
                     }
                 }
             }};
         Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
 
-
-        add(layer, BorderLayout.CENTER);
-        
-      //  add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
     }
 }

@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
@@ -40,6 +41,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.ui.swing.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -70,6 +72,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private static final int SHARED_ROW_COUNT = 20;
     private static final int BORDER_INSETS = 10;
     private static final int HGAP = 5;
+    
     
     private  final SharingTarget GNUTELLA_SHARE = new SharingTarget(I18n.tr("Gnutella Network"));
 
@@ -114,6 +117,9 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     @Resource
     private Icon addIconPressed;
     
+    @Resource
+    private int shareTableIndent = 15;
+    
     
     @Inject
     public LibrarySharePanel(LibraryManager libraryManager) {
@@ -140,6 +146,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
       
         
         inputField = new JTextField(12);
+        inputField.setBorder(new RoundedBorder(5));
         
         shareLabel = new JLabel(I18n.tr("Currently sharing with"));
         
@@ -162,8 +169,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         shareTable.getColumnModel().getColumn(1).setPreferredWidth(removeEditor.getPreferredSize().width);    
         shareTable.getColumnModel().getColumn(1).setMaxWidth(removeEditor.getPreferredSize().width);    
         shareTable.getColumnModel().getColumn(1).setCellRenderer(new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed));      
-        shareTable.setShowGrid(false);
-        shareTable.setBorder(null);
+        shareTable.setShowGrid(false);       
         shareTable.setOpaque(false);
   
         noShareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
@@ -200,12 +206,12 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
         buddyTable.setRowHeight(addEditor.getPreferredSize().height);
         buddyTable.setVisibleRowCount(BUDDY_ROW_COUNT);
-        buddyScroll = new JScrollPane(buddyTable);        
+        buddyScroll = new JScrollPane(buddyTable);      
+        buddyScroll.setBorder(new RoundedBorder(5));
         
         shareScroll = new JScrollPane(shareTable);
-        shareScroll.setBorder(null);
+        shareScroll.setBorder(new EmptyBorder(0, shareTableIndent, 0, 0));
         shareScroll.setOpaque(false);
-        
 
         buddyLabel = new JLabel(I18n.tr("To share, type name below"));
         
@@ -305,7 +311,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         buddyTable.setVisibleRowCount(visibleRows);
         buddyScroll.setVisible(noShareBuddyList.size() > 0);
         buddyLabel.setVisible(noShareBuddyList.size() > 0);
-        inputField.setVisible(noShareBuddyList.size() > 0);
+        inputField.setVisible(noShareBuddyList.size() > 1);
         
         visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);

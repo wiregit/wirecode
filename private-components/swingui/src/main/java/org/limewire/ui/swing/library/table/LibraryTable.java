@@ -9,7 +9,6 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
-import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 
@@ -90,15 +89,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         @Override
         public void actionPerformed(ActionEvent e) {
             librarySharePanel.setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow())));
-            //adjust y for header height
-            int headerAdjust = 0;
-            if(getTableHeader() != null && getTableHeader().isVisible()){
-                headerAdjust = getTableHeader().getHeight();
-                if(getParent() instanceof JViewport){
-                    headerAdjust -= ((JViewport)getParent()).getViewPosition().y;
-                }
-            }
-            librarySharePanel.show(shareEditor, 0, headerAdjust);       
+            librarySharePanel.show(shareEditor, 0, 0);
             shareEditor.cancelCellEditing();
         }
         
