@@ -7,16 +7,22 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import net.miginfocom.swing.MigLayout;
 
 public class BuddySharingHeaderPanel extends SharingHeaderPanel {
+    
+    @Resource
+    Icon downIcon;
     
     private LibraryButton libraryButton;
     private JButton shareButton;
@@ -31,6 +37,8 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
             ViewSelectionPanel viewPanel, LibraryManager libraryManager) {
         super(icon, staticText, name, viewPanel);
                 
+        GuiUtils.assignResources(this);
+        
         createMenu(libraryManager);
     }
     
@@ -66,8 +74,9 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
     protected void createComponents() {
         libraryButton = new LibraryButton(I18n.tr("Library"));
         libraryButton.setEnabled(false);
-        shareButton = new JButton("Share v");       
+        shareButton = new JButton(I18n.tr("Share"), downIcon);       
         shareButton.setVisible(false);
+        shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
     }
     
     @Override

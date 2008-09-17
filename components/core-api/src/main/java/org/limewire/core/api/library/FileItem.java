@@ -11,7 +11,7 @@ public interface FileItem {
     }
 
     public static enum Keys {
-        IMAGE, TEMP_IMAGE, TITLE, AUTHOR, ALBUM
+        IMAGE, TITLE, AUTHOR, ALBUM
     }
     
     String getName();

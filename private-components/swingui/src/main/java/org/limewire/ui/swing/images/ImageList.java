@@ -19,7 +19,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -92,13 +91,14 @@ public class ImageList extends JXList {
 
             LocalFileItem item = (LocalFileItem)value;
             ImageIcon imageIcon = (ImageIcon) item.getProperty(FileItem.Keys.IMAGE);
+            //TODO: there should be an image handler to lookup these values rather than
+            // save them in a each FileItem.
             if(imageIcon != null) {
                 setIcon(imageIcon);
             } else {
                 setIcon(loadIcon);
                 item.setProperty(FileItem.Keys.IMAGE, loadIcon);
-                ImageLoader imageLoader = new ImageLoader(list, item, errorIcon);
-                BackgroundExecutorService.schedule(imageLoader);
+                ImageExecutorService.submit(new ImageCallable(list,item,errorIcon));
             }
             
             this.setBackground(isSelected ? selectionCellColor : nonSelectionCellColor);
