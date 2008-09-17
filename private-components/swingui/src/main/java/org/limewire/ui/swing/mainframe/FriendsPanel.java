@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -16,8 +17,10 @@ import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.WavSoundPlayer;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.PanelDisplayedEvent;
@@ -47,6 +50,7 @@ import com.google.inject.Singleton;
 public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifecycleListener {
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     private static final Log LOG = LogFactory.getLog(FriendsPanel.class);
+    private static final String MESSAGE_SOUND_PATH = "/org/limewire/ui/swing/mainframe/resources/sounds/friends/message.wav";
     private final LoginPanel loginPanel;
     private final ChatPanel chatPanel;
     private final UnseenMessageListener unseenMessageListener;
@@ -138,6 +142,11 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
         if (event.getMessage().getType() != Type.Sent && !windowStateListener.isWindowMainFocus()) {
             LOG.debug("Sending a message to the tray notifier");
             notifier.showMessage(new Notification(getNoticeForMessage(event)));
+            
+            URL soundURL = FriendsPanel.class.getResource(MESSAGE_SOUND_PATH);
+            if (soundURL != null) {
+                ThreadExecutor.startThread(new WavSoundPlayer(soundURL.getFile()), "newmessage-sound");
+            }
         } 
     }
 
