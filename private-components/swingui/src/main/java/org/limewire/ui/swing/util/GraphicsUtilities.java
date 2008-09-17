@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.1 2008-09-17 19:21:53 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.2 2008-09-17 22:02:02 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -231,7 +231,12 @@ public class GraphicsUtilities {
     public static BufferedImage loadCompatibleImage(URL resource)
             throws IOException {
         BufferedImage image = ImageIO.read(resource);
-        return toCompatibleImage(image);
+        BufferedImage image2 = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);  
+        Graphics g = image2.getGraphics();  
+        g.drawImage(image, 0, 0, null);  
+        g.dispose();
+        
+        return toCompatibleImage(image2);
     }
 
     /**
@@ -409,7 +414,7 @@ public class GraphicsUtilities {
 
 //        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
         boolean isTranslucent = true;
-        boolean isWidthGreater = width > height;
+        boolean isWidthGreater = false;//width > height;
 
         if (isWidthGreater) {
             if (newSize >= width) {

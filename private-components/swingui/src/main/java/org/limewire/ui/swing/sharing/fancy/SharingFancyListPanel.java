@@ -161,6 +161,8 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         public MouseReaction(ImageList imageList, JButton unShareButton) {
             this.imageList = imageList;
             this.ushareButton = unShareButton;
+            this.ushareButton.setBorder(null);
+            this.ushareButton.setContentAreaFilled(false);
             
             imageList.addMouseListener(this);
             imageList.addMouseMotionListener(this);

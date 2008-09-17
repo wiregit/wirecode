@@ -56,7 +56,7 @@ public class ImageCallable implements Callable<Void> {
         if(image.getWidth() > ImageLocalFileItem.WIDTH || image.getHeight() > ImageLocalFileItem.HEIGHT) {
             //TODO: this can be optimized for pictures within one step away from the target size
             //TODO: this seems to fail regularly if width > 2 * height or height > 2 * width
-            image = GraphicsUtilities.createThumbnail(image, ImageLocalFileItem.WIDTH);
+            image = GraphicsUtilities.createThumbnail(image, ImageLocalFileItem.HEIGHT);
         }
         ImageIcon imageIcon = new ImageIcon(image);
         setProperty(imageIcon);
