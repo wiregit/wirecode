@@ -16,6 +16,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.TLSManager;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -151,6 +152,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
             protected void configure() {
                 bind(ActivityCallback.class).toInstance(activityCallback);
                 bind(NetworkManager.class).to(NetworkManagerStub.class);
+                bind(TLSManager.class).to(NetworkManagerStub.class);
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
             }
         });
