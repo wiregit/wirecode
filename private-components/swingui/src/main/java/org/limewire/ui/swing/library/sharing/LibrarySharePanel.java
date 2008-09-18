@@ -10,8 +10,6 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -46,6 +44,7 @@ import org.limewire.ui.swing.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -86,7 +85,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private JScrollPane buddyScroll;
 
     private JXTable shareTable;
-    private JXTable buddyTable;
+    private MouseableTable buddyTable;
 
     private JLabel buddyLabel;
     private JLabel shareLabel;
@@ -182,7 +181,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
                 baseList.add(element.getName());
             }
         };
-        EventList<SharingTarget> noShareSortedList = new FilterList<SharingTarget>(noShareBuddyList, 
+        final EventList<SharingTarget> noShareSortedList = new FilterList<SharingTarget>(noShareBuddyList, 
                 new TextComponentMatcherEditor<SharingTarget>(inputField, textFilter));
         
         buddyTable = new MouseableTable(new EventTableModel<SharingTarget>(noShareSortedList, new LibraryShareTableFormat(0)));
@@ -200,6 +199,13 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
                addEditor.cancelCellEditing();
             }            
         });
+        
+        buddyTable.setDoubleClickHandler(new TableDoubleClickHandler(){
+
+            @Override
+            public void handleDoubleClick(int row) {
+               shareBuddy(noShareSortedList.get(row));
+            }});
         
         buddyTable.getColumnModel().getColumn(0).setCellEditor(addEditor);
         buddyTable.getColumnModel().getColumn(0).setPreferredWidth(addEditor.getPreferredSize().width); 
@@ -249,13 +255,6 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         add(mainPanel);
 
         adjustSize();
-        addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                inputField.requestFocus();
-            }
-        });        
-
 
         EventAnnotationProcessor.subscribe(this);   
         
@@ -294,6 +293,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         setBounds(c.getX() - mainPanel.getWidth() - HGAP * 2,y, getWidth(), getHeight());
         getParent().validate();
         setVisible(true);
+        inputField.requestFocus();
     }
 
     //TODO: clean this up
