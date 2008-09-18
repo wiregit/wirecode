@@ -5,15 +5,12 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.ImageLocalFileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -30,10 +27,6 @@ import ca.odell.glazedlists.EventList;
 public class ImageList extends JXList {
    
     @Resource
-    private Icon loadIcon;
-    @Resource
-    private Icon errorIcon; 
-    @Resource
     private Color selectionCellColor;
     @Resource
     private Color nonSelectionCellColor;   
@@ -43,10 +36,14 @@ public class ImageList extends JXList {
     private static final int selectionBorderWidth = 4;
     private static final int insetCellSize = 20;
     
-    public ImageList(EventList<LocalFileItem> eventList, LocalFileList fileList) {
+    private ThumbnailManager thumbnailManager;
+    
+    public ImageList(EventList<LocalFileItem> eventList, LocalFileList fileList, ThumbnailManager thumbnailManager) {
         super(new ImageListModel(eventList, fileList));
 
         GuiUtils.assignResources(this); 
+        
+        this.thumbnailManager = thumbnailManager;
         
         setBackground(backgroundListcolor);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -90,16 +87,7 @@ public class ImageList extends JXList {
                 boolean isSelected, boolean cellHasFocus) {
 
             LocalFileItem item = (LocalFileItem)value;
-            ImageIcon imageIcon = (ImageIcon) item.getProperty(FileItem.Keys.IMAGE);
-            //TODO: there should be an image handler to lookup these values rather than
-            // save them in a each FileItem.
-            if(imageIcon != null) {
-                setIcon(imageIcon);
-            } else {
-                setIcon(loadIcon);
-                item.setProperty(FileItem.Keys.IMAGE, loadIcon);
-                ImageExecutorService.submit(new ImageCallable(list,item,errorIcon));
-            }
+            setIcon(thumbnailManager.getThumbnailForFile(item.getFile(), list));
             
             this.setBackground(isSelected ? selectionCellColor : nonSelectionCellColor);
             this.setForeground(list.getBackground());

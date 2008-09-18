@@ -18,6 +18,7 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.sharing.SharingShortcutPanel;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
@@ -67,7 +68,7 @@ public class SharingFancyPanel extends JPanel {
     
     private ShareDropTarget drop;
     
-    public SharingFancyPanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, LocalFileList originalList, IconManager iconManager) {
+    public SharingFancyPanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, LocalFileList originalList, IconManager iconManager, ThumbnailManager thumbnailManager) {
 
         GuiUtils.assignResources(this); 
         
@@ -85,7 +86,7 @@ public class SharingFancyPanel extends JPanel {
         
         musicTable = new SharingFancyTablePanel(music, list.get(0), new SharingFancyAudioTableFormat(), drop.getDropTarget(), originalList, audioIcon);
         videoTable = new SharingFancyTablePanel(video, list.get(1), new SharingFancyDefaultTableFormat(),false, drop.getDropTarget(), originalList, videoIcon);
-        imageList = new SharingFancyListPanel(image, list.get(2), drop.getDropTarget(), originalList, imageIcon);
+        imageList = new SharingFancyListPanel(image, list.get(2), drop.getDropTarget(), originalList, imageIcon, thumbnailManager);
         documentTable = new SharingFancyTablePanel(doc, list.get(3), new SharingFancyIconTableFormat(), false, drop.getDropTarget(), originalList, documentIcon);
         programTable = new SharingFancyTablePanel(program, list.get(4), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget(), originalList, appIcon);
         otherTable = new SharingFancyTablePanel(other, list.get(5), new SharingFancyDefaultTableFormat(), drop.getDropTarget(), originalList, appIcon);

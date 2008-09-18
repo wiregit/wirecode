@@ -26,6 +26,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
+import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
@@ -54,7 +55,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     
     private static final String unshareAll = I18n.tr("Unshare All");
     
-    public SharingFancyListPanel(String name, EventList<LocalFileItem> eventList, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon) {       
+    public SharingFancyListPanel(String name, EventList<LocalFileItem> eventList, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager) {       
         setBackground(Color.WHITE);
         
         this.currentEventList = eventList;
@@ -71,7 +72,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         final JPopupMenu menu = new JPopupMenu();
         menu.add(new JMenuItem("Item"));
         
-        imageList = new ImageList(eventList, fileList);
+        imageList = new ImageList(eventList, fileList, thumbnailManager);
         imageList.setDropTarget(dropTarget);  
         
         layerButton = new UnshareButton(new SharingRemoveListAction(imageList));

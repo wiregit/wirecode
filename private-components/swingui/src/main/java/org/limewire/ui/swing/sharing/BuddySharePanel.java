@@ -28,6 +28,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
@@ -84,6 +85,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     
     private LibraryManager libraryManager;
     private IconManager iconManager;
+    private ThumbnailManager thumbnailManager;
     
     private BuddySharingHeaderPanel headerPanel;
     
@@ -91,12 +93,13 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     private IconLabelRenderer iconLabelRenderer;
     
     @Inject
-    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, NavigableTree navTree, IconManager iconManager) {        
+    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, NavigableTree navTree, IconManager iconManager, ThumbnailManager thumbnailManager) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
         
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
+        this.thumbnailManager = thumbnailManager;
         
         buddyLists = new HashMap<String,FileList>();
 
@@ -142,7 +145,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         createTable(tempList);
         
         JScrollPane scrollPane = new JScrollPane();
-        sharingFancyPanel = new SharingFancyPanel(tempList, scrollPane, null, iconManager);
+        sharingFancyPanel = new SharingFancyPanel(tempList, scrollPane, null, iconManager, thumbnailManager);
         scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),TABLE);

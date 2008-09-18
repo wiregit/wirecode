@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.2 2008-09-17 22:02:02 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.3 2008-09-18 20:11:13 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -384,6 +384,96 @@ public class GraphicsUtilities {
 
         return temp;
     }
+    
+    /**
+     * Returns a thumbnail of the source image. This preserves the aspect ratio of the image. All images will
+     * always be scaled to fit within the targetWidth and the taretHeight of the image. 
+     * 
+     * @param image - image to create a thumbnail of
+     * @param maxTargetWidth - max width the thumbnail can be
+     * @param maxTargetHeight - max height the thumbnail can be
+     */
+    @SuppressWarnings("null")
+    public static BufferedImage createRatioPreservedThumbnail(BufferedImage image, int maxTargetWidth, int maxTargetHeight) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+//        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
+        boolean isTranslucent = true;
+        boolean isWidthGreater = width > height;
+
+        if (isWidthGreater) {
+            if (maxTargetWidth >= width) {
+                throw new IllegalArgumentException("newSize must be lower than" +
+                                                   " the image width");
+            }
+        } else if (maxTargetHeight >= height) {
+            throw new IllegalArgumentException("newSize must be lower than" +
+                                               " the image height");
+        }
+
+        if (maxTargetWidth <= 0 || maxTargetHeight <= 0) {
+            throw new IllegalArgumentException("newSize must" +
+                                               " be greater than 0");
+        }
+
+        float ratioWH = (float) width / (float) height;
+        float ratioHW = (float) height / (float) width;
+
+        BufferedImage thumb = image;
+        BufferedImage temp = null;
+
+        Graphics2D g2 = null;
+
+        int previousWidth = width;
+        int previousHeight = height;
+
+        do {
+            if (isWidthGreater) {
+                width /= 2;
+                if (width < maxTargetWidth) {
+                    width = maxTargetWidth;
+                }
+                height = (int) (width / ratioWH);
+            } else {
+                height /= 2;
+                if (height < maxTargetHeight) {
+                    height = maxTargetHeight;
+                }
+                width = (int) (height / ratioHW);
+            }
+
+            if (temp == null || isTranslucent) {
+                temp = createCompatibleImage(image, width, height);
+                if(g2 != null)
+                    g2.dispose();
+                g2 = temp.createGraphics();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            }
+            g2.drawImage(thumb, 0, 0, width, height,
+                    0, 0, previousWidth, previousHeight, null);
+
+            previousWidth = width;
+            previousHeight = height;
+
+            thumb = temp;
+        } while (isWidthGreater ? (maxTargetWidth != width) : (maxTargetHeight != height));
+
+        g2.dispose();
+
+        if (width != thumb.getWidth() || height != thumb.getHeight()) {
+            temp = createCompatibleImage(image, width, height);
+            g2 = temp.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.drawImage(thumb, 0, 0, width, height, null);
+            g2.dispose();
+            thumb = temp;
+        }
+
+        return thumb;
+    }
 
     /**
      * <p>Returns a thumbnail of a source image. <code>newSize</code> defines
@@ -407,8 +497,7 @@ public class GraphicsUtilities {
      *   the largest dimension of <code>image</code> or &lt;= 0
      */
     @SuppressWarnings("null")
-    public static BufferedImage createThumbnail(BufferedImage image,
-                                                int newSize) {
+    public static BufferedImage createThumbnail(BufferedImage image, int newSize) {
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -515,7 +604,8 @@ public class GraphicsUtilities {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
+//        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
+        boolean isTranslucent = true;
 
         if (newWidth >= width || newHeight >= height) {
             throw new IllegalArgumentException("newWidth and newHeight cannot" +
@@ -551,6 +641,8 @@ public class GraphicsUtilities {
 
             if (temp == null || isTranslucent) {
                 temp = createCompatibleImage(image, width, height);
+                if(g2 != null)
+                    g2.dispose();
                 g2 = temp.createGraphics();
                 g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);

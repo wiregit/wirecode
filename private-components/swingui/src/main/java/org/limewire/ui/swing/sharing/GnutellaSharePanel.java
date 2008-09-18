@@ -16,6 +16,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
@@ -46,6 +47,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     @Resource
     protected Icon sharingIcon;
     
+    private ThumbnailManager thumbnailManager;
     private IconManager iconManager;
     
     private ViewSelectionPanel viewSelectionPanel;
@@ -61,9 +63,10 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     MultiButtonTableCellRendererEditor renderer;
     
     @Inject
-    public GnutellaSharePanel(LibraryManager libraryManager, IconManager iconManager, SharingEmptyPanel emptyPanel) {
+    public GnutellaSharePanel(LibraryManager libraryManager, IconManager iconManager, SharingEmptyPanel emptyPanel, ThumbnailManager thumbnailManager) {
         GuiUtils.assignResources(this); 
         
+        this.thumbnailManager = thumbnailManager;
         this.iconManager = iconManager;
         
         this.fileList = libraryManager.getGnutellaList();
@@ -131,7 +134,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         
         createTable(filteredList);
         
-        SharingFancyPanel sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList, iconManager);
+        SharingFancyPanel sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList, iconManager, thumbnailManager);
         scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),ViewSelectionPanel.TABLE_SELECTED);
