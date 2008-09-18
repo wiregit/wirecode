@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -103,6 +104,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     private int ledgeWidth;
     private int ledgeHeight;
+    private int ledgeY;
     
     @Resource
     private Icon removeIcon;
@@ -260,12 +262,36 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     }
     
     //@Override
-    public void show(Component c, int x, int y){
-       // super.show(c, x, y);
+    public void show(Component c, Rectangle visibleRect){
+        inputField.setText(null);
+        
         ledgeWidth = c.getWidth();
         ledgeHeight = c.getHeight();
+        
         adjustSize();
-        setBounds(x + c.getX() - mainPanel.getWidth() - HGAP * 2,y + c.getY(), getWidth(), getHeight());
+        
+        //favor ledge on top
+        boolean ledgeFitsOnBottom = c.getY() + c.getHeight() - getHeight() >= visibleRect.getY();
+        boolean ledgeFitsOnTop = c.getY() + getHeight() <= visibleRect.getHeight();
+ 
+        int y = 0; //y position for widget bounds
+        if (ledgeFitsOnTop) {
+            y = c.getY();
+            ledgeY = 1;
+        } else if (ledgeFitsOnBottom) {
+            y = c.getY() + c.getHeight() - getHeight();
+            ledgeY = getHeight() - c.getHeight() - 1;
+        } else {
+            y = (int) visibleRect.getY();
+            ledgeY = c.getY() - y;
+            if (ledgeY <= y) {
+                ledgeY = y + 1;
+            }
+        }
+        
+        adjustPainter();
+        
+        setBounds(c.getX() - mainPanel.getWidth() - HGAP * 2,y, getWidth(), getHeight());
         getParent().validate();
         setVisible(true);
     }
@@ -273,9 +299,9 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     //TODO: clean this up
     private void adjustPainter(){
         Area area = new Area(new RoundRectangle2D.Float(1, 1, mainPanel.getWidth() + HGAP * 2-1, getHeight()-2, BORDER_INSETS, BORDER_INSETS));
-        Area area2 = new Area(new RoundRectangle2D.Float(mainPanel.getWidth() + HGAP * 2, 1, ledgeWidth-1, ledgeHeight, BORDER_INSETS, BORDER_INSETS));
+        Area area2 = new Area(new RoundRectangle2D.Float(mainPanel.getWidth() + HGAP * 2, ledgeY, ledgeWidth-1, ledgeHeight, BORDER_INSETS, BORDER_INSETS));
         area.exclusiveOr(area2);
-        Area area3 = new Area(new Rectangle2D.Float(mainPanel.getWidth() + HGAP, 1, BORDER_INSETS * 2, ledgeHeight));
+        Area area3 = new Area(new Rectangle2D.Float(mainPanel.getWidth() + HGAP, ledgeY, BORDER_INSETS * 2, ledgeHeight));
         area.add(area3);
         shapePainter.setShape(area);
     }
@@ -328,7 +354,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         }
         
         mainPanel.setSize(prefWidth, height);
-        setSize(mainPanel.getSize().width + ledgeWidth + 2 * HGAP, mainPanel.getSize().height + 2 * BORDER_INSETS);
+        setSize(mainPanel.getSize().width + ledgeWidth + 2 * HGAP, mainPanel.getSize().height + BORDER_INSETS);
         revalidate();       
         adjustPainter(); 
         repaint();

@@ -39,7 +39,7 @@ public class MyLibraryPanel extends JPanel {
         table = new LibraryTable<LocalFileItem>(libraryManager.getLibraryList().getModel()); 
         table.enableSharing(sharePanel);
                 
-        final JXLayer<JTable> layer = new JXLayer<JTable>(table);
+        final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>() {});
         final JScrollPane scrollPane = new JScrollPane(layer);
         scrollPane.setColumnHeaderView(table.getTableHeader());
         if(table.isColumnControlVisible()){
@@ -59,8 +59,6 @@ public class MyLibraryPanel extends JPanel {
             }
         });
         
-        //necessary if the layer is to paint 
-        layer.setUI(new AbstractLayerUI<JTable>() {});
         
         //for absolute positioning of LibrarySharePanel
         layer.getGlassPane().setLayout(null);
