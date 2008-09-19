@@ -23,7 +23,7 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiFriendsModule());
         install(new LimeWireUiPlayerModule());
         install(new LimeWireUISharingModule());
-        install(new LimeWireUiMozillaModule());
+        //install(new LimeWireUiMozillaModule());
         install(new LimeWireUIImagesModule());
     }
 }
