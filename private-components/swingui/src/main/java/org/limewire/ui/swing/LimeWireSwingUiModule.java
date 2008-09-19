@@ -1,6 +1,6 @@
 package org.limewire.ui.swing;
 
-import org.limewire.ui.swing.browser.LimeWireUiMozillaModule;
+import org.limewire.core.impl.mozilla.LimeWireUiMozillaModule;
 import org.limewire.ui.swing.friends.LimeWireUiFriendsModule;
 import org.limewire.ui.swing.images.LimeWireUIImagesModule;
 import org.limewire.ui.swing.mainframe.LimeWireUiMainframeModule;

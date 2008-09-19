@@ -1,6 +1,5 @@
-package org.limewire.ui.swing.browser;
+package org.limewire.core.impl.mozilla;
 
-import org.limewire.core.impl.mozilla.LimeMozillaDownloadManagerListenerImpl;
 import org.limewire.core.settings.MozillaSettings;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownloadManager;

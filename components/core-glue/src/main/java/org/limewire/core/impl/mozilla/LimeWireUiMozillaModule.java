@@ -1,6 +1,5 @@
-package org.limewire.ui.swing.browser;
+package org.limewire.core.impl.mozilla;
 
-import org.limewire.core.impl.mozilla.LimeMozillaDownloadManagerListenerImpl;
 
 import com.google.inject.AbstractModule;
 
