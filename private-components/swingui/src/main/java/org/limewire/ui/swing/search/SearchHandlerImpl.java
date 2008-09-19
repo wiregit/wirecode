@@ -10,6 +10,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
+import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
@@ -19,14 +20,17 @@ class SearchHandlerImpl implements SearchHandler {
     private final SearchFactory searchFactory;
     private final SearchResultsPanelFactory panelFactory;
     private final SearchNavigator searchNavigator;
+    private final SimilarResultsDetectorFactory similarResultsDetectorFactory;
     
     @Inject
     SearchHandlerImpl(SearchFactory searchFactory,
             SearchResultsPanelFactory panelFactory,
-            SearchNavigator searchNavigator) {
+            SearchNavigator searchNavigator,
+            SimilarResultsDetectorFactory similarResultsDetectorFactory) {
         this.searchNavigator = searchNavigator;
         this.searchFactory = searchFactory;
         this.panelFactory = panelFactory;
+        this.similarResultsDetectorFactory = similarResultsDetectorFactory;
     }
 
     @Override
@@ -46,7 +50,7 @@ class SearchHandlerImpl implements SearchHandler {
         });
         
         String panelTitle = info.getTitle();
-        final BasicSearchResultsModel model = new BasicSearchResultsModel();
+        final BasicSearchResultsModel model = new BasicSearchResultsModel(similarResultsDetectorFactory.newSimilarResultsDetector());
         final SearchResultsPanel searchPanel =
             panelFactory.createSearchResultsPanel(
                 info, model.getVisualSearchResults(), search);

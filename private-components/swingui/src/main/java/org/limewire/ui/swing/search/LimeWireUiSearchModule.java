@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
+import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryMockImpl;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.AudioResultsPanel;
@@ -23,6 +25,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
+        bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryMockImpl.class);
         
         bind(SearchResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(

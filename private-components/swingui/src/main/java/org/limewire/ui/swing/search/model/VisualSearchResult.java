@@ -32,6 +32,8 @@ public interface VisualSearchResult {
     Collection<RemoteHost> getSources();
     
     List<VisualSearchResult> getSimilarResults();
+    
+    VisualSearchResult getSimilarityParent();
 
     long getSize();
     
@@ -40,4 +42,8 @@ public interface VisualSearchResult {
     void setDownloadState(BasicDownloadState downloadState);
 
     void setJunk(boolean junk);
+    
+    boolean isVisible();
+    
+    void setVisible(boolean visible);
 }

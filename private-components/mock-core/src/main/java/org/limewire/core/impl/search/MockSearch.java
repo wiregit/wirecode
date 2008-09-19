@@ -1,7 +1,5 @@
 package org.limewire.core.impl.search;
 
-import static org.limewire.core.api.search.SearchResult.PropertyKey;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,11 +17,13 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 
 public class MockSearch implements Search {
+    public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
     
     private CopyOnWriteArrayList<SearchListener> listeners =
         new CopyOnWriteArrayList<SearchListener>();
@@ -233,6 +233,16 @@ public class MockSearch implements Search {
     private void handleSearchResult(MockSearchResult mock) {
         for (SearchListener listener : listeners) {
             listener.handleSearchResult(mock);
+            
+            try {
+                MockSearchResult similarResult = (MockSearchResult) mock.clone();
+                similarResult.setUrn(SIMILAR_RESULT_PREFIX + mock.getUrn());
+                similarResult.setProperty(PropertyKey.NAME, SIMILAR_RESULT_PREFIX + mock.getProperty(PropertyKey.NAME));
+                listener.handleSearchResult(similarResult);
+            } catch (CloneNotSupportedException e) {
+                // This should never happen.
+                System.err.println("MockSearch: clone problem!");
+            }
         }
     }
     

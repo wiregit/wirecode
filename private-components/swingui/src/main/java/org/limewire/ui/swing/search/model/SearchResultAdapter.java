@@ -2,12 +2,13 @@ package org.limewire.ui.swing.search.model;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,10 @@ class SearchResultAdapter implements VisualSearchResult {
     private Map<SearchResult.PropertyKey, Object> properties;
     private final Set<RemoteHost> remoteHosts;
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
+    private final Set<VisualSearchResult> similarResults = new HashSet<VisualSearchResult>();
+    private VisualSearchResult similarityParent;
     private boolean junk;
+    private boolean visible;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
@@ -37,6 +41,7 @@ class SearchResultAdapter implements VisualSearchResult {
                     o2.getHostDescription());
             }
         });
+        this.visible = true;
         
         update();
     }
@@ -127,11 +132,24 @@ class SearchResultAdapter implements VisualSearchResult {
         }
     }
     
-    @Override
-    public List<VisualSearchResult> getSimilarResults() {
-        return Collections.emptyList();
+    public void addSimilarSearchResult(VisualSearchResult similarResult) {
+        similarResults.add(similarResult);
     }
     
+    @Override
+    public List<VisualSearchResult> getSimilarResults() {
+        return new ArrayList<VisualSearchResult>(similarResults);
+    }
+    
+    public void setSimilarityParent(VisualSearchResult parent) {
+        this.similarityParent = parent;
+    }
+    
+    @Override
+    public VisualSearchResult getSimilarityParent() {
+        return similarityParent;
+    }
+
     @Override
     public long getSize() {
         return coreResults.get(0).getSize();
@@ -189,5 +207,15 @@ class SearchResultAdapter implements VisualSearchResult {
         for (SearchResult result : coreResults) {
             remoteHosts.addAll(result.getSources());
         }
+    }
+
+    @Override
+    public boolean isVisible() {
+        return visible;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

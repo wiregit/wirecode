@@ -18,16 +18,18 @@ public class BasicSearchResultsModel {
     private final GroupingList<SearchResult> groupingListUrns;    
     private final FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults;
     private final AtomicInteger resultCount = new AtomicInteger();
+    
 //    private final GroupingList<VisualSearchResult> groupingListSimilarResults;
 //    private final FunctionList<List<VisualSearchResult>, VisualSearchResult> 
     
-    public BasicSearchResultsModel() {
+    public BasicSearchResultsModel(SimilarResultsDetector similarResultsDetector) {
+        
         allSearchResults = new BasicEventList<SearchResult>();
         groupingListUrns = new GroupingList<SearchResult>(
             allSearchResults, new UrnComparator());
         groupedUrnResults =
             new FunctionList<List<SearchResult>, VisualSearchResult>(
-                groupingListUrns, new SearchResultGrouper(resultCount)); 
+                groupingListUrns, new SearchResultGrouper(similarResultsDetector, resultCount)); 
     }
     
     public int getResultCount() {
@@ -55,10 +57,11 @@ public class BasicSearchResultsModel {
     
     private static class SearchResultGrouper
     implements AdvancedFunction<List<SearchResult>, VisualSearchResult> {
-        
+        private final SimilarResultsDetector similarResultsDetector;
         private final AtomicInteger resultCount;
         
-        public SearchResultGrouper(AtomicInteger resultCount) {
+        public SearchResultGrouper(SimilarResultsDetector similarResultsDetector, AtomicInteger resultCount) {
+            this.similarResultsDetector = similarResultsDetector;
             this.resultCount = resultCount;
         }
         
@@ -72,6 +75,7 @@ public class BasicSearchResultsModel {
         public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
             SearchResultAdapter adapter = new SearchResultAdapter(sourceValue);
             resultCount.addAndGet(adapter.getSources().size());
+            similarResultsDetector.detectSimilarResult(adapter);
             return adapter;
         }
 
