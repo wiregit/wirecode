@@ -308,6 +308,7 @@ public class NetworkManagerImpl implements NetworkManager {
                 fireDirectConnectionAddressEvent(newDirectAddress); 
             }
         } else {
+            Thread.dumpStack();
             fireNullAddressEvent();
         }
     }

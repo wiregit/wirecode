@@ -36,8 +36,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.net.address.PushProxyHolePunchAddressImpl;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -84,12 +83,11 @@ public class PushDownloadManagerTest extends LimeTestCase {
             server = new HTTPPushProxyServer(9999);
             server.start();
             BlockingConnectObserver observer = new BlockingConnectObserver();
-            Set<Connectable> set = new TreeSet<Connectable>();
-            set.add(new ConnectableImpl("localhost", 9999, false));
+            Set<Connectable> proxies = new TreeSet<Connectable>();
+            proxies.add(new ConnectableImpl("localhost", 9999, false));
             GUID guid = new GUID();
-            PushProxyMediatorAddressImpl proxies = new PushProxyMediatorAddressImpl(guid, set);
             Connectable hostAddress = new ConnectableImpl(new ConnectableImpl("localhost", 1111, false));
-            PushProxyHolePunchAddressImpl address = new PushProxyHolePunchAddressImpl(0, hostAddress, proxies);
+            FirewalledAddress address = new FirewalledAddress(new ConnectableImpl("0.0.0.0", 1, false), hostAddress, guid, proxies, 0);
             pushDownloadManager.connect(address, 15 * 1000, observer);
             server.latch.await(2, TimeUnit.SECONDS);
             GiveWritingSocket socket = new GiveWritingSocket(guid, networkManager.getPort());

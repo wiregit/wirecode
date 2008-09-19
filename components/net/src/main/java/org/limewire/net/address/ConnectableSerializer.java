@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Inet4Address;
 import java.nio.ByteOrder;
+import java.util.Set;
 
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
@@ -17,9 +18,10 @@ import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @Singleton
-public class ConnectableSerializer implements AddressSerializer{
+public class ConnectableSerializer implements AddressSerializer {
     
     private static final int IP_V4 = 0;
     private static final int IP_V6 = 1;
@@ -43,11 +45,19 @@ public class ConnectableSerializer implements AddressSerializer{
         ByteUtils.readFully(in, hostPort);
         try {
             IpPort ipPort = NetworkUtils.getIpPort(hostPort, ByteOrder.BIG_ENDIAN);
-            boolean supportsTLS = in.read() == (byte)1;
+            boolean supportsTLS = ByteUtils.readByte(in) == (byte)1;
             return new ConnectableImpl(ipPort.getAddress(), ipPort.getPort(), supportsTLS);
         } catch (InvalidDataException e) {
             throw new IOException(e);
         }
+    }
+    
+    public Set<Connectable> deserializeSet(InputStream in) throws IOException {
+        StrictIpPortSet<Connectable> set = new StrictIpPortSet<Connectable>();
+        while (in.available() > 0) {
+            set.add(deserialize(in));
+        }
+        return set;
     }
 
     public byte[] serialize(Address address) throws IOException {
@@ -58,6 +68,14 @@ public class ConnectableSerializer implements AddressSerializer{
         bos.write(NetworkUtils.getBytes(connectable, ByteOrder.BIG_ENDIAN));
         bos.write(connectable.isTLSCapable() ? (byte)1 : (byte) 0);
         return bos.toByteArray();
+    }
+    
+    public byte[] serialize(Set<Connectable> addresses) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (Connectable connectable : addresses) {
+            out.write(serialize(connectable));
+        }
+        return out.toByteArray();
     }
 
     @Inject

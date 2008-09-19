@@ -3,7 +3,7 @@ package org.limewire.net.address;
 import org.limewire.io.Address;
 
 /**
- * Defines the requirements for an entity that can resolve addresses to other addresses. 
+ * Defines the requirements for an entity that can resolve addresses to other addresses.
  */
 public interface AddressResolver {
 

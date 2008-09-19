@@ -29,6 +29,7 @@ public class PushProxyMediatorAddressImpl implements PushProxyMediatorAddress {
             return false;
         }
         PushProxyMediatorAddress other = (PushProxyMediatorAddress)o;
+        // TODO proxies.equals doesn't work, since IpPorts don't override equals as expected
         return guid.equals(other.getClientID()) && proxies.equals(other.getPushProxies());
     }
     
@@ -40,4 +41,5 @@ public class PushProxyMediatorAddressImpl implements PushProxyMediatorAddress {
         hash = hash * 31 + proxies.hashCode();
         return hash;
     }
+
 }

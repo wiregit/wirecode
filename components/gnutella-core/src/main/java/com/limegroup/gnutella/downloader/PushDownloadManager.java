@@ -68,6 +68,7 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.net.address.PushProxyHolePunchAddress;
 import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 import com.limegroup.gnutella.util.MultiShutdownable;
@@ -178,39 +179,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     
     @Override
     public void connect(Address addr, int timeout, ConnectObserver observer) {
-        if (addr instanceof PushProxyHolePunchAddress) {
-            PushProxyHolePunchAddress holePunchAddress = (PushProxyHolePunchAddress)addr;
-            connect(holePunchAddress.getDirectConnectionAddress(), holePunchAddress.getMediatorAddress(), holePunchAddress.getVersion(), timeout, observer);
-        } else if (addr instanceof PushProxyMediatorAddress) {
-            connect(null, (PushProxyMediatorAddress)addr, 0, timeout, observer);
-        } else {
-            throw new IllegalArgumentException("should not have been called with address type: " + addr.getClass());
-        }
-    } 
-    
-    /**
-     * Connects to a firewalled <code>target</code>.
-     * 
-     * @param target can be null if target host's ip is not known and the only way is
-     * for them to connect back to this client
-     * @param mediator mediator address that contains push proxy information
-     * @param rudpVersion the version of firewalled transfers that is supported
-     * @param timeout connect timeout in milliseconds
-     * @param observer connect observer to be notified of success or failure
-     */
-    private void connect(Connectable target, PushProxyMediatorAddress mediator, int rudpVersion, int timeout, ConnectObserver observer) {
-        GUID clientGuid = mediator.getClientID();
-        target = target != null ? target : createInvalidHost();
+        FirewalledAddress address = (FirewalledAddress)addr;
+        Connectable publicAddress = address.getPublicAddress();
         RemoteFileDesc fakeRFD = 
-            remoteFileDescFactory.createRemoteFileDesc(target.getAddress(), target.getPort(), SPECIAL_INDEX, "fake",
-                0, clientGuid.bytes(), 0, false, 0, false, null, null, false, true, "", mediator.getPushProxies(),
-                -1, rudpVersion, target.isTLSCapable());
-        PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(clientGuid, observer);
+            remoteFileDescFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(), SPECIAL_INDEX, "fake",
+                0, address.getClientGuid().bytes(), 0, false, 0, false, null, null, false, true, "", address.getPushProxies(),
+                -1, address.getFwtVersion(), publicAddress.isTLSCapable());
+        PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(address.getClientGuid(), observer);
         pushHandlers.add(handlerAdapter);
         sendPush(fakeRFD);
         scheduleExpirerFor(handlerAdapter, (int)(timeout * 1.5));
     }
-    
     
     /**
      * Creates an invalid host for pushes.

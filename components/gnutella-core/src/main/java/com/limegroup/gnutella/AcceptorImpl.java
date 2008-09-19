@@ -181,6 +181,8 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * @see com.limegroup.gnutella.Acceptor#setAddress(java.net.InetAddress)
      */
 	public void setAddress(InetAddress address) {
+	    System.out.println("setting address: " + address);
+	    Thread.dumpStack();
 		byte[] byteAddr = address.getAddress();
 		if( !NetworkUtils.isValidAddress(byteAddr) )
 		    return;
@@ -206,6 +208,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * @see com.limegroup.gnutella.Acceptor#setExternalAddress(java.net.InetAddress)
      */
 	public void setExternalAddress(InetAddress address) {
+	    System.out.println("setting external address: " + address);
 	    byte[] byteAddr = address.getAddress();
 
 		if( byteAddr[0] == 127 &&

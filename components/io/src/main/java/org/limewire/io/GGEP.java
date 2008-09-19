@@ -80,6 +80,13 @@ public class GGEP {
     }
     
     /**
+     * Constructs a new ggep message with the given data. 
+     */
+    public GGEP(byte[] data) throws BadGGEPBlockException {
+        this(data, 0);
+    }
+    
+    /**
      * Constructs a new GGEP message with the given bytes & offset.
      */
     public GGEP(byte[] data, int offset) throws BadGGEPBlockException {
