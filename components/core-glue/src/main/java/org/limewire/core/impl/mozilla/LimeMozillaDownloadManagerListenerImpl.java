@@ -52,13 +52,9 @@ public class LimeMozillaDownloadManagerListenerImpl implements
         this.backgroundExecutor = Objects.nonNull(backgroundExecutor, "backgroundExecutor");
         this.downloadManager = Objects.nonNull(downloadManager, "downloadManager");
         this.listeners = new HashMap<Long, LimeMozillaDownloadProgressListener>();
-        synchronized (this) {
-            addMissingDownloads();
-            resumeDownloads();
-        }
     }
 
-    private synchronized void resumeDownloads() {
+    public synchronized void resumeDownloads() {
         nsIDownloadManager downloadManager = getDownloadManager();
         nsISimpleEnumerator enumerator = downloadManager.getActiveDownloads();
         while (enumerator.hasMoreElements()) {
@@ -75,7 +71,7 @@ public class LimeMozillaDownloadManagerListenerImpl implements
         }
     }
 
-    private synchronized void addMissingDownloads() {
+    public synchronized void addMissingDownloads() {
         nsIDownloadManager downloadManager = getDownloadManager();
         nsISimpleEnumerator enumerator = downloadManager.getActiveDownloads();
         while (enumerator.hasMoreElements()) {

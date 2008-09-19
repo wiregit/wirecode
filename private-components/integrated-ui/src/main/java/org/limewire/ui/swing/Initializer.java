@@ -15,6 +15,7 @@ import javax.swing.plaf.basic.BasicHTML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
+import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.service.ErrorService;
@@ -100,7 +101,10 @@ public final class Initializer {
         // Creates LimeWire itself.
      //   LimeWireUI limewireGUI = createLimeWire(); 
         LimeWireCore limeWireCore = createLimeWire();
-
+        Injector injector = limeWireCore.getInjector();
+        
+        LimeMozillaOverrides mozillaOverrides = injector.getInstance(LimeMozillaOverrides.class);
+       
         // Various tasks that can be done after core is glued & started.
         glueCore(limeWireCore);        
         validateEarlyCore(limeWireCore);
@@ -125,7 +129,7 @@ public final class Initializer {
         
         // Initialize early UI components, display the setup manager (if necessary),
         // and ensure the save directory is valid.
-        initializeEarlyUI();
+        initializeEarlyUI(mozillaOverrides);
 //        startSetupManager(setupManager);
         validateSaveDirectory();
         
@@ -380,8 +384,10 @@ public final class Initializer {
         }
     }
     
-    /** Initializes any early UI tasks, such as HTML loading & the Bug Manager. */
-    private void initializeEarlyUI() {
+    /** Initializes any early UI tasks, such as HTML loading & the Bug Manager. 
+     * @param mozillaOverrides 
+     * @param mozillaOverrides */
+    private void initializeEarlyUI(LimeMozillaOverrides mozillaOverrides) {
         // Load up the HTML engine.
         splashRef.get().setStatusText(I18n.tr("Loading HTML Engine..."));
         stopwatch.resetAndLog("update splash for HTML engine");
@@ -406,6 +412,7 @@ public final class Initializer {
         if (OSUtils.isWindows() || OSUtils.isMacOSX() || OSUtils.isLinux()) {
             try {
                 LimeMozillaInitializer.initialize();
+                mozillaOverrides.overrideMozillaDefaults();
             } catch (Exception e) {
                 LOG.error("Mozilla initialization failed");
             }
@@ -418,6 +425,7 @@ public final class Initializer {
                 stopwatch.resetAndLog("Load MozillaPanel");
             }
         });
+        
         stopwatch.resetAndLog("return from evt queue");
     }
     

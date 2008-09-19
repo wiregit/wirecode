@@ -19,7 +19,7 @@ import org.mozilla.browser.IMozillaWindow;
 import org.mozilla.browser.MozillaPanel;
 import org.mozilla.browser.impl.ChromeAdapter;
 
-class MozillaPopupPanel extends MozillaPanel {
+public class MozillaPopupPanel extends MozillaPanel {
 
     @Resource
     private Icon limeIcon;
@@ -29,7 +29,7 @@ class MozillaPopupPanel extends MozillaPanel {
 
     private File icoFile;
 
-    MozillaPopupPanel(boolean attachNewBrowserOnCreation) {
+    public MozillaPopupPanel(boolean attachNewBrowserOnCreation) {
         super(null, attachNewBrowserOnCreation, null, null);
         GuiUtils.assignResources(this);
         icoFile = new File(URI.create(

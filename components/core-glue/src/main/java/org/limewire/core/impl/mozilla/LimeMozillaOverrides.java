@@ -1,5 +1,7 @@
 package org.limewire.core.impl.mozilla;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.MozillaSettings;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownloadManager;
@@ -8,22 +10,19 @@ import org.mozilla.interfaces.nsIPrefService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-/**
- * This class overrides mozilla defaults with values we want it to run with
- * inside of limewire.
- */
 @Singleton
 public class LimeMozillaOverrides {
 
-    private static final String NS_IDOWNLOADMANAGER_CID = "@mozilla.org/download-manager;1";
+    private static final Log LOG = LogFactory.getLog(LimeMozillaOverrides.class);
+
+    private final LimeMozillaDownloadManagerListenerImpl downloadManagerListener;
 
     @Inject
     public LimeMozillaOverrides(LimeMozillaDownloadManagerListenerImpl downloadManagerListener) {
-        overrideMozillaDefaults(downloadManagerListener);
+        this.downloadManagerListener = downloadManagerListener;
     }
 
-    private void overrideMozillaDefaults(
-            LimeMozillaDownloadManagerListenerImpl mozillaDownloadManagerListener) {
+    public void overrideMozillaDefaults() {
         // lookup the preferences service by contract id.
         // by getting a proxy we do not need to run code through mozilla thread.
         nsIPrefService prefService = XPCOMUtils.getServiceProxy(
@@ -45,8 +44,10 @@ public class LimeMozillaOverrides {
                 MozillaSettings.DOWNLOAD_MIME_TYPES.getValue());
 
         // adding the download listener
-        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy(NS_IDOWNLOADMANAGER_CID,
+        nsIDownloadManager downloadManager = XPCOMUtils.getServiceProxy("@mozilla.org/download-manager;1",
                 nsIDownloadManager.class);
-        downloadManager.addListener(mozillaDownloadManagerListener);
+        downloadManagerListener.addMissingDownloads();
+        downloadManagerListener.resumeDownloads();
+        downloadManager.addListener(downloadManagerListener);
     }
 }
