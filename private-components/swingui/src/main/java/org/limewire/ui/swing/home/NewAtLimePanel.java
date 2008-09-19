@@ -11,7 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.limewire.ui.swing.browser.Browser;
-import org.mozilla.browser.IMozillaWindow.VisibilityMode;
+import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 public class NewAtLimePanel extends JPanel {
     

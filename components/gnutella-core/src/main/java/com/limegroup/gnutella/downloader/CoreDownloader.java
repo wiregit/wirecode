@@ -81,5 +81,10 @@ public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStat
      * @throws InvalidDataException if the memento contains invalid data.
      */
     void initFromMemento(DownloadMemento memento) throws InvalidDataException;
+    
+    /**
+     * Indicator of whether this downloader supports a memento or not.
+     */
+    public boolean isMementoSupported();
 
 }

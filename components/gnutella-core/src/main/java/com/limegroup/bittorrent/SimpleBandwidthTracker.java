@@ -35,7 +35,7 @@ public class SimpleBandwidthTracker implements BandwidthTracker {
 	 * @param added non negative value to count twoards bandwidth
 	 * @throws IllegalArgumentException if value supplied is < 0
 	 */
-	public synchronized void count(int added) {
+	public synchronized void count(long added) {
 		if( added < 0) {
 		    throw new IllegalArgumentException("Count values must be positive: " + added);
 		}

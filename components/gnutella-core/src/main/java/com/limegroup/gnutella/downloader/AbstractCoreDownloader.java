@@ -241,4 +241,11 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
             return object;
         }        
     }
+
+    @Override
+    public boolean isMementoSupported() {
+        return true;
+    }
+    
+    
 }

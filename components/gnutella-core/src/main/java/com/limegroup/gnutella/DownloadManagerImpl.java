@@ -63,6 +63,8 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
+import com.limegroup.mozilla.MozillaDownload;
+import com.limegroup.mozilla.MozillaDownloaderImpl;
 
 @Singleton
 public class DownloadManagerImpl implements DownloadManager, Service, FileEventListener {
@@ -103,6 +105,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
      * how many downloaders are active
      */
     private int storeDownloadCount = 0;
+    
+    private int mozillaDownloadCount = 0;
     
     /**
      * The number of times we've been bandwidth measures
@@ -288,7 +292,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         synchronized(this) {
             mementos = new ArrayList<DownloadMemento>(active.size() + waiting.size());
             for(CoreDownloader downloader : activeAndWaiting) {
-                mementos.add(downloader.toMemento());
+                if(downloader.isMementoSupported()) {
+                    mementos.add(downloader.toMemento());
+                }
             }
         }
         
@@ -485,7 +491,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
      * @see com.limegroup.gnutella.DownloadManager#getNumActiveDownloads()
      */
     public synchronized int getNumActiveDownloads() {
-        return active.size() - innetworkCount - storeDownloadCount;
+        return active.size() - innetworkCount - storeDownloadCount - mozillaDownloadCount;
     }
    
     /* (non-Javadoc)
@@ -791,6 +797,18 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         return ret;
     }
     
+    public synchronized Downloader downloadFromMozilla(MozillaDownload listener) {
+        
+        CoreDownloader downloader = new MozillaDownloaderImpl(this, listener);
+        
+        downloader.initialize();
+        callback(downloader).addDownload(downloader);
+        active.add(downloader);
+        mozillaDownloadCount++;
+        fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
+        return downloader;
+    }
+    
     private void checkTargetLocation(TorrentFileSystem info, boolean overwrite) 
     throws SaveLocationException{
         for (File f : info.getFilesAndFolders()) {
@@ -969,7 +987,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        return active.size() - innetworkCount - storeDownloadCount
+        return active.size() - innetworkCount - storeDownloadCount - mozillaDownloadCount
             < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
@@ -984,6 +1002,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         // make sure an active download was removed prior to decrementing this index
         if(downloader.getDownloadType() == DownloaderType.STORE && isRemoved)
             storeDownloadCount--;
+        
+        if(downloader.getDownloadType() == DownloaderType.MOZILLA && isRemoved)
+            mozillaDownloadCount--;
         
         waiting.remove(downloader);
         if(completed)

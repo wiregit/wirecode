@@ -10,7 +10,7 @@ import java.awt.GridBagLayout;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.browser.Browser;
-import org.mozilla.browser.IMozillaWindow.VisibilityMode;
+import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
 
