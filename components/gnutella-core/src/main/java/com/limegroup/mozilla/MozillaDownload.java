@@ -102,4 +102,9 @@ public interface MozillaDownload extends BandwidthTracker {
      * Returns indicator that the download is queued.
      */
     boolean isQueued();
+
+    /**
+     * Returns indicator that the download is CANCELLED.
+     */
+    boolean isCancelled();
 }

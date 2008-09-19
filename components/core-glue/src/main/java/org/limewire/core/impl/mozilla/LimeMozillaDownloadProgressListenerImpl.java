@@ -258,12 +258,14 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
         MozillaExecutor.mozSyncExec(new Runnable() {
             @Override
             public void run() {
-                try {
-                    synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
-                        getDownloadManager().cancelDownload(downloadId);
+                if (!LimeMozillaDownloadProgressListenerImpl.this.isCancelled()) {
+                    try {
+                        synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
+                            getDownloadManager().cancelDownload(downloadId);
+                        }
+                    } catch (XPCOMException e) {
+                        LOG.debug(e.getMessage(), e);
                     }
-                } catch (XPCOMException e) {
-                    LOG.debug(e.getMessage(), e);
                 }
             }
         });
@@ -276,12 +278,14 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
             @Override
             public void run() {
                 synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
-                    try {
-                        getDownloadManager().pauseDownload(downloadId);
-                    } catch (XPCOMException e) {
-                        LOG.debug(e.getMessage(), e);
+                    if (!LimeMozillaDownloadProgressListenerImpl.this.isPaused()) {
+                        try {
+                            getDownloadManager().pauseDownload(downloadId);
+                        } catch (XPCOMException e) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                        changeState(nsIDownloadManager.DOWNLOAD_PAUSED);
                     }
-                    changeState(nsIDownloadManager.DOWNLOAD_PAUSED);
                 }
             }
         });
@@ -311,12 +315,14 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
             @Override
             public void run() {
                 synchronized (LimeMozillaDownloadProgressListenerImpl.this) {
-                    try {
-                        getDownloadManager().resumeDownload(downloadId);
-                    } catch (XPCOMException e) {
-                        LOG.debug(e.getMessage(), e);
+                    if (LimeMozillaDownloadProgressListenerImpl.this.isPaused()
+                            || LimeMozillaDownloadProgressListenerImpl.this.isQueued()) {
+                        try {
+                            getDownloadManager().resumeDownload(downloadId);
+                        } catch (XPCOMException e) {
+                            LOG.debug(e.getMessage(), e);
+                        }
                     }
-                    changeState(nsIDownloadManager.DOWNLOAD_QUEUED);
                 }
             }
         });
@@ -342,6 +348,14 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
     public synchronized boolean isQueued() {
         boolean queued = state.get() == nsIDownloadManager.DOWNLOAD_QUEUED;
         return queued;
+    }
+
+    @Override
+    public synchronized boolean isCancelled() {
+        DownloadStatus downloadStatus = getDownloadStatus();
+        boolean cancelled = downloadStatus == DownloadStatus.ABORTED
+                || downloadStatus == DownloadStatus.INVALID;
+        return cancelled;
     }
 
 }

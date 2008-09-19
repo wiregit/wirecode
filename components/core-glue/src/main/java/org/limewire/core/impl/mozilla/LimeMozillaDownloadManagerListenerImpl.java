@@ -68,7 +68,9 @@ public class LimeMozillaDownloadManagerListenerImpl implements
             try {
                 downloadManager.resumeDownload(downloadId);
             } catch (XPCOMException e) {
-                LOG.debug(e.getMessage(), e);
+                // can see the downloads in the ui and reusme them from there.
+                // When first starting we don't know what downloads have already
+                // started, so eat this exception here.
             }
         }
     }
