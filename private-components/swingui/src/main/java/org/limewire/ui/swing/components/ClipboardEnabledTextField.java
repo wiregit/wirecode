@@ -17,8 +17,7 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
 import org.limewire.i18n.I18nMarker;
-
-import com.limegroup.gnutella.gui.I18n;
+import org.limewire.ui.swing.util.I18n;
 
 /**
  * A better JTextField.
