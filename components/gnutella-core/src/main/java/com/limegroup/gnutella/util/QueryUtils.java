@@ -132,33 +132,9 @@ public class QueryUtils {
             retString = removeIllegalChars(name);
             retString = StringUtils.truncate(retString, maxLen);
         } else {
-            StringBuilder sb = new StringBuilder();
-            int numWritten = 0;
-            for(String currKey : keywords) {
-                if(numWritten >= maxLen)
-                    break;
-                
-                // if we have space to add the keyword
-                if ((numWritten + currKey.length()) < maxLen) {
-                    if (numWritten > 0) { // add a space if we've written before
-                        sb.append(" ");
-                        numWritten++;
-                    }
-                    sb.append(currKey); // add the new keyword
-                    numWritten += currKey.length();
-                }
-            }
-    
-            retString = sb.toString();
-    
-            //one small problem - if every keyword in the filename is
-            //greater than MAX_LEN, then the string returned will be empty.
-            //if this happens just truncate the first keyword....
-            if (retString.equals("")) {
-                retString = StringUtils.truncate(keywords.iterator().next(), maxLen);
-            }
+            retString = constructQueryStringFromKeywords(maxLen, keywords);
         }
-    
+
         // Added a bunch of asserts to catch bugs.  There is some form of
         // input we are not considering in our algorithms....
         assert retString.length() <= maxLen : "Original filename: " + name + ", converted: " + retString;
@@ -166,6 +142,36 @@ public class QueryUtils {
             assert !retString.equals("") : "Original filename: " + name;
     
         return retString;
+    }
+
+    /**
+     * Constructs a space(" ") delimited query string that
+     * must be <= maxLen from a set of keywords.
+     *
+     * @param maxLen
+     * @param keywords set of keywords from which to generate the query string
+     * @return
+     */
+    public static String constructQueryStringFromKeywords(int maxLen, Set<String> keywords) {
+        // adding keywords that fit when appended to query string field, skipping keywords that do not fit.
+        StringBuilder queryFieldValue = new StringBuilder();
+        for (String keyword : keywords) {
+            String delimIncl = (queryFieldValue.length() == 0) ? "" : " ";
+
+            if ((queryFieldValue.length() + keyword.length() + delimIncl.length())
+                    <= maxLen) {
+                queryFieldValue.append(delimIncl);
+                queryFieldValue.append(keyword);
+            }
+        }
+
+        // in case the query string field is blank
+        // All keywords are longer than queryField_LIMIT,
+        // query string field would use maxLen chars of 1st keyword
+        if (queryFieldValue.length() == 0) {
+            queryFieldValue.append(StringUtils.truncate(keywords.iterator().next(), maxLen));
+        }
+        return queryFieldValue.toString();
     }
 
     /**

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.core.settings.SearchSettings;
 
 import junit.framework.Test;
 
@@ -39,23 +40,31 @@ public class QueryUtilsTest extends BaseTestCase {
     
     public void testCreateQueryString() {
         QueryRequest qr;
-        
+
+        int maxQueryLength = SearchSettings.MAX_QUERY_LENGTH.getValue();
         String query = QueryUtils.createQueryString("file and 42-name_minus #numbers");
         containsAll("file name minus numbers", query);
-        
-        query = QueryUtils.createQueryString("reallylongfilenamethatisgoingtotruncate");
-        assertEquals("reallylongfilenamethatisgoingt", query);
+
+        String tooLongString = generateStringByLengthCharsOnly(maxQueryLength + 23);
+        String tooLongStringTruncated = tooLongString.substring(0, maxQueryLength);
+
+        query = QueryUtils.createQueryString(tooLongString);
+        assertEquals(tooLongStringTruncated, query);
+
         // verify that we can create local & network queries out of the query string
         qr = queryRequestFactory.createQuery(query);
         queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
         
         //such query will fit any 2 out of 3 words in it.
-        query = QueryUtils.createQueryString("short one, reallylongotherfilename");
+        String thirdKeywordTooLong = "short one, " + generateStringByLengthCharsOnly(maxQueryLength - 7);
+        query = QueryUtils.createQueryString(thirdKeywordTooLong);
         assertEquals(2,query.split(" ").length);
         qr = queryRequestFactory.createQuery(query);
         queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
-        
-        query = QueryUtils.createQueryString("longfirstthingthatwontfitatall, but short others");
+
+        String firstThingWontFit_But_Others_Will = generateStringByLengthCharsOnly(maxQueryLength + 1) +
+                ", but short others";
+        query = QueryUtils.createQueryString(firstThingWontFit_But_Others_Will);
         containsAll("but short others", query);
         qr = queryRequestFactory.createQuery(query);
         queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
@@ -72,8 +81,9 @@ public class QueryUtilsTest extends BaseTestCase {
         
         // test that string with a number + illegal characters + keyword too long
         // is truncating the keyword, not the whole string.
-        query = QueryUtils.createQueryString("1920936_thisisaverylongkeywordwithanumbernadillegalcharacterthatwillbetruncated");
-        assertEquals("thisisaverylongkeywordwithanum", query);
+        String tooLongStringWithNumbersAtBeginning = "1920936_" + tooLongString;
+        query = QueryUtils.createQueryString(tooLongStringWithNumbersAtBeginning);
+        assertEquals(tooLongStringTruncated, query);
     }
 
     
@@ -124,7 +134,14 @@ public class QueryUtilsTest extends BaseTestCase {
         assertEquals(valid, QueryUtils.extractKeywords(QueryUtils.ripExtension("11 test pg-13 3.1415947"), true));
     }
     
+    private String generateStringByLengthCharsOnly(int length) {
+        StringBuilder longStr = new StringBuilder();
 
+        while (longStr.length() < length) {
+            longStr.append("dummystring");
+        }
+        return longStr.substring(0, length);
+    }
     
     private void containsAll(String match, String query) {
         Collection matchSet = Arrays.asList(match.split(" "));

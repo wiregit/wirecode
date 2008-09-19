@@ -362,32 +362,15 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     private String getQueryFieldValue() {
         
         // extract keywords from query
-        String[] keywords = StringUtils.split(QUERY, QueryUtils.DELIMITERS);
+        Set<String> keywords = QueryUtils.extractKeywords(QUERY, true);
 
         // conditions for which the query field will be identical to the query string
-        if ((QUERY.length() <= OLD_LW_MAX_QUERY_FIELD_LEN) || (keywords.length == 0)) {
+        if ((QUERY.length() <= OLD_LW_MAX_QUERY_FIELD_LEN) || (keywords.isEmpty())) {
             return QUERY;
         }
 
         // adding keywords that fit when appended to query string field, skipping keywords that do not fit.
-        StringBuilder queryFieldValue = new StringBuilder();
-        for (String keyword : keywords) {
-            String delimIncl = (queryFieldValue.length() == 0) ? "" : " ";
-
-            if ((queryFieldValue.length() + keyword.length() + delimIncl.length())
-                    <= OLD_LW_MAX_QUERY_FIELD_LEN) {
-                queryFieldValue.append(delimIncl);
-                queryFieldValue.append(keyword);
-            }
-        }
-
-        // in case the query string field is blank
-        // All keywords are longer than queryField_LIMIT,
-        // query string field would use 1st 30 chars of 1st keyword
-        if (queryFieldValue.length() == 0) {
-            queryFieldValue.append(QUERY.substring(0, OLD_LW_MAX_QUERY_FIELD_LEN));
-        }
-        return queryFieldValue.toString();
+        return QueryUtils.constructQueryStringFromKeywords(OLD_LW_MAX_QUERY_FIELD_LEN, keywords);
     }
 
 
