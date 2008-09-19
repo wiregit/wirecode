@@ -13,11 +13,13 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
+
+import org.limewire.collection.AutoCompleteDictionary;
+import org.limewire.ui.swing.components.DropDownListAutoCompleteTextField;
 
 /**
  * This is a custom component that includes a JTextField and a JButton.
@@ -30,7 +32,7 @@ import javax.swing.text.AbstractDocument;
 public class TextFieldWithEnterButton extends JPanel implements FocusListener {
     
     private JButton button;
-    private JTextField textField;
+    private DropDownListAutoCompleteTextField textField;
     private List<ActionListener> listeners = new ArrayList<ActionListener>();
     private String promptText;
     private boolean empty;
@@ -43,15 +45,16 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      * @param icon the Icon to be display on the button
      */
     public TextFieldWithEnterButton(
-        int columns, String promptText,
-        Icon upIcon, Icon overIcon, Icon downIcon) {
+            int columns, String promptText,
+            Icon upIcon, Icon overIcon, Icon downIcon, AutoCompleteDictionary friendLibraries) {
         
         this.promptText = promptText;
         
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         
         // Configure the JTextField.
-        textField = new JTextField(columns);
+        textField = new DropDownListAutoCompleteTextField(columns);
+        textField.setDictionary(friendLibraries);
         prompt();
         textField.addFocusListener(this);
         textField.addActionListener(new ActionListener() {

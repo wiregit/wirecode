@@ -28,6 +28,7 @@ import javax.swing.Timer;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
@@ -50,6 +51,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 @Singleton
 class TopPanel extends JPanel implements SearchNavigator {
@@ -66,7 +68,8 @@ class TopPanel extends JPanel implements SearchNavigator {
     @Resource private Icon enterDownIcon;
     
     @Inject
-    public TopPanel(final SearchHandler searchHandler, Navigator navigator) {
+    public TopPanel(final SearchHandler searchHandler, Navigator navigator,
+                    @Named("friendLibraries") AutoCompleteDictionary friendLibraries) {
         this.navigator = navigator;
         
         setMinimumSize(new Dimension(0, 40));
@@ -75,7 +78,7 @@ class TopPanel extends JPanel implements SearchNavigator {
         
 	    GuiUtils.assignResources(this);
         textField = new TextFieldWithEnterButton(
-            15, I18n.tr("Search..."), enterUpIcon, enterOverIcon, enterDownIcon);
+            15, I18n.tr("Search..."), enterUpIcon, enterOverIcon, enterDownIcon, friendLibraries);
         textField.setMaximumSize(120);
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
