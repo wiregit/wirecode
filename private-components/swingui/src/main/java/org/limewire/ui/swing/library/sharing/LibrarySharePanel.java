@@ -10,6 +10,8 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -18,18 +20,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
@@ -57,8 +66,8 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -121,6 +130,28 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     @Resource
     private int shareTableIndent = 15;
     
+    private Action up = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int selRow = buddyTable.getSelectedRow();
+            if (selRow > 0) {
+                selRow--;
+                buddyTable.setRowSelectionInterval(selRow, selRow);
+            }
+        }
+    };
+
+    private Action down = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int selRow = buddyTable.getSelectedRow();
+            if (selRow < buddyTable.getRowCount() - 1) {
+                selRow++;
+                buddyTable.setRowSelectionInterval(selRow, selRow);
+            }
+        }
+    };
+    
     
     @Inject
     public LibrarySharePanel(LibraryManager libraryManager) {
@@ -172,6 +203,8 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         shareTable.getColumnModel().getColumn(1).setCellRenderer(new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed));      
         shareTable.setShowGrid(false);       
         shareTable.setOpaque(false);
+        shareTable.setColumnSelectionAllowed(false);
+        shareTable.setRowSelectionAllowed(false);
   
         noShareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
         
@@ -181,15 +214,68 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
                 baseList.add(element.getName());
             }
         };
-        final EventList<SharingTarget> noShareSortedList = new FilterList<SharingTarget>(noShareBuddyList, 
-                new TextComponentMatcherEditor<SharingTarget>(inputField, textFilter));
         
-        buddyTable = new MouseableTable(new EventTableModel<SharingTarget>(noShareSortedList, new LibraryShareTableFormat(0)));
+        //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
+        //have no guarantee about the order of sorting and selecting
+        final TextMatcherEditor<SharingTarget>textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
+        
+        final EventList<SharingTarget> noShareSortedList = new FilterList<SharingTarget>(noShareBuddyList, textMatcher);
+        
+        inputField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if("".equals(inputField.getText()) || inputField.getText() == null){
+                    setVisible(false);
+                } else if (buddyTable.getSelectedRow() >= 0) {
+                    shareBuddy(noShareSortedList.get(buddyTable.getSelectedRow()));
+                }
+            }
+        });
+        
+        inputField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+               update();
+            }
+            
+            private void update(){
+                textMatcher.setFilterText(inputField.getText().split(" "));
+                if (buddyTable.getRowCount() > 0){
+                    buddyTable.setRowSelectionInterval(0, 0);
+                }
+            }
+        });
+        
+        buddyTable = new MouseableTable(new EventTableModel<SharingTarget>(noShareSortedList, new LibraryShareTableFormat(0))){
+            public String getToolTipText(MouseEvent event) {
+                System.out.println(event.getComponent());
+               int row = rowAtPoint(event.getPoint());
+               if (row >= 0){
+                   return noShareSortedList.get(row).getName();
+               }
+                return null;
+                
+            }
+        };
         //do nothing ColorHighlighter eliminates default striping
-        buddyTable.setHighlighters(new ColorHighlighter());
+        buddyTable.setHighlighters(new ColorHighlighter(HighlightPredicate.ALWAYS, getBackground(),
+                Color.BLACK, buddyTable.getSelectionBackground(), buddyTable.getSelectionForeground()));
         buddyTable.setTableHeader(null);
         buddyTable.setOpaque(false);
-        buddyTable.setShowGrid(false);
+        buddyTable.setShowGrid(false, false);
+        buddyTable.setColumnSelectionAllowed(false);
+        buddyTable.setRowSelectionAllowed(true);
+        buddyTable.setToolTipText("filler to enable tooltips");
 
         final ShareRendererEditor addEditor = new ShareRendererEditor(addIcon, addIconRollover, addIconPressed);
         addEditor.addActionListener(new ActionListener(){
@@ -200,13 +286,13 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             }            
         });
         
-        buddyTable.setDoubleClickHandler(new TableDoubleClickHandler(){
-
+        buddyTable.setDoubleClickHandler(new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
-               shareBuddy(noShareSortedList.get(row));
-            }});
-        
+                shareBuddy(noShareSortedList.get(row));
+            }
+        });
+
         buddyTable.getColumnModel().getColumn(0).setCellEditor(addEditor);
         buddyTable.getColumnModel().getColumn(0).setPreferredWidth(addEditor.getPreferredSize().width); 
         buddyTable.getColumnModel().getColumn(0).setMaxWidth(addEditor.getPreferredSize().width);       
@@ -258,6 +344,18 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
         EventAnnotationProcessor.subscribe(this);   
         
+        setKeyStrokes(this);
+        setKeyStrokes(mainPanel);
+        setKeyStrokes(inputField);
+        
+    }
+    
+    
+    private void setKeyStrokes(JComponent component) {
+        component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "up");
+        component.getActionMap().put("up", up);
+        component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "down");
+        component.getActionMap().put("down", down);       
     }
     
     //@Override
@@ -478,11 +576,11 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
         @Override
         public boolean isEditable(SharingTarget baseObject, int column) {
-            if (column == editColumn) {
+           // if (column == editColumn) {
                 return true;
-            }
-
-            return false;
+//            }
+//
+//            return false;
         }
 
         @Override
