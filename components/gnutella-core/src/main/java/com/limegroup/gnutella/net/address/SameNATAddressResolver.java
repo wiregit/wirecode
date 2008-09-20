@@ -15,7 +15,8 @@ import com.limegroup.gnutella.NetworkManager;
 
 /**
  * Detects if a firewalled address is behind the same NAT and on the same
- * local network and resolves to the local address.
+ * local network and resolves to the local address. Otherwise marks the 
+ * firewalled address as resolved.
  */
 @Singleton
 public class SameNATAddressResolver implements AddressResolver {

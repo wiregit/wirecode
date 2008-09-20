@@ -45,6 +45,7 @@ import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.net.address.PushProxyHolePunchAddress;
 import com.limegroup.gnutella.net.address.PushProxyHolePunchAddressImpl;
 import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
+import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
@@ -226,7 +227,7 @@ public class NetworkManagerImpl implements NetworkManager {
         if (connectionManager.get().isShieldedLeaf()) 
             connectionManager.get().sendUpdatedCapabilities();
         synchronized (addressLock) {
-            maybeFireNewHolePunchAddress();
+            newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()), firewalledAddress.getPushProxies()));
         }
     }
 
