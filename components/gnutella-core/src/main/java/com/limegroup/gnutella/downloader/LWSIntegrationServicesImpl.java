@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +28,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Mutable;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.lws.server.LWSManager;
@@ -330,7 +330,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
         // Make sure we aren't already downloading this
         //
         String fileName = rfd.getFileName();
-        final Mutable<Downloader> downloader = new Mutable<Downloader>();
+        final AtomicReference<Downloader> downloader = new AtomicReference<Downloader>();
         synchronized (lwsIntegrationServicesDelegate) {
             final File saveFile = new File(saveDir, fileName);
             lwsIntegrationServicesDelegate.visitDownloads(new Visitor<CoreDownloader>() {
@@ -594,7 +594,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices,
             //
             // Find the downloader, by System.identityHashCode()
             //
-            final Mutable<String> res = new Mutable<String>("OK");
+            final AtomicReference<String> res = new AtomicReference<String>("OK");
             del.visitDownloads(new Visitor<CoreDownloader>() {
                 public boolean visit(CoreDownloader d) {  
                     String hash = String.valueOf(System.identityHashCode(d));

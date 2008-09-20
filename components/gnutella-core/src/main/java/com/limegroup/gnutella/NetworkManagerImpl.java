@@ -280,8 +280,9 @@ public class NetworkManagerImpl implements NetworkManager {
     private void maybeFireNewDirectConnectionAddress() {
         if(isDirectConnectionCapable()) {
             Connectable newDirectAddress = getDirectConnectionAddress();
-            if(directAddress == null || !directAddress.equals(newDirectAddress)) {
-                fireDirectConnectionAddressEvent(newDirectAddress); 
+            if (directAddress == null || ConnectableImpl.COMPARATOR.compare(directAddress, newDirectAddress) != 0) {
+                directAddress = newDirectAddress;
+                fireAddressChange(newDirectAddress);
             }
         } else {
             fireNullAddressEvent();
@@ -289,9 +290,8 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     private boolean isDirectConnectionCapable() {
-        // TODO is that the right port method?
         return NetworkUtils.isValidAddress(getExternalAddress()) 
-                && acceptedIncomingConnection() && NetworkUtils.isValidPort(getNonForcedPort());
+        && acceptedIncomingConnection() && NetworkUtils.isValidPort(getPort());
     }
 
     public void portChanged() {
@@ -309,7 +309,7 @@ public class NetworkManagerImpl implements NetworkManager {
     private Connectable getDirectConnectionAddress() {
         try {
             return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
-                    getNonForcedPort(), isIncomingTLSEnabled()); // TODO is that the right port method?
+                    getPort(), isIncomingTLSEnabled());
         } catch (UnknownHostException e) {
             // TODO does this warrant ErrorService?
             ErrorService.error(e);
@@ -317,11 +317,6 @@ public class NetworkManagerImpl implements NetworkManager {
         }                                  
     }
     
-    private void fireDirectConnectionAddressEvent(Connectable address) {
-        directAddress = address;
-        fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
-    }
-
     public void newMediatedConnectionAddress(PushProxyMediatorAddress newMediatorAddress) {
         FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), newMediatorAddress.getPushProxies(), supportsFWTVersion());
         boolean changed = false;
@@ -332,7 +327,7 @@ public class NetworkManagerImpl implements NetworkManager {
             }
         }
         if (changed) {
-            fireEvent(new AddressEvent(newAddress, Address.EventType.ADDRESS_CHANGED));
+            fireAddressChange(newAddress);
         }
     }
     
@@ -342,9 +337,9 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
     private Connectable getPrivateAddress() {
-        byte[] privateAddress = getAddress();
+        byte[] privateAddress = getNonForcedAddress();
         try {
-            return new ConnectableImpl(new InetSocketAddress(InetAddress.getByAddress(privateAddress), getPort()), isTLSSupported());
+            return new ConnectableImpl(new InetSocketAddress(InetAddress.getByAddress(privateAddress), getNonForcedPort()), isTLSSupported());
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
@@ -458,8 +453,8 @@ public class NetworkManagerImpl implements NetworkManager {
         return listeners.removeListener(listener);
     }
     
-    private void fireEvent(AddressEvent event) {
-        listeners.broadcast(event);
+    private void fireAddressChange(Address newAddress) {
+        listeners.broadcast(new AddressEvent(newAddress, Address.EventType.ADDRESS_CHANGED));
     }
     
     private static class SSLSettings extends LimeProps {
