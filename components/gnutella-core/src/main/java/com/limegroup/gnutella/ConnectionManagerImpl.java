@@ -2610,6 +2610,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     
     public void handleEvent(final GnutellaConnectionEvent event) {
         Set<Connectable> pushProxies = getPushProxies();
-        networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxies));
+        if (pushProxies.size() >= 2) {
+            networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxies));
+        }
     }
 }
