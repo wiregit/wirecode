@@ -6,6 +6,16 @@ import java.net.UnknownHostException;
 
 /** A default implementation of Connectable. */
 public class ConnectableImpl implements Connectable {
+
+    public static final Connectable INVALID_CONNECTABLE;
+    
+    static {
+        try {
+            INVALID_CONNECTABLE = new ConnectableImpl("0.0.0.0", 1, false);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     private final IpPort ipPort;
     private final boolean tlsCapable;
