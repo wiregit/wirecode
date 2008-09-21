@@ -20,6 +20,8 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
 
 import com.google.inject.assistedinject.Assisted;
@@ -71,8 +73,11 @@ public class SearchResultsPanel extends JPanel {
         this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new SearchScrollPane();
 
+        ObservableElementList<VisualSearchResult> observableList = 
+            new ObservableElementList<VisualSearchResult>(eventList, GlazedLists.beanConnector(VisualSearchResult.class));
+        
         final SortedList<VisualSearchResult> filteredList =
-            sortAndFilterPanel.getFilteredAndSortedList(eventList);
+            sortAndFilterPanel.getFilteredAndSortedList(observableList);
         
         // The ResultsContainerFactory create method takes two parameters
         // which it passes to the ResultsContainer constructor

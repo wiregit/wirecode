@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search.model;
 
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +42,13 @@ public interface VisualSearchResult {
 
     void setDownloadState(BasicDownloadState downloadState);
 
-    void setJunk(boolean junk);
+    void setMarkedAsJunk(boolean junk);
     
     boolean isVisible();
     
     void setVisible(boolean visible);
+    
+    void addPropertyChangeListener(PropertyChangeListener listener);
+    
+    void removePropertyChangeListener(PropertyChangeListener listener);
 }

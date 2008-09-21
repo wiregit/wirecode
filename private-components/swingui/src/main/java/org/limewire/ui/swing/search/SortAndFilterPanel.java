@@ -28,6 +28,7 @@ import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.friends.ChatLoginState;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -209,8 +210,9 @@ public class SortAndFilterPanel extends JXPanel {
 
     private static Comparator<VisualSearchResult> getDateComparator(
         final PropertyKey key, final boolean ascending) {
-        return new Comparator<VisualSearchResult>() {
-            public int compare(
+        return new SimilarResultsGroupingComparator() {
+            @Override
+            public int doCompare(
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Date v1 = (Date) vsr1.getProperty(key);
                 Date v2 = (Date) vsr2.getProperty(key);
@@ -221,10 +223,11 @@ public class SortAndFilterPanel extends JXPanel {
     }
 
     private static Comparator<VisualSearchResult> getFloatComparator(
-        final PropertyKey key, final boolean ascending) {
-        return new Comparator<VisualSearchResult>() {
-            public int compare(
-                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+            final PropertyKey key, final boolean ascending) {
+        return new SimilarResultsGroupingComparator() {
+            @Override
+            protected int doCompare(
+                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Float v1 = (Float) vsr1.getProperty(key);
                 Float v2 = (Float) vsr2.getProperty(key);
                 return v1 == null ? 0 :
@@ -235,8 +238,9 @@ public class SortAndFilterPanel extends JXPanel {
 
     private static Comparator<VisualSearchResult> getLongComparator(
         final PropertyKey key, final boolean ascending) {
-        return new Comparator<VisualSearchResult>() {
-            public int compare(
+        return new SimilarResultsGroupingComparator() {
+            @Override
+            public int doCompare(
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Long v1 = (Long) vsr1.getProperty(key);
                 Long v2 = (Long) vsr2.getProperty(key);
@@ -248,8 +252,9 @@ public class SortAndFilterPanel extends JXPanel {
 
     private static Comparator<VisualSearchResult> getStringComparator(
         final PropertyKey key, final boolean ascending) {
-        return new Comparator<VisualSearchResult>() {
-            public int compare(
+        return new SimilarResultsGroupingComparator() {
+            @Override
+            public int doCompare(
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 String v1 = (String) vsr1.getProperty(key);
                 String v2 = (String) vsr2.getProperty(key);
@@ -280,8 +285,9 @@ public class SortAndFilterPanel extends JXPanel {
         if ("File extension".equals(item)
             || "File type".equals(item)
             || "Type".equals(item)) {
-            return new Comparator<VisualSearchResult>() {
-                public int compare(
+            return new SimilarResultsGroupingComparator() {
+                @Override
+                public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
                     String v1 = vsr1.getMediaType();
                     String v2 = vsr2.getMediaType();
@@ -317,8 +323,9 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         if ("Size (high to low)".equals(item)) {
-            return new Comparator<VisualSearchResult>() {
-                public int compare(
+            return new SimilarResultsGroupingComparator() {
+                @Override
+                public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
                     Long v1 = vsr1.getSize();
                     Long v2 = vsr2.getSize();
@@ -328,8 +335,9 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         if ("Size (low to high)".equals(item)) {
-            return new Comparator<VisualSearchResult>() {
-                public int compare(
+            return new SimilarResultsGroupingComparator() {
+                @Override
+                public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
                     Long v1 = vsr1.getSize();
                     Long v2 = vsr2.getSize();

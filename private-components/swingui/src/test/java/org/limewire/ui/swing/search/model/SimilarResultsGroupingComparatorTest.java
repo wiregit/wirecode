@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search.model;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
 import junit.framework.TestCase;
 
 public class SimilarResultsGroupingComparatorTest extends TestCase {
@@ -21,10 +20,10 @@ public class SimilarResultsGroupingComparatorTest extends TestCase {
 
     @Override
     protected void setUp() {
-        comparator = new SimilarResultsGroupingComparator<String>() {
+        comparator = new SimilarResultsGroupingComparator() {
             @Override
-            protected String getSecondaryComparable(VisualSearchResult result) {
-                return result.getDescription();
+            protected int doCompare(VisualSearchResult result1, VisualSearchResult result2) {
+                return result1.getDescription().compareTo(result2.getDescription());
             }
         };
 
@@ -70,7 +69,6 @@ public class SimilarResultsGroupingComparatorTest extends TestCase {
         }
     }
     
-    @SuppressWarnings("unchecked")
     private void assertOrder(String... order) {
         Collections.sort(results, comparator);
         /*for(VisualSearchResult result : results) {

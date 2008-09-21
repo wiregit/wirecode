@@ -14,12 +14,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.util.MediaType;
 
-class SearchResultAdapter implements VisualSearchResult {
+class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     
     private final List<SearchResult> coreResults;
     private Map<SearchResult.PropertyKey, Object> properties;
@@ -186,12 +187,16 @@ class SearchResultAdapter implements VisualSearchResult {
 
     @Override
     public void setDownloadState(BasicDownloadState downloadState) {
+        BasicDownloadState oldDownloadState = this.downloadState;
         this.downloadState = downloadState;
+        firePropertyChange("downloadState", oldDownloadState, downloadState);
     }
 
     @Override
-    public void setJunk(boolean junk) {
+    public void setMarkedAsJunk(boolean junk) {
+        boolean oldJunk = this.junk;
         this.junk = junk;
+        firePropertyChange("markedAsJunk", oldJunk, junk);
     }
 
     @Override
@@ -216,6 +221,8 @@ class SearchResultAdapter implements VisualSearchResult {
 
     @Override
     public void setVisible(boolean visible) {
+        boolean oldVisible = this.visible;
         this.visible = visible;
+        firePropertyChange("visible", oldVisible, visible);
     }
 }

@@ -38,11 +38,10 @@ implements TableCellEditor, TableCellRenderer {
         
         JToggleButton junkButton = panel.getJunkButton();
         junkButton.addItemListener(new ItemListener() {
-            @SuppressWarnings("unchecked")
             @Override
             public void itemStateChanged(ItemEvent event) {
                 boolean junk = event.getStateChange() == ItemEvent.SELECTED;
-                vsr.setJunk(junk);
+                vsr.setMarkedAsJunk(junk);
             }
         });
         

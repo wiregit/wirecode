@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
@@ -37,6 +38,8 @@ import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.library.MyLibraryPanel;
@@ -59,6 +62,8 @@ public class ListViewTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
+    private static final int SIMILARITY_INDENTATION = 20;
+    private final Log LOG = LogFactory.getLog(getClass());
     private final Color SELECTED_COLOR = Color.GREEN;
 
     private final String SEARCH_TEXT_COLOR = "red";
@@ -94,6 +99,7 @@ implements TableCellEditor, TableCellRenderer {
     private boolean isShowingSimilar;
    // private int row;
     private int similarCount;
+    private JComponent similarResultIndentation;
 
     @Inject
     public ListViewTableCellEditor(
@@ -121,7 +127,7 @@ implements TableCellEditor, TableCellRenderer {
      */
     private String highlightMatches(String sourceText) {
         boolean haveSearchText = searchText != null && searchText.length() > 0;
-        System.out.println("haveSearchText = " + haveSearchText);
+        LOG.debugf("haveSearchText = {0}", haveSearchText);
         boolean haveFilterText = filterText != null && filterText.length() > 0;
 
         // If there is no search or filter text then return sourceText as is.
@@ -189,7 +195,7 @@ implements TableCellEditor, TableCellRenderer {
         }
 
         result += sourceText; // tack on the remaining sourceText
-        System.out.println("highlighted text is " + result);
+        LOG.debugf("highlighted text is {0}", result);
         return result;
     }
 
@@ -225,8 +231,7 @@ implements TableCellEditor, TableCellRenderer {
 
     public Component getTableCellEditorComponent(
         JTable table, Object value, boolean isSelected, int row, int column) {
-        //System.out.println(
-        //    "ListViewTableCellEditor.getTableCellEditorComponent: row = " + row);
+        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0}", row);
 
         this.table = table;
 
@@ -286,8 +291,11 @@ implements TableCellEditor, TableCellRenderer {
                 String text = hyperlinkText(tr(isShowingSimilar ? "Hide" : "Show"), 
                         " ", similarCount, tr(" similar files"));
                 similarButton.setText(text);
-
-                // TODO: RMV Need code here to display similar results.
+                
+                List<VisualSearchResult> similarResults = vsr.getSimilarResults();
+                for(VisualSearchResult result : similarResults) {
+                    result.setVisible(isShowingSimilar);
+                }
             }
         });
 
@@ -411,6 +419,7 @@ implements TableCellEditor, TableCellRenderer {
 
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 0;
+        panel.add(makeIndentationPanel(), gbc);
         panel.add(makeLeftPanel(), gbc);
 
         gbc.weightx = 1;
@@ -422,6 +431,11 @@ implements TableCellEditor, TableCellRenderer {
         panel.add(actionPanel, gbc);
 
         return panel;
+    }
+
+    private Component makeIndentationPanel() {
+        similarResultIndentation = new JComponent(){};
+        return similarResultIndentation;
     }
 
     private void markAsJunk(boolean junk) {
@@ -495,6 +509,10 @@ implements TableCellEditor, TableCellRenderer {
 
     private void populatePanel(VisualSearchResult vsr) {
         if (vsr == null) return;
+        
+        Dimension indentSize = new Dimension(
+                vsr.getSimilarityParent() != null ? SIMILARITY_INDENTATION : 0, 0);
+        similarResultIndentation.setPreferredSize(indentSize);
 
         switch (vsr.getDownloadState()) {
             case NOT_STARTED:

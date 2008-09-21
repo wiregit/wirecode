@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search.model;
 
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -117,7 +118,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public void setJunk(boolean junk) {
+    public void setMarkedAsJunk(boolean junk) {
         // TODO Auto-generated method stub
         
     }
@@ -128,4 +129,15 @@ public class MockVisualSearchResult implements VisualSearchResult {
         
     }
 
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
 }
