@@ -34,6 +34,7 @@ public class FirewalledAddressSerializer implements AddressSerializer {
         this.serializer = serializer;
     }
     
+    @Inject
     @Override
     public void register(AddressFactory factory) {
         factory.addSerializer(this);
