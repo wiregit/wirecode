@@ -594,8 +594,9 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private String getHideShowSimilarFilesButtonText() {
+        int similarResultsCount = getSimilarResultsCount();
         return hyperlinkText(tr(isShowingSimilarResults() ? "Hide" : "Show"), 
-                " ", getSimilarResultsCount(), " ", tr("similar files"));
+                " ", similarResultsCount, " ", tr(similarResultsCount > 1 ? "similar files" : "similar file"));
     }
 
     static class PropertyMatch {
