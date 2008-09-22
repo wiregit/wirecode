@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.library.ImageLocalFileItem;
@@ -19,6 +20,11 @@ import org.limewire.ui.swing.util.GraphicsUtilities;
  * If an error occurs while reading the file and error Image will be loaded in
  * its place. If a component is passed in, it will be treated as a callback to
  * refresh the component after the thumbnail has been created.
+ * 
+ * If a component is passed in expecting a callback, the component must still be
+ * visible when the thumbnail is set to be created. If the component is a list
+ * that is expecting a callback, the index for the thumbnail must still be 
+ * visible prior to the thumbnail being loaded.
  */
 public class ThumbnailCallable implements Callable<Void> {
     
@@ -26,6 +32,8 @@ public class ThumbnailCallable implements Callable<Void> {
     private File file;
     private final Icon errorIcon;
     private final JComponent callback;
+    
+    private int index = -1;
     
     /**
      * Reads the image file and create a thumbnail, storing the thumbnail
@@ -45,6 +53,9 @@ public class ThumbnailCallable implements Callable<Void> {
      * Call a repaint on the component once the thumbnail has been created. If
      * the component is no longer showing don't bother repainting it.
      * 
+     * If the callback is no longer visible when the load method is created, the
+     * thumbnail is not created. 
+     * 
      * @param thumbnailMap - map to store the thumbnail in
      * @param file - image file to read and create a thumbnail from
      * @param errorIcon - icon to show if the file can't be read
@@ -57,8 +68,45 @@ public class ThumbnailCallable implements Callable<Void> {
         this.callback = callback;
     }
     
+    /**
+     * Reads the image file and create a thumbnail, storing the thumbnail
+     * in the thumbnail map. If an error occurs, store the error icon instead.
+     * Call a repaint on the component once the thumbnail has been created. If
+     * the component is no longer showing don't bother repainting it.
+     * 
+     * If the callback is no longer visible when the load method is created, the
+     * thumbnail is not created. If the list is still visible but the index is 
+     * no longer shown in the list, the image is not loaded. 
+     * 
+     * @param thumbnailMap - map to store the thumbnail in
+     * @param file - image file to read and create a thumbnail from
+     * @param errorIcon - icon to show if the file can't be read
+     * @param callback - component to repaint once the thumbnail has been created.
+     * @param index - index within this list, this thumbnail is intended for
+     */
+    public ThumbnailCallable(Map<File,Icon> thumbnailMap, File file, Icon errorIcon, JList list, int index) {
+        this.thumbnailMap = thumbnailMap;
+        this.file = file;
+        this.errorIcon = errorIcon;
+        this.callback = list;
+        this.index = index;
+    }
+    
     @Override
     public Void call() throws Exception {
+        // do some testing. If the component this thumbnail is intended for isn't showing anymore,
+        // don't waste the time loading the thumbnail
+        if(callback != null) {
+            if(!callback.isShowing()) {
+                thumbnailMap.put(file, null);
+                return null;
+            }
+            if((callback instanceof JList) && index != -1 && (((JList)callback).getFirstVisibleIndex() > index || ((JList)callback).getLastVisibleIndex() < index)){
+                thumbnailMap.put(file, null);
+                return null;
+            }
+        }
+        
         BufferedImage image = null;
         try {  
             URL url = file.toURI().toURL();

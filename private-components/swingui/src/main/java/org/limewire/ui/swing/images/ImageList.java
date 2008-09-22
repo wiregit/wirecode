@@ -87,7 +87,7 @@ public class ImageList extends JXList {
                 boolean isSelected, boolean cellHasFocus) {
 
             LocalFileItem item = (LocalFileItem)value;
-            setIcon(thumbnailManager.getThumbnailForFile(item.getFile(), list));
+            setIcon(thumbnailManager.getThumbnailForFile(item.getFile(), list, index));
             
             this.setBackground(isSelected ? selectionCellColor : nonSelectionCellColor);
             this.setForeground(list.getBackground());

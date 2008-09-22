@@ -30,6 +30,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.SimpleDownloadTable;
 import org.limewire.ui.swing.sharing.ViewSelectionPanel;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -59,21 +60,33 @@ public class MainDownloadPanel extends JPanel {
     private final Action pauseAction = new AbstractAction(I18n.tr("Pause All")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            downloadMediator.pauseAll();
+            BackgroundExecutorService.schedule(new Runnable(){
+                public void run() {
+                    downloadMediator.pauseAll();
+                }
+            });
         }
     };
 
     private final Action resumeAction = new AbstractAction(I18n.tr("Resume All")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            downloadMediator.resumeAll();
+            BackgroundExecutorService.schedule(new Runnable(){
+                public void run() {
+                    downloadMediator.resumeAll();
+                }
+            });
         }
     };
 
     private final Action clearAction = new AbstractAction(I18n.tr("Clear Finished")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            downloadMediator.clearFinished();
+            BackgroundExecutorService.schedule(new Runnable(){
+                public void run() {
+                    downloadMediator.clearFinished();
+                }
+            });
         }
     };
     

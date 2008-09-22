@@ -6,6 +6,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -29,14 +30,18 @@ public class DownloadTable extends MouseableTable {
         TableDoubleClickHandler clickHandler = new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
-                DownloadItem item = getDownloadItem(row);
-                if (item.isLaunchable()) {
-                    if(item.getCategory() == Category.AUDIO){
-                        PlayerUtils.play(item.getFile());
-                    } else {
-                        NativeLaunchUtils.launchFile(item.getFile());
+                final DownloadItem item = getDownloadItem(row);
+                BackgroundExecutorService.schedule(new Runnable(){
+                    public void run() {
+                        if (item.isLaunchable()) {
+                            if(item.getCategory() == Category.AUDIO){
+                                PlayerUtils.play(item.getFile());
+                            } else {
+                                NativeLaunchUtils.launchFile(item.getFile());
+                            }
+                        }
                     }
-                }
+                });
             }
         };
 

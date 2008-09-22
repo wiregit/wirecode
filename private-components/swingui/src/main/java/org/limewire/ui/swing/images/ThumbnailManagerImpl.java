@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JList;
 
 import org.jdesktop.application.Resource;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
@@ -48,6 +49,18 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
         if(icon == null) {
             thumbnails.put(file, loadIcon);
             ImageExecutorService.submit(new ThumbnailCallable(thumbnails, file, errorIcon, callback));
+        }
+        return icon;
+    }
+    
+    @Override 
+    public Icon getThumbnailForFile(File file, JList list, int index) {
+        if(file == null)
+            return null;
+        Icon icon = thumbnails.get(file);
+        if(icon == null) {
+            thumbnails.put(file, loadIcon);
+            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, file, errorIcon, list, index));
         }
         return icon;
     }
