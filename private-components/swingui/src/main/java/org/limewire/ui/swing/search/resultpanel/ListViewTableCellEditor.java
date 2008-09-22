@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -25,6 +26,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.table.TableCellEditor;
@@ -343,19 +345,7 @@ implements TableCellEditor, TableCellRenderer {
         headingPanel.add(subheadingLabel, gbc);
         headingPanel.add(otherLabel, gbc);
 
-        JXPanel panel = new JXPanel(new GridBagLayout()) {
-            @Override
-            public Dimension getMinimumSize() {
-                return getPreferredSize();
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension size = super.getPreferredSize();
-                size.width = LEFT_WIDTH;
-                return size;
-            }
-        };
+        JXPanel panel = new JXPanel(new GridBagLayout());
 
         panel.setOpaque(false);
 
@@ -394,8 +384,7 @@ implements TableCellEditor, TableCellRenderer {
 
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 0;
-        panel.add(makeIndentationPanel(), gbc);
-        panel.add(makeLeftPanel(), gbc);
+        panel.add(makeIndentablePanel(makeLeftPanel()), gbc);
 
         gbc.weightx = 1;
         panel.add(makeCenterPanel(), gbc);
@@ -408,9 +397,25 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private Component makeIndentationPanel() {
+    private Component makeIndentablePanel(Component component) {
+        JPanel wrapperPanel = new JPanel(new BorderLayout()) {
+            @Override
+            public Dimension getMinimumSize() {
+                return getPreferredSize();
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width = LEFT_WIDTH;
+                return size;
+            }
+        };
+        wrapperPanel.setOpaque(false);
         similarResultIndentation = new JComponent(){};
-        return similarResultIndentation;
+        wrapperPanel.add(similarResultIndentation, BorderLayout.WEST);
+        wrapperPanel.add(component, BorderLayout.CENTER);
+        return wrapperPanel;
     }
 
     private void markAsJunk(boolean junk) {
