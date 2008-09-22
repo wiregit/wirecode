@@ -96,9 +96,6 @@ implements TableCellEditor, TableCellRenderer {
     private String schema;
 
     private VisualSearchResult vsr;
-    private boolean isShowingSimilar;
-   // private int row;
-    private int similarCount;
     private JComponent similarResultIndentation;
 
     @Inject
@@ -240,8 +237,7 @@ implements TableCellEditor, TableCellRenderer {
             MediaType.getMediaTypeForExtension(vsr.getFileExtension());
         schema = mediaType == null ? "other" : mediaType.toString();
 
-        similarCount = vsr.getSimilarResults().size();
-        similarButton.setVisible(similarCount > 0);
+        similarButton.setVisible(getSimilarResultsCount() > 0);
 
         if (thePanel == null) thePanel = makePanel();
 
@@ -265,6 +261,10 @@ implements TableCellEditor, TableCellRenderer {
         return thePanel;
     }
 
+    private int getSimilarResultsCount() {
+        return vsr == null ? 0 : vsr.getSimilarResults().size();
+    }
+
     public Component getTableCellRendererComponent(
         JTable table, Object value,
         boolean isSelected, boolean hasFocus,
@@ -283,19 +283,20 @@ implements TableCellEditor, TableCellRenderer {
         bldr.append("</u></html>");
         return bldr.toString();
     }
+    
+    private boolean isShowingSimilarResults() {
+        return vsr != null && getSimilarResultsCount() > 0 && vsr.getSimilarResults().get(0).isVisible();
+    }
 
     private Component makeCenterPanel() {
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                isShowingSimilar = !isShowingSimilar;
-                String text = hyperlinkText(tr(isShowingSimilar ? "Hide" : "Show"), 
-                        " ", similarCount, tr(" similar files"));
-                similarButton.setText(text);
-                
-                List<VisualSearchResult> similarResults = vsr.getSimilarResults();
-                for(VisualSearchResult result : similarResults) {
-                    result.setVisible(isShowingSimilar);
+                boolean toggleVisibility = !isShowingSimilarResults();
+                for(VisualSearchResult result : vsr.getSimilarResults()) {
+                    result.setVisible(toggleVisibility);
                 }
+                
+                similarButton.setText(getHideShowSimilarFilesButtonText());
             }
         });
 
@@ -402,7 +403,7 @@ implements TableCellEditor, TableCellRenderer {
             @Override
             public Dimension getPreferredSize() {
                 int count = 1;
-                if (isShowingSimilar) count += similarCount;
+                if (isShowingSimilarResults()) count += getSimilarResultsCount();
                 return new Dimension(WIDTH, count * HEIGHT);
             }
 
@@ -537,9 +538,8 @@ implements TableCellEditor, TableCellRenderer {
         populateOther(vsr);
         populateFrom(vsr);
 
-        if (similarCount > 0) {
-            String text = "Show " + similarCount + " similar files";
-            similarButton.setText(text);
+        if (getSimilarResultsCount() > 0) {
+            similarButton.setText(getHideShowSimilarFilesButtonText());
         }
     }
 
@@ -591,6 +591,11 @@ implements TableCellEditor, TableCellRenderer {
         downloadButton.setEnabled(false);
         downloadingLink.setVisible(true);
         brp.download(vsr, row);
+    }
+
+    private String getHideShowSimilarFilesButtonText() {
+        return hyperlinkText(tr(isShowingSimilarResults() ? "Hide" : "Show"), 
+                " ", getSimilarResultsCount(), " ", tr("similar files"));
     }
 
     static class PropertyMatch {
