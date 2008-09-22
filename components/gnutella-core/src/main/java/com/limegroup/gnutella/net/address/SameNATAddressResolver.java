@@ -6,6 +6,7 @@ import org.limewire.io.Address;
 import org.limewire.io.NetworkUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
 
@@ -28,6 +29,11 @@ public class SameNATAddressResolver implements AddressResolver {
     @Inject
     public SameNATAddressResolver(NetworkManager networkManager) {
         this.networkManager = networkManager;
+    }
+    
+    @Inject
+    public void register(SocketsManager socketsManager) {
+        socketsManager.registerResolver(this);
     }
     
     @Override

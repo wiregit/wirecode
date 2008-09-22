@@ -69,8 +69,6 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
-import com.limegroup.gnutella.net.address.PushProxyHolePunchAddress;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -825,7 +823,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
 
     @Override
     public boolean canConnect(Address address) {
-        return address instanceof PushProxyHolePunchAddress || address instanceof PushProxyMediatorAddress;
+        return address instanceof FirewalledAddress;
     }
 
     /**
