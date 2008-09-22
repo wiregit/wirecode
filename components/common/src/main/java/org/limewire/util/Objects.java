@@ -26,5 +26,4 @@ public class Objects {
         }
         return o1.equals(o2);
     }
-
 }

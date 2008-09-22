@@ -17,7 +17,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,28 +27,24 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.search.FilterEvent;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 
@@ -68,9 +63,6 @@ implements TableCellEditor, TableCellRenderer {
 
     private final String SEARCH_TEXT_COLOR = "red";
 
-    // Change this null to avoid seeing filter matches.
-    private final String FILTER_TEXT_COLOR = null; // "blue";
-
     public static final int HEIGHT = 50;
     public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
@@ -78,6 +70,8 @@ implements TableCellEditor, TableCellRenderer {
     private String searchText;
 
     @Resource private Icon downloadIcon;
+    
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
 
     private ActionColumnTableCellEditor actionEditor;
     private ActionButtonPanel actionButtonPanel;
@@ -92,8 +86,7 @@ implements TableCellEditor, TableCellRenderer {
     private JXPanel thePanel;
     private JTable table;
     private NavigableTree navTree;
-    private String filterText = "";
-    private String schema;
+    private Category category;
 
     private VisualSearchResult vsr;
     private JComponent similarResultIndentation;
@@ -112,8 +105,6 @@ implements TableCellEditor, TableCellRenderer {
         // private-components/swingui/src/main/resources/
         // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
-
-        EventAnnotationProcessor.subscribe(this);
     }
 
     /**
@@ -125,53 +116,40 @@ implements TableCellEditor, TableCellRenderer {
     private String highlightMatches(String sourceText) {
         boolean haveSearchText = searchText != null && searchText.length() > 0;
         LOG.debugf("haveSearchText = {0}", haveSearchText);
-        boolean haveFilterText = filterText != null && filterText.length() > 0;
 
         // If there is no search or filter text then return sourceText as is.
-        if (!haveSearchText && !haveFilterText) return sourceText;
+        if (!haveSearchText)
+            return sourceText;
 
         String lowerText = sourceText.toLowerCase();
-        if (haveSearchText) searchText = searchText.toLowerCase();
-        if (haveFilterText) filterText = filterText.toLowerCase();
+        if (haveSearchText)
+            searchText = searchText.toLowerCase();
 
         int searchIndex = haveSearchText ? lowerText.indexOf(searchText) : -1;
-        int filterIndex = haveFilterText ? lowerText.indexOf(filterText) : -1;
 
         boolean foundSearchText = searchIndex != -1;
-        boolean foundFilterText = filterIndex != -1;
 
         // If sourceText doesn't contains searchText or filterText
         // then return sourceText as is.
-        if (!foundSearchText && !foundFilterText) return sourceText;
+        if (!foundSearchText)
+            return sourceText;
 
         // We know that either the search text or the filter text was found
         // at this point.
         // Get the index of the first one found.
-        int index =
-            foundSearchText && !foundFilterText ? searchIndex :
-            foundFilterText && !foundSearchText ? filterIndex :
-            Math.min(searchIndex, filterIndex);
+        int index = searchIndex;
 
         String result = "<html>";
 
         while (index != -1) {
-            // Which one was found first?
-            boolean useSearchText = index == searchIndex;
-
-            int matchLength =
-                useSearchText ? searchText.length() : filterText.length();
+            int matchLength = searchText.length();
             String match = sourceText.substring(index, index + matchLength);
-            String color =
-                useSearchText ? SEARCH_TEXT_COLOR : FILTER_TEXT_COLOR;
+            String color = SEARCH_TEXT_COLOR;
 
             result += sourceText.substring(0, index);
-            if (color == null) {
-                result += match;
-            } else {
-                result += "<span style='color:" + color + "; font-weight:bold'>";
-                result += match;
-                result += "</span>";
-            }
+            result += "<span style='color:" + color + "; font-weight:bold'>";
+            result += match;
+            result += "</span>";
 
             // Find the next occurrences.
 
@@ -179,16 +157,10 @@ implements TableCellEditor, TableCellRenderer {
             lowerText = lowerText.substring(index + matchLength);
 
             searchIndex = haveSearchText ? lowerText.indexOf(searchText) : -1;
-            filterIndex = haveFilterText ? lowerText.indexOf(filterText) : -1;
 
             foundSearchText = searchIndex != -1;
-            foundFilterText = filterIndex != -1;
 
-            index =
-                !foundSearchText && !foundFilterText ? -1 :
-                foundSearchText && !foundFilterText ? searchIndex :
-                foundFilterText && !foundSearchText ? filterIndex :
-                Math.min(searchIndex, filterIndex);
+            index = searchIndex;
         }
 
         result += sourceText; // tack on the remaining sourceText
@@ -197,21 +169,24 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private PropertyMatch getPropertyMatch(VisualSearchResult vsr) {
-        if (filterText == null) return null;
-
+        if(searchText == null)
+            return null;
+        
         // If any data displayed in the headingLabel or subheadingLabel
         // matches the search or filter criteria,
         // then the otherLabel isn't needed.
         // In this case, return an empty string.
-        if (headingLabel.getText().contains(filterText)) return null;
-        if (subheadingLabel.getText().contains(filterText)) return null;
+        if (headingLabel.getText().contains(searchText))
+            return null;
+        if (subheadingLabel.getText().contains(searchText))
+            return null;
 
         // Look for metadata that matches the search criteria.
         Map<PropertyKey, Object> props = vsr.getProperties();
         for (PropertyKey key : props.keySet()) {
             String value = vsr.getPropertyString(key);
 
-            if (value.toLowerCase().contains(filterText)) {
+            if (value.toLowerCase().contains(searchText)) {
                 String betterKey = key.toString().toLowerCase();
                 betterKey = betterKey.replace('_', ' ');
                 return new PropertyMatch(betterKey, value);
@@ -233,13 +208,12 @@ implements TableCellEditor, TableCellRenderer {
         this.table = table;
 
         vsr = (VisualSearchResult) value;
-        MediaType mediaType =
-            MediaType.getMediaTypeForExtension(vsr.getFileExtension());
-        schema = mediaType == null ? "other" : mediaType.toString();
+        category = vsr.getCategory();
 
         similarButton.setVisible(getSimilarResultsCount() > 0);
 
-        if (thePanel == null) thePanel = makePanel();
+        if (thePanel == null)
+            thePanel = makePanel();
 
         actionButtonPanel =
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
@@ -459,13 +433,16 @@ implements TableCellEditor, TableCellRenderer {
     private void populateHeading(VisualSearchResult vsr) {
         String name = getProperty(vsr, PropertyKey.NAME);
         String heading;
-
-        if (MediaType.SCHEMA_AUDIO.equals(schema)) {
+        
+        switch(category) {
+        case AUDIO:
             heading = getProperty(vsr, PropertyKey.ARTIST_NAME) + " - " + name;
-        } else if (MediaType.SCHEMA_VIDEO.equals(schema)
-            || MediaType.SCHEMA_IMAGES.equals(schema)) {
+            break;
+        case VIDEO:
+        case IMAGE:
             heading = name;
-        } else {
+            break;
+        default:
             heading = name + "." + vsr.getFileExtension();
         }
 
@@ -475,24 +452,6 @@ implements TableCellEditor, TableCellRenderer {
     private String getProperty(VisualSearchResult vsr, PropertyKey key) {
         Object property = vsr.getProperty(key);
         return property == null ? "?" : property.toString();
-    }
-
-    /**
-     * This is invoked when the user enters filter text
-     * in the SortAndFilterPanel.
-     * @param event the FilterEvent
-     */
-    @EventSubscriber
-    public void handleFilter(FilterEvent event) {
-        // Change the text that is highlighted in search results
-        // to be the filter text.
-        // At least for now this functionality isn't desired.
-        filterText = event.getText().toLowerCase();
-    
-        // Cause the table associated with the renders and editors to repaint
-        // so text matching highlightText will be displayed/highlighted.
-        AbstractTableModel model = (AbstractTableModel) table.getModel();
-        model.fireTableDataChanged();
     }
 
     private void populateOther(VisualSearchResult vsr) {
@@ -546,20 +505,26 @@ implements TableCellEditor, TableCellRenderer {
     private void populateSubheading(VisualSearchResult vsr) {
         String subheading;
 
-        if (MediaType.SCHEMA_AUDIO.equals(schema)) {
+        switch(category) {
+        case AUDIO:
             Object albumTitle = vsr.getProperty(PropertyKey.ALBUM_TITLE);
             String prefix = albumTitle == null ? "" : albumTitle + " - ";
             subheading = prefix + vsr.getProperty(PropertyKey.QUALITY)
                 + " - " + vsr.getProperty(PropertyKey.LENGTH);
-        } else if (MediaType.SCHEMA_VIDEO.equals(schema)) {
+            break;
+        case VIDEO:
             subheading = vsr.getProperty(PropertyKey.QUALITY)
                 + " - " + vsr.getProperty(PropertyKey.LENGTH);
-        } else if (MediaType.SCHEMA_IMAGES.equals(schema)) {
-            Object calendar = vsr.getProperty(PropertyKey.DATE_CREATED);
-            SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy");
-            subheading = calendar == null ?
-                "" : sdf.format(((Calendar) calendar).getTime());
-        } else {
+            break;
+        case IMAGE:
+            Object time = vsr.getProperty(PropertyKey.DATE_CREATED);
+            if(time == null) {
+                subheading = "";
+            } else {
+                subheading = DATE_FORMAT.format(new java.util.Date((Long)time));
+            }
+            break;
+        default:
             subheading = "{application name}"
                 + " - " + vsr.getProperty(PropertyKey.FILE_SIZE) + "MB";
         }

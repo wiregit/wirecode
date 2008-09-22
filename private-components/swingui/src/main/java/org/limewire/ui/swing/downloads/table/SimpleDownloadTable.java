@@ -19,9 +19,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadItem.Category;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -135,7 +135,7 @@ public class SimpleDownloadTable extends DownloadTable {
         public Class getColumnClass(int column) {
             switch (column) {
             case CATEGORY:
-                return DownloadItem.Category.class;
+                return Category.class;
             case TITLE:
                 return String.class;
             case STATE:

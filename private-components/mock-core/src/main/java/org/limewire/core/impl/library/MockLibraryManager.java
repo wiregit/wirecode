@@ -3,8 +3,8 @@ package org.limewire.core.impl.library;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.BuddyShareListListener;
-import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;

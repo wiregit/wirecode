@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import java.io.File;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.xmpp.api.client.LimePresence;
 

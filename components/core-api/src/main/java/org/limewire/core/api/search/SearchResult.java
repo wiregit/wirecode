@@ -3,6 +3,7 @@ package org.limewire.core.api.search;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 
 public interface SearchResult {
@@ -42,7 +43,7 @@ public interface SearchResult {
 
     Object getProperty(PropertyKey key);
     
-    ResultType getResultType();
+    Category getCategory();
 
     long getSize();
     

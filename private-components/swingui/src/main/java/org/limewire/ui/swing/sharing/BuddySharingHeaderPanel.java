@@ -10,9 +10,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;

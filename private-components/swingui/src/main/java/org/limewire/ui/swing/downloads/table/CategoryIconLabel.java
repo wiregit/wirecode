@@ -4,7 +4,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.Category;
 import org.limewire.ui.swing.util.GuiUtils;
 
 public class CategoryIconLabel extends JLabel {
@@ -63,7 +63,7 @@ public class CategoryIconLabel extends JLabel {
         }
     }
     
-    public void setIcon(DownloadItem.Category category) {
+    public void setIcon(Category category) {
         switch (category) {
         case AUDIO:
             setIcon(audioIcon);

@@ -2,10 +2,10 @@ package org.limewire.core.impl.library;
 
 import java.io.File;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileItem.Category;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;

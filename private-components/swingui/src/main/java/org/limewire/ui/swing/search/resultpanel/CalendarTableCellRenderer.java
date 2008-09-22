@@ -4,10 +4,12 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
+
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
+
 import org.jdesktop.swingx.JXPanel;
 
 /**
@@ -18,6 +20,8 @@ public class CalendarTableCellRenderer implements TableCellRenderer {
 
     private static final int HGAP = 2;
     private static final int VGAP = 5;
+    
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
 
     private JLabel label = new JLabel();
     private JXPanel panel = new JXPanel();
@@ -37,10 +41,8 @@ public class CalendarTableCellRenderer implements TableCellRenderer {
         int row, int column) {
 
         String text = null;
-        if (value instanceof Calendar) {
-            Calendar calendar = (Calendar) value;
-            SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy");
-            text = sdf.format(calendar.getTime());
+        if (value instanceof Long) {
+            text = DATE_FORMAT.format(new Date((Long)value));
         } else {
             text = value == null ? "" : value.toString();
         }

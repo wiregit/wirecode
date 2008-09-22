@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.downloads.table;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadItem.Category;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 

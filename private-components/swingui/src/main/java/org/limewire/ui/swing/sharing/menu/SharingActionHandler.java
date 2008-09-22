@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.sharing.menu;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.NativeLaunchUtils;

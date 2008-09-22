@@ -15,7 +15,7 @@ import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.VerticalLayout;
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
@@ -77,12 +77,12 @@ public class SharingFancyPanel extends JPanel {
         drop = new ShareDropTarget(this, originalList, false);
 
         List<EventList<LocalFileItem>> list = new ArrayList<EventList<LocalFileItem>>();
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.AUDIO)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.VIDEO)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.IMAGE)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.DOCUMENT)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.PROGRAM)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.OTHER)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.AUDIO)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.VIDEO)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.IMAGE)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.DOCUMENT)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.PROGRAM)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.OTHER)));
         
         musicTable = new SharingFancyTablePanel(music, list.get(0), new SharingFancyAudioTableFormat(), drop.getDropTarget(), originalList, audioIcon);
         videoTable = new SharingFancyTablePanel(video, list.get(1), new SharingFancyDefaultTableFormat(),false, drop.getDropTarget(), originalList, videoIcon);
@@ -124,12 +124,12 @@ public class SharingFancyPanel extends JPanel {
         //TODO: these need to be lazily created and stored somewhere, FileList?? so we don't keep recreating them
         //		GlazedLists.multiMap would be perfect if they supported EventLists instead of Lists
         List<EventList<LocalFileItem>> list = new ArrayList<EventList<LocalFileItem>>();
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.AUDIO)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.VIDEO)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.IMAGE)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.DOCUMENT)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.PROGRAM)));
-        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(FileItem.Category.OTHER)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.AUDIO)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.VIDEO)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.IMAGE)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.DOCUMENT)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.PROGRAM)));
+        list.add(new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.OTHER)));
         
         musicTable.setModel(list.get(0), fileList);
         videoTable.setModel(list.get(1), fileList);

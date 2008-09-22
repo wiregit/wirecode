@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
@@ -55,7 +55,7 @@ public class SharingAddAllAction extends AbstractAction {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(selectMusic) {
-                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.AUDIO));
+                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(Category.AUDIO));
                     try {
                         audio.getReadWriteLock().readLock().lock();
                         for(LocalFileItem item : audio) {
@@ -67,7 +67,7 @@ public class SharingAddAllAction extends AbstractAction {
                     audio.dispose();
                 }
                 if(selectVideo) {
-                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.VIDEO));
+                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(Category.VIDEO));
                     try {
                         video.getReadWriteLock().readLock().lock();
                         for(LocalFileItem item : video) {
@@ -79,7 +79,7 @@ public class SharingAddAllAction extends AbstractAction {
                     video.dispose();
                 }
                 if(selectImage) {
-                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(FileItem.Category.IMAGE));
+                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(Category.IMAGE));
                     try {
                         image.getReadWriteLock().readLock().lock();
                         for(LocalFileItem item : image) {

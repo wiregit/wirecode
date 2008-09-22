@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.sharing.table;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileItem.Category;
 
 import ca.odell.glazedlists.matchers.Matcher;
 

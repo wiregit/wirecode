@@ -155,7 +155,7 @@ class SearchTabItems {
                 while (listChanges.next()) {                    
                     if(listChanges.getType() == ListEvent.INSERT) {
                         VisualSearchResult added = source.get(listChanges.getIndex());
-                        SearchCategory searchCategory = added.getCategory().toSearchCategory();
+                        SearchCategory searchCategory = SearchCategory.forCategory(added.getCategory());
                         FancyTab tab = categoryToMap.remove(searchCategory);
                         if(tab != null && !tab.isVisible()) {
                             tab.underline();

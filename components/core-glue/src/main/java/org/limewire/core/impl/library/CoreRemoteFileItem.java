@@ -1,13 +1,12 @@
 package org.limewire.core.impl.library;
 
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.util.MediaType;
 
 public class CoreRemoteFileItem implements RemoteFileItem {
     private final SearchResult searchResult;
@@ -27,7 +26,11 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     }
 
     public long getCreationTime() {
-        return ((Calendar)searchResult.getProperty(SearchResult.PropertyKey.DATE_CREATED)).getTime().getTime();
+        Long time = (Long)searchResult.getProperty(SearchResult.PropertyKey.DATE_CREATED);
+        if(time == null)
+            return -1;
+        else
+            return time;
     }
 
     public long getLastModifiedTime() {
@@ -43,19 +46,7 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     }
 
     public Category getCategory() {
-        MediaType type = MediaType.getMediaTypeForExtension(searchResult.getFileExtension());
-        if (type == MediaType.getAudioMediaType()) {
-            return Category.AUDIO;
-        } else if (type == MediaType.getVideoMediaType()) {
-            return Category.VIDEO;
-        } else if (type == MediaType.getImageMediaType()) {
-            return Category.IMAGE;
-        } else if (type == MediaType.getDocumentMediaType()) {
-            return Category.DOCUMENT;
-        } else if (type == MediaType.getProgramMediaType()) {
-            return Category.PROGRAM;
-        }
-        return Category.OTHER;   
+        return searchResult.getCategory();   
     }
 
     public Object getProperty(Keys key) {

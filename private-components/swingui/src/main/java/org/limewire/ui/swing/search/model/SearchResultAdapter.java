@@ -15,8 +15,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.jdesktop.beans.AbstractBean;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.util.MediaType;
 
@@ -71,8 +71,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     }
 
     @Override
-    public ResultType getCategory() {
-        return coreResults.get(0).getResultType();
+    public Category getCategory() {
+        return coreResults.get(0).getCategory();
     }
     
     @Override

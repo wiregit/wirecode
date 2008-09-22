@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 
@@ -21,7 +21,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public ResultType getCategory() {
+    public Category getCategory() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.swing.Action;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.search.ResultType;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -58,17 +58,17 @@ public class ResultsContainer extends JXPanel {
         panelMap.put(SearchCategory.ALL.name(),
             allFactory.create(eventList, search));
         panelMap.put(SearchCategory.AUDIO.name(),
-            audioFactory.create(filter(ResultType.AUDIO, eventList), search));
+            audioFactory.create(filter(Category.AUDIO, eventList), search));
         panelMap.put(SearchCategory.VIDEO.name(),
-            videoFactory.create(filter(ResultType.VIDEO, eventList), search));
+            videoFactory.create(filter(Category.VIDEO, eventList), search));
         panelMap.put(SearchCategory.IMAGE.name(),
-            imagesFactory.create(filter(ResultType.IMAGE, eventList), search));
+            imagesFactory.create(filter(Category.IMAGE, eventList), search));
         panelMap.put(SearchCategory.DOCUMENT.name(),
-            documentsFactory.create(filter(ResultType.DOCUMENT, eventList), search));
+            documentsFactory.create(filter(Category.DOCUMENT, eventList), search));
         panelMap.put(SearchCategory.PROGRAM.name(),
-            programFactory.create(filter(ResultType.PROGRAM, eventList), search));
+            programFactory.create(filter(Category.PROGRAM, eventList), search));
         panelMap.put(SearchCategory.OTHER.name(),
-            otherFactory.create(filter(ResultType.OTHER, eventList), search));
+            otherFactory.create(filter(Category.OTHER, eventList), search));
         
         setLayout(cardLayout);
         
@@ -100,7 +100,7 @@ public class ResultsContainer extends JXPanel {
     }
     
     private FilterList<VisualSearchResult> filter(
-        final ResultType category, EventList<VisualSearchResult> eventList) {
+        final Category category, EventList<VisualSearchResult> eventList) {
         return new FilterList<VisualSearchResult>(
             eventList, new Matcher<VisualSearchResult>() {
             @Override

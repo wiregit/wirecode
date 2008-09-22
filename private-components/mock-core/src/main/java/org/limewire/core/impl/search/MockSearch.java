@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.endpoint.RemoteHostAction;
-import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -76,13 +76,13 @@ public class MockSearch implements Search {
                 name = "Lab19";
                 msr.setDescription(name);
                 msr.setExtension("doc");
-                msr.setResultType(ResultType.DOCUMENT);
+                msr.setResultType(Category.DOCUMENT);
                 msr.setSize(4567L);
                 msr.addSource("ross");
                 msr.setUrn("www.mizzou.edu");
                 msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
                 msr.setProperty(PropertyKey.DATE_CREATED,
-                    new GregorianCalendar(2008, 7, 27));
+                    new GregorianCalendar(2008, 7, 27).getTimeInMillis());
                 msr.setProperty(PropertyKey.FILE_SIZE, 1.7);
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.OWNER, "Ross Geller");
@@ -105,7 +105,7 @@ public class MockSearch implements Search {
                 name = "When Everyone has a Sweet Party";
                 msr.setDescription(name);
                 msr.setExtension("tmp");
-                msr.setResultType(ResultType.OTHER);
+                msr.setResultType(Category.OTHER);
                 msr.setSize(1L);
                 msr.addSource("phoebe");
                 msr.setUrn("www.partytime.com");
@@ -124,7 +124,7 @@ public class MockSearch implements Search {
                 name = "The Night Won't Last Long";
                 msr.setDescription(name);
                 msr.setExtension("mp3");
-                msr.setResultType(ResultType.AUDIO);
+                msr.setResultType(Category.AUDIO);
                 msr.setSize(1234L);
                 msr.addSource("monica");
                 msr.setUrn("www.solarsystem.net");
@@ -149,7 +149,7 @@ public class MockSearch implements Search {
                 name = "Monkey on Skateboard";
                 msr.setDescription(name);
                 msr.setExtension("ogm");
-                msr.setResultType(ResultType.VIDEO);
+                msr.setResultType(Category.VIDEO);
                 msr.setSize(9876L);
                 msr.addSource("chandler");
                 msr.addSource("joey");
@@ -176,7 +176,7 @@ public class MockSearch implements Search {
                 name = "SuperSpreadsheet";
                 msr.setDescription(name);
                 msr.setExtension("exe");
-                msr.setResultType(ResultType.PROGRAM);
+                msr.setResultType(Category.PROGRAM);
                 msr.setSize(8765L);
                 msr.addSource("chandler");
                 msr.setUrn("www.superspread.org");
@@ -187,7 +187,7 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
                 msr.setProperty(PropertyKey.PLATFORM, "Mac OS X");
                 msr.setProperty(PropertyKey.DATE_CREATED,
-                    new GregorianCalendar(2008, 9, 2));
+                    new GregorianCalendar(2008, 9, 2).getTimeInMillis());
                 msr.setProperty(PropertyKey.RELEVANCE, 0.6f);
                 handleSearchResult(msr);
 
@@ -196,7 +196,7 @@ public class MockSearch implements Search {
                 name = "EightGoldMedals";
                 msr.setDescription(name);
                 msr.setExtension("png");
-                msr.setResultType(ResultType.IMAGE);
+                msr.setResultType(Category.IMAGE);
                 msr.setSize(5678L);
                 msr.addSource("rachel");
                 msr.addSource("phoebe");
@@ -205,7 +205,7 @@ public class MockSearch implements Search {
                 msr.setProperty(PropertyKey.NAME, name);
                 msr.setProperty(PropertyKey.OWNER, "Rachel Green");
                 msr.setProperty(PropertyKey.DATE_CREATED,
-                    new GregorianCalendar(2008, 7, 20));
+                    new GregorianCalendar(2008, 7, 20).getTimeInMillis());
                 msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
                 handleSearchResult(msr);
 
@@ -271,7 +271,7 @@ public class MockSearch implements Search {
         private String description;
         private String extension;
         private String urn;
-        private ResultType resultType;
+        private Category resultType;
         private long size;
 
         public void addSource(String host) {
@@ -316,7 +316,7 @@ public class MockSearch implements Search {
         }
 
         @Override
-        public ResultType getResultType() {
+        public Category getCategory() {
             return resultType;
         }
 
@@ -347,7 +347,7 @@ public class MockSearch implements Search {
             properties.put(key, value);
         }
 
-        public void setResultType(ResultType resultType) {
+        public void setResultType(Category resultType) {
             this.resultType = resultType;
         }
 

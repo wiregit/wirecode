@@ -4,15 +4,13 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
 
+import org.limewire.core.api.Category;
+
 /**
  * A single download
  */
 public interface DownloadItem {	
 
-	public static enum Category {
-		VIDEO, AUDIO, DOCUMENT, IMAGE, PROGRAM, OTHER
-	};
-	
 	public static enum ErrorState {
         NONE, DISK_PROBLEM, CORRUPT_FILE, FILE_NOT_SHARABLE, UNABLE_TO_CONNECT
     };

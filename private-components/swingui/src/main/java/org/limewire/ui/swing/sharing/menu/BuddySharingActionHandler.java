@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.sharing.menu;
 
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -36,7 +36,7 @@ public class BuddySharingActionHandler {
                     NavItem navItem = navTree.getNavigableItemByName(Navigator.NavCategory.LIBRARY, item.getName());
                     navItem.select();
                 } else if(actionCommand == SHARE_ALL_VIDEO) {
-                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.VIDEO));
+                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.VIDEO));
                     try {
                         video.getReadWriteLock().readLock().lock();
                         for(LocalFileItem fileItem : video) {
@@ -47,7 +47,7 @@ public class BuddySharingActionHandler {
                     }
                     video.dispose();
                 } else if(actionCommand == SHARE_ALL_AUDIO) {
-                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.AUDIO));
+                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.AUDIO));
                     try {
                         audio.getReadWriteLock().readLock().lock();
                         for(LocalFileItem fileItem : audio) {
@@ -58,7 +58,7 @@ public class BuddySharingActionHandler {
                     }
                     audio.dispose();
                 } else if(actionCommand == SHARE_ALL_IMAGE) {
-                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(FileItem.Category.IMAGE));                 
+                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.IMAGE));                 
                     
                     try {
                         image.getReadWriteLock().readLock().lock();

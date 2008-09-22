@@ -8,7 +8,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -214,8 +213,8 @@ public class SortAndFilterPanel extends JXPanel {
             @Override
             public int doCompare(
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                Date v1 = (Date) vsr1.getProperty(key);
-                Date v2 = (Date) vsr2.getProperty(key);
+                Long v1 = (Long) vsr1.getProperty(key);
+                Long v2 = (Long) vsr2.getProperty(key);
                 return v1 == null ? 0 :
                     ascending ? v1.compareTo(v2) : v2.compareTo(v1);
             }

@@ -4,10 +4,10 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.FileItem.Category;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 

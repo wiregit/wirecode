@@ -43,6 +43,10 @@ public class StringTableCellRenderer implements TableCellRenderer {
         boolean isSelected, boolean hasFocus,
         int row, int column) {
 
+        if(value == null) {
+            value = "";
+        }
+        
         label.setText(value.toString());
 
         int align = value instanceof Number ?

@@ -2,18 +2,15 @@ package org.limewire.core.impl.search;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.endpoint.RemoteHostAction;
-import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
@@ -54,18 +51,10 @@ public class RemoteFileDescAdapter implements SearchResult {
         Map<PropertyKey, Object> property = new HashMap<PropertyKey, Object>();
         LimeXMLDocument doc = rfd.getXMLDocument();
 
-        // TODO is this correct?
         property.put(PropertyKey.NAME, rfd.getFileName());
-        Date date = new Date(rfd.getCreationTime());
-        Calendar c = new GregorianCalendar();
-        c.setTime(date);
-        property.put(PropertyKey.DATE_CREATED, c);
+        property.put(PropertyKey.DATE_CREATED, rfd.getCreationTime());
         
-//        if(doc == null)
-//            return Collections.emptyMap();
-        
-        if(doc != null) {
-            //TODO: clean this implementation up, fix missing fields 
+        if(doc != null) { 
             if(LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI())) {
                 property.put(PropertyKey.ALBUM_TITLE, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
                 property.put(PropertyKey.ARTIST_NAME, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
@@ -73,7 +62,6 @@ public class RemoteFileDescAdapter implements SearchResult {
                 property.put(PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.AUDIO_COMMENTS));
                 property.put(PropertyKey.GENRE, doc.getValue(LimeXMLNames.AUDIO_GENRE));
                 property.put(PropertyKey.LENGTH, doc.getValue(LimeXMLNames.AUDIO_SECONDS));
-    //            property.put(PropertyKey.SAMPLE_RATE, doc.getValue(LimeXMLNames.AUDIO_));
                 property.put(PropertyKey.TRACK_NUMBER, doc.getValue(LimeXMLNames.AUDIO_TRACK));
                 property.put(PropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
             } else if(LimeXMLNames.VIDEO_SCHEMA.equals(doc.getSchemaURI())) {
@@ -95,9 +83,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                 property.put(PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.IMAGE_ARTIST));
             }
         }
-
-//        property.put(PropertyKey.QUALITY, doc.getValue(LimeXMLNames.AUDIO_TITLE));
-//        property.put(PropertyKey.RATING, doc.getValue(LimeXMLNames.AUDIO_TITLE));        
+  
         return property;
     }
 
@@ -107,22 +93,24 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
 
     @Override
-    public ResultType getResultType() {
+    public Category getCategory() {
         String extension = getFileExtension();
         if (extension != null) {
             MediaType type = MediaType.getMediaTypeForExtension(extension);
             if (type == MediaType.getAudioMediaType()) {
-                return ResultType.AUDIO;
+                return Category.AUDIO;
             } else if (type == MediaType.getVideoMediaType()) {
-                return ResultType.VIDEO;
+                return Category.VIDEO;
             } else if (type == MediaType.getImageMediaType()) {
-                return ResultType.IMAGE;
+                return Category.IMAGE;
             } else if (type == MediaType.getDocumentMediaType()) {
-                return ResultType.DOCUMENT;
+                return Category.DOCUMENT;
+            } else if (type == MediaType.getProgramMediaType()) {
+                return Category.PROGRAM;
             }
         }
         
-        return ResultType.OTHER;
+        return Category.OTHER;
     }
 
     public RemoteFileDesc getRfd() {
@@ -176,9 +164,5 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public String getUrn() {
         return rfd.getSHA1Urn().toString();
-    }
-
-    public void addSimilarResult(SearchResult result) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
