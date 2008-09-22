@@ -10,6 +10,7 @@ import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.io.Address;
 import org.limewire.io.IpPort;
+import org.limewire.util.Objects;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -30,7 +31,7 @@ public class CoreBrowse implements Browse {
     @AssistedInject
     public CoreBrowse(@Assisted Address address, SearchServices searchServices,
             QueryReplyListenerList listenerList) {
-        this.addr = address;
+        this.addr = Objects.nonNull(address, "address");
         this.searchServices = searchServices;
         this.listenerList = listenerList;
     }

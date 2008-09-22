@@ -17,9 +17,8 @@ public interface LimePresence extends Presence {
     public void offerFile(FileMetaData file);
 
     /**
-     * 
      * @return the <code>Address</code> that can be used to connect
-     * to the lime buddy
+     * to the lime buddy.
      */
     public Address getAddress();
     
