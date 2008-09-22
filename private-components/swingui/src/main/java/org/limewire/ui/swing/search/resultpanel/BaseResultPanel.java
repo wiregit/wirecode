@@ -10,7 +10,6 @@ import java.util.Calendar;
 
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -21,6 +20,8 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.ConfigurableTable;
 import org.limewire.ui.swing.StringTableCellRenderer;
 import org.limewire.ui.swing.nav.NavigableTree;
@@ -35,6 +36,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 
 public abstract class BaseResultPanel extends JXPanel {
     public static final int TABLE_ROW_HEIGHT = 26;
+    private final Log LOG = LogFactory.getLog(getClass());
     
     private ActionColumnTableCellEditor actionEditor =
         new ActionColumnTableCellEditor();
@@ -231,15 +233,6 @@ public abstract class BaseResultPanel extends JXPanel {
                                     BasicDownloadState.DOWNLOADED);
                                 break;
                         }
-
-                        // Trigger a re-render of the corresponding list row.
-                        AbstractTableModel tm =
-                            (AbstractTableModel) resultsList.getModel();
-                        
-                        // TODO: Why doesn't this cause the row to be repainted?
-                        //System.out.println(
-                        //    "BaseResultPanel: firing row " + row + " update");
-                        tm.fireTableRowsUpdated(row, row);
                     }
                 }
             });
@@ -247,7 +240,7 @@ public abstract class BaseResultPanel extends JXPanel {
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
         } catch (SaveLocationException sle) {
             // TODO: Do something!
-            sle.printStackTrace();
+            LOG.error("Unable to save the download", sle);
         }
     }
     
