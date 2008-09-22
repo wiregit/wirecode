@@ -998,7 +998,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 		if( isMCastReply ) {
 		    iFirewalled = false;
 		    heFirewalled = NO;
-		} else if(networkManager.isPrivateAddress(this.getIPBytes())) {
+		} else if(networkInstanceUtils.isPrivateAddress(this.getIPBytes())) {
 			heFirewalled = YES;
 		} else {
 			try {

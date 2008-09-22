@@ -125,7 +125,5 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
     public GUID getSolicitedGUID();
     
     public int supportsFWTVersion();
-    
-    /** A convenience stub. */
-    public boolean isPrivateAddress(byte[] addr);
+
 }

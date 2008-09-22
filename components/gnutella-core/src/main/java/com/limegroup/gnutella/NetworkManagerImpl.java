@@ -8,7 +8,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
-import org.hamcrest.collection.IsIn;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.core.settings.SearchSettings;
@@ -22,7 +21,6 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.HolePunchAddress;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
@@ -38,12 +36,9 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
-import com.limegroup.gnutella.net.address.PushProxyHolePunchAddress;
-import com.limegroup.gnutella.net.address.PushProxyHolePunchAddressImpl;
 import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
@@ -227,7 +222,10 @@ public class NetworkManagerImpl implements NetworkManager {
         if (connectionManager.get().isShieldedLeaf()) 
             connectionManager.get().sendUpdatedCapabilities();
         synchronized (addressLock) {
-            newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()), firewalledAddress.getPushProxies()));
+            FirewalledAddress address = firewalledAddress;
+            if (address != null) {
+                newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()), address.getPushProxies()));
+            }
         }
     }
 
@@ -280,7 +278,7 @@ public class NetworkManagerImpl implements NetworkManager {
 
     private void maybeFireNewDirectConnectionAddress() {
         if(isDirectConnectionCapable()) {
-            Connectable newDirectAddress = getDirectConnectionAddress();
+            Connectable newDirectAddress = getPublicAddress();
             if (directAddress == null || ConnectableImpl.COMPARATOR.compare(directAddress, newDirectAddress) != 0) {
                 directAddress = newDirectAddress;
                 fireAddressChange(newDirectAddress);
@@ -307,17 +305,6 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
 
-    private Connectable getDirectConnectionAddress() {
-        try {
-            return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
-                    getPort(), isIncomingTLSEnabled());
-        } catch (UnknownHostException e) {
-            // TODO does this warrant ErrorService?
-            ErrorService.error(e);
-            return null;
-        }                                  
-    }
-    
     public void newMediatedConnectionAddress(PushProxyMediatorAddress newMediatorAddress) {
         FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), newMediatorAddress.getPushProxies(), supportsFWTVersion());
         boolean changed = false;
@@ -333,14 +320,18 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
     private Connectable getPublicAddress() {
-        Connectable publicAddress = directAddress;
-        return publicAddress != null ? publicAddress : ConnectableImpl.INVALID_CONNECTABLE;  
+        try {
+            return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
+                    getPort(), isIncomingTLSEnabled());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private Connectable getPrivateAddress() {
         byte[] privateAddress = getNonForcedAddress();
         try {
-            return new ConnectableImpl(new InetSocketAddress(InetAddress.getByAddress(privateAddress), getNonForcedPort()), isTLSSupported());
+            return new ConnectableImpl(new InetSocketAddress(InetAddress.getByAddress(privateAddress), getNonForcedPort()), isIncomingTLSEnabled());
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

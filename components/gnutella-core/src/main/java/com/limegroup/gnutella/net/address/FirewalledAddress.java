@@ -7,6 +7,7 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.Objects;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.GUID;
 
@@ -55,6 +56,11 @@ public class FirewalledAddress implements Address {
     
     public GUID getClientGuid() {
         return clientGuid;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this, publicAddress, privateAddress, clientGuid, pushProxies, fwtVersion);
     }
     
     @Override

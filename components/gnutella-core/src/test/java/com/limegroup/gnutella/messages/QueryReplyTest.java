@@ -772,8 +772,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         final byte[] addr=new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
         Mockery mockery = new Mockery();
         final NetworkManager mockNetworkManager = mockery.mock(NetworkManager.class);
+        final NetworkInstanceUtils networkInstanceUtils = mockery.mock(NetworkInstanceUtils.class);
         mockery.checking(new Expectations() {{
-            atLeast(0).of(mockNetworkManager).isPrivateAddress(addr);
+            atLeast(0).of(networkInstanceUtils).isPrivateAddress(addr);
             will(returnValue(false));
             atLeast(0).of(mockNetworkManager).getAddress();
             will(returnValue(InetAddress.getLocalHost().getAddress()));            
@@ -802,8 +803,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         final byte[] addr=new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
         Mockery mockery = new Mockery();
         final NetworkManager mockNetworkManager = mockery.mock(NetworkManager.class);
+        final NetworkInstanceUtils networkInstanceUtils = mockery.mock(NetworkInstanceUtils.class);
         mockery.checking(new Expectations() {{
-            atLeast(0).of(mockNetworkManager).isPrivateAddress(addr);
+            atLeast(0).of(networkInstanceUtils).isPrivateAddress(addr);
             will(returnValue(false));
             atLeast(0).of(mockNetworkManager).getAddress();
             will(returnValue(InetAddress.getLocalHost().getAddress()));            

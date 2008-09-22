@@ -65,10 +65,7 @@ public class FirewalledAddressSerializer implements AddressSerializer {
             throw new IOException(e);
         }
     }
-    
-    
 
-    
     @Override
     public byte[] serialize(Address addr) throws IOException {
         FirewalledAddress address = (FirewalledAddress)addr;
