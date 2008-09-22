@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,17 +18,25 @@ class GroupingSearchResultAdapter extends BasicSearchResultAdapter {
 
     public GroupingSearchResultAdapter(List<SearchResult> sourceValue) {
         super(new ArrayList<SearchResult>());
-       
-        groupingListUrns = new GroupingList<SearchResult>(getCoreResultsEventList(), new UrnComparator());
+
+        groupingListUrns = new GroupingList<SearchResult>(getCoreResultsEventList(),
+                new UrnComparator());
         groupedResultsUrns = new FunctionList<List<SearchResult>, VisualSearchResult>(
                 groupingListUrns, new UrnResultGrouper(new AtomicInteger(0)));
 
         getCoreResultsEventList().addAll(sourceValue);
     }
-    
-    
+
     @Override
     public List<VisualSearchResult> getSimilarResults() {
+        if (groupedResultsUrns.size() > 1) {
+            return groupedResultsUrns.subList(1, groupedResultsUrns.size() - 1);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<VisualSearchResult> getGroupedSearchResults() {
         return groupedResultsUrns;
     }
 

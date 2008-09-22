@@ -144,12 +144,17 @@ class BasicSearchResultAdapter implements VisualSearchResult {
             return null;
         }
     }
-
+    
     @Override
     public List<VisualSearchResult> getSimilarResults() {
         return Collections.emptyList();
     }
 
+    @Override
+    public List<VisualSearchResult> getGroupedSearchResults() {
+        return Collections.emptyList();
+    }
+    
     @Override
     public long getSize() {
         return coreResults.get(0).getSize();
@@ -203,4 +208,5 @@ class BasicSearchResultAdapter implements VisualSearchResult {
             remoteHosts.addAll(result.getSources());
         }
     }
+
 }

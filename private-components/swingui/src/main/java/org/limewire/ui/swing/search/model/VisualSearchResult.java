@@ -32,6 +32,8 @@ public interface VisualSearchResult {
     Collection<RemoteHost> getSources();
     
     List<VisualSearchResult> getSimilarResults();
+    
+    List<VisualSearchResult> getGroupedSearchResults();
 
     long getSize();
     
