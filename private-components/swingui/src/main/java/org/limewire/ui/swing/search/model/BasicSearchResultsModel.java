@@ -40,7 +40,17 @@ public class BasicSearchResultsModel {
     }
 
     public void addSearchResult(SearchResult result) {
+        addSearchResult(result, true);
+    }
+
+    public void addSearchResult(SearchResult result, boolean update) {
         allSearchResults.add(result);
+        if (update) {
+            update();
+        }
+    }
+
+    public void update() {
         for (SearchResult searchResult : allSearchResults) {
             allSearchResults.remove(searchResult);
             allSearchResults.add(searchResult);
