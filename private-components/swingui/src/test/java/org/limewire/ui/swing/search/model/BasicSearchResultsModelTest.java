@@ -52,13 +52,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testUrnOrNameGrouping2() {
         BasicSearchResultsModel model = new BasicSearchResultsModel();
         model.addSearchResult(new TestSearchResult("1", "file name"));
-        model.addSearchResult(new TestSearchResult("1", "alternate file name"));
         model.addSearchResult(new TestSearchResult("2", "other file"));
-        model.addSearchResult(new TestSearchResult("3", "file name"));
-
+        model.addSearchResult(new TestSearchResult("1", "file name"));
+        model.addSearchResult(new TestSearchResult("1", "other file"));
 
         List<VisualSearchResult> results = model.getVisualSearchResults();
-        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
         Assert.assertEquals(0, groupResults0.size());
@@ -69,13 +68,8 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
         Assert.assertEquals(0, groupResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
-        Assert.assertEquals(1, coreResults1.size());
+        Assert.assertEquals(2, coreResults1.size());
         
-        VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(0, groupResults2.size());
-        List<SearchResult> coreResults2 = group2.getCoreSearchResults();
-        Assert.assertEquals(1, coreResults2.size());
     }
 
     public class TestSearchResult implements SearchResult {
