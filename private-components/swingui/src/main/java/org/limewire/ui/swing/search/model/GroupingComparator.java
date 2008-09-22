@@ -3,8 +3,10 @@
  */
 package org.limewire.ui.swing.search.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,77 +14,93 @@ import org.limewire.core.api.search.SearchResult;
 
 class GroupingComparator implements SearchResultComparator {
 
-    private final Map<SearchResult, Set<SearchResult>> matchingResults;
+    public class Group {
+        private final Set<SearchResult> items;
+
+        private List<String> urns;
+
+        public Group() {
+            this.items = new HashSet<SearchResult>();
+            this.urns = new ArrayList<String>();
+        }
+
+        public void add(SearchResult searchResult) {
+            items.add(searchResult);
+            urns.add(searchResult.getUrn());
+        }
+
+        public boolean remove(SearchResult searchResult) {
+            boolean removed = items.remove(searchResult);
+            if (removed) {
+                urns.remove(searchResult.getUrn());
+            }
+            return removed;
+        }
+
+        public boolean isInGroup(SearchResult searchResult) {
+            return items.contains(searchResult);
+        }
+
+        public boolean belongsInGroup(SearchResult searchResult) {
+            return hasResultUrn(searchResult);
+        }
+
+        public boolean hasResultUrn(SearchResult searchResult) {
+            return urns.contains(searchResult.getUrn());
+        }
+
+        public void addAll(Group group) {
+            for (SearchResult result : group.items) {
+                add(result);
+            }
+        }
+
+    }
+
+    private final Map<SearchResult, Group> matchingResults;
 
     private final SearchResultComparator searchResultComparator;
 
     public GroupingComparator(SearchResultComparator searchResultComparator) {
         this.searchResultComparator = searchResultComparator;
-        this.matchingResults = new HashMap<SearchResult, Set<SearchResult>>();
+        this.matchingResults = new HashMap<SearchResult, Group>();
     }
 
     @Override
     public int compare(SearchResult o1, SearchResult o2) {
+
         int result = searchResultComparator.compare(o1, o2);
 
-        if (result == 0 || matchFound(o1, o2)) {
-            addMatch(o1, o2);
-            return 0;
+        boolean hasGroup1 = hasGroup(o1);
+        boolean hasGroup2 = hasGroup(o2);
+
+        if (hasGroup1 && !hasGroup2 && result == 0) {
+            Group group1 = getGroup(o1);
+            group1.add(o2);
+        } else if (!hasGroup1 && hasGroup2 && result == 0) {
+            Group group2 = getGroup(o1);
+            group2.add(o1);
+        } else if (result == 0) {
+            Group group1 = getGroup(o1);
+            group1.addAll(getGroup(o2));
+            matchingResults.put(o2, group1);
         }
+
         return result;
     }
 
-    private boolean matchFound(SearchResult o1, SearchResult o2) {
-        if (inSameGroup(o1, o2)) {
-            return true;
-        }
-        //TODO optimize, this is expensive
-        Set<SearchResult> l1 = getSet(o1);
-        Set<SearchResult> l2 = getSet(o2);
-        for (SearchResult searchResult : l1) {
-            Set<SearchResult> set = getSet(searchResult);
-            if (set.contains(o2)) {
-                return true;
-            }
-        }
-        for (SearchResult searchResult : l2) {
-            Set<SearchResult> set = getSet(searchResult);
-            if (set.contains(o1)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean hasGroup(SearchResult o1) {
+        return matchingResults.containsKey(o1);
     }
 
-    private boolean inSameGroup(SearchResult o1, SearchResult o2) {
-        if (getSet(o1).contains(o2) || getSet(o2).contains(o1)) {
-            return true;
+    private Group getGroup(SearchResult o1) {
+        Group group = matchingResults.get(o1);
+        if (group == null) {
+            group = new Group();
+            group.add(o1);
+            matchingResults.put(o1, group);
         }
-        return false;
+        return group;
     }
 
-    private void addMatch(SearchResult o1, SearchResult o2) {
-        //TODO optimize, this is expensive
-        Set<SearchResult> l1 = getSet(o1);
-        Set<SearchResult> l2 = getSet(o2);
-        l1.add(o2);
-        for (SearchResult searchResult : l1) {
-            Set<SearchResult> set = getSet(searchResult);
-            set.add(o2);
-        }
-        l2.add(o1);
-        for (SearchResult searchResult : l2) {
-            Set<SearchResult> set = getSet(searchResult);
-            set.add(o1);
-        }
-    }
-
-    private Set<SearchResult> getSet(SearchResult o1) {
-        Set<SearchResult> set = matchingResults.get(o1);
-        if (set == null) {
-            set = new HashSet<SearchResult>();
-            matchingResults.put(o1, set);
-        }
-        return set;
-    }
 }
