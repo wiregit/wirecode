@@ -26,7 +26,6 @@ class UrnResultGrouper implements
 
     @Override
     public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
-        System.out.println(sourceValue.size());
         BasicSearchResultAdapter adapter = new BasicSearchResultAdapter(sourceValue);
         resultCount.addAndGet(adapter.getSources().size());
         return adapter;
