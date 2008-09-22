@@ -37,7 +37,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testUrnOrnNameGrouping1() {
-        // TODO fix grouping by urn
         BasicSearchResultsModel model = new BasicSearchResultsModel();
         model.addSearchResult(new TestSearchResult("1", "file name"));
         model.addSearchResult(new TestSearchResult("1", "other file"));
@@ -56,13 +55,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testUrnOrNameGrouping2() {
-        // TODO this test is wrong
         BasicSearchResultsModel model = new BasicSearchResultsModel();
-        model.addSearchResult(new TestSearchResult("1", "file name"));
-        model.addSearchResult(new TestSearchResult("2", "other file"));
-        model.addSearchResult(new TestSearchResult("1", "file name"));
-        model.addSearchResult(new TestSearchResult("1", "other file"));
-
+        model.addSearchResult(new TestSearchResult("1", "file name"), false);
+        model.addSearchResult(new TestSearchResult("2", "other file"), false);
+        model.addSearchResult(new TestSearchResult("1", "file name"), false);
+        model.addSearchResult(new TestSearchResult("1", "other file"), false);
+        model.update();
         
         
         List<VisualSearchResult> results = model.getVisualSearchResults();
