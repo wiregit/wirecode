@@ -10,6 +10,7 @@ import junit.framework.Assert;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.util.BaseTestCase;
 
 public class BasicSearchResultsModelTest extends BaseTestCase {
@@ -31,9 +32,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(0, groupResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(4, coreResults0.size());
+
+        print(coreResults0);
     }
 
     public void testUrnOrnNameGrouping1() {
+        //TODO fix grouping by urn
         BasicSearchResultsModel model = new BasicSearchResultsModel();
         model.addSearchResult(new TestSearchResult("1", "file name"));
         model.addSearchResult(new TestSearchResult("1", "other file"));
@@ -47,10 +51,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(0, groupResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(4, coreResults0.size());
+        
+        print(coreResults0);
     }
 
     public void testUrnOrNameGrouping2() {
-        //TODO this test is wrong
+        // TODO this test is wrong
         BasicSearchResultsModel model = new BasicSearchResultsModel();
         model.addSearchResult(new TestSearchResult("1", "file name"));
         model.addSearchResult(new TestSearchResult("2", "other file"));
@@ -64,18 +70,24 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(0, groupResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
-        
+        print(coreResults0);
+
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
         Assert.assertEquals(0, groupResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
-        
-        for(SearchResult searchResult : coreResults1)
-        {
-            System.out.println(searchResult.getDescription());
+
+        print(coreResults1);
+
+    }
+
+    private void print(List<SearchResult> coreResults) {
+        System.out.println();
+        for (SearchResult searchResult : coreResults) {
+            System.out.println(searchResult.getUrn() + " - "
+                    + searchResult.getProperty(PropertyKey.NAME));
         }
-        
     }
 
     public class TestSearchResult implements SearchResult {
