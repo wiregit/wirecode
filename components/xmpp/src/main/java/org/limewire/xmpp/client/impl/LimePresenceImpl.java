@@ -1,14 +1,12 @@
 package org.limewire.xmpp.client.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Presence;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.xmpp.api.client.FileMetaData;
@@ -17,17 +15,21 @@ import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.NullAddressIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 
+import com.google.inject.internal.base.Objects;
+
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
     
     private Address address;
     
-    private List<FileMetaData> files;
-
-    LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection) {
+    LimePresenceImpl(Presence presence, XMPPConnection connection) {
         super(presence, connection);
-        files = new ArrayList<FileMetaData>();
+    }
+    
+    LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
+        super(presence, connection);
+        address = Objects.nonNull(limePresence, "limePresence").getAddress();
     }
     
     public Address getAddress() {
@@ -68,11 +70,4 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         connection.sendPacket(transferIQ);
     }
 
-    public List<FileMetaData> getFiles() {
-        return files;
-    }
-    
-    public void addFile(FileMetaData file) {
-        files.add(file);
-    }
 }

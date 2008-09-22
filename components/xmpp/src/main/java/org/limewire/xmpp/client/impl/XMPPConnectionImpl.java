@@ -318,8 +318,8 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         private void updatePresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
             Presence currentPresence = user.getPresences().get(presence.getFrom());
             Presence updatedPresence;
-            if(currentPresence instanceof LimePresenceImpl) {
-                updatedPresence = new LimePresenceImpl(presence, connection);    
+            if(currentPresence instanceof LimePresence) {
+                updatedPresence = new LimePresenceImpl(presence, connection, (LimePresence)currentPresence);    
             } else {
                 updatedPresence = new PresenceImpl(presence, connection);   
             }
