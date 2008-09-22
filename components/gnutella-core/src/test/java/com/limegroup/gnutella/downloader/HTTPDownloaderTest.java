@@ -30,6 +30,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -60,7 +61,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 import com.limegroup.gnutella.util.MockUtils;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
 

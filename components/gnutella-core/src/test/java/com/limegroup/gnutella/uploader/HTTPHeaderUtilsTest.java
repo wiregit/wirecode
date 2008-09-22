@@ -22,6 +22,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
@@ -49,7 +50,6 @@ import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class HTTPHeaderUtilsTest extends BaseTestCase {
     

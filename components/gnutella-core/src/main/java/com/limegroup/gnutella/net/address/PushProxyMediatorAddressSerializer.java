@@ -10,12 +10,12 @@ import org.limewire.io.Connectable;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.net.address.ConnectableSerializer;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @Singleton
 public class PushProxyMediatorAddressSerializer implements AddressSerializer {

@@ -37,6 +37,7 @@ import org.limewire.lifecycle.Service;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -69,7 +70,6 @@ import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
  * The list of all RoutedConnection's.  Provides a factory method for creating

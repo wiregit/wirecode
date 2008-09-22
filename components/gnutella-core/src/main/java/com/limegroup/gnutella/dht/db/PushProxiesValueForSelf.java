@@ -11,12 +11,12 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
+import org.limewire.net.address.StrictIpPortSet;
 
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
  * An implementation of PushProxiesDHTValue for the localhost.

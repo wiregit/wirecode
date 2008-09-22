@@ -14,6 +14,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.rudp.RUDPUtils;
 
 import com.google.inject.AbstractModule;
@@ -24,7 +25,6 @@ import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class NetworkManagerImplTest extends LimeTestCase {
     

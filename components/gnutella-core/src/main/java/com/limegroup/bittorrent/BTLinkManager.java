@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.NECallable;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.bittorrent.messages.BTHave;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
  * Manages BitTorrent links since torrents have hundreds of connections.

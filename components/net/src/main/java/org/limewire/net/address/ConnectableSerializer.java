@@ -18,7 +18,6 @@ import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @Singleton
 public class ConnectableSerializer implements AddressSerializer {
