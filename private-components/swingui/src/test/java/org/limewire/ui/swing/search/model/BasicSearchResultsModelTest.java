@@ -37,7 +37,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testUrnOrnNameGrouping1() {
-        //TODO fix grouping by urn
+        // TODO fix grouping by urn
         BasicSearchResultsModel model = new BasicSearchResultsModel();
         model.addSearchResult(new TestSearchResult("1", "file name"));
         model.addSearchResult(new TestSearchResult("1", "other file"));
@@ -51,7 +51,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(0, groupResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(4, coreResults0.size());
-        
+
         print(coreResults0);
     }
 
@@ -63,22 +63,16 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(new TestSearchResult("1", "file name"));
         model.addSearchResult(new TestSearchResult("1", "other file"));
 
+        
+        
         List<VisualSearchResult> results = model.getVisualSearchResults();
-        Assert.assertEquals(2, results.size());
+        Assert.assertEquals(1, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
         Assert.assertEquals(0, groupResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
-        Assert.assertEquals(2, coreResults0.size());
+        Assert.assertEquals(4, coreResults0.size());
         print(coreResults0);
-
-        VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
-        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
-        Assert.assertEquals(2, coreResults1.size());
-
-        print(coreResults1);
 
     }
 
@@ -141,6 +135,10 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         @Override
         public String getUrn() {
             return urn;
+        }
+
+        public String toString() {
+            return getUrn() + " - " + getProperty(PropertyKey.NAME);
         }
     }
 

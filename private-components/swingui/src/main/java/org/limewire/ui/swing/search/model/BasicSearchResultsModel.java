@@ -41,6 +41,10 @@ public class BasicSearchResultsModel {
 
     public void addSearchResult(SearchResult result) {
         allSearchResults.add(result);
+        for (SearchResult searchResult : allSearchResults) {
+            allSearchResults.remove(searchResult);
+            allSearchResults.add(searchResult);
+        }
     }
 
     public void removeSearchResult(SearchResult result) {
@@ -53,6 +57,5 @@ public class BasicSearchResultsModel {
         public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
             return new GroupingSearchResultAdapter(sourceValue);
         }
-
     }
 }

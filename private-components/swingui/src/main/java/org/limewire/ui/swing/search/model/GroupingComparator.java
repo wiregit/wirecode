@@ -55,6 +55,14 @@ class GroupingComparator implements SearchResultComparator {
             }
         }
 
+        public int size() {
+            return items.size();
+        }
+
+        public String toString() {
+            return items.toString();
+        }
+
     }
 
     private final Map<SearchResult, Group> matchingResults;
@@ -70,27 +78,42 @@ class GroupingComparator implements SearchResultComparator {
     public int compare(SearchResult o1, SearchResult o2) {
 
         int result = searchResultComparator.compare(o1, o2);
+        Group group1 = getGroup(o1);
+        Group group2 = getGroup(o2);
 
-        boolean hasGroup1 = hasGroup(o1);
-        boolean hasGroup2 = hasGroup(o2);
+        if (group1 != group2) {
+            if (group1.hasResultUrn(o2)) {
+                consolidateGroups(o1, o2);
+                return 0;
+            } else if (group2.hasResultUrn(o1)) {
+                consolidateGroups(o2, o1);
+                return 0;
+            }
+            if (result == 0 && group1.size() > 1) {
+                consolidateGroups(o1, o2);
+                return 0;
+            }
 
-        if (hasGroup1 && !hasGroup2 && result == 0) {
-            Group group1 = getGroup(o1);
-            group1.add(o2);
-        } else if (!hasGroup1 && hasGroup2 && result == 0) {
-            Group group2 = getGroup(o1);
-            group2.add(o1);
-        } else if (result == 0) {
-            Group group1 = getGroup(o1);
-            group1.addAll(getGroup(o2));
-            matchingResults.put(o2, group1);
+            if (result == 0 && group2.size() > 1) {
+                consolidateGroups(o2, o1);
+                return 0;
+            }
+
+            if (result == 0) {
+                consolidateGroups(o1, o2);
+                return 0;
+            }
+
+        } else {
+            return 0;
         }
-
         return result;
     }
 
-    private boolean hasGroup(SearchResult o1) {
-        return matchingResults.containsKey(o1);
+    private void consolidateGroups(SearchResult o1, SearchResult o2) {
+        Group group1 = getGroup(o1);
+        group1.addAll(getGroup(o2));
+        matchingResults.put(o2, group1);
     }
 
     private Group getGroup(SearchResult o1) {
