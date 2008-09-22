@@ -143,6 +143,9 @@ public class SocketsManagerImpl implements SocketsManager {
     
     @Override
     public void connect(Address address, final int timeout, final ConnectObserver observer) {
+        if (address == null) { 
+            throw new NullPointerException("address must not be null");
+        }
         AddressResolutionObserver proxy = new AddressResolutionObserver() {
             @Override
             public void resolved(Address... addresses) {
@@ -168,6 +171,9 @@ public class SocketsManagerImpl implements SocketsManager {
 
     @Override
     public void resolve(Address address, int timeout, AddressResolutionObserver observer) {
+        if (address == null) { 
+            throw new NullPointerException("address must not be null");
+        }
         // this can also be changed to allow multiple resolvers to resolve the same
         // address and re-resolve the resolved addresses too
         AddressResolver resolver = getResolver(address);
