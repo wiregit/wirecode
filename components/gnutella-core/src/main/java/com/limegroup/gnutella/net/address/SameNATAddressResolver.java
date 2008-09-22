@@ -52,6 +52,7 @@ public class SameNATAddressResolver implements AddressResolver {
         }
         byte[] privateAddress = networkManager.getAddress();
         if (NetworkUtils.areInSameSiteLocalNetwork(privateAddress, address.getPrivateAddress().getInetAddress().getAddress())) {
+            LOG.debug("addresses behind same NAT!");
             observer.resolved(address.getPrivateAddress());
         } else {
             LOG.debugf("different site local networks: {0}", address.getPrivateAddress());
