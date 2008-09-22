@@ -22,7 +22,7 @@ public class BasicSearchResultsModel {
         allSearchResults = new BasicEventList<SearchResult>();
 
         groupingListSimilarResults = new GroupingList<SearchResult>(allSearchResults,
-                new ChainedSearchResultComparator(new UrnComparator(), new GroupingComparator(
+                new GroupingComparator(new ChainedSearchResultComparator(new UrnComparator(),
                         new NamesMatchComparator())));
 
         groupedSimilarResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
@@ -31,7 +31,7 @@ public class BasicSearchResultsModel {
     }
 
     public int getResultCount() {
-        //TODO add counting back in
+        // TODO add counting back in
         return 0;
     }
 
