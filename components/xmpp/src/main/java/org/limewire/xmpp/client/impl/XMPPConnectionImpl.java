@@ -16,6 +16,7 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.Address;
+import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
@@ -301,9 +302,14 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
                 }
-                LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
-                limePresense.subscribeAndWaitForAddress();
-                user.addPresense(limePresense);
+                try {
+                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
+                    limePresense.subscribeAndWaitForAddress();
+                    user.addPresense(limePresense);
+                } catch (InvalidDataException e) {
+                    LOG.debug("could not parse address data", e);
+                    user.addPresense(new PresenceImpl(presence, connection));
+                }
             } else {
                 user.addPresense(new PresenceImpl(presence, connection));
             }

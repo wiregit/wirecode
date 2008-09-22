@@ -26,7 +26,7 @@ public class ConnectableSerializer implements AddressSerializer {
     private static final int IP_V6 = 1;
     
     public String getAddressType() {
-        return "connectable";
+        return "direct-connect";
     }
 
     public Class<? extends Address> getAddressClass() {

@@ -10,9 +10,11 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.limewire.io.Address;
+import org.limewire.io.InvalidDataException;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.NullAddressIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
@@ -36,7 +38,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         this.address = address;
     }
     
-    void subscribeAndWaitForAddress() {
+    void subscribeAndWaitForAddress() throws InvalidDataException {
         if(LOG.isInfoEnabled()) {
             LOG.info("getting address from " + getJID() + " ...");
         }
@@ -48,6 +50,9 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
             new PacketIDFilter(addressIQ.getPacketID()));         
         connection.sendPacket(addressIQ);
         final AddressIQ response = (AddressIQ) collector.nextResult();
+        if (response instanceof NullAddressIQ) {
+            throw new InvalidDataException(((NullAddressIQ)response).getException());
+        }
         address = response.getAddress();
         collector.cancel();
     }
