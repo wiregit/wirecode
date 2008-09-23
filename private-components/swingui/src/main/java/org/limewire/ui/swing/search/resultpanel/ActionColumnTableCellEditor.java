@@ -11,6 +11,7 @@ import javax.swing.JToggleButton;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -24,17 +25,21 @@ extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
         
     private ActionButtonPanel panel;
-    private VisualSearchResult vsr;
+    private final NavigableTree navTree;
+    
+    public ActionColumnTableCellEditor(NavigableTree navTree) {
+        this.navTree = navTree;
+    }
     
     @Override
     public Object getCellEditorValue() {
         return null;
     }
     
-    private ActionButtonPanel getPanel(final JTable table) {
+    private ActionButtonPanel getPanel(final JTable table, final VisualSearchResult vsr) {
         if (panel != null) return panel;
         
-        panel = new ActionButtonPanel();
+        panel = new ActionButtonPanel(navTree);
         
         JToggleButton junkButton = panel.getJunkButton();
         junkButton.addItemListener(new ItemListener() {
@@ -53,8 +58,10 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value, boolean isSelected,
         int row, int column) {
         
-        panel = getPanel(table);
-        vsr = (VisualSearchResult) value;
+        panel = getPanel(table, (VisualSearchResult) value);
+        VisualSearchResult vsr = (VisualSearchResult) value;
+        panel.setVisualSearchResult(vsr);
+        panel.setRow(row);
         panel.setAlpha(vsr.isMarkedAsJunk() ? 0.2f : 1.0f);
 
         // If the VisualSearchResult for the current row is currently

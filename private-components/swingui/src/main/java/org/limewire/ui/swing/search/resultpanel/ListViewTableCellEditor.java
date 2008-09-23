@@ -1,11 +1,11 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -40,12 +40,9 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.library.MyLibraryPanel;
-import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavigableTree;
-import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -65,29 +62,26 @@ implements TableCellEditor, TableCellRenderer {
 
     private final String SEARCH_TEXT_COLOR = "red";
 
-    public static final int HEIGHT = 50;
+    public static final int HEIGHT = 60;
     public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
 
     private String searchText;
 
-    @Resource private Icon downloadIcon;
+    @Resource private Icon itemIcon;
     
     private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
 
     private ActionColumnTableCellEditor actionEditor;
     private ActionButtonPanel actionButtonPanel;
     private FromWidget fromWidget = new FromWidget();
-    private JLabel downloadButton;
-    private JXHyperlink downloadingLink = new JXHyperlink();
+    private JLabel itemIconLabel;
     private JXHyperlink similarButton = new JXHyperlink();
     private JLabel headingLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
     private JLabel otherLabel = new JLabel();
     private JXPanel actionPanel = new JXPanel();
     private JXPanel thePanel;
-    private JTable table;
-    private NavigableTree navTree;
     private Category category;
 
     private VisualSearchResult vsr;
@@ -99,13 +93,8 @@ implements TableCellEditor, TableCellRenderer {
         NavigableTree navTree) {
 
         this.actionEditor = actionEditor;
-        this.navTree = navTree;
+        FontUtils.changeSize(similarButton, -2.0F);
 
-        // Cause the @Resource fields to be injected
-        // using properties in AppFrame.properties.
-        // The icon PNG file is in
-        // private-components/swingui/src/main/resources/
-        // org/limewire/ui/swing/mainframe/resources/icons.
         GuiUtils.assignResources(this);
     }
 
@@ -207,19 +196,20 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value, boolean isSelected, int row, int column) {
         LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0}", row);
 
-        this.table = table;
-
         vsr = (VisualSearchResult) value;
         category = vsr.getCategory();
 
         similarButton.setVisible(getSimilarResultsCount() > 0);
 
-        if (thePanel == null)
-            thePanel = makePanel();
-
         actionButtonPanel =
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
-            table, value, isSelected, row, column);
+                    table, value, isSelected, row, column);
+        
+        if (thePanel == null) {
+            thePanel = makePanel();
+            actionButtonPanel.configureForListView();
+        }
+
         actionPanel.removeAll();
         actionPanel.add(actionButtonPanel);
 
@@ -248,16 +238,6 @@ implements TableCellEditor, TableCellRenderer {
 
         return getTableCellEditorComponent(
             table, value, isSelected, row, column);
-    }
-    
-    private String hyperlinkText(Object...pieces ) {
-        StringBuilder bldr = new StringBuilder();
-        bldr.append("<html><u>");
-        for(Object s : pieces) {
-            bldr.append(s);
-        }
-        bldr.append("</u></html>");
-        return bldr.toString();
     }
     
     private boolean isShowingSimilarResults() {
@@ -300,41 +280,23 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private Component makeLeftPanel() {
-        downloadButton = new JLabel(downloadIcon);
-        downloadButton.setCursor(
-            Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        downloadButton.setOpaque(false);
-        downloadButton.addMouseListener(new MouseAdapter() {
+        itemIconLabel = new JLabel(itemIcon);
+        itemIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                int row = table.rowAtPoint(e.getPoint());
-                startDownload(row);
+                actionButtonPanel.startDownload();
             }
         });
-
-        downloadingLink.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
-                    navTree.getNavigableItemByName(
-                        NavCategory.DOWNLOAD,
-                        MainDownloadPanel.NAME).select();
-                } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
-                    navTree.getNavigableItemByName(
-                        NavCategory.LIBRARY,
-                        MyLibraryPanel.NAME).select();
-                }
-            }
-        });
-
+        itemIconLabel.setCursor(
+            Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        itemIconLabel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
 
         JXPanel downloadPanel = new JXPanel(new GridBagLayout());
         downloadPanel.setOpaque(false);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0;
-        downloadPanel.add(downloadButton, gbc);
-        downloadPanel.add(downloadingLink, gbc);
+        downloadPanel.add(itemIconLabel, gbc);
 
         JXPanel headingPanel = new JXPanel(new GridBagLayout());
         headingPanel.setOpaque(false);
@@ -479,23 +441,7 @@ implements TableCellEditor, TableCellRenderer {
                 vsr.getSimilarityParent() != null ? SIMILARITY_INDENTATION : 0, 0);
         similarResultIndentation.setPreferredSize(indentSize);
 
-        switch (vsr.getDownloadState()) {
-            case NOT_STARTED:
-                downloadButton.setEnabled(true);
-                downloadingLink.setText("");
-                downloadingLink.setVisible(false);
-                break;
-            case DOWNLOADING:
-                downloadButton.setEnabled(false);
-                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
-                downloadingLink.setVisible(true);
-                break;
-            case DOWNLOADED:
-                downloadButton.setEnabled(false);
-                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
-                downloadingLink.setVisible(true);
-                break;
-        }
+        actionButtonPanel.setDownloadingDisplay(vsr);
 
         populateHeading(vsr);
         populateSubheading(vsr);
@@ -548,19 +494,6 @@ implements TableCellEditor, TableCellRenderer {
             Component child = thePanel.getComponent(i);
             child.setBackground(color);
         }
-    }
-
-    private void startDownload(int row) {
-        // Find the BaseResultPanel this is inside.
-        Container parent = thePanel.getParent();
-        while (!(parent instanceof BaseResultPanel)) {
-            parent = parent.getParent();
-        }
-        BaseResultPanel brp = (BaseResultPanel) parent;
-
-        downloadButton.setEnabled(false);
-        downloadingLink.setVisible(true);
-        brp.download(vsr, row);
     }
 
     private String getHideShowSimilarFilesButtonText() {

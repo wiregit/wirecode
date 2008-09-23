@@ -1,22 +1,40 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JToggleButton;
 import javax.swing.ToolTipManager;
+
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.library.MyLibraryPanel;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
@@ -26,19 +44,13 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class ActionButtonPanel extends JXPanel {
 
-//    private static final Point toolTipOffset = new Point(0, 25);
     private static final String[] TOOLTIPS =
         { "Download", "More Info", "Mark as Junk" };
     
-    private static final int HGAP = 10;    
-    private static final int VGAP = 0;    
-
     private static final int DOWNLOAD = 0;    
     private static final int MORE_INFO = 1;    
     private static final int MARK_AS_JUNK = 2;    
 
-    // The icons displayed in the action column,
-    // supplied by the call to GuiUtils.assignResources().
     @Resource private Icon downloadDownIcon;
     @Resource private Icon downloadOverIcon;
     @Resource private Icon downloadUpIcon;
@@ -51,15 +63,14 @@ public class ActionButtonPanel extends JXPanel {
 
     private Icon[][] icons;
     private JButton downloadButton;
+    private JXHyperlink downloadingLink = new JXHyperlink();
     private JButton infoButton;
     private JToggleButton junkButton;
     private int height;
+    private VisualSearchResult vsr;
+    private int currentRow;
 
-    public ActionButtonPanel() {
-        // Cause the @Resource fields to be injected
-        // using properties in AppFrame.properties.
-        // The icon PNG file is in swingui/src/main/resources/
-        // org/limewire/ui/swing/mainframe/resources/icons.
+    public ActionButtonPanel(final NavigableTree navTree) {
         GuiUtils.assignResources(this);
 
         downloadButton = new JButton() {
@@ -68,6 +79,28 @@ public class ActionButtonPanel extends JXPanel {
                 return getToolTipOffset(this);
             }
         };
+        
+        downloadButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                startDownload();
+            }
+        });
+        
+        downloadingLink.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+                    navTree.getNavigableItemByName(
+                        NavCategory.DOWNLOAD,
+                        MainDownloadPanel.NAME).select();
+                } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
+                    navTree.getNavigableItemByName(
+                        NavCategory.LIBRARY,
+                        MyLibraryPanel.NAME).select();
+                }
+            }
+        });
         
         infoButton = new JButton() {
             @Override
@@ -90,8 +123,8 @@ public class ActionButtonPanel extends JXPanel {
         };
         calculateHeight();
 
-        setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
-        createButtons();
+        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        addButtonsToPanel();
 
         // Set the tooltip delay to zero only when the mouse is over this panel.
         addMouseListener(new MouseAdapter() {
@@ -111,6 +144,22 @@ public class ActionButtonPanel extends JXPanel {
             }
         });
     }
+    
+    public void startDownload() {
+        // Find the BaseResultPanel this is inside.
+        Container parent = getParent();
+        while (!(parent instanceof BaseResultPanel)) {
+            parent = parent.getParent();
+        }
+        BaseResultPanel brp = (BaseResultPanel) parent;
+
+        brp.download(vsr, currentRow);
+        setDownloadingDisplay(vsr);
+    }
+    
+    public void setVisualSearchResult(VisualSearchResult vsr) {
+        this.vsr = vsr;
+    }
 
     private void calculateHeight() {
         for (Icon[] iconSet : icons) {
@@ -119,7 +168,7 @@ public class ActionButtonPanel extends JXPanel {
         }
     }
 
-    private void createButtons() {
+    private void addButtonsToPanel() {
         int buttonIndex = 0;
 
         for (Icon[] iconSet : icons) {
@@ -135,7 +184,7 @@ public class ActionButtonPanel extends JXPanel {
             button.setPressedIcon(downIcon);
             button.setSelectedIcon(downIcon);
 
-            button.setToolTipText(TOOLTIPS[buttonIndex]);
+            button.setToolTipText(TOOLTIPS[buttonIndex++]);
 
             button.setBorderPainted(false);
             button.setContentAreaFilled(false);
@@ -144,9 +193,7 @@ public class ActionButtonPanel extends JXPanel {
                 new Dimension(upIcon.getIconWidth(), upIcon.getIconHeight());
             button.setPreferredSize(size);
 
-            add(button);
-
-            ++buttonIndex;
+            add(button, buttonIndex == TOOLTIPS.length ? "wrap" : "");
         }
     }
 
@@ -154,14 +201,6 @@ public class ActionButtonPanel extends JXPanel {
         return buttonIndex == DOWNLOAD ? downloadButton :
             buttonIndex == MORE_INFO ? infoButton :
             buttonIndex == MARK_AS_JUNK ? junkButton : null;
-    }
-
-    /**
-     * Gets the height of the tallest button icon.
-     * @return the height
-     */
-    public int getIconHeight() {
-        return height;
     }
 
     /**
@@ -231,5 +270,37 @@ public class ActionButtonPanel extends JXPanel {
         Icon icon = rollover ?
             getRolloverIcon(buttonIndex) : getUpIcon(buttonIndex);
         button.setIcon(icon);
+    }
+    
+    public void setDownloadingDisplay(VisualSearchResult vsr) {
+        switch (vsr.getDownloadState()) {
+            case NOT_STARTED:
+                downloadButton.setEnabled(true);
+                downloadingLink.setText("");
+                downloadingLink.setVisible(false);
+                break;
+            case DOWNLOADING:
+                downloadButton.setEnabled(false);
+                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
+                downloadingLink.setVisible(true);
+                break;
+            case DOWNLOADED:
+                downloadButton.setEnabled(false);
+                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
+                downloadingLink.setVisible(true);
+                break;
+        }
+    }
+
+    public void setRow(int row) {
+        this.currentRow = row;        
+    }
+    
+    public void configureForListView() {
+        removeAll();
+        setLayout(new MigLayout("insets 0 0 0 0", "0[]0[]0[]0", "0[]0[]0"));
+        addButtonsToPanel();
+        FontUtils.changeSize(downloadingLink, -2.0f);
+        add(downloadingLink, "span");
     }
 }

@@ -38,10 +38,6 @@ public abstract class BaseResultPanel extends JXPanel {
     public static final int TABLE_ROW_HEIGHT = 26;
     private final Log LOG = LogFactory.getLog(getClass());
     
-    private ActionColumnTableCellEditor actionEditor =
-        new ActionColumnTableCellEditor();
-    private ActionColumnTableCellEditor actionRenderer =
-        new ActionColumnTableCellEditor();
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
     private ConfigurableTable<VisualSearchResult> resultsList;
@@ -92,12 +88,12 @@ public abstract class BaseResultPanel extends JXPanel {
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor renderer =
-            new ListViewTableCellEditor(actionRenderer, navTree);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navTree), navTree);
         resultsList.setDefaultRenderer(VisualSearchResult.class, renderer);
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor editor =
-            new ListViewTableCellEditor(actionEditor, navTree);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navTree), navTree);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         int columnIndex = 0;
@@ -186,9 +182,9 @@ public abstract class BaseResultPanel extends JXPanel {
         }
 
         resultsTable.setDefaultRenderer(
-            VisualSearchResult.class, actionRenderer);
+            VisualSearchResult.class, new ActionColumnTableCellEditor(navTree));
         resultsTable.setDefaultEditor(
-            VisualSearchResult.class, actionEditor);
+            VisualSearchResult.class, new ActionColumnTableCellEditor(navTree));
 
         // Don't allow sorting on the "Actions" column
         int columnIndex = tableFormat.getActionColumnIndex();
