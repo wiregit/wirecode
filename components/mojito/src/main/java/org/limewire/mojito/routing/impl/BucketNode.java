@@ -369,7 +369,7 @@ class BucketNode implements Bucket {
             }
         }
         
-        assert ((left.size() + right.size()) == size());
+        assert ((left.size() + right.size()) == size()) : "left: " + left.size() + ", right: " + right.size() + ", old: " + size();
         return Arrays.asList(left, right);
     }
     
