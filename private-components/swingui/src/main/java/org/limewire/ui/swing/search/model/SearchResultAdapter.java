@@ -18,6 +18,7 @@ import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.util.MediaType;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
@@ -103,7 +104,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         if (properties == null) {
             properties = new HashMap<SearchResult.PropertyKey, Object>();
             for (SearchResult result : coreResults) {
-                properties.putAll(result.getProperties());
+                Map<PropertyKey, Object> props = result.getProperties();
+                properties.putAll(props);
             }
         }
 
@@ -224,5 +226,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         boolean oldVisible = this.visible;
         this.visible = visible;
         firePropertyChange("visible", oldVisible, visible);
+    }
+
+    public void removeSimilarSearchResult(VisualSearchResult result) {
+        similarResults.remove(result);       
     }
 }
