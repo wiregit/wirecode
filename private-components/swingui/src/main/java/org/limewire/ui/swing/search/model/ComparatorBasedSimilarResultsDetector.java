@@ -48,21 +48,11 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
     }
 
     private void update(VisualSearchResult addedItem, VisualSearchResult existingItem) {
-        if (addedItem.getSimilarityParent() != null) {
-            update(existingItem, addedItem.getSimilarityParent());
-        }
-
         VisualSearchResult parent = findParent(addedItem, existingItem);
-        VisualSearchResult child = null;
-
-        if (parent == existingItem) {
-            child = addedItem;
-        } else {
-            child = existingItem;
-        }
-
-        updateParent(child, parent);
-        updateVisibility(child, parent);
+        updateParent(addedItem, parent);
+        updateParent(existingItem, parent);
+        updateVisibility(addedItem, parent);
+        updateVisibility(existingItem, parent);
     }
 
     /**
@@ -116,9 +106,9 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
         } else if (parent1 == null && parent2 != null) {
             parent = parent2;
         } else if (parent1.getCoreSearchResults().size() < parent2.getCoreSearchResults().size()) {
-            parent = parent1;
-        } else {
             parent = parent2;
+        } else {
+            parent = parent1;
         }
         return parent;
     }
