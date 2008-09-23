@@ -71,10 +71,12 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
      * Moves the children from the child to the parent.
      */
     private void moveChildren(VisualSearchResult child, VisualSearchResult parent) {
+        ((SearchResultAdapter) child).removeSimilarSearchResult(parent);
         for (VisualSearchResult item : child.getSimilarResults()) {
             up(item, parent);
             ((SearchResultAdapter) child).removeSimilarSearchResult(item);
             ((SearchResultAdapter) parent).addSimilarSearchResult(item);
+           
         }
     }
 
@@ -87,20 +89,26 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
     private VisualSearchResult findParent(VisualSearchResult item1, VisualSearchResult item2) {
         VisualSearchResult parent = null;
 
-        VisualSearchResult parent1 = item1.getSimilarityParent() == null ? item1 : item1
-                .getSimilarityParent();
-        VisualSearchResult parent2 = item2.getSimilarityParent() == null ? item2 : item2
-                .getSimilarityParent();
 
-        if (parent1 != null && parent2 == null) {
-            parent = parent1;
-        } else if (parent1 == null && parent2 != null) {
-            parent = parent2;
-        } else if (parent1.getCoreSearchResults().size() < parent2.getCoreSearchResults().size()) {
+        VisualSearchResult parent1 = item1;
+        VisualSearchResult parent2 = item2;
+        VisualSearchResult parent3 = item1.getSimilarityParent();
+        VisualSearchResult parent4 = item2.getSimilarityParent();
+        int parent1Count = parent1 == null ? 0 : parent1.getCoreSearchResults().size();
+        int parent2Count = parent2 == null ? 0 : parent2.getCoreSearchResults().size();
+        int parent3Count = parent3 == null ? 0 : parent3.getCoreSearchResults().size();
+        int parent4Count = parent4 == null ? 0 : parent4.getCoreSearchResults().size();
+        if (parent4Count > parent3Count && parent4Count > parent2Count
+                && parent4Count > parent1Count) {
+            parent = parent4;
+        } else if (parent3Count > parent2Count && parent3Count > parent1Count) {
+            parent = parent3;
+        } else if (parent2Count > parent1Count) {
             parent = parent2;
         } else {
             parent = parent1;
         }
+
 
         return parent;
     }
