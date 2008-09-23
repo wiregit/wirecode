@@ -11,7 +11,7 @@ public class MockNavigableTree implements NavigableTree {
     }
 
     @Override
-    public void addNavigableItem(NavCategory category, NavItem navItem, boolean userRemovable) {
+    public void addNavigableItem(NavCategory category, NavItem navItem) {
         // TODO Auto-generated method stub
 
     }

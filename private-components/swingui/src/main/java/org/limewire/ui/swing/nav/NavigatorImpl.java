@@ -59,7 +59,7 @@ class NavigatorImpl implements Navigator {
                 selectNavigablePanel(category, this);
             }
         };
-        navTree.addNavigableItem(category, item, userRemovable);
+        navTree.addNavigableItem(category, item);
         navTarget.addNavigablePanel(item, panel);
         return item;
     }

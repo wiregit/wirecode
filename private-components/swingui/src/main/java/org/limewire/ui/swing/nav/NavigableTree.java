@@ -8,7 +8,7 @@ public interface NavigableTree {
    
     void removeNavigableItem(NavCategory category, NavItem navItem);
     
-    void addNavigableItem(NavCategory category, NavItem navItem, boolean userRemovable);
+    void addNavigableItem(NavCategory category, NavItem navItem);
     
     void addNavSelectionListener(NavSelectionListener listener);
 

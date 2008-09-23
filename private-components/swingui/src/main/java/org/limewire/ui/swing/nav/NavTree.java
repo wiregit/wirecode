@@ -7,13 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Box;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.mainframe.StorePanel;
+import org.limewire.ui.swing.nav.NavList.SelectionListener;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
 import com.google.inject.Singleton;
@@ -28,20 +27,11 @@ public class NavTree extends JXPanel implements NavigableTree {
         this.navigableLists = new ArrayList<NavList>();
         setLayout(new GridBagLayout());
         
-        addNavList(new NavList("LimeWire", Navigator.NavCategory.LIMEWIRE));
-        addNavList(new NavList("Library", Navigator.NavCategory.LIBRARY));
-        
-        NavList hiddenList = new NavList("Download", Navigator.NavCategory.DOWNLOAD);
-        hiddenList.setVisible(false);
-        addNavList(hiddenList);
-        
-        hiddenList = new NavList("Search", Navigator.NavCategory.SEARCH);
-        hiddenList.setVisible(false);
-        addNavList(hiddenList);
-        
-        hiddenList = new NavList("Sharing", Navigator.NavCategory.SHARING);
-        hiddenList.setVisible(false);
-        addNavList(hiddenList);
+        addNavList(new ListNavList("LimeWire", Navigator.NavCategory.LIMEWIRE), true);
+        addNavList(new ListNavList("Library", Navigator.NavCategory.LIBRARY), true);        
+        addNavList(new SimpleNavList(Navigator.NavCategory.DOWNLOAD), false);        
+        addNavList(new SimpleNavList(Navigator.NavCategory.SEARCH), false);        
+        addNavList(new SimpleNavList(Navigator.NavCategory.SHARING), false);     
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -52,23 +42,25 @@ public class NavTree extends JXPanel implements NavigableTree {
         add(Box.createGlue(), gbc);
     }
     
-    private void addNavList(NavList navList) {
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.weightx = 1;
-        gbc.insets = new Insets(0, 0, 20, 0);
+    private void addNavList(NavList navList, boolean visible) {
+        if(visible) {
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.gridwidth = GridBagConstraints.REMAINDER;
+            gbc.weightx = 1;
+            gbc.insets = new Insets(0, 0, 20, 0);            
+            add(navList.getComponent(), gbc);
+        }
         
-        add(navList, gbc);
         navigableLists.add(navList);
-        navList.addListSelectionListener(new Listener());
+        navList.addSelectionListener(new Listener());
     }
     
     @Override
-    public void addNavigableItem(NavCategory category, NavItem navItem, boolean userRemovable) {
+    public void addNavigableItem(NavCategory category, NavItem navItem) {
         for(NavList list : navigableLists) {
             if(list.getCategory() == category) {
-                list.addNavItem(navItem, userRemovable);
+                list.addNavItem(navItem);
             }
         }
     }
@@ -136,21 +128,16 @@ public class NavTree extends JXPanel implements NavigableTree {
         selectNavigableItemByName(NavCategory.LIMEWIRE, StorePanel.NAME);
     }
     
-    private class Listener implements ListSelectionListener {
-        
+    private class Listener implements SelectionListener {        
         @Override
-        public void valueChanged(ListSelectionEvent e) {
-            if(e.getValueIsAdjusting()) // Ignore.
-                return; 
-            
-            NavList list = (NavList)e.getSource();
-            if(list.getSelectedIndex() != -1) { // Something is selected!
+        public void selectionChanged(NavList source) {
+            if(source.isNavItemSelected()) {
                 for(NavList navList : navigableLists) {
-                    if(navList != list) {
+                    if(navList != source) {
                         navList.clearSelection();
                     } else {
                         for(NavSelectionListener listener : navSelectionListeners) {
-                            listener.navItemSelected(navList.getCategory(), list.getNavItem());
+                            listener.navItemSelected(navList.getCategory(), source.getSelectedNavItem());
                         }
                     }
                 }
