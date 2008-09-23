@@ -3,6 +3,7 @@ package com.limegroup.gnutella.net.address;
 import java.util.Arrays;
 
 import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -41,6 +42,14 @@ public class SameNATAddressResolver implements AddressResolver {
         return address instanceof FirewalledAddress && !(address instanceof ResolvedFirewalledAddress); 
     }
 
+    /**
+     * Resolves a {@link FirewalledAddress} to the {@link Connectable} of its 
+     * {@link FirewalledAddress#getPrivateAddress() private address} if this peer
+     * and the peer the address belongs to are behind the same firewall.
+     * 
+     * Otherwise resolves the address to a {@link ResolvedFirewalledAddress} to
+     * mark it as resolved.
+     */
     @Override
     public void resolve(Address addr, int timeout, AddressResolutionObserver observer) {
         FirewalledAddress address = (FirewalledAddress)addr;
