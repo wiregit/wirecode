@@ -70,7 +70,7 @@ public class LimeXMLSchemaRepository {
     /**
      * Returns the URIs scooresponding to the schemas that we have
      * 
-     * @return the URIs scooresponding to the schemas that we have
+     * @return sorted array of URIs scooresponding to the schemas that we have
      */
     public String[] getAvailableSchemaURIs() {
         String[] schemaURIs;

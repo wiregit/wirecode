@@ -8,7 +8,7 @@ public class LimeWireBittorrentModule extends AbstractModule {
     @Override
     protected void configure() {
         // bound eagerly so it registers itself with MetaDataFactory
-        bind(TorrentMetaReader.class);
+        bind(TorrentMetaReader.class).asEagerSingleton();
     }
 
 }

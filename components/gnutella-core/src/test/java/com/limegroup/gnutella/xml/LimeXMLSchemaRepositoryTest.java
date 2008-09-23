@@ -56,7 +56,8 @@ public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
         check( availableSchemas[1], "audio");
         check( availableSchemas[2], "document");
         check( availableSchemas[3], "image");
-        check( availableSchemas[4], "video");
+        check( availableSchemas[4], "torrent");
+        check( availableSchemas[5], "video");
     }
     
     private static void check(String actual, String name) {
