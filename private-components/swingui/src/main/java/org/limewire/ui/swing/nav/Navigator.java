@@ -8,10 +8,6 @@ import javax.swing.JComponent;
  */
 public interface Navigator {
 
-    public static enum NavCategory {
-        LIBRARY, LIMEWIRE, SEARCH, DOWNLOAD, SHARING
-    }
-
     /**
      * Adds a panel described by the given name, in the category.
      * 

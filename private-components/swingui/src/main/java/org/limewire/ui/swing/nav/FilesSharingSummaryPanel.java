@@ -26,7 +26,6 @@ import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.sharing.BuddySharePanel;
 import org.limewire.ui.swing.sharing.GenericSharingPanel;
 import org.limewire.ui.swing.sharing.GnutellaSharePanel;

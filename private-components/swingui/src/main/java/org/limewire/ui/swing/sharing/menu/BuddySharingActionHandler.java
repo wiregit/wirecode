@@ -4,9 +4,9 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavigableTree;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -33,7 +33,7 @@ public class BuddySharingActionHandler {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {
-                    NavItem navItem = navTree.getNavigableItemByName(Navigator.NavCategory.LIBRARY, item.getName());
+                    NavItem navItem = navTree.getNavigableItemByName(NavCategory.LIBRARY, item.getName());
                     navItem.select();
                 } else if(actionCommand == SHARE_ALL_VIDEO) {
                     FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.VIDEO));

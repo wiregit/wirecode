@@ -22,7 +22,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 class ListNavList extends JXPanel implements NavList {
@@ -30,11 +29,11 @@ class ListNavList extends JXPanel implements NavList {
     private final JLabel titleLabel;
     private final JXTable itemList;
     private final DefaultTableModel listModel;
-    private final Navigator.NavCategory navCategory;
+    private final NavCategory navCategory;
     private final List<SelectionListener> listeners = new ArrayList<SelectionListener>();
     private boolean vizSet = false;
     
-    ListNavList(String title, Navigator.NavCategory target) {
+    ListNavList(String title, NavCategory target) {
         GuiUtils.assignResources(this);
         
         this.navCategory = target;

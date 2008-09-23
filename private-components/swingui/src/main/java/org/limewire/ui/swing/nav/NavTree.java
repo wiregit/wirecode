@@ -13,7 +13,6 @@ import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavList.SelectionListener;
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
 import com.google.inject.Singleton;
 
@@ -27,11 +26,11 @@ public class NavTree extends JXPanel implements NavigableTree {
         this.navigableLists = new ArrayList<NavList>();
         setLayout(new GridBagLayout());
         
-        addNavList(new ListNavList("LimeWire", Navigator.NavCategory.LIMEWIRE), true);
-        addNavList(new ListNavList("Library", Navigator.NavCategory.LIBRARY), true);        
-        addNavList(new SimpleNavList(Navigator.NavCategory.DOWNLOAD), false);        
-        addNavList(new SimpleNavList(Navigator.NavCategory.SEARCH), false);        
-        addNavList(new SimpleNavList(Navigator.NavCategory.SHARING), false);     
+        addNavList(new ListNavList("LimeWire", NavCategory.LIMEWIRE), true);
+        addNavList(new ListNavList("Library", NavCategory.LIBRARY), true);        
+        addNavList(new SimpleNavList(NavCategory.DOWNLOAD), false);        
+        addNavList(new SimpleNavList(NavCategory.SEARCH), false);        
+        addNavList(new SimpleNavList(NavCategory.SHARING), false);     
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;

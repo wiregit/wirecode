@@ -3,7 +3,6 @@ package org.limewire.ui.swing.nav;
 import java.awt.Component;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
 class SimpleNavList implements NavList {
     

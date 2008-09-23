@@ -42,8 +42,8 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.library.MyLibraryPanel;
+import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavigableTree;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -317,11 +317,11 @@ implements TableCellEditor, TableCellRenderer {
             public void actionPerformed(ActionEvent e) {
                 if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
                     navTree.getNavigableItemByName(
-                        Navigator.NavCategory.DOWNLOAD,
+                        NavCategory.DOWNLOAD,
                         MainDownloadPanel.NAME).select();
                 } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
                     navTree.getNavigableItemByName(
-                        Navigator.NavCategory.LIBRARY,
+                        NavCategory.LIBRARY,
                         MyLibraryPanel.NAME).select();
                 }
             }

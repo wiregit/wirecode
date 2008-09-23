@@ -2,7 +2,6 @@ package org.limewire.ui.swing.nav;
 
 import java.awt.Component;
 
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
 interface NavList {
 

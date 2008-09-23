@@ -30,7 +30,7 @@ class NavigatorImpl implements Navigator {
         
         navTree.addNavSelectionListener(new NavSelectionListener() {
             @Override
-            public void navItemSelected(Navigator.NavCategory category, NavItem navItem) {
+            public void navItemSelected(NavCategory category, NavItem navItem) {
                 showNavigablePanel(category, navItem);
                 for(NavSelectionListener listener : listeners) {
                     listener.navItemSelected(category, navItem);
