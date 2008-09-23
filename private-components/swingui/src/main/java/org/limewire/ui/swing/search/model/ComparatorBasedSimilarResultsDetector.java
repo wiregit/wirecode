@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,68 +19,106 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
 
     public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult result) {
         for (VisualSearchResult existingResult : results) {
-            if (existingResult != result
-                    && searchResultComparator.compare(existingResult, result) == 0) {
+            if (existingResult != result && compareMatched(existingResult, result)) {
                 update(result, existingResult);
-                break;
             }
         }
+
+    }
+
+    // private void rearrange(List<VisualSearchResult> results) {
+    // List<VisualSearchResult> res = new
+    // ArrayList<VisualSearchResult>(results);
+    // Collections.reverse(res);
+    // List<VisualSearchResult> done = new ArrayList<VisualSearchResult>();
+    // for (VisualSearchResult result : res) {
+    // done.add(result);
+    // for (VisualSearchResult result2 : results) {
+    // if (!done.contains(result2) && result != result2 &&
+    // compareMatched(result, result2)) {
+    // update(result, result2);
+    // }
+    // }
+    // }
+    //
+    // }
+
+    private boolean compareMatched(VisualSearchResult result, VisualSearchResult result2) {
+        return searchResultComparator.compare(result, result2) == 0;
     }
 
     private void update(VisualSearchResult addedItem, VisualSearchResult existingItem) {
+        if (addedItem.getSimilarityParent() != null) {
+            update(existingItem, addedItem.getSimilarityParent());
+        }
+
         VisualSearchResult parent = findParent(addedItem, existingItem);
+        VisualSearchResult child = null;
 
         if (parent == existingItem) {
-            updateParent(addedItem, parent);
+            child = addedItem;
         } else {
-            updateParent(existingItem, parent);
-            updateVisibility(existingItem, parent);
+            child = existingItem;
         }
+
+        updateParent(child, parent);
+        updateVisibility(child, parent);
     }
 
     /**
      * Update visibilities of newly changed parents.
      */
-    private void updateVisibility(VisualSearchResult existingItem, VisualSearchResult parent) {
-        parent.setChildrenVisible(existingItem.isChildrenVisible());
-        existingItem.setChildrenVisible(false);
+    private void updateVisibility(VisualSearchResult child, VisualSearchResult parent) {
+        parent.setChildrenVisible(child.isChildrenVisible() || parent.isChildrenVisible());
+        child.setChildrenVisible(false);
     }
 
     /**
-     * Updates the updateItem to use the given parent. The parent is set, the
+     * Updates the child to use the given parent. The parent is set, the
      * children are moved, and the visibility is copied.
      */
-    private void updateParent(VisualSearchResult updateItem, VisualSearchResult parent) {
-        if (updateItem != parent) {
-            ((SearchResultAdapter) updateItem).setSimilarityParent(parent);
-            ((SearchResultAdapter) parent).addSimilarSearchResult(updateItem);
-            moveChildren(updateItem, parent);
+    private void updateParent(VisualSearchResult child, VisualSearchResult parent) {
+        if (child != parent) {
+            ((SearchResultAdapter) parent).setSimilarityParent(null);
+            ((SearchResultAdapter) child).setSimilarityParent(parent);
+            ((SearchResultAdapter) parent).addSimilarSearchResult(child);
+            moveChildren(child, parent);
         }
     }
 
     /**
-     * Moves the children from the udateItem to the parent.
+     * Moves the children from the child to the parent.
      */
     private void moveChildren(VisualSearchResult updateItem, VisualSearchResult parent) {
-        for (VisualSearchResult res : updateItem.getSimilarResults()) {
-            ((SearchResultAdapter) updateItem).removeSimilarSearchResult(res);
-            ((SearchResultAdapter) parent).addSimilarSearchResult(res);
+        for (VisualSearchResult child : updateItem.getSimilarResults()) {
+            updateParent(child, parent);
+            ((SearchResultAdapter) updateItem).removeSimilarSearchResult(child);
+            ((SearchResultAdapter) parent).addSimilarSearchResult(child);
         }
     }
 
     /**
      * Returns which item should be the parent between the two similar search
      * results. Currently the item with the most core results, is considered the
-     * parent item
+     * parent.
      */
-    private VisualSearchResult findParent(VisualSearchResult addedItem,
-            VisualSearchResult existingItem) {
-        VisualSearchResult parent = existingItem.getSimilarityParent();
-        if (parent == null) {
-            parent = existingItem;
-        }
-        if (parent.getCoreSearchResults().size() < addedItem.getCoreSearchResults().size()) {
-            parent = addedItem;
+    @SuppressWarnings("null")
+    private VisualSearchResult findParent(VisualSearchResult item1, VisualSearchResult item2) {
+        VisualSearchResult parent = null;
+
+        VisualSearchResult parent1 = item1.getSimilarityParent() == null ? item1 : item1
+                .getSimilarityParent();
+        VisualSearchResult parent2 = item2.getSimilarityParent() == null ? item2 : item2
+                .getSimilarityParent();
+
+        if (parent1 != null && parent2 == null) {
+            parent = parent1;
+        } else if (parent1 == null && parent2 != null) {
+            parent = parent2;
+        } else if (parent1.getCoreSearchResults().size() < parent2.getCoreSearchResults().size()) {
+            parent = parent1;
+        } else {
+            parent = parent2;
         }
         return parent;
     }
