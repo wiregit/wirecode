@@ -12,7 +12,7 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
-import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.NullAddressIQ;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.ExceptionalAddressIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 
 import com.google.inject.internal.base.Objects;
@@ -52,8 +52,8 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
             new PacketIDFilter(addressIQ.getPacketID()));         
         connection.sendPacket(addressIQ);
         final AddressIQ response = (AddressIQ) collector.nextResult();
-        if (response instanceof NullAddressIQ) {
-            throw new InvalidDataException(((NullAddressIQ)response).getException());
+        if (response instanceof ExceptionalAddressIQ) {
+            throw new InvalidDataException(((ExceptionalAddressIQ)response).getException());
         }
         address = response.getAddress();
         collector.cancel();

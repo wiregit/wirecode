@@ -15,7 +15,6 @@ import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.address.AddressConnector;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
-import org.limewire.net.address.ConnectableConnector;
 import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
@@ -41,7 +40,6 @@ public class SocketsManagerImpl implements SocketsManager {
     @Inject
     public SocketsManagerImpl(SocketController socketController) {
         this.socketController = socketController;
-        addressConnectors.add(new ConnectableConnector(this));
     }
 
     public Socket create(ConnectType type) throws IOException {

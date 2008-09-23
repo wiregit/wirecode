@@ -2,6 +2,7 @@ package org.limewire.net;
 
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressFactoryImpl;
+import org.limewire.net.address.ConnectableConnector;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.net.address.HolePunchAddressSerializer;
 import org.limewire.util.OSUtils;
@@ -44,6 +45,7 @@ public class LimeWireNetModule extends AbstractModule {
         bind(AddressFactory.class).to(AddressFactoryImpl.class);
         bind(ConnectableSerializer.class);
         bind(HolePunchAddressSerializer.class);
+        bind(ConnectableConnector.class);
         
         
         if(OSUtils.isSocketChallengedWindows())

@@ -206,7 +206,6 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * @see com.limegroup.gnutella.Acceptor#setExternalAddress(java.net.InetAddress)
      */
 	public void setExternalAddress(InetAddress address) {
-	    System.out.println("setting external address: " + address);
 	    byte[] byteAddr = address.getAddress();
 
 		if( byteAddr[0] == 127 &&

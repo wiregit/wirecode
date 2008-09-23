@@ -20,17 +20,17 @@ public class AddressIQProvider implements IQProvider {
         try {
             return new AddressIQ(parser, factory);
         } catch (IOException ie) {
-            return new NullAddressIQ(ie); 
+            return new ExceptionalAddressIQ(ie); 
         } catch (XmlPullParserException xmpe) {
-            return new NullAddressIQ(xmpe);
+            return new ExceptionalAddressIQ(xmpe);
         }
     }
     
-    public static class NullAddressIQ extends AddressIQ {
+    public static class ExceptionalAddressIQ extends AddressIQ {
 
         private final Exception exception;
 
-        public NullAddressIQ(Exception exception) {
+        public ExceptionalAddressIQ(Exception exception) {
             this.exception = exception;
         }
         

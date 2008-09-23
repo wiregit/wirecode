@@ -118,6 +118,10 @@ public interface SearchServices {
      */
     public byte[] newQueryGUID();
 
-    public BrowseHostHandler doAsynchronousBrowseHost(Address address, GUID guid);
+    /**
+     * Initiates a non-blocking browse of <code>address</code> with
+     * session guid <code>browseGuid</code>.
+     */
+    public BrowseHostHandler doAsynchronousBrowseHost(Address address, GUID browseGuid);
 
 }
