@@ -182,8 +182,8 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(1, coreResults2.size());
         
         VisualSearchResult group3 = results.get(3);
-        List<VisualSearchResult> groupResults3 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults3.size());
+        List<VisualSearchResult> groupResults3 = group3.getSimilarResults();
+        Assert.assertEquals(3, groupResults3.size());
         List<SearchResult> coreResults3 = group1.getCoreSearchResults();
         Assert.assertEquals(1, coreResults3.size());
 
@@ -350,7 +350,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(2, groupResults0.size());
+        Assert.assertEquals(0, groupResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
@@ -363,14 +363,14 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(0, groupResults2.size());
+        Assert.assertEquals(2, groupResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(3, coreResults2.size());
         
         
-        Assert.assertNull(group0.getSimilarityParent());
-        Assert.assertEquals(group0, group1.getSimilarityParent());
-        Assert.assertEquals(group0, group2.getSimilarityParent());
+        Assert.assertNull(group2.getSimilarityParent());
+        Assert.assertEquals(group2, group1.getSimilarityParent());
+        Assert.assertEquals(group2, group0.getSimilarityParent());
     }
 
     public class TestSearchResult implements SearchResult {

@@ -203,11 +203,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public String toString() {
-        return getDescription() +
-            " with " + getSources().size() + " sources, " +
-            "in category: " + getCategory() +
-            ", with size: " + getSize() +
-            ", and extension: " + getFileExtension();
+        return getCoreSearchResults().toString();
     }
 
     void update() {
