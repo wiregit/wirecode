@@ -83,6 +83,18 @@ public class LimeTestUtils {
     }
 
     /**
+     * generate a dummy repeating String of the specified length
+     */
+    public static String generateRepeatingStringByLength(String stringtoRepeat, int length) {
+        StringBuilder longStr = new StringBuilder();
+
+        while (longStr.length() < length) {
+            longStr.append(stringtoRepeat);
+        }
+        return longStr.substring(0, length);
+    }
+
+    /**
      * Simple copy.  Horrible performance for large files.
      * Good performance for alphabets.
      */
@@ -103,6 +115,7 @@ public class LimeTestUtils {
             fis.close();
         }
     }
+
 
     
     /**

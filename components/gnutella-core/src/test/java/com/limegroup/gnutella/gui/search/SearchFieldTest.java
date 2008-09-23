@@ -9,6 +9,7 @@ import org.limewire.util.I18NConvert;
 
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.search.SearchField.SearchFieldDocument;
+import com.limegroup.gnutella.LimeTestUtils;
 
 public class SearchFieldTest extends GUIBaseTestCase {
 
@@ -84,8 +85,16 @@ public class SearchFieldTest extends GUIBaseTestCase {
     
     public void testInsertTooLongStringWithCharactersThatAreRemovedInNormalization() throws Exception {
         SearchFieldDocument doc = new SearchFieldDocument();
+        int maxLength = SearchSettings.MAX_QUERY_LENGTH.getValue();
+
         // + and = are removed in normalization and thus a too long query string could slip in
-        doc.insertString(0, "hello === ==++ world that is way too +==++", null);
+        String toInsertPart1 = "hello === ==++ world that is way too long long long long +==++";
+        String toInsertPart2 = LimeTestUtils.generateRepeatingStringByLength("===+++==+=++",
+                maxLength-toInsertPart1.length()+1);
+        String toInsert = toInsertPart1 + toInsertPart2;
+        
+
+        doc.insertString(0, toInsert, null);
         assertEquals(0, doc.getLength());
     }
     

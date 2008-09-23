@@ -45,7 +45,8 @@ public class QueryUtilsTest extends BaseTestCase {
         String query = QueryUtils.createQueryString("file and 42-name_minus #numbers");
         containsAll("file name minus numbers", query);
 
-        String tooLongString = generateStringByLengthCharsOnly(maxQueryLength + 23);
+        String tooLongString = 
+                LimeTestUtils.generateRepeatingStringByLength("dummystring", maxQueryLength + 23);
         String tooLongStringTruncated = tooLongString.substring(0, maxQueryLength);
 
         query = QueryUtils.createQueryString(tooLongString);
@@ -56,13 +57,15 @@ public class QueryUtilsTest extends BaseTestCase {
         queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
         
         //such query will fit any 2 out of 3 words in it.
-        String thirdKeywordTooLong = "short one, " + generateStringByLengthCharsOnly(maxQueryLength - 7);
+        String thirdKeywordTooLong = "short one, " +
+                LimeTestUtils.generateRepeatingStringByLength("dummystring", maxQueryLength - 7);
         query = QueryUtils.createQueryString(thirdKeywordTooLong);
         assertEquals(2,query.split(" ").length);
         qr = queryRequestFactory.createQuery(query);
         queryRequestFactory.createMulticastQuery(GUID.makeGuid(), qr);
 
-        String firstThingWontFit_But_Others_Will = generateStringByLengthCharsOnly(maxQueryLength + 1) +
+        String firstThingWontFit_But_Others_Will =
+                LimeTestUtils.generateRepeatingStringByLength("dummystring", maxQueryLength + 1) +
                 ", but short others";
         query = QueryUtils.createQueryString(firstThingWontFit_But_Others_Will);
         containsAll("but short others", query);
@@ -133,16 +136,7 @@ public class QueryUtilsTest extends BaseTestCase {
         valid.add("3");
         assertEquals(valid, QueryUtils.extractKeywords(QueryUtils.ripExtension("11 test pg-13 3.1415947"), true));
     }
-    
-    private String generateStringByLengthCharsOnly(int length) {
-        StringBuilder longStr = new StringBuilder();
 
-        while (longStr.length() < length) {
-            longStr.append("dummystring");
-        }
-        return longStr.substring(0, length);
-    }
-    
     private void containsAll(String match, String query) {
         Collection matchSet = Arrays.asList(match.split(" "));
         
