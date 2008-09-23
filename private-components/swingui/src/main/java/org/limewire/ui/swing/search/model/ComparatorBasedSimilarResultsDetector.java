@@ -19,6 +19,7 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
         for (VisualSearchResult test : results) {
             if (test != result && searchResultComparator.compare(test, result) == 0) {
                 update(result, test);
+                break;
             }
         }
     }
