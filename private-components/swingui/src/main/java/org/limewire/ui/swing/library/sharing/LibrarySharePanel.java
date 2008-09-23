@@ -10,8 +10,9 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -27,6 +28,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
@@ -42,11 +44,13 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.BuddyFileList;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.RoundedBorder;
@@ -87,7 +91,14 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
     private JTextField inputField;
 
+    /**
+     * all unshared buddies
+     */    
     private EventList<SharingTarget> noShareBuddyList;
+    /**
+     * filtered list of unshared buddies
+     */
+    private FilterList<SharingTarget> noShareFilterList;
     private EventList<SharingTarget> shareBuddyList;
 
     private JScrollPane shareScroll;
@@ -184,7 +195,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         
         shareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
        
-        shareTable = new MouseableTable(new EventTableModel<SharingTarget>(shareBuddyList, new LibraryShareTableFormat(1)));
+        shareTable = new ToolTipTable(new EventTableModel<SharingTarget>(shareBuddyList, new LibraryShareTableFormat(1)));
         shareTable.setTableHeader(null);
         final ShareRendererEditor removeEditor = new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed);
         removeEditor.addActionListener(new ActionListener(){
@@ -192,6 +203,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             public void actionPerformed(ActionEvent e) {
                unshareBuddy(removeEditor.getBuddy());
                removeEditor.cancelCellEditing();
+               inputField.requestFocusInWindow();
             }            
         });
         //do nothing ColorHighlighter eliminates default striping
@@ -206,7 +218,6 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         shareTable.setColumnSelectionAllowed(false);
         shareTable.setRowSelectionAllowed(false);
   
-        noShareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
         
         TextFilterator<SharingTarget> textFilter = new TextFilterator<SharingTarget>() {
             @Override
@@ -218,16 +229,16 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
         //have no guarantee about the order of sorting and selecting
         final TextMatcherEditor<SharingTarget>textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
-        
-        final EventList<SharingTarget> noShareSortedList = new FilterList<SharingTarget>(noShareBuddyList, textMatcher);
+        noShareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+        noShareFilterList = new FilterList<SharingTarget>(noShareBuddyList, textMatcher);
         
         inputField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if("".equals(inputField.getText()) || inputField.getText() == null){
+                if("".equals(inputField.getText()) || inputField.getText() == null || buddyTable.getRowCount() == 0){
                     setVisible(false);
                 } else if (buddyTable.getSelectedRow() >= 0) {
-                    shareBuddy(noShareSortedList.get(buddyTable.getSelectedRow()));
+                    shareBuddy(noShareFilterList.get(buddyTable.getSelectedRow()));
                 }
             }
         });
@@ -256,17 +267,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             }
         });
         
-        buddyTable = new MouseableTable(new EventTableModel<SharingTarget>(noShareSortedList, new LibraryShareTableFormat(0))){
-            public String getToolTipText(MouseEvent event) {
-                System.out.println(event.getComponent());
-               int row = rowAtPoint(event.getPoint());
-               if (row >= 0){
-                   return noShareSortedList.get(row).getName();
-               }
-                return null;
-                
-            }
-        };
+        buddyTable = new ToolTipTable(new EventTableModel<SharingTarget>(noShareFilterList, new LibraryShareTableFormat(0)));
         //do nothing ColorHighlighter eliminates default striping
         buddyTable.setHighlighters(new ColorHighlighter(HighlightPredicate.ALWAYS, getBackground(),
                 Color.BLACK, buddyTable.getSelectionBackground(), buddyTable.getSelectionForeground()));
@@ -281,15 +282,18 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         addEditor.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
+               int row = buddyTable.getSelectedRow();
                shareBuddy(addEditor.getBuddy());
                addEditor.cancelCellEditing();
+               inputField.requestFocusInWindow();
+               resetRowSelection(buddyTable, row);
             }            
         });
         
         buddyTable.setDoubleClickHandler(new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
-                shareBuddy(noShareSortedList.get(row));
+                addSelectedBuddy();
             }
         });
 
@@ -348,8 +352,58 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         setKeyStrokes(mainPanel);
         setKeyStrokes(inputField);
         
+        
+         Action enterAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addSelectedBuddy();
+            }
+        };
+        
+        buddyTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0),enterAction.toString() );
+        buddyTable.getActionMap().put(enterAction.toString(), enterAction);        
+        
+        Action closeAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setVisible(false);
+            }
+        };
+
+        
+
+        this.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
+        this.getActionMap().put(closeAction.toString(), closeAction);  
+
+        mainPanel.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
+        mainPanel.getActionMap().put(closeAction.toString(), closeAction);  
+        
+        buddyTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
+        buddyTable.getActionMap().put(closeAction.toString(), closeAction);  
+        
+        shareTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
+        shareTable.getActionMap().put(closeAction.toString(), closeAction); 
+        
+        inputField.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
+        inputField.getActionMap().put(closeAction.toString(), closeAction);   
+     
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                inputField.requestFocusInWindow();
+            }
+        });
     }
     
+
+    private void addSelectedBuddy() {
+        if (buddyTable.getSelectedRow() >= 0) {
+            int row = buddyTable.getSelectedRow();
+            shareBuddy(noShareFilterList.get(row));
+            resetRowSelection(buddyTable, row);
+        }
+    
+    }
     
     private void setKeyStrokes(JComponent component) {
         component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "up");
@@ -381,8 +435,8 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         } else {
             y = (int) visibleRect.getY();
             ledgeY = c.getY() - y;
-            if (ledgeY <= y) {
-                ledgeY = y + 1;
+            if (ledgeY <= 0) {
+                ledgeY = 1;
             }
         }
         
@@ -391,7 +445,6 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         setBounds(c.getX() - mainPanel.getWidth() - HGAP * 2,y, getWidth(), getHeight());
         getParent().validate();
         setVisible(true);
-        inputField.requestFocus();
     }
 
     //TODO: clean this up
@@ -404,6 +457,18 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         shapePainter.setShape(area);
     }
 
+
+    private void resetRowSelection(JTable table, int oldSelRow) {
+        if(oldSelRow == -1){
+            table.setRowSelectionInterval(0, 0);
+        } else if(table.getRowCount() > oldSelRow){
+            table.setRowSelectionInterval(oldSelRow, oldSelRow);
+        } else if ((oldSelRow - 1) >= 0 && (oldSelRow - 1) < table.getRowCount()) {
+            table.setRowSelectionInterval(oldSelRow - 1, oldSelRow - 1);
+        }
+    }
+    
+    
     private void shareBuddy(SharingTarget buddy) {
         shareBuddyList.add(buddy);
         noShareBuddyList.remove(buddy);
@@ -525,21 +590,22 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private void loadSharedBuddies() {
         shareBuddyList.clear();
         noShareBuddyList.clear();
-        
-        loadBuddy(GNUTELLA_SHARE);
+
+        if (fileItem.getCategory() != Category.DOCUMENT || SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
+            loadBuddy(GNUTELLA_SHARE);
+        }
         
         for (SharingTarget buddy : buddyListMap.keySet()) {
             loadBuddy(buddy);
         }
     }
     
-    private void loadBuddy(SharingTarget buddy){
-        if (isShared(fileItem, buddy)){
+    private void loadBuddy(SharingTarget buddy) {
+        if (isShared(fileItem, buddy)) {
             shareBuddyList.add(buddy);
         } else {
             noShareBuddyList.add(buddy);
         }
-    
     }
     
     private boolean isShared(FileItem fileItem, SharingTarget buddy){
