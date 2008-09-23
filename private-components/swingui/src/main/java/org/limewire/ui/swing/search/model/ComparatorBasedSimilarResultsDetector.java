@@ -16,9 +16,10 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
     }
 
     public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult result) {
-        for (VisualSearchResult test : results) {
-            if (test != result && searchResultComparator.compare(test, result) == 0) {
-                update(result, test);
+        for (VisualSearchResult existingResult : results) {
+            if (existingResult != result
+                    && searchResultComparator.compare(existingResult, result) == 0) {
+                update(result, existingResult);
                 break;
             }
         }
@@ -39,6 +40,11 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
             ((SearchResultAdapter) updateItem).setSimilarityParent(parent);
             ((SearchResultAdapter) parent).addSimilarSearchResult(updateItem);
             moveChildren(updateItem, parent);
+            parent.setVisible(true);
+            updateItem.setVisible(false);
+            for (VisualSearchResult searchResult : parent.getSimilarResults()) {
+                searchResult.setVisible(false);
+            }
         }
     }
 
