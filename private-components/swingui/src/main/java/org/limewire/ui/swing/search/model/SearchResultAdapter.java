@@ -30,7 +30,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private final Set<VisualSearchResult> similarResults = new HashSet<VisualSearchResult>();
     private VisualSearchResult similarityParent;
     private boolean junk;
-    private boolean visible;
+    private boolean childrenVisible;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
@@ -43,7 +43,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
                     o2.getHostDescription());
             }
         });
-        this.visible = true;
+        this.childrenVisible = false;
         
         update();
     }
@@ -218,14 +218,22 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public boolean isVisible() {
-        return visible;
+        if(similarityParent == null) {
+           return true;   
+        }
+        return similarityParent.isChildrenVisible();
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        boolean oldVisible = this.visible;
-        this.visible = visible;
-        firePropertyChange("visible", oldVisible, visible);
+    public boolean isChildrenVisible() {
+        return childrenVisible;
+    }
+    
+    @Override
+    public void setChildrenVisible(boolean childrenVisible) {
+        boolean oldVisible = this.childrenVisible;
+        this.childrenVisible = childrenVisible;
+        firePropertyChange("childrenVisible", oldVisible, childrenVisible);
     }
 
     public void removeSimilarSearchResult(VisualSearchResult result) {

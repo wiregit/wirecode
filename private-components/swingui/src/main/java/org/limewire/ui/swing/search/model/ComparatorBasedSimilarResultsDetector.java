@@ -32,22 +32,33 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
             updateParent(addedItem, parent);
         } else {
             updateParent(existingItem, parent);
+            updateVisibility(existingItem, parent);
         }
     }
 
+    /**
+     * Update visibilities of newly changed parents.
+     */
+    private void updateVisibility(VisualSearchResult existingItem, VisualSearchResult parent) {
+        parent.setChildrenVisible(existingItem.isChildrenVisible());
+        existingItem.setChildrenVisible(false);
+    }
+
+    /**
+     * Updates the updateItem to use the given parent. The parent is set, the
+     * children are moved, and the visibility is copied.
+     */
     private void updateParent(VisualSearchResult updateItem, VisualSearchResult parent) {
         if (updateItem != parent) {
             ((SearchResultAdapter) updateItem).setSimilarityParent(parent);
             ((SearchResultAdapter) parent).addSimilarSearchResult(updateItem);
             moveChildren(updateItem, parent);
-            parent.setVisible(true);
-            updateItem.setVisible(false);
-            for (VisualSearchResult searchResult : parent.getSimilarResults()) {
-                searchResult.setVisible(false);
-            }
         }
     }
 
+    /**
+     * Moves the children from the udateItem to the parent.
+     */
     private void moveChildren(VisualSearchResult updateItem, VisualSearchResult parent) {
         for (VisualSearchResult res : updateItem.getSimilarResults()) {
             ((SearchResultAdapter) updateItem).removeSimilarSearchResult(res);
@@ -55,6 +66,11 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
         }
     }
 
+    /**
+     * Returns which item should be the parent between the two similar search
+     * results. Currently the item with the most core results, is considered the
+     * parent item
+     */
     private VisualSearchResult findParent(VisualSearchResult addedItem,
             VisualSearchResult existingItem) {
         VisualSearchResult parent = existingItem.getSimilarityParent();

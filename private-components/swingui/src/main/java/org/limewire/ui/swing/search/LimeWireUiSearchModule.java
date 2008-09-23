@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
-import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryMockImpl;
+import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryImpl;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.AudioResultsPanel;
@@ -12,20 +12,20 @@ import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.OtherResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanel;
+import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryProvider;
-import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanel;
-import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
 
 public class LimeWireUiSearchModule extends AbstractModule {
     
     @Override
     protected void configure() {
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
-        bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryMockImpl.class);
+        bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryImpl.class);
         
         bind(SearchResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
