@@ -20,7 +20,7 @@ public class BasicSearchResultsModel {
     private final AtomicInteger resultCount = new AtomicInteger();
     private final GroupingListEventListener groupingListEventListener;
     
-    public BasicSearchResultsModel() {
+    public BasicSearchResultsModel(SimilarResultsDetector similarResultsDetector) {
         
         allSearchResults = new BasicEventList<SearchResult>();
         groupingListUrns = new GroupingList<SearchResult>(
@@ -28,7 +28,7 @@ public class BasicSearchResultsModel {
         groupedUrnResults =
             new FunctionList<List<SearchResult>, VisualSearchResult>(
                 groupingListUrns, new SearchResultGrouper(resultCount));
-        this.groupingListEventListener = new GroupingListEventListener();
+        this.groupingListEventListener = new GroupingListEventListener(similarResultsDetector);
         groupedUrnResults.addListEventListener(groupingListEventListener);
         }
     
@@ -84,9 +84,5 @@ public class BasicSearchResultsModel {
             resultCount.addAndGet(transformedValue.getSources().size());
             return transformedValue;
         }
-    }
-
-    public void update() {
-      groupingListEventListener.update();  
     }
 }

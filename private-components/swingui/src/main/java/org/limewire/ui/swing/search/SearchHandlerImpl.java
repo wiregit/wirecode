@@ -50,7 +50,7 @@ class SearchHandlerImpl implements SearchHandler {
         });
         
         String panelTitle = info.getTitle();
-        final BasicSearchResultsModel model = new BasicSearchResultsModel();
+        final BasicSearchResultsModel model = new BasicSearchResultsModel(similarResultsDetectorFactory.newSimilarResultsDetector());
         final SearchResultsPanel searchPanel =
             panelFactory.createSearchResultsPanel(
                 info, model.getVisualSearchResults(), search);

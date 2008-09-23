@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.impl.search.MockSearch;
@@ -12,7 +13,7 @@ public class SimilarResultsDetectorFactoryMockImpl implements SimilarResultsDete
         return new SimilarResultsDetector() {
             private Map<String, SearchResultAdapter> urnToVSRMap = new HashMap<String, SearchResultAdapter>();
             @Override
-            public void detectSimilarResult(VisualSearchResult result) {
+            public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult result) {
                 String urn = result.getCoreSearchResults().get(0).getUrn();
                 if (result instanceof SearchResultAdapter) {
                     SearchResultAdapter adapter = (SearchResultAdapter)result;
