@@ -21,7 +21,6 @@ import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
@@ -47,6 +46,7 @@ import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
 import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
 /**
  * Handles upload requests for files and THEX trees.
@@ -92,7 +92,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private final HashTreeWriteHandlerFactory tigerWriteHandlerFactory;
 
-    @Inject
+    private final HttpRequestFileListProvider fileListProvider;
+
     FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager,
             HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory,
             Provider<CreationTimeCache> creationTimeCache,
@@ -100,7 +101,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             AlternateLocationFactory alternateLocationFactory,
             Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache,
             PushEndpointFactory pushEndpointFactory,
-            HashTreeWriteHandlerFactory tigerWriteHandlerFactory) {
+            HashTreeWriteHandlerFactory tigerWriteHandlerFactory, 
+            HttpRequestFileListProvider fileListProvider) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -113,6 +115,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         this.tigerTreeCache = tigerTreeCache;
         this.pushEndpointFactory = pushEndpointFactory;
         this.tigerWriteHandlerFactory = tigerWriteHandlerFactory;
+        this.fileListProvider = fileListProvider;
     }
     
     public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,

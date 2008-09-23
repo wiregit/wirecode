@@ -46,6 +46,7 @@ import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
+import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseRequestFileListProvider;
 
 /**
  * Manages {@link HTTPUploader} objects that are created by
@@ -197,13 +198,17 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private final Provider<HTTPAcceptor> httpAcceptor;
     
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
+
+    private final Provider<GnutellaBrowseRequestFileListProvider> gnutellaBrowseRequestFileListProvider;
     
     @Inject
     public HTTPUploadManager(UploadSlotManager slotManager,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
             Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
             Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
-            TcpBandwidthStatistics tcpBandwidthStatistics) {
+            TcpBandwidthStatistics tcpBandwidthStatistics,
+            Provider<GnutellaBrowseRequestFileListProvider> gnutellaBrowseRequestFileListProvider) {
+        this.gnutellaBrowseRequestFileListProvider = gnutellaBrowseRequestFileListProvider;
         this.slotManager = Objects.nonNull(slotManager, "slotManager");
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.contentManager = contentManager;
@@ -241,7 +246,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         httpAcceptor.get().addAcceptorListener(responseListener);
 
         // browse
-        httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler());
+        httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler(gnutellaBrowseRequestFileListProvider.get()));
 
         // push-proxy requests
         NHttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();

@@ -1,10 +1,12 @@
 package com.limegroup.gnutella.uploader;
 
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
+
 public interface HttpRequestHandlerFactory {
 
     public FileRequestHandler createFileRequestHandler();
-
-    public BrowseRequestHandler createBrowseRequestHandler();
+    
+    public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider);
 
     public FreeLoaderRequestHandler createFreeLoaderRequestHandler();
 
