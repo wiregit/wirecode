@@ -20,8 +20,10 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.ToolTipManager;
+import javax.swing.event.ChangeEvent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -79,13 +81,6 @@ public class ActionButtonPanel extends JXPanel {
                 return getToolTipOffset(this);
             }
         };
-        
-        downloadButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                startDownload();
-            }
-        });
         
         downloadingLink.addActionListener(new ActionListener() {
             @Override
@@ -202,7 +197,7 @@ public class ActionButtonPanel extends JXPanel {
             buttonIndex == MORE_INFO ? infoButton :
             buttonIndex == MARK_AS_JUNK ? junkButton : null;
     }
-
+    
     /**
      * Gets the "Mark as Junk" button.
      * @return the button
@@ -296,7 +291,15 @@ public class ActionButtonPanel extends JXPanel {
         this.currentRow = row;        
     }
     
-    public void configureForListView() {
+    public void configureForListView(final JTable table) {
+        downloadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startDownload();
+                table.editingStopped(new ChangeEvent(table));
+            }
+        });
+        
         removeAll();
         setLayout(new MigLayout("insets 0 0 0 0", "0[]0[]0[]0", "0[]0[]0"));
         addButtonsToPanel();

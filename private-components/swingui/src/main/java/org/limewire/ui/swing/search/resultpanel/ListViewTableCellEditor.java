@@ -29,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -193,7 +194,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     public Component getTableCellEditorComponent(
-        JTable table, Object value, boolean isSelected, int row, int column) {
+        final JTable table, Object value, boolean isSelected, int row, int column) {
         LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0}", row);
 
         vsr = (VisualSearchResult) value;
@@ -205,21 +206,30 @@ implements TableCellEditor, TableCellRenderer {
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, column);
         
+        final JToggleButton junkButton = actionButtonPanel.getJunkButton();
+        
         if (thePanel == null) {
             thePanel = makePanel();
-            actionButtonPanel.configureForListView();
+            actionButtonPanel.configureForListView(table);
+            itemIconLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    actionButtonPanel.startDownload();
+                    table.editingStopped(new ChangeEvent(table));
+                }
+            });
+            
+            junkButton.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    table.editingStopped(new ChangeEvent(table));
+                }
+            });
         }
 
         actionPanel.removeAll();
         actionPanel.add(actionButtonPanel);
 
-        final JToggleButton junkButton = actionButtonPanel.getJunkButton();
-        junkButton.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JToggleButton junkButton = actionButtonPanel.getJunkButton();
-                markAsJunk(junkButton.isSelected());
-            }
-        });
+        markAsJunk(junkButton.isSelected());
 
         populatePanel((VisualSearchResult) value);
         setBackground(isSelected);
@@ -281,12 +291,6 @@ implements TableCellEditor, TableCellRenderer {
 
     private Component makeLeftPanel() {
         itemIconLabel = new JLabel(itemIcon);
-        itemIconLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                actionButtonPanel.startDownload();
-            }
-        });
         itemIconLabel.setCursor(
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         itemIconLabel.setOpaque(false);
@@ -381,9 +385,6 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void markAsJunk(boolean junk) {
-        JToggleButton junkButton = actionButtonPanel.getJunkButton();
-        junkButton.setSelected(junk);
-
         float opacity = junk ? 0.2f : 1.0f;
         thePanel.setAlpha(opacity);
     }
@@ -440,7 +441,7 @@ implements TableCellEditor, TableCellRenderer {
         Dimension indentSize = new Dimension(
                 vsr.getSimilarityParent() != null ? SIMILARITY_INDENTATION : 0, 0);
         similarResultIndentation.setPreferredSize(indentSize);
-
+        
         actionButtonPanel.setDownloadingDisplay(vsr);
 
         populateHeading(vsr);
