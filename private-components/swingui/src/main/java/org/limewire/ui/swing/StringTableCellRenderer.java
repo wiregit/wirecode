@@ -58,8 +58,6 @@ public class StringTableCellRenderer implements TableCellRenderer {
         float opacity = 1.0f; // 0.2f;
         panel.setAlpha(opacity);
 
-        System.out.println("StringTableCellRenderer: panel bg = "
-            + panel.getBackground());
         return panel;
     }
 }

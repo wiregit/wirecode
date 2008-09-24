@@ -2,13 +2,16 @@ package org.limewire.ui.swing.search;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -57,6 +60,9 @@ public class SearchResultsPanel extends JPanel {
     
     /** The scroll pane embedding the search results & sponsored results. */
     private JScrollPane scrollPane;
+    
+    /** The ScrollablePanel that the scroll pane is embedding. */
+    private ScrollablePanel scrollablePanel;
 
     @AssistedInject
     public SearchResultsPanel(
@@ -72,6 +78,7 @@ public class SearchResultsPanel extends JPanel {
         sponsoredResultsPanel.setVisible(false);
         this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new SearchScrollPane();
+        this.scrollablePanel = new ScrollablePanel();
 
         ObservableElementList<VisualSearchResult> observableList = 
             new ObservableElementList<VisualSearchResult>(eventList, GlazedLists.beanConnector(VisualSearchResult.class));
@@ -97,7 +104,7 @@ public class SearchResultsPanel extends JPanel {
             @Override
             public void setMode(Mode mode) {
                 resultsContainer.setMode(mode);
-                syncColumnHeader();
+                syncScrollPieces();
             }
         });
 
@@ -108,7 +115,7 @@ public class SearchResultsPanel extends JPanel {
                 sortAndFilterPanel.clearFilterBox();
                 sortAndFilterPanel.setSearchCategory(category);
                 resultsContainer.showCategory(category);
-                syncColumnHeader();
+                syncScrollPieces();
             }
         };
         
@@ -154,7 +161,7 @@ public class SearchResultsPanel extends JPanel {
             sponsoredResultsPanel.setTitleVisible(false);
         }
     }
-    
+        
     private void layoutComponents() {
         MigLayout layout = new MigLayout(
                 "insets 0 0 0 0, gap 0!",
@@ -166,24 +173,51 @@ public class SearchResultsPanel extends JPanel {
         add(sortAndFilterPanel, "wrap, align right");
         add(scrollPane, "span, grow");
         
-        JXPanel bottom = new JXPanel() {
-            @Override
-            public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation,
-                    int direction) {
-                return 20;
-            }
-            
-            @Override
-            public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation,
-                    int direction) {
-                return 20;
-            }
-        };
-        bottom.setScrollableTracksViewportHeight(false);
-        bottom.setLayout(new MigLayout("hidemode 3, gap 0!, insets 0 0 0 0", "[]", "[grow][]"));
-        bottom.add(resultsContainer, "grow, push, alignx left, aligny top");
-        bottom.add(sponsoredResultsPanel, "aligny top, alignx right");
-        scrollPane.setViewportView(bottom);
+        scrollablePanel.setScrollableTracksViewportHeight(false);
+        scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0!, insets 0 0 0 0", "[]", "[grow][]"));
+        scrollablePanel.add(resultsContainer, "grow, push, alignx left, aligny top");
+        scrollablePanel.add(sponsoredResultsPanel, "aligny top, alignx right");
+        scrollPane.setViewportView(scrollablePanel);
+        syncScrollPieces();
+    }
+
+    private void syncScrollPieces() {
+        scrollablePanel.setScrollable(resultsContainer.getScrollable());
         syncColumnHeader();
+    }
+    
+    private class ScrollablePanel extends JXPanel {
+        private Scrollable scrollable;
+
+        public void setScrollable(Scrollable scrollable) {
+            this.scrollable = scrollable;
+        }
+        
+        @Override
+        public Dimension getPreferredSize() {
+            if(scrollable == null) {
+                return super.getPreferredScrollableViewportSize();
+            } else {
+                return new Dimension(super.getPreferredSize().width, ((JComponent)scrollable).getPreferredSize().height);
+            }
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            if(scrollable == null) {
+                return super.getScrollableUnitIncrement(visibleRect, orientation, direction);
+            } else {
+                return scrollable.getScrollableUnitIncrement(visibleRect, orientation, direction);
+            }
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            if(scrollable == null) {
+                return super.getScrollableBlockIncrement(visibleRect, orientation, direction);
+            } else {
+                return scrollable.getScrollableBlockIncrement(visibleRect, orientation, direction);
+            }
+        }
     }
 }

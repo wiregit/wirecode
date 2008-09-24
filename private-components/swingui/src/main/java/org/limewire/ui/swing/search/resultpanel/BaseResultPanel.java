@@ -275,4 +275,8 @@ public abstract class BaseResultPanel extends JXPanel {
         return visibileComponent == resultsTable ?
             resultsTable.getTableHeader() : null;
     }
+
+    public Scrollable getScrollable() {
+        return visibileComponent;
+    }
 }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
@@ -112,5 +113,9 @@ public class ResultsContainer extends JXPanel {
 
     public Component getScrollPaneHeader() {
         return currentPanel.getScrollPaneHeader();
+    }
+
+    public Scrollable getScrollable() {
+        return currentPanel.getScrollable();
     }
 }
