@@ -71,7 +71,11 @@ public class CoreDownloadItem implements DownloadItem {
     public void cancel() {
        cancelled = true;
        support.firePropertyChange("state", null, getState());
+       File file = downloader.getFile();
        downloader.stop();
+        if (file != null) {
+            file.delete();
+        }
     }
 
     @Override
