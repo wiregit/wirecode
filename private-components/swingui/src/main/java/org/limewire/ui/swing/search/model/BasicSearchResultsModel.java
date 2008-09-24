@@ -18,9 +18,7 @@ public class BasicSearchResultsModel {
     private final GroupingList<SearchResult> groupingListUrns;    
     private final FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults;
     private final AtomicInteger resultCount = new AtomicInteger();
-    
-//    private final GroupingList<VisualSearchResult> groupingListSimilarResults;
-//    private final FunctionList<List<VisualSearchResult>, VisualSearchResult> 
+    private final GroupingListEventListener groupingListEventListener;
     
     public BasicSearchResultsModel(SimilarResultsDetector similarResultsDetector) {
         
@@ -29,8 +27,10 @@ public class BasicSearchResultsModel {
             allSearchResults, new UrnComparator());
         groupedUrnResults =
             new FunctionList<List<SearchResult>, VisualSearchResult>(
-                groupingListUrns, new SearchResultGrouper(similarResultsDetector, resultCount)); 
-    }
+                groupingListUrns, new SearchResultGrouper(resultCount));
+        this.groupingListEventListener = new GroupingListEventListener(similarResultsDetector);
+        groupedUrnResults.addListEventListener(groupingListEventListener);
+        }
     
     public int getResultCount() {
         return resultCount.get();
@@ -57,11 +57,9 @@ public class BasicSearchResultsModel {
     
     private static class SearchResultGrouper
     implements AdvancedFunction<List<SearchResult>, VisualSearchResult> {
-        private final SimilarResultsDetector similarResultsDetector;
         private final AtomicInteger resultCount;
         
-        public SearchResultGrouper(SimilarResultsDetector similarResultsDetector, AtomicInteger resultCount) {
-            this.similarResultsDetector = similarResultsDetector;
+        public SearchResultGrouper(AtomicInteger resultCount) {
             this.resultCount = resultCount;
         }
         
@@ -75,7 +73,6 @@ public class BasicSearchResultsModel {
         public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
             SearchResultAdapter adapter = new SearchResultAdapter(sourceValue);
             resultCount.addAndGet(adapter.getSources().size());
-            similarResultsDetector.detectSimilarResult(adapter);
             return adapter;
         }
 

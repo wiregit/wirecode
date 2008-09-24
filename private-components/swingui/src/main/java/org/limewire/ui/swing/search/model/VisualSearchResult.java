@@ -45,10 +45,12 @@ public interface VisualSearchResult {
     void setMarkedAsJunk(boolean junk);
     
     boolean isVisible();
-    
-    void setVisible(boolean visible);
-    
+        
     void addPropertyChangeListener(PropertyChangeListener listener);
     
     void removePropertyChangeListener(PropertyChangeListener listener);
+
+    boolean isChildrenVisible();
+
+    void setChildrenVisible(boolean childrenVisible);
 }

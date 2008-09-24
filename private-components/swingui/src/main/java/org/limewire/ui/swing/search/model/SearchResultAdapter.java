@@ -18,6 +18,7 @@ import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.util.MediaType;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
@@ -29,7 +30,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private final Set<VisualSearchResult> similarResults = new HashSet<VisualSearchResult>();
     private VisualSearchResult similarityParent;
     private boolean junk;
-    private boolean visible;
+    private boolean childrenVisible;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
@@ -42,32 +43,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
                     o2.getHostDescription());
             }
         });
-        this.visible = true;
+        this.childrenVisible = false;
         
         update();
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (!(obj instanceof SearchResultAdapter)) return false;
-        
-        final SearchResultAdapter other = (SearchResultAdapter) obj;
-        
-        // TODO: RMV Should the comparison be only on the description?
-        return getDescription().equals(other.getDescription());
-        /*
-        if (coreResults == null) {
-            if (other.coreResults != null) return false;
-        } else if (!coreResults.equals(other.coreResults)) return false;
-        
-        if (remoteHosts == null) {
-            if (other.remoteHosts != null) return false;
-        } else if (!remoteHosts.equals(other.remoteHosts)) return false;
-        
-        return true;
-        */
     }
 
     @Override
@@ -103,7 +81,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         if (properties == null) {
             properties = new HashMap<SearchResult.PropertyKey, Object>();
             for (SearchResult result : coreResults) {
-                properties.putAll(result.getProperties());
+                Map<PropertyKey, Object> props = result.getProperties();
+                properties.putAll(props);
             }
         }
 
@@ -160,21 +139,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     public Collection<RemoteHost> getSources() {
         return remoteHosts;
     }
-
-    @Override
-    public int hashCode() {
-        /*
-        final int prime = 31;
-        int result = 1;
-        result = prime * result +
-            ((coreResults == null) ? 0 : coreResults.hashCode());
-        result = prime * result +
-            ((remoteHosts == null) ? 0 : remoteHosts.hashCode());
-        return result;
-        */
-        return getDescription().hashCode(); // TODO: RMV Changed to match equal.
-    }
-
+    
     @Override
     public BasicDownloadState getDownloadState() {
         return downloadState;
@@ -201,11 +166,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public String toString() {
-        return getDescription() +
-            " with " + getSources().size() + " sources, " +
-            "in category: " + getCategory() +
-            ", with size: " + getSize() +
-            ", and extension: " + getFileExtension();
+        return getCoreSearchResults().toString();
     }
 
     void update() {
@@ -216,13 +177,25 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public boolean isVisible() {
-        return visible;
+        if(similarityParent == null) {
+           return true;   
+        }
+        return similarityParent.isChildrenVisible();
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        boolean oldVisible = this.visible;
-        this.visible = visible;
-        firePropertyChange("visible", oldVisible, visible);
+    public boolean isChildrenVisible() {
+        return childrenVisible;
+    }
+    
+    @Override
+    public void setChildrenVisible(boolean childrenVisible) {
+        boolean oldVisible = this.childrenVisible;
+        this.childrenVisible = childrenVisible;
+        firePropertyChange("childrenVisible", oldVisible, childrenVisible);
+    }
+
+    public void removeSimilarSearchResult(VisualSearchResult result) {
+        similarResults.remove(result);       
     }
 }
