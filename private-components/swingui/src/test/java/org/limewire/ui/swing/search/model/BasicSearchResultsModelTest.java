@@ -18,13 +18,14 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         super(name);
     }
 
-    public void testUrnOrnNameGrouping1() {
+    public void testGroupingByName2UrnsNameComesEarly() {
 
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("1", "other file");
+        //other file for urn1 is coming in early
         TestSearchResult testResult3 = new TestSearchResult("2", "other file");
         TestSearchResult testResult4 = new TestSearchResult("1", "file name");
 
@@ -51,7 +52,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group0, group1.getSimilarityParent());
     }
 
-    public void testUrnOrNameGrouping2() {
+    public void testGroupingByName2UrnsNameComesLate() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
         
@@ -59,6 +60,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
         TestSearchResult testResult3 = new TestSearchResult("1", "file name");
+        //other file for urn1 is coming in late
         TestSearchResult testResult4 = new TestSearchResult("1", "other file");
 
         model.addSearchResult(testResult1);
@@ -84,7 +86,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group0, group1.getSimilarityParent());
     }
 
-    public void testUrnOrNameGrouping3() {
+    public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
         
@@ -125,7 +127,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group0, group1.getSimilarityParent());
     }
 
-    public void testUrnOrNameGrouping4() {
+    public void testGroupByName4Urns() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
         
@@ -173,7 +175,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     }
 
-    public void testUrnOrNameGrouping5() {
+    public void testGroupingByName3Urns() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
         
@@ -215,7 +217,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertNull(group1.getSimilarityParent());
     }
 
-    public void testUrnOrNameGrouping6() {
+    public void testGroupingByName3UrnsNameMatchViaTransitiveProperty() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
         
@@ -259,51 +261,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group2, group1.getSimilarityParent());
     }
 
-    public void testUrnOrNameGrouping7() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
-        
-
-        TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
-        TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
-        TestSearchResult testResult3 = new TestSearchResult("2", "blah2 file");
-        TestSearchResult testResult4 = new TestSearchResult("2", "blah2 file");
-        TestSearchResult testResult5 = new TestSearchResult("3", "blah1 file");
-        TestSearchResult testResult6 = new TestSearchResult("3", "blah2 file");
-
-        model.addSearchResult(testResult1);
-        model.addSearchResult(testResult2);
-        model.addSearchResult(testResult3);
-        model.addSearchResult(testResult4);
-        model.addSearchResult(testResult5);
-        model.addSearchResult(testResult6);
-
-        List<VisualSearchResult> results = model.getVisualSearchResults();
-        Assert.assertEquals(3, results.size());
-        VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
-        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
-        Assert.assertEquals(2, coreResults0.size());
-
-        VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
-        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
-        Assert.assertEquals(2, coreResults1.size());
-
-        VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(2, groupResults2.size());
-        List<SearchResult> coreResults2 = group2.getCoreSearchResults();
-        Assert.assertEquals(2, coreResults2.size());
-
-        Assert.assertNull(group2.getSimilarityParent());
-        Assert.assertEquals(group2, group0.getSimilarityParent());
-        Assert.assertEquals(group2, group1.getSimilarityParent());
-    }
-
-    public void testUrnOrNameGrouping8() {
+    public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
         
