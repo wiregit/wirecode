@@ -266,7 +266,7 @@ implements TableCellEditor, TableCellRenderer {
             }
         });
 
-        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0[]0")) {
+        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[left]0", "0[]0[]0")) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -310,7 +310,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private JXPanel makePanel() {
-        final JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "[]push[]", "0[]0")) {
+        final JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]push[shrinkprio 50]0", "0[]0")) {
 
             @Override
             public void setBackground(Color bg) {
@@ -325,7 +325,7 @@ implements TableCellEditor, TableCellRenderer {
 
         JPanel rightColumn = new JPanel(new MigLayout("insets 0 0 0 0", "0[][]0", "0[]0"));
         rightColumn.setOpaque(false);
-        rightColumn.add(makeCenterPanel());
+        rightColumn.add(makeCenterPanel(), "wmin 250, grow");
 
         actionPanel.setOpaque(false);
         rightColumn.add(actionPanel);
