@@ -4,15 +4,14 @@ import java.util.List;
 
 /**
  * Responsible for detecting a VisualSearchResult that is similar to another
- * result and associating the two. Uses a comparator checking for compare result
- * == 0, on successful match, the parent for that group is found and the items
- * are updated to reflect this.
+ * result and associating the two. Uses a matcher, on successful match, the
+ * parent for that group is found and the items are updated to reflect this.
  */
-public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDetector {
-    private final SearchResultComparator searchResultComparator;
+public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
+    private final SearchResultMatcher searchResultComparator;
 
-    public ComparatorBasedSimilarResultsDetector(SearchResultComparator searchResultComparator) {
-        this.searchResultComparator = searchResultComparator;
+    public SimilarResultsMatchingDetector(SearchResultMatcher searchResultMatcher) {
+        this.searchResultComparator = searchResultMatcher;
     }
 
     public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult result) {
@@ -25,39 +24,56 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
     }
 
     private boolean compareMatched(VisualSearchResult result, VisualSearchResult result2) {
-        return searchResultComparator.compare(result, result2) == 0;
+        return searchResultComparator.matches(result, result2);
     }
 
+    /**
+     * Finds the parent correlating the two searchResults and then moves these
+     * search results under that parent. Then updates the visibility of these
+     * items based on their parents visibilities.
+     */
     private void update(VisualSearchResult addedItem, VisualSearchResult existingItem) {
+
         VisualSearchResult parent = findParent(addedItem, existingItem);
+
+        boolean childrenVisible = addedItem.isChildrenVisible() || existingItem.isChildrenVisible()
+                || parent.isChildrenVisible() || addedItem.getSimilarityParent() != null
+                && addedItem.getSimilarityParent().isChildrenVisible()
+                || existingItem.getSimilarityParent() != null
+                && existingItem.getSimilarityParent().isChildrenVisible()
+                || parent.getSimilarityParent() != null
+                && parent.getSimilarityParent().isChildrenVisible();
+
         updateParent(addedItem, parent);
         updateParent(existingItem, parent);
-        updateVisibility(addedItem, parent);
-        updateVisibility(existingItem, parent);
+        updateVisibility(parent, childrenVisible);
     }
 
     /**
      * Update visibilities of newly changed parents.
      */
-    private void updateVisibility(VisualSearchResult child, VisualSearchResult parent) {
-        parent.setChildrenVisible(child.isChildrenVisible() || parent.isChildrenVisible());
-        child.setChildrenVisible(false);
+    private void updateVisibility(VisualSearchResult parent, boolean childrenVisible) {
+        parent.setChildrenVisible(childrenVisible);
+        for (VisualSearchResult similarResult : parent.getSimilarResults()) {
+            similarResult.setChildrenVisible(false);
+        }
     }
 
     /**
      * Updates the child to use the given parent. The parent is set, the
-     * children are moved, and the visibility is copied.
+     * children are moved, and the visibility is copied. Also the given child is
+     * checked to see if it already has a parent, if so its parent is also updated to
+     * be a child of the given parent.
      */
     private void updateParent(VisualSearchResult child, VisualSearchResult parent) {
         if (child.getSimilarityParent() != null && child.getSimilarityParent() != parent) {
             up(child.getSimilarityParent(), parent);
         }
-        
+
         if (child != parent) {
             up(child, parent);
         }
 
-      
     }
 
     private void up(VisualSearchResult child, VisualSearchResult parent) {
@@ -76,7 +92,7 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
             up(item, parent);
             ((SearchResultAdapter) child).removeSimilarSearchResult(item);
             ((SearchResultAdapter) parent).addSimilarSearchResult(item);
-           
+
         }
     }
 
@@ -85,10 +101,8 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
      * results. Currently the item with the most core results, is considered the
      * parent.
      */
-    @SuppressWarnings("null")
     private VisualSearchResult findParent(VisualSearchResult item1, VisualSearchResult item2) {
         VisualSearchResult parent = null;
-
 
         VisualSearchResult parent1 = item1;
         VisualSearchResult parent2 = item2;
@@ -108,7 +122,6 @@ public class ComparatorBasedSimilarResultsDetector implements SimilarResultsDete
         } else {
             parent = parent1;
         }
-
 
         return parent;
     }

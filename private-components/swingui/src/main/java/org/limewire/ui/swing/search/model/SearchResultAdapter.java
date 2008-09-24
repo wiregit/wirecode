@@ -47,29 +47,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         
         update();
     }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (!(obj instanceof SearchResultAdapter)) return false;
-        
-        final SearchResultAdapter other = (SearchResultAdapter) obj;
-        
-        // TODO: RMV Should the comparison be only on the description?
-        return getDescription().equals(other.getDescription());
-        /*
-        if (coreResults == null) {
-            if (other.coreResults != null) return false;
-        } else if (!coreResults.equals(other.coreResults)) return false;
-        
-        if (remoteHosts == null) {
-            if (other.remoteHosts != null) return false;
-        } else if (!remoteHosts.equals(other.remoteHosts)) return false;
-        
-        return true;
-        */
-    }
 
     @Override
     public Category getCategory() {
@@ -162,21 +139,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     public Collection<RemoteHost> getSources() {
         return remoteHosts;
     }
-
-    @Override
-    public int hashCode() {
-        /*
-        final int prime = 31;
-        int result = 1;
-        result = prime * result +
-            ((coreResults == null) ? 0 : coreResults.hashCode());
-        result = prime * result +
-            ((remoteHosts == null) ? 0 : remoteHosts.hashCode());
-        return result;
-        */
-        return getDescription().hashCode(); // TODO: RMV Changed to match equal.
-    }
-
+    
     @Override
     public BasicDownloadState getDownloadState() {
         return downloadState;
