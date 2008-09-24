@@ -26,6 +26,7 @@ implements TableCellEditor, TableCellRenderer {
         
     private ActionButtonPanel panel;
     private final NavigableTree navTree;
+    private VisualSearchResult vsr;
     
     public ActionColumnTableCellEditor(NavigableTree navTree) {
         this.navTree = navTree;
@@ -36,7 +37,7 @@ implements TableCellEditor, TableCellRenderer {
         return null;
     }
     
-    private ActionButtonPanel getPanel(final JTable table, final VisualSearchResult vsr) {
+    private ActionButtonPanel getPanel(final JTable table) {
         if (panel != null) return panel;
         
         panel = new ActionButtonPanel(navTree);
@@ -58,8 +59,8 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value, boolean isSelected,
         int row, int column) {
         
-        panel = getPanel(table, (VisualSearchResult) value);
-        VisualSearchResult vsr = (VisualSearchResult) value;
+        panel = getPanel(table);
+        vsr = (VisualSearchResult) value;
         panel.setVisualSearchResult(vsr);
         panel.setRow(row);
         panel.setAlpha(vsr.isMarkedAsJunk() ? 0.2f : 1.0f);
