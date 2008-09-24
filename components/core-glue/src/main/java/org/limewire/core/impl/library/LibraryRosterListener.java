@@ -3,8 +3,10 @@ package org.limewire.core.impl.library;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.logging.Log;
@@ -67,7 +69,8 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                                     }
                                 }
                                 RemoteFileList list = libraryManager.getBuddyLibrary(name);
-                                list.addFile(searchResult);
+                                RemoteFileItem file = new CoreRemoteFileItem((RemoteFileDescAdapter)searchResult);
+                                list.addFile(file);
                             }
                         });
                     }

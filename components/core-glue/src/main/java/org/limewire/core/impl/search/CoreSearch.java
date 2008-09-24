@@ -1,18 +1,22 @@
 package org.limewire.core.impl.search;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.impl.library.CoreRemoteFileItem;
+import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
 import org.limewire.io.IpPort;
 import org.limewire.promotion.PromotionSearcher;
@@ -34,10 +38,12 @@ public class CoreSearch implements Search {
     private final SearchServices searchServices;
     private final QueryReplyListenerList listenerList;
     private final PromotionSearcher promotionSearcher;
+    private final FriendSearcher friendSearcher;
     private CachedGeoLocation geoLocation;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
     private final QrListener qrListener = new QrListener();
+    private final FriendSearchListener friendSearchListener = new FriendSearchListenerImpl();
     private final ScheduledExecutorService backgroundExecutor;
     
     private volatile byte[] searchGuid;
@@ -45,11 +51,15 @@ public class CoreSearch implements Search {
     @AssistedInject
     public CoreSearch(@Assisted
     SearchDetails searchDetails, SearchServices searchServices,
-            QueryReplyListenerList listenerList, PromotionSearcher promotionSearcher, CachedGeoLocation geoLocation, @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor) {
+            QueryReplyListenerList listenerList, PromotionSearcher promotionSearcher,
+            FriendSearcher friendSearcher,
+            CachedGeoLocation geoLocation,
+            @Named("backgroundExecutor")ScheduledExecutorService backgroundExecutor) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
         this.promotionSearcher = promotionSearcher;
+        this.friendSearcher = friendSearcher;
         this.geoLocation = geoLocation;
         this.backgroundExecutor = backgroundExecutor;
     }
@@ -88,6 +98,14 @@ public class CoreSearch implements Search {
 
         searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
                 MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
+        
+        backgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() { 
+                friendSearcher.doSearch(searchDetails, friendSearchListener);
+            }
+        });
+        
         
         if (initial) {
             
@@ -179,4 +197,12 @@ public class CoreSearch implements Search {
         }
     }
 
+    private class FriendSearchListenerImpl implements FriendSearchListener {
+        public void handleFriendResults(Iterator<RemoteFileItem> results) {
+            while(results.hasNext()) {
+                RemoteFileDesc rfd = ((CoreRemoteFileItem)results.next()).getRfd();
+                qrListener.handleQueryReply(rfd, null, IpPort.EMPTY_SET);    
+            }            
+        }
+    }
 }

@@ -13,6 +13,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(LibraryManager.class).to(LibraryManagerImpl.class);
         bind(LibraryRosterListener.class);
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("friendLibraries")).to(FriendLibraryAutoCompleter.class);
+        bind(FriendSearcher.class);
     }
 
 }

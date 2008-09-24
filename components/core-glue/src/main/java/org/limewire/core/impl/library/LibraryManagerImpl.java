@@ -17,7 +17,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
-import org.limewire.core.api.search.SearchResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -447,12 +446,12 @@ class LibraryManagerImpl implements LibraryManager {
             this.name = name;
         }
 
-        public void addFile(SearchResult file) {
-            eventList.add(new CoreRemoteFileItem(file));
+        public void addFile(RemoteFileItem file) {
+            eventList.add(file);
         }
 
-        public void removeFile(SearchResult file) {
-            eventList.remove(new CoreRemoteFileItem(file));
+        public void removeFile(RemoteFileItem file) {
+            eventList.remove(file);
         }
 
         @Override

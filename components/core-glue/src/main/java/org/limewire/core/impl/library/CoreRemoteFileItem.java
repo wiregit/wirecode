@@ -7,14 +7,21 @@ import java.util.Map;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.search.RemoteFileDescAdapter;
+
+import com.limegroup.gnutella.RemoteFileDesc;
 
 public class CoreRemoteFileItem implements RemoteFileItem {
-    private final SearchResult searchResult;
+    private final RemoteFileDescAdapter searchResult;
     private final Map<Keys, Object> map;
 
-    CoreRemoteFileItem(SearchResult searchResult) {
-        this.searchResult = searchResult;
+    CoreRemoteFileItem(RemoteFileDescAdapter rfd) {
+        this.searchResult = rfd;
         this.map = Collections.synchronizedMap(new HashMap<Keys,Object>());
+    }
+    
+    public RemoteFileDesc getRfd() {
+        return searchResult.getRfd();
     }
     
     public String getName() {
