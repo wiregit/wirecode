@@ -366,6 +366,101 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     }
 
+    public void testVisibility() {
+        BasicSearchResultsModel model = new BasicSearchResultsModel(
+                new SimilarResultsMatchingDetector(new NameMatcher()));
+
+        TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
+        TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
+        TestSearchResult testResult3 = new TestSearchResult("2", "blah1 file");
+        TestSearchResult testResult4 = new TestSearchResult("2", "blah2 file");
+        TestSearchResult testResult5 = new TestSearchResult("3", "blah1 file");
+        TestSearchResult testResult6 = new TestSearchResult("3", "blah2 file");
+
+        model.addSearchResult(testResult1);
+        List<VisualSearchResult> results = model.getVisualSearchResults();
+        Assert.assertEquals(1, results.size());
+        VisualSearchResult result0 = results.get(0);
+        Assert.assertTrue(result0.isVisible());
+        Assert.assertFalse(result0.isChildrenVisible());
+        result0.setChildrenVisible(true);
+        Assert.assertTrue(result0.isVisible());
+        Assert.assertTrue(result0.isChildrenVisible());
+
+        model.addSearchResult(testResult2);
+        Assert.assertTrue(result0.isVisible());
+        Assert.assertTrue(result0.isChildrenVisible());
+
+        model.addSearchResult(testResult3);
+
+        Assert.assertTrue(result0.isVisible());
+        Assert.assertTrue(result0.isChildrenVisible());
+        List<VisualSearchResult> children = result0.getSimilarResults();
+        Assert.assertEquals(1, children.size());
+        VisualSearchResult child = children.get(0);
+        Assert.assertTrue(child.isVisible());
+
+        result0.setChildrenVisible(false);
+        Assert.assertTrue(result0.isVisible());
+        Assert.assertFalse(result0.isChildrenVisible());
+        Assert.assertFalse(child.isVisible());
+        result0.setChildrenVisible(true);
+
+        
+        model.addSearchResult(testResult4);
+        model.addSearchResult(testResult5);
+        VisualSearchResult result1 = results.get(1);
+
+        VisualSearchResult result2 = results.get(2);
+
+        children = result1.getSimilarResults();
+        Assert.assertEquals(2, children.size());
+        VisualSearchResult child0 = children.get(0);
+        VisualSearchResult child1 = children.get(1);
+        Assert.assertTrue(child0.isVisible());
+        Assert.assertTrue(child1.isVisible());
+        result1.setChildrenVisible(false);
+        
+        
+        model.addSearchResult(testResult6);
+        
+        children = result2.getSimilarResults();
+        Assert.assertEquals(2, children.size());
+        child0 = children.get(0);
+        child1 = children.get(1);
+        Assert.assertFalse(child0.isVisible());
+        Assert.assertFalse(child1.isVisible());
+        result2.setChildrenVisible(true);
+        Assert.assertTrue(child0.isVisible());
+        Assert.assertTrue(child1.isVisible());
+        
+        
+        
+        results = model.getVisualSearchResults();
+        Assert.assertEquals(3, results.size());
+        VisualSearchResult group0 = results.get(0);
+        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, groupResults0.size());
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        Assert.assertEquals(2, coreResults0.size());
+
+        VisualSearchResult group1 = results.get(1);
+        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, groupResults1.size());
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        Assert.assertEquals(2, coreResults1.size());
+
+        VisualSearchResult group2 = results.get(2);
+        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
+        Assert.assertEquals(2, groupResults2.size());
+        List<SearchResult> coreResults2 = group2.getCoreSearchResults();
+        Assert.assertEquals(2, coreResults2.size());
+
+        Assert.assertNull(group2.getSimilarityParent());
+        Assert.assertEquals(group2, group0.getSimilarityParent());
+        Assert.assertEquals(group2, group1.getSimilarityParent());
+    }
+
     public class TestSearchResult implements SearchResult {
 
         private String urn;
