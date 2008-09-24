@@ -8,8 +8,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -32,6 +30,8 @@ import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
@@ -266,7 +266,7 @@ implements TableCellEditor, TableCellRenderer {
             }
         });
 
-        JXPanel panel = new JXPanel(new GridBagLayout()) {
+        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0[]0")) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -277,14 +277,8 @@ implements TableCellEditor, TableCellRenderer {
         };
 
         panel.setOpaque(false);
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridy = 0;
-        panel.add(fromWidget, gbc);
-
-        gbc.gridy++;
-        panel.add(similarButton, gbc);
+        panel.add(fromWidget, "wrap");
+        panel.add(similarButton);
 
         return panel;
     }
@@ -294,48 +288,29 @@ implements TableCellEditor, TableCellRenderer {
         itemIconLabel.setCursor(
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         itemIconLabel.setOpaque(false);
-        GridBagConstraints gbc = new GridBagConstraints();
 
-        JXPanel downloadPanel = new JXPanel(new GridBagLayout());
+        JXPanel downloadPanel = new JXPanel(new MigLayout());
         downloadPanel.setOpaque(false);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        downloadPanel.add(itemIconLabel, gbc);
+        downloadPanel.add(itemIconLabel);
 
-        JXPanel headingPanel = new JXPanel(new GridBagLayout());
+        JXPanel headingPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0[]0[]0"));
         headingPanel.setOpaque(false);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.weightx = 1;
-        headingPanel.add(headingLabel, gbc);
-        headingPanel.add(subheadingLabel, gbc);
-        headingPanel.add(otherLabel, gbc);
+        headingPanel.add(headingLabel, "wrap");
+        headingPanel.add(subheadingLabel, "wrap");
+        headingPanel.add(otherLabel);
 
-        JXPanel panel = new JXPanel(new GridBagLayout());
+        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[][]0", "0[]0"));
 
         panel.setOpaque(false);
 
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0;
-        panel.add(downloadPanel, gbc);
-
-        gbc.gridx++;
-        gbc.weightx = 1;
-        panel.add(headingPanel, gbc);
+        panel.add(downloadPanel);
+        panel.add(headingPanel);
 
         return panel;
     }
 
     private JXPanel makePanel() {
-        final JXPanel panel = new JXPanel(new GridBagLayout()) {
-            @Override
-            public Dimension getPreferredSize() {
-                int count = 1;
-                if (isShowingSimilarResults()) count += getSimilarResultsCount();
-                return new Dimension(WIDTH, count * HEIGHT);
-            }
+        final JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "[]push[]", "0[]0")) {
 
             @Override
             public void setBackground(Color bg) {
@@ -346,19 +321,15 @@ implements TableCellEditor, TableCellRenderer {
             }
         };
 
-        GridBagConstraints gbc = new GridBagConstraints();
+        panel.add(makeIndentablePanel(makeLeftPanel()));
 
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.weightx = 0;
-        panel.add(makeIndentablePanel(makeLeftPanel()), gbc);
+        JPanel rightColumn = new JPanel(new MigLayout("insets 0 0 0 0", "0[][]0", "0[]0"));
+        rightColumn.setOpaque(false);
+        rightColumn.add(makeCenterPanel());
 
-        gbc.weightx = 1;
-        panel.add(makeCenterPanel(), gbc);
-
-        gbc.anchor = GridBagConstraints.EAST;
-        gbc.weightx = 0;
         actionPanel.setOpaque(false);
-        panel.add(actionPanel, gbc);
+        rightColumn.add(actionPanel);
+        panel.add(rightColumn);
 
         return panel;
     }
