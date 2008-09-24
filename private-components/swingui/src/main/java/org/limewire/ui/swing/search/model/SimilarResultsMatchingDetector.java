@@ -43,8 +43,11 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
                 || parent.getSimilarityParent() != null
                 && parent.getSimilarityParent().isChildrenVisible();
 
+        updateParent(o1.getSimilarityParent(), parent);
         updateParent(o1, parent);
+        updateParent(o2.getSimilarityParent(), parent);
         updateParent(o2, parent);
+        
         updateVisibility(parent, childrenVisible);
     }
 
@@ -65,25 +68,12 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      * updated to be a child of the given parent.
      */
     private void updateParent(VisualSearchResult child, VisualSearchResult parent) {
-        if (child.getSimilarityParent() != null && child.getSimilarityParent() != parent) {
-            updateFields(child.getSimilarityParent(), parent);
-        }
-
-        if (child!= null && child != parent) {
-            updateFields(child, parent);
-        }
-
-    }
-
-    /**
-     * Updates the fields of the given child and parent to reflect their
-     * relationship.
-     */
-    private void updateFields(VisualSearchResult child, VisualSearchResult parent) {
         ((SearchResultAdapter) parent).setSimilarityParent(null);
-        ((SearchResultAdapter) child).setSimilarityParent(parent);
-        ((SearchResultAdapter) parent).addSimilarSearchResult(child);
-        moveChildren(child, parent);
+        if (child!= null && child != parent) {
+            ((SearchResultAdapter) child).setSimilarityParent(parent);
+            ((SearchResultAdapter) parent).addSimilarSearchResult(child);
+            moveChildren(child, parent);
+        }
     }
 
     /**
@@ -92,10 +82,9 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     private void moveChildren(VisualSearchResult child, VisualSearchResult parent) {
         ((SearchResultAdapter) child).removeSimilarSearchResult(parent);
         for (VisualSearchResult item : child.getSimilarResults()) {
-            updateFields(item, parent);
+            updateParent(item, parent);
             ((SearchResultAdapter) child).removeSimilarSearchResult(item);
             ((SearchResultAdapter) parent).addSimilarSearchResult(item);
-
         }
     }
 
