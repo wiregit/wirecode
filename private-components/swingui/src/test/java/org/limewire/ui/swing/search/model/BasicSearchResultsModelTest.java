@@ -25,7 +25,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("1", "other file");
-        //other file for urn1 is coming in early
+        // other file for urn1 is coming in early
         TestSearchResult testResult3 = new TestSearchResult("2", "other file");
         TestSearchResult testResult4 = new TestSearchResult("1", "file name");
 
@@ -55,12 +55,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testGroupingByName2UrnsNameComesLate() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
-        
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
         TestSearchResult testResult3 = new TestSearchResult("1", "file name");
-        //other file for urn1 is coming in late
+        // other file for urn1 is coming in late
         TestSearchResult testResult4 = new TestSearchResult("1", "other file");
 
         model.addSearchResult(testResult1);
@@ -89,7 +88,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
-        
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -130,7 +128,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testGroupByName4Urns() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
-        
 
         TestSearchResult testResult1 = new TestSearchResult("1", "other file");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -178,7 +175,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testGroupingByName3Urns() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
-        
 
         TestSearchResult testResult1 = new TestSearchResult("1", "other file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -220,7 +216,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
-        
 
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -264,7 +259,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
         BasicSearchResultsModel model = new BasicSearchResultsModel(
                 new SimilarResultsMatchingDetector(new NameMatcher()));
-        
 
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -313,9 +307,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
                     @Override
                     public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
                         for (SearchResult result1 : o1.getCoreSearchResults()) {
-                            String name1 = result1.getProperty(SearchResult.PropertyKey.NAME).toString();
+                            String name1 = result1.getProperty(SearchResult.PropertyKey.NAME)
+                                    .toString();
                             for (SearchResult result2 : o2.getCoreSearchResults()) {
-                                String name2 = result2.getProperty(SearchResult.PropertyKey.NAME).toString();
+                                String name2 = result2.getProperty(SearchResult.PropertyKey.NAME)
+                                        .toString();
                                 if (name1.startsWith("lime") && name2.startsWith("lime")) {
                                     return true;
                                 }
@@ -377,19 +373,15 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         private Map<PropertyKey, Object> properties;
 
-        private final String description;
-
         public TestSearchResult(String urn, String fileName) {
             this.urn = urn;
             this.properties = new HashMap<PropertyKey, Object>();
             this.properties.put(PropertyKey.NAME, fileName);
-            this.description = UUID.randomUUID().toString();
-
         }
 
         @Override
         public String getDescription() {
-            return description;
+            return null;
         }
 
         @Override
@@ -428,7 +420,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         @Override
         public Category getCategory() {
-            // TODO Auto-generated method stub
             return null;
         }
     }
