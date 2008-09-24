@@ -10,21 +10,21 @@ import java.util.List;
 public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     private final SearchResultMatcher searchResultComparator;
 
+    /**
+     * Builds the SimilarResultDetector using the given supplied matching
+     * algorithm.
+     */
     public SimilarResultsMatchingDetector(SearchResultMatcher searchResultMatcher) {
         this.searchResultComparator = searchResultMatcher;
     }
 
-    public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult result) {
-        for (VisualSearchResult existingResult : results) {
-            if (existingResult != result && compareMatched(existingResult, result)) {
-                update(result, existingResult);
+    @Override
+    public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult eventItem) {
+        for (VisualSearchResult result : results) {
+            if (result != eventItem &&  searchResultComparator.matches(result, eventItem)) {
+                update(eventItem, result);
             }
         }
-
-    }
-
-    private boolean compareMatched(VisualSearchResult result, VisualSearchResult result2) {
-        return searchResultComparator.matches(result, result2);
     }
 
     /**
@@ -32,20 +32,19 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      * search results under that parent. Then updates the visibility of these
      * items based on their parents visibilities.
      */
-    private void update(VisualSearchResult addedItem, VisualSearchResult existingItem) {
+    private void update(VisualSearchResult o1, VisualSearchResult o2) {
 
-        VisualSearchResult parent = findParent(addedItem, existingItem);
+        VisualSearchResult parent = findParent(o1, o2);
 
-        boolean childrenVisible = addedItem.isChildrenVisible() || existingItem.isChildrenVisible()
-                || parent.isChildrenVisible() || addedItem.getSimilarityParent() != null
-                && addedItem.getSimilarityParent().isChildrenVisible()
-                || existingItem.getSimilarityParent() != null
-                && existingItem.getSimilarityParent().isChildrenVisible()
+        boolean childrenVisible = o1.isChildrenVisible() || o2.isChildrenVisible()
+                || parent.isChildrenVisible() || o1.getSimilarityParent() != null
+                && o1.getSimilarityParent().isChildrenVisible() || o2.getSimilarityParent() != null
+                && o2.getSimilarityParent().isChildrenVisible()
                 || parent.getSimilarityParent() != null
                 && parent.getSimilarityParent().isChildrenVisible();
 
-        updateParent(addedItem, parent);
-        updateParent(existingItem, parent);
+        updateParent(o1, parent);
+        updateParent(o2, parent);
         updateVisibility(parent, childrenVisible);
     }
 
@@ -62,21 +61,25 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     /**
      * Updates the child to use the given parent. The parent is set, the
      * children are moved, and the visibility is copied. Also the given child is
-     * checked to see if it already has a parent, if so its parent is also updated to
-     * be a child of the given parent.
+     * checked to see if it already has a parent, if so its parent is also
+     * updated to be a child of the given parent.
      */
     private void updateParent(VisualSearchResult child, VisualSearchResult parent) {
         if (child.getSimilarityParent() != null && child.getSimilarityParent() != parent) {
-            up(child.getSimilarityParent(), parent);
+            updateFields(child.getSimilarityParent(), parent);
         }
 
-        if (child != parent) {
-            up(child, parent);
+        if (child!= null && child != parent) {
+            updateFields(child, parent);
         }
 
     }
 
-    private void up(VisualSearchResult child, VisualSearchResult parent) {
+    /**
+     * Updates the fields of the given child and parent to reflect their
+     * relationship.
+     */
+    private void updateFields(VisualSearchResult child, VisualSearchResult parent) {
         ((SearchResultAdapter) parent).setSimilarityParent(null);
         ((SearchResultAdapter) child).setSimilarityParent(parent);
         ((SearchResultAdapter) parent).addSimilarSearchResult(child);
@@ -89,7 +92,7 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     private void moveChildren(VisualSearchResult child, VisualSearchResult parent) {
         ((SearchResultAdapter) child).removeSimilarSearchResult(parent);
         for (VisualSearchResult item : child.getSimilarResults()) {
-            up(item, parent);
+            updateFields(item, parent);
             ((SearchResultAdapter) child).removeSimilarSearchResult(item);
             ((SearchResultAdapter) parent).addSimilarSearchResult(item);
 
@@ -101,17 +104,18 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      * results. Currently the item with the most core results, is considered the
      * parent.
      */
-    private VisualSearchResult findParent(VisualSearchResult item1, VisualSearchResult item2) {
+    private VisualSearchResult findParent(VisualSearchResult o1, VisualSearchResult o2) {
         VisualSearchResult parent = null;
 
-        VisualSearchResult parent1 = item1;
-        VisualSearchResult parent2 = item2;
-        VisualSearchResult parent3 = item1.getSimilarityParent();
-        VisualSearchResult parent4 = item2.getSimilarityParent();
+        VisualSearchResult parent1 = o1;
+        VisualSearchResult parent2 = o2;
+        VisualSearchResult parent3 = o1.getSimilarityParent();
+        VisualSearchResult parent4 = o2.getSimilarityParent();
         int parent1Count = parent1 == null ? 0 : parent1.getCoreSearchResults().size();
         int parent2Count = parent2 == null ? 0 : parent2.getCoreSearchResults().size();
         int parent3Count = parent3 == null ? 0 : parent3.getCoreSearchResults().size();
         int parent4Count = parent4 == null ? 0 : parent4.getCoreSearchResults().size();
+        
         if (parent4Count > parent3Count && parent4Count > parent2Count
                 && parent4Count > parent1Count) {
             parent = parent4;
