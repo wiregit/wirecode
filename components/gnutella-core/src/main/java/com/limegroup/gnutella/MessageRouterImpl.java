@@ -2366,18 +2366,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         
         if (!(handler instanceof Connection)) 
             return;
-        
-        Connection c = (Connection) handler;
-        QueryReply update = staticMessages.getUpdateReply();
-        if (request.getHops() == 1 && c.getConnectionCapabilities().isOldLimeWire()) {
-            if (update != null) {
-                QueryReply qr = queryReplyFactory.createQueryReply(request.getGUID(), update);
-                try {
-                    sendQueryReply(qr);
-                } catch (IOException ignored) {
-                }
-            }
-        }
     }
 
     /**

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -10,13 +9,7 @@ import junit.framework.Test;
 import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.security.SecureMessage;
-import org.limewire.security.SecureMessageVerifier;
-import org.limewire.security.SecureMessageVerifierImpl;
-import org.limewire.util.CommonUtils;
 
-import com.google.inject.Injector;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class MiscTests extends LimeTestCase {
@@ -29,33 +22,6 @@ public class MiscTests extends LimeTestCase {
         return buildTestSuite(MiscTests.class);
     }
     
-    /** Makes sure all stuff we need to work works. */
-    public void testSecureUpdateMessage() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
-        StaticMessages staticMessages = injector.getInstance(StaticMessages.class);
-        staticMessages.start();
-        QueryReply reply = staticMessages.getUpdateReply();
-        QueryReply lime = staticMessages.getLimeReply();
-        assertTrue(reply.hasSecureData());
-        assertTrue(lime.hasSecureData());
-
-        SecureMessageVerifier verifier =
-            new SecureMessageVerifierImpl(new File(CommonUtils.getUserSettingsDir(), "secureMessage.key"));
-        StubSecureMessageCallback callback = new StubSecureMessageCallback();
-        verifier.verify(reply, callback);
-        callback.waitForReply();
-        assertTrue(callback.getPassed());
-        assertSame(reply, callback.getSecureMessage());
-        assertEquals(SecureMessage.SECURE, reply.getSecureStatus());
-        
-        callback = new StubSecureMessageCallback();
-        verifier.verify(lime, callback);
-        callback.waitForReply();
-        assertTrue(callback.getPassed());
-        assertSame(lime, callback.getSecureMessage());
-        assertEquals(SecureMessage.SECURE, lime.getSecureStatus());
-    }
-
     // Makes sure QueryKeys have no problem going in and out of GGEP blocks
     public void testQueryKeysAndGGEP() throws Exception {
         MACCalculatorRepositoryManager macManager = new MACCalculatorRepositoryManager();

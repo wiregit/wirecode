@@ -1,9 +1,6 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
@@ -13,7 +10,6 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.util.Base32;
-import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -27,7 +23,6 @@ public final class StaticMessages implements Service {
     
     private static final Log LOG = LogFactory.getLog(StaticMessages.class);
 
-    private volatile QueryReply updateReply;
     private volatile QueryReply limeReply;
     
     private final QueryReplyFactory queryReplyFactory;
@@ -63,16 +58,7 @@ public final class StaticMessages implements Service {
     }
     
     private void reloadMessages() {
-        updateReply = readUpdateReply();
         limeReply = createLimeReply();
-    }
-    
-    private QueryReply readUpdateReply() {
-        try {
-            return createReply(new FileInputStream(new File(CommonUtils.getUserSettingsDir(), "data.ser")));
-        } catch (FileNotFoundException bad) {
-            return null;
-        }
     }
     
     private QueryReply createLimeReply() {
@@ -93,10 +79,6 @@ public final class StaticMessages implements Service {
         } finally {
             IOUtils.close(in);
         }
-    }
-    
-    public QueryReply getUpdateReply() {
-        return updateReply;
     }
     
     public QueryReply getLimeReply() {
