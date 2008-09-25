@@ -12,6 +12,8 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.util.BaseTestCase;
 
+import ca.odell.glazedlists.EventList;
+
 public class BasicSearchResultsModelTest extends BaseTestCase {
     public BasicSearchResultsModelTest(String name) {
         super(name);
@@ -588,6 +590,31 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group2, group0.getSimilarityParent());
         Assert.assertEquals(group2, group1.getSimilarityParent());
     }
+    
+    public void testTwoSearchResults() {
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
+
+        TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
+        TestSearchResult testResult2 = new TestSearchResult("sim", "blah1 file");
+
+        model.addSearchResult(testResult1);
+        model.addSearchResult(testResult2);
+        
+        EventList<VisualSearchResult> visualSearchResults = model.getVisualSearchResults();
+        VisualSearchResult child = visualSearchResults.get(0);
+        VisualSearchResult parent = visualSearchResults.get(1);
+        assertEquals("1", child.getCoreSearchResults().get(0).getUrn());
+        assertEquals("sim", parent.getCoreSearchResults().get(0).getUrn());
+        
+        assertSame(parent, child.getSimilarityParent());
+        assertEquals(0, child.getSimilarResults().size());
+        assertEquals(1, parent.getSimilarResults().size());
+        assertSame(child, parent.getSimilarResults().get(0));
+    }
 
     public class TestSearchResult implements SearchResult {
 
@@ -650,5 +677,4 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
             return false;
         }
     }
-
 }

@@ -2,6 +2,9 @@ package org.limewire.ui.swing.search.model;
 
 import java.util.List;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+
 /**
  * Responsible for detecting a VisualSearchResult that is similar to another
  * result and associating the two. Uses a matcher, on successful match, the
@@ -9,6 +12,7 @@ import java.util.List;
  */
 public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     private final SearchResultMatcher searchResultComparator;
+    private final Log LOG = LogFactory.getLog(getClass());
 
     /**
      * Builds the SimilarResultDetector using the given supplied matching
@@ -55,6 +59,7 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      * Update visibilities of newly changed parents.
      */
     private void updateVisibility(VisualSearchResult parent, boolean childrenVisible) {
+        LOG.debugf("Setting child visibility for {0} to {1}", parent.getCoreSearchResults().get(0).getUrn(), childrenVisible);
         parent.setChildrenVisible(childrenVisible);
         for (VisualSearchResult similarResult : parent.getSimilarResults()) {
             similarResult.setChildrenVisible(false);

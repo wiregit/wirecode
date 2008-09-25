@@ -137,7 +137,9 @@ public abstract class BaseResultPanel extends JXPanel {
         return new FilterList<VisualSearchResult>(eventList, new Matcher<VisualSearchResult>() {
             @Override
             public boolean matches(VisualSearchResult item) {
-                return item.isVisible();
+                boolean visible = item.isVisible();
+                LOG.debugf("filter... VSR urn {0} visibility {1}", item.getCoreSearchResults().get(0).getUrn(), visible);
+                return visible;
             }
         });
     }

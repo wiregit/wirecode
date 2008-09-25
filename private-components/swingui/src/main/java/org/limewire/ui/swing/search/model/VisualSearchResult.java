@@ -41,6 +41,8 @@ public interface VisualSearchResult {
     void setDownloadState(BasicDownloadState downloadState);
     
     boolean isVisible();
+
+    void setVisible(boolean visible);
         
     void addPropertyChangeListener(PropertyChangeListener listener);
     

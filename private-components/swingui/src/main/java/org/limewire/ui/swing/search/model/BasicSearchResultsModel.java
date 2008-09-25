@@ -41,7 +41,13 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
     @Override
     public void addSearchResult(SearchResult result) {
-        allSearchResults.add(result);
+        System.out.println(result.getUrn());
+        try {
+            allSearchResults.add(result);
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+        System.out.println("foo");
     }
 
     @Override

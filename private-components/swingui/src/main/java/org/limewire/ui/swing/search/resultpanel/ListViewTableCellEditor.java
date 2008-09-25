@@ -117,7 +117,6 @@ implements TableCellEditor, TableCellRenderer {
      */
     private String highlightMatches(String sourceText) {
         boolean haveSearchText = searchText != null && searchText.length() > 0;
-        LOG.debugf("haveSearchText = {0}", haveSearchText);
 
         // If there is no search or filter text then return sourceText as is.
         if (!haveSearchText)
@@ -166,7 +165,6 @@ implements TableCellEditor, TableCellRenderer {
         }
 
         result += sourceText; // tack on the remaining sourceText
-        LOG.debugf("highlighted text is {0}", result);
         return result;
     }
 
@@ -204,12 +202,12 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     public Component getTableCellEditorComponent(
-        JTable table, Object value, boolean isSelected, int row, int column) {
-        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0}", row);
+        final JTable table, Object value, boolean isSelected, int row, int column) {
 
         this.table = table;
 
         vsr = (VisualSearchResult) value;
+        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0} {1} {2}", row, vsr.getCoreSearchResults().get(0).getUrn(), vsr.isVisible());
         category = vsr.getCategory();
 
         similarButton.setVisible(getSimilarResultsCount() > 0);
@@ -261,7 +259,7 @@ implements TableCellEditor, TableCellRenderer {
     }
     
     private boolean isShowingSimilarResults() {
-        return vsr != null && getSimilarResultsCount() > 0 && vsr.getSimilarResults().get(0).isVisible();
+        return vsr != null && getSimilarResultsCount() > 0 && vsr.isChildrenVisible();
     }
 
     private Component makeCenterPanel() {
