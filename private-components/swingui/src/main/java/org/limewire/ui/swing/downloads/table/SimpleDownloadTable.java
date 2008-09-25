@@ -22,6 +22,7 @@ import javax.swing.table.TableCellRenderer;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -161,7 +162,7 @@ public class SimpleDownloadTable extends DownloadTable {
     private static class PercentRenderer extends JPanel implements TableCellRenderer{
         JProgressBar progressBar;
         public PercentRenderer(){
-            progressBar = new JProgressBar(0, 100);
+            progressBar = new LimeProgressBar(0, 100);
             add(progressBar);
         }
 

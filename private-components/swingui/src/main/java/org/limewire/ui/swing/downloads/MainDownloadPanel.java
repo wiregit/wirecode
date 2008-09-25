@@ -33,6 +33,7 @@ import org.limewire.ui.swing.sharing.ViewSelectionPanel;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -149,21 +150,36 @@ public class MainDownloadPanel extends JPanel {
 		pausableList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                pauseAction.setEnabled(pausableList.size() > 0);
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        pauseAction.setEnabled(pausableList.size() > 0);
+                    }
+                });
             }
         });
 
         resumableList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                resumeAction.setEnabled(resumableList.size() > 0);
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        resumeAction.setEnabled(resumableList.size() > 0);
+                    }
+                });
             }
         });
         
         doneList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                clearAction.setEnabled(doneList.size() > 0);
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        clearAction.setEnabled(doneList.size() > 0);
+                    }
+                });
             }
         });
     }

@@ -15,6 +15,14 @@ public class LimeProgressBar extends JProgressBar {
 			.getInstance(AlphaComposite.SRC_ATOP).derive(.3f);
 	
 	private boolean isHidden = false;
+	
+	public LimeProgressBar(int min, int max){
+	    super(min, max);
+	}
+	
+	public LimeProgressBar(){
+        super();
+    }
 
 	@Override
 	protected void paintComponent(Graphics g) {

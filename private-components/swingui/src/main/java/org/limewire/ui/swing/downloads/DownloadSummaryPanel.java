@@ -36,6 +36,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -191,8 +192,13 @@ public class DownloadSummaryPanel extends JPanel {
 
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                updateTitle();
-                adjustVisibility();
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateTitle();
+                        adjustVisibility();
+                    }
+                });
             }
 
         });
@@ -211,7 +217,12 @@ public class DownloadSummaryPanel extends JPanel {
                 }
 
                 if (addWarning) {
-                    setWarningVisible(true);
+                    SwingUtils.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            setWarningVisible(true);
+                        }
+                    });
                 }
             }
 
