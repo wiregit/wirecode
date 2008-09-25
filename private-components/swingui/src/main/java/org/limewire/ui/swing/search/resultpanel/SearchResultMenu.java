@@ -2,13 +2,15 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.event.ActionEvent;
 import java.util.Collection;
+
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
+
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -19,14 +21,14 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class SearchResultMenu extends JPopupMenu {
 
-    private NavigableTree navTree;
+    private Navigator navigator;
 
     public SearchResultMenu(final BaseResultPanel brp,
-        final NavigableTree navTree,
+        final Navigator navigator,
         final VisualSearchResult vsr,
         final int row) {
 
-        this.navTree = navTree;
+        this.navigator = navigator;
 
         add(new AbstractAction("Download") {
             public void actionPerformed(ActionEvent e) {
@@ -77,7 +79,7 @@ public class SearchResultMenu extends JPopupMenu {
 
         menu.add(new AbstractAction("View library") {
             public void actionPerformed(ActionEvent e) {
-                navTree.getNavigableItemByName(
+                navigator.getNavItem(
                     NavCategory.LIBRARY,
                     MyLibraryPanel.NAME).select();
             }

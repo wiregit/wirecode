@@ -71,7 +71,7 @@ public class BuddyNameRenderer extends JLabel implements TableCellRenderer {
         
         //set the text
         if(column == 0) {
-            setText(item.getName());
+            setText(item.getId());
         } else {
             setHorizontalAlignment(RIGHT);
             if( item.size() > 0) 

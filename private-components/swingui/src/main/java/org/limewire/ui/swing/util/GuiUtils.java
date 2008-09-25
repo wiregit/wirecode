@@ -229,8 +229,10 @@ public class GuiUtils {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                listener.actionPerformed(new ActionEvent(e.getComponent(),
-                        ActionEvent.ACTION_PERFORMED, null));
+                if(listener != null) {
+                    listener.actionPerformed(new ActionEvent(e.getComponent(),
+                            ActionEvent.ACTION_PERFORMED, null));
+                }
             }
         };
     }

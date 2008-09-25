@@ -29,7 +29,7 @@ import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
@@ -93,7 +93,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     private IconLabelRenderer iconLabelRenderer;
     
     @Inject
-    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, NavigableTree navTree, IconManager iconManager, ThumbnailManager thumbnailManager) {        
+    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager, ThumbnailManager thumbnailManager) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
         
@@ -113,7 +113,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         ObservableElementList.Connector<BuddyItem> buddyConnector = GlazedLists.beanConnector(BuddyItem.class);
         eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
                
-        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager, navTree);
+        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager, navigator);
         
         headerPanel = createHeader(cardPanel);
 
@@ -209,14 +209,14 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
                 int index = buddy.getSelectedRow();
                 if( index >= 0 && index < buddy.getModel().getRowCount()) {
                     BuddyItem buddyItem = (BuddyItem) buddy.getModel().getValueAt(index, 0);
-                    if(buddyItem.getName().equals(name))
+                    if(buddyItem.getId().equals(name))
                         return;
                     
-                    name = buddyItem.getName();
-                    headerPanel.setBuddyName(buddyItem.getName());
-                    emptyPanel.setBuddyName(buddyItem.getName());
+                    name = buddyItem.getId();
+                    headerPanel.setBuddyName(buddyItem.getId());
+                    emptyPanel.setBuddyName(buddyItem.getId());
       
-                    BuddyFileList fileList = (BuddyFileList) buddyLists.get(buddyItem.getName());
+                    BuddyFileList fileList = (BuddyFileList) buddyLists.get(buddyItem.getId());
                     emptyPanel.setUserFileList(fileList);
                     table.setModel(new SharingTableModel(fileList.getFilteredModel(), fileList,sharingTableFormat));
                     TableColumn tc = table.getColumn(6);
@@ -286,14 +286,14 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         eventList.clear();
     }
     
-    private void addBuddy(String name) {
-        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(name);
-        buddyLists.put(name, fileList);
+    private void addBuddy(String id) {
+        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(id);
+        buddyLists.put(id, fileList);
         FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getModel(), 
               new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         fileList.setFilteredModel(filteredList);
 
-        eventList.add(new BuddyItemImpl(name, fileList.getFilteredModel()));
+        eventList.add(new BuddyItemImpl(id, fileList.getFilteredModel()));
     }
     
     /**
@@ -306,7 +306,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     public void selectBuddy(String name) {
         for(int i = 0; i < table.getModel().getRowCount(); i++) {
             BuddyItem item = (BuddyItem) table.getModel().getValueAt(i, 0);
-            if(item.getName().equals(name)) {
+            if(item.getId().equals(name)) {
                 final int index = i;
                 SwingUtils.invokeLater(new Runnable(){
                     public void run() {

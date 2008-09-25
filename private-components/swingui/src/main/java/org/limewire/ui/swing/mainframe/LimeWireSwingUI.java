@@ -24,7 +24,6 @@ import com.google.inject.Inject;
 
 public class LimeWireSwingUI extends JPanel {
     
-    private final LeftPanel leftPanel;
     private final TopPanel topPanel;
     private final TrayNotifier trayNotifier;
     
@@ -44,7 +43,6 @@ public class LimeWireSwingUI extends JPanel {
     	        
     	this.trayNotifier = trayNotifier;
     	this.topPanel = topPanel;
-    	this.leftPanel = leftPanel;
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -57,14 +55,6 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;        
         add(new Line(lineColor), gbc);
-        
-        // The left panel
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.weightx = 0;
-        gbc.weighty = 1;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 3;
-        add(leftPanel, gbc);
         
         // The top panel
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -80,6 +70,14 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         add(new Line(lineColor), gbc);
+        
+        // The left panel
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.weightx = 0;
+        gbc.weighty = 1;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 3;
+        add(leftPanel, gbc);        
         
         // Line between left & main panel
         gbc.fill = GridBagConstraints.VERTICAL;
@@ -119,8 +117,8 @@ public class LimeWireSwingUI extends JPanel {
         add(statusPanel, gbc);
     }
     
-    public void goHome() {        
-        leftPanel.goHome();
+    public void goHome() {
+        topPanel.goHome();
     }
 
     public void focusOnSearch() {

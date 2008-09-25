@@ -11,7 +11,7 @@ import javax.swing.JToggleButton;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -25,11 +25,11 @@ extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
         
     private ActionButtonPanel panel;
-    private final NavigableTree navTree;
+    private final Navigator navigator;
     private VisualSearchResult vsr;
     
-    public ActionColumnTableCellEditor(NavigableTree navTree) {
-        this.navTree = navTree;
+    public ActionColumnTableCellEditor(Navigator navigator) {
+        this.navigator = navigator;
     }
     
     @Override
@@ -40,7 +40,7 @@ implements TableCellEditor, TableCellRenderer {
     private ActionButtonPanel getPanel(final JTable table) {
         if (panel != null) return panel;
         
-        panel = new ActionButtonPanel(navTree);
+        panel = new ActionButtonPanel(navigator);
         
         JToggleButton junkButton = panel.getJunkButton();
         junkButton.addItemListener(new ItemListener() {

@@ -17,6 +17,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -36,16 +37,20 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.TextFieldWithEnterButton;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavSelectionListener;
+import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -66,10 +71,17 @@ class TopPanel extends JPanel implements SearchNavigator {
     @Resource private Icon enterUpIcon;
     @Resource private Icon enterOverIcon;
     @Resource private Icon enterDownIcon;
+    @Resource private Icon homeIcon;
+    @Resource private Icon storeIcon;
+    
+    private final NavItem homeNav;
+
     
     @Inject
     public TopPanel(final SearchHandler searchHandler, Navigator navigator,
-                    @Named("friendLibraries") AutoCompleteDictionary friendLibraries) {
+                    @Named("friendLibraries") AutoCompleteDictionary friendLibraries,
+                    HomePanel homePanel,
+                    StorePanel storePanel) {
         this.navigator = navigator;
         
         setMinimumSize(new Dimension(0, 40));
@@ -83,7 +95,8 @@ class TopPanel extends JPanel implements SearchNavigator {
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
         combo.removeItem(SearchCategory.OTHER);
-        if (!programEnabled) combo.removeItem(SearchCategory.PROGRAM);
+        if (!programEnabled)
+            combo.removeItem(SearchCategory.PROGRAM);
 
         combo.setName("TopPanel.combo");
         JLabel search = new JLabel(I18n.tr("Search"));
@@ -125,12 +138,29 @@ class TopPanel extends JPanel implements SearchNavigator {
             }
         });
         
+        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);
+        NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
+        JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
+        homeButton.setIcon(homeIcon);
+        FontUtils.changeSize(homeButton, -2);
+        JButton storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
+        storeButton.setIcon(storeIcon);
+        FontUtils.changeSize(storeButton, -2);
+        
         setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weighty = 1;
+                
+        gbc.insets = new Insets(5, 10, 0, 0);
+        gbc.fill = GridBagConstraints.NONE;
+        add(homeButton, gbc);
         
-        gbc.insets = new Insets(5, 1, 0, 5);
+        gbc.insets = new Insets(5, 10, 0, 0);
+        gbc.fill = GridBagConstraints.NONE;
+        add(storeButton, gbc);
+        
+        gbc.insets = new Insets(5, 50, 0, 5);
         gbc.fill = GridBagConstraints.NONE;
         add(search, gbc);
         
@@ -170,9 +200,9 @@ class TopPanel extends JPanel implements SearchNavigator {
     public SearchNavItem addSearch(
         String title, JComponent searchPanel, final Search search) {
         
-        final NavItem item = navigator.addNavigablePanel(
-            NavCategory.SEARCH, title, searchPanel, false);
-        final SearchAction action = new SearchAction(item, search);
+        final NavItem item = navigator.createNavItem(
+            NavCategory.SEARCH, title, searchPanel);
+        final SearchAction action = new SearchAction(item);
         search.addSearchListener(action);
 
         final Action moreTextAction = new NoOpAction();
@@ -188,23 +218,21 @@ class TopPanel extends JPanel implements SearchNavigator {
         
         searchList.addTabActionMapAt(actionMap, 0);
         
-        return new SearchNavItem() {
+        item.addNavItemListener(new NavItemListener() {
             @Override
-            public String getName() {
-                return item.getName();
-            }
-            
-            @Override
-            public void remove() {
+            public void itemRemoved() {
                 searchList.removeTabActionMap(actionMap);
-                action.remove();
+                search.stop();
             }
-            
+
             @Override
-            public void select() {
-                action.putValue(Action.SELECTED_KEY, true);
+            public void itemSelected(boolean selected) {
+                textField.setText(item.getId());
+                action.putValue(Action.SELECTED_KEY, selected);
             }
-            
+        });
+        
+        return new SearchNavItem() {
             @Override
             public void sourceCountUpdated(int newSourceCount) {
                 moreTextAction.putValue(Action.NAME,
@@ -214,18 +242,41 @@ class TopPanel extends JPanel implements SearchNavigator {
                     action.killBusy();
                 }
             }
+            
+            @Override
+            public String getId() {
+                return item.getId();
+            }
+            
+            @Override
+            public void remove() {
+                item.remove();
+            }
+            
+            @Override
+            public void select() {
+                item.select();
+            }
+            
+            @Override
+            public void addNavItemListener(NavItemListener listener) {
+                item.addNavItemListener(listener);
+            }
+            
+            @Override
+            public void removeNavItemListener(NavItemListener listener) {
+                item.removeNavItemListener(listener);
+            }
         };
     }
     
     private class SearchAction extends AbstractAction implements SearchListener {
         private final NavItem item;
-        private final Search search;
         private Timer busyTimer;
         
-        public SearchAction(NavItem item, Search search) {
-            super(item.getName());
+        public SearchAction(NavItem item) {
+            super(item.getId());
             this.item = item;
-            this.search = search;
 
             // Make sure this syncs up with any changes in selection.
             addPropertyChangeListener(new PropertyChangeListener() {
@@ -233,7 +284,7 @@ class TopPanel extends JPanel implements SearchNavigator {
                 public void propertyChange(PropertyChangeEvent evt) {
                     if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                         if (evt.getNewValue().equals(Boolean.TRUE)) {
-                            select();
+                            SearchAction.this.item.select();
                         }
                     }
                 }
@@ -243,9 +294,9 @@ class TopPanel extends JPanel implements SearchNavigator {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand().equals(TabActionMap.SELECT_COMMAND)) {
-                select();
+                item.select();
             } else if (e.getActionCommand().equals(TabActionMap.REMOVE_COMMAND)) {
-                remove();
+                item.remove();
             }
         }
 
@@ -261,11 +312,6 @@ class TopPanel extends JPanel implements SearchNavigator {
         void killBusy() {
             busyTimer.stop();
             putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);
-        }
-        
-        public void remove() {
-            item.remove();
-            search.stop();
         }
         
         @Override
@@ -295,20 +341,9 @@ class TopPanel extends JPanel implements SearchNavigator {
                 }
             });
         }
+    }
 
-        public void select() {
-            item.select();
-            textField.setText(item.getName());
-            navigator.addNavListener(new NavSelectionListener() {
-                @Override
-                public void navItemSelected(
-                    NavCategory category, NavItem navItem) {
-                    if (navItem != item) {
-                        navigator.removeNavListener(this);
-                        putValue(Action.SELECTED_KEY, false);
-                    }
-                }
-            });
-        }
+    public void goHome() {
+        homeNav.select();
     }
 }

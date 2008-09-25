@@ -3,41 +3,48 @@ package org.limewire.ui.swing.nav;
 import javax.swing.JComponent;
 
 /**
- * An interface allowing panels to be added as navigable,
- * or removed.
+ * The main hub for navigation.
  */
 public interface Navigator {
 
     /**
-     * Adds a panel described by the given name, in the category.
+     * Creates a new navigable item in the given category. When the item is
+     * selected, the given panel should be rendered.
      * 
-     * @param category The category this belongs in
-     * @param name The name this should be rendered with
-     * @param panel The panel to display when selected
-     * @param userRemovable true if this should be rendered with a 'remove' icon
+     * To remove the NavItem, call {@link NavItem#remove()} on the NavItem
+     * returned by this, or retrieve the NavItem later by calling
+     * {@link #getNavItem(NavCategory, String)}.
+     * 
+     * @param category The category this belongs in.
+     * @param id The id that identifies this panel.
+     * @param panel The panel to display when selected.
+     * 
      * @return A {@link NavItem} that can be used to select or remove the item.
      */
-    public NavItem addNavigablePanel(NavCategory category, String name, JComponent panel, boolean userRemovable);
-    
+    public NavItem createNavItem(NavCategory category, String id, JComponent panel);
+
     /**
-     * Removes a panel described by the given name, in the category.
-     * 
-     * @param category The category this belongs in
-     * @param name The name this should be rendered with
-     * @param panel The panel to display when selected
+     * Returns true if a panel with the given id in the given category exists.
      */
-    public void removeNavigablePanel(NavCategory category, String name);
-    
-    boolean hasNavigablePanel(NavCategory category, String name);
-    
+    boolean hasNavItem(NavCategory category, String id);
+
     /**
-     * Adds a listener that is notified when a {@link NavItem} is selected.
+     * Returns the NavItem for the given id in the given category.
      */
-    public void addNavListener(NavSelectionListener itemListener);
-    
+    NavItem getNavItem(NavCategory category, String id);
+
     /**
-     * Removes the listener from being notified when a {@link NavItem} is selected.
+     * Adds a listener that is notified when a {@link NavItem} is selected,
+     * added or removed. When a new listener is installed, it is notified of all
+     * existing NavItems via
+     * {@link NavigationListener#itemAdded(NavCategory, NavItem, JComponent)},
+     * in addition to notifying about future NavItems.
      */
-    public void removeNavListener(NavSelectionListener itemListener);
+    public void addNavigationListener(NavigationListener itemListener);
+
+    /**
+     * Removes the listener from the list of listeners.
+     */
+    public void removeNavigationListener(NavigationListener itemListener);
 
 }

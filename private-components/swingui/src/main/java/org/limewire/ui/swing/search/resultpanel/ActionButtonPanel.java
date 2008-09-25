@@ -33,7 +33,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FontUtils;
@@ -72,7 +72,7 @@ public class ActionButtonPanel extends JXPanel {
     private VisualSearchResult vsr;
     private int currentRow;
 
-    public ActionButtonPanel(final NavigableTree navTree) {
+    public ActionButtonPanel(final Navigator navigator) {
         GuiUtils.assignResources(this);
 
         downloadButton = new JButton() {
@@ -86,11 +86,11 @@ public class ActionButtonPanel extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
-                    navTree.getNavigableItemByName(
+                    navigator.getNavItem(
                         NavCategory.DOWNLOAD,
                         MainDownloadPanel.NAME).select();
                 } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
-                    navTree.getNavigableItemByName(
+                    navigator.getNavItem(
                         NavCategory.LIBRARY,
                         MyLibraryPanel.NAME).select();
                 }

@@ -9,21 +9,30 @@ import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.limewire.ui.swing.nav.NavigableTarget;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavigationListener;
+import org.limewire.ui.swing.nav.Navigator;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class MainPanel extends JPanel implements NavigableTarget {
+class MainPanel extends JPanel {
+    
+    private static final Log LOG = LogFactory.getLog(MainPanel.class);
+    
+    private final Map<String, JComponent> keyToComponents = new HashMap<String, JComponent>();
 
-    private final Map<String, JComponent> keyToComponents =
-        new HashMap<String, JComponent>();
     private final CardLayout cardLayout;
-
-    public MainPanel() {
+    
+    @Inject
+    public MainPanel(Navigator navigator) {   
         cardLayout = new CardLayout();
         setLayout(cardLayout);
-        
+
         this.addComponentListener(new ComponentListener(){
             @Override
             public void componentHidden(ComponentEvent e) {}
@@ -38,25 +47,37 @@ class MainPanel extends JPanel implements NavigableTarget {
             }
 
         });
-    }
 
-    public void showNavigablePanel(Object key) {
-        cardLayout.show(this, asString(key));
-        keyToComponents.get(asString(key)).requestFocusInWindow();
-    }
-    
-    @Override
-    public void addNavigablePanel(Object key, JComponent panel) {
-        keyToComponents.put(asString(key), panel);
-        add(panel, asString(key));
-    }
-    
-    @Override
-    public void removeNavigablePanel(Object key) {
-        remove(keyToComponents.remove(asString(key)));
+        // We show the panel based on selection & ignore adding/removal,
+        // in order to workaround initialization-order problems where
+        // items are added to the Navigator 
+        navigator.addNavigationListener(new NavigationListener() {
+            @Override
+            public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {
+                LOG.debugf("Added item {0}", navItem);
+                keyToComponents.put(asString(navItem), panel);
+                add(panel, asString(navItem));
+            }
+
+            @Override
+            public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {
+                LOG.debugf("Removed item {0}", navItem);
+                remove(keyToComponents.remove(asString(navItem)));
+            }
+
+            @Override
+            public void itemSelected(NavCategory category, NavItem navItem, JComponent panel) {
+                LOG.debugf("Selected item {0}", navItem);
+                if(navItem != null) {
+                    cardLayout.show(MainPanel.this, asString(navItem));
+                    keyToComponents.get(asString(navItem)).requestFocusInWindow();
+                }
+            }
+        });
     }
     
     private String asString(Object key) {
         return System.identityHashCode(key) + "";
     }
+
 }

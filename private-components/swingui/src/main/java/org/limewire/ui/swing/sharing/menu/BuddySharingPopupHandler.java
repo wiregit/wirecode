@@ -103,7 +103,7 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
             viewLibraryItem.setEnabled(false);
         }
         
-        buddyFileList = libraryManager.getBuddy(currentBuddy.getName());
+        buddyFileList = libraryManager.getBuddy(currentBuddy.getId());
         
         popupMenu.show(component, x, y);
     }

@@ -17,7 +17,8 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.ui.swing.mainframe.StorePanel;
-import org.limewire.ui.swing.nav.NavTree;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -27,7 +28,7 @@ import com.google.inject.Inject;
 
 public class SponsoredResultsPanel extends JXPanel {
   
-    private final NavTree navTree;
+    private final Navigator navigator;
     private final StorePanel storePanel;
 
     @Resource
@@ -40,9 +41,9 @@ public class SponsoredResultsPanel extends JXPanel {
 
     
     @Inject
-    public SponsoredResultsPanel(NavTree navTree, StorePanel storePanel) {
+    public SponsoredResultsPanel(Navigator navigator, StorePanel storePanel) {
         GuiUtils.assignResources(this);
-        this.navTree = navTree;
+        this.navigator = navigator;
         this.storePanel = storePanel;
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -120,7 +121,7 @@ public class SponsoredResultsPanel extends JXPanel {
                 NativeLaunchUtils.openURL(result.getUrl());
             } else {
                 storePanel.load(result.getUrl());
-                navTree.showStore();
+                navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
             }
         }
         

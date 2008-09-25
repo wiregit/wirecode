@@ -6,7 +6,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.friends.BuddyItem;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -15,7 +15,7 @@ import ca.odell.glazedlists.FilterList;
 
 public class BuddySharingActionHandler {
     
-    private final NavigableTree navTree;
+    private final Navigator navigator;
     private final LibraryManager libraryManager;
     
     public static final String VIEW_LIBRARY = "VIEW_LIBRARY";
@@ -24,8 +24,8 @@ public class BuddySharingActionHandler {
     public static final String SHARE_ALL_IMAGE = "SHARE_ALL_IMAGE";
     public static final String UNSHARE_ALL = "UNSHARE_ALL";
     
-    public BuddySharingActionHandler(NavigableTree tree, LibraryManager libraryManager) {
-        this.navTree = tree;
+    public BuddySharingActionHandler(Navigator navigator, LibraryManager libraryManager) {
+        this.navigator = navigator;
         this.libraryManager = libraryManager;
     }
     
@@ -33,7 +33,7 @@ public class BuddySharingActionHandler {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {
-                    NavItem navItem = navTree.getNavigableItemByName(NavCategory.LIBRARY, item.getName());
+                    NavItem navItem = navigator.getNavItem(NavCategory.LIBRARY, item.getId());
                     navItem.select();
                 } else if(actionCommand == SHARE_ALL_VIDEO) {
                     FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.VIDEO));

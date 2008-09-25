@@ -7,6 +7,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -22,16 +24,18 @@ import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavSelectionListener;
+import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -39,8 +43,9 @@ import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
 
-import org.limewire.ui.swing.util.I18n;
+import com.google.inject.Inject;
 
 
 
@@ -86,8 +91,6 @@ public class DownloadSummaryPanel extends JPanel {
     @Resource
     private Color fontColor;
 
-    private Navigator navigator;
-
 
     private boolean selected;
 
@@ -96,16 +99,11 @@ public class DownloadSummaryPanel extends JPanel {
 
 
      
-
-	/**
-	 * Create the panel
-	 * @param navigator2 
-	 */
-	public DownloadSummaryPanel(final EventList<DownloadItem> itemList, Navigator navigator) {
+    @Inject
+	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, Navigator navigator) {
 	    GuiUtils.assignResources(this);
 	    
-	    this.navigator = navigator;
-        this.allList = itemList;
+        this.allList = GlazedListsSwing.swingThreadProxyList(downloadListManager.getDownloads());
 
         setLayout(new BorderLayout());
                 
@@ -166,6 +164,24 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		addListeners();
 		
+        final NavItem item = navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);
+        item.addNavItemListener(new NavItemListener() {
+            @Override
+            public void itemRemoved() {                
+            }
+            
+            @Override
+            public void itemSelected(boolean selected) {
+                setSelected(selected);
+            }
+        });
+        
+        addMouseListener(GuiUtils.getActionHandListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                item.select();
+            }            
+        }));
 	}
 	
     
@@ -207,13 +223,6 @@ public class DownloadSummaryPanel extends JPanel {
             public void mouseClicked(MouseEvent e){
                 setWarningVisible(false);
             }
-        });
-        
-        navigator.addNavListener(new NavSelectionListener(){
-            @Override
-            public void navItemSelected(NavCategory category, NavItem navItem) {
-               setSelected(category == NavCategory.DOWNLOAD);
-            }            
         });
 	}
 	

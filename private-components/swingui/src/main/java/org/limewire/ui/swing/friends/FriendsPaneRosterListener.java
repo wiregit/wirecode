@@ -9,6 +9,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.library.BuddyLibrary;
 import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
@@ -77,7 +78,10 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
         synchronized (this) {
             RemoteFileList libraryList = libraryManager.getBuddyLibrary(name);
             BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryList);
-            navigator.removeNavigablePanel(NavCategory.LIBRARY, library.getName());
+            NavItem item = navigator.getNavItem(NavCategory.LIBRARY, library.getName());
+            if(item != null) {
+                item.remove();
+            }
             libraryManager.removeBuddyLibrary(name);
         }
     }
@@ -91,9 +95,9 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
             if(!libraryManager.containsBuddyLibrary(name)) {
                 libraryManager.addBuddyLibrary(name);  
             }       
-            if(!navigator.hasNavigablePanel(NavCategory.LIBRARY, name)) { 
+            if(!navigator.hasNavItem(NavCategory.LIBRARY, name)) { 
                 BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryManager.getBuddyLibrary(name));
-                navigator.addNavigablePanel(NavCategory.LIBRARY, name, library, false);
+                navigator.createNavItem(NavCategory.LIBRARY, name, library);
             }
         }
     }

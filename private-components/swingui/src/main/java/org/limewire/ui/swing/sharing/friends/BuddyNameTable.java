@@ -10,7 +10,7 @@ import javax.swing.ListSelectionModel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.menu.BuddySharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.BuddySharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -30,7 +30,7 @@ public class BuddyNameTable extends JXTable {
     
     private EventTableModel<BuddyItem> tableModel;
     
-    public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat, LibraryManager libraryManager, NavigableTree navTree) {
+    public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat, LibraryManager libraryManager, Navigator navigator) {
         GuiUtils.assignResources(this);
         
         SortedList<BuddyItem> buddyList = new SortedList<BuddyItem>(eventList, new BuddyComparator());       
@@ -51,7 +51,7 @@ public class BuddyNameTable extends JXTable {
         getColumn(1).setWidth(30);
         getColumn(1).setPreferredWidth(30);
         
-        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler(navTree, libraryManager), libraryManager);
+        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler(navigator, libraryManager), libraryManager);
         
         addMouseListener(new MouseAdapter() {
             
@@ -89,13 +89,13 @@ public class BuddyNameTable extends JXTable {
         @Override
         public int compare(BuddyItem o1, BuddyItem o2) {
             if(o1.size() > 0 && o2.size() > 0) { 
-                return o1.getName().compareTo(o2.getName());
+                return o1.getId().compareTo(o2.getId());
             } else if(o1.size() > 0 && o2.size() <= 0) {
                 return -1;
             } else if(o1.size() <= 0 && o2.size() > 0) {
                 return 1;
             } else {
-                return o1.getName().compareTo(o2.getName());
+                return o1.getId().compareTo(o2.getId());
             }
         }
     }

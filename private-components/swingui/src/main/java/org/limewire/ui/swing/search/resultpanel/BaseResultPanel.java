@@ -24,7 +24,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.ConfigurableTable;
 import org.limewire.ui.swing.StringTableCellRenderer;
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
@@ -42,7 +42,7 @@ public abstract class BaseResultPanel extends JXPanel {
     private final EventList<VisualSearchResult> baseEventList;
     private ConfigurableTable<VisualSearchResult> resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
-    private NavigableTree navTree;
+    private final Navigator navigator;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -53,11 +53,11 @@ public abstract class BaseResultPanel extends JXPanel {
             ResultsTableFormat<VisualSearchResult> tableFormat,
             SearchResultDownloader searchResultDownloader,
             Search search,
-            NavigableTree navTree) {
+            Navigator navigator) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
-        this.navTree = navTree;
+        this.navigator = navigator;
         
         setLayout(layout);
                 
@@ -88,12 +88,12 @@ public abstract class BaseResultPanel extends JXPanel {
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor renderer =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navTree), navTree);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator));
         resultsList.setDefaultRenderer(VisualSearchResult.class, renderer);
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor editor =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navTree), navTree);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator));
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         int columnIndex = 0;
@@ -121,7 +121,7 @@ public abstract class BaseResultPanel extends JXPanel {
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
                     SearchResultMenu menu = new SearchResultMenu(
-                        BaseResultPanel.this, navTree, vsr, row);
+                        BaseResultPanel.this, navigator, vsr, row);
                     menu.show(component, e.getX(), e.getY());
                 }
             }
@@ -182,9 +182,9 @@ public abstract class BaseResultPanel extends JXPanel {
         }
 
         resultsTable.setDefaultRenderer(
-            VisualSearchResult.class, new ActionColumnTableCellEditor(navTree));
+            VisualSearchResult.class, new ActionColumnTableCellEditor(navigator));
         resultsTable.setDefaultEditor(
-            VisualSearchResult.class, new ActionColumnTableCellEditor(navTree));
+            VisualSearchResult.class, new ActionColumnTableCellEditor(navigator));
 
         // Don't allow sorting on the "Actions" column
         int columnIndex = tableFormat.getActionColumnIndex();

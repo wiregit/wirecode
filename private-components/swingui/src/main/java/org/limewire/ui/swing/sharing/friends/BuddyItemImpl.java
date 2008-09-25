@@ -12,7 +12,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem>{
 
-    private final String name;
+    private final String id;
     private final EventList<LocalFileItem> eventList;
     private FileList buddyLibraryList;
     
@@ -20,8 +20,8 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem
     
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     
-    public BuddyItemImpl(String name, EventList<LocalFileItem> eventList) {
-        this.name = name;
+    public BuddyItemImpl(String id, EventList<LocalFileItem> eventList) {
+        this.id = id;
         this.eventList = eventList;
         this.eventList.addListEventListener(this);
     }
@@ -35,8 +35,8 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem
     }
     
     @Override
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     @Override

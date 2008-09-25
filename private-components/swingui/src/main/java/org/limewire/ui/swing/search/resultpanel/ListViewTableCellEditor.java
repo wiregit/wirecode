@@ -41,7 +41,6 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -90,8 +89,7 @@ implements TableCellEditor, TableCellRenderer {
 
     @Inject
     public ListViewTableCellEditor(
-        ActionColumnTableCellEditor actionEditor,
-        NavigableTree navTree) {
+        ActionColumnTableCellEditor actionEditor) {
 
         this.actionEditor = actionEditor;
         FontUtils.changeSize(similarButton, -2.0F);
@@ -286,6 +284,7 @@ implements TableCellEditor, TableCellRenderer {
         itemIconLabel.setCursor(
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         itemIconLabel.setOpaque(false);
+
 
         JXPanel downloadPanel = new JXPanel(new MigLayout());
         downloadPanel.setOpaque(false);

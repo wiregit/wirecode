@@ -8,7 +8,7 @@ public interface BuddyItem {
     
     public int size();
     
-    public String getName();
+    public String getId();
     
     public void addPropertyChangeListener(PropertyChangeListener l);
     

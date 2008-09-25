@@ -11,7 +11,14 @@ public interface NavItem {
     /** Removes this nav item. */
     void remove();
 
-    /** Returns the title of nav item. */
-    String getName();
+    /** Returns the id of nav item. */
+    String getId();
+    
+    /** Adds a NavItemListener. */
+    void addNavItemListener(NavItemListener listener);
+    
+    /** Removes a NavItemListener. */
+    void removeNavItemListener(NavItemListener listener);
+
 
 }

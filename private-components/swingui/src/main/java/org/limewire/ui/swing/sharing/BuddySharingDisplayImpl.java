@@ -2,19 +2,19 @@ package org.limewire.ui.swing.sharing;
 
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavigableTree;
+import org.limewire.ui.swing.nav.Navigator;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class BuddySharingDisplayImpl implements BuddySharingDisplay {
-    private final NavigableTree navTree;
+    private final Navigator navigator;
     private final BuddySharePanel buddySharePanel;
     
     @Inject
-    public BuddySharingDisplayImpl(NavigableTree navTree, BuddySharePanel buddySharePanel) {
-        this.navTree = navTree;
+    public BuddySharingDisplayImpl(Navigator navigator, BuddySharePanel buddySharePanel) {
+        this.navigator = navigator;
         this.buddySharePanel = buddySharePanel;
     }
     
@@ -24,7 +24,7 @@ public class BuddySharingDisplayImpl implements BuddySharingDisplay {
     }
 
     private void displayNavigableItem(NavCategory navCategory, String name) {
-        NavItem item = navTree.getNavigableItemByName(navCategory, name);
+        NavItem item = navigator.getNavItem(navCategory, name);
         item.select();
     }
     

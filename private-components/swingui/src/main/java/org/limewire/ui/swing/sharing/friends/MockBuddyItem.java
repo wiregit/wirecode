@@ -15,7 +15,7 @@ public class MockBuddyItem implements BuddyItem {
     }
     
     @Override
-    public String getName() {
+    public String getId() {
         return name;
     }
 
