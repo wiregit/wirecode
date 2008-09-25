@@ -32,8 +32,6 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                     @Override
                     public void propertyChange(PropertyChangeEvent evt) {
                         if ("spam".equals(evt.getPropertyName())) {
-                            System.out.println(evt + " : spam : old=" + evt.getOldValue()
-                                    + " : new=" + evt.getNewValue());
                             boolean oldSpam = (Boolean) evt.getOldValue();
                             boolean newSpam = (Boolean) evt.getNewValue();
                             if (oldSpam != newSpam) {
