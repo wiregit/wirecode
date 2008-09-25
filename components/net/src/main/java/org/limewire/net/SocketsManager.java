@@ -190,6 +190,8 @@ public interface SocketsManager {
      * Asynchronously connects to <code>address</code> resolving the address if 
      * possible/necessary and notifying <code>observer</code> of the success or
      * failure.
+     * 
+     * @param timeout timeout in milliseconds
      */
     public void connect(Address address, int timeout, ConnectObserver observer);
     
@@ -197,6 +199,8 @@ public interface SocketsManager {
      * Asynchronously resolves <code>address</code> to other addresses if 
      * possible and notifying <code>observer</code> of the success or
      * failure.
+     * 
+     * @param timeout timeout in milliseconds
      */
     public void resolve(Address address, int timeout, AddressResolutionObserver observer);
 

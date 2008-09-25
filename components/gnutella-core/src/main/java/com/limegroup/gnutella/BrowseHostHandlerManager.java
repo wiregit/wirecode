@@ -18,7 +18,7 @@ public interface BrowseHostHandlerManager extends PushedSocketHandler {
     /**
      * Creates a browse host handler with a session guid <code>browseGuid</code>.
      * 
-     * This is used for browses on {@link Address} objects, call 
+     * Used for browses on {@link Address} objects. Call 
      * {@link BrowseHostHandler#browseHost(Address)} on the created browse
      * host handler.
      */

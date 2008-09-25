@@ -26,6 +26,10 @@ public class AddressIQProvider implements IQProvider {
         }
     }
     
+    /**
+     * Address iq that is instantiated and returned if the actual address
+     * iq could not be parsed.
+     */
     public static class ExceptionalAddressIQ extends AddressIQ {
 
         private final Exception exception;

@@ -141,6 +141,7 @@ public class SocketsManagerImpl implements SocketsManager {
     
     @Override
     public void connect(Address address, final int timeout, final ConnectObserver observer) {
+        // feel free to rework this logic with more use cases that don't fit the model
         if (address == null) { 
             throw new NullPointerException("address must not be null");
         }
@@ -169,6 +170,7 @@ public class SocketsManagerImpl implements SocketsManager {
 
     @Override
     public void resolve(Address address, int timeout, AddressResolutionObserver observer) {
+        // feel free to rework this logic with more use cases that don't fit the model
         if (address == null) { 
             throw new NullPointerException("address must not be null");
         }

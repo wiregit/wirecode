@@ -4,7 +4,7 @@ import org.limewire.io.Address;
 import org.limewire.nio.observer.IOErrorObserver;
 
 /**
- * Defines the callback that can be notified of a done address resolution.
+ * Defines the callback that can be notified of a finished address resolution.
  */
 public interface AddressResolutionObserver extends IOErrorObserver {
 

@@ -1217,7 +1217,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      * there are no push proxies available, or if this node is an Ultrapeer,
      * this will return an empty <tt>Set</tt>.
      * 
-     * Callers can take ownership of the returned set, the set might be immutable.
+     * Callers can take ownership of the returned set; the set might be immutable.
      *
      * @return a <tt>Set</tt> of push proxies with a maximum size of 4
      *
