@@ -12,7 +12,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.endpoint.RemoteHostAction;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
