@@ -365,6 +365,31 @@ public class FileUtils {
     }
     
     /**
+     * Forcibly deletes a file, removing any locks that may
+     * be held from any FileLockers that were added.
+     * 
+     * @param file the file to delete
+     * @return true if the deletion succeeded
+     */
+    public static boolean forceDelete(File file) {
+         // First attempt to rename it.
+        boolean success = file.delete();
+        
+        // If that fails, try releasing the locks one by one.
+        if (!success) {
+            for(FileLocker locker : fileLockers) {
+                if(locker.releaseLock(file)) {
+                    success = file.delete();
+                    if(success)
+                        break;
+                }
+            }
+        }
+        System.err.println("success="+success + ", file.exists()?"+file.exists());
+        return !file.exists();
+    }
+    
+    /**
      * Saves the data iff it was written exactly as we wanted.
      */
     public static boolean verySafeSave(File dir, String name, byte[] data) {
