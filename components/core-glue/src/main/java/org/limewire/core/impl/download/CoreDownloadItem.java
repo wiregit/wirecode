@@ -45,6 +45,13 @@ public class CoreDownloadItem implements DownloadItem {
             public void handleEvent(DownloadStatusEvent event) {
                 // broadcast the status has changed
                 fireDataChanged();
+                if (event.getType() == DownloadStatus.ABORTED) {
+                  //attempt to delete ABORTED file
+                    File file = CoreDownloadItem.this.downloader.getFile();
+                    if (file != null) {
+                        FileUtils.forceDelete(file);
+                    }
+                }
             }           
         });
     }
@@ -69,12 +76,13 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public void cancel() {
-       cancelled = true;
-       support.firePropertyChange("state", null, getState());
-       File file = downloader.getFile();
-       downloader.stop();
+        cancelled = true;
+        support.firePropertyChange("state", null, getState());
+        File file = downloader.getFile();
+        downloader.stop();
+        //attempt to delete file will not catch some aborted files necessary here for deleting files in error or stalled states
         if (file != null) {
-            file.delete();
+            FileUtils.forceDelete(file);
         }
     }
 
@@ -212,7 +220,6 @@ public class CoreDownloadItem implements DownloadItem {
         case BUSY:
         case WAITING_FOR_CONNECTIONS:
         case ITERATIVE_GUESSING:
-        case WAITING_FOR_USER:
             return DownloadState.CONNECTING;
 
         case COMPLETE:
@@ -229,7 +236,7 @@ public class CoreDownloadItem implements DownloadItem {
             return DownloadState.PAUSED;
 
         
-        case GAVE_UP://"GAVE_UP" means no sources
+        case WAITING_FOR_USER:
             return DownloadState.STALLED;
 
         case ABORTED:
@@ -239,6 +246,7 @@ public class CoreDownloadItem implements DownloadItem {
         case CORRUPT_FILE:
         case RECOVERY_FAILED:
         case INVALID:
+        case GAVE_UP://"GAVE_UP" means no sources - Is this really an error state?
             return DownloadState.ERROR;
             
 
@@ -273,8 +281,8 @@ public class CoreDownloadItem implements DownloadItem {
             return ErrorState.DISK_PROBLEM;
         case INVALID:
             return ErrorState.FILE_NOT_SHARABLE;
-       // TODO: what state is this?
-          //  return ErrorState.UNABLE_TO_CONNECT;
+        case GAVE_UP://"GAVE_UP" means no sources
+            return ErrorState.UNABLE_TO_CONNECT;
         default:
             return ErrorState.NONE;
         }
