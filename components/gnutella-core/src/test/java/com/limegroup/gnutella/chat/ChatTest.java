@@ -14,6 +14,7 @@ import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
+import org.limewire.core.settings.ChatSettings;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.StubSpamServices;
@@ -22,6 +23,10 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 //ITEST
 public class ChatTest extends BaseTestCase {
 
+    static {
+        ChatSettings.CHAT_ENABLED.setValue(true);
+    }
+    
     private static final int CHAT_PORT = 9999;
 
     private MyActivityCallback receiverCallback;

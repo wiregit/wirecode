@@ -26,7 +26,6 @@ class ConnectionAcceptorGlue {
     private final PushDownloadManager pushDownloadManager;
     private final TorrentManager torrentManager;
     private final ControlRequestAcceptor controlRequestAcceptor;
-    private final ChatManager chatManager;
     private final LWSManager lwsManager;
 
     @Inject
@@ -38,7 +37,6 @@ class ConnectionAcceptorGlue {
             PushDownloadManager pushDownloadManager,
             TorrentManager torrentManager,
             ControlRequestAcceptor controlRequestAcceptor,
-            ChatManager chatManager,
             LWSManager lwsManager) {
         this.externalDispatcher = externalDispatcher;
         this.localDispatcher = localDispatcher;
@@ -47,7 +45,6 @@ class ConnectionAcceptorGlue {
         this.torrentManager = torrentManager;
         this.localHttpAcceptor = localHttpAcceptor;
         this.controlRequestAcceptor = controlRequestAcceptor;
-        this.chatManager = chatManager;
         this.lwsManager = lwsManager;
     }
 
@@ -77,7 +74,6 @@ class ConnectionAcceptorGlue {
                             true, "MAGNET", "TORRENT");
                 externalDispatcher.addConnectionAcceptor(controlRequestAcceptor,
                             true, "MAGNET","TORRENT");
-                externalDispatcher.addConnectionAcceptor(chatManager, false, "CHAT");
                 
                 if (LWSSettings.LWS_IS_ENABLED.getValue()) {
                     localHttpAcceptor.registerHandler("/" + LWSManager.PREFIX + "*",  lwsManager.getHandler());

@@ -14,5 +14,5 @@ public class ChatSettings extends LimeProps {
 	 * Sets whether or not chat should be enabled.
 	 */
     public static final BooleanSetting CHAT_ENABLED =
-        FACTORY.createBooleanSetting("CHAT_ENABLED", true);
+        FACTORY.createBooleanSetting("CHAT_ENABLED_ALWAYS_FALSE", false);
 }

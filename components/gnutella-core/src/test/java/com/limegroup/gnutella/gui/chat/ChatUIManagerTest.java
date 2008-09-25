@@ -5,6 +5,7 @@ import java.awt.event.WindowEvent;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.ChatSettings;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.BaseTestCase;
@@ -27,6 +28,10 @@ import com.limegroup.gnutella.gui.VisualConnectionCallback;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class ChatUIManagerTest extends BaseTestCase {
+
+    static {
+        ChatSettings.CHAT_ENABLED.setValue(true);        
+    }
 
     private static final int CHAT_PORT = 9999;
 

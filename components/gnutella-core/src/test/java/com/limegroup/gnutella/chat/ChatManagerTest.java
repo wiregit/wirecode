@@ -5,11 +5,16 @@ import java.net.InetAddress;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
+import org.limewire.core.settings.ChatSettings;
 
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.stubs.SocketStub;
 
 public class ChatManagerTest extends BaseTestCase {
+
+    static {
+        ChatSettings.CHAT_ENABLED.setValue(true);
+    }
 
     private final Mockery context = new Mockery();
     
