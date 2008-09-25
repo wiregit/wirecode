@@ -363,6 +363,11 @@ public class MockSearch implements Search {
         public String toString() {
             return getClass().getName() + ": " + getProperty(PropertyKey.NAME);
         }
+
+        @Override
+        public boolean isSpam() {
+            return false;
+        }
     }
 
     private static class MockRemoteHost implements RemoteHost {

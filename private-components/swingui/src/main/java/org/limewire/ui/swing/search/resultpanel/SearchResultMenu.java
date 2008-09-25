@@ -36,7 +36,7 @@ public class SearchResultMenu extends JPopupMenu {
 
         add(new AbstractAction("Mark as junk") {
             public void actionPerformed(ActionEvent e) {
-                vsr.setMarkedAsJunk(true);
+                vsr.setSpam(true);
             }
         });
 

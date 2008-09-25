@@ -19,8 +19,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName2UrnsNameComesEarly() {
 
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("1", "other file");
@@ -36,14 +39,14 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(1, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(1, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(3, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(1, coreResults1.size());
 
@@ -52,8 +55,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName2UrnsNameComesLate() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -69,14 +75,14 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(1, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(1, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(3, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(1, coreResults1.size());
 
@@ -85,8 +91,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "file name");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -109,14 +118,14 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(1, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(1, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(9, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(3, coreResults1.size());
 
@@ -125,8 +134,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupByName4Urns() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "other file");
         TestSearchResult testResult2 = new TestSearchResult("2", "other file");
@@ -141,26 +153,26 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(4, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(1, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(1, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(0, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(0, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(1, coreResults2.size());
 
         VisualSearchResult group3 = results.get(3);
-        List<VisualSearchResult> groupResults3 = group3.getSimilarResults();
-        Assert.assertEquals(3, groupResults3.size());
+        List<VisualSearchResult> similarResults3 = group3.getSimilarResults();
+        Assert.assertEquals(3, similarResults3.size());
         List<SearchResult> coreResults3 = group1.getCoreSearchResults();
         Assert.assertEquals(1, coreResults3.size());
 
@@ -172,8 +184,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName3Urns() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "other file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -190,20 +205,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(2, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(2, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(0, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(0, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(1, coreResults2.size());
 
@@ -213,8 +228,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -233,20 +251,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(2, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(2, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(2, coreResults2.size());
 
@@ -256,8 +274,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -278,20 +299,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(2, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(2, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(3, coreResults2.size());
 
@@ -301,28 +322,30 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingUsingNameLikeLimeComparator() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new SearchResultMatcher() {
-                    @Override
-                    public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
-                        for (SearchResult result1 : o1.getCoreSearchResults()) {
-                            String name1 = result1.getProperty(SearchResult.PropertyKey.NAME)
-                                    .toString();
-                            for (SearchResult result2 : o2.getCoreSearchResults()) {
-                                String name2 = result2.getProperty(SearchResult.PropertyKey.NAME)
-                                        .toString();
-                                if (name1.startsWith("lime") && name2.startsWith("lime")) {
-                                    return true;
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults().addListEventListener(
+                new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                        new SearchResultMatcher() {
+                            @Override
+                            public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
+                                for (SearchResult result1 : o1.getCoreSearchResults()) {
+                                    String name1 = result1.getProperty(
+                                            SearchResult.PropertyKey.NAME).toString();
+                                    for (SearchResult result2 : o2.getCoreSearchResults()) {
+                                        String name2 = result2.getProperty(
+                                                SearchResult.PropertyKey.NAME).toString();
+                                        if (name1.startsWith("lime") && name2.startsWith("lime")) {
+                                            return true;
+                                        }
+                                        int result = name1.compareTo(name2);
+                                        if (result == 0) {
+                                            return true;
+                                        }
+                                    }
                                 }
-                                int result = name1.compareTo(name2);
-                                if (result == 0) {
-                                    return true;
-                                }
+                                return false;
                             }
-                        }
-                        return false;
-                    }
-                }));
+                        })));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "lime1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -343,20 +366,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(2, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(2, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(3, coreResults2.size());
 
@@ -365,15 +388,17 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group2, group0.getSimilarityParent());
 
     }
-    
+
     public void testEverythingSimilarComparator() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new SearchResultMatcher() {
-                    @Override
-                    public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
-                        return true;
-                    }
-                }));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults().addListEventListener(
+                new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                        new SearchResultMatcher() {
+                            @Override
+                            public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
+                                return true;
+                            }
+                        })));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "lime1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -394,20 +419,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(2, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(2, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(3, coreResults2.size());
 
@@ -416,15 +441,17 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group2, group0.getSimilarityParent());
 
     }
-    
+
     public void testNothingSimilarComparator() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new SearchResultMatcher() {
-                    @Override
-                    public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
-                        return false;
-                    }
-                }));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults().addListEventListener(
+                new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                        new SearchResultMatcher() {
+                            @Override
+                            public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
+                                return false;
+                            }
+                        })));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "lime1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -445,20 +472,20 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<VisualSearchResult> results = model.getVisualSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(0, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(0, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(3, coreResults2.size());
 
@@ -469,8 +496,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testVisibility() {
-        BasicSearchResultsModel model = new BasicSearchResultsModel(
-                new SimilarResultsMatchingDetector(new NameMatcher()));
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getVisualSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+                                new NameMatcher())));
 
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
@@ -508,7 +538,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertFalse(child.isVisible());
         result0.setChildrenVisible(true);
 
-        
         model.addSearchResult(testResult4);
         model.addSearchResult(testResult5);
         VisualSearchResult result1 = results.get(1);
@@ -522,10 +551,9 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertTrue(child0.isVisible());
         Assert.assertTrue(child1.isVisible());
         result1.setChildrenVisible(false);
-        
-        
+
         model.addSearchResult(testResult6);
-        
+
         children = result2.getSimilarResults();
         Assert.assertEquals(2, children.size());
         child0 = children.get(0);
@@ -535,26 +563,24 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         result2.setChildrenVisible(true);
         Assert.assertTrue(child0.isVisible());
         Assert.assertTrue(child1.isVisible());
-        
-        
-        
+
         results = model.getVisualSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> groupResults0 = group0.getSimilarResults();
-        Assert.assertEquals(0, groupResults0.size());
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> groupResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, groupResults1.size());
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
-        List<VisualSearchResult> groupResults2 = group2.getSimilarResults();
-        Assert.assertEquals(2, groupResults2.size());
+        List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
+        Assert.assertEquals(2, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(2, coreResults2.size());
 

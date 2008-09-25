@@ -41,7 +41,7 @@ implements TableCellEditor, TableCellRenderer {
             @Override
             public void itemStateChanged(ItemEvent event) {
                 boolean junk = event.getStateChange() == ItemEvent.SELECTED;
-                vsr.setMarkedAsJunk(junk);
+                vsr.setSpam(junk);
             }
         });
         
@@ -55,12 +55,12 @@ implements TableCellEditor, TableCellRenderer {
         
         panel = getPanel(table);
         vsr = (VisualSearchResult) value;
-        panel.setAlpha(vsr.isMarkedAsJunk() ? 0.2f : 1.0f);
+        panel.setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
 
         // If the VisualSearchResult for the current row is currently
         // marked as junk then display the junkButton as pressed.
         JToggleButton junkButton = panel.getJunkButton();
-        boolean junk = vsr.isMarkedAsJunk(); // isJunk(vsr);
+        boolean junk = vsr.isSpam(); // isJunk(vsr);
         junkButton.setSelected(junk);
 
         return panel;

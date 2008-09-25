@@ -29,7 +29,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private final Set<VisualSearchResult> similarResults = new HashSet<VisualSearchResult>();
     private VisualSearchResult similarityParent;
-    private boolean junk;
     private boolean childrenVisible;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
@@ -146,22 +145,10 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     }
 
     @Override
-    public boolean isMarkedAsJunk() {
-        return junk;
-    }
-
-    @Override
     public void setDownloadState(BasicDownloadState downloadState) {
         BasicDownloadState oldDownloadState = this.downloadState;
         this.downloadState = downloadState;
         firePropertyChange("downloadState", oldDownloadState, downloadState);
-    }
-
-    @Override
-    public void setMarkedAsJunk(boolean junk) {
-        boolean oldJunk = this.junk;
-        this.junk = junk;
-        firePropertyChange("markedAsJunk", oldJunk, junk);
     }
 
     @Override
@@ -197,5 +184,15 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     public void removeSimilarSearchResult(VisualSearchResult result) {
         similarResults.remove(result);       
+    }
+
+    @Override
+    public boolean isSpam() {
+        return coreResults.get(0).isSpam();
+    }
+
+    @Override
+    public void setSpam(boolean spam) {
+        firePropertyChange("spam", isSpam(), spam);
     }
 }

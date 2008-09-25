@@ -38,11 +38,7 @@ public interface VisualSearchResult {
 
     long getSize();
     
-    boolean isMarkedAsJunk();
-
     void setDownloadState(BasicDownloadState downloadState);
-
-    void setMarkedAsJunk(boolean junk);
     
     boolean isVisible();
         
@@ -53,4 +49,8 @@ public interface VisualSearchResult {
     boolean isChildrenVisible();
 
     void setChildrenVisible(boolean childrenVisible);
+    
+    boolean isSpam();
+    
+    void setSpam(boolean spam);
 }
