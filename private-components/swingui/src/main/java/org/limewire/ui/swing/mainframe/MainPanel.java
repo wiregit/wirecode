@@ -48,9 +48,6 @@ class MainPanel extends JPanel {
 
         });
 
-        // We show the panel based on selection & ignore adding/removal,
-        // in order to workaround initialization-order problems where
-        // items are added to the Navigator 
         navigator.addNavigationListener(new NavigationListener() {
             @Override
             public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {
