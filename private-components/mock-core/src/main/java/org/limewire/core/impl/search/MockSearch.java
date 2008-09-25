@@ -238,6 +238,7 @@ public class MockSearch implements Search {
                 MockSearchResult similarResult = (MockSearchResult) mock.clone();
                 similarResult.setUrn(SIMILAR_RESULT_PREFIX + mock.getUrn());
 //                similarResult.setProperty(PropertyKey.NAME, SIMILAR_RESULT_PREFIX + mock.getProperty(PropertyKey.NAME));
+                similarResult.addSource("mock");
                 listener.handleSearchResult(similarResult);
             } catch (CloneNotSupportedException e) {
                 // This should never happen.
