@@ -13,8 +13,8 @@ public class FileListStub extends SharedFileListImpl {
     private FileDescStub fdStub = new FileDescStub();
     private FileDescStub defaultStub = new FileDescStub("other.txt");
     
-    public FileListStub(String name, FileManager fileManager, Set<File> individual, Set<File> files) {
-        super(name, fileManager, individual, files);
+    public FileListStub(FileManager fileManager, Set<File> individual, Set<File> files) {
+        super(fileManager, individual, files);
     }
 
     public void setDescs(List<FileDesc> descs) {

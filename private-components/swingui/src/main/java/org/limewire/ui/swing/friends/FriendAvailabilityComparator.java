@@ -12,11 +12,11 @@ import java.util.Comparator;
 
 import org.limewire.xmpp.api.client.Presence.Mode;
 
-class FriendAvailabilityComparator implements Comparator<Friend> {
+class FriendAvailabilityComparator implements Comparator<ChatFriend> {
     private static ArrayList<Mode> ORDERED = new ArrayList<Mode>(Arrays.asList(new Mode[]{chat, available, away, xa, dnd})); 
     
     @Override
-    public int compare(Friend a, Friend b) {
+    public int compare(ChatFriend a, ChatFriend b) {
         boolean a_chatting = a.isChatting();
         boolean b_chatting = b.isChatting();
         if(a_chatting && b_chatting == false) {
@@ -45,7 +45,7 @@ class FriendAvailabilityComparator implements Comparator<Friend> {
         return a_name.compareTo(b_name);
     }
     
-    private static int order(Friend friend) {
-        return ORDERED.indexOf(friend.getMode());
+    private static int order(ChatFriend chatFriend) {
+        return ORDERED.indexOf(chatFriend.getMode());
     }
 }

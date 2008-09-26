@@ -21,6 +21,11 @@ public class MockUser implements User {
         // TODO Auto-generated method stub
 
     }
+    
+    @Override
+    public String getRenderName() {
+        return name;
+    }
 
     @Override
     public String getId() {

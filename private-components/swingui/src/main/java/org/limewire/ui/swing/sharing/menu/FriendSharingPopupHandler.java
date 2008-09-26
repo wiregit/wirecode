@@ -103,7 +103,7 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
             viewLibraryItem.setEnabled(false);
         }
         
-        friendFileList = libraryManager.getFriend(currentFriend.getId());
+        friendFileList = libraryManager.getOrCreateFriendShareList(currentFriend.getFriend());
         
         popupMenu.show(component, x, y);
     }

@@ -76,7 +76,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private final String conversationName;
     private final String friendId;
     private final MessageWriter writer;
-    private final Friend friend;
+    private final ChatFriend chatFriend;
     private final LibraryManager libraryManager;
     private final IconManager iconManager;
     private final FriendSharingDisplay friendSharingDisplay;
@@ -84,12 +84,12 @@ public class ConversationPane extends JPanel implements Displayable {
     private ChatState currentChatState;
 
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, 
+    public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, 
             LibraryManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay) {
         this.writer = writer;
-        this.friend = friend;
-        this.conversationName = friend.getName();
-        this.friendId = friend.getID();
+        this.chatFriend = chatFriend;
+        this.conversationName = chatFriend.getName();
+        this.friendId = chatFriend.getID();
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
         this.friendSharingDisplay = friendSharingDisplay;
@@ -123,7 +123,7 @@ public class ConversationPane extends JPanel implements Displayable {
         
         scroll.getViewport().add(editor);
         
-        add(footerPanel(writer, friend), BorderLayout.SOUTH);
+        add(footerPanel(writer, chatFriend), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
         
@@ -227,13 +227,13 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
 
-    private JPanel footerPanel(MessageWriter writer, Friend friend) {
+    private JPanel footerPanel(MessageWriter writer, ChatFriend chatFriend) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
         JXButton libraryButton = new JXButton(new LibraryAction());
-        if (!friend.isSignedInToLimewire()) {
+        if (!chatFriend.isSignedInToLimewire()) {
             libraryButton.setEnabled(false);
-            libraryButton.setToolTipText(friend.getName() + DISABLED_LIBRARY_TOOLTIP);
+            libraryButton.setToolTipText(chatFriend.getName() + DISABLED_LIBRARY_TOOLTIP);
         }
         panel.add(libraryButton, BorderLayout.NORTH);
         inputPanel = new ResizingInputPanel(writer);
@@ -259,7 +259,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            friendSharingDisplay.selectFriendLibrary(friend.getName());            
+            friendSharingDisplay.selectFriendLibrary(chatFriend.getName());            
         }
     }
 
@@ -275,7 +275,7 @@ public class ConversationPane extends JPanel implements Displayable {
                 
             } else if (EventType.ACTIVATED == e.getEventType()) {
                 if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
-                    LOG.debugf("Opening a view to {0}'s library", friend.getName());
+                    LOG.debugf("Opening a view to {0}'s library", chatFriend.getName());
                     //TODO: Open the view for this friends' library
                     
                 } else {
@@ -293,8 +293,8 @@ public class ConversationPane extends JPanel implements Displayable {
     }
 
     public void offerFile(LocalFileItem file) {
-        if(friend.getPresence() instanceof LimePresence) {
-            file.offer((LimePresence)friend.getPresence());
+        if(chatFriend.getPresence() instanceof LimePresence) {
+            file.offer((LimePresence)chatFriend.getPresence());
         }
     }
     
@@ -321,7 +321,7 @@ public class ConversationPane extends JPanel implements Displayable {
         }
 
         private void checkLimewireConnected(DropTargetDragEvent dtde) {
-            if (!friend.isSignedInToLimewire()) {
+            if (!chatFriend.isSignedInToLimewire()) {
                 dtde.rejectDrag();
             }
         }
@@ -348,7 +348,7 @@ public class ConversationPane extends JPanel implements Displayable {
         
         @Override
         public void addFile(File file) {
-            LocalFileList friendList = libraryManager.getFriend(friend.getID());
+            LocalFileList friendList = libraryManager.getOrCreateFriendShareList(chatFriend.getFriend());
             friendList.addFile(file);
             for (LocalFileItem item : friendList.getModel()) {
                 if (file.getPath().equals(item.getFile().getPath())) {

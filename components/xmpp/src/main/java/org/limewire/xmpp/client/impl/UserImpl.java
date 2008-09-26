@@ -39,6 +39,16 @@ public class UserImpl implements User {
         return name.get();
     }
     
+    @Override
+    public String getRenderName() {
+        String visualName = name.get();
+        if(visualName == null) {
+            return id;
+        } else {
+            return visualName;
+        }
+    }
+    
     void setRosterEntry(RosterEntry rosterEntry) {
         name.set(rosterEntry.getName());
     }

@@ -43,9 +43,9 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     }
     
     private void createMenu(LibraryManager libraryManager) {
-        musicAction = new SharingAddAction(libraryManager.getLibraryList(), Category.AUDIO);
-        videoAction = new SharingAddAction(libraryManager.getLibraryList(), Category.VIDEO);
-        imageAction = new SharingAddAction(libraryManager.getLibraryList(), Category.IMAGE);
+        musicAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.AUDIO);
+        videoAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.VIDEO);
+        imageAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.IMAGE);
         
         JMenuItem audioMenu = new JMenuItem(I18n.tr("All music in My Library"));
         audioMenu.addActionListener(musicAction);

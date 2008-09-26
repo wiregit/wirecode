@@ -1,6 +1,7 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -9,9 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
@@ -42,7 +42,8 @@ class LibraryManagerImpl implements LibraryManager {
     
     private final LibraryFileList libraryFileList;
     private final GnutellaFileList gnutellaFileList;
-    private final Map<String, LocalFileList> friendFileLists;
+    
+    private final ConcurrentHashMap<String, LocalFileList> friendLocalFileLists;
     
     private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener; 
     private final ConcurrentHashMap<String, RemoteFileList> friendLibraryFileLists;
@@ -56,7 +57,7 @@ class LibraryManagerImpl implements LibraryManager {
 
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
-        friendFileLists = new HashMap<String, LocalFileList>();
+        friendLocalFileLists = new ConcurrentHashMap<String, LocalFileList>();
         friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileList>();
     }
 
@@ -80,43 +81,40 @@ class LibraryManagerImpl implements LibraryManager {
     }
     
     @Override
-    public LocalFileList getLibraryList() {
+    public LocalFileList getLibraryManagedList() {
         return libraryFileList;
     }
     
     @Override
-    public LocalFileList getGnutellaList() {
+    public LocalFileList getGnutellaShareList() {
         return gnutellaFileList;
     }
-
+    
     @Override
-    public Map<String, LocalFileList> getAllFriendLists() {
-        return friendFileLists;
+    public Collection<LocalFileList> getAllFriendShareLists() {
+        return friendLocalFileLists.values();
     }
     
     @Override
-    public LocalFileList getFriend(String id) {
-        if(friendFileLists.containsKey(id))
-            return friendFileLists.get(id);
-
-        FriendFileListImpl newFriendList = new FriendFileListImpl(fileManager, id);
-        friendFileLists.put(id, newFriendList);
-        return newFriendList;
+    public LocalFileList getOrCreateFriendShareList(Friend friend) {
+        FriendFileListImpl newList = new FriendFileListImpl(fileManager, friend.getId());        
+        LocalFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
+        if(existing == null) {
+            newList.loadSavedFiles();
+            return newList;
+        } else {
+            return existing;
+        }
     }
     
     @Override
-    public void addFriend(String id) {
-        fileManager.addFriendFileList(id);
+    public LocalFileList getFriendShareList(Friend friend) {
+        return friendLocalFileLists.get(friend.getId());
     }
 
     @Override
-    public void removeFriend(String id) {
-        fileManager.removeFriendFileList(id);
-    }
-    
-    @Override
-    public boolean containsFriend(String id) {
-        return fileManager.containsFriendFileList(id);
+    public void removeFriendShareList(Friend friend) {
+        fileManager.removeFriendFileList(friend.getId());
     }
     
     //////////////////////////////////////////////////////
@@ -214,11 +212,10 @@ class LibraryManagerImpl implements LibraryManager {
     }
 
     
-    private class FriendFileListImpl extends LocalFileListImpl implements FileListListener, FriendFileList {
+    private class FriendFileListImpl extends LocalFileListImpl implements FileListListener {
 
         private FileManager fileManager;
         private String name;
-        private EventList<LocalFileItem> filteredEventList;
         
         private Map<File, FileItem> lookup;
         
@@ -228,11 +225,10 @@ class LibraryManagerImpl implements LibraryManager {
                      
             this.fileManager.getFriendFileList(name).addFileListListener(this);
             lookup = new HashMap<File, FileItem>();
-            loadSavedFiles();
         }
         
         //TODO: reexamine this. Needs to be loaded on a seperate thread and maybe cleaned up somehow
-        private void loadSavedFiles() {
+        void loadSavedFiles() {
             com.limegroup.gnutella.FileList fileList = this.fileManager.getFriendFileList(name);  
 
               synchronized (fileList.getLock()) {
@@ -259,24 +255,6 @@ class LibraryManagerImpl implements LibraryManager {
         @Override
         public void clear() {
             fileManager.getFriendFileList(name).clear();
-        }
-        
-        @Override
-        public void setFilteredModel(EventList<LocalFileItem> filteredList) {
-            this.filteredEventList = filteredList;
-        }
-        
-        @Override
-        public EventList<LocalFileItem> getFilteredModel() {
-            return this.filteredEventList;
-        }
-        
-        @Override
-        public int getFilteredSize() {
-            if(filteredEventList == null)
-                return 0;
-            else
-                return filteredEventList.size();
         }
 
         @Override

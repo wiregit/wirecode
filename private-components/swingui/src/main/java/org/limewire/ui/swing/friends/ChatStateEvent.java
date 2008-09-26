@@ -5,16 +5,16 @@ import org.limewire.xmpp.api.client.ChatState;
 
 public class ChatStateEvent extends AbstractEDTEvent {
     private static final String TOPIC_PREFIX = "chatstate-";
-    private final Friend friend;
+    private final ChatFriend chatFriend;
     private final ChatState state;
 
-    public ChatStateEvent(Friend friend, ChatState state) {
-        this.friend = friend;
+    public ChatStateEvent(ChatFriend chatFriend, ChatState state) {
+        this.chatFriend = chatFriend;
         this.state = state;
     }
     
-    public Friend getFriend() {
-        return friend;
+    public ChatFriend getFriend() {
+        return chatFriend;
     }
     
     public ChatState getState() {
@@ -27,6 +27,6 @@ public class ChatStateEvent extends AbstractEDTEvent {
     
     @Override
     public void publish() {
-        super.publish(buildTopic(friend.getID()));
+        super.publish(buildTopic(chatFriend.getID()));
     }
 }

@@ -4,10 +4,10 @@ import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.ChatState;
 
 class MessageReaderImpl implements MessageReader {
-    private final Friend friend;
+    private final ChatFriend chatFriend;
 
-    MessageReaderImpl(Friend friend) {
-        this.friend = friend;
+    MessageReaderImpl(ChatFriend chatFriend) {
+        this.chatFriend = chatFriend;
     }
 
     public void readMessage(final String message) {
@@ -18,10 +18,10 @@ class MessageReaderImpl implements MessageReader {
     }
 
     private Message newMessage(String message, Message.Type type) {
-        return new MessageImpl(friend.getName(), friend, message, type);
+        return new MessageImpl(chatFriend.getName(), chatFriend, message, type);
     }
 
     public void newChatState(ChatState chatState) {
-        new ChatStateEvent(friend, chatState).publish();
+        new ChatStateEvent(chatFriend, chatState).publish();
     }
 }

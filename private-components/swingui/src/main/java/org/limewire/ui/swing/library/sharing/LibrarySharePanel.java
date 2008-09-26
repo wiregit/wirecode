@@ -45,7 +45,7 @@ import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.FriendFileList;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -87,7 +87,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private static final int HGAP = 5;
     
     
-    private  final SharingTarget GNUTELLA_SHARE = new SharingTarget(I18n.tr("Gnutella Network"));
+    private  final SharingTarget GNUTELLA_SHARE = new SharingTarget(new Gnutella());
 
     private JTextField inputField;
 
@@ -171,7 +171,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         
         this.libraryManager = libraryManager;
         friendListMap = new ConcurrentHashMap<SharingTarget, LocalFileList>();   
-        gnutellaList = libraryManager.getGnutellaList();
+        gnutellaList = libraryManager.getGnutellaShareList();
         
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setOpaque(false);
@@ -222,7 +222,8 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         TextFilterator<SharingTarget> textFilter = new TextFilterator<SharingTarget>() {
             @Override
             public void getFilterStrings(List<String> baseList, SharingTarget element) {
-                baseList.add(element.getId());
+                baseList.add(element.getFriend().getName());
+                baseList.add(element.getFriend().getId());
             }
         };
         
@@ -527,9 +528,9 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     @Override
     public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {              
-            addFriend(new SharingTarget(event.getSource().getId()));
+            addFriend(new SharingTarget(event.getSource()));
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            removeFriend(new SharingTarget(event.getSource().getId()));
+            removeFriend(new SharingTarget(event.getSource()));
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
@@ -579,10 +580,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     }
     
     private void addFriend(SharingTarget friend) {
-        if(!libraryManager.containsFriend(friend.getId())) {
-            libraryManager.addFriend(friend.getId());
-        }
-        FriendFileList fileList = (FriendFileList) libraryManager.getFriend(friend.getId());
+        LocalFileList fileList = libraryManager.getOrCreateFriendShareList(friend.getFriend());
         friendListMap.put(friend, fileList);
         loadFriend(friend);
     }
@@ -637,7 +635,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             if(column == editColumn){
                 return baseObject;
             }
-            return baseObject.getId();
+            return baseObject.getFriend();
         }
 
         @Override
@@ -669,9 +667,26 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             if(o2 == GNUTELLA_SHARE){
                 return 1;
             }
-            return o1.getId().compareTo(o2.getId());
+            return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
         }
         
+    }
+    
+    private static class Gnutella implements Friend {
+        @Override
+        public String getId() {
+            return "_@_internal_@_";
+        }
+
+        @Override
+        public String getName() {
+            return I18n.tr("Gnutella Network");
+        }
+        
+        @Override
+        public String getRenderName() {
+            return getName();
+        }
     }
  
 }

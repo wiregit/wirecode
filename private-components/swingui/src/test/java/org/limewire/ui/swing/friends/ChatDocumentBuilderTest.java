@@ -93,7 +93,7 @@ public class ChatDocumentBuilderTest extends TestCase {
         conversation.append("<div class=\"me\">me:</div>heynow<br/><br/>")
         .append("<div class=\"me\">me:</div>yo<br/>");
         
-        MockFriend friend = new MockFriend(null, null, Mode.available);
+        MockChatFriend friend = new MockChatFriend(null, null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
         messages.add(new MockMessage(friend, "heynow", 0, "me", Type.Sent, null));      
         messages.add(new MockMessage(friend, "yo", 600001, "me", Type.Sent, null));      
@@ -106,7 +106,7 @@ public class ChatDocumentBuilderTest extends TestCase {
                     .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"heynow-fileid\"/><input type=\"submit\" value=\"Foo doc.doc\"/></form><br/>")
                     .append("Download it now, or get it from his <a href=\"#library\">Library</a> later<br/>");
         
-        MockFriend friend = new MockFriend(null, null, Mode.available);
+        MockChatFriend friend = new MockChatFriend(null, null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
         messages.add(new MockMessage(friend, null, 0, "you", Type.FileOffer, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
         

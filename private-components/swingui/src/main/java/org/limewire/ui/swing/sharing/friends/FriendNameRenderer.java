@@ -15,7 +15,7 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
- * Renders friend names in the sharing panel. Buddys that you have shared files
+ * Renders friend names in the sharing panel. Friends that you have shared files
  * with are displayed at the top of the table in alphabetical order. Buddies
  * that you are not sharing anything with are displayed at the bottom of the 
  * table with no file count.
@@ -71,7 +71,7 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
         
         //set the text
         if(column == 0) {
-            setText(item.getId());
+            setText(item.getFriend().getRenderName());
         } else {
             setHorizontalAlignment(RIGHT);
             if( item.size() > 0) 

@@ -2,9 +2,7 @@ package org.limewire.ui.swing.sharing;
 
 import java.awt.CardLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.DropMode;
@@ -20,10 +18,9 @@ import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -51,8 +48,6 @@ import org.limewire.xmpp.api.client.User;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -81,8 +76,6 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
 
     private EventList<FriendItem> eventList;
     
-    private Map<String, FileList> friendLists;
-    
     private LibraryManager libraryManager;
     private IconManager iconManager;
     private ThumbnailManager thumbnailManager;
@@ -100,19 +93,13 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
         this.thumbnailManager = thumbnailManager;
-        
-        friendLists = new HashMap<String,FileList>();
 
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
         cardPanel.setLayout(viewCardLayout);
         cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
 
-        //TODO: fix this. ObservableElementList is an easy way to update the table when a list size changes
-        //  however it is making dynamic filtering of multiple lists very slow
-        ObservableElementList.Connector<FriendItem> friendConnector = GlazedLists.beanConnector(FriendItem.class);
-        eventList = new ObservableElementList<FriendItem>(GlazedLists.threadSafeList(new BasicEventList<FriendItem>()), friendConnector);
-               
+        eventList = new BasicEventList<FriendItem>();               
         friendTable = new FriendNameTable(eventList, new FriendTableFormat(), libraryManager, navigator);
         
         headerPanel = createHeader(cardPanel);
@@ -209,22 +196,23 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                 int index = friend.getSelectedRow();
                 if( index >= 0 && index < friend.getModel().getRowCount()) {
                     FriendItem friendItem = (FriendItem) friend.getModel().getValueAt(index, 0);
-                    if(friendItem.getId().equals(name))
+                    if(friendItem.getFriend().equals(name))
                         return;
                     
-                    name = friendItem.getId();
-                    headerPanel.setFriendName(friendItem.getId());
-                    emptyPanel.setFriendName(friendItem.getId());
+                    name = friendItem.getFriend().getRenderName();
+                    headerPanel.setFriendName(friendItem.getFriend().getRenderName());
+                    emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
       
-                    FriendFileList fileList = (FriendFileList) friendLists.get(friendItem.getId());
+                    LocalFileList fileList = libraryManager.getOrCreateFriendShareList(friendItem.getFriend());
                     emptyPanel.setUserFileList(fileList);
-                    table.setModel(new SharingTableModel(fileList.getFilteredModel(), fileList,sharingTableFormat));
+                    EventList<LocalFileItem> filteredList = filter(fileList.getModel());
+                    table.setModel(new SharingTableModel(filteredList, fileList,sharingTableFormat));
                     TableColumn tc = table.getColumn(6);
                     tc.setCellEditor(editor);
                     tc.setCellRenderer(renderer);
                     tc = table.getColumn(0);
                     tc.setCellRenderer(iconLabelRenderer);
-                    sharingFancyPanel.setModel(fileList.getFilteredModel(), fileList);
+                    sharingFancyPanel.setModel(filteredList, fileList);
                     headerPanel.setModel(fileList);           
                     
                     if(dropTarget == null) {
@@ -236,8 +224,9 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                         emptyDropTarget.setModel(fileList);
                     }
                     
-                    if(currentList != null)
+                    if(currentList != null) {
                         currentList.removeListEventListener(this);
+                    }
                     currentList = fileList.getModel();
                     currentList.addListEventListener(this);
                     
@@ -271,12 +260,10 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     @Override
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
-            if(!libraryManager.containsFriend(event.getSource().getId())) {
-                libraryManager.addFriend(event.getSource().getId());
-            }
-            addFriend(event.getSource().getId());
+            LocalFileList fileList = libraryManager.getOrCreateFriendShareList(event.getSource());
+            eventList.add(new FriendItemImpl(event.getSource(), fileList.getModel()));
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            libraryManager.removeFriend(event.getSource().getId());
+            libraryManager.removeFriendShareList(event.getSource());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
@@ -286,14 +273,10 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         eventList.clear();
     }
     
-    private void addFriend(String id) {
-        FriendFileList fileList = (FriendFileList) libraryManager.getFriend(id);
-        friendLists.put(id, fileList);
-        FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getModel(), 
+    private EventList<LocalFileItem> filter(EventList<LocalFileItem> list) {
+        return new FilterList<LocalFileItem>(list, 
               new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
-        fileList.setFilteredModel(filteredList);
 
-        eventList.add(new FriendItemImpl(id, fileList.getFilteredModel()));
     }
     
     /**
@@ -306,7 +289,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     public void selectFriend(String name) {
         for(int i = 0; i < table.getModel().getRowCount(); i++) {
             FriendItem item = (FriendItem) table.getModel().getValueAt(i, 0);
-            if(item.getId().equals(name)) {
+            if(item.getFriend().equals(name)) {
                 final int index = i;
                 SwingUtils.invokeLater(new Runnable(){
                     public void run() {

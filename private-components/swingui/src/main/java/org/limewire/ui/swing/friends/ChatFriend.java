@@ -2,6 +2,7 @@ package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
@@ -11,7 +12,9 @@ import org.limewire.xmpp.api.client.Presence.Mode;
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
-public interface Friend {
+public interface ChatFriend {
+    Friend getFriend();
+    
     String getID();
     
     String getName();

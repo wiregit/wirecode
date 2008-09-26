@@ -33,10 +33,10 @@ public class FriendSharingActionHandler {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {
-                    NavItem navItem = navigator.getNavItem(NavCategory.LIBRARY, item.getId());
+                    NavItem navItem = navigator.getNavItem(NavCategory.LIBRARY, item.getFriend().getId());
                     navItem.select();
                 } else if(actionCommand == SHARE_ALL_VIDEO) {
-                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.VIDEO));
+                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryManagedList().getModel(), new CategoryFilter(Category.VIDEO));
                     try {
                         video.getReadWriteLock().readLock().lock();
                         for(LocalFileItem fileItem : video) {
@@ -47,7 +47,7 @@ public class FriendSharingActionHandler {
                     }
                     video.dispose();
                 } else if(actionCommand == SHARE_ALL_AUDIO) {
-                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.AUDIO));
+                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( libraryManager.getLibraryManagedList().getModel(), new CategoryFilter(Category.AUDIO));
                     try {
                         audio.getReadWriteLock().readLock().lock();
                         for(LocalFileItem fileItem : audio) {
@@ -58,7 +58,7 @@ public class FriendSharingActionHandler {
                     }
                     audio.dispose();
                 } else if(actionCommand == SHARE_ALL_IMAGE) {
-                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryList().getModel(), new CategoryFilter(Category.IMAGE));                 
+                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryManagedList().getModel(), new CategoryFilter(Category.IMAGE));                 
                     
                     try {
                         image.getReadWriteLock().readLock().lock();

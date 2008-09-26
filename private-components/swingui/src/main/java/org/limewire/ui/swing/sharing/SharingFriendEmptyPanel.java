@@ -65,7 +65,7 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
         imageCheckBox = new SharingCheckBox(I18n.tr("All my images"));
         
         addAllAction = new SharingAddAllAction(audioCheckBox, videoCheckBox, imageCheckBox);
-        addAllAction.setLibrary(libraryManager.getLibraryList());
+        addAllAction.setLibrary(libraryManager.getLibraryManagedList());
         shareButton = new JButton(addAllAction);
         shareButton.setFocusable(false);
         shareButton.setEnabled(false);

@@ -2,13 +2,14 @@ package org.limewire.ui.swing.sharing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 
 public interface FriendItem {
     
     public int size();
     
-    public String getId();
+    public Friend getFriend();
     
     public void addPropertyChangeListener(PropertyChangeListener l);
     

@@ -27,7 +27,7 @@ public class ConversationPaneHarness {
             public void run() {
                 final JFrame frame = new JFrame();
 
-                final MockFriend friend = new MockFriend("Will Benedict", "Just listening to some jams", Mode.available);
+                final MockChatFriend friend = new MockChatFriend("Will Benedict", "Just listening to some jams", Mode.available);
                 final MessageWriter writer = new MessageWriter() {
                     @Override
                     public void writeMessage(String message) throws XMPPException {

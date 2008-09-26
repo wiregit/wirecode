@@ -1,28 +1,29 @@
 package org.limewire.core.api.library;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.limewire.core.api.friend.Friend;
 
+/**
+ * Library Management of a gnutella share lists & friend share lists, and remote friend libraries.
+ */
 public interface LibraryManager {
 
     void addLibraryLisListener(LibraryListListener libraryListener);
 
     void removeLibraryListener(LibraryListListener libraryListener);
 
-    LocalFileList getLibraryList();
+    LocalFileList getLibraryManagedList();
 
-    LocalFileList getGnutellaList();
+    LocalFileList getGnutellaShareList();
+    
+    Collection<LocalFileList> getAllFriendShareLists(); 
 
-    Map<String, LocalFileList> getAllFriendLists();
+    LocalFileList getOrCreateFriendShareList(Friend friend);
+    
+    LocalFileList getFriendShareList(Friend friend);
 
-    LocalFileList getFriend(String id);
-
-    void addFriend(String id);
-
-    void removeFriend(String id);
-
-    boolean containsFriend(String id);
+    void removeFriendShareList(Friend friend);
 
     RemoteFileList getOrCreateFriendLibrary(Friend friend);
 

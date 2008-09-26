@@ -192,10 +192,10 @@ public class TopPanel extends JPanel {
     @EventSubscriber
     public void handleConversationStarted(ConversationStartedEvent event) {
         if (event.isLocallyInitiated()) {
-            Friend friend = event.getFriend();
-            friendAvailabiltyIcon.setText(getAvailabilityHTML(friend.getMode()));
-            friendNameLabel.setText(friend.getName());
-            String status = friend.getStatus();
+            ChatFriend chatFriend = event.getFriend();
+            friendAvailabiltyIcon.setText(getAvailabilityHTML(chatFriend.getMode()));
+            friendNameLabel.setText(chatFriend.getName());
+            String status = chatFriend.getStatus();
             friendStatusLabel.setText(status != null && status.length() > 0 ? " - " + status : "");
         }
     }

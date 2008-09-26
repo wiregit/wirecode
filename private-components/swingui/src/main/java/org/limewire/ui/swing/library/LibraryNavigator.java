@@ -225,5 +225,10 @@ public class LibraryNavigator extends JPanel {
         public String getName() {
             return I18n.tr("Me");
         }
+        
+        @Override
+        public String getRenderName() {
+            return getName();
+        }
     }
 }

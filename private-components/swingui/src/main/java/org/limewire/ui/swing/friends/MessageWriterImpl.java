@@ -7,12 +7,12 @@ import org.limewire.xmpp.api.client.XMPPException;
 
 class MessageWriterImpl implements MessageWriter {
     private final String localID;
-    private final Friend friend;
+    private final ChatFriend chatFriend;
     private final MessageWriter writer;
 
-    MessageWriterImpl(String localID, Friend friend, MessageWriter writer) {
+    MessageWriterImpl(String localID, ChatFriend chatFriend, MessageWriter writer) {
         this.localID = localID;
-        this.friend = friend;
+        this.chatFriend = chatFriend;
         this.writer = writer;
     }
 
@@ -31,7 +31,7 @@ class MessageWriterImpl implements MessageWriter {
     }
 
     private Message newMessage(String message, Message.Type type) {
-        return new MessageImpl(localID, friend, message, type);
+        return new MessageImpl(localID, chatFriend, message, type);
     }
 
     public void setChatState(ChatState chatState) throws XMPPException {

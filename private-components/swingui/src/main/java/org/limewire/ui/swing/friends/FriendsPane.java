@@ -107,11 +107,11 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private static final Color LIGHT_GREY = new Color(218, 218, 218);
     private static final int TWENTY_MINUTES_IN_MILLIS = 1200000;
     
-    private final EventList<Friend> friends;
+    private final EventList<ChatFriend> chatFriends;
     private final JTable friendsTable;
     private final IconLibrary icons;
-    private final WeakHashMap<String, Friend> idToFriendMap;
-    private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
+    private final WeakHashMap<String, ChatFriend> idToFriendMap;
+    private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
     private final FriendSharingDisplay friendSharing;
@@ -120,21 +120,21 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private final JLabel unseenMessageCountPopupLabel = new JLabel();
     private Popup unseenMessageCountPopup;
     private String myID;
-    private WeakReference<Friend> activeConversation = new WeakReference<Friend>(null);
+    private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
 
     @Inject
     public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager, FriendSharingDisplay friendSharing) {
         super(new BorderLayout());
         this.icons = icons;
-        this.friends = new BasicEventList<Friend>();
-        this.idToFriendMap = new WeakHashMap<String, Friend>();
-        this.friendTimerMap = new WeakHashMap<Friend, AlternatingIconTimer>();
+        this.chatFriends = new BasicEventList<ChatFriend>();
+        this.idToFriendMap = new WeakHashMap<String, ChatFriend>();
+        this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
         this.friendSharing = friendSharing;
-        ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
-        SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
+        ObservableElementList<ChatFriend> observableList = new ObservableElementList<ChatFriend>(chatFriends, GlazedLists.beanConnector(ChatFriend.class));
+        SortedList<ChatFriend> sortedFriends = new SortedList<ChatFriend>(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
         
         addPopupMenus(friendsTable);
@@ -227,30 +227,30 @@ public class FriendsPane extends JPanel implements FriendRemover {
             //Popup selects the item (as per spec)
             table.getSelectionModel().setSelectionInterval(index, index);
             
-            Friend friend = getFriend(table, index);
+            ChatFriend chatFriend = getFriend(table, index);
             
-            context.setFriend(friend);
-            return friend.isChatting() == expected;
+            context.setFriend(chatFriend);
+            return chatFriend.isChatting() == expected;
         }
     }
     
-    private static Friend getFriend(JTable table, int index) {
+    private static ChatFriend getFriend(JTable table, int index) {
         EventTableModel model = (EventTableModel)table.getModel();
-        return index < 0 ? null : (Friend) model.getElementAt(index);
+        return index < 0 ? null : (ChatFriend) model.getElementAt(index);
     }
     
-    private JTable createFriendsTable(final EventList<Friend> friendsList) {
-        TextFilterator<Friend> friendFilterator = new TextFilterator<Friend>() {
+    private JTable createFriendsTable(final EventList<ChatFriend> friendsList) {
+        TextFilterator<ChatFriend> friendFilterator = new TextFilterator<ChatFriend>() {
             @Override
-            public void getFilterStrings(List<String> baseList, Friend element) {
+            public void getFilterStrings(List<String> baseList, ChatFriend element) {
                 baseList.add(element.getName());
             }
         };
         
-        final TextMatcherEditor<Friend> editor = new TextMatcherEditor<Friend>(friendFilterator);
-        final FilterList<Friend> filter = new FilterList<Friend>(friendsList, editor);
+        final TextMatcherEditor<ChatFriend> editor = new TextMatcherEditor<ChatFriend>(friendFilterator);
+        final FilterList<ChatFriend> filter = new FilterList<ChatFriend>(friendsList, editor);
         
-        TableFormat<Friend> format = new TableFormat<Friend>() {
+        TableFormat<ChatFriend> format = new TableFormat<ChatFriend>() {
             @Override
             public int getColumnCount() {
                 return 1;
@@ -265,15 +265,15 @@ public class FriendsPane extends JPanel implements FriendRemover {
             }
 
             @Override
-            public Object getColumnValue(Friend friend, int column) {
+            public Object getColumnValue(ChatFriend chatFriend, int column) {
                 if (column == 0) {
-                    return friend.getName();
+                    return chatFriend.getName();
                 }
                 throw new UnsupportedOperationException(tr("Couldn't find value for unknown friends chat table column: ") + column);
             }
         };
         
-        final JXTable table = new CustomTooltipLocationTable(new EventTableModel<Friend>(friendsList, format)); 
+        final JXTable table = new CustomTooltipLocationTable(new EventTableModel<ChatFriend>(friendsList, format)); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new LaunchChatListener());
         //Add as mouse listener and motion listener because it cares about MouseExit and MouseMove events
@@ -301,7 +301,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 }
                 
                 if (filter.size() > 0) {
-                    Friend firstFriend = filter.get(0);
+                    ChatFriend firstFriend = filter.get(0);
                     int index = friendsList.indexOf(firstFriend);
                     table.getSelectionModel().setSelectionInterval(index, index);
                 }
@@ -343,12 +343,12 @@ public class FriendsPane extends JPanel implements FriendRemover {
             JXTable table = (JXTable) adapter.getComponent();
             
             int row = adapter.row;
-            Friend friend = getFriend(table, row);
+            ChatFriend chatFriend = getFriend(table, row);
             
-            if (friend.isChatting()) {
+            if (chatFriend.isChatting()) {
                 EventTableModel model = (EventTableModel) table.getModel();
                 if (model.getRowCount() > (row + 1)) {
-                    Friend nextFriend = (Friend) model.getElementAt(row + 1);
+                    ChatFriend nextFriend = (ChatFriend) model.getElementAt(row + 1);
                     if (!nextFriend.isChatting()) {
                         return true;
                     }
@@ -363,11 +363,11 @@ public class FriendsPane extends JPanel implements FriendRemover {
         LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
         final Presence presence = event.getPresence();
         final User user = event.getUser();
-        Friend friend = idToFriendMap.get(user.getId());
+        ChatFriend chatFriend = idToFriendMap.get(user.getId());
         switch(presence.getType()) {
             case available:
-                if(friend == null) {
-                    final FriendImpl newFriend = new FriendImpl(user, presence);
+                if(chatFriend == null) {
+                    final ChatFriendImpl newFriend = new ChatFriendImpl(user, presence);
                     presence.setIncomingChatListener(new IncomingChatListener() {
                         public MessageReader incomingChat(MessageWriter writer) {
                             LOG.debugf("{0} is typing a message", presence.getJID());
@@ -379,40 +379,40 @@ public class FriendsPane extends JPanel implements FriendRemover {
                             return new MessageReaderImpl(newFriend);
                         }
                     });
-                    friend = newFriend;
-                    friends.add(friend);
-                    idToFriendMap.put(user.getId(), friend);
+                    chatFriend = newFriend;
+                    chatFriends.add(chatFriend);
+                    idToFriendMap.put(user.getId(), chatFriend);
                 }
-                friend.setStatus(presence.getStatus());
-                friend.setMode(presence.getMode());
+                chatFriend.setStatus(presence.getStatus());
+                chatFriend.setMode(presence.getMode());
                 break;
             case unavailable:
-                if (friend != null) {
-                    friend.releasePresence(presence);
-                    Presence newPresence = friend.getPresence();
+                if (chatFriend != null) {
+                    chatFriend.releasePresence(presence);
+                    Presence newPresence = chatFriend.getPresence();
                     if (newPresence != null) {
-                        friend.setStatus(newPresence.getStatus());
-                        friend.setMode(newPresence.getMode());
+                        chatFriend.setStatus(newPresence.getStatus());
+                        chatFriend.setMode(newPresence.getMode());
                     } else {
-                        friends.remove(idToFriendMap.remove(user.getId()));
+                        chatFriends.remove(idToFriendMap.remove(user.getId()));
                     }
                 } 
                 break;
         }
-        friendsCountUpdater.setFriendsCount(friends.size());
+        friendsCountUpdater.setFriendsCount(chatFriends.size());
     }
     
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
-        Friend friend = idToFriendMap.get(message.getFriendID());
-        if (!friend.isActiveConversation() && message.getType() != Type.Sent) {
-            friend.startChat();
-            friend.setReceivingUnviewedMessages(true);
-            if (!friendTimerMap.containsKey(friend)) {
-                AlternatingIconTimer iconTimer = new AlternatingIconTimer(friend);
-                friendTimerMap.put(friend, iconTimer);
+        ChatFriend chatFriend = idToFriendMap.get(message.getFriendID());
+        if (!chatFriend.isActiveConversation() && message.getType() != Type.Sent) {
+            chatFriend.startChat();
+            chatFriend.setReceivingUnviewedMessages(true);
+            if (!friendTimerMap.containsKey(chatFriend)) {
+                AlternatingIconTimer iconTimer = new AlternatingIconTimer(chatFriend);
+                friendTimerMap.put(chatFriend, iconTimer);
                 iconTimer.start();
             }
             showUnseenMessageCountPopup();
@@ -435,46 +435,46 @@ public class FriendsPane extends JPanel implements FriendRemover {
         this.myID = id;
     }
     
-    private void fireConversationStarted(Friend friend) {
-        MessageWriter writer = friend.createChat(new MessageReaderImpl(friend));
-        MessageWriter writerWrapper = new MessageWriterImpl(myID, friend, writer);
-        new ConversationStartedEvent(friend, writerWrapper, true).publish();
-        setActiveConversation(friend);
+    private void fireConversationStarted(ChatFriend chatFriend) {
+        MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
+        MessageWriter writerWrapper = new MessageWriterImpl(myID, chatFriend, writer);
+        new ConversationStartedEvent(chatFriend, writerWrapper, true).publish();
+        setActiveConversation(chatFriend);
     }
 
-    private void setActiveConversation(Friend friend) {
-        LOG.debugf("Setting active conversation: {0}", friend.getName());
-        Friend oldActiveConversation = activeConversation.get();
+    private void setActiveConversation(ChatFriend chatFriend) {
+        LOG.debugf("Setting active conversation: {0}", chatFriend.getName());
+        ChatFriend oldActiveConversation = activeConversation.get();
         if (oldActiveConversation != null) {
             oldActiveConversation.setActiveConversation(false);
         }
-        activeConversation = new WeakReference<Friend>(friend);
-        friend.setReceivingUnviewedMessages(false);
-        friend.setActiveConversation(true);
-        friendTimerMap.remove(friend);
+        activeConversation = new WeakReference<ChatFriend>(chatFriend);
+        chatFriend.setReceivingUnviewedMessages(false);
+        chatFriend.setActiveConversation(true);
+        friendTimerMap.remove(chatFriend);
     }
     
-    private Icon getChatIcon(Friend friend) {
-        AlternatingIconTimer timer = friendTimerMap.get(friend);
+    private Icon getChatIcon(ChatFriend chatFriend) {
+        AlternatingIconTimer timer = friendTimerMap.get(chatFriend);
         if (timer != null) {
             return timer.getIcon();
         }
         //Change to chatting icon because gtalk doesn't actually set mode to 'chat', so icon won't show chat bubble normally
-        if (friend.isChatting()) {
+        if (chatFriend.isChatting()) {
             return icons.getChatting();
         }
-        return getIcon(friend, icons);
+        return getIcon(chatFriend, icons);
     }
 
-    private void closeChat(Friend friend) {
-        if (friend != null) {
+    private void closeChat(ChatFriend chatFriend) {
+        if (chatFriend != null) {
 
-            friend.stopChat();
-            new CloseChatEvent(friend).publish();
+            chatFriend.stopChat();
+            new CloseChatEvent(chatFriend).publish();
             
-            Friend nextFriend = null;
-            for(Friend tmpFriend : friends) {
-                if (tmpFriend == friend || !tmpFriend.isChatting()) {
+            ChatFriend nextFriend = null;
+            for(ChatFriend tmpFriend : chatFriends) {
+                if (tmpFriend == chatFriend || !tmpFriend.isChatting()) {
                     continue;
                 }
                 if (nextFriend == null || tmpFriend.getChatStartTime() > nextFriend.getChatStartTime()) {
@@ -517,16 +517,16 @@ public class FriendsPane extends JPanel implements FriendRemover {
             cell.removeAll();
             cell.setBackgroundPainter(null);
             
-            Friend friend = getFriend(table, row);
+            ChatFriend chatFriend = getFriend(table, row);
             
             //Handle null possible sent in via AccessibleJTable inner class
             value = value == null ? table.getValueAt(row, column) : value;
-            boolean isChatHoveredOver = (friend == mouseHoverFriend.getFriend() && friend.isChatting());
-            renderComponent(cell, value, friend, isChatHoveredOver);
+            boolean isChatHoveredOver = (chatFriend == mouseHoverFriend.getFriend() && chatFriend.isChatting());
+            renderComponent(cell, value, chatFriend, isChatHoveredOver);
             
             if (isSelected || isChatHoveredOver) {
                 cell.setBackground(LIGHT_GREY);
-            } else if (friend.isActiveConversation()) {
+            } else if (chatFriend.isActiveConversation()) {
                 cell.setBackgroundPainter(activeConversationPainter);
             } else  {
                 cell.setBackground(table.getBackground());
@@ -536,8 +536,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
             return cell;
         }
 
-        protected void renderComponent(JPanel panel, Object value, Friend friend, boolean isChatHoveredOver) {
-            chatStatus.setIcon(getChatIcon(friend));
+        protected void renderComponent(JPanel panel, Object value, ChatFriend chatFriend, boolean isChatHoveredOver) {
+            chatStatus.setIcon(getChatIcon(chatFriend));
             panel.add(chatStatus);
 
             friendName.setText(value.toString());
@@ -583,7 +583,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 return null;
             }
             EventTableModel model = (EventTableModel) friendsTable.getModel();
-            Friend friend = (Friend) model.getElementAt(row);
+            ChatFriend chatFriend = (ChatFriend) model.getElementAt(row);
             StringBuilder tooltip = new StringBuilder();
             tooltip.append("<html>")
                 .append("<head>")
@@ -591,9 +591,9 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 .append("</head>")
                 .append("<body>")
                 .append("<img src=\"")
-                .append(FriendsUtil.getIconURL(friend.getMode())).append("\"/>&nbsp;")
-                .append("<b>").append(friend.getName()).append("</b><br/>");
-            String status = friend.getStatus();
+                .append(FriendsUtil.getIconURL(chatFriend.getMode())).append("\"/>&nbsp;")
+                .append("<b>").append(chatFriend.getName()).append("</b><br/>");
+            String status = chatFriend.getStatus();
             if (status != null && status.length() > 0) {
                 tooltip.append("<div color=\"rgb(255,255,255)\">").append(status).append("</div>");
             }
@@ -611,11 +611,11 @@ public class FriendsPane extends JPanel implements FriendRemover {
     }
 
     private class AlternatingIconTimer {
-        private WeakReference<Friend> friendRef;
+        private WeakReference<ChatFriend> friendRef;
         private int flashCount;
         
-        public AlternatingIconTimer(Friend friend) {
-            this.friendRef = new WeakReference<Friend>(friend);
+        public AlternatingIconTimer(ChatFriend chatFriend) {
+            this.friendRef = new WeakReference<ChatFriend>(chatFriend);
         }
 
         public void start() {
@@ -623,13 +623,13 @@ public class FriendsPane extends JPanel implements FriendRemover {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    Friend friend = friendRef.get();
-                    if (friend == null || flashCount == 4) {
+                    ChatFriend chatFriend = friendRef.get();
+                    if (chatFriend == null || flashCount == 4) {
                         stopTimer(e);
                         return;
                     }
                     
-                    int friendIndex = friends.indexOf(friend);
+                    int friendIndex = chatFriends.indexOf(chatFriend);
                     if (friendIndex > -1) {
                         AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
                         model.fireTableCellUpdated(friendIndex, 0);
@@ -656,14 +656,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
         public void mouseClicked(MouseEvent e) {
             JTable table = (JTable)e.getSource();
             
-            Friend friend = getFriend(table, table.rowAtPoint(e.getPoint()));
+            ChatFriend chatFriend = getFriend(table, table.rowAtPoint(e.getPoint()));
             
-            if (friend == null) {
+            if (chatFriend == null) {
                 return;
             }
             
-            if (e.getClickCount() == 2 || friend.isChatting()) {
-                fireConversationStarted(friend);
+            if (e.getClickCount() == 2 || chatFriend.isChatting()) {
+                fireConversationStarted(chatFriend);
              }
         }
     }
@@ -677,14 +677,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            Friend friend = getFriendFromPoint(e);
+            ChatFriend friend = getFriendFromPoint(e);
             
             if (friend == null) {
                 //Mouse is not hovering over a friend row
-                Friend previousMouseHoverFriend = mouseHoverFriend.getFriend();
+                ChatFriend previousMouseHoverFriend = mouseHoverFriend.getFriend();
                 if (previousMouseHoverFriend != null) {
                     //Mouse used to be hovering over a friend, but has moved
-                    int previousMouseHoverFriendIndex = friends.indexOf(previousMouseHoverFriend);
+                    int previousMouseHoverFriendIndex = chatFriends.indexOf(previousMouseHoverFriend);
                     if (previousMouseHoverFriendIndex > -1) {
                         //Friend is still in the list, but is no longer being hovered over
                         mouseHoverFriend.clearHoverDetails();
@@ -695,7 +695,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 return;
             }
             
-            int friendIndex = friends.indexOf(friend);
+            int friendIndex = chatFriends.indexOf(friend);
             if (friendIndex > -1) {
                 mouseHoverFriend.setHoverDetails(friend, e.getPoint());
                 repaintTableCell(friendIndex);
@@ -708,7 +708,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
             model.fireTableCellUpdated(friendIndex, 0);
         }
 
-        private Friend getFriendFromPoint(MouseEvent e) {
+        private ChatFriend getFriendFromPoint(MouseEvent e) {
             JTable table = (JTable)e.getSource();
             
             return getFriend(table, table.rowAtPoint(e.getPoint()));
@@ -719,10 +719,10 @@ public class FriendsPane extends JPanel implements FriendRemover {
          */
         @Override
         public void mouseExited(MouseEvent e) {
-            Friend friend = mouseHoverFriend.getFriend();
-            if (friend != null) {
+            ChatFriend chatFriend = mouseHoverFriend.getFriend();
+            if (chatFriend != null) {
                 mouseHoverFriend.clearHoverDetails();
-                int friendIndex = friends.indexOf(friend);
+                int friendIndex = chatFriends.indexOf(chatFriend);
                 repaintTableCell(friendIndex);
             }
         }
@@ -730,9 +730,9 @@ public class FriendsPane extends JPanel implements FriendRemover {
         @Override
         public void mouseClicked(MouseEvent e) {
             if (isOverCloseIcon(e.getPoint())) {
-                Friend friend = getFriendFromPoint(e);
-                if (e.getClickCount() == 1 && friend != null && friend.isChatting()) {
-                    closeChat(friend);
+                ChatFriend chatFriend = getFriendFromPoint(e);
+                if (e.getClickCount() == 1 && chatFriend != null && chatFriend.isChatting()) {
+                    closeChat(chatFriend);
                     setTableCursor(false);
                 }
             } 
@@ -740,20 +740,20 @@ public class FriendsPane extends JPanel implements FriendRemover {
     }
     
     private static class FriendHoverBean {
-        private WeakReference<Friend> friend;
+        private WeakReference<ChatFriend> chatFriend;
         private Point hoverPoint;
         
         public void clearHoverDetails() {
             setHoverDetails(null, null);
         }
         
-        public void setHoverDetails(Friend friend, Point point) {
-            this.friend = new WeakReference<Friend>(friend);
+        public void setHoverDetails(ChatFriend chatFriend, Point point) {
+            this.chatFriend = new WeakReference<ChatFriend>(chatFriend);
             this.hoverPoint = point;
         }
 
-        public Friend getFriend() {
-            return friend == null ? null : friend.get();
+        public ChatFriend getFriend() {
+            return chatFriend == null ? null : chatFriend.get();
         }
         
         public Point getHoverPoint() {
@@ -762,14 +762,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
     }
     
     private class FriendContext {
-        private WeakReference<Friend> weakFriend;
+        private WeakReference<ChatFriend> weakFriend;
         
-        public Friend getFriend() {
+        public ChatFriend getFriend() {
             return weakFriend == null ? null : weakFriend.get();
         }
         
-        public void setFriend(Friend friend) {
-            weakFriend = new WeakReference<Friend>(friend);
+        public void setFriend(ChatFriend chatFriend) {
+            weakFriend = new WeakReference<ChatFriend>(chatFriend);
         }
     }
     
@@ -789,9 +789,9 @@ public class FriendsPane extends JPanel implements FriendRemover {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            Friend friend = context.getFriend();
-            if (friend != null) {
-                fireConversationStarted(friend);
+            ChatFriend chatFriend = context.getFriend();
+            if (chatFriend != null) {
+                fireConversationStarted(chatFriend);
             }
         }
     }
@@ -803,17 +803,17 @@ public class FriendsPane extends JPanel implements FriendRemover {
         
         @Override
         public boolean isEnabled() {
-            Friend friend = context.getFriend();
-            return friend != null && friend.isSignedInToLimewire();
+            ChatFriend chatFriend = context.getFriend();
+            return chatFriend != null && chatFriend.isSignedInToLimewire();
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            Friend friend = context.getFriend();
-            if (friend != null) {
+            ChatFriend chatFriend = context.getFriend();
+            if (chatFriend != null) {
                 //minimize chat
                 new DisplayFriendsEvent(false).publish();
-                friendSharing.selectFriendLibrary(friend.getName());
+                friendSharing.selectFriendLibrary(chatFriend.getName());
             }
         }
     }
@@ -827,47 +827,45 @@ public class FriendsPane extends JPanel implements FriendRemover {
         public void actionPerformed(ActionEvent e) {
             //minimize chat
             new DisplayFriendsEvent(false).publish();
-            Friend friend = context.getFriend();
-            if (friend != null) {
-                friendSharing.selectFriendInFileSharingList(friend.getID());
+            ChatFriend chatFriend = context.getFriend();
+            if (chatFriend != null) {
+                friendSharing.selectFriendInFileSharingList(chatFriend.getID());
             }
         }
 
         @Override
         public boolean isEnabled() {
-            Friend friend = context.getFriend();
+            ChatFriend chatFriend = context.getFriend();
             
-            if (friend == null) {
+            if (chatFriend == null) {
                 return false;
             }
             
-            return getSharedFileCount(friend) > 0 && friend.isSignedInToLimewire();
+            return getSharedFileCount(chatFriend) > 0 && chatFriend.isSignedInToLimewire();
         }
 
         @Override
         public void notifyItem(JMenuItem item) {
-            Friend friend = context.getFriend();
+            ChatFriend chatFriend = context.getFriend();
             
-            if (friend == null) {
+            if (chatFriend == null) {
                 return;
             }
             
-            int sharedFileCount = getSharedFileCount(friend);
+            int sharedFileCount = getSharedFileCount(chatFriend);
             item.setText(buildString(tr("View Files I'm sharing with them")," (", sharedFileCount, ")"));
             if (sharedFileCount == 0) {
-                item.setToolTipText(buildString(friend.getName(), " ", tr("isn't using LimeWire. Tell them about it to see their Library")));
+                item.setToolTipText(buildString(chatFriend.getName(), " ", tr("isn't using LimeWire. Tell them about it to see their Library")));
             }
         }
 
-        private int getSharedFileCount(Friend friend) {
-            if (!friend.isSignedInToLimewire()) {
+        private int getSharedFileCount(ChatFriend chatFriend) {
+            if (!chatFriend.isSignedInToLimewire()) {
                 return 0;
             }
             int sharedFileCount = 0;
-            if (libraryManager.containsFriend(friend.getID())) {
-                FileList sharedFileList = libraryManager.getFriend(friend.getID());
-                sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
-            }
+            FileList sharedFileList = libraryManager.getOrCreateFriendShareList(chatFriend.getFriend());
+            sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
             return sharedFileCount;
         }
         
@@ -898,14 +896,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            Friend friend = context.getFriend();
-            closeChat(friend);
+            ChatFriend chatFriend = context.getFriend();
+            closeChat(chatFriend);
         }
     }
 
     @Override
     public boolean canRemoveSelectedFriend() {
-        Friend selectedFriend = getSelectedFriend();
+        ChatFriend selectedFriend = getSelectedFriend();
         return selectedFriend != null && !selectedFriend.isChatting();
     }
 
@@ -914,15 +912,15 @@ public class FriendsPane extends JPanel implements FriendRemover {
         removeBuddy(getSelectedFriend());
     }
 
-    private void removeBuddy(Friend selectedFriend) {
+    private void removeBuddy(ChatFriend selectedFriend) {
         if (selectedFriend != null) {
-            friends.remove(selectedFriend);
+            chatFriends.remove(selectedFriend);
             idToFriendMap.remove(selectedFriend.getID());
             new RemoveFriendEvent(selectedFriend).publish();
         }
     }
     
-    private Friend getSelectedFriend() {
+    private ChatFriend getSelectedFriend() {
         int selectedRow = friendsTable.getSelectedRow();
         if (selectedRow > -1) {
             return getFriend(friendsTable, selectedRow);
@@ -931,8 +929,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
     }
     
     public boolean isSharingFilesWithFriends() {
-        for(Friend friend : friends) {
-            if (libraryManager.getFriend(friend.getID()).size() > 0) {
+        for(ChatFriend chatFriend : chatFriends) {
+            if (libraryManager.getOrCreateFriendShareList(chatFriend.getFriend()).size() > 0) {
                 return true;
             }
         }
@@ -940,8 +938,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
     }
     
     public boolean hasFriendsOnLimeWire() {
-        for(Friend friend : friends) {
-            if (friend.isSignedInToLimewire()) {
+        for(ChatFriend chatFriend : chatFriends) {
+            if (chatFriend.isSignedInToLimewire()) {
                 return true;
             }
         }
@@ -961,8 +959,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
         int unseenMessageFriendsCount = 0;
         EventTableModel model = (EventTableModel) friendsTable.getModel();
         for(int row = 0; row < firstVisibleRow; row++) {
-            Friend friend = (Friend) model.getElementAt(row);
-            if (friend.isReceivingUnviewedMessages()) {
+            ChatFriend chatFriend = (ChatFriend) model.getElementAt(row);
+            if (chatFriend.isReceivingUnviewedMessages()) {
                 unseenMessageFriendsCount++;
             }
         }

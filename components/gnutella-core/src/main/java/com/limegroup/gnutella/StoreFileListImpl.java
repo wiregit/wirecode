@@ -12,8 +12,8 @@ import org.limewire.util.FileUtils;
  */
 public class StoreFileListImpl extends FileListImpl {
 
-    public StoreFileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
-        super(name, fileManager, individualFiles);
+    public StoreFileListImpl(FileManager fileManager, Set<File> individualFiles) {
+        super(fileManager, individualFiles);
     }
     
     /**

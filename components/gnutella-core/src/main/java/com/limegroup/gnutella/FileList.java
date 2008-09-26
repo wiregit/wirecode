@@ -10,11 +10,6 @@ import java.util.List;
 public interface FileList {
     
     /**
-     * Returns the name of this fileList
-     */
-    public String getName();
-    
-    /**
      * Given a non-null FileDesc, adds this FileDesc to this list. If FileDesc
      * is null, throws an IllegalArguementException. 
      * @param fileDesc - FileDesc to be added to this list

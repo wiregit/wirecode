@@ -133,12 +133,12 @@ public class ChatPanel extends JPanel implements Displayable {
     
     @EventSubscriber
     public void handleAddConversation(ConversationStartedEvent event) {
-        Friend friend = event.getFriend();
-        LOG.debugf("ConversationStartedEvent with friend: {0}", friend.getName());
-        ConversationPane chatPane = chats.get(friend.getID());
+        ChatFriend chatFriend = event.getFriend();
+        LOG.debugf("ConversationStartedEvent with friend: {0}", chatFriend.getName());
+        ConversationPane chatPane = chats.get(chatFriend.getID());
         if (chatPane == null) {
-            chatPane = conversationFactory.create(event.getWriter(), friend);
-            chats.put(friend.getID(), chatPane);
+            chatPane = conversationFactory.create(event.getWriter(), chatFriend);
+            chats.put(chatFriend.getID(), chatPane);
         }
         
         if (conversationPanel.getComponent(0) != chatPane && event.isLocallyInitiated()) {

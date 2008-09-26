@@ -69,7 +69,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         this.thumbnailManager = thumbnailManager;
         this.iconManager = iconManager;
         
-        this.fileList = libraryManager.getGnutellaList();
+        this.fileList = libraryManager.getGnutellaShareList();
         this.fileList.getModel().addListEventListener(new ListEventListener<LocalFileItem>(){
             @Override
             public void listChanged(ListEvent<LocalFileItem> listChanges) {

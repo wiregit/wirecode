@@ -3,13 +3,13 @@ package org.limewire.ui.swing.friends;
 import org.limewire.ui.swing.AbstractEDTEvent;
 
 class FriendLoginEvent extends AbstractEDTEvent {
-    private final Friend friend;
+    private final ChatFriend chatFriend;
     
-    public FriendLoginEvent(Friend friend) {
-        this.friend = friend;
+    public FriendLoginEvent(ChatFriend chatFriend) {
+        this.chatFriend = chatFriend;
     }
 
-    public Friend getFriend() {
-        return friend;
+    public ChatFriend getFriend() {
+        return chatFriend;
     }
 }

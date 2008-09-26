@@ -16,10 +16,6 @@ public class SynchronizedFileList implements FileListPackage {
         mutex = fileList;
     }
     
-    public String getName() {
-        return fileList.getName();
-    }
-    
     public void clear() {
         synchronized (mutex) {
             fileList.clear();

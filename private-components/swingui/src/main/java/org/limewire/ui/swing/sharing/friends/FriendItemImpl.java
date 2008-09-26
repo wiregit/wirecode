@@ -3,6 +3,7 @@ package org.limewire.ui.swing.sharing.friends;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
 
@@ -12,7 +13,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileItem>{
 
-    private final String id;
+    private final Friend friend;
     private final EventList<LocalFileItem> eventList;
     private FileList friendLibraryList;
     
@@ -20,8 +21,8 @@ public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileIt
     
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     
-    public FriendItemImpl(String id, EventList<LocalFileItem> eventList) {
-        this.id = id;
+    public FriendItemImpl(Friend friend, EventList<LocalFileItem> eventList) {
+        this.friend = friend;
         this.eventList = eventList;
         this.eventList.addListEventListener(this);
     }
@@ -35,8 +36,8 @@ public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileIt
     }
     
     @Override
-    public String getId() {
-        return id;
+    public Friend getFriend() {
+        return friend;
     }
 
     @Override

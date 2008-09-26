@@ -11,8 +11,8 @@ class MessageImpl implements Message {
     private final long messageTimeMillis;
     private final FileMetaData fileOffer;
 
-    public MessageImpl(String senderName, Friend friend, String message, Type type) {
-        this(senderName, friend.getName(), friend.getID(), message, type, null);
+    public MessageImpl(String senderName, ChatFriend chatFriend, String message, Type type) {
+        this(senderName, chatFriend.getName(), chatFriend.getID(), message, type, null);
     }
 
     public MessageImpl(String senderName, String friendName, String friendId, String message, Type type, FileMetaData fileMetaData) {

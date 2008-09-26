@@ -252,12 +252,12 @@ public class FileManagerImpl implements FileManager, Service {
         this.backgroundExecutor = backgroundExecutor;
         this.eventListeners = eventListeners;
         
-        sharedFileList = new SynchronizedFileList(new SharedFileListImpl("Shared", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
-        storeFileList = new SynchronizedFileList(new StoreFileListImpl("Store", this, _data.SPECIAL_STORE_FILES));
-        friendFileList = new SynchronizedFileList(new FriendFileListImpl("All Friends", this, _data.getFriendList("All")));
-        incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl("Incomplete", this, new HashSet<File>()));
+        sharedFileList = new SynchronizedFileList(new SharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
+        storeFileList = new SynchronizedFileList(new StoreFileListImpl(this, _data.SPECIAL_STORE_FILES));
+        friendFileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList("All")));
+        incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl(this, new HashSet<File>()));
         for(String name : SharingSettings.SHARED_FRIEND_LIST_NAMES.getValue())
-            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(name, this, _data.getFriendList(name))));
+            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name))));
         
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -350,7 +350,7 @@ public class FileManagerImpl implements FileManager, Service {
         if(!containsFriendFileList(name)) {
             SharingSettings.addFriendListName(name);
             _data.addFriendList(name);
-            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(name, this, _data.getFriendList(name))));
+            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name))));
         }
     }
     

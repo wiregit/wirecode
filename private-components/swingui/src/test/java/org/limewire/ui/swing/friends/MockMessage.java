@@ -11,10 +11,10 @@ public class MockMessage implements Message {
     private final long messageTimeMillis;
     private final FileMetaData fileOffer;
     
-    public MockMessage(Friend friend, String message, long messageTimeMillis, String senderName,
+    public MockMessage(ChatFriend chatFriend, String message, long messageTimeMillis, String senderName,
             Type type, FileMetaData fileOffer) {
-        this.friendName = friend.getName();
-        this.friendID = friend.getID();
+        this.friendName = chatFriend.getName();
+        this.friendID = chatFriend.getID();
         this.message = message;
         this.messageTimeMillis = messageTimeMillis;
         this.senderName = senderName;

@@ -89,13 +89,13 @@ public class FriendNameTable extends JXTable {
         @Override
         public int compare(FriendItem o1, FriendItem o2) {
             if(o1.size() > 0 && o2.size() > 0) { 
-                return o1.getId().compareTo(o2.getId());
+                return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
             } else if(o1.size() > 0 && o2.size() <= 0) {
                 return -1;
             } else if(o1.size() <= 0 && o2.size() > 0) {
                 return 1;
             } else {
-                return o1.getId().compareTo(o2.getId());
+                return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
             }
         }
     }

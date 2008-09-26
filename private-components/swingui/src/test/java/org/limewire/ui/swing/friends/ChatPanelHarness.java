@@ -31,8 +31,8 @@ public class ChatPanelHarness {
                 FriendsPane friendsPane = new FriendsPane(icons, new MockFriendsCountUpdater(), libraryManager, friendSharing);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
-                    public ConversationPane create(MessageWriter writer, Friend friend) {
-                        return new ConversationPane(writer, friend, libraryManager, new IconManagerStub(), new MockFriendSharingDisplay());
+                    public ConversationPane create(MessageWriter writer, ChatFriend chatFriend) {
+                        return new ConversationPane(writer, chatFriend, libraryManager, new IconManagerStub(), new MockFriendSharingDisplay());
                     }
                 }, icons, friendsPane, new TopPanel(icons, friendsPane), friendSharing));
                 
@@ -91,7 +91,7 @@ public class ChatPanelHarness {
         
         for(int i = 0; i < 50; i++) {
             String id = "foo" + i;
-            new MessageReceivedEvent(new MockMessage(new MockFriend(id, "hey", Mode.available), "yo", System.currentTimeMillis(), "me", Type.Received, null)).publish();
+            new MessageReceivedEvent(new MockMessage(new MockChatFriend(id, "hey", Mode.available), "yo", System.currentTimeMillis(), "me", Type.Received, null)).publish();
         }
     }
 }

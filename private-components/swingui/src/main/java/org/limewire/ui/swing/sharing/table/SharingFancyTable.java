@@ -97,7 +97,16 @@ public class SharingFancyTable extends StripedJXTable {
         return false;        
     }
 
+    
+    
     public void setModel(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
+        // Dispose the old model.
+        if(getModel() instanceof SharingTableModel) {
+            SharingTableModel model = (SharingTableModel)getModel();
+            if(model != null) {
+                model.dispose();
+            }
+        }
         super.setModel(new SharingTableModel(sharedItems, fileList, tableFormat));
     }
 }

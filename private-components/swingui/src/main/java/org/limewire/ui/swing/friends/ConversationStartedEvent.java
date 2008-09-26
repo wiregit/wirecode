@@ -7,22 +7,22 @@ import org.limewire.ui.swing.AbstractEDTEvent;
 import org.limewire.xmpp.api.client.MessageWriter;
 
 public class ConversationStartedEvent extends AbstractEDTEvent {
-    private final Friend friend;
+    private final ChatFriend chatFriend;
     private final MessageWriter writer;
     //On-off switch to signal that this event has been processed and normal execution can continue can continue
     private final CountDownLatch latch = new CountDownLatch(1);
     private final boolean locallyInitiated;
 
-    ConversationStartedEvent(Friend friend, MessageWriter writer, boolean locallyInitiated) {
-        this.friend = friend;
+    ConversationStartedEvent(ChatFriend chatFriend, MessageWriter writer, boolean locallyInitiated) {
+        this.chatFriend = chatFriend;
         this.writer = writer;
         this.locallyInitiated = locallyInitiated;
         
-        friend.startChat();
+        chatFriend.startChat();
     }
     
-    public Friend getFriend() {
-        return friend;
+    public ChatFriend getFriend() {
+        return chatFriend;
     }
 
     public MessageWriter getWriter() {

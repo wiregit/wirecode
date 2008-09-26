@@ -1,5 +1,7 @@
 package org.limewire.core.impl.library;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,25 +113,25 @@ public class MockLibraryManager implements LibraryManager {
         
     }
     
+    @Override
+    public Collection<LocalFileList> getAllFriendShareLists() {
+        return Collections.emptyList();
+    }
+    
 
     @Override
-    public LocalFileList getLibraryList() {
+    public LocalFileList getLibraryManagedList() {
         return allFileList;
     }
     
     
     @Override
-    public LocalFileList getGnutellaList() {
+    public LocalFileList getGnutellaShareList() {
         return gnutellaList;
-    }
-
-    @Override
-    public Map<String, LocalFileList> getAllFriendLists() {
-        return friendMap;
     }
     
     @Override
-    public LocalFileList getFriend(String name) {
+    public LocalFileList getOrCreateFriendShareList(Friend name) {
         return new FileListAdapter();
     }
 
@@ -140,22 +142,17 @@ public class MockLibraryManager implements LibraryManager {
     }
 
     @Override
-    public void addFriend(String name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void removeFriend(String name) {
+    public void removeFriendShareList(Friend name) {
         // TODO Auto-generated method stub
         
     }
     
     @Override
-    public boolean containsFriend(String name) {
-        return false;
+    public LocalFileList getFriendShareList(Friend friend) {
+        // TODO Auto-generated method stub
+        return null;
     }
-
+    
     
     ///////////////////////////////////////////////
     //  Accessors for Friend Libraries

@@ -13,15 +13,15 @@ import junit.framework.TestCase;
  */
 public class FriendAvailabilityComparatorTest extends TestCase {
 
-    private ArrayList<Friend> friends;
+    private ArrayList<ChatFriend> chatFriends;
     
     public void setUp() {
-        friends = new ArrayList<Friend>();
+        chatFriends = new ArrayList<ChatFriend>();
     }
     
-    private MockFriend populateFriends(String name, Mode mode) {
-        MockFriend friend = new MockFriend(name, "foo", mode);
-        friends.add(friend);
+    private MockChatFriend populateFriends(String name, Mode mode) {
+        MockChatFriend friend = new MockChatFriend(name, "foo", mode);
+        chatFriends.add(friend);
         return friend;
     }
 
@@ -36,7 +36,7 @@ public class FriendAvailabilityComparatorTest extends TestCase {
         populateFriends("a_dnd", Mode.dnd);
         populateFriends("a_available", Mode.available);
         
-        Collections.sort(friends, new FriendAvailabilityComparator());
+        Collections.sort(chatFriends, new FriendAvailabilityComparator());
         
         String[] sorted = new String[] {"b_chat", 
                                         "a_available", "b_available",
@@ -49,7 +49,7 @@ public class FriendAvailabilityComparatorTest extends TestCase {
 
     private void assertOrder(String[] sorted) {
         for(int i = 0; i < sorted.length; i++) {
-            assertEquals(sorted[i], friends.get(i).getName());
+            assertEquals(sorted[i], chatFriends.get(i).getName());
         }
     }
 
@@ -59,7 +59,7 @@ public class FriendAvailabilityComparatorTest extends TestCase {
         populateFriends(null, Mode.chat);
         populateFriends("a_chat", Mode.chat);
         
-        Collections.sort(friends, new FriendAvailabilityComparator());
+        Collections.sort(chatFriends, new FriendAvailabilityComparator());
         
         assertOrder(new String[] {"a_chat", null, "a_xa", null});
     }
@@ -69,7 +69,7 @@ public class FriendAvailabilityComparatorTest extends TestCase {
         populateFriends("a_chat", Mode.chat).chatStartTime = 1l;
         populateFriends("h_chat", Mode.chat).chatStartTime = 2l;
         
-        Collections.sort(friends, new FriendAvailabilityComparator());
+        Collections.sort(chatFriends, new FriendAvailabilityComparator());
 
         assertOrder(new String[] {"a_chat", "h_chat", "b_chat"});
     }

@@ -7,7 +7,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.font.TextLayout;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -22,7 +23,6 @@ import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
@@ -75,15 +75,15 @@ public class FilesSharingSummaryPanel extends JPanel {
         gnutellaButton = new JToggleButton(NavigatorUtils.getNavAction(gnutellaNav));
         gnutellaButton.setHideActionText(true);
         gnutellaButton.setName("FilesSharingSummaryPanel.all");
-        gnutellaButton.setIcon(new NumberIcon(libraryManager.getGnutellaList(), gnutellaIcon));
+        gnutellaButton.setIcon(new NumberIcon(Collections.singleton(libraryManager.getGnutellaShareList()), gnutellaIcon));
         gnutellaButton.setUI(new HighlightToggleButtonUI(highLightColor));
-        new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaList());
+        new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaShareList());
         
         NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME, friendSharePanel);
         friendButton = new JToggleButton(NavigatorUtils.getNavAction(friendNav));
         friendButton.setHideActionText(true);
         friendButton.setName("FilesSharingSummaryPanel.friends");
-		friendButton.setIcon(new NumberIcon(libraryManager.getAllFriendLists(), friendsIcon));
+		friendButton.setIcon(new NumberIcon(libraryManager.getAllFriendShareLists(), friendsIcon));
 		friendButton.setUI(new HighlightToggleButtonUI(highLightColor));   
 		
 		setLayout(new MigLayout("insets 0 0 0 0", "", ""));
@@ -94,18 +94,10 @@ public class FilesSharingSummaryPanel extends JPanel {
     }
     
     private class NumberIcon implements Icon {
-        private final FileList fileList;
-        private final Map<String, LocalFileList> fileLists;
+        private final Collection<? extends FileList> fileLists;
         private final Icon delegateIcon;
         
-        public NumberIcon(FileList fileList, Icon icon) {
-            this.fileList = fileList;
-            this.delegateIcon = icon;
-            this.fileLists = null;
-        }
-        
-        public NumberIcon(Map<String, LocalFileList> fileLists, Icon icon) {
-            this.fileList = null;
+        public NumberIcon(Collection<? extends FileList> fileLists,  Icon icon) {
             this.delegateIcon = icon;
             this.fileLists = fileLists;
         }
@@ -131,16 +123,11 @@ public class FilesSharingSummaryPanel extends JPanel {
         }
         
         private long getNumber() {
-            if(fileList != null) {
-                return fileList.size();
-            } else {
-                long x = 0;
-                for(FileList list : fileLists.values()) {
-                    x += list.size();
-                }
-                return x;
+            long x = 0;
+            for(FileList list : fileLists) {
+                x += list.size();
             }
-            
+            return x;
         }
     }
     

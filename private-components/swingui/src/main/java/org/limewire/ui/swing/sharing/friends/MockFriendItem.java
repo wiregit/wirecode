@@ -2,21 +2,22 @@ package org.limewire.ui.swing.sharing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 
 public class MockFriendItem implements FriendItem {
 
-    private String name;
+    private Friend friend;
     private int size;
     
-    public MockFriendItem(String name, int size) {
-        this.name = name;
+    public MockFriendItem(Friend friend, int size) {
+        this.friend = friend;
         this.size = size;
     }
     
     @Override
-    public String getId() {
-        return name;
+    public Friend getFriend() {
+        return friend;
     }
 
     @Override

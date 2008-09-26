@@ -8,8 +8,8 @@ import java.util.Set;
  */
 public class FriendFileListImpl extends FileListImpl {
 
-    public FriendFileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
-        super(name, fileManager, individualFiles);
+    public FriendFileListImpl(FileManager fileManager, Set<File> individualFiles) {
+        super(fileManager, individualFiles);
     }
 
     /**

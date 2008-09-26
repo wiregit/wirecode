@@ -2,21 +2,40 @@ package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
-class MockFriend implements Friend {
+class MockChatFriend implements ChatFriend {
     private String name, status;
     private Mode state;
     private boolean activeConversation;
     private boolean receivingUnviewedMessages;
     
-    public MockFriend(String name, String status, Mode state) {
+    public MockChatFriend(String name, String status, Mode state) {
         this.name = name;
         this.state = state;
         this.status = status;
+    }
+    
+    @Override
+    public Friend getFriend() {
+        return new Friend() {
+            @Override
+            public String getId() {
+                return name;
+            }
+            @Override
+            public String getName() {
+                return name;
+            }
+            @Override
+            public String getRenderName() {
+                return name;
+            }
+        };
     }
 
     @Override

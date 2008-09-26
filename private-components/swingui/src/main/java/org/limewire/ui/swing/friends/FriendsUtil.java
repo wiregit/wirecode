@@ -8,8 +8,8 @@ import org.limewire.xmpp.api.client.Presence;
 
 public class FriendsUtil {
 
-    public static Icon getIcon(Friend friend, IconLibrary icons) {
-        Presence.Mode mode = friend.getMode(); 
+    public static Icon getIcon(ChatFriend chatFriend, IconLibrary icons) {
+        Presence.Mode mode = chatFriend.getMode(); 
         return getIcon(mode, icons);
     }
 

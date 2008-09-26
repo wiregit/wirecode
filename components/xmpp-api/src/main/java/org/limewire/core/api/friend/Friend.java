@@ -16,5 +16,10 @@ public interface Friend {
      * @return the friendly user given name to the user; can be null.
      */
     public String getName();
+    
+    /**
+     * Returns the best possible name this can be rendered with.
+     */
+    public String getRenderName();
 
 }

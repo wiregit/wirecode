@@ -36,8 +36,8 @@ public class SharedFileListImpl extends FileListImpl {
      */
     private Collection<File> individualSharedFiles; 
     
-    public SharedFileListImpl(String name, FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
-        super(name, fileManager, individualFiles);
+    public SharedFileListImpl(FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
+        super(fileManager, individualFiles);
         
         this.filesNotToShare = filesNotToShare;
         transientSharedFiles = new HashSet<File>();

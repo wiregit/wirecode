@@ -3,13 +3,13 @@ package org.limewire.ui.swing.friends;
 import org.limewire.ui.swing.AbstractEDTEvent;
 
 public class CloseChatEvent extends AbstractEDTEvent {
-    private final Friend friend;
+    private final ChatFriend chatFriend;
     
-    public CloseChatEvent(Friend friend) {
-        this.friend = friend;
+    public CloseChatEvent(ChatFriend chatFriend) {
+        this.chatFriend = chatFriend;
     }
     
-    public Friend getFriend() {
-        return friend;
+    public ChatFriend getFriend() {
+        return chatFriend;
     }
 }

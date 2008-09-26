@@ -46,19 +46,13 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
     protected final List<File> pendingFiles;
     
     /**
-     * Name of this FileList
-     */
-    private final String name;
-    
-    /**
      * Size of all the FileDescs in this list in bytes
      */
     protected long numBytes;
     
     protected final FileManager fileManager;
     
-    public FileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
-        this.name = name;
+    public FileListImpl(FileManager fileManager, Set<File> individualFiles) {
         this.fileManager = fileManager;
         this.individualFiles = individualFiles;
         this.fileDescs = new ArrayList<FileDesc>();
@@ -69,10 +63,6 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
         listeners = new CopyOnWriteArrayList<FileListListener>();
         
         clear();
-    }
-
-    public String getName() {
-        return name;
     }
 
     public void addPendingFileAlways(File file) {

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.jdesktop.beans.AbstractBean;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -17,7 +18,7 @@ import org.limewire.xmpp.api.client.Presence.Mode;
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
-public class FriendImpl extends AbstractBean implements Friend {
+public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     private boolean chatting;
     private boolean activeConversation;
     private final User user;
@@ -27,11 +28,16 @@ public class FriendImpl extends AbstractBean implements Friend {
     private long chatStartTime;
     private boolean hasUnviewedMessages;
     
-    FriendImpl(User user, Presence presence) {
+    ChatFriendImpl(User user, Presence presence) {
         this.user = user;
         this.presence = presence;
         this.status = presence.getStatus();
         this.mode = presence.getMode();        
+    }
+    
+    @Override
+    public Friend getFriend() {
+        return user;
     }
     
     @Override
