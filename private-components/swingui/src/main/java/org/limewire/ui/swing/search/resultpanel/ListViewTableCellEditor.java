@@ -266,9 +266,7 @@ implements TableCellEditor, TableCellRenderer {
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 boolean toggleVisibility = !isShowingSimilarResults();
-                for(VisualSearchResult result : vsr.getSimilarResults()) {
-                    result.setVisible(toggleVisibility);
-                }
+                vsr.setChildrenVisible(toggleVisibility);
                 
                 similarButton.setText(getHideShowSimilarFilesButtonText());
             }
