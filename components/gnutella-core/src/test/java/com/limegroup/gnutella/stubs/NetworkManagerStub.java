@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.IOException;
+import java.util.Set;
 
+import org.limewire.io.Connectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
@@ -13,7 +15,6 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
@@ -254,7 +255,7 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     @Override
-    public void newMediatedConnectionAddress(PushProxyMediatorAddress address) {
+    public void newPushProxies(Set<Connectable> pushProxies) {
     }
 
 }

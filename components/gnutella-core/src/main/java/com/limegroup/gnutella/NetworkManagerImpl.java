@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.Set;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.LimeProps;
@@ -39,8 +40,6 @@ import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
@@ -224,7 +223,7 @@ public class NetworkManagerImpl implements NetworkManager {
         synchronized (addressLock) {
             FirewalledAddress address = firewalledAddress;
             if (address != null) {
-                newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()), address.getPushProxies()));
+                newPushProxies(address.getPushProxies());
             }
         }
     }
@@ -305,8 +304,8 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
 
-    public void newMediatedConnectionAddress(PushProxyMediatorAddress newMediatorAddress) {
-        FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), newMediatorAddress.getPushProxies(), supportsFWTVersion());
+    public void newPushProxies(Set<Connectable> pushProxies) {
+        FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
         boolean changed = false;
         synchronized (addressLock) {
             if (!newAddress.equals(firewalledAddress)) {

@@ -22,8 +22,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddress;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NetworkManagerImplTest extends LimeTestCase {
@@ -175,9 +173,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        PushProxyMediatorAddress address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(address);
+        networkManager.newPushProxies(proxies);
         assertEquals(1, addressChangedListener.events.size());
         FirewalledAddress firewalledAddress = (FirewalledAddress)addressChangedListener.events.get(0).getSource();
         assertEquals(proxies, firewalledAddress.getPushProxies());
@@ -189,9 +185,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
         assertEquals(0, addressChangedListener.events.size());
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
-        PushProxyMediatorAddress address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(address);
+        networkManager.newPushProxies(proxies);
         assertEquals(1, addressChangedListener.events.size());
         FirewalledAddress firewalledAddress = (FirewalledAddress)addressChangedListener.events.get(0).getSource();
         assertEquals(proxies, firewalledAddress.getPushProxies());
@@ -203,9 +197,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         Connectable proxyAddress2 = new ConnectableImpl("200.200.200.200", 5001, false);
         proxies.add(proxyAddress);
         proxies.add(proxyAddress2);
-        address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(address);
+        networkManager.newPushProxies(proxies);
         assertEquals(1, addressChangedListener.events.size());
         firewalledAddress = (FirewalledAddress)addressChangedListener.events.get(0).getSource();
         assertEquals(proxies, firewalledAddress.getPushProxies());
@@ -218,9 +210,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        PushProxyMediatorAddress address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(address);
+        networkManager.newPushProxies(proxies);
         assertEquals(1, addressChangedListener.events.size());
         FirewalledAddress firewalledAddress = (FirewalledAddress)addressChangedListener.events.get(0).getSource();
         assertEquals(proxies, firewalledAddress.getPushProxies());
@@ -230,9 +220,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        address = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(address);
+        networkManager.newPushProxies(proxies);
         assertEquals(0, addressChangedListener.events.size());
     }
     
@@ -243,9 +231,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(mediatorAddress);
+        networkManager.newPushProxies(proxies);
         assertEquals(1, addressChangedListener.events.size());
         FirewalledAddress firewalledAddress = (FirewalledAddress)addressChangedListener.events.get(0).getSource();
         assertEquals(proxies, firewalledAddress.getPushProxies());
@@ -291,9 +277,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(mediatorAddress);
+        networkManager.newPushProxies(proxies);
         
         assertEquals(1, addressChangedListener.events.size());
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
@@ -316,9 +300,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         
-        PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(mediatorAddress);
+        networkManager.newPushProxies(proxies);
         
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
                 new ConnectableImpl("0.0.0.0", networkManager.getNonForcedPort(), networkManager.isIncomingTLSEnabled()),
@@ -331,9 +313,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
         proxies.add(new ConnectableImpl("201.201.201.201", 5002, false));
-        mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(mediatorAddress);
+        networkManager.newPushProxies(proxies);
         
         expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
                 new ConnectableImpl("0.0.0.0", networkManager.getNonForcedPort(), networkManager.isIncomingTLSEnabled()),
@@ -358,9 +338,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         Set<Connectable> proxies = new HashSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(mediatorAddress);
+        networkManager.newPushProxies(proxies);
         
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
                 new ConnectableImpl("0.0.0.0", networkManager.getNonForcedPort(), networkManager.isIncomingTLSEnabled()),
@@ -397,9 +375,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        PushProxyMediatorAddress mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(mediatorAddress);
+        networkManager.newPushProxies(proxies);
         
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
                 new ConnectableImpl("0.0.0.0", networkManager.getNonForcedPort(), networkManager.isIncomingTLSEnabled()),
@@ -415,9 +391,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         proxies = new StrictIpPortSet<Connectable>();
         proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
-        mediatorAddress = new PushProxyMediatorAddressImpl(new GUID(applicationServices.getMyGUID()),
-                proxies);
-        networkManager.newMediatedConnectionAddress(mediatorAddress);
+        networkManager.newPushProxies(proxies);
         assertEquals(0, addressChangedListener.events.size());
     }
 

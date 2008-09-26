@@ -67,7 +67,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.net.address.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 
@@ -2610,8 +2609,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     
     public void handleEvent(final GnutellaConnectionEvent event) {
         Set<Connectable> pushProxies = getPushProxies();
-        if (pushProxies.size() >= 2) {
-            networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxies));
+        if (!pushProxies.isEmpty()) {
+            networkManager.newPushProxies(pushProxies);
         }
     }
 }
