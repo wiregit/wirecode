@@ -79,6 +79,7 @@ class NavigatorImpl implements Navigator {
                     listener.itemSelected(null, null, null);
                 }
             }
+            item.fireRemoved();
         } else {
             LOG.debugf("Item {0} not contained in list.", item);
         }
@@ -146,6 +147,12 @@ class NavigatorImpl implements Navigator {
         void fireSelected(boolean selected) {
             for(NavItemListener listener : listeners) {
                 listener.itemSelected(selected);
+            }
+        }
+        
+        void fireRemoved() {
+            for(NavItemListener listener : listeners) {
+                listener.itemRemoved();
             }
         }
     }

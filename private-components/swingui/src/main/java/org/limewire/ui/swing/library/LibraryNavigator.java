@@ -19,7 +19,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.limewire.core.api.library.Buddy;
 import org.limewire.core.api.library.BuddyLibraryEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -66,7 +65,7 @@ public class LibraryNavigator extends JPanel {
         listModel.setColumnCount(3);
         itemList.getColumnExt(0).setPreferredWidth(10);
         itemList.getColumnExt(1).setPreferredWidth(135);
-        itemList.getColumnExt(1).setCellRenderer(new BuddyCellRenderer());
+        itemList.getColumnExt(1).setCellRenderer(new FriendCellRenderer());
         itemList.getColumnExt(2).setVisible(false);
         itemList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         itemList.addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, Color.CYAN,
@@ -100,17 +99,7 @@ public class LibraryNavigator extends JPanel {
                 }
             }
         });
-        addNavItem(new Buddy() {
-            @Override
-            public String getId() {
-                return "_@_internal_@_";
-            }
-
-            @Override
-            public String getName() {
-                return I18n.tr("Me");
-            }
-        }, myLibraryItem);
+        addNavItem(new Me(), myLibraryItem);
 
         itemList.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
@@ -132,18 +121,18 @@ public class LibraryNavigator extends JPanel {
             public void handleEvent(BuddyLibraryEvent event) {
                 switch (event.getType()) {
                 case BUDDY_ADDED:
-                    addBuddy(event.getBuddy(), event.getFileList());
+                    addFriend(event.getId(), event.getFileList());
                     break;
                 case BUDDY_REMOVED:
-                    removeBuddy(event.getBuddy(), event.getFileList());
+                    removeFriend(event.getId(), event.getFileList());
                     break;
                 }
             }
         });
     }
 
-    private void addNavItem(Buddy buddy, NavItem navItem) {
-        listModel.addRow(new Object[] { null, buddy, navItem });
+    private void addNavItem(LibraryName name, NavItem navItem) {
+        listModel.addRow(new Object[] { null, name, navItem });
     }
 
     private void removeNavItem(NavItem navItem) {
@@ -155,17 +144,14 @@ public class LibraryNavigator extends JPanel {
         itemList.getSelectionModel().removeSelectionInterval(row, row);
     }
 
-    private class BuddyCellRenderer extends DefaultTableCellRenderer {
+    private class FriendCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
             String render = "";
-            Buddy buddy = (Buddy)value;
-            if(buddy != null) {
-                render = buddy.getName();
-                if(render == null) {
-                    render = buddy.getId();
-                }
+            LibraryName friend = (LibraryName)value;
+            if(friend != null) {
+                render = friend.getRenderName();
             }
             JComponent renderer = (JComponent) super.getTableCellRendererComponent(table,
                     render, isSelected, hasFocus, row, column);
@@ -183,13 +169,13 @@ public class LibraryNavigator extends JPanel {
         return -1;
     }
 
-    private int getRowForBuddy(Buddy buddy) {
+    private NavItem getNavItemForFriend(String id) {
         for (int i = 0; i < listModel.getRowCount(); i++) {
-            if (((Buddy) listModel.getValueAt(i, 1)).getId().equals(buddy.getId())) {
-                return i;
+            if (((LibraryName)listModel.getValueAt(i, 1)).getId().equals(id)) {
+                return (NavItem)listModel.getValueAt(i, 2);
             }
         }
-        return -1;
+        return null;
     }
 
     private void selectItem(NavItem navItem) {
@@ -197,9 +183,9 @@ public class LibraryNavigator extends JPanel {
         itemList.getSelectionModel().setSelectionInterval(row, row);
     }
 
-    private void addBuddy(Buddy buddy, RemoteFileList fileList) {
+    private void addFriend(String id, RemoteFileList fileList) {
         BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(fileList);
-        final NavItem item = navigator.createNavItem(NavCategory.LIBRARY, buddy.getId(), library);
+        final NavItem item = navigator.createNavItem(NavCategory.LIBRARY, id, library);
         item.addNavItemListener(new NavItemListener() {
             @Override
             public void itemRemoved() {
@@ -215,13 +201,48 @@ public class LibraryNavigator extends JPanel {
                 }
             }
         });
-        addNavItem(buddy, item);
+        addNavItem(new Friend(id), item);
     }
 
-    private void removeBuddy(Buddy buddy, RemoteFileList fileList) {
-        int row = getRowForBuddy(buddy);
-        if(row != -1) {
-            listModel.removeRow(row);
+    private void removeFriend(String id, RemoteFileList fileList) {
+        NavItem item = getNavItemForFriend(id);
+        if(item != null) {
+            item.remove();
+        }
+    }
+    
+    private static interface LibraryName {
+        String getRenderName();
+        String getId();
+    }
+    
+    private class Me implements LibraryName {
+        @Override
+        public String getRenderName() {
+            return I18n.tr("Me");
+        }
+        
+        @Override
+        public String getId() {
+            return "_@_internal_@_";
+        }
+    }
+    
+    private class Friend implements LibraryName {
+        private final String id;
+        
+        Friend(String id) {
+            this.id = id;
+        }
+        
+        @Override
+        public String getId() {
+            return id;
+        }
+        
+        @Override
+        public String getRenderName() {
+            return id;
         }
     }
 }

@@ -22,7 +22,7 @@ public interface LibraryManager {
 
     boolean containsBuddy(String id);
 
-    RemoteFileList getOrCreateBuddyLibrary(Buddy buddy);
+    RemoteFileList getOrCreateBuddyLibrary(String id);
 
-    void removeBuddyLibrary(Buddy buddy);
+    void removeBuddyLibrary(String id);
 }

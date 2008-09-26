@@ -1,5 +1,7 @@
 package org.limewire.core.impl.library;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.LibraryManager;
@@ -42,41 +44,40 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
             userAdded(event.getSource());
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            userDeleted(event.getSource().getId());
-        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-            userUpdated(event.getSource());
-        }
+        } // else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+//            userDeleted(event.getSource().getId());
+//        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
+//            userUpdated(event.getSource());
+//        }
     }
-
+    
     public void userAdded(final User user) {
         user.addPresenceListener(new PresenceListener() {
+            private AtomicBoolean libraryExists = new AtomicBoolean(false);
             public void presenceChanged(final Presence presence) {
                 if(presence.getType().equals(Presence.Type.available)) {                    
                     if(presence instanceof LimePresence) {
-                        Address address = ((LimePresence)presence).getAddress();
-                        LOG.debugf("browsing {0} ...", presence.getJID());
-                        browseFactory.createBrowse(address).start(new BrowseListener() {
-                            public void handleBrowseResult(SearchResult searchResult) {
-                                LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
-                                RemoteFileList list = libraryManager.getOrCreateBuddyLibrary(new UserBuddy(user));
-                                RemoteFileItem file = new CoreRemoteFileItem((RemoteFileDescAdapter)searchResult);
-                                list.addFile(file);
-                            }
-                        });
+                        if(!libraryExists.getAndSet(true)) {
+                            final RemoteFileList list = libraryManager.getOrCreateBuddyLibrary(user.getId());
+                            Address address = ((LimePresence)presence).getAddress();
+                            LOG.debugf("browsing {0} ...", presence.getJID());
+                            browseFactory.createBrowse(address).start(new BrowseListener() {
+                                public void handleBrowseResult(SearchResult searchResult) {
+                                    LOG.debugf("browse result: {0}, {1}, libraryExists {2}", searchResult.getUrn(), searchResult.getSize(), libraryExists);
+                                    if(libraryExists.get()) {
+                                        RemoteFileItem file = new CoreRemoteFileItem((RemoteFileDescAdapter)searchResult);
+                                        list.addFile(file);
+                                    }
+                                }
+                            });
+                        }
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                    //new PresenceUpdateEvent(user, presence).publish();
+                    if(libraryExists.getAndSet(false)) {
+                        libraryManager.removeBuddyLibrary(user.getId());
+                    }
                 }                
             }   
         });
-    }
-
-    private void userUpdated(User source) {
-        // TODO
-    }
-
-    private void userDeleted(String id) {
-        // TODO
     }
 }

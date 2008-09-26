@@ -10,12 +10,12 @@ public class BuddyLibraryEvent {
     
     private final Type type;
     private final RemoteFileList fileList;
-    private final Buddy buddy;
+    private final String id;
     
-    public BuddyLibraryEvent(Type type, RemoteFileList fileList, Buddy buddy) {
+    public BuddyLibraryEvent(Type type, RemoteFileList fileList, String id) {
         this.type = type;
         this.fileList = fileList;
-        this.buddy = buddy;
+        this.id = id;
     }
 
     public Type getType() {
@@ -26,8 +26,8 @@ public class BuddyLibraryEvent {
         return fileList;
     }
 
-    public Buddy getBuddy() {
-        return buddy;
+    public String getId() {
+        return id;
     }
     
     @Override

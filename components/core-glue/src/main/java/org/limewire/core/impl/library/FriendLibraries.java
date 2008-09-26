@@ -39,14 +39,14 @@ public class FriendLibraries {
                 switch(event.getType()) {
                 case BUDDY_ADDED:
                     StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
-                    LOG.debugf("adding friend library " + event.getBuddy() + " to index");
-                    libraries.put(event.getBuddy().getId(), trie);
+                    LOG.debugf("adding friend library " + event.getId() + " to index");
+                    libraries.put(event.getId(), trie);
                     // TODO race condition?
                     event.getFileList().getModel().addListEventListener(new LibraryListener(trie));
                     break;
                 case BUDDY_REMOVED:
-                    LOG.debugf("removing friend library " + event.getBuddy() + " from index");
-                    libraries.remove(event.getBuddy().getId());
+                    LOG.debugf("removing friend library " + event.getId() + " from index");
+                    libraries.remove(event.getId());
                 }
             }
         });

@@ -11,7 +11,6 @@ import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
-import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.lws.server.LWSManager;
 

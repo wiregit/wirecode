@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.Buddy;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
@@ -166,11 +165,11 @@ public class MockLibraryManager implements LibraryManager {
     ///////////////////////////////////////////////
 
     @Override
-    public RemoteFileList getOrCreateBuddyLibrary(Buddy buddy) {
+    public RemoteFileList getOrCreateBuddyLibrary(String id) {
         return null;
     }
 
     @Override
-    public void removeBuddyLibrary(Buddy buddy) {
+    public void removeBuddyLibrary(String id) {
     }
 }

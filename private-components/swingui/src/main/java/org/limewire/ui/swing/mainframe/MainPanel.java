@@ -27,7 +27,6 @@ class MainPanel extends JPanel {
     private final Map<String, JComponent> keyToComponents = new HashMap<String, JComponent>();
 
     private final CardLayout cardLayout;
-    private NavItem selectedNav;
     
     @Inject
     public MainPanel(Navigator navigator) {   
@@ -61,20 +60,12 @@ class MainPanel extends JPanel {
             public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {
                 LOG.debugf("Removed item {0}", navItem);
                 remove(keyToComponents.remove(asString(navItem)));
-                if(selectedNav == navItem) {
-                    // TODO: Sync the selectedNav with the first panel.
-                    // (Hopefully in practice this isn't a problem, since the first ones
-                    //  should never be removed.)
-                    cardLayout.first(MainPanel.this);
-                    selectedNav = null;
-                }
             }
 
             @Override
             public void itemSelected(NavCategory category, NavItem navItem, JComponent panel) {
                 LOG.debugf("Selected item {0}", navItem);
                 if(navItem != null) {
-                    selectedNav = navItem;
                     cardLayout.show(MainPanel.this, asString(navItem));
                     keyToComponents.get(asString(navItem)).requestFocusInWindow();
                 }
