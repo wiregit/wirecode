@@ -4,9 +4,9 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 /**
  * Format for displaying Buddy Name and number of files shared with
- * that buddy.
+ * that friend.
  */
-public class BuddyTableFormat implements TableFormat<BuddyItem> {
+public class FriendTableFormat implements TableFormat<FriendItem> {
 
     public static final String[] columnLabels = new String[] {"Name", "Size"};
             
@@ -24,7 +24,7 @@ public class BuddyTableFormat implements TableFormat<BuddyItem> {
     }
 
     @Override
-    public Object getColumnValue(BuddyItem baseObject, int column) {
+    public Object getColumnValue(FriendItem baseObject, int column) {
         if(column == 0) return baseObject;
         else if(column == 1) return baseObject;
             

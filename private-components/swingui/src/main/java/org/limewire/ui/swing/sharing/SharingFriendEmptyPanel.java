@@ -17,7 +17,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
-import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
+import org.limewire.ui.swing.sharing.friends.FriendUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -27,10 +27,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
+public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
 
     @Resource
-    Icon buddyIcon;
+    Icon friendIcon;
     
     private JLabel titleLabel;
     private JLabel text;
@@ -50,13 +50,13 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
     private final String textPart2 = ", drag files here, or use the shortcuts below to share files";
     
     @Inject
-    public SharingBuddyEmptyPanel(LibraryManager libraryManager) {
+    public SharingFriendEmptyPanel(LibraryManager libraryManager) {
         
         GuiUtils.assignResources(this); 
         
         setBackground(Color.WHITE);
         
-        titleLabel = new JLabel(buddyIcon);
+        titleLabel = new JLabel(friendIcon);
         
         text = new JLabel();
 
@@ -88,10 +88,10 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
 
     }
     
-    private void setText(String buddyName) {
-        text.setText(textPart1 + buddyName + textPart2);
-        shareButton.setText(buttonText + buddyName);
-        titleLabel.setText( title + buddyName);
+    private void setText(String friendName) {
+        text.setText(textPart1 + friendName + textPart2);
+        shareButton.setText(buttonText + friendName);
+        titleLabel.setText( title + friendName);
     }
     
     private class SharingCheckBox extends JCheckBox {
@@ -105,7 +105,7 @@ public class SharingBuddyEmptyPanel extends JPanel implements BuddyUpdate {
     }
     
     @Override
-    public void setBuddyName(String name) {
+    public void setFriendName(String name) {
         setText(name);
         
         // when changing the user name, reset checkboxes to false to 

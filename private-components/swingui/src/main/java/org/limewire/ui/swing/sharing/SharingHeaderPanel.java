@@ -11,7 +11,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.search.FilteredTextField;
-import org.limewire.ui.swing.sharing.friends.BuddyUpdate;
+import org.limewire.ui.swing.sharing.friends.FriendUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -23,7 +23,7 @@ import ca.odell.glazedlists.EventList;
  * TODO: This is very similar to SortAndFilterPanel. Once final designs are
  * ironed out these two classes should be merged and subclassed.
  */
-public class SharingHeaderPanel extends JXPanel implements BuddyUpdate {
+public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
 
     private static final int FILTER_WIDTH = 10;
     
@@ -66,7 +66,7 @@ public class SharingHeaderPanel extends JXPanel implements BuddyUpdate {
     }
     
     @Override
-    public void setBuddyName(String name) {
+    public void setFriendName(String name) {
         descriptionLabel.setText(staticText + name);
     }
 

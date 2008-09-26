@@ -20,7 +20,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.BuddyFileList;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -33,10 +33,10 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
-import org.limewire.ui.swing.sharing.friends.BuddyItem;
-import org.limewire.ui.swing.sharing.friends.BuddyItemImpl;
-import org.limewire.ui.swing.sharing.friends.BuddyNameTable;
-import org.limewire.ui.swing.sharing.friends.BuddyTableFormat;
+import org.limewire.ui.swing.sharing.friends.FriendItem;
+import org.limewire.ui.swing.sharing.friends.FriendItemImpl;
+import org.limewire.ui.swing.sharing.friends.FriendNameTable;
+import org.limewire.ui.swing.sharing.friends.FriendTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
@@ -61,7 +61,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class BuddySharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
+public class FriendSharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
     public static final String NAME = "All Friends";
     
     @Resource
@@ -73,27 +73,27 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     
     private CardLayout viewCardLayout;
 
-    private BuddyNameTable buddyTable;
+    private FriendNameTable friendTable;
     private SharingFancyPanel sharingFancyPanel;
 
     private MultiButtonTableCellRendererEditor editor;
     private MultiButtonTableCellRendererEditor renderer;
 
-    private EventList<BuddyItem> eventList;
+    private EventList<FriendItem> eventList;
     
-    private Map<String, FileList> buddyLists;
+    private Map<String, FileList> friendLists;
     
     private LibraryManager libraryManager;
     private IconManager iconManager;
     private ThumbnailManager thumbnailManager;
     
-    private BuddySharingHeaderPanel headerPanel;
+    private FriendSharingHeaderPanel headerPanel;
     
     private SharingTableFormat sharingTableFormat;
     private IconLabelRenderer iconLabelRenderer;
     
     @Inject
-    public BuddySharePanel(LibraryManager libraryManager, SharingBuddyEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager, ThumbnailManager thumbnailManager) {        
+    public FriendSharePanel(LibraryManager libraryManager, SharingFriendEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager, ThumbnailManager thumbnailManager) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
         
@@ -101,7 +101,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         this.iconManager = iconManager;
         this.thumbnailManager = thumbnailManager;
         
-        buddyLists = new HashMap<String,FileList>();
+        friendLists = new HashMap<String,FileList>();
 
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
@@ -110,10 +110,10 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
 
         //TODO: fix this. ObservableElementList is an easy way to update the table when a list size changes
         //  however it is making dynamic filtering of multiple lists very slow
-        ObservableElementList.Connector<BuddyItem> buddyConnector = GlazedLists.beanConnector(BuddyItem.class);
-        eventList = new ObservableElementList<BuddyItem>(GlazedLists.threadSafeList(new BasicEventList<BuddyItem>()), buddyConnector);
+        ObservableElementList.Connector<FriendItem> friendConnector = GlazedLists.beanConnector(FriendItem.class);
+        eventList = new ObservableElementList<FriendItem>(GlazedLists.threadSafeList(new BasicEventList<FriendItem>()), friendConnector);
                
-        buddyTable = new BuddyNameTable(eventList, new BuddyTableFormat(), libraryManager, navigator);
+        friendTable = new FriendNameTable(eventList, new FriendTableFormat(), libraryManager, navigator);
         
         headerPanel = createHeader(cardPanel);
 
@@ -121,22 +121,22 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
 
         viewCardLayout.show(cardPanel, ViewSelectionPanel.DISABLED);
         
-        BuddySelectionListener buddySelectionListener = new BuddySelectionListener(buddyTable, headerPanel, emptyPanel, cardPanel);
-        buddyTable.getSelectionModel().addListSelectionListener(buddySelectionListener);
+        FriendSelectionListener friendSelectionListener = new FriendSelectionListener(friendTable, headerPanel, emptyPanel, cardPanel);
+        friendTable.getSelectionModel().addListSelectionListener(friendSelectionListener);
         
         
         setLayout(new MigLayout("insets 0 0 0 0", "[150!]0[grow]","[grow]"));
         
         add(headerPanel, "dock north");
-        add(new JScrollPane(buddyTable), "grow");
+        add(new JScrollPane(friendTable), "grow");
         add(cardPanel, "grow");
     }
     
-    private BuddySharingHeaderPanel createHeader(JPanel cardPanel) {
+    private FriendSharingHeaderPanel createHeader(JPanel cardPanel) {
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.LIST_SELECTED), 
                 new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.TABLE_SELECTED));
         
-        BuddySharingHeaderPanel headerPanel = new BuddySharingHeaderPanel(sharingIcon, "Sharing with ", "", viewSelectionPanel, libraryManager);
+        FriendSharingHeaderPanel headerPanel = new FriendSharingHeaderPanel(sharingIcon, "Sharing with ", "", viewSelectionPanel, libraryManager);
         return headerPanel;
     }
     
@@ -182,11 +182,11 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         return list;
     }
     
-    private class BuddySelectionListener implements ListSelectionListener, ListEventListener<LocalFileItem> {
+    private class FriendSelectionListener implements ListSelectionListener, ListEventListener<LocalFileItem> {
 
-        private JTable buddy;
-        private BuddySharingHeaderPanel headerPanel;
-        private SharingBuddyEmptyPanel emptyPanel;
+        private JTable friend;
+        private FriendSharingHeaderPanel headerPanel;
+        private SharingFriendEmptyPanel emptyPanel;
         private JPanel cardPanel;
         private String name = "";
         
@@ -195,8 +195,8 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         
         private EventList<LocalFileItem> currentList;
         
-        public BuddySelectionListener(JTable table, BuddySharingHeaderPanel headerPanel, SharingBuddyEmptyPanel emptyPanel, JPanel cardPanel) {
-            this.buddy = table;
+        public FriendSelectionListener(JTable table, FriendSharingHeaderPanel headerPanel, SharingFriendEmptyPanel emptyPanel, JPanel cardPanel) {
+            this.friend = table;
             this.headerPanel = headerPanel;
             this.emptyPanel = emptyPanel;
             this.cardPanel = cardPanel;
@@ -206,17 +206,17 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         @Override
         public void valueChanged(ListSelectionEvent e) { 
             if(!e.getValueIsAdjusting()) {
-                int index = buddy.getSelectedRow();
-                if( index >= 0 && index < buddy.getModel().getRowCount()) {
-                    BuddyItem buddyItem = (BuddyItem) buddy.getModel().getValueAt(index, 0);
-                    if(buddyItem.getId().equals(name))
+                int index = friend.getSelectedRow();
+                if( index >= 0 && index < friend.getModel().getRowCount()) {
+                    FriendItem friendItem = (FriendItem) friend.getModel().getValueAt(index, 0);
+                    if(friendItem.getId().equals(name))
                         return;
                     
-                    name = buddyItem.getId();
-                    headerPanel.setBuddyName(buddyItem.getId());
-                    emptyPanel.setBuddyName(buddyItem.getId());
+                    name = friendItem.getId();
+                    headerPanel.setFriendName(friendItem.getId());
+                    emptyPanel.setFriendName(friendItem.getId());
       
-                    BuddyFileList fileList = (BuddyFileList) buddyLists.get(buddyItem.getId());
+                    FriendFileList fileList = (FriendFileList) friendLists.get(friendItem.getId());
                     emptyPanel.setUserFileList(fileList);
                     table.setModel(new SharingTableModel(fileList.getFilteredModel(), fileList,sharingTableFormat));
                     TableColumn tc = table.getColumn(6);
@@ -228,7 +228,7 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
                     headerPanel.setModel(fileList);           
                     
                     if(dropTarget == null) {
-                        dropTarget = new ShareDropTarget(BuddySharePanel.this, fileList, true);
+                        dropTarget = new ShareDropTarget(FriendSharePanel.this, fileList, true);
                         emptyDropTarget = new ShareDropTarget(emptyPanel, fileList, true);
                         
                     } else {
@@ -271,12 +271,12 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
     @Override
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
-            if(!libraryManager.containsBuddy(event.getSource().getId())) {
-                libraryManager.addBuddy(event.getSource().getId());
+            if(!libraryManager.containsFriend(event.getSource().getId())) {
+                libraryManager.addFriend(event.getSource().getId());
             }
-            addBuddy(event.getSource().getId());
+            addFriend(event.getSource().getId());
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            libraryManager.removeBuddy(event.getSource().getId());
+            libraryManager.removeFriend(event.getSource().getId());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
@@ -286,26 +286,26 @@ public class BuddySharePanel extends GenericSharingPanel implements RegisteringE
         eventList.clear();
     }
     
-    private void addBuddy(String id) {
-        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(id);
-        buddyLists.put(id, fileList);
+    private void addFriend(String id) {
+        FriendFileList fileList = (FriendFileList) libraryManager.getFriend(id);
+        friendLists.put(id, fileList);
         FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getModel(), 
               new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         fileList.setFilteredModel(filteredList);
 
-        eventList.add(new BuddyItemImpl(id, fileList.getFilteredModel()));
+        eventList.add(new FriendItemImpl(id, fileList.getFilteredModel()));
     }
     
     /**
-     * If the buddy name exists in the list, this selects
-     * that buddy in the table and shows the appropriate 
+     * If the friend name exists in the list, this selects
+     * that friend in the table and shows the appropriate 
      * information on the right.
      * 
-     * @param name - buddy name
+     * @param name - friend name
      */
-    public void selectBuddy(String name) {
+    public void selectFriend(String name) {
         for(int i = 0; i < table.getModel().getRowCount(); i++) {
-            BuddyItem item = (BuddyItem) table.getModel().getValueAt(i, 0);
+            FriendItem item = (FriendItem) table.getModel().getValueAt(i, 0);
             if(item.getId().equals(name)) {
                 final int index = i;
                 SwingUtils.invokeLater(new Runnable(){

@@ -7,7 +7,7 @@ import javax.swing.SwingUtilities;
 
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.ui.swing.sharing.MockBuddySharingDisplay;
+import org.limewire.ui.swing.sharing.MockFriendSharingDisplay;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.ChatState;
@@ -50,7 +50,7 @@ public class ConversationPaneHarness {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        ConversationPane pane = new ConversationPane(writer, friend, new MockLibraryManager(), iconManager, new MockBuddySharingDisplay());
+                        ConversationPane pane = new ConversationPane(writer, friend, new MockLibraryManager(), iconManager, new MockFriendSharingDisplay());
                         frame.add(pane);
                         
                         for(int i = 0; i < 10; i++) {

@@ -37,17 +37,17 @@ public class FilesSharingSummaryPanel extends JPanel {
     
     private final JLabel title = new JLabel();
     private final JToggleButton gnutellaButton;
-    private final JToggleButton buddyButton;
+    private final JToggleButton friendButton;
   
     @Resource private Icon gnutellaIcon;    
-    @Resource private Icon buddiesIcon;     
+    @Resource private Icon friendsIcon;     
     @Resource private Font iconOverlayFont;
     @Resource private Color iconOverlayColor;
     @Resource private Color highLightColor;
         
     @Inject
     FilesSharingSummaryPanel(LibraryManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
-            BuddySharePanel buddySharePanel, Navigator navigator) {
+            FriendSharePanel friendSharePanel, Navigator navigator) {
         GuiUtils.assignResources(this);
         
         libraryManager.addLibraryLisListener(new LibraryListListener() {
@@ -59,7 +59,7 @@ public class FilesSharingSummaryPanel extends JPanel {
                     SwingUtils.invokeLater(new Runnable() {
                         public void run() {
                             gnutellaButton.repaint();
-                            buddyButton.repaint();
+                            friendButton.repaint();
                         }
                     });
                     break;
@@ -79,18 +79,18 @@ public class FilesSharingSummaryPanel extends JPanel {
         gnutellaButton.setUI(new HighlightToggleButtonUI(highLightColor));
         new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaList());
         
-        NavItem buddyNav = navigator.createNavItem(NavCategory.SHARING, BuddySharePanel.NAME, buddySharePanel);
-        buddyButton = new JToggleButton(NavigatorUtils.getNavAction(buddyNav));
-        buddyButton.setHideActionText(true);
-        buddyButton.setName("FilesSharingSummaryPanel.buddies");
-		buddyButton.setIcon(new NumberIcon(libraryManager.getAllBuddyLists(), buddiesIcon));
-		buddyButton.setUI(new HighlightToggleButtonUI(highLightColor));   
+        NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME, friendSharePanel);
+        friendButton = new JToggleButton(NavigatorUtils.getNavAction(friendNav));
+        friendButton.setHideActionText(true);
+        friendButton.setName("FilesSharingSummaryPanel.friends");
+		friendButton.setIcon(new NumberIcon(libraryManager.getAllFriendLists(), friendsIcon));
+		friendButton.setUI(new HighlightToggleButtonUI(highLightColor));   
 		
 		setLayout(new MigLayout("insets 0 0 0 0", "", ""));
 
         add(title, "span, gapbottom 10, wrap");
         add(gnutellaButton);
-        add(buddyButton);
+        add(friendButton);
     }
     
     private class NumberIcon implements Icon {

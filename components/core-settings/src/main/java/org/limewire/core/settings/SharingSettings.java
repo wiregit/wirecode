@@ -374,37 +374,37 @@ public class SharingSettings extends LimeProps {
     }
     
     /**
-     * A saved list of names of all the buddyLists that have been created.
+     * A saved list of names of all the friendLists that have been created.
      */
-    public static final StringArraySetting SHARED_BUDDY_LIST_NAMES = 
-        FACTORY.createStringArraySetting("SHARED_BUDDY_LIST_NAMES", new String[0]);
+    public static final StringArraySetting SHARED_FRIEND_LIST_NAMES = 
+        FACTORY.createStringArraySetting("SHARED_FRIEND_LIST_NAMES", new String[0]);
 
     /**
-     * Removes a name of a saved buddylist.
+     * Removes a name of a saved friendlist.
      */
-    public static final void removeBuddyListName(String removeName) {
-        String[] names = SHARED_BUDDY_LIST_NAMES.getValue();
+    public static final void removeFriendListName(String id) {
+        String[] names = SHARED_FRIEND_LIST_NAMES.getValue();
         List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        nameList.remove(removeName);
+        nameList.remove(id);
         
         if(nameList.size() != names.length) {
-            SHARED_BUDDY_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
+            SHARED_FRIEND_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
         }
     }
     
     /**
-     * Adds a new name to the list of shared buddy list names if one does not 
+     * Adds a new name to the list of shared friend list names if one does not 
      * already exist. Returns true if the name was added or false if it 
      * already existed
      */
-    public static final boolean addBuddyListName(String name) {
-        String[] names = SHARED_BUDDY_LIST_NAMES.getValue();
+    public static final boolean addFriendListName(String id) {
+        String[] names = SHARED_FRIEND_LIST_NAMES.getValue();
         List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        if(nameList.contains(name))
+        if(nameList.contains(id))
             return false;
         else {
-            nameList.add(name);
-            SHARED_BUDDY_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
+            nameList.add(id);
+            SHARED_FRIEND_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
             return true;
         }
     }

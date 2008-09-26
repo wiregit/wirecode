@@ -42,7 +42,7 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.ui.swing.sharing.BuddySharingDisplay;
+import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -79,20 +79,20 @@ public class ConversationPane extends JPanel implements Displayable {
     private final Friend friend;
     private final LibraryManager libraryManager;
     private final IconManager iconManager;
-    private final BuddySharingDisplay buddySharingDisplay;
+    private final FriendSharingDisplay friendSharingDisplay;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted Friend friend, 
-            LibraryManager libraryManager, IconManager iconManager, BuddySharingDisplay buddySharingDisplay) {
+            LibraryManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay) {
         this.writer = writer;
         this.friend = friend;
         this.conversationName = friend.getName();
         this.friendId = friend.getID();
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
-        this.buddySharingDisplay = buddySharingDisplay;
+        this.friendSharingDisplay = friendSharingDisplay;
         
         setLayout(new BorderLayout());
         
@@ -240,8 +240,8 @@ public class ConversationPane extends JPanel implements Displayable {
         panel.add(inputPanel, BorderLayout.CENTER);
         
         JTextComponent inputComponent = inputPanel.getInputComponent();
-        BuddyShareDropTarget buddyShare = new BuddyShareDropTarget(inputComponent, new ShareLocalFileList());
-        inputComponent.setDropTarget(buddyShare.getDropTarget());
+        FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, new ShareLocalFileList());
+        inputComponent.setDropTarget(friendShare.getDropTarget());
         
         return panel;
     }
@@ -259,7 +259,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            buddySharingDisplay.selectBuddyLibrary(friend.getName());            
+            friendSharingDisplay.selectFriendLibrary(friend.getName());            
         }
     }
 
@@ -298,10 +298,10 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
     
-    private class BuddyShareDropTarget extends ShareDropTarget {
+    private class FriendShareDropTarget extends ShareDropTarget {
         private final ShareLocalFileList fileList;
 
-        public BuddyShareDropTarget(JTextComponent component, ShareLocalFileList fileList) {
+        public FriendShareDropTarget(JTextComponent component, ShareLocalFileList fileList) {
             super(component, fileList);
             this.fileList = fileList;
         }
@@ -348,7 +348,7 @@ public class ConversationPane extends JPanel implements Displayable {
         
         @Override
         public void addFile(File file) {
-            LocalFileList friendList = libraryManager.getBuddy(friend.getID());
+            LocalFileList friendList = libraryManager.getFriend(friend.getID());
             friendList.addFile(file);
             for (LocalFileItem item : friendList.getModel()) {
                 if (file.getPath().equals(item.getFile().getPath())) {

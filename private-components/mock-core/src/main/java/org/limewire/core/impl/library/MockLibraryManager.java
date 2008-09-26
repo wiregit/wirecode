@@ -16,20 +16,20 @@ public class MockLibraryManager implements LibraryManager {
 
     private FileListAdapter allFileList;
     private FileListAdapter gnutellaList;
-    private FileListAdapter buddyList;
+    private FileListAdapter friendList;
     
-    private Map<String, LocalFileList> buddyMap;
+    private Map<String, LocalFileList> friendMap;
     
     public MockLibraryManager() {
         allFileList = new FileListAdapter();
         gnutellaList = new FileListAdapter();
-        buddyList = new FileListAdapter();
+        friendList = new FileListAdapter();
         
-        buddyMap = new HashMap<String, LocalFileList>();
+        friendMap = new HashMap<String, LocalFileList>();
 
         initializeMockGnutellaData();
-        initializeMockBuddyData();
-        initializeBuddys();
+        initializeMockFriendData();
+        initializeFriends();
     }
     
     private void initializeMockGnutellaData(){
@@ -60,43 +60,43 @@ public class MockLibraryManager implements LibraryManager {
         t.start();
     }
     
-    private void initializeMockBuddyData(){
+    private void initializeMockFriendData(){
         MockLocalFileItem item = new MockLocalFileItem("Small Town Hero.mp3", 1000,12345,23456,1,1, Category.IMAGE);
-        buddyList.addFileItem(item);
+        friendList.addFileItem(item);
         allFileList.addFileItem(item);
         
         item = new MockLocalFileItem("LimeWireStore.html", 12345,12312,534512,5,0, Category.OTHER);
-        buddyList.addFileItem(item);
+        friendList.addFileItem(item);
         allFileList.addFileItem(item);
         
         item = new MockLocalFileItem("Pictures.png", 32423, 3415412, 123123,0,0, Category.OTHER);
-        buddyList.addFileItem(item);
+        friendList.addFileItem(item);
         allFileList.addFileItem(item);
     }
     
-    private void initializeBuddys() {
-        buddyMap.put("Sean", new FileListAdapter());
-        initializeBuddy4(buddyMap.get("Sean"));
-        buddyMap.put("Bob", new FileListAdapter());
-        buddyMap.put("Johanna", new FileListAdapter());
-        buddyMap.put("Mark", new FileListAdapter());
-        initializeBuddy(buddyMap.get("Mark"));
-        buddyMap.put("Rob", new FileListAdapter());
-        initializeBuddy2(buddyMap.get("Rob"));
+    private void initializeFriends() {
+        friendMap.put("Sean", new FileListAdapter());
+        initializeFriend4(friendMap.get("Sean"));
+        friendMap.put("Bob", new FileListAdapter());
+        friendMap.put("Johanna", new FileListAdapter());
+        friendMap.put("Mark", new FileListAdapter());
+        initializeFriend(friendMap.get("Mark"));
+        friendMap.put("Rob", new FileListAdapter());
+        initializeFriend2(friendMap.get("Rob"));
     }
     
-    private void initializeBuddy(FileList fileList) {
+    private void initializeFriend(FileList fileList) {
         FileListAdapter files = (FileListAdapter) fileList;
         files.addFileItem(allFileList.getModel().get(0));
     }
     
-    private void initializeBuddy2(FileList fileList) {
+    private void initializeFriend2(FileList fileList) {
         FileListAdapter files = (FileListAdapter) fileList;
         files.addFileItem(allFileList.getModel().get(0));
         files.addFileItem(allFileList.getModel().get(2));
     }
     
-    private void initializeBuddy4(FileList fileList) {
+    private void initializeFriend4(FileList fileList) {
         FileListAdapter files = (FileListAdapter) fileList;
         files.addFileItem(allFileList.getModel().get(0));
         files.addFileItem(allFileList.getModel().get(1));
@@ -117,10 +117,6 @@ public class MockLibraryManager implements LibraryManager {
         return allFileList;
     }
     
-//    @Override
-//    public FileList getAllBuddyList() {
-//        return buddyList;
-//    }
     
     @Override
     public LocalFileList getGnutellaList() {
@@ -128,12 +124,12 @@ public class MockLibraryManager implements LibraryManager {
     }
 
     @Override
-    public Map<String, LocalFileList> getAllBuddyLists() {
-        return buddyMap;
+    public Map<String, LocalFileList> getAllFriendLists() {
+        return friendMap;
     }
     
     @Override
-    public LocalFileList getBuddy(String name) {
+    public LocalFileList getFriend(String name) {
         return new FileListAdapter();
     }
 
@@ -144,33 +140,33 @@ public class MockLibraryManager implements LibraryManager {
     }
 
     @Override
-    public void addBuddy(String name) {
+    public void addFriend(String name) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void removeBuddy(String name) {
+    public void removeFriend(String name) {
         // TODO Auto-generated method stub
         
     }
     
     @Override
-    public boolean containsBuddy(String name) {
+    public boolean containsFriend(String name) {
         return false;
     }
 
     
     ///////////////////////////////////////////////
-    //  Accessors for Buddy Libraries
+    //  Accessors for Friend Libraries
     ///////////////////////////////////////////////
 
     @Override
-    public RemoteFileList getOrCreateBuddyLibrary(Friend id) {
+    public RemoteFileList getOrCreateFriendLibrary(Friend id) {
         return null;
     }
 
     @Override
-    public void removeBuddyLibrary(Friend id) {
+    public void removeFriendLibrary(Friend id) {
     }
 }

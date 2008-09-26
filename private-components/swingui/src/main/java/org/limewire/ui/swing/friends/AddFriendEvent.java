@@ -2,11 +2,11 @@ package org.limewire.ui.swing.friends;
 
 import org.limewire.ui.swing.AbstractEDTEvent;
 
-public class AddBuddyEvent extends AbstractEDTEvent {
+public class AddFriendEvent extends AbstractEDTEvent {
     private final String id;
     private final String name;
     
-    public AddBuddyEvent(String id, String name) {
+    public AddFriendEvent(String id, String name) {
         this.id = id;
         this.name = name;
     }

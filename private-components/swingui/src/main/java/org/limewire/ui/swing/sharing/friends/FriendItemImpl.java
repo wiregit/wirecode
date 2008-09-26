@@ -10,17 +10,17 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem>{
+public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileItem>{
 
     private final String id;
     private final EventList<LocalFileItem> eventList;
-    private FileList buddyLibraryList;
+    private FileList friendLibraryList;
     
     private int size = 0;
     
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     
-    public BuddyItemImpl(String id, EventList<LocalFileItem> eventList) {
+    public FriendItemImpl(String id, EventList<LocalFileItem> eventList) {
         this.id = id;
         this.eventList = eventList;
         this.eventList.addListEventListener(this);
@@ -56,16 +56,16 @@ public class BuddyItemImpl implements BuddyItem, ListEventListener<LocalFileItem
 
     @Override
     public FileList getLibrary() {
-        return buddyLibraryList;
+        return friendLibraryList;
     }
 
     @Override
     public boolean hasLibrary() {
-        return buddyLibraryList != null;
+        return friendLibraryList != null;
     }
 
     @Override
     public void setLibrary(FileList libraryFileList) {
-        this.buddyLibraryList = libraryFileList;
+        this.friendLibraryList = libraryFileList;
     }
 }

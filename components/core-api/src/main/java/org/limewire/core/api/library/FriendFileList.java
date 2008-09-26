@@ -2,7 +2,7 @@ package org.limewire.core.api.library;
 
 import ca.odell.glazedlists.EventList;
 
-public interface BuddyFileList extends LocalFileList {
+public interface FriendFileList extends LocalFileList {
 
     public void setFilteredModel(EventList<LocalFileItem> filteredList);
     

@@ -4,7 +4,7 @@ import java.beans.PropertyChangeListener;
 
 import org.limewire.core.api.library.FileList;
 
-public interface BuddyItem {
+public interface FriendItem {
     
     public int size();
     

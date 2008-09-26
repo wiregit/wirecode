@@ -7,13 +7,13 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.sharing.friends.BuddyItem;
+import org.limewire.ui.swing.sharing.friends.FriendItem;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.FilterList;
 
-public class BuddySharingActionHandler {
+public class FriendSharingActionHandler {
     
     private final Navigator navigator;
     private final LibraryManager libraryManager;
@@ -24,12 +24,12 @@ public class BuddySharingActionHandler {
     public static final String SHARE_ALL_IMAGE = "SHARE_ALL_IMAGE";
     public static final String UNSHARE_ALL = "UNSHARE_ALL";
     
-    public BuddySharingActionHandler(Navigator navigator, LibraryManager libraryManager) {
+    public FriendSharingActionHandler(Navigator navigator, LibraryManager libraryManager) {
         this.navigator = navigator;
         this.libraryManager = libraryManager;
     }
     
-    public void performAction(final String actionCommand, final LocalFileList fileList, final BuddyItem item) {
+    public void performAction(final String actionCommand, final LocalFileList fileList, final FriendItem item) {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {

@@ -64,7 +64,7 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.ui.swing.sharing.BuddySharingDisplay;
+import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
@@ -92,7 +92,7 @@ import com.google.inject.Singleton;
  *
  */
 @Singleton
-public class FriendsPane extends JPanel implements BuddyRemover {
+public class FriendsPane extends JPanel implements FriendRemover {
     
     private static final Color MEDIUM_GRAY = new Color(183, 183, 183);
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
@@ -114,7 +114,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private final WeakHashMap<Friend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final LibraryManager libraryManager;
-    private final BuddySharingDisplay buddySharing;
+    private final FriendSharingDisplay friendSharing;
     private final JScrollPane scrollPane;
     private final Timer idleTimer;
     private final JLabel unseenMessageCountPopupLabel = new JLabel();
@@ -124,7 +124,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
 
     @Inject
-    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager, BuddySharingDisplay buddySharing) {
+    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager, FriendSharingDisplay friendSharing) {
         super(new BorderLayout());
         this.icons = icons;
         this.friends = new BasicEventList<Friend>();
@@ -132,7 +132,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         this.friendTimerMap = new WeakHashMap<Friend, AlternatingIconTimer>();
         this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
-        this.buddySharing = buddySharing;
+        this.friendSharing = friendSharing;
         ObservableElementList<Friend> observableList = new ObservableElementList<Friend>(friends, GlazedLists.beanConnector(Friend.class));
         SortedList<Friend> sortedFriends = new SortedList<Friend>(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
@@ -201,7 +201,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         nonChattingPopup.add(viewLibrary);
         nonChattingPopup.add(viewSharedFiles);
         nonChattingPopup.addSeparator();
-        nonChattingPopup.add(new RemoveBuddy(context));
+        nonChattingPopup.add(new RemoveFriend(context));
         
         JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
         chattingPopup.addSeparator();
@@ -813,7 +813,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             if (friend != null) {
                 //minimize chat
                 new DisplayFriendsEvent(false).publish();
-                buddySharing.selectBuddyLibrary(friend.getName());
+                friendSharing.selectFriendLibrary(friend.getName());
             }
         }
     }
@@ -829,7 +829,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
             new DisplayFriendsEvent(false).publish();
             Friend friend = context.getFriend();
             if (friend != null) {
-                buddySharing.selectBuddyInFileSharingList(friend.getID());
+                friendSharing.selectFriendInFileSharingList(friend.getID());
             }
         }
 
@@ -864,8 +864,8 @@ public class FriendsPane extends JPanel implements BuddyRemover {
                 return 0;
             }
             int sharedFileCount = 0;
-            if (libraryManager.containsBuddy(friend.getID())) {
-                FileList sharedFileList = libraryManager.getBuddy(friend.getID());
+            if (libraryManager.containsFriend(friend.getID())) {
+                FileList sharedFileList = libraryManager.getFriend(friend.getID());
                 sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
             }
             return sharedFileCount;
@@ -880,9 +880,9 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         }
     }
     
-    private class RemoveBuddy extends AbstractContextAction {
-        public RemoveBuddy(FriendContext context) {
-            super("Remove buddy from list", context);
+    private class RemoveFriend extends AbstractContextAction {
+        public RemoveFriend(FriendContext context) {
+            super("Remove friend from list", context);
         }
 
         @Override
@@ -904,13 +904,13 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     }
 
     @Override
-    public boolean canRemoveSelectedBuddy() {
+    public boolean canRemoveSelectedFriend() {
         Friend selectedFriend = getSelectedFriend();
         return selectedFriend != null && !selectedFriend.isChatting();
     }
 
     @Override
-    public void removeSelectedBuddy() {
+    public void removeSelectedFriend() {
         removeBuddy(getSelectedFriend());
     }
 
@@ -918,7 +918,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
         if (selectedFriend != null) {
             friends.remove(selectedFriend);
             idToFriendMap.remove(selectedFriend.getID());
-            new RemoveBuddyEvent(selectedFriend).publish();
+            new RemoveFriendEvent(selectedFriend).publish();
         }
     }
     
@@ -932,7 +932,7 @@ public class FriendsPane extends JPanel implements BuddyRemover {
     
     public boolean isSharingFilesWithFriends() {
         for(Friend friend : friends) {
-            if (libraryManager.getBuddy(friend.getID()).size() > 0) {
+            if (libraryManager.getFriend(friend.getID()).size() > 0) {
                 return true;
             }
         }

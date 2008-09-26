@@ -4,17 +4,17 @@ import java.io.File;
 import java.util.Set;
 
 /**
- * A collection of FileDescs containing files shared with an individual buddy.
+ * A collection of FileDescs containing files shared with an individual friend.
  */
-public class BuddyFileListImpl extends FileListImpl {
+public class FriendFileListImpl extends FileListImpl {
 
-    public BuddyFileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
+    public FriendFileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
         super(name, fileManager, individualFiles);
     }
 
     /**
-     * Buddy lists are based completely on individual files since there's no 
-     * directory for files to defaultly reside in. Always add buddy files as 
+     * Friend lists are based completely on individual files since there's no 
+     * directory for files to defaultly reside in. Always add friend files as 
      * individuals
      */
     @Override

@@ -45,7 +45,7 @@ import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.BuddyFileList;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -81,7 +81,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
 
 
-    private static final int BUDDY_ROW_COUNT = 4;
+    private static final int FRIEND_ROW_COUNT = 4;
     private static final int SHARED_ROW_COUNT = 20;
     private static final int BORDER_INSETS = 10;
     private static final int HGAP = 5;
@@ -92,22 +92,22 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private JTextField inputField;
 
     /**
-     * all unshared buddies
+     * all unshared friends
      */    
-    private EventList<SharingTarget> noShareBuddyList;
+    private EventList<SharingTarget> noShareFriendList;
     /**
-     * filtered list of unshared buddies
+     * filtered list of unshared friends
      */
     private FilterList<SharingTarget> noShareFilterList;
-    private EventList<SharingTarget> shareBuddyList;
+    private EventList<SharingTarget> shareFriendList;
 
     private JScrollPane shareScroll;
-    private JScrollPane buddyScroll;
+    private JScrollPane friendScroll;
 
     private JXTable shareTable;
-    private MouseableTable buddyTable;
+    private MouseableTable friendTable;
 
-    private JLabel buddyLabel;
+    private JLabel friendLabel;
     private JLabel shareLabel;
     
     private JXPanel mainPanel;
@@ -118,7 +118,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     private ShapePainter shapePainter;
     
-    private Map<SharingTarget, LocalFileList> buddyListMap;
+    private Map<SharingTarget, LocalFileList> friendListMap;
     private LocalFileItem fileItem;
     
     private int ledgeWidth;
@@ -144,10 +144,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private Action up = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int selRow = buddyTable.getSelectedRow();
+            int selRow = friendTable.getSelectedRow();
             if (selRow > 0) {
                 selRow--;
-                buddyTable.setRowSelectionInterval(selRow, selRow);
+                friendTable.setRowSelectionInterval(selRow, selRow);
             }
         }
     };
@@ -155,10 +155,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private Action down = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int selRow = buddyTable.getSelectedRow();
-            if (selRow < buddyTable.getRowCount() - 1) {
+            int selRow = friendTable.getSelectedRow();
+            if (selRow < friendTable.getRowCount() - 1) {
                 selRow++;
-                buddyTable.setRowSelectionInterval(selRow, selRow);
+                friendTable.setRowSelectionInterval(selRow, selRow);
             }
         }
     };
@@ -170,7 +170,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         
         
         this.libraryManager = libraryManager;
-        buddyListMap = new ConcurrentHashMap<SharingTarget, LocalFileList>();   
+        friendListMap = new ConcurrentHashMap<SharingTarget, LocalFileList>();   
         gnutellaList = libraryManager.getGnutellaList();
         
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -193,15 +193,15 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         
         shareLabel = new JLabel(I18n.tr("Currently sharing with"));
         
-        shareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+        shareFriendList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
        
-        shareTable = new ToolTipTable(new EventTableModel<SharingTarget>(shareBuddyList, new LibraryShareTableFormat(1)));
+        shareTable = new ToolTipTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(1)));
         shareTable.setTableHeader(null);
         final ShareRendererEditor removeEditor = new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed);
         removeEditor.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-               unshareBuddy(removeEditor.getBuddy());
+               unshareFriend(removeEditor.getFriend());
                removeEditor.cancelCellEditing();
                inputField.requestFocusInWindow();
             }            
@@ -229,16 +229,16 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
         //have no guarantee about the order of sorting and selecting
         final TextMatcherEditor<SharingTarget>textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
-        noShareBuddyList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
-        noShareFilterList = new FilterList<SharingTarget>(noShareBuddyList, textMatcher);
+        noShareFriendList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+        noShareFilterList = new FilterList<SharingTarget>(noShareFriendList, textMatcher);
         
         inputField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if("".equals(inputField.getText()) || inputField.getText() == null || buddyTable.getRowCount() == 0){
+                if("".equals(inputField.getText()) || inputField.getText() == null || friendTable.getRowCount() == 0){
                     setVisible(false);
-                } else if (buddyTable.getSelectedRow() >= 0) {
-                    shareBuddy(noShareFilterList.get(buddyTable.getSelectedRow()));
+                } else if (friendTable.getSelectedRow() >= 0) {
+                    shareFriend(noShareFilterList.get(friendTable.getSelectedRow()));
                 }
             }
         });
@@ -261,61 +261,61 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             
             private void update(){
                 textMatcher.setFilterText(inputField.getText().split(" "));
-                if (buddyTable.getRowCount() > 0){
-                    buddyTable.setRowSelectionInterval(0, 0);
+                if (friendTable.getRowCount() > 0){
+                    friendTable.setRowSelectionInterval(0, 0);
                 }
             }
         });
         
-        buddyTable = new ToolTipTable(new EventTableModel<SharingTarget>(noShareFilterList, new LibraryShareTableFormat(0)));
+        friendTable = new ToolTipTable(new EventTableModel<SharingTarget>(noShareFilterList, new LibraryShareTableFormat(0)));
         //do nothing ColorHighlighter eliminates default striping
-        buddyTable.setHighlighters(new ColorHighlighter(HighlightPredicate.ALWAYS, getBackground(),
-                Color.BLACK, buddyTable.getSelectionBackground(), buddyTable.getSelectionForeground()));
-        buddyTable.setTableHeader(null);
-        buddyTable.setOpaque(false);
-        buddyTable.setShowGrid(false, false);
-        buddyTable.setColumnSelectionAllowed(false);
-        buddyTable.setRowSelectionAllowed(true);
-        buddyTable.setToolTipText("filler to enable tooltips");
+        friendTable.setHighlighters(new ColorHighlighter(HighlightPredicate.ALWAYS, getBackground(),
+                Color.BLACK, friendTable.getSelectionBackground(), friendTable.getSelectionForeground()));
+        friendTable.setTableHeader(null);
+        friendTable.setOpaque(false);
+        friendTable.setShowGrid(false, false);
+        friendTable.setColumnSelectionAllowed(false);
+        friendTable.setRowSelectionAllowed(true);
+        friendTable.setToolTipText("filler to enable tooltips");
 
         final ShareRendererEditor addEditor = new ShareRendererEditor(addIcon, addIconRollover, addIconPressed);
         addEditor.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-               int row = buddyTable.getSelectedRow();
-               shareBuddy(addEditor.getBuddy());
+               int row = friendTable.getSelectedRow();
+               shareFriend(addEditor.getFriend());
                addEditor.cancelCellEditing();
                inputField.requestFocusInWindow();
-               resetRowSelection(buddyTable, row);
+               resetRowSelection(friendTable, row);
             }            
         });
         
-        buddyTable.setDoubleClickHandler(new TableDoubleClickHandler() {
+        friendTable.setDoubleClickHandler(new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
-                addSelectedBuddy();
+                addSelectedFriend();
             }
         });
 
-        buddyTable.getColumnModel().getColumn(0).setCellEditor(addEditor);
-        buddyTable.getColumnModel().getColumn(0).setPreferredWidth(addEditor.getPreferredSize().width); 
-        buddyTable.getColumnModel().getColumn(0).setMaxWidth(addEditor.getPreferredSize().width);       
-        buddyTable.getColumnModel().getColumn(0).setCellRenderer(new ShareRendererEditor(addIcon, addIconRollover, addIconPressed));
+        friendTable.getColumnModel().getColumn(0).setCellEditor(addEditor);
+        friendTable.getColumnModel().getColumn(0).setPreferredWidth(addEditor.getPreferredSize().width); 
+        friendTable.getColumnModel().getColumn(0).setMaxWidth(addEditor.getPreferredSize().width);       
+        friendTable.getColumnModel().getColumn(0).setCellRenderer(new ShareRendererEditor(addIcon, addIconRollover, addIconPressed));
 
-        buddyTable.setRowHeight(addEditor.getPreferredSize().height);
-        buddyTable.setVisibleRowCount(BUDDY_ROW_COUNT);
-        buddyScroll = new JScrollPane(buddyTable);      
-        buddyScroll.setBorder(new RoundedBorder(5));
+        friendTable.setRowHeight(addEditor.getPreferredSize().height);
+        friendTable.setVisibleRowCount(FRIEND_ROW_COUNT);
+        friendScroll = new JScrollPane(friendTable);      
+        friendScroll.setBorder(new RoundedBorder(5));
         
         shareScroll = new JScrollPane(shareTable);
         shareScroll.setBorder(new EmptyBorder(0, shareTableIndent, 0, 0));
         shareScroll.setOpaque(false);
 
-        buddyLabel = new JLabel(I18n.tr("To share, type name below"));
+        friendLabel = new JLabel(I18n.tr("To share, type name below"));
         
-        Dimension labelSize = buddyLabel.getPreferredSize().width > shareLabel.getPreferredSize().width ? 
-                buddyLabel.getPreferredSize() : shareLabel.getPreferredSize();
-        buddyLabel.setPreferredSize(labelSize);
+        Dimension labelSize = friendLabel.getPreferredSize().width > shareLabel.getPreferredSize().width ? 
+                friendLabel.getPreferredSize() : shareLabel.getPreferredSize();
+        friendLabel.setPreferredSize(labelSize);
         shareLabel.setPreferredSize(labelSize);
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -324,14 +324,14 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(0, HGAP, 0, HGAP);
-        mainPanel.add(buddyLabel, gbc);
+        mainPanel.add(friendLabel, gbc);
         
         gbc.gridy++;
         gbc.weighty = 0;
         mainPanel.add(inputField, gbc);
         gbc.gridy++;
         gbc.weighty = 1.0;
-        mainPanel.add(buddyScroll, gbc);
+        mainPanel.add(friendScroll, gbc);
         gbc.gridy++;
         gbc.weighty = 0;
         mainPanel.add(new JSeparator(), gbc);   
@@ -356,12 +356,12 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
          Action enterAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addSelectedBuddy();
+                addSelectedFriend();
             }
         };
         
-        buddyTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0),enterAction.toString() );
-        buddyTable.getActionMap().put(enterAction.toString(), enterAction);        
+        friendTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0),enterAction.toString() );
+        friendTable.getActionMap().put(enterAction.toString(), enterAction);        
         
         Action closeAction = new AbstractAction() {
             @Override
@@ -378,8 +378,8 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         mainPanel.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
         mainPanel.getActionMap().put(closeAction.toString(), closeAction);  
         
-        buddyTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
-        buddyTable.getActionMap().put(closeAction.toString(), closeAction);  
+        friendTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
+        friendTable.getActionMap().put(closeAction.toString(), closeAction);  
         
         shareTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
         shareTable.getActionMap().put(closeAction.toString(), closeAction); 
@@ -396,11 +396,11 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     }
     
 
-    private void addSelectedBuddy() {
-        if (buddyTable.getSelectedRow() >= 0) {
-            int row = buddyTable.getSelectedRow();
-            shareBuddy(noShareFilterList.get(row));
-            resetRowSelection(buddyTable, row);
+    private void addSelectedFriend() {
+        if (friendTable.getSelectedRow() >= 0) {
+            int row = friendTable.getSelectedRow();
+            shareFriend(noShareFilterList.get(row));
+            resetRowSelection(friendTable, row);
         }
     
     }
@@ -469,38 +469,38 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     }
     
     
-    private void shareBuddy(SharingTarget buddy) {
-        shareBuddyList.add(buddy);
-        noShareBuddyList.remove(buddy);
+    private void shareFriend(SharingTarget friend) {
+        shareFriendList.add(friend);
+        noShareFriendList.remove(friend);
 
-        if (buddy == GNUTELLA_SHARE) {
+        if (friend == GNUTELLA_SHARE) {
             gnutellaList.addFile(fileItem.getFile());
         } else {
-            buddyListMap.get(buddy).addFile(fileItem.getFile());
+            friendListMap.get(friend).addFile(fileItem.getFile());
         }
         adjustSize();
     }
     
     
-    private void unshareBuddy(SharingTarget buddy) {
-        shareBuddyList.remove(buddy);
-        noShareBuddyList.add(buddy);
+    private void unshareFriend(SharingTarget friend) {
+        shareFriendList.remove(friend);
+        noShareFriendList.add(friend);
         
-        if (buddy == GNUTELLA_SHARE) {
+        if (friend == GNUTELLA_SHARE) {
             gnutellaList.removeFile(fileItem.getFile());
         } else {
-            buddyListMap.get(buddy).removeFile(fileItem.getFile());
+            friendListMap.get(friend).removeFile(fileItem.getFile());
         }
         adjustSize();
     }
     
     //TODO: clean this up
     private void adjustSize(){
-        int visibleRows = (noShareBuddyList.size() < BUDDY_ROW_COUNT) ? noShareBuddyList.size() : BUDDY_ROW_COUNT;
-        buddyTable.setVisibleRowCount(visibleRows);
-        buddyScroll.setVisible(noShareBuddyList.size() > 0);
-        buddyLabel.setVisible(noShareBuddyList.size() > 0);
-        inputField.setVisible(noShareBuddyList.size() > 1);
+        int visibleRows = (noShareFriendList.size() < FRIEND_ROW_COUNT) ? noShareFriendList.size() : FRIEND_ROW_COUNT;
+        friendTable.setVisibleRowCount(visibleRows);
+        friendScroll.setVisible(noShareFriendList.size() > 0);
+        friendLabel.setVisible(noShareFriendList.size() > 0);
+        inputField.setVisible(noShareFriendList.size() > 1);
         
         visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
@@ -527,18 +527,18 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     @Override
     public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {              
-            addBuddy(new SharingTarget(event.getSource().getId()));
+            addFriend(new SharingTarget(event.getSource().getId()));
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            removeBuddy(new SharingTarget(event.getSource().getId()));
+            removeFriend(new SharingTarget(event.getSource().getId()));
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
     
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
-        shareBuddyList.clear();
-        noShareBuddyList.clear();
-        buddyListMap.clear();
+        shareFriendList.clear();
+        noShareFriendList.clear();
+        friendListMap.clear();
     }
     
 
@@ -572,47 +572,47 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         return false;
     }
     
-    private void removeBuddy(SharingTarget buddy) {
-        buddyListMap.remove(buddy);
-        shareBuddyList.remove(buddy);
-        noShareBuddyList.remove(buddy);
+    private void removeFriend(SharingTarget friend) {
+        friendListMap.remove(friend);
+        shareFriendList.remove(friend);
+        noShareFriendList.remove(friend);
     }
     
-    private void addBuddy(SharingTarget buddy) {
-        if(!libraryManager.containsBuddy(buddy.getId())) {
-            libraryManager.addBuddy(buddy.getId());
+    private void addFriend(SharingTarget friend) {
+        if(!libraryManager.containsFriend(friend.getId())) {
+            libraryManager.addFriend(friend.getId());
         }
-        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(buddy.getId());
-        buddyListMap.put(buddy, fileList);
-        loadBuddy(buddy);
+        FriendFileList fileList = (FriendFileList) libraryManager.getFriend(friend.getId());
+        friendListMap.put(friend, fileList);
+        loadFriend(friend);
     }
     
     private void loadSharedBuddies() {
-        shareBuddyList.clear();
-        noShareBuddyList.clear();
+        shareFriendList.clear();
+        noShareFriendList.clear();
 
         if (fileItem.getCategory() != Category.DOCUMENT || SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
-            loadBuddy(GNUTELLA_SHARE);
+            loadFriend(GNUTELLA_SHARE);
         }
         
-        for (SharingTarget buddy : buddyListMap.keySet()) {
-            loadBuddy(buddy);
+        for (SharingTarget friend : friendListMap.keySet()) {
+            loadFriend(friend);
         }
     }
     
-    private void loadBuddy(SharingTarget buddy) {
-        if (isShared(fileItem, buddy)) {
-            shareBuddyList.add(buddy);
+    private void loadFriend(SharingTarget friend) {
+        if (isShared(fileItem, friend)) {
+            shareFriendList.add(friend);
         } else {
-            noShareBuddyList.add(buddy);
+            noShareFriendList.add(friend);
         }
     }
     
-    private boolean isShared(FileItem fileItem, SharingTarget buddy){
-        if(buddy == GNUTELLA_SHARE){
+    private boolean isShared(FileItem fileItem, SharingTarget friend){
+        if(friend == GNUTELLA_SHARE){
             return gnutellaList.getModel().contains(fileItem);
         }
-        return buddyListMap.get(buddy).getModel().contains(fileItem);
+        return friendListMap.get(friend).getModel().contains(fileItem);
     }   
     
     private static class LibraryShareTableFormat implements WritableTableFormat<SharingTarget> {

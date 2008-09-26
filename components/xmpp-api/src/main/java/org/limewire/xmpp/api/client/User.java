@@ -5,7 +5,7 @@ import java.util.Map;
 import org.limewire.core.api.friend.Friend;
 
 /**
- * Represents a user ("buddy") in a persons roster
+ * Represents a user ("friend") in a persons roster
  */
 public interface User extends Friend {
     

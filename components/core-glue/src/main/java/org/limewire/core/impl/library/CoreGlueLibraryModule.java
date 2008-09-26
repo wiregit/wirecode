@@ -21,9 +21,9 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("friendLibraries")).to(FriendLibraryAutoCompleter.class);
         bind(FriendSearcher.class);
         
-        EventMulticaster<FriendRemoteLibraryEvent> buddyMulticaster = new EventMulticasterImpl<FriendRemoteLibraryEvent>(); 
-        bind(new TypeLiteral<EventListener<FriendRemoteLibraryEvent>>(){}).toInstance(buddyMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FriendRemoteLibraryEvent>>(){}).toInstance(buddyMulticaster);
+        EventMulticaster<FriendRemoteLibraryEvent> friendMulticaster = new EventMulticasterImpl<FriendRemoteLibraryEvent>(); 
+        bind(new TypeLiteral<EventListener<FriendRemoteLibraryEvent>>(){}).toInstance(friendMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FriendRemoteLibraryEvent>>(){}).toInstance(friendMulticaster);
     }
 
 }

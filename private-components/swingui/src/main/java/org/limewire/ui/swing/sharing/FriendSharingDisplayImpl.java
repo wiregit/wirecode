@@ -8,19 +8,19 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class BuddySharingDisplayImpl implements BuddySharingDisplay {
+public class FriendSharingDisplayImpl implements FriendSharingDisplay {
     private final Navigator navigator;
-    private final BuddySharePanel buddySharePanel;
+    private final FriendSharePanel friendSharePanel;
     
     @Inject
-    public BuddySharingDisplayImpl(Navigator navigator, BuddySharePanel buddySharePanel) {
+    public FriendSharingDisplayImpl(Navigator navigator, FriendSharePanel friendSharePanel) {
         this.navigator = navigator;
-        this.buddySharePanel = buddySharePanel;
+        this.friendSharePanel = friendSharePanel;
     }
     
     @Override
     public void displaySharing() {
-        displayNavigableItem(NavCategory.SHARING, BuddySharePanel.NAME);
+        displayNavigableItem(NavCategory.SHARING, FriendSharePanel.NAME);
     }
 
     private void displayNavigableItem(NavCategory navCategory, String name) {
@@ -29,13 +29,13 @@ public class BuddySharingDisplayImpl implements BuddySharingDisplay {
     }
     
     @Override
-    public void selectBuddyInFileSharingList(String buddyId) {
+    public void selectFriendInFileSharingList(String friendId) {
         displaySharing();
-        buddySharePanel.selectBuddy(buddyId);
+        friendSharePanel.selectFriend(friendId);
     }
 
     @Override
-    public void selectBuddyLibrary(String buddyName) {
-        displayNavigableItem(NavCategory.LIBRARY, buddyName);
+    public void selectFriendLibrary(String friendName) {
+        displayNavigableItem(NavCategory.LIBRARY, friendName);
     }
 }

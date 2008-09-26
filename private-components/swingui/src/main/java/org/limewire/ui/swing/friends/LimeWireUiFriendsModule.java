@@ -14,7 +14,7 @@ public class LimeWireUiFriendsModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(BuddyRemover.class).to(FriendsPane.class);
+        bind(FriendRemover.class).to(FriendsPane.class);
         bind(IconLibrary.class).to(IconLibraryImpl.class);
         bind(ChatLoginState.class).to(ChatLoginStateImpl.class);
         bind(ConversationPaneFactory.class).toProvider(

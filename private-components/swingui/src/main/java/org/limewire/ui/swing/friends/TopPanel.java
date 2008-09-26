@@ -49,15 +49,15 @@ public class TopPanel extends JPanel {
     private JLabel friendNameLabel;
     private JLabel friendStatusLabel;
     private final IconLibrary icons;
-    private final BuddyRemover buddyRemover;
+    private final FriendRemover friendRemover;
     private ButtonGroup availabilityButtonGroup;
     private JCheckBoxMenuItem availablePopupItem;
     private JCheckBoxMenuItem awayPopupItem;
     
     @Inject
-    public TopPanel(final IconLibrary icons, BuddyRemover buddyRemover) {
+    public TopPanel(final IconLibrary icons, FriendRemover friendRemover) {
         this.icons = icons;
-        this.buddyRemover = buddyRemover;
+        this.friendRemover = friendRemover;
         
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
@@ -105,8 +105,8 @@ public class TopPanel extends JPanel {
         options.setForeground(getForeground());
         options.setBackground(getBackground());
         options.setBorderPainted(false);
-        options.add(new AddBuddyOption());
-        options.add(new RemoveBuddyOption());
+        options.add(new AddFriendOption());
+        options.add(new RemoveFriendOption());
         options.add(new MoreChatOptionsOption());
         options.addSeparator();
         availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
@@ -226,30 +226,30 @@ public class TopPanel extends JPanel {
         }
     }
     
-    private class AddBuddyOption extends AbstractAction {
-        public AddBuddyOption() {
-            super(tr("Add buddy"));
+    private class AddFriendOption extends AbstractAction {
+        public AddFriendOption() {
+            super(tr("Add friend"));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            final JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(TopPanel.this), tr("Add Buddy"));
+            final JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(TopPanel.this), tr("Add Friend"));
             dialog.setModalityType(ModalityType.MODELESS);
             dialog.setLayout(new MigLayout("", "[right]2[]2[]", "[]2[]2[]"));
-            dialog.add(new JLabel(tr("Buddy ID:")));
+            dialog.add(new JLabel(tr("Friend ID:")));
             final JTextField idTextField = new JTextField(25);
             dialog.add(idTextField, "span, wrap");
             dialog.add(new JLabel(tr("Name:")));
             final JTextField nameField = new JTextField(25);
             dialog.add(nameField, "span, wrap");
             
-            JButton ok = new JButton(tr("Add buddy"));
+            JButton ok = new JButton(tr("Add friend"));
             ok.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (idTextField.getText().length() > 0)
                     dialog.setVisible(false);
-                    new AddBuddyEvent(idTextField.getText(), nameField.getText()).publish();
+                    new AddFriendEvent(idTextField.getText(), nameField.getText()).publish();
                 }
             });
             
@@ -268,19 +268,19 @@ public class TopPanel extends JPanel {
         }
     }
     
-    private class RemoveBuddyOption extends AbstractAction {
-        public RemoveBuddyOption() {
-            super(tr("Remove buddy"));
+    private class RemoveFriendOption extends AbstractAction {
+        public RemoveFriendOption() {
+            super(tr("Remove friend"));
         }
 
         @Override
         public boolean isEnabled() {
-            return buddyRemover.canRemoveSelectedBuddy();
+            return friendRemover.canRemoveSelectedFriend();
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            buddyRemover.removeSelectedBuddy();
+            friendRemover.removeSelectedFriend();
         }
     }
     

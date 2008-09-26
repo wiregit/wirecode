@@ -10,11 +10,11 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.ui.swing.library.table.LibraryTable;
 
-public class BuddyLibrary<T extends FileItem> extends JPanel {
+public class FriendLibrary<T extends FileItem> extends JPanel {
    
     public final JXTable table;
     
-    public BuddyLibrary(FileList<T> fileList) {
+    public FriendLibrary(FileList<T> fileList) {
         setLayout(new BorderLayout());
 
         table = new LibraryTable<T>(fileList.getModel()); 

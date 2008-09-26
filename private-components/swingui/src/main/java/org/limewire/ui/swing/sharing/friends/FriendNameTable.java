@@ -11,8 +11,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.sharing.menu.BuddySharingActionHandler;
-import org.limewire.ui.swing.sharing.menu.BuddySharingPopupHandler;
+import org.limewire.ui.swing.sharing.menu.FriendSharingActionHandler;
+import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -21,20 +21,20 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
- * Table for displaying a list of buddies in the shared view
+ * Table for displaying a list of friends in the shared view
  */
-public class BuddyNameTable extends JXTable {
+public class FriendNameTable extends JXTable {
 
     @Resource
     Color tableBackgroundColor;
     
-    private EventTableModel<BuddyItem> tableModel;
+    private EventTableModel<FriendItem> tableModel;
     
-    public BuddyNameTable(EventList<BuddyItem> eventList, TableFormat<BuddyItem> tableFormat, LibraryManager libraryManager, Navigator navigator) {
+    public FriendNameTable(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat, LibraryManager libraryManager, Navigator navigator) {
         GuiUtils.assignResources(this);
         
-        SortedList<BuddyItem> buddyList = new SortedList<BuddyItem>(eventList, new BuddyComparator());       
-        tableModel = new EventTableModel<BuddyItem>(buddyList, tableFormat);
+        SortedList<FriendItem> friendList = new SortedList<FriendItem>(eventList, new FriendComparator());       
+        tableModel = new EventTableModel<FriendItem>(friendList, tableFormat);
         
         setModel(tableModel);
         
@@ -45,13 +45,13 @@ public class BuddyNameTable extends JXTable {
         setShowGrid(false, false);
         setColumnSelectionAllowed(false);
         
-        getColumn(0).setCellRenderer(new BuddyNameRenderer());
-        getColumn(1).setCellRenderer(new BuddyNameRenderer());
+        getColumn(0).setCellRenderer(new FriendNameRenderer());
+        getColumn(1).setCellRenderer(new FriendNameRenderer());
         
         getColumn(1).setWidth(30);
         getColumn(1).setPreferredWidth(30);
         
-        final BuddySharingPopupHandler handler = new BuddySharingPopupHandler(this, new BuddySharingActionHandler(navigator, libraryManager), libraryManager);
+        final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), libraryManager);
         
         addMouseListener(new MouseAdapter() {
             
@@ -81,13 +81,13 @@ public class BuddyNameTable extends JXTable {
         });
     }
     
-    public EventTableModel<BuddyItem> getEventTableModel() {
+    public EventTableModel<FriendItem> getEventTableModel() {
         return tableModel;
     }
     
-    private static class BuddyComparator implements Comparator<BuddyItem> {
+    private static class FriendComparator implements Comparator<FriendItem> {
         @Override
-        public int compare(BuddyItem o1, BuddyItem o2) {
+        public int compare(FriendItem o1, FriendItem o2) {
             if(o1.size() > 0 && o2.size() > 0) { 
                 return o1.getId().compareTo(o2.getId());
             } else if(o1.size() > 0 && o2.size() <= 0) {

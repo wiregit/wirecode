@@ -10,17 +10,17 @@ import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.sharing.friends.BuddyItem;
-import org.limewire.ui.swing.sharing.friends.BuddyNameTable;
+import org.limewire.ui.swing.sharing.friends.FriendItem;
+import org.limewire.ui.swing.sharing.friends.FriendNameTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
- * Popup menu for the buddy list names in the sharing view
+ * Popup menu for the friend list names in the sharing view
  */
-public class BuddySharingPopupHandler implements TablePopupHandler {
+public class FriendSharingPopupHandler implements TablePopupHandler {
 
     private int popupRow = -1;
     
@@ -31,16 +31,16 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
     private JMenuItem imageShareAllItem;
     private JMenuItem unshareAllItem;
     
-    private BuddyNameTable table;
-    private final BuddySharingActionHandler actionHandler;
+    private FriendNameTable table;
+    private final FriendSharingActionHandler actionHandler;
     private final LibraryManager libraryManager;
     
     protected final MenuListener menuListener;
 
-    private BuddyItem currentBuddy;
-    private LocalFileList buddyFileList;
+    private FriendItem currentFriend;
+    private LocalFileList friendFileList;
     
-    public BuddySharingPopupHandler(BuddyNameTable table, BuddySharingActionHandler handler, LibraryManager libraryManager) {
+    public FriendSharingPopupHandler(FriendNameTable table, FriendSharingActionHandler handler, LibraryManager libraryManager) {
         this.table = table;
         this.actionHandler = handler;
         this.libraryManager = libraryManager;
@@ -53,23 +53,23 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
         popupMenu = new JPopupMenu();
         
         viewLibraryItem = new JMenuItem(I18n.tr("View Library"));
-        viewLibraryItem.setActionCommand(BuddySharingActionHandler.VIEW_LIBRARY);
+        viewLibraryItem.setActionCommand(FriendSharingActionHandler.VIEW_LIBRARY);
         viewLibraryItem.addActionListener(menuListener);
         
         musicShareAllItem = new JMenuItem(I18n.tr("Share all music"));
-        musicShareAllItem.setActionCommand(BuddySharingActionHandler.SHARE_ALL_AUDIO);
+        musicShareAllItem.setActionCommand(FriendSharingActionHandler.SHARE_ALL_AUDIO);
         musicShareAllItem.addActionListener(menuListener);
         
         videoShareAllItem = new JMenuItem(I18n.tr("Share all videos"));
-        videoShareAllItem.setActionCommand(BuddySharingActionHandler.SHARE_ALL_VIDEO);
+        videoShareAllItem.setActionCommand(FriendSharingActionHandler.SHARE_ALL_VIDEO);
         videoShareAllItem.addActionListener(menuListener);
         
         imageShareAllItem = new JMenuItem(I18n.tr("Share all images"));
-        imageShareAllItem.setActionCommand(BuddySharingActionHandler.SHARE_ALL_IMAGE);
+        imageShareAllItem.setActionCommand(FriendSharingActionHandler.SHARE_ALL_IMAGE);
         imageShareAllItem.addActionListener(menuListener);
         
         unshareAllItem = new JMenuItem(I18n.tr("Unshare all"));
-        unshareAllItem.setActionCommand(BuddySharingActionHandler.UNSHARE_ALL);
+        unshareAllItem.setActionCommand(FriendSharingActionHandler.UNSHARE_ALL);
         unshareAllItem.addActionListener(menuListener);
         
         popupMenu.add(viewLibraryItem);
@@ -90,27 +90,27 @@ public class BuddySharingPopupHandler implements TablePopupHandler {
     public void maybeShowPopup(Component component, int x, int y) {
         popupRow = table.rowAtPoint(new Point(x, y));
         
-        EventTableModel<BuddyItem> model = table.getEventTableModel();
-        currentBuddy = model.getElementAt(popupRow);
-        if(currentBuddy.size() > 0) {
+        EventTableModel<FriendItem> model = table.getEventTableModel();
+        currentFriend = model.getElementAt(popupRow);
+        if(currentFriend.size() > 0) {
             unshareAllItem.setEnabled(true);
         } else {
             unshareAllItem.setEnabled(false);
         }
-        if(currentBuddy.hasLibrary()) {
+        if(currentFriend.hasLibrary()) {
             viewLibraryItem.setEnabled(true);
         } else {
             viewLibraryItem.setEnabled(false);
         }
         
-        buddyFileList = libraryManager.getBuddy(currentBuddy.getId());
+        friendFileList = libraryManager.getFriend(currentFriend.getId());
         
         popupMenu.show(component, x, y);
     }
     
     private class MenuListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            actionHandler.performAction(e.getActionCommand(), buddyFileList, currentBuddy);
+            actionHandler.performAction(e.getActionCommand(), friendFileList, currentFriend);
         }
     }
 }

@@ -19,7 +19,7 @@ public interface LimePresence extends Presence {
     /**
      * 
      * @return the <code>Address</code> that can be used to connect
-     * to the lime buddy
+     * to the lime friend
      */
     public Address getAddress();
     

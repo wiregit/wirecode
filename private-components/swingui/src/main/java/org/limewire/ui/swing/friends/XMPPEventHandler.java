@@ -104,38 +104,38 @@ public class XMPPEventHandler {
     }
     
     @EventSubscriber
-    public void handleAddBuddy(final AddBuddyEvent event) {
+    public void handleAddFriend(final AddFriendEvent event) {
         final XMPPConnection connection = getLoggedInConnection();
         if (connection != null) {
-            LOG.debugf("Adding new buddy: ID {0} - Name {1}", event.getId(), event.getName());
+            LOG.debugf("Adding new friend: ID {0} - Name {1}", event.getId(), event.getName());
             ThreadExecutor.startThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         connection.addUser(event.getId(), event.getName());
                     } catch (XMPPException e) {
-                        LOG.error("Could not add buddy", e);
+                        LOG.error("Could not add friend", e);
                     }
                 }
-            }, "add-buddy");
+            }, "add-friend");
         }
     }
     
     @EventSubscriber
-    public void handleRemoveBuddy(final RemoveBuddyEvent event) {
+    public void handleRemoveFriend(final RemoveFriendEvent event) {
         final XMPPConnection connection = getLoggedInConnection();
         if (connection != null) {
-            LOG.debugf("Removing buddy: ID {0} - Name {1}", event.getFriend().getID(), event.getFriend().getName());
+            LOG.debugf("Removing friend: ID {0} - Name {1}", event.getFriend().getID(), event.getFriend().getName());
             ThreadExecutor.startThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         connection.removeUser(event.getFriend().getID());
                     } catch (XMPPException e) {
-                        LOG.error("Could not remove buddy", e);
+                        LOG.error("Could not remove friend", e);
                     }
                 }
-            }, "remove-buddy");
+            }, "remove-friend");
         }
     }
 }

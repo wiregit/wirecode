@@ -22,7 +22,7 @@ public class ShareRendererEditor extends JPanel implements  TableCellEditor, Tab
     private JButton button;
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     
-    private SharingTarget buddy;
+    private SharingTarget friend;
     
     public ShareRendererEditor(Icon icon, Icon rolloverIcon, Icon pressedIcon){
         super(new FlowLayout(FlowLayout.LEADING, 0,0));
@@ -31,8 +31,8 @@ public class ShareRendererEditor extends JPanel implements  TableCellEditor, Tab
         add(button);
     }
     
-    public SharingTarget getBuddy() {
-        return buddy;
+    public SharingTarget getFriend() {
+        return friend;
     }
 
     public void addActionListener(ActionListener listener){
@@ -42,7 +42,7 @@ public class ShareRendererEditor extends JPanel implements  TableCellEditor, Tab
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int row, int column) {
-        buddy = (SharingTarget)value;
+        friend = (SharingTarget)value;
         return this;
     }
 

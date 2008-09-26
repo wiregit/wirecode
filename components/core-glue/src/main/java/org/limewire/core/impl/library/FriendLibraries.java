@@ -32,8 +32,8 @@ public class FriendLibraries {
         this.libraries = new ConcurrentHashMap<String, StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
     }
     
-    @Inject void register(ListenerSupport<FriendRemoteLibraryEvent> buddyLibrarySupport) {
-        buddyLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
+    @Inject void register(ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport) {
+        friendLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
             @Override
             public void handleEvent(FriendRemoteLibraryEvent event) {
                 switch(event.getType()) {

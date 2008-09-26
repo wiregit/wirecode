@@ -89,9 +89,9 @@ public class FileManagerImpl implements FileManager, Service {
     
     private final FileListPackage sharedFileList;
     private final FileListPackage storeFileList; 
-    private final FileListPackage buddyFileList;
+    private final FileListPackage friendFileList;
     private final FileListPackage incompleteFileList;
-    private final Map<String, FileListPackage> buddyFileLists = new HashMap<String,FileListPackage>();
+    private final Map<String, FileListPackage> friendFileLists = new HashMap<String,FileListPackage>();
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -162,7 +162,7 @@ public class FileManagerImpl implements FileManager, Service {
     
     /**
      * Generic directories that are loaded. Subsets of these folders can be
-     * shared files/ store files/ shared with buddys or none of the above. 
+     * shared files/ store files/ shared with friends or none of the above. 
      */
     private Set<File> displayDirectories;
     
@@ -254,10 +254,10 @@ public class FileManagerImpl implements FileManager, Service {
         
         sharedFileList = new SynchronizedFileList(new SharedFileListImpl("Shared", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl("Store", this, _data.SPECIAL_STORE_FILES));
-        buddyFileList = new SynchronizedFileList(new BuddyFileListImpl("All Buddys", this, _data.getBuddyList("All")));
+        friendFileList = new SynchronizedFileList(new FriendFileListImpl("All Friends", this, _data.getFriendList("All")));
         incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl("Incomplete", this, new HashSet<File>()));
-        for(String name : SharingSettings.SHARED_BUDDY_LIST_NAMES.getValue())
-            buddyFileLists.put(name, new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
+        for(String name : SharingSettings.SHARED_FRIEND_LIST_NAMES.getValue())
+            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(name, this, _data.getFriendList(name))));
         
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -281,8 +281,8 @@ public class FileManagerImpl implements FileManager, Service {
         getSharedFileList().clear();
         getStoreFileList().clear();
         getIncompleteFileList().clear();
-        for(String key : buddyFileLists.keySet() )
-            buddyFileLists.get(key).clear();
+        for(String key : friendFileLists.keySet() )
+            friendFileLists.get(key).clear();
 
         numFiles = 0;
         _numPendingFiles = 0;
@@ -338,34 +338,34 @@ public class FileManagerImpl implements FileManager, Service {
         return storeFileList;
     }
 	
-    public FileList getBuddyFileList() {
-        return buddyFileList;
+    public FileList getFriendFileList() {
+        return friendFileList;
     }
     
-    public FileList getBuddyFileList(String name) {
-        return buddyFileLists.get(name);
+    public FileList getFriendFileList(String name) {
+        return friendFileLists.get(name);
     }
     
-    public void addBuddyFileList(String name) {
-        if(!containsBuddyFileList(name)) {
-            SharingSettings.addBuddyListName(name);
-            _data.addBuddyList(name);
-            buddyFileLists.put(name, new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
+    public void addFriendFileList(String name) {
+        if(!containsFriendFileList(name)) {
+            SharingSettings.addFriendListName(name);
+            _data.addFriendList(name);
+            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(name, this, _data.getFriendList(name))));
         }
     }
     
-    public boolean containsBuddyFileList(String name) {
-        return buddyFileLists.containsKey(name);
+    public boolean containsFriendFileList(String name) {
+        return friendFileLists.containsKey(name);
     }
     
-    public void removeBuddyFileList(String name) {
+    public void removeFriendFileList(String name) {
         // if it was a valid key, remove saved references to it
-        FileList removeFileList = buddyFileLists.get(name);
+        FileList removeFileList = friendFileLists.get(name);
         if(removeFileList != null) {
             removeFileList.cleanupListeners();
-            buddyFileLists.remove(name);
-            _data.removeBuddyList(name);
-            SharingSettings.removeBuddyListName(name);
+            friendFileLists.remove(name);
+            _data.removeFriendList(name);
+            SharingSettings.removeFriendListName(name);
         }
     }
 
@@ -373,10 +373,10 @@ public class FileManagerImpl implements FileManager, Service {
         return incompleteFileList;
     }
     
-    public Map<String, FileList> getAllBuddyLists(){
+    public Map<String, FileList> getAllFriendLists(){
         Map<String, FileList> map = new HashMap<String, FileList>();
-        for(String name : buddyFileLists.keySet())
-            map.put(name, buddyFileLists.get(name));
+        for(String name : friendFileLists.keySet())
+            map.put(name, friendFileLists.get(name));
         return map;
     }
     
@@ -635,9 +635,9 @@ public class FileManagerImpl implements FileManager, Service {
         // Add individual store files
         loadIndividualFiles(storeFileList, revision);
     
-        //Buddy files
-        for(String key : buddyFileLists.keySet())
-            loadIndividualFiles(buddyFileLists.get(key), revision);
+        //Friend files
+        for(String key : friendFileLists.keySet())
+            loadIndividualFiles(friendFileLists.get(key), revision);
     
         _isUpdating = false;
     }
@@ -821,8 +821,8 @@ public class FileManagerImpl implements FileManager, Service {
     //  File Accessors
     //////////////////////////////////////////////////////////////////////////////
 	
-    public void addBuddyFile(String name, File file) {
-        FileListPackage fileList = buddyFileLists.get(name);
+    public void addFriendFile(String name, File file) {
+        FileListPackage fileList = friendFileLists.get(name);
         
         if(fileList != null) {
             fileList.addPendingFile(file);

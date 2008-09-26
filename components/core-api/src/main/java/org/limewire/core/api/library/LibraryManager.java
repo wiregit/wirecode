@@ -14,17 +14,17 @@ public interface LibraryManager {
 
     LocalFileList getGnutellaList();
 
-    Map<String, LocalFileList> getAllBuddyLists();
+    Map<String, LocalFileList> getAllFriendLists();
 
-    LocalFileList getBuddy(String id);
+    LocalFileList getFriend(String id);
 
-    void addBuddy(String id);
+    void addFriend(String id);
 
-    void removeBuddy(String id);
+    void removeFriend(String id);
 
-    boolean containsBuddy(String id);
+    boolean containsFriend(String id);
 
-    RemoteFileList getOrCreateBuddyLibrary(Friend friend);
+    RemoteFileList getOrCreateFriendLibrary(Friend friend);
 
-    void removeBuddyLibrary(Friend friend);
+    void removeFriendLibrary(Friend friend);
 }

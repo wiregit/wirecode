@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.BuddyFileList;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryListEventType;
@@ -42,22 +42,22 @@ class LibraryManagerImpl implements LibraryManager {
     
     private final LibraryFileList libraryFileList;
     private final GnutellaFileList gnutellaFileList;
-    private final Map<String, LocalFileList> buddyFileLists;
+    private final Map<String, LocalFileList> friendFileLists;
     
-    private final EventListener<FriendRemoteLibraryEvent> buddyLibraryEventListener; 
-    private final ConcurrentHashMap<String, RemoteFileList> buddyLibraryFileLists;
+    private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener; 
+    private final ConcurrentHashMap<String, RemoteFileList> friendLibraryFileLists;
     private final LocalFileDetailsFactory detailsFactory;
 
     @Inject
-    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory, EventListener<FriendRemoteLibraryEvent> buddyLibraryEventListener) {
+    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory, EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener) {
         this.fileManager = fileManager;
         this.detailsFactory = detailsFactory;
-        this.buddyLibraryEventListener = buddyLibraryEventListener;
+        this.friendLibraryEventListener = friendLibraryEventListener;
 
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
-        buddyFileLists = new HashMap<String, LocalFileList>();
-        buddyLibraryFileLists = new ConcurrentHashMap<String, RemoteFileList>();
+        friendFileLists = new HashMap<String, LocalFileList>();
+        friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileList>();
     }
 
     @Override
@@ -90,46 +90,46 @@ class LibraryManagerImpl implements LibraryManager {
     }
 
     @Override
-    public Map<String, LocalFileList> getAllBuddyLists() {
-        return buddyFileLists;
+    public Map<String, LocalFileList> getAllFriendLists() {
+        return friendFileLists;
     }
     
     @Override
-    public LocalFileList getBuddy(String id) {
-        if(buddyFileLists.containsKey(id))
-            return buddyFileLists.get(id);
+    public LocalFileList getFriend(String id) {
+        if(friendFileLists.containsKey(id))
+            return friendFileLists.get(id);
 
-        BuddyFileListImpl newBuddyList = new BuddyFileListImpl(fileManager, id);
-        buddyFileLists.put(id, newBuddyList);
-        return newBuddyList;
+        FriendFileListImpl newFriendList = new FriendFileListImpl(fileManager, id);
+        friendFileLists.put(id, newFriendList);
+        return newFriendList;
     }
     
     @Override
-    public void addBuddy(String id) {
-        fileManager.addBuddyFileList(id);
+    public void addFriend(String id) {
+        fileManager.addFriendFileList(id);
     }
 
     @Override
-    public void removeBuddy(String id) {
-        fileManager.removeBuddyFileList(id);
+    public void removeFriend(String id) {
+        fileManager.removeFriendFileList(id);
     }
     
     @Override
-    public boolean containsBuddy(String id) {
-        return fileManager.containsBuddyFileList(id);
+    public boolean containsFriend(String id) {
+        return fileManager.containsFriendFileList(id);
     }
     
     //////////////////////////////////////////////////////
-    //  Accessors for Buddy Libraries (Files being shared with you)
+    //  Accessors for friend Libraries (Files being shared with you)
     /////////////////////////////////////////////////////
 
     @Override
-    public RemoteFileList getOrCreateBuddyLibrary(Friend friend) {
-        RemoteFileList newList = new BuddyLibraryFileList();
-        RemoteFileList existing = buddyLibraryFileLists.putIfAbsent(friend.getId(), newList);
+    public RemoteFileList getOrCreateFriendLibrary(Friend friend) {
+        RemoteFileList newList = new FriendLibraryFileList();
+        RemoteFileList existing = friendLibraryFileLists.putIfAbsent(friend.getId(), newList);
         
         if(existing == null) {
-            buddyLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_ADDED, newList, friend));
+            friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_ADDED, newList, friend));
             return newList;
         } else {
             return existing;
@@ -137,10 +137,10 @@ class LibraryManagerImpl implements LibraryManager {
     }
     
     @Override
-    public void removeBuddyLibrary(Friend friend) {
-        RemoteFileList list = buddyLibraryFileLists.remove(friend.getId());
+    public void removeFriendLibrary(Friend friend) {
+        RemoteFileList list = friendLibraryFileLists.remove(friend.getId());
         if(list != null) {
-            buddyLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_REMOVED, list, friend));
+            friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_REMOVED, list, friend));
         }
     }
     
@@ -214,7 +214,7 @@ class LibraryManagerImpl implements LibraryManager {
     }
 
     
-    private class BuddyFileListImpl extends LocalFileListImpl implements FileListListener, BuddyFileList {
+    private class FriendFileListImpl extends LocalFileListImpl implements FileListListener, FriendFileList {
 
         private FileManager fileManager;
         private String name;
@@ -222,18 +222,18 @@ class LibraryManagerImpl implements LibraryManager {
         
         private Map<File, FileItem> lookup;
         
-        BuddyFileListImpl(FileManager fileManager, String name) {
+        FriendFileListImpl(FileManager fileManager, String name) {
             this.fileManager = fileManager;
             this.name = name;
                      
-            this.fileManager.getBuddyFileList(name).addFileListListener(this);
+            this.fileManager.getFriendFileList(name).addFileListListener(this);
             lookup = new HashMap<File, FileItem>();
             loadSavedFiles();
         }
         
         //TODO: reexamine this. Needs to be loaded on a seperate thread and maybe cleaned up somehow
         private void loadSavedFiles() {
-            com.limegroup.gnutella.FileList fileList = this.fileManager.getBuddyFileList(name);  
+            com.limegroup.gnutella.FileList fileList = this.fileManager.getFriendFileList(name);  
 
               synchronized (fileList.getLock()) {
                   Iterator<FileDesc> iter = fileList.iterator();
@@ -248,17 +248,17 @@ class LibraryManagerImpl implements LibraryManager {
         
         @Override
         public void addFile(File file) {
-            fileManager.addBuddyFile(name, file);
+            fileManager.addFriendFile(name, file);
         }
 
         @Override
         public void removeFile(File file) {
-            fileManager.getBuddyFileList(name).remove(fileManager.getFileDesc(file));
+            fileManager.getFriendFileList(name).remove(fileManager.getFileDesc(file));
         }
         
         @Override
         public void clear() {
-            fileManager.getBuddyFileList(name).clear();
+            fileManager.getFriendFileList(name).clear();
         }
         
         @Override
@@ -385,7 +385,7 @@ class LibraryManagerImpl implements LibraryManager {
         }
     }
     
-    private class BuddyLibraryFileList extends RemoteFileListImpl {
+    private class FriendLibraryFileList extends RemoteFileListImpl {
 
 
         public void addFile(RemoteFileItem file) {
@@ -401,6 +401,6 @@ class LibraryManagerImpl implements LibraryManager {
         }
         //TODO: add new accessors appropriate for creating FileItems based on
         //      lookups. May also need to subclass CoreFileItem appropriate for
-        //      buddy library info.
+        //      friend library info.
     }
 }

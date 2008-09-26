@@ -50,7 +50,7 @@ public class LibraryNavigator extends JPanel {
 
     @Inject
     LibraryNavigator(Navigator navigator, MyLibraryPanel libraryPanel,
-            ListenerSupport<FriendRemoteLibraryEvent> buddyLibrarySupport, LibraryManager libraryManager
+            ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport, LibraryManager libraryManager
             ) {
         GuiUtils.assignResources(this);
 
@@ -117,7 +117,7 @@ public class LibraryNavigator extends JPanel {
             }
         });
 
-        buddyLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
+        friendLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
             @Override
             public void handleEvent(FriendRemoteLibraryEvent event) {
                 switch (event.getType()) {
@@ -188,7 +188,7 @@ public class LibraryNavigator extends JPanel {
     }
 
     private void addFriend(Friend friend, RemoteFileList fileList) {
-        BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(fileList);
+        FriendLibrary library = new FriendLibrary<RemoteFileItem>(fileList);
         final NavItem item = navigator.createNavItem(NavCategory.LIBRARY, friend.getId(), library);
         item.addNavItemListener(new NavItemListener() {
             @Override

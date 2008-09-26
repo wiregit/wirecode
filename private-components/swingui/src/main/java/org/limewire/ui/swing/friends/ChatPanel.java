@@ -20,7 +20,7 @@ import org.limewire.core.settings.FriendSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.sharing.BuddySharingDisplay;
+import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,17 +35,17 @@ public class ChatPanel extends JPanel implements Displayable {
     private final ConversationPaneFactory conversationFactory;
     private final JPanel conversationPanel;
     private final FriendsPane friendsPanel;
-    private final BuddySharingDisplay buddySharing;
+    private final FriendSharingDisplay friendSharing;
     private final Map<String, ConversationPane> chats;
     
     @Inject
     public ChatPanel(ConversationPaneFactory conversationFactory, IconLibrary icons, FriendsPane friendsPanel,
-            TopPanel topPanel, BuddySharingDisplay buddySharing) {
+            TopPanel topPanel, FriendSharingDisplay friendSharing) {
         super(new BorderLayout());
         this.conversationFactory = conversationFactory;
         this.friendsPanel = friendsPanel;
         this.chats = new HashMap<String, ConversationPane>();
-        this.buddySharing = buddySharing;
+        this.friendSharing = friendSharing;
 
         //Dimensions according to the spec
         setPreferredSize(new Dimension(400, 235));
@@ -64,7 +64,7 @@ public class ChatPanel extends JPanel implements Displayable {
         pane.setEditable(false);
         pane.setContentType("text/html");
         pane.setText(getMessagesPaneText());
-        pane.addHyperlinkListener(new HyperlinkHandler(buddySharing));
+        pane.addHyperlinkListener(new HyperlinkHandler(friendSharing));
         panel.add(pane, BorderLayout.CENTER);
         return panel;
     }
@@ -114,10 +114,10 @@ public class ChatPanel extends JPanel implements Displayable {
     }
 
     private static class HyperlinkHandler implements HyperlinkListener {
-        private final BuddySharingDisplay buddySharing;
+        private final FriendSharingDisplay friendSharing;
         
-        public HyperlinkHandler(BuddySharingDisplay buddySharing) {
-            this.buddySharing = buddySharing;
+        public HyperlinkHandler(FriendSharingDisplay friendSharing) {
+            this.friendSharing = friendSharing;
         }
         
         @Override
@@ -125,7 +125,7 @@ public class ChatPanel extends JPanel implements Displayable {
             if (EventType.ACTIVATED == e.getEventType()) {
                 LOG.debugf("Hyperlink clicked: {0}", e.getDescription());
                 if (e.getDescription().equals("all_friends_share_list")) {
-                    buddySharing.displaySharing();
+                    friendSharing.displaySharing();
                 }
             }
         }
@@ -178,7 +178,7 @@ public class ChatPanel extends JPanel implements Displayable {
     }
     
     @EventSubscriber
-    public void handleRemoveBuddy(RemoveBuddyEvent event) {
+    public void handleRemoveFriend(RemoveFriendEvent event) {
         final String friendID = event.getFriend().getID();
         if (chats.containsKey(friendID)) {
             closeChat(friendID);

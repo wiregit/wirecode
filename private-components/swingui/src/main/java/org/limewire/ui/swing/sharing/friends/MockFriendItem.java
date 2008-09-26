@@ -4,12 +4,12 @@ import java.beans.PropertyChangeListener;
 
 import org.limewire.core.api.library.FileList;
 
-public class MockBuddyItem implements BuddyItem {
+public class MockFriendItem implements FriendItem {
 
     private String name;
     private int size;
     
-    public MockBuddyItem(String name, int size) {
+    public MockFriendItem(String name, int size) {
         this.name = name;
         this.size = size;
     }

@@ -2,10 +2,10 @@ package org.limewire.ui.swing.friends;
 
 import org.limewire.ui.swing.AbstractEDTEvent;
 
-public class RemoveBuddyEvent extends AbstractEDTEvent {
+public class RemoveFriendEvent extends AbstractEDTEvent {
     private final Friend friend;
 
-    public RemoveBuddyEvent(Friend friend) {
+    public RemoveFriendEvent(Friend friend) {
         super();
         this.friend = friend;
     }

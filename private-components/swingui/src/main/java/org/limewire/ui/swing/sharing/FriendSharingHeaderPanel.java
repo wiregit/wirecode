@@ -19,7 +19,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import net.miginfocom.swing.MigLayout;
 
-public class BuddySharingHeaderPanel extends SharingHeaderPanel {
+public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     
     @Resource
     Icon downIcon;
@@ -33,7 +33,7 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
     
     private JPopupMenu popup;
     
-    public BuddySharingHeaderPanel(Icon icon, String staticText, String name,
+    public FriendSharingHeaderPanel(Icon icon, String staticText, String name,
             ViewSelectionPanel viewPanel, LibraryManager libraryManager) {
         super(icon, staticText, name, viewPanel);
                 
@@ -108,8 +108,8 @@ public class BuddySharingHeaderPanel extends SharingHeaderPanel {
     }
     
     @Override
-    public void setBuddyName(String name) {
-        super.setBuddyName(name);
+    public void setFriendName(String name) {
+        super.setFriendName(name);
         libraryButton.setFriend(name);
     }
     
