@@ -80,8 +80,7 @@ public class SpamManager {
 		// apply bayesian filter
 		rating = 1 - (1 - rating) * (1 - ratingTable.getRating(rfd));
 		rfd.setSpamRating(rating);
-		return rating >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
-                SearchSettings.QUERY_SPAM_CUTOFF.getValue());
+		return rfd.isSpam();
 	}
 
 	/**

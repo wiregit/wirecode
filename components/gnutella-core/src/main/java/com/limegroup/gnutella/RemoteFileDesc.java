@@ -169,5 +169,7 @@ public interface RemoteFileDesc extends RemoteFileDetails {
      * Returns a memento that can be used for serializing this object.
      */
     public RemoteHostMemento toMemento();
+    
+    public boolean isSpam();
 
 }

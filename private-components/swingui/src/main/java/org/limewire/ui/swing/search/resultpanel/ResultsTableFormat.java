@@ -74,7 +74,7 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
         JXPanel panel = new JXPanel(new FlowLayout(FlowLayout.LEFT));
         panel.add(label);
 
-        panel.setAlpha(vsr.isMarkedAsJunk() ? 0.2f : 1.0f);
+        panel.setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
 
         return panel;
     }

@@ -196,6 +196,7 @@ implements TableCellEditor, TableCellRenderer {
         LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0}", row);
 
         vsr = (VisualSearchResult) value;
+        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0} {1} {2}", row, vsr.getCoreSearchResults().get(0).getUrn(), vsr.isVisible());
         category = vsr.getCategory();
 
         similarButton.setVisible(getSimilarResultsCount() > 0);
@@ -249,7 +250,7 @@ implements TableCellEditor, TableCellRenderer {
     }
     
     private boolean isShowingSimilarResults() {
-        return vsr != null && getSimilarResultsCount() > 0 && vsr.getSimilarResults().get(0).isVisible();
+        return vsr != null && getSimilarResultsCount() > 0 && vsr.isChildrenVisible();
     }
 
     private Component makeCenterPanel() {

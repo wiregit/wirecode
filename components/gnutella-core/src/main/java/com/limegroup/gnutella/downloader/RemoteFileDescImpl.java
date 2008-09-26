@@ -14,6 +14,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
@@ -735,5 +736,11 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             public void failedPushConnect() {}
 
             public void increment(DownloadStatsTracker.PushReason reason) {}    
+    }
+
+    @Override
+    public boolean isSpam() {
+        return getSpamRating() >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
+                SearchSettings.QUERY_SPAM_CUTOFF.getValue());
     }
 }

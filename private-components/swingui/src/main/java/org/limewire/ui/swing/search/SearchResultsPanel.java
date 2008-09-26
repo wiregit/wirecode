@@ -19,13 +19,15 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -36,6 +38,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class SearchResultsPanel extends JPanel {
+    private final Log LOG = LogFactory.getLog(getClass());
         
     /**
      * This is the subpanel that appears in the upper-left corner
@@ -80,11 +83,8 @@ public class SearchResultsPanel extends JPanel {
         this.scrollPane = new SearchScrollPane();
         this.scrollablePanel = new ScrollablePanel();
 
-        ObservableElementList<VisualSearchResult> observableList = 
-            new ObservableElementList<VisualSearchResult>(eventList, GlazedLists.beanConnector(VisualSearchResult.class));
-        
         final SortedList<VisualSearchResult> filteredList =
-            sortAndFilterPanel.getFilteredAndSortedList(observableList);
+            sortAndFilterPanel.getFilteredAndSortedList(newVisibleFilterList(eventList));
         
         // The ResultsContainerFactory create method takes two parameters
         // which it passes to the ResultsContainer constructor
@@ -128,6 +128,18 @@ public class SearchResultsPanel extends JPanel {
         }
         
         layoutComponents();
+    }
+    
+    private EventList<VisualSearchResult> newVisibleFilterList(
+            EventList<VisualSearchResult> eventList) {
+        return new FilterList<VisualSearchResult>(eventList, new Matcher<VisualSearchResult>() {
+            @Override
+            public boolean matches(VisualSearchResult item) {
+                boolean visible = item.isVisible();
+                LOG.debugf("filter... VSR urn {0} visibility {1}", item.getCoreSearchResults().get(0).getUrn(), visible);
+                return visible;
+            }
+        });
     }
     
     public void addSponsoredResults(List<SponsoredResult> sponsoredResults){

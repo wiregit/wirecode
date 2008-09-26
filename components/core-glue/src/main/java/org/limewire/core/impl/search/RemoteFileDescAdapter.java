@@ -165,4 +165,11 @@ public class RemoteFileDescAdapter implements SearchResult {
     public String getUrn() {
         return rfd.getSHA1Urn().toString();
     }
+
+    @Override
+    public boolean isSpam() {
+        return rfd.isSpam();
+    }
+    
+    
 }

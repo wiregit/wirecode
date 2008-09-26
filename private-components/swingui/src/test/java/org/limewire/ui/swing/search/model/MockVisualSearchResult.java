@@ -100,12 +100,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public boolean isMarkedAsJunk() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public boolean isVisible() {
         // TODO Auto-generated method stub
         return false;
@@ -118,11 +112,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public void setMarkedAsJunk(boolean junk) {
+    public void setVisible(boolean visible) {
         // TODO Auto-generated method stub
         
     }
-
+    
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         // TODO Auto-generated method stub
@@ -139,6 +133,23 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public boolean isChildrenVisible() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+//    @Override
+//    public void setChildrenVisible(boolean childrenVisible) {
+//        // TODO Auto-generated method stub
+//        
+//    }
+
+    @Override
+    public boolean isSpam() {
+        return false;
+    }
+
+    @Override
+    public void setSpam(boolean spam) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override

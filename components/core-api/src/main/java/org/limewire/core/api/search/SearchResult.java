@@ -50,4 +50,6 @@ public interface SearchResult {
     List<RemoteHost> getSources();
 
     String getUrn();
+    
+    public boolean isSpam();
 }
