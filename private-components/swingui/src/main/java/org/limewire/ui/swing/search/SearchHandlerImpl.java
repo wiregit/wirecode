@@ -52,7 +52,7 @@ class SearchHandlerImpl implements SearchHandler {
         final SearchResultsModel model = searchResultsModelFactory.createSearchResultsModel();
         final SearchResultsPanel searchPanel =
             panelFactory.createSearchResultsPanel(
-                info, model.getVisualSearchResults(), search);
+                info, model.getObservableSearchResults(), search);
         final SearchNavItem item =
             searchNavigator.addSearch(panelTitle, searchPanel, search);
         item.select();

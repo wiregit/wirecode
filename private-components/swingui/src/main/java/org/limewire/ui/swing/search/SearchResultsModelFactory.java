@@ -26,7 +26,7 @@ public class SearchResultsModelFactory {
     public SearchResultsModel createSearchResultsModel() {
         SearchResultsModel searchResultsModel = new BasicSearchResultsModel();
         
-        EventList<VisualSearchResult> visualSearchResults = searchResultsModel.getVisualSearchResults();
+        EventList<VisualSearchResult> visualSearchResults = searchResultsModel.getGroupedSearchResults();
         
         GroupingListEventListener groupingListEventListener = new GroupingListEventListener(similarResultsDetectorFactory.newSimilarResultsDetector());
         visualSearchResults.addListEventListener(groupingListEventListener);

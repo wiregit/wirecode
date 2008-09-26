@@ -26,14 +26,17 @@ public class BasicSearchResultsModel implements SearchResultsModel {
     private final AtomicInteger resultCount = new AtomicInteger();
 
     private ObservableElementList<VisualSearchResult> observableList;
-    private EventList<VisualSearchResult> groupedUrnResults;
+
+    private FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults;
 
     public BasicSearchResultsModel() {
         allSearchResults = new BasicEventList<SearchResult>();
-        GroupingList<SearchResult> groupingListUrns = new GroupingList<SearchResult>(allSearchResults, new UrnComparator());
-        this.groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
+        GroupingList<SearchResult> groupingListUrns = new GroupingList<SearchResult>(
+                allSearchResults, new UrnComparator());
+        groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
                 groupingListUrns, new SearchResultGrouper(resultCount));
-       // observableList = new ObservableElementList<VisualSearchResult>(groupedUrnResults, GlazedLists.beanConnector(VisualSearchResult.class));
+        observableList = new ObservableElementList<VisualSearchResult>(groupedUrnResults,
+                GlazedLists.beanConnector(VisualSearchResult.class));
     }
 
     @Override
@@ -42,13 +45,19 @@ public class BasicSearchResultsModel implements SearchResultsModel {
     }
 
     @Override
-    public EventList<VisualSearchResult> getVisualSearchResults() {
+    public EventList<VisualSearchResult> getObservableSearchResults() {
+        return observableList;
+    }
+
+    @Override
+    public EventList<VisualSearchResult> getGroupedSearchResults() {
         return groupedUrnResults;
     }
 
     @Override
     public void addSearchResult(SearchResult result) {
-        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
+        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities
+                .isEventDispatchThread());
         allSearchResults.add(result);
     }
 
@@ -80,7 +89,7 @@ public class BasicSearchResultsModel implements SearchResultsModel {
         @Override
         public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
             SearchResultAdapter adapter = new SearchResultAdapter(sourceValue);
-            
+
             resultCount.addAndGet(adapter.getSources().size());
             return adapter;
         }

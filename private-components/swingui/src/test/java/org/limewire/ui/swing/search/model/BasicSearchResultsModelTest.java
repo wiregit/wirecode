@@ -22,7 +22,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testGroupingByName2UrnsNameComesEarly() {
 
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -38,7 +38,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult3);
         model.addSearchResult(testResult4);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -58,7 +58,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName2UrnsNameComesLate() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -74,7 +74,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult3);
         model.addSearchResult(testResult4);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -94,7 +94,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -117,7 +117,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult3);
         model.addSearchResult(testResult4);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -137,7 +137,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupByName4Urns() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -152,7 +152,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult3);
         model.addSearchResult(testResult4);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(4, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -187,7 +187,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName3Urns() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -204,7 +204,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult4);
         model.addSearchResult(testResult5);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -231,7 +231,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -250,7 +250,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult5);
         model.addSearchResult(testResult6);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -277,7 +277,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -298,7 +298,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult6);
         model.addSearchResult(testResult7);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -325,7 +325,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testGroupingUsingNameLikeLimeComparator() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults().addListEventListener(
+        model.getGroupedSearchResults().addListEventListener(
                 new GroupingListEventListener(new SimilarResultsMatchingDetector(
                         new SearchResultMatcher() {
                             @Override
@@ -365,7 +365,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult6);
         model.addSearchResult(testResult7);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -393,7 +393,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testEverythingSimilarComparator() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults().addListEventListener(
+        model.getGroupedSearchResults().addListEventListener(
                 new GroupingListEventListener(new SimilarResultsMatchingDetector(
                         new SearchResultMatcher() {
                             @Override
@@ -418,7 +418,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult6);
         model.addSearchResult(testResult7);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -446,7 +446,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testNothingSimilarComparator() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults().addListEventListener(
+        model.getGroupedSearchResults().addListEventListener(
                 new GroupingListEventListener(new SimilarResultsMatchingDetector(
                         new SearchResultMatcher() {
                             @Override
@@ -471,7 +471,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult6);
         model.addSearchResult(testResult7);
 
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -499,7 +499,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
     public void testVisibility() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -512,7 +512,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         TestSearchResult testResult6 = new TestSearchResult("3", "blah2 file");
 
         model.addSearchResult(testResult1);
-        List<VisualSearchResult> results = model.getVisualSearchResults();
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(1, results.size());
         VisualSearchResult result0 = results.get(0);
         Assert.assertTrue(result0.isVisible());
@@ -566,7 +566,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertTrue(child0.isVisible());
         Assert.assertTrue(child1.isVisible());
 
-        results = model.getVisualSearchResults();
+        results = model.getGroupedSearchResults();
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
@@ -593,7 +593,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     
     public void testTwoSearchResults() {
         SearchResultsModel model = new BasicSearchResultsModel();
-        model.getVisualSearchResults()
+        model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
@@ -604,7 +604,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         model.addSearchResult(testResult1);
         model.addSearchResult(testResult2);
         
-        EventList<VisualSearchResult> visualSearchResults = model.getVisualSearchResults();
+        EventList<VisualSearchResult> visualSearchResults = model.getGroupedSearchResults();
         VisualSearchResult child = visualSearchResults.get(0);
         VisualSearchResult parent = visualSearchResults.get(1);
         assertEquals("1", child.getCoreSearchResults().get(0).getUrn());
