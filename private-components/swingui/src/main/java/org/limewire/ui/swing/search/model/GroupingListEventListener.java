@@ -3,12 +3,15 @@
  */
 package org.limewire.ui.swing.search.model;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 public class GroupingListEventListener implements ListEventListener<VisualSearchResult> {
-
+    private final Log LOG = LogFactory.getLog(getClass());
     private final SimilarResultsDetector similarResultsDetector;
 
     public GroupingListEventListener(SimilarResultsDetector similarResultsDetector) {
@@ -22,5 +25,6 @@ public class GroupingListEventListener implements ListEventListener<VisualSearch
             VisualSearchResult searchResult = eventList.get(listChanges.getIndex());
             similarResultsDetector.detectSimilarResult(eventList, searchResult);
         }
+        LOG.debugf("finished detecting similar results");
     }
 }

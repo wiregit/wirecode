@@ -267,8 +267,9 @@ implements TableCellEditor, TableCellRenderer {
             public void actionPerformed(ActionEvent e) {
                 boolean toggleVisibility = !isShowingSimilarResults();
                 for(VisualSearchResult result : vsr.getSimilarResults()) {
-                    //result.setVisible(toggleVisibility);
-                    //TODO mario will update this with the new logic
+                    boolean oldValue = result.isVisible();
+                    result.setVisible(toggleVisibility);
+                    result.fireVisibilityChanged(oldValue);
                 }
                 
                 similarButton.setText(getHideShowSimilarFilesButtonText());

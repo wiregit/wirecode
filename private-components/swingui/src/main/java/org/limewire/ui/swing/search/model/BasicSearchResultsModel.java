@@ -4,7 +4,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.SwingUtilities;
+
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -13,6 +17,7 @@ import ca.odell.glazedlists.GroupingList;
 import ca.odell.glazedlists.FunctionList.AdvancedFunction;
 
 public class BasicSearchResultsModel implements SearchResultsModel {
+    private final Log LOG = LogFactory.getLog(getClass());
 
     private final EventList<SearchResult> allSearchResults;
 
@@ -41,13 +46,8 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
     @Override
     public void addSearchResult(SearchResult result) {
-        System.out.println(result.getUrn());
-        try {
-            allSearchResults.add(result);
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-        }
-        System.out.println("foo");
+        LOG.debugf("Adding result urn: {0} EDT: {1}", result.getUrn(), SwingUtilities.isEventDispatchThread());
+        allSearchResults.add(result);
     }
 
     @Override
