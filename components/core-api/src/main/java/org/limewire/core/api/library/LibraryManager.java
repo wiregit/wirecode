@@ -2,6 +2,8 @@ package org.limewire.core.api.library;
 
 import java.util.Map;
 
+import org.limewire.core.api.friend.Friend;
+
 public interface LibraryManager {
 
     void addLibraryLisListener(LibraryListListener libraryListener);
@@ -22,7 +24,7 @@ public interface LibraryManager {
 
     boolean containsBuddy(String id);
 
-    RemoteFileList getOrCreateBuddyLibrary(String id);
+    RemoteFileList getOrCreateBuddyLibrary(Friend friend);
 
-    void removeBuddyLibrary(String id);
+    void removeBuddyLibrary(Friend friend);
 }

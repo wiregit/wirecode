@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
-import org.limewire.core.api.library.BuddyLibraryEvent;
+import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -32,21 +32,21 @@ public class FriendLibraries {
         this.libraries = new ConcurrentHashMap<String, StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
     }
     
-    @Inject void register(ListenerSupport<BuddyLibraryEvent> buddyLibrarySupport) {
-        buddyLibrarySupport.addListener(new EventListener<BuddyLibraryEvent>() {
+    @Inject void register(ListenerSupport<FriendRemoteLibraryEvent> buddyLibrarySupport) {
+        buddyLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
             @Override
-            public void handleEvent(BuddyLibraryEvent event) {
+            public void handleEvent(FriendRemoteLibraryEvent event) {
                 switch(event.getType()) {
-                case BUDDY_ADDED:
+                case FRIEND_LIBRARY_ADDED:
                     StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
-                    LOG.debugf("adding friend library " + event.getId() + " to index");
-                    libraries.put(event.getId(), trie);
+                    LOG.debugf("adding friend library " + event.getFriend() + " to index");
+                    libraries.put(event.getFriend().getId(), trie);
                     // TODO race condition?
                     event.getFileList().getModel().addListEventListener(new LibraryListener(trie));
                     break;
-                case BUDDY_REMOVED:
-                    LOG.debugf("removing friend library " + event.getId() + " from index");
-                    libraries.remove(event.getId());
+                case FRIEND_LIBRARY_REMOVED:
+                    LOG.debugf("removing friend library " + event.getFriend() + " from index");
+                    libraries.remove(event.getFriend().getId());
                 }
             }
         });

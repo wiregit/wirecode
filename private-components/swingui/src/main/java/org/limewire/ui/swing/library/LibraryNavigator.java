@@ -19,7 +19,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.limewire.core.api.library.BuddyLibraryEvent;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
@@ -49,7 +50,7 @@ public class LibraryNavigator extends JPanel {
 
     @Inject
     LibraryNavigator(Navigator navigator, MyLibraryPanel libraryPanel,
-            ListenerSupport<BuddyLibraryEvent> buddyLibrarySupport, LibraryManager libraryManager
+            ListenerSupport<FriendRemoteLibraryEvent> buddyLibrarySupport, LibraryManager libraryManager
             ) {
         GuiUtils.assignResources(this);
 
@@ -116,23 +117,23 @@ public class LibraryNavigator extends JPanel {
             }
         });
 
-        buddyLibrarySupport.addListener(new EventListener<BuddyLibraryEvent>() {
+        buddyLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
             @Override
-            public void handleEvent(BuddyLibraryEvent event) {
+            public void handleEvent(FriendRemoteLibraryEvent event) {
                 switch (event.getType()) {
-                case BUDDY_ADDED:
-                    addFriend(event.getId(), event.getFileList());
+                case FRIEND_LIBRARY_ADDED:
+                    addFriend(event.getFriend(), event.getFileList());
                     break;
-                case BUDDY_REMOVED:
-                    removeFriend(event.getId(), event.getFileList());
+                case FRIEND_LIBRARY_REMOVED:
+                    removeFriend(event.getFriend(), event.getFileList());
                     break;
                 }
             }
         });
     }
 
-    private void addNavItem(LibraryName name, NavItem navItem) {
-        listModel.addRow(new Object[] { null, name, navItem });
+    private void addNavItem(Friend friend, NavItem navItem) {
+        listModel.addRow(new Object[] { null, friend, navItem });
     }
 
     private void removeNavItem(NavItem navItem) {
@@ -149,9 +150,12 @@ public class LibraryNavigator extends JPanel {
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
             String render = "";
-            LibraryName friend = (LibraryName)value;
+            Friend friend = (Friend)value;
             if(friend != null) {
-                render = friend.getRenderName();
+                render = friend.getName();
+                if(render == null) {
+                    render = friend.getId();
+                }
             }
             JComponent renderer = (JComponent) super.getTableCellRendererComponent(table,
                     render, isSelected, hasFocus, row, column);
@@ -169,9 +173,9 @@ public class LibraryNavigator extends JPanel {
         return -1;
     }
 
-    private NavItem getNavItemForFriend(String id) {
+    private NavItem getNavItemForFriend(Friend friend) {
         for (int i = 0; i < listModel.getRowCount(); i++) {
-            if (((LibraryName)listModel.getValueAt(i, 1)).getId().equals(id)) {
+            if (((Friend)listModel.getValueAt(i, 1)).getId().equals(friend.getId())) {
                 return (NavItem)listModel.getValueAt(i, 2);
             }
         }
@@ -183,9 +187,9 @@ public class LibraryNavigator extends JPanel {
         itemList.getSelectionModel().setSelectionInterval(row, row);
     }
 
-    private void addFriend(String id, RemoteFileList fileList) {
+    private void addFriend(Friend friend, RemoteFileList fileList) {
         BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(fileList);
-        final NavItem item = navigator.createNavItem(NavCategory.LIBRARY, id, library);
+        final NavItem item = navigator.createNavItem(NavCategory.LIBRARY, friend.getId(), library);
         item.addNavItemListener(new NavItemListener() {
             @Override
             public void itemRemoved() {
@@ -201,48 +205,25 @@ public class LibraryNavigator extends JPanel {
                 }
             }
         });
-        addNavItem(new Friend(id), item);
+        addNavItem(friend, item);
     }
 
-    private void removeFriend(String id, RemoteFileList fileList) {
-        NavItem item = getNavItemForFriend(id);
+    private void removeFriend(Friend friend, RemoteFileList fileList) {
+        NavItem item = getNavItemForFriend(friend);
         if(item != null) {
             item.remove();
         }
     }
     
-    private static interface LibraryName {
-        String getRenderName();
-        String getId();
-    }
-    
-    private class Me implements LibraryName {
-        @Override
-        public String getRenderName() {
-            return I18n.tr("Me");
-        }
-        
+    private static class Me implements Friend {
         @Override
         public String getId() {
             return "_@_internal_@_";
         }
-    }
-    
-    private class Friend implements LibraryName {
-        private final String id;
-        
-        Friend(String id) {
-            this.id = id;
-        }
-        
+
         @Override
-        public String getId() {
-            return id;
-        }
-        
-        @Override
-        public String getRenderName() {
-            return id;
+        public String getName() {
+            return I18n.tr("Me");
         }
     }
 }

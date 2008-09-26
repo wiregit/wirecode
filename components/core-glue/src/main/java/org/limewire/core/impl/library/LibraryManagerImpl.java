@@ -8,8 +8,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.BuddyFileList;
-import org.limewire.core.api.library.BuddyLibraryEvent;
+import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
@@ -43,12 +44,12 @@ class LibraryManagerImpl implements LibraryManager {
     private final GnutellaFileList gnutellaFileList;
     private final Map<String, LocalFileList> buddyFileLists;
     
-    private final EventListener<BuddyLibraryEvent> buddyLibraryEventListener; 
+    private final EventListener<FriendRemoteLibraryEvent> buddyLibraryEventListener; 
     private final ConcurrentHashMap<String, RemoteFileList> buddyLibraryFileLists;
     private final LocalFileDetailsFactory detailsFactory;
 
     @Inject
-    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory, EventListener<BuddyLibraryEvent> buddyLibraryEventListener) {
+    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory, EventListener<FriendRemoteLibraryEvent> buddyLibraryEventListener) {
         this.fileManager = fileManager;
         this.detailsFactory = detailsFactory;
         this.buddyLibraryEventListener = buddyLibraryEventListener;
@@ -123,12 +124,12 @@ class LibraryManagerImpl implements LibraryManager {
     /////////////////////////////////////////////////////
 
     @Override
-    public RemoteFileList getOrCreateBuddyLibrary(String id) {
+    public RemoteFileList getOrCreateBuddyLibrary(Friend friend) {
         RemoteFileList newList = new BuddyLibraryFileList();
-        RemoteFileList existing = buddyLibraryFileLists.putIfAbsent(id, newList);
+        RemoteFileList existing = buddyLibraryFileLists.putIfAbsent(friend.getId(), newList);
         
         if(existing == null) {
-            buddyLibraryEventListener.handleEvent(new BuddyLibraryEvent(BuddyLibraryEvent.Type.BUDDY_ADDED, newList, id));
+            buddyLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_ADDED, newList, friend));
             return newList;
         } else {
             return existing;
@@ -136,10 +137,10 @@ class LibraryManagerImpl implements LibraryManager {
     }
     
     @Override
-    public void removeBuddyLibrary(String id) {
-        RemoteFileList list = buddyLibraryFileLists.remove(id);
+    public void removeBuddyLibrary(Friend friend) {
+        RemoteFileList list = buddyLibraryFileLists.remove(friend.getId());
         if(list != null) {
-            buddyLibraryEventListener.handleEvent(new BuddyLibraryEvent(BuddyLibraryEvent.Type.BUDDY_REMOVED, list, id));
+            buddyLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_REMOVED, list, friend));
         }
     }
     

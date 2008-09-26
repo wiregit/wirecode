@@ -58,7 +58,7 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                 if(presence.getType().equals(Presence.Type.available)) {                    
                     if(presence instanceof LimePresence) {
                         if(!libraryExists.getAndSet(true)) {
-                            final RemoteFileList list = libraryManager.getOrCreateBuddyLibrary(user.getId());
+                            final RemoteFileList list = libraryManager.getOrCreateBuddyLibrary(user);
                             Address address = ((LimePresence)presence).getAddress();
                             LOG.debugf("browsing {0} ...", presence.getJID());
                             browseFactory.createBrowse(address).start(new BrowseListener() {
@@ -74,7 +74,7 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     if(libraryExists.getAndSet(false)) {
-                        libraryManager.removeBuddyLibrary(user.getId());
+                        libraryManager.removeBuddyLibrary(user);
                     }
                 }                
             }   

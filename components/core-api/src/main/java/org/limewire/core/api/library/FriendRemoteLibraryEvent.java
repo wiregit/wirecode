@@ -1,21 +1,22 @@
 package org.limewire.core.api.library;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.util.StringUtils;
 
-public class BuddyLibraryEvent {
+public class FriendRemoteLibraryEvent {
     
     public enum Type {
-        BUDDY_ADDED, BUDDY_REMOVED;
+        FRIEND_LIBRARY_ADDED, FRIEND_LIBRARY_REMOVED;
     }
     
     private final Type type;
     private final RemoteFileList fileList;
-    private final String id;
+    private final Friend friend;
     
-    public BuddyLibraryEvent(Type type, RemoteFileList fileList, String id) {
+    public FriendRemoteLibraryEvent(Type type, RemoteFileList fileList, Friend friend) {
         this.type = type;
         this.fileList = fileList;
-        this.id = id;
+        this.friend = friend;
     }
 
     public Type getType() {
@@ -26,8 +27,8 @@ public class BuddyLibraryEvent {
         return fileList;
     }
 
-    public String getId() {
-        return id;
+    public Friend getFriend() {
+        return friend;
     }
     
     @Override

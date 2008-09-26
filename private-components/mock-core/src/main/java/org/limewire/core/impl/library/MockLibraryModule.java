@@ -1,6 +1,6 @@
 package org.limewire.core.impl.library;
 
-import org.limewire.core.api.library.BuddyLibraryEvent;
+import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.listener.EventListener;
@@ -20,9 +20,9 @@ public class MockLibraryModule extends AbstractModule {
         bind(LibraryManager.class).to(MockLibraryManager.class);
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("friendLibraries")).to(MockFriendLibraryAutoCompleter.class);
 
-        EventMulticaster<BuddyLibraryEvent> buddyMulticaster = new EventMulticasterImpl<BuddyLibraryEvent>(); 
-        bind(new TypeLiteral<EventListener<BuddyLibraryEvent>>(){}).toInstance(buddyMulticaster);
-        bind(new TypeLiteral<ListenerSupport<BuddyLibraryEvent>>(){}).toInstance(buddyMulticaster);
+        EventMulticaster<FriendRemoteLibraryEvent> buddyMulticaster = new EventMulticasterImpl<FriendRemoteLibraryEvent>(); 
+        bind(new TypeLiteral<EventListener<FriendRemoteLibraryEvent>>(){}).toInstance(buddyMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FriendRemoteLibraryEvent>>(){}).toInstance(buddyMulticaster);
     }
 
 }
