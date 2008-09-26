@@ -58,9 +58,8 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     /**
      * Update visibilities of newly changed parents.
      */
-    private void updateVisibility(VisualSearchResult parent, boolean childrenVisible) {
+    private void updateVisibility(VisualSearchResult parent, final boolean childrenVisible) {
         LOG.debugf("Setting child visibility for {0} to {1}", parent.getCoreSearchResults().get(0).getUrn(), childrenVisible);
-//        parent.setChildrenVisible(childrenVisible);
         for (VisualSearchResult similarResult : parent.getSimilarResults()) {
             similarResult.setVisible(childrenVisible);
         }

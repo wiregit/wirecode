@@ -31,8 +31,6 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.matchers.Matcher;
 
 public abstract class BaseResultPanel extends JXPanel {
     public static final int TABLE_ROW_HEIGHT = 26;
@@ -78,7 +76,7 @@ public abstract class BaseResultPanel extends JXPanel {
         // because that will allow us to display buttons with rollover icons.
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
 
-        resultsList.setEventList(newVisibleFilterList(eventList));
+        resultsList.setEventList(eventList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();
         resultsList.setTableFormat(tableFormat);
 
@@ -128,18 +126,6 @@ public abstract class BaseResultPanel extends JXPanel {
                         BaseResultPanel.this, navTree, vsr, row);
                     menu.show(component, e.getX(), e.getY());
                 }
-            }
-        });
-    }
-
-    private EventList<VisualSearchResult> newVisibleFilterList(
-            EventList<VisualSearchResult> eventList) {
-        return new FilterList<VisualSearchResult>(eventList, new Matcher<VisualSearchResult>() {
-            @Override
-            public boolean matches(VisualSearchResult item) {
-                boolean visible = item.isVisible();
-                LOG.debugf("filter... VSR urn {0} visibility {1}", item.getCoreSearchResults().get(0).getUrn(), visible);
-                return visible;
             }
         });
     }

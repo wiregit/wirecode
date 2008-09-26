@@ -49,10 +49,6 @@ public interface VisualSearchResult {
     void removePropertyChangeListener(PropertyChangeListener listener);
 
     boolean isChildrenVisible();
-//
-//    void setChildrenVisible(boolean childrenVisible);
-    
-    void fireVisibilityChanged(boolean oldValue);
     
     boolean isSpam();
     

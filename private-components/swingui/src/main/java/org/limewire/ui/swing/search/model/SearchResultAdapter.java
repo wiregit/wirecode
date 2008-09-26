@@ -31,7 +31,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private final Set<VisualSearchResult> similarResults = new HashSet<VisualSearchResult>();
     private VisualSearchResult similarityParent;
-//    private boolean childrenVisible;
     private boolean visible;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
@@ -46,7 +45,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             }
         });
         this.visible = true;
-//        this.childrenVisible = true;
         
         update();
     }
@@ -125,9 +123,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     }
     
     public void setSimilarityParent(VisualSearchResult parent) {
-//        VisualSearchResult oldParent = this.similarityParent;
+        VisualSearchResult oldParent = this.similarityParent;
         this.similarityParent = parent;
-//        firePropertyChange("similarityParent", oldParent, parent);
+        firePropertyChange("similarityParent", oldParent, parent);
     }
     
     @Override
@@ -170,24 +168,17 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public boolean isVisible() {
-//        if(similarityParent == null) {
-//           return true;   
-//        }
-//        return similarityParent.isChildrenVisible();
         return visible;
     }
     
     @Override
     public void setVisible(boolean visible) {
+        boolean oldValue = this.visible;
         this.visible = visible;
+        firePropertyChange("visible", oldValue, visible);
         LOG.debugf("Updating visible to {0} for urn: {1}", visible, getUrn());
     }
     
-    @Override
-    public void fireVisibilityChanged(boolean oldValue) {
-        firePropertyChange("visible", oldValue, visible);
-    }
-
     private String getUrn() {
         List<SearchResult> coreSearchResults = getCoreSearchResults();
         if (coreSearchResults == null || coreSearchResults.size() == 0) return "";
@@ -197,17 +188,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public boolean isChildrenVisible() {
-//        return childrenVisible;
         return getSimilarResults().size() > 0 && getSimilarResults().get(0).isVisible();
     }
     
-//    @Override
-//    public void setChildrenVisible(boolean childrenVisible) {
-//        boolean oldVisible = this.childrenVisible;
-//        this.childrenVisible = childrenVisible;
-//        firePropertyChange("childrenVisible", oldVisible, childrenVisible);
-//    }
-
     public void removeSimilarSearchResult(VisualSearchResult result) {
         similarResults.remove(result);       
     }

@@ -118,12 +118,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
     
     @Override
-    public void fireVisibilityChanged(boolean oldValue) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         // TODO Auto-generated method stub
         

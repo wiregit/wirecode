@@ -13,7 +13,9 @@ import org.limewire.logging.LogFactory;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.GroupingList;
+import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.FunctionList.AdvancedFunction;
 
 public class BasicSearchResultsModel implements SearchResultsModel {
@@ -21,17 +23,16 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
     private final EventList<SearchResult> allSearchResults;
 
-    private final GroupingList<SearchResult> groupingListUrns;
-
-    private final FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults;
-
     private final AtomicInteger resultCount = new AtomicInteger();
+
+    private ObservableElementList<VisualSearchResult> observableList;
 
     public BasicSearchResultsModel() {
         allSearchResults = new BasicEventList<SearchResult>();
-        groupingListUrns = new GroupingList<SearchResult>(allSearchResults, new UrnComparator());
-        groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
+        GroupingList<SearchResult> groupingListUrns = new GroupingList<SearchResult>(allSearchResults, new UrnComparator());
+        FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
                 groupingListUrns, new SearchResultGrouper(resultCount));
+        observableList = new ObservableElementList<VisualSearchResult>(groupedUrnResults, GlazedLists.beanConnector(VisualSearchResult.class));
     }
 
     @Override
@@ -41,7 +42,7 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
     @Override
     public EventList<VisualSearchResult> getVisualSearchResults() {
-        return groupedUrnResults;
+        return observableList;
     }
 
     @Override
