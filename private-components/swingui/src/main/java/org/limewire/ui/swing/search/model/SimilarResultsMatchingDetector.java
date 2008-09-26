@@ -12,6 +12,7 @@ import org.limewire.logging.LogFactory;
  */
 public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     private final SearchResultMatcher searchResultComparator;
+
     private final Log LOG = LogFactory.getLog(getClass());
 
     /**
@@ -25,7 +26,7 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     @Override
     public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult eventItem) {
         for (VisualSearchResult result : results) {
-            if (result != eventItem &&  searchResultComparator.matches(result, eventItem)) {
+            if (result != eventItem && searchResultComparator.matches(result, eventItem)) {
                 update(eventItem, result);
             }
         }
@@ -51,7 +52,7 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
         updateParent(o1, parent);
         updateParent(o2.getSimilarityParent(), parent);
         updateParent(o2, parent);
-        
+
         updateVisibility(parent, childrenVisible);
     }
 
@@ -59,7 +60,8 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      * Update visibilities of newly changed parents.
      */
     private void updateVisibility(VisualSearchResult parent, final boolean childrenVisible) {
-        LOG.debugf("Setting child visibility for {0} to {1}", parent.getCoreSearchResults().get(0).getUrn(), childrenVisible);
+        LOG.debugf("Setting child visibility for {0} to {1}", parent.getCoreSearchResults().get(0)
+                .getUrn(), childrenVisible);
         parent.setVisible(true);
         parent.setChildrenVisible(childrenVisible);
     }
@@ -72,7 +74,7 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      */
     private void updateParent(VisualSearchResult child, VisualSearchResult parent) {
         ((SearchResultAdapter) parent).setSimilarityParent(null);
-        if (child!= null && child != parent) {
+        if (child != null && child != parent) {
             ((SearchResultAdapter) child).setSimilarityParent(parent);
             ((SearchResultAdapter) parent).addSimilarSearchResult(child);
             moveChildren(child, parent);
@@ -93,7 +95,7 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
 
     /**
      * Returns which item should be the parent between the two similar search
-     * results. Currently the item with the most core results, is considered the
+     * results. Currently the item with the most sources, is considered the
      * parent.
      */
     private VisualSearchResult findParent(VisualSearchResult o1, VisualSearchResult o2) {
@@ -103,11 +105,11 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
         VisualSearchResult parent2 = o2;
         VisualSearchResult parent3 = o1.getSimilarityParent();
         VisualSearchResult parent4 = o2.getSimilarityParent();
-        int parent1Count = parent1 == null ? 0 : parent1.getCoreSearchResults().size();
-        int parent2Count = parent2 == null ? 0 : parent2.getCoreSearchResults().size();
-        int parent3Count = parent3 == null ? 0 : parent3.getCoreSearchResults().size();
-        int parent4Count = parent4 == null ? 0 : parent4.getCoreSearchResults().size();
-        
+        int parent1Count = parent1 == null ? 0 : parent1.getSources().size();
+        int parent2Count = parent2 == null ? 0 : parent2.getSources().size();
+        int parent3Count = parent3 == null ? 0 : parent3.getSources().size();
+        int parent4Count = parent4 == null ? 0 : parent4.getSources().size();
+
         if (parent4Count > parent3Count && parent4Count > parent2Count
                 && parent4Count > parent1Count) {
             parent = parent4;

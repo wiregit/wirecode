@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import junit.framework.Assert;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.endpoint.RemoteHostAction;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.util.BaseTestCase;
 
@@ -504,6 +506,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
                         new GroupingListEventListener(new SimilarResultsMatchingDetector(
                                 new NameMatcher())));
 
+        
         TestSearchResult testResult1 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult2 = new TestSearchResult("1", "blah1 file");
         TestSearchResult testResult3 = new TestSearchResult("2", "blah1 file");
@@ -511,6 +514,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         TestSearchResult testResult5 = new TestSearchResult("3", "blah1 file");
         TestSearchResult testResult6 = new TestSearchResult("3", "blah2 file");
 
+        
         model.addSearchResult(testResult1);
         List<VisualSearchResult> results = model.getGroupedSearchResults();
         Assert.assertEquals(1, results.size());
@@ -590,7 +594,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group2, group0.getSimilarityParent());
         Assert.assertEquals(group2, group1.getSimilarityParent());
     }
-    
+
     public void testTwoSearchResults() {
         SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
@@ -603,13 +607,13 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         model.addSearchResult(testResult1);
         model.addSearchResult(testResult2);
-        
+
         EventList<VisualSearchResult> visualSearchResults = model.getGroupedSearchResults();
         VisualSearchResult child = visualSearchResults.get(0);
         VisualSearchResult parent = visualSearchResults.get(1);
         assertEquals("1", child.getCoreSearchResults().get(0).getUrn());
         assertEquals("sim", parent.getCoreSearchResults().get(0).getUrn());
-        
+
         assertSame(parent, child.getSimilarityParent());
         assertEquals(0, child.getSimilarResults().size());
         assertEquals(1, parent.getSimilarResults().size());
@@ -655,7 +659,21 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         @Override
         public List<RemoteHost> getSources() {
-            return new ArrayList<RemoteHost>();
+            List<RemoteHost> sources =new ArrayList<RemoteHost>();
+            sources.add(new RemoteHost() {
+                @Override
+                public List<RemoteHostAction> getHostActions() {
+                   List<RemoteHostAction> reList = new ArrayList<RemoteHostAction>();
+                   
+                    return reList;
+                }
+
+                @Override
+                public String getHostDescription() {
+                    return UUID.randomUUID().toString();
+                }
+            });
+            return sources;
         }
 
         @Override
