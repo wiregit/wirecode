@@ -28,27 +28,6 @@ public class ByteUtils {
     }
 
     /**
-     * Reads a byte from input stream and throws {@link EOFException} if
-     * the end of the stream was reached. 
-     */
-    public static int readByte(InputStream is) throws IOException{
-        int ret = is.read();
-        if (ret == -1)
-            throw new EOFException();
-        return ret;
-    }
-    
-    /**
-     * Fills array with bytes from input stream and throws {@link EOFException}
-     * if it couldn't be fully read. 
-     */
-    public static void readFully(InputStream in, byte[] array) throws IOException {
-        if (in.read(array) != array.length) {
-            throw new EOFException();
-        }
-    }
-    
-    /**
      * Little-endian bytes to short.
      *
      * @requires x.length - offset &gt;= 2
@@ -672,4 +651,18 @@ public class ByteUtils {
 			throw new IllegalArgumentException("No bytes specified");
 		}
 	}
+	
+    /**
+     * Reads a byte from input stream and throws {@link EOFException} if
+     * the end of the stream was reached.
+     * 
+     * Do not make public, the same method can be found in {@link IOUtils},
+     * but can't be used here to not introduce dependencies.
+     */
+    private static int readByte(InputStream is) throws IOException{
+        int ret = is.read();
+        if (ret == -1)
+            throw new EOFException();
+        return ret;
+    }
 }

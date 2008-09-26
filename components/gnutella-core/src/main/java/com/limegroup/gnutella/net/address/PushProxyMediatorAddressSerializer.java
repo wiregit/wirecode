@@ -7,11 +7,11 @@ import java.util.Set;
 
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.IOUtils;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.net.address.StrictIpPortSet;
-import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,7 +43,7 @@ public class PushProxyMediatorAddressSerializer implements AddressSerializer {
     public Address deserialize(byte[] serializedAddress) throws IOException {
         ByteArrayInputStream in = new ByteArrayInputStream(serializedAddress);
         byte[] guidBytes = new byte[16];
-        ByteUtils.readFully(in, guidBytes);
+        IOUtils.readFully(in, guidBytes);
         final GUID guid = new GUID(guidBytes); 
         final Set<Connectable> pushProxyAddresses = new StrictIpPortSet<Connectable>();
         while (in.available() > 0) {
