@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.BuddyShareListListener;
+import org.limewire.core.api.library.Buddy;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
@@ -21,9 +21,9 @@ public class MockLibraryManager implements LibraryManager {
     private Map<String, LocalFileList> buddyMap;
     
     public MockLibraryManager() {
-        allFileList = new FileListAdapter("My Library");
-        gnutellaList = new FileListAdapter("Gnutella List");
-        buddyList = new FileListAdapter("Buddy List");
+        allFileList = new FileListAdapter();
+        gnutellaList = new FileListAdapter();
+        buddyList = new FileListAdapter();
         
         buddyMap = new HashMap<String, LocalFileList>();
 
@@ -75,13 +75,13 @@ public class MockLibraryManager implements LibraryManager {
     }
     
     private void initializeBuddys() {
-        buddyMap.put("Sean", new FileListAdapter("Sean"));
+        buddyMap.put("Sean", new FileListAdapter());
         initializeBuddy4(buddyMap.get("Sean"));
-        buddyMap.put("Bob", new FileListAdapter("Bob"));
-        buddyMap.put("Johanna", new FileListAdapter("Johanna"));
-        buddyMap.put("Mark", new FileListAdapter("Mark"));
+        buddyMap.put("Bob", new FileListAdapter());
+        buddyMap.put("Johanna", new FileListAdapter());
+        buddyMap.put("Mark", new FileListAdapter());
         initializeBuddy(buddyMap.get("Mark"));
-        buddyMap.put("Rob", new FileListAdapter("Rob"));
+        buddyMap.put("Rob", new FileListAdapter());
         initializeBuddy2(buddyMap.get("Rob"));
     }
     
@@ -134,7 +134,7 @@ public class MockLibraryManager implements LibraryManager {
     
     @Override
     public LocalFileList getBuddy(String name) {
-        return new FileListAdapter(name);
+        return new FileListAdapter();
     }
 
     @Override
@@ -160,49 +160,17 @@ public class MockLibraryManager implements LibraryManager {
         return false;
     }
 
-    @Override
-    public void addBuddyShareListListener(BuddyShareListListener listener) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void removeBuddyShareListListener(BuddyShareListListener listener) {
-        // TODO Auto-generated method stub
-        
-    }
     
     ///////////////////////////////////////////////
     //  Accessors for Buddy Libraries
     ///////////////////////////////////////////////
 
     @Override
-    public void addBuddyLibrary(String name) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public boolean containsBuddyLibrary(String name) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Map<String, RemoteFileList> getAllBuddyLibraries() {
-        // TODO Auto-generated method stub
+    public RemoteFileList getOrCreateBuddyLibrary(Buddy buddy) {
         return null;
     }
 
     @Override
-    public RemoteFileList getBuddyLibrary(String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void removeBuddyLibrary(String name) {
-        // TODO Auto-generated method stub
-        
+    public void removeBuddyLibrary(Buddy buddy) {
     }
 }

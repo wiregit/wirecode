@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
+import org.limewire.ui.swing.library.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.util.GuiUtils;

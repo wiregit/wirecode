@@ -1,9 +1,15 @@
 package org.limewire.core.impl.library;
 
 import org.limewire.collection.AutoCompleteDictionary;
+import org.limewire.core.api.library.BuddyLibraryEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.inject.AbstractModule;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventMulticasterImpl;
+import org.limewire.listener.ListenerSupport;
 
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 public class CoreGlueLibraryModule extends AbstractModule {
@@ -14,6 +20,10 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(LibraryRosterListener.class);
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("friendLibraries")).to(FriendLibraryAutoCompleter.class);
         bind(FriendSearcher.class);
+        
+        EventMulticaster<BuddyLibraryEvent> buddyMulticaster = new EventMulticasterImpl<BuddyLibraryEvent>(); 
+        bind(new TypeLiteral<EventListener<BuddyLibraryEvent>>(){}).toInstance(buddyMulticaster);
+        bind(new TypeLiteral<ListenerSupport<BuddyLibraryEvent>>(){}).toInstance(buddyMulticaster);
     }
 
 }

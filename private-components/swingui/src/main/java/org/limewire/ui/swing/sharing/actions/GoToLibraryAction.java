@@ -16,8 +16,8 @@ public class GoToLibraryAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(libraryManager.containsBuddyLibrary("")) {
-            //TODO: do something here
-        }
+//        if(libraryManager.containsBuddyLibrary("")) {
+//            //TODO: do something here
+//        }
     }
 }

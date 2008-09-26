@@ -2,21 +2,21 @@ package org.limewire.ui.swing.library.sharing;
 
 public class SharingTarget {
     
-    private final String name;
+    private final String id;
 
-    public SharingTarget(String name){
-        this.name = name;
+    public SharingTarget(String id){
+        this.id = id;
     }
-    
-    public String getName(){
-        return name;
+
+    public String getId() {
+        return id;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -30,7 +30,7 @@ public class SharingTarget {
                 return false;
         }
 
-        return getName().equals(((SharingTarget)obj).getName());
+        return getId().equals(((SharingTarget)obj).getId());
     }
 
    

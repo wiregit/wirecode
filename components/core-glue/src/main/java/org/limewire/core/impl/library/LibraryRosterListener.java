@@ -59,16 +59,7 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                         browseFactory.createBrowse(address).start(new BrowseListener() {
                             public void handleBrowseResult(SearchResult searchResult) {
                                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
-                                String name = user.getName();
-                                if(name == null) {
-                                    name = user.getId();
-                                }
-                                synchronized (libraryManager) {
-                                    if(!libraryManager.containsBuddyLibrary(name)) {
-                                        libraryManager.addBuddyLibrary(name);                                        
-                                    }
-                                }
-                                RemoteFileList list = libraryManager.getBuddyLibrary(name);
+                                RemoteFileList list = libraryManager.getOrCreateBuddyLibrary(new UserBuddy(user));
                                 RemoteFileItem file = new CoreRemoteFileItem((RemoteFileDescAdapter)searchResult);
                                 list.addFile(file);
                             }

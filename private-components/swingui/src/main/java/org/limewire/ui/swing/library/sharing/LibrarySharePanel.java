@@ -222,7 +222,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         TextFilterator<SharingTarget> textFilter = new TextFilterator<SharingTarget>() {
             @Override
             public void getFilterStrings(List<String> baseList, SharingTarget element) {
-                baseList.add(element.getName());
+                baseList.add(element.getId());
             }
         };
         
@@ -579,10 +579,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     }
     
     private void addBuddy(SharingTarget buddy) {
-        if(!libraryManager.containsBuddy(buddy.getName())) {
-            libraryManager.addBuddy(buddy.getName());
+        if(!libraryManager.containsBuddy(buddy.getId())) {
+            libraryManager.addBuddy(buddy.getId());
         }
-        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(buddy.getName());
+        BuddyFileList fileList = (BuddyFileList) libraryManager.getBuddy(buddy.getId());
         buddyListMap.put(buddy, fileList);
         loadBuddy(buddy);
     }
@@ -637,7 +637,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             if(column == editColumn){
                 return baseObject;
             }
-            return baseObject.getName();
+            return baseObject.getId();
         }
 
         @Override
@@ -669,7 +669,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             if(o2 == GNUTELLA_SHARE){
                 return 1;
             }
-            return o1.getName().compareTo(o2.getName());
+            return o1.getId().compareTo(o2.getId());
         }
         
     }

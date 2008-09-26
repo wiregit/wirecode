@@ -18,7 +18,7 @@ public class ToolTipTable extends MouseableTable {
     public String getToolTipText(MouseEvent event) {
         int row = rowAtPoint(event.getPoint());
         if (row >= 0){
-            return model.getElementAt(row).getName();
+            return model.getElementAt(row).getId();
         }
          return null;
          

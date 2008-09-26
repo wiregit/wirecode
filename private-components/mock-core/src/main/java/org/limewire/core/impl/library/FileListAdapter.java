@@ -14,11 +14,6 @@ import ca.odell.glazedlists.GlazedLists;
 public class FileListAdapter implements LocalFileList {
 
     private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
-    private final String name;
-    
-    public FileListAdapter(String name) {
-        this.name = name;
-    }
     
     @Override
     public EventList<LocalFileItem> getModel() {
@@ -41,11 +36,6 @@ public class FileListAdapter implements LocalFileList {
     
     public void removeFileItem(FileItem item) {
         eventList.remove(item);
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override

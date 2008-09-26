@@ -1,16 +1,10 @@
 package org.limewire.ui.swing.friends;
 
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.library.BuddyLibrary;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
@@ -24,12 +18,10 @@ import com.google.inject.Singleton;
 public class FriendsPaneRosterListener implements RegisteringEventListener<RosterEvent> {
     private static final Log LOG = LogFactory.getLog(FriendsPaneRosterListener.class);
 
-    private final Navigator navigator;
     private final LibraryManager libraryManager;
     
     @Inject
-    public FriendsPaneRosterListener(Navigator navigator, LibraryManager libraryManager) {
-        this.navigator = navigator;
+    public FriendsPaneRosterListener(LibraryManager libraryManager) {
         this.libraryManager = libraryManager;
     }
     
@@ -42,9 +34,9 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
         if(event.getType().equals(User.EventType.USER_ADDED)) {
             userAdded(event.getSource());
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            userDeleted(event.getSource().getId());
+//            userDeleted(event.getSource().getId());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-            userUpdated(event.getSource());
+//            userUpdated(event.getSource());
         }
     }
 
@@ -54,60 +46,24 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
                 LOG.debugf("presenceChanged(). Presence jid: {0} presence-type: {1}", presence.getJID(), presence.getMode());
                 if(presence.getType().equals(Presence.Type.available)) {
                     //TODO: Should distinguish between Sharable/Lime and "regular" presence with 2 event types
+                    //TODO: Add presenceChanged listeners directly (elsewhere) and avoid global publish
                     new PresenceUpdateEvent(user, presence).publish();
                     if(presence instanceof LimePresence) {
-                        addBuddyLibrary(user);
+                        // This will trigger the creation of the library in the nav --
+                        // if we want to delaying showing the library till any files
+                        // are retrieved, comment this line out.
+                        libraryManager.getOrCreateBuddyLibrary(new UserBuddy(user));
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     new PresenceUpdateEvent(user, presence).publish();
                     if(presence instanceof LimePresence) {
-                        removeBuddyLibrary(user);
+                        libraryManager.removeBuddyLibrary(new UserBuddy(user));
                     }
                 } else {
                     // TODO update UI
                 }
             }
         });        
-    }
-
-    private void removeBuddyLibrary(User user) {
-        String name = user.getName();
-        if(name == null) {
-            name = user.getId();
-        }
-        synchronized (this) {
-            RemoteFileList libraryList = libraryManager.getBuddyLibrary(name);
-            BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryList);
-            NavItem item = navigator.getNavItem(NavCategory.LIBRARY, library.getName());
-            if(item != null) {
-                item.remove();
-            }
-            libraryManager.removeBuddyLibrary(name);
-        }
-    }
-
-    private void addBuddyLibrary(User user) {
-        String name = user.getName();
-        if(name == null) {
-            name = user.getId();
-        }
-        synchronized (this) {
-            if(!libraryManager.containsBuddyLibrary(name)) {
-                libraryManager.addBuddyLibrary(name);  
-            }       
-            if(!navigator.hasNavItem(NavCategory.LIBRARY, name)) { 
-                BuddyLibrary library = new BuddyLibrary<RemoteFileItem>(name, libraryManager.getBuddyLibrary(name));
-                navigator.createNavItem(NavCategory.LIBRARY, name, library);
-            }
-        }
-    }
-
-    public void userUpdated(User user) {
-        // TODO fire UserUpdateEvent    
-    }
-
-    public void userDeleted(String id) {
-        
     }
 }
 

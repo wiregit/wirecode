@@ -10,62 +10,46 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.BuddyLibraryEvent;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.RegisteringEventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.User;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 @Singleton
-public class FriendLibraries implements RegisteringEventListener<RosterEvent> {
-    private final LibraryManager libraryManager;
+public class FriendLibraries {
     private final Map<String, StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>> libraries;
     private static final Log LOG = LogFactory.getLog(FriendLibraries.class);
 
-    @Inject
-    FriendLibraries(LibraryManager libraryManager) {
-        this.libraryManager = libraryManager;
+    FriendLibraries() {
         this.libraries = new ConcurrentHashMap<String, StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
     }
-
-    @Inject
-    public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
-        rosterEventListenerSupport.addListener(this);
-    }
-
-    public void handleEvent(RosterEvent event) {
-        if(event.getType().equals(User.EventType.USER_ADDED)) {
-            String name = event.getSource().getName();
-            if(name == null) {
-                name = event.getSource().getId();
-            }
-            synchronized (libraryManager) {
-                if(!libraryManager.containsBuddyLibrary(name)) {
-                    libraryManager.addBuddyLibrary(name);
+    
+    @Inject void register(ListenerSupport<BuddyLibraryEvent> buddyLibrarySupport) {
+        buddyLibrarySupport.addListener(new EventListener<BuddyLibraryEvent>() {
+            @Override
+            public void handleEvent(BuddyLibraryEvent event) {
+                switch(event.getType()) {
+                case BUDDY_ADDED:
+                    StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
+                    LOG.debugf("adding friend library " + event.getBuddy() + " to index");
+                    libraries.put(event.getBuddy().getId(), trie);
+                    // TODO race condition?
+                    event.getFileList().getModel().addListEventListener(new LibraryListener(trie));
+                    break;
+                case BUDDY_REMOVED:
+                    LOG.debugf("removing friend library " + event.getBuddy() + " from index");
+                    libraries.remove(event.getBuddy().getId());
                 }
             }
-            StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library = new StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
-            LOG.debugf("adding friend library " + name + " to index");
-            libraries.put(name, library);
-            // TODO race condition?
-            libraryManager.getBuddyLibrary(name).getModel().addListEventListener(new LibraryListener(library));
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            String name = event.getSource().getName();
-            if(name == null) {
-                event.getSource().getId();
-            }
-            LOG.debugf("removing friend library " + name + " from index");
-            libraries.remove(name);
-        }
+        });
     }
 
     class LibraryListener implements ListEventListener<RemoteFileItem> {

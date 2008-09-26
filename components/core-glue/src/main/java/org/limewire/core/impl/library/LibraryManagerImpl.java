@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.library.Buddy;
 import org.limewire.core.api.library.BuddyFileList;
-import org.limewire.core.api.library.BuddyShareListListener;
+import org.limewire.core.api.library.BuddyLibraryEvent;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
@@ -17,6 +19,11 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
+import org.limewire.listener.EventListener;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,33 +34,30 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LocalFileDetailsFactory;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-
 @Singleton
 class LibraryManagerImpl implements LibraryManager {
     
     private final FileManager fileManager;
     private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
-    private final List<BuddyShareListListener> buddyListeners = new CopyOnWriteArrayList<BuddyShareListListener>();
     
-    private LibraryFileList libraryFileList;
-    private GnutellaFileList gnutellaFileList;
-    private Map<String, LocalFileList> buddyFileLists;
+    private final LibraryFileList libraryFileList;
+    private final GnutellaFileList gnutellaFileList;
+    private final Map<String, LocalFileList> buddyFileLists;
     
-    private Map<String, RemoteFileList> buddyLibraryFileLists;
+    private final EventListener<BuddyLibraryEvent> buddyLibraryEventListener; 
+    private final ConcurrentHashMap<String, RemoteFileList> buddyLibraryFileLists;
     private final LocalFileDetailsFactory detailsFactory;
 
     @Inject
-    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory) {
+    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory, EventListener<BuddyLibraryEvent> buddyLibraryEventListener) {
         this.fileManager = fileManager;
         this.detailsFactory = detailsFactory;
+        this.buddyLibraryEventListener = buddyLibraryEventListener;
 
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
         buddyFileLists = new HashMap<String, LocalFileList>();
-        buddyLibraryFileLists = new HashMap<String, RemoteFileList>();
+        buddyLibraryFileLists = new ConcurrentHashMap<String, RemoteFileList>();
     }
 
     @Override
@@ -91,45 +95,28 @@ class LibraryManagerImpl implements LibraryManager {
     }
     
     @Override
-    public LocalFileList getBuddy(String name) {
-        if(buddyFileLists.containsKey(name))
-            return buddyFileLists.get(name);
+    public LocalFileList getBuddy(String id) {
+        if(buddyFileLists.containsKey(id))
+            return buddyFileLists.get(id);
 
-        BuddyFileListImpl newBuddyList = new BuddyFileListImpl(fileManager, name);
-        buddyFileLists.put(name, newBuddyList);
+        BuddyFileListImpl newBuddyList = new BuddyFileListImpl(fileManager, id);
+        buddyFileLists.put(id, newBuddyList);
         return newBuddyList;
     }
     
     @Override
-    public void addBuddy(String name) {
-        fileManager.addBuddyFileList(name);
-        for(BuddyShareListListener listener : buddyListeners) {
-            listener.handleBuddyShareEvent(BuddyShareListListener.BuddyShareEvent.ADD, name);
-        }
+    public void addBuddy(String id) {
+        fileManager.addBuddyFileList(id);
     }
 
     @Override
-    public void removeBuddy(String name) {
-        fileManager.removeBuddyFileList(name);
-        for(BuddyShareListListener listener : buddyListeners) {
-            listener.handleBuddyShareEvent(BuddyShareListListener.BuddyShareEvent.REMOVE, name);
-        }
+    public void removeBuddy(String id) {
+        fileManager.removeBuddyFileList(id);
     }
     
     @Override
-    public boolean containsBuddy(String name) {
-        return fileManager.containsBuddyFileList(name);
-    }
-    
-
-    @Override
-    public void addBuddyShareListListener(BuddyShareListListener listener) {
-        buddyListeners.add(listener);
-    }
-
-    @Override
-    public void removeBuddyShareListListener(BuddyShareListListener listener) {
-        buddyListeners.remove(listener);
+    public boolean containsBuddy(String id) {
+        return fileManager.containsBuddyFileList(id);
     }
     
     //////////////////////////////////////////////////////
@@ -137,50 +124,25 @@ class LibraryManagerImpl implements LibraryManager {
     /////////////////////////////////////////////////////
 
     @Override
-    public Map<String, RemoteFileList> getAllBuddyLibraries() {
-        return buddyLibraryFileLists;
-    }
-
-    @Override
-    public RemoteFileList getBuddyLibrary(String name) {
-        return buddyLibraryFileLists.get(name);
-    }
-
-    @Override
-    public void addBuddyLibrary(String name) {
-        if(!buddyLibraryFileLists.containsKey(name)) {
-            buddyLibraryFileLists.put(name, new BuddyLibraryFileList(name));
+    public RemoteFileList getOrCreateBuddyLibrary(Buddy buddy) {
+        RemoteFileList newList = new BuddyLibraryFileList();
+        RemoteFileList existing = buddyLibraryFileLists.putIfAbsent(buddy.getId(), newList);
+        
+        if(existing == null) {
+            buddyLibraryEventListener.handleEvent(new BuddyLibraryEvent(BuddyLibraryEvent.Type.BUDDY_ADDED, newList, buddy));
+            return newList;
+        } else {
+            return existing;
         }
     }
     
     @Override
-    public void removeBuddyLibrary(String name) {
-        buddyLibraryFileLists.remove(name);
+    public void removeBuddyLibrary(Buddy buddy) {
+        RemoteFileList list = buddyLibraryFileLists.remove(buddy.getId());
+        if(list != null) {
+            buddyLibraryEventListener.handleEvent(new BuddyLibraryEvent(BuddyLibraryEvent.Type.BUDDY_REMOVED, list, buddy));
+        }
     }
-    
-    @Override
-    public boolean containsBuddyLibrary(String name) {
-        return buddyLibraryFileLists.containsKey(name);
-    }
-
-//    @Override
-//    public void handleFileEvent(FileManagerEvent evt) {
-//        switch(evt.getType()) {
-//            case ADD_FILE:
-//                allFileList.add(new CoreFileItem(evt.getNewFileDesc()));
-//                break;
-//            case FILEMANAGER_LOAD_STARTED:
-//                allFileList.clear();
-//                break;
-//            case REMOVE_FILE:
-//                removeFileItem(allFileList, evt.getNewFileDesc());
-//                break;
-//            case RENAME_FILE:
-//            case CHANGE_FILE:
-//                removeFileItem(allFileList, evt.getOldFileDesc());
-//                allFileList.add(new CoreFileItem(evt.getNewFileDesc()));
-//        }
-//    }
     
     private static class Listener implements FileEventListener {
         private final LibraryListListener listener;
@@ -249,11 +211,6 @@ class LibraryManagerImpl implements LibraryManager {
         public void clear() {
             fileManager.getSharedFileList().clear();
         }
-
-        @Override
-        public String getName() {
-            return "Gnutella List";
-        }
     }
 
     
@@ -297,11 +254,6 @@ class LibraryManagerImpl implements LibraryManager {
         @Override
         public void removeFile(File file) {
             fileManager.getBuddyFileList(name).remove(fileManager.getFileDesc(file));
-        }
-
-        @Override
-        public String getName() {
-            return name;
         }
         
         @Override
@@ -391,11 +343,6 @@ class LibraryManagerImpl implements LibraryManager {
         public void clear() {
             
         }
-
-        @Override
-        public String getName() {
-            return "My Library";
-        }
     }
     
     private abstract class LocalFileListImpl implements LocalFileList {
@@ -440,11 +387,6 @@ class LibraryManagerImpl implements LibraryManager {
     
     private class BuddyLibraryFileList extends RemoteFileListImpl {
 
-        private final String name;
-        
-        public BuddyLibraryFileList(String name) {
-            this.name = name;
-        }
 
         public void addFile(RemoteFileItem file) {
             eventList.add(file);
@@ -452,11 +394,6 @@ class LibraryManagerImpl implements LibraryManager {
 
         public void removeFile(RemoteFileItem file) {
             eventList.remove(file);
-        }
-
-        @Override
-        public String getName() {
-            return name;
         }
         
         public void clear() {

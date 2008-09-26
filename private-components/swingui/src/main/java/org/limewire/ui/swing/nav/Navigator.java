@@ -24,7 +24,7 @@ public interface Navigator {
     public NavItem createNavItem(NavCategory category, String id, JComponent panel);
 
     /**
-     * Returns true if a panel with the given id in the given category exists.
+     * Returns true if a {@link NavItem} exists in the given category with the given id.
      */
     boolean hasNavItem(NavCategory category, String id);
 
@@ -46,5 +46,6 @@ public interface Navigator {
      * Removes the listener from the list of listeners.
      */
     public void removeNavigationListener(NavigationListener itemListener);
+
 
 }

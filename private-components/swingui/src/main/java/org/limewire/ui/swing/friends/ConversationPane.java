@@ -361,11 +361,6 @@ public class ConversationPane extends JPanel implements Displayable {
         public void removeFile(File file) {
             //TODO: how do you convert a File into a LocalFileItem?
         }
-        
-        @Override
-        public String getName() {
-            return "Files shared via chat";
-        }
 
         @Override
         public int size() {
