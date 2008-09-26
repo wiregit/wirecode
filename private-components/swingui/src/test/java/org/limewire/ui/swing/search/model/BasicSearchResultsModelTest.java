@@ -517,7 +517,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         VisualSearchResult result0 = results.get(0);
         Assert.assertTrue(result0.isVisible());
         Assert.assertFalse(result0.isChildrenVisible());
-//        result0.setChildrenVisible(true);
+        result0.setChildrenVisible(true);
         Assert.assertTrue(result0.isVisible());
         Assert.assertTrue(result0.isChildrenVisible());
 
@@ -534,11 +534,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         VisualSearchResult child = children.get(0);
         Assert.assertTrue(child.isVisible());
 
-//        result0.setChildrenVisible(false);
+        result0.setChildrenVisible(false);
         Assert.assertTrue(result0.isVisible());
         Assert.assertFalse(result0.isChildrenVisible());
         Assert.assertFalse(child.isVisible());
-//        result0.setChildrenVisible(true);
+        result0.setChildrenVisible(true);
 
         model.addSearchResult(testResult4);
         model.addSearchResult(testResult5);
@@ -552,7 +552,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         VisualSearchResult child1 = children.get(1);
         Assert.assertTrue(child0.isVisible());
         Assert.assertTrue(child1.isVisible());
-//        result1.setChildrenVisible(false);
+        result1.setChildrenVisible(false);
 
         model.addSearchResult(testResult6);
 
@@ -562,7 +562,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         child1 = children.get(1);
         Assert.assertFalse(child0.isVisible());
         Assert.assertFalse(child1.isVisible());
-//        result2.setChildrenVisible(true);
+        result2.setChildrenVisible(true);
         Assert.assertTrue(child0.isVisible());
         Assert.assertTrue(child1.isVisible());
 

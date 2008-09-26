@@ -151,4 +151,10 @@ public class MockVisualSearchResult implements VisualSearchResult {
         // TODO Auto-generated method stub
         
     }
+
+    @Override
+    public void setChildrenVisible(boolean childrenVisible) {
+        // TODO Auto-generated method stub
+        
+    }
 }

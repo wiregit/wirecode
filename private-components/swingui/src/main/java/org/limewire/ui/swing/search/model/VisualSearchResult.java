@@ -50,6 +50,8 @@ public interface VisualSearchResult {
 
     boolean isChildrenVisible();
     
+    void setChildrenVisible(boolean childrenVisible);
+    
     boolean isSpam();
     
     void setSpam(boolean spam);

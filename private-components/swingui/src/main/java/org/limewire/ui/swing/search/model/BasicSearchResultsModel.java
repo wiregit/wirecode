@@ -26,13 +26,14 @@ public class BasicSearchResultsModel implements SearchResultsModel {
     private final AtomicInteger resultCount = new AtomicInteger();
 
     private ObservableElementList<VisualSearchResult> observableList;
+    private EventList<VisualSearchResult> groupedUrnResults;
 
     public BasicSearchResultsModel() {
         allSearchResults = new BasicEventList<SearchResult>();
         GroupingList<SearchResult> groupingListUrns = new GroupingList<SearchResult>(allSearchResults, new UrnComparator());
-        FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
+        this.groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
                 groupingListUrns, new SearchResultGrouper(resultCount));
-        observableList = new ObservableElementList<VisualSearchResult>(groupedUrnResults, GlazedLists.beanConnector(VisualSearchResult.class));
+       // observableList = new ObservableElementList<VisualSearchResult>(groupedUrnResults, GlazedLists.beanConnector(VisualSearchResult.class));
     }
 
     @Override
@@ -42,7 +43,7 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
     @Override
     public EventList<VisualSearchResult> getVisualSearchResults() {
-        return observableList;
+        return groupedUrnResults;
     }
 
     @Override
