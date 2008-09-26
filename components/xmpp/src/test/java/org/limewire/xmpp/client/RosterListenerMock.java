@@ -35,35 +35,37 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
         final String name = user.getName();
         user.addPresenceListener(new PresenceListener() {
             public void presenceChanged(Presence presence) {
-                String id = StringUtils.parseBareAddress(presence.getJID());
-                if(presence.getType().equals(Presence.Type.available)) {
-                    if(roster.get(id) == null) {
-                        roster.put(id, new ArrayList<Presence>());
-                    }
-                    if(!contains(roster.get(id), presence.getJID())) {
-                        roster.get(id).add(presence);
-                        presence.setIncomingChatListener(listener);
+                synchronized (RosterListenerMock.this) {
+                    String id = StringUtils.parseBareAddress(presence.getJID());
+                    if(presence.getType().equals(Presence.Type.available)) {
+                        if(roster.get(id) == null) {
+                            roster.put(id, new ArrayList<Presence>());
+                        }
+                        if(!contains(roster.get(id), presence.getJID())) {
+                            roster.get(id).add(presence);
+                            presence.setIncomingChatListener(listener);
+                            if(presence instanceof LimePresence) {
+                                System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
+                                // TODO browse host
+                            } else {                            
+                                System.out.println("user " + presence.getJID() + " (" + name + ") available");
+                            }
+                        } else {
+                            replace(roster.get(id), presence);
+                        }
+                    } else if(presence.getType().equals(Presence.Type.unavailable)) {
+                        if(roster.get(id) == null) {
+                            roster.put(id, new ArrayList<Presence>());
+                        }
+                        remove(id, presence);
                         if(presence instanceof LimePresence) {
-                            System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
-                            // TODO browse host
-                        } else {                            
-                            System.out.println("user " + presence.getJID() + " (" + name + ") available");
+                            System.out.println("lime user " + presence.getJID() + " (" + name + ") unavailable");
+                        } else {                        
+                            System.out.println("user " + presence.getJID() + " (" + name + ") unavailable");
                         }
                     } else {
-                        replace(roster.get(id), presence);
+                        System.out.println("user presence changed: " + presence.getType());
                     }
-                } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                    if(roster.get(id) == null) {
-                        roster.put(id, new ArrayList<Presence>());
-                    }
-                    remove(id, presence);
-                    if(presence instanceof LimePresence) {
-                        System.out.println("lime user " + presence.getJID() + " (" + name + ") unavailable");
-                    } else {                        
-                        System.out.println("user " + presence.getJID() + " (" + name + ") unavailable");
-                    }
-                } else {
-                    System.out.println("user presence changed: " + presence.getType());
                 }
             }
         });

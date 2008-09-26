@@ -65,6 +65,8 @@ public class XMPPServiceTest extends BaseTestCase {
         Thread.sleep(10 * 1000); // allow login, roster, presence, library messages to be
                                 // sent, received   
                                 // TODO wait()/notify()
+        assertEquals("another limebuddy2 presence has been detecteded, test cannnot run", 0, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        assertEquals("another limebuddy1 presence has been detecteded, test cannnot run", 0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
     }
     
     protected Injector createInjector(Module... modules) {
