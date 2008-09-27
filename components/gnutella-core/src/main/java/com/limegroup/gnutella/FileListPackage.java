@@ -6,7 +6,7 @@ import java.io.File;
  * Extra methods for FileManager to access but not part of the public API.
  * Pending files should only be added through the FileManager API.
  */
-public interface FileListPackage extends FileList {
+interface FileListPackage extends FileList {
 
     /**
      * Adds the file to the pending file list. Once this

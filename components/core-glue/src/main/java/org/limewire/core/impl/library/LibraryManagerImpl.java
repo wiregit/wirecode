@@ -160,9 +160,9 @@ class LibraryManagerImpl implements LibraryManager {
     
     private class GnutellaFileList extends LocalFileListImpl implements FileListListener {
 
-        private FileManager fileManager;
+        private final FileManager fileManager;
         
-        private Map<File, FileItem> lookup;
+        private final Map<File, FileItem> lookup;
         
         public GnutellaFileList(FileManager fileManager) {
             this.fileManager = fileManager;
@@ -214,22 +214,23 @@ class LibraryManagerImpl implements LibraryManager {
     
     private class FriendFileListImpl extends LocalFileListImpl implements FileListListener {
 
-        private FileManager fileManager;
-        private String name;
+        private final FileManager fileManager;
+        private final String name;
         
-        private Map<File, FileItem> lookup;
+        private final Map<File, FileItem> lookup;
         
         FriendFileListImpl(FileManager fileManager, String name) {
             this.fileManager = fileManager;
             this.name = name;
                      
-            this.fileManager.getFriendFileList(name).addFileListListener(this);
-            lookup = new HashMap<File, FileItem>();
+            this.fileManager.getOrCreateFriendFileList(name).addFileListListener(this);
+            lookup = new ConcurrentHashMap<File, FileItem>();
         }
         
         //TODO: reexamine this. Needs to be loaded on a seperate thread and maybe cleaned up somehow
         void loadSavedFiles() {
-            com.limegroup.gnutella.FileList fileList = this.fileManager.getFriendFileList(name);  
+            com.limegroup.gnutella.FileList fileList =
+                fileManager.getFriendFileList(name);  
 
               synchronized (fileList.getLock()) {
                   Iterator<FileDesc> iter = fileList.iterator();
@@ -283,7 +284,7 @@ class LibraryManagerImpl implements LibraryManager {
     
     private class LibraryFileList extends LocalFileListImpl implements FileEventListener {
 
-        private FileManager fileManager;
+        private final FileManager fileManager;
         
         LibraryFileList(FileManager fileManager) {
             super();
@@ -324,7 +325,7 @@ class LibraryManagerImpl implements LibraryManager {
     }
     
     private abstract class LocalFileListImpl implements LocalFileList {
-        final EventList<LocalFileItem> eventList;
+        protected final EventList<LocalFileItem> eventList;
         
         LocalFileListImpl() {
             eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
@@ -346,7 +347,7 @@ class LibraryManagerImpl implements LibraryManager {
     }
     
     private abstract class RemoteFileListImpl implements RemoteFileList {
-        final EventList<RemoteFileItem> eventList;
+        protected final EventList<RemoteFileItem> eventList;
         
         RemoteFileListImpl() {
             eventList = GlazedLists.threadSafeList(new BasicEventList<RemoteFileItem>());

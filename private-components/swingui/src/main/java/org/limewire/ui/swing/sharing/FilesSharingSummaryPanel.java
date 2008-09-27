@@ -123,6 +123,8 @@ public class FilesSharingSummaryPanel extends JPanel {
         }
         
         private long getNumber() {
+            // TODO: THIS IS WRONG!
+            //       It doubly counts files that are shared with two friends.
             long x = 0;
             for(FileList list : fileLists) {
                 x += list.size();

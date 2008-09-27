@@ -635,7 +635,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             if(column == editColumn){
                 return baseObject;
             }
-            return baseObject.getFriend();
+            return baseObject.getFriend().getRenderName();
         }
 
         @Override

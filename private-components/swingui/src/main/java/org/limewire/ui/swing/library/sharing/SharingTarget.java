@@ -32,7 +32,7 @@ public class SharingTarget {
                 return false;
         }
 
-        return getFriend().equals(((SharingTarget)obj).getFriend());
+        return getFriend().getId().equals(((SharingTarget)obj).getFriend().getId());
     }
 
    

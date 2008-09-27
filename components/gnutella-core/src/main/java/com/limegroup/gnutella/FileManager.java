@@ -36,34 +36,29 @@ public interface FileManager {
     /**
      * Returns the FileList containing files shared with all friends.
      */
-    public FileList getFriendFileList();
+    public FileList getAllFriendsFileList();
 
     /**
      * Returns all individual Friend File Lists.
      */
-    public Map<String, FileList> getAllFriendLists();
+    public Map<String, FileList> getFileListsForAllFriends();
 
     /**
-     * Returns the FileList containing Shared Friend files of this name. If this
-     * friend list does not exist, a new Friendlist with this name will be
-     * created.
+     * Returns the FileList containing Shared Friend files of this name.
+     * If no list exists, returns null.
      */
     public FileList getFriendFileList(String name);
 
     /**
-     * Creates a new FileList with the given name.
+     * Returns a FileList for the given friend, or creates
+     * one if it doesn't exist already.
      */
-    public void addFriendFileList(String name);
+    public FileList getOrCreateFriendFileList(String name);
 
     /**
      * Removes the shared Friend list containing this name.
      */
     public void removeFriendFileList(String name);
-
-    /**
-     * Returns true if a shared friend list of this name exists, false otherwise.
-     */
-    public boolean containsFriendFileList(String name);
 
     /**
      * Returns the FileList containing Incomplete files.

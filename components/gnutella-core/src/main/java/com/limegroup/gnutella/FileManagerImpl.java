@@ -89,7 +89,7 @@ public class FileManagerImpl implements FileManager, Service {
     
     private final FileListPackage sharedFileList;
     private final FileListPackage storeFileList; 
-    private final FileListPackage friendFileList;
+    private final FileListPackage allFriendsFileList;
     private final FileListPackage incompleteFileList;
     private final Map<String, FileListPackage> friendFileLists = new HashMap<String,FileListPackage>();
     
@@ -254,10 +254,14 @@ public class FileManagerImpl implements FileManager, Service {
         
         sharedFileList = new SynchronizedFileList(new SharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl(this, _data.SPECIAL_STORE_FILES));
-        friendFileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList("All")));
+        allFriendsFileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList("All")));
         incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl(this, new HashSet<File>()));
-        for(String name : SharingSettings.SHARED_FRIEND_LIST_NAMES.getValue())
-            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name))));
+        
+        synchronized(this) {
+            for(String name : SharingSettings.SHARED_FRIEND_LIST_NAMES.getValue()) {
+                friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name))));
+            }
+        }
         
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -273,7 +277,7 @@ public class FileManagerImpl implements FileManager, Service {
      * all invariants.  This is necessary, for example, when the shared
      * files are reloaded.
      */
-    protected void resetVariables()  {
+    protected synchronized void resetVariables()  {
         files = new ArrayList<FileDesc>();
         urnMap = new HashMap<URN, IntSet>();
         fileToFileDescMap = new HashMap<File, FileDesc>();
@@ -281,8 +285,9 @@ public class FileManagerImpl implements FileManager, Service {
         getSharedFileList().clear();
         getStoreFileList().clear();
         getIncompleteFileList().clear();
-        for(String key : friendFileLists.keySet() )
-            friendFileLists.get(key).clear();
+        for(FileList list : friendFileLists.values()) {
+            list.clear();
+        }
 
         numFiles = 0;
         _numPendingFiles = 0;
@@ -338,27 +343,26 @@ public class FileManagerImpl implements FileManager, Service {
         return storeFileList;
     }
 	
-    public FileList getFriendFileList() {
-        return friendFileList;
+    public FileList getAllFriendsFileList() {
+        return allFriendsFileList;
     }
     
-    public FileList getFriendFileList(String name) {
+    public synchronized FileList getFriendFileList(String name) {
         return friendFileLists.get(name);
     }
     
-    public void addFriendFileList(String name) {
-        if(!containsFriendFileList(name)) {
+    public synchronized FileList getOrCreateFriendFileList(String name) {
+        FileListPackage fileList = friendFileLists.get(name);
+        if(fileList == null) {
             SharingSettings.addFriendListName(name);
             _data.addFriendList(name);
-            friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name))));
+            fileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name)));
+            friendFileLists.put(name, fileList);
         }
+        return fileList;
     }
     
-    public boolean containsFriendFileList(String name) {
-        return friendFileLists.containsKey(name);
-    }
-    
-    public void removeFriendFileList(String name) {
+    public synchronized void removeFriendFileList(String name) {
         // if it was a valid key, remove saved references to it
         FileList removeFileList = friendFileLists.get(name);
         if(removeFileList != null) {
@@ -373,10 +377,9 @@ public class FileManagerImpl implements FileManager, Service {
         return incompleteFileList;
     }
     
-    public Map<String, FileList> getAllFriendLists(){
+    public synchronized Map<String, FileList> getFileListsForAllFriends(){
         Map<String, FileList> map = new HashMap<String, FileList>();
-        for(String name : friendFileLists.keySet())
-            map.put(name, friendFileLists.get(name));
+        map.putAll(friendFileLists);
         return map;
     }
     
@@ -822,7 +825,10 @@ public class FileManagerImpl implements FileManager, Service {
     //////////////////////////////////////////////////////////////////////////////
 	
     public void addFriendFile(String name, File file) {
-        FileListPackage fileList = friendFileLists.get(name);
+        FileListPackage fileList;
+        synchronized(this) {
+            fileList = friendFileLists.get(name);
+        }
         
         if(fileList != null) {
             fileList.addPendingFile(file);
