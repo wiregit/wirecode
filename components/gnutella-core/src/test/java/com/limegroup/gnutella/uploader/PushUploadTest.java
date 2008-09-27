@@ -57,6 +57,7 @@ import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.FileManagerEvent.Type;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
@@ -584,9 +585,9 @@ public class PushUploadTest extends LimeTestCase {
                 Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
                 Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
                 NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
-                Provider<ByteBufferCache> bbCache) {
+                Provider<ByteBufferCache> bbCache, ApplicationServices applicationServices) {
             super(udpService, acceptor, dhtManager, connectionManager, activityCallback,
-                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory, bbCache);
+                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory, bbCache, applicationServices);
         }
 
         @Override

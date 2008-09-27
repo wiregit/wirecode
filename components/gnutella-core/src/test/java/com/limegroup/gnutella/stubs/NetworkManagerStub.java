@@ -1,13 +1,14 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.IOException;
+import java.util.Set;
 
+import org.limewire.io.Connectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.MediatorAddress;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
@@ -253,7 +254,8 @@ public class NetworkManagerStub implements NetworkManager {
         
     }
 
-    public void newMediatedConnectionAddress(MediatorAddress address) {
-        
+    @Override
+    public void newPushProxies(Set<Connectable> pushProxies) {
     }
+
 }

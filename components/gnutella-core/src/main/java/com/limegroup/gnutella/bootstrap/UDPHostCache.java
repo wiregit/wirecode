@@ -17,6 +17,7 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.address.StrictIpPortSet;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.ConnectionServices;
@@ -29,7 +30,6 @@ import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
  * A collection of UDP Host Caches.

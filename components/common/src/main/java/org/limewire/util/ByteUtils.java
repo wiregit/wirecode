@@ -27,13 +27,6 @@ public class ByteUtils {
         return x;
     }
 
-    private static int readByte(InputStream is) throws IOException{
-        int ret = is.read();
-        if (ret == -1)
-            throw new EOFException();
-        return ret;
-    }
-    
     /**
      * Little-endian bytes to short.
      *
@@ -658,4 +651,18 @@ public class ByteUtils {
 			throw new IllegalArgumentException("No bytes specified");
 		}
 	}
+	
+    /**
+     * Reads a byte from input stream and throws {@link EOFException} if
+     * the end of the stream was reached.
+     * 
+     * Do not make public, the same method can be found in {@link IOUtils},
+     * but can't be used here to not introduce dependencies.
+     */
+    private static int readByte(InputStream is) throws IOException{
+        int ret = is.read();
+        if (ret == -1)
+            throw new EOFException();
+        return ret;
+    }
 }

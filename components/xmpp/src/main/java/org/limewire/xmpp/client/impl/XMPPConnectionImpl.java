@@ -15,11 +15,12 @@ import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.Address;
+import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
@@ -306,9 +307,14 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
                 }
-                LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
-                limePresense.subscribeAndWaitForAddress();
-                user.addPresense(limePresense);
+                try {
+                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
+                    limePresense.subscribeAndWaitForAddress();
+                    user.addPresense(limePresense);
+                } catch (InvalidDataException e) {
+                    LOG.debug("could not parse address data", e);
+                    user.addPresense(new PresenceImpl(presence, connection));
+                }
             } else {
                 user.addPresense(new PresenceImpl(presence, connection));
             }
@@ -317,8 +323,8 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         private void updatePresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
             Presence currentPresence = user.getPresences().get(presence.getFrom());
             Presence updatedPresence;
-            if(currentPresence instanceof LimePresenceImpl) {
-                updatedPresence = new LimePresenceImpl(presence, connection);    
+            if(currentPresence instanceof LimePresence) {
+                updatedPresence = new LimePresenceImpl(presence, connection, (LimePresence)currentPresence);    
             } else {
                 updatedPresence = new PresenceImpl(presence, connection);   
             }

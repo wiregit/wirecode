@@ -9,6 +9,8 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,12 +22,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.BlockingConnectObserver;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.rudp.RUDPUtils;
@@ -62,6 +66,7 @@ public class BrowseHostHandler {
     private static final int PUSHING = 2;
     private static final int EXCHANGING = 3;
     private static final int FINISHED = 4;
+    private static final int CONNECTING = 5;
 
     static final int DIRECT_CONNECT_TIME = 10000; // 10 seconds.
 
@@ -131,6 +136,29 @@ public class BrowseHostHandler {
         this.pushEndpointFactory = pushEndpointFactory;
     }
 
+    public void browseHost(Address address) {
+        setState(STARTED);
+        setState(CONNECTING);
+        BlockingConnectObserver connectObserver = new BlockingConnectObserver();
+        socketsManager.connect(address, (int)EXPIRE_TIME, connectObserver);
+        try {
+            Socket socket = connectObserver.getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
+            browseHost(socket);
+            return;
+        } catch (IOException ie) {
+            LOG.debug("Error during direct transfer", ie);
+        } catch (URISyntaxException e) {
+            LOG.debug("Error during direct transfer", e);
+        } catch (HttpException e) {
+            LOG.debug("Error during direct transfer", e);
+        } catch (InterruptedException e) {
+            LOG.debug("Error during direct transfer", e);
+        } catch (TimeoutException e) {
+            LOG.debug("Error during direct transfer", e);
+        }
+        failed();
+    }
+    
     /** 
      * Browses the files on the specified host and port.
      *
@@ -260,6 +288,7 @@ public class BrowseHostHandler {
             elapsed = currentTime - _stateStarted;
             return (double) elapsed / DIRECT_CONNECT_TIME;
         case PUSHING:
+        case CONNECTING:
             // return how long it'll take to push.
             elapsed = currentTime - _stateStarted;
             return (double) elapsed / EXPIRE_TIME;

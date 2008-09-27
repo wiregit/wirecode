@@ -2,6 +2,8 @@ package org.limewire.net.address;
 
 import java.io.IOException;
 
+import org.limewire.io.Address;
+
 import com.google.inject.Inject;
 
 /**

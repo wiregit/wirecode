@@ -3,32 +3,33 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.Set;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.LimeProps;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
-import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.DirectConnectionAddress;
-import org.limewire.net.address.DirectConnectionAddressImpl;
-import org.limewire.net.address.HolePunchAddress;
-import org.limewire.net.address.MediatorAddress;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
-import org.limewire.setting.BooleanSetting;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -38,8 +39,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddress;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressImpl;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
@@ -57,9 +57,9 @@ public class NetworkManagerImpl implements NetworkManager {
     private final Provider<ByteBufferCache> bbCache;
     
     private final Object addressLock = new Object();
-    private volatile DirectConnectionAddress directAddress;
-    private volatile MediatorAddress mediatedAddress;
-    private volatile HolePunchAddress holePunchAddress;
+
+    private volatile Connectable directAddress;
+    private volatile FirewalledAddress firewalledAddress;
     
     
     /** True if TLS is supported for this session. */
@@ -72,6 +72,7 @@ public class NetworkManagerImpl implements NetworkManager {
     
     private final EventListenerList<AddressEvent> listeners =
         new EventListenerList<AddressEvent>(getClass());
+    private final ApplicationServices applicationServices;
     
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -82,7 +83,8 @@ public class NetworkManagerImpl implements NetworkManager {
             OutOfBandStatistics outOfBandStatistics,
             NetworkInstanceUtils networkInstanceUtils,
             Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
-            Provider<ByteBufferCache> bbCache) {
+            Provider<ByteBufferCache> bbCache,
+            ApplicationServices applicationServices) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
@@ -92,6 +94,7 @@ public class NetworkManagerImpl implements NetworkManager {
         this.networkInstanceUtils = networkInstanceUtils;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.bbCache = bbCache;
+        this.applicationServices = applicationServices;
     }
     
     @Inject
@@ -218,39 +221,10 @@ public class NetworkManagerImpl implements NetworkManager {
         if (connectionManager.get().isShieldedLeaf()) 
             connectionManager.get().sendUpdatedCapabilities();
         synchronized (addressLock) {
-            maybeFireNewHolePunchAddress();
-        }
-    }
-
-    private boolean maybeFireNewHolePunchAddress() {
-        if(isPushProxyHolePunchCapable()) {
-            PushProxyHolePunchAddress newHolePunchAddress = getPushProxyHolePunchAddress();
-            if(holePunchAddress == null || !holePunchAddress.equals(newHolePunchAddress)) {
-                fireHolePunchAddressEvent(newHolePunchAddress);
-                return true;
+            FirewalledAddress address = firewalledAddress;
+            if (address != null) {
+                newPushProxies(address.getPushProxies());
             }
-        } else {
-            // TODO newMediatedConnectionAddress(mediatedAddress); ??
-        }
-        return false;
-    }
-
-    private boolean isPushProxyHolePunchCapable() {
-        return supportsFWTVersion() > 0 && mediatedAddress != null;
-    }
-
-    private void fireHolePunchAddressEvent(PushProxyHolePunchAddress holePunchAddress) {
-        this.holePunchAddress = holePunchAddress;
-        fireEvent(new AddressEvent(holePunchAddress, Address.EventType.ADDRESS_CHANGED));
-    }
-
-    private PushProxyHolePunchAddress getPushProxyHolePunchAddress() {
-        try {
-            DirectConnectionAddress directAddress = new DirectConnectionAddressImpl(NetworkUtils.ip2string(getExternalAddress()),
-                    getStableUDPPort(), isIncomingTLSEnabled()); // TODO is that the right port method?
-            return new PushProxyHolePunchAddressImpl(supportsFWTVersion(), directAddress, mediatedAddress);
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -303,9 +277,10 @@ public class NetworkManagerImpl implements NetworkManager {
 
     private void maybeFireNewDirectConnectionAddress() {
         if(isDirectConnectionCapable()) {
-            DirectConnectionAddress newDirectAddress = getDirectConnectionAddress();
-            if(directAddress == null || !directAddress.equals(newDirectAddress)) {
-                fireDirectConnectionAddressEvent(newDirectAddress); 
+            Connectable newDirectAddress = getPublicAddress();
+            if (directAddress == null || ConnectableImpl.COMPARATOR.compare(directAddress, newDirectAddress) != 0) {
+                directAddress = newDirectAddress;
+                fireAddressChange(newDirectAddress);
             }
         } else {
             fireNullAddressEvent();
@@ -313,9 +288,8 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     private boolean isDirectConnectionCapable() {
-        // TODO is that the right port method?
         return NetworkUtils.isValidAddress(getExternalAddress()) 
-                && acceptedIncomingConnection() && NetworkUtils.isValidPort(getNonForcedPort());
+        && acceptedIncomingConnection() && NetworkUtils.isValidPort(getPort());
     }
 
     public void portChanged() {
@@ -330,41 +304,38 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
 
-    private DirectConnectionAddress getDirectConnectionAddress() {
-        try {
-            return new DirectConnectionAddressImpl(NetworkUtils.ip2string(getExternalAddress()),
-                    getNonForcedPort(), isIncomingTLSEnabled()); // TODO is that the right port method?
-        } catch (UnknownHostException e) {
-            // TODO does this warrant ErrorService?
-            ErrorService.error(e);
-            return null;
-        }                                  
-    }
-    
-    private void fireDirectConnectionAddressEvent(DirectConnectionAddress address) {
-        directAddress = address;
-        fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
-    }
-
-    public void newMediatedConnectionAddress(MediatorAddress newMediatorAddress) { 
+    public void newPushProxies(Set<Connectable> pushProxies) {
+        FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
+        boolean changed = false;
         synchronized (addressLock) {
-            if(supportsFWTVersion() > 0) {
-                mediatedAddress = newMediatorAddress;
-                PushProxyHolePunchAddress newHolePunchAddress = getPushProxyHolePunchAddress();
-                if(holePunchAddress == null || !holePunchAddress.equals(newHolePunchAddress)) {
-                    fireHolePunchAddressEvent(newHolePunchAddress);
-                }
-            } else if(mediatedAddress == null || !mediatedAddress.equals(newMediatorAddress)) {
-                fireMediatedConenctionAddressEvent(newMediatorAddress);
-            }           
+            if (!newAddress.equals(firewalledAddress)) {
+                firewalledAddress = newAddress;
+                changed = true;
+            }
+        }
+        if (changed) {
+            fireAddressChange(newAddress);
         }
     }
     
-    private void fireMediatedConenctionAddressEvent(MediatorAddress address) {
-        mediatedAddress = address;
-        fireEvent(new AddressEvent(address, Address.EventType.ADDRESS_CHANGED));                                 
+    private Connectable getPublicAddress() {
+        try {
+            return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
+                    getPort(), isIncomingTLSEnabled());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
-
+    
+    private Connectable getPrivateAddress() {
+        byte[] privateAddress = getNonForcedAddress();
+        try {
+            return new ConnectableImpl(new InetSocketAddress(InetAddress.getByAddress(privateAddress), getNonForcedPort()), isIncomingTLSEnabled());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     private void fireNullAddressEvent() {
         // TODO NullAddress
         //fireEvent(new AddressEvent(null, Address.EventType.ADDRESS_CHANGED));
@@ -473,8 +444,8 @@ public class NetworkManagerImpl implements NetworkManager {
         return listeners.removeListener(listener);
     }
     
-    private void fireEvent(AddressEvent event) {
-        listeners.broadcast(event);
+    private void fireAddressChange(Address newAddress) {
+        listeners.broadcast(new AddressEvent(newAddress, Address.EventType.ADDRESS_CHANGED));
     }
     
     private static class SSLSettings extends LimeProps {

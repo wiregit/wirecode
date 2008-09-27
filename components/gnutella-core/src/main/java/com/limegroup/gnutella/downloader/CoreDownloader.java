@@ -21,6 +21,10 @@ public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStat
      */
     public void setInactivePriority(int priority);
     
+    /**
+     * Returns the guid that was used for query from which this download
+     * was triggered, or null.
+     */
     public GUID getQueryGUID();
 
     /**

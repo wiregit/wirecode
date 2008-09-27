@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.limewire.io.Address;
+import org.limewire.net.address.AddressConnector;
+import org.limewire.net.address.AddressResolutionObserver;
+import org.limewire.net.address.AddressResolver;
 import org.limewire.nio.NBSocket;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.NIOSocketFactory;
@@ -181,7 +185,25 @@ public interface SocketsManager {
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public Socket connect(InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException;
+
+    /**
+     * Asynchronously connects to <code>address</code> resolving the address if 
+     * possible/necessary and notifying <code>observer</code> of the success or
+     * failure.
+     * 
+     * @param timeout timeout in milliseconds
+     */
+    public void connect(Address address, int timeout, ConnectObserver observer);
     
+    /**
+     * Asynchronously resolves <code>address</code> to other addresses if 
+     * possible and notifying <code>observer</code> of the success or
+     * failure.
+     * 
+     * @param timeout timeout in milliseconds
+     */
+    public void resolve(Address address, int timeout, AddressResolutionObserver observer);
+
     /**
      * Removes the given ConnectObserver from wanting to make a request.
      * This returns true if it was able to remove the observer because the request had
@@ -196,4 +218,28 @@ public interface SocketsManager {
     
     /** Returns the number of Sockets that are waiting for the controller to process them. */
     public int getNumWaitingSockets();
+
+    /**
+     * Registers an {@link AddressConnector} to handle connects for certain types
+     * of address.
+     * 
+     * When {@link #connect(Address, int, ConnectObserver)} is called the sockets
+     * manager will iterate over all registered {@link AddressConnector address connectors}
+     * and see which one can connect to the given address. 
+     *
+     * See {@link AddressConnector}.
+     */
+    public void registerConnector(AddressConnector connector);
+    
+    /**
+     * Registers an {@link AddressResolver} to handle address resolution for
+     * certain types of addresses. 
+     * 
+     * When {@link #resolve(Address, int, AddressResolutionObserver)} is called the sockets
+     * manager will iterate over all registered {@link AddressResolver address resolvers}
+     * and see which one can resolve the given address. 
+     *
+     * See {@link AddressResolver}.
+     */
+    public void registerResolver(AddressResolver resolver);
 }

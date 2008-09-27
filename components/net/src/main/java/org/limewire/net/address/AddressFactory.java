@@ -2,6 +2,8 @@ package org.limewire.net.address;
 
 import java.io.IOException;
 
+import org.limewire.io.Address;
+
 /**
  * A collection of <code>AddressSerializer</code>s.  <code>Address</code>s should register
  * themselves with this factory via the <code>addSerializer()</code> method at injection time.

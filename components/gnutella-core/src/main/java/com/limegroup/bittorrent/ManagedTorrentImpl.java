@@ -19,6 +19,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.service.ErrorService;
 import org.limewire.swarm.SwarmSourceType;
 import org.limewire.swarm.Swarmer;
@@ -48,7 +49,6 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
  * Class that keeps track of state relevant to a single torrent.

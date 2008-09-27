@@ -1,12 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.util.Set;
 
+import org.limewire.io.Connectable;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.MediatorAddress;
 
 public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, TLSManager {
 
@@ -97,7 +98,7 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
      * used to notify the <code>NetworkManager</code> of a new
      * <code>MediatorAddress</code> (i.e., push proxy)
      */
-    public void newMediatedConnectionAddress(MediatorAddress address);
+    public void newPushProxies(Set<Connectable> pushProxies);
 
     /** 
      * Returns true if this has accepted an incoming connection, and hence
@@ -124,7 +125,5 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
     public GUID getSolicitedGUID();
     
     public int supportsFWTVersion();
-    
-    /** A convenience stub. */
-    public boolean isPrivateAddress(byte[] addr);
+
 }

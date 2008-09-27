@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +31,16 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
+import org.limewire.net.SocketsManager;
+import org.limewire.net.address.AddressConnector;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
@@ -63,6 +68,7 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -70,9 +76,11 @@ import com.limegroup.gnutella.util.URLDecoder;
  * Handles sending out pushes and awaiting incoming GIVs.
  */
 @Singleton
-public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHandlerRegistry {
+public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHandlerRegistry, AddressConnector {
 
     private static final Log LOG = LogFactory.getLog(PushDownloadManager.class);
+    
+    private static final int SPECIAL_INDEX = 0;
    
     /**
      * how long we think should take a host that receives an udp push
@@ -110,6 +118,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private final Provider<UDPSelectorProvider> udpSelectorProvider;
     
     private final Provider<PushEndpointCache> pushEndpointCache;
+
+    private final RemoteFileDescFactory remoteFileDescFactory;
     
     @Inject
     public PushDownloadManager(
@@ -122,7 +132,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService,
     		Provider<UDPSelectorProvider> udpSelectorProvider,
-    		Provider<PushEndpointCache> pushEndpointCache) {
+    		Provider<PushEndpointCache> pushEndpointCache,
+    		RemoteFileDescFactory remoteFileDescFactory) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;
         this.defaultParams = defaultParams;
@@ -133,10 +144,16 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         this.udpService = udpService;
         this.udpSelectorProvider = udpSelectorProvider;
         this.pushEndpointCache = pushEndpointCache;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     public void register(PushedSocketHandler handler) {
         pushHandlers.add(handler);
+    }
+    
+    @Inject
+    public void register(SocketsManager socketsManager) {
+        socketsManager.registerConnector(this);
     }
     
     public boolean isBlocking() {
@@ -158,6 +175,40 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         ((NIOMultiplexor)socket).setReadObserver(new GivParser(socket));
     }
     
+    @Override
+    public void connect(Address addr, int timeout, ConnectObserver observer) {
+        FirewalledAddress address = (FirewalledAddress)addr;
+        Connectable publicAddress = address.getPublicAddress();
+        RemoteFileDesc fakeRFD = 
+            remoteFileDescFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(), SPECIAL_INDEX, "fake",
+                0, address.getClientGuid().bytes(), 0, false, 0, false, null, null, false, true, "", address.getPushProxies(),
+                -1, address.getFwtVersion(), publicAddress.isTLSCapable());
+        PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(address.getClientGuid(), observer);
+        pushHandlers.add(handlerAdapter);
+        sendPush(fakeRFD);
+        scheduleExpirerFor(handlerAdapter, (int)(timeout * 1.5));
+    }
+    
+    /**
+     * Creates an invalid host for pushes.
+     */
+    static Connectable createInvalidHost() {
+        try {
+            return new ConnectableImpl("0.0.0.0", 1, false);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void scheduleExpirerFor(final PushedSocketHandlerAdapter handlerAdapter, int timeout) {
+        backgroundExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                pushHandlers.remove(handlerAdapter);
+            }
+        }, timeout, TimeUnit.MILLISECONDS);
+    }
+
     /**
      * Sends a push for the given file.
      */
@@ -769,4 +820,39 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             return false;
         }
     }
+
+    @Override
+    public boolean canConnect(Address address) {
+        return address instanceof FirewalledAddress;
+    }
+
+    /**
+     * Adapts {@link PushedSocketHandler} to {@link ConnectObserver}.
+     */
+    private class PushedSocketHandlerAdapter implements PushedSocketHandler {
+
+        private final GUID clientGuid;
+        private final ConnectObserver observer;
+
+        public PushedSocketHandlerAdapter(GUID clientGuid, ConnectObserver observer) {
+            this.clientGuid = clientGuid;
+            this.observer = observer;
+        }
+        
+        @Override
+        public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket) {
+            if (Arrays.equals(clientGuid.bytes(), clientGUID)) {
+                pushHandlers.remove(this);
+                try {
+                    observer.handleConnect(socket);
+                } catch (IOException e) {
+                    IOUtils.close(socket);
+                }
+                return true;
+            }
+            return false;
+        }
+        
+    }
+
 }

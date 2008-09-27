@@ -8,7 +8,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,6 +37,7 @@ import org.limewire.lifecycle.Service;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -67,12 +67,8 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddress;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressImpl;
-import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
  * The list of all RoutedConnection's.  Provides a factory method for creating
@@ -1219,6 +1215,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      * Accessor for the <tt>Set</tt> of push proxies for this node.  If
      * there are no push proxies available, or if this node is an Ultrapeer,
      * this will return an empty <tt>Set</tt>.
+     * 
+     * Callers can take ownership of the returned set; the set might be immutable.
      *
      * @return a <tt>Set</tt> of push proxies with a maximum size of 4
      *
@@ -2611,10 +2609,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     
     public void handleEvent(final GnutellaConnectionEvent event) {
         Set<Connectable> pushProxies = getPushProxies();
-        final Set<PushProxyAddress> pushProxyAddresses = new HashSet<PushProxyAddress>();
-        for(Connectable proxy : pushProxies) {
-            pushProxyAddresses.add(new PushProxyAddressImpl(proxy));
+        if (!pushProxies.isEmpty()) {
+            networkManager.newPushProxies(pushProxies);
         }
-        networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxyAddresses));
     }
 }

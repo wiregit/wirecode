@@ -306,6 +306,47 @@ public final class NetworkUtils {
     }
     
     /**
+     * Returns true if both addresses belong to the same site local network.
+     * This method is IPV6 safe.
+     */
+    public static boolean areInSameSiteLocalNetwork(InetAddress address1, InetAddress address2) {
+        return areInSameSiteLocalNetwork(address1.getAddress(), address2.getAddress());
+    }
+    
+    /**
+     * Returns true if both addresses belong to the same site local network.
+     * This method is IPV6 safe.
+     */
+    public static boolean areInSameSiteLocalNetwork(byte[] address1, byte[] address2) {
+        if (address1.length != address2.length) {
+            return false;
+        }
+        if (address1.length == 4) {
+            if (address1[0] == 10) {
+                return address2[0] == 10;
+            } else if (address1[0] == (byte)172 && address1[1] == 16) {
+                return address2[0] == (byte)172 && address2[1] == 16;
+            } else if (address1[0] == (byte)192 && address1[1] == (byte)168) {
+                return address2[0] == (byte)192 && address2[1] == (byte)168;
+            } else {
+                return false;
+            }
+        } else if (address1.length == 16) {
+            try {
+                InetAddress a1 = InetAddress.getByAddress(address1);
+                InetAddress a2 = InetAddress.getByAddress(address2);
+                // it looks like ipv6 only has one type of site local address, so
+                // just check if both addresses are site local
+                return a1.isSiteLocalAddress() && a2.isSiteLocalAddress();
+            } catch (UnknownHostException e) {
+                // impossible since addresses are of correct length
+                throw new RuntimeException(e);
+            }
+        }
+        throw new IllegalArgumentException("addresses of illegal length: " + address1.length);
+    }
+    
+    /**
      * Checks if the given address is a private address.
      * 
      * This method is IPv6 compliant
@@ -570,7 +611,7 @@ public final class NetworkUtils {
             ByteUtils.short2leb((short)port, dst, dst.length-2);
         return dst;
     }
-
+    
     /**
      * Creates an IpPort out of network data. The ByteOrder is used to determine
      * the order of the port. Throws <code>InvalidDataException</code> if the

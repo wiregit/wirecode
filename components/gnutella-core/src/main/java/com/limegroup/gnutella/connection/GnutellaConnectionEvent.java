@@ -12,6 +12,10 @@ public class GnutellaConnectionEvent extends DefaultEvent<GnutellaConnection, Gn
         this.guid = guid;
     }
 
+    /**
+     * Returns the guid of this peer. 
+     */
+    // TODO remove 
     public GUID getGuid() {
         return guid;
     }

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.net.address;
 
 
 import java.util.Arrays;
@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import org.limewire.io.IpPort;
+
 
 
 /**
@@ -28,5 +29,14 @@ public class StrictIpPortSet<T extends IpPort> extends TreeSet<T> {
     /** Constructs a set with the given initial IpPorts. */
     public StrictIpPortSet(T... ipps) {
         this(Arrays.asList(ipps));
+    }
+    
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        boolean modified = false;
+        for (Object o : c) {
+            modified |= remove(o);
+        }
+        return modified;
     }
 }

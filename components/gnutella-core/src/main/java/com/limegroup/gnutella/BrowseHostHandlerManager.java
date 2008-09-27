@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.io.Address;
+
 import com.limegroup.gnutella.BrowseHostHandler.PushRequestDetails;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 
@@ -12,5 +14,14 @@ public interface BrowseHostHandlerManager extends PushedSocketHandler {
     }
 
     public void initialize();
+
+    /**
+     * Creates a browse host handler with a session guid <code>browseGuid</code>.
+     * 
+     * Used for browses on {@link Address} objects. Call 
+     * {@link BrowseHostHandler#browseHost(Address)} on the created browse
+     * host handler.
+     */
+    public BrowseHostHandler createBrowseHostHandler(GUID browseGuid);
 
 }
