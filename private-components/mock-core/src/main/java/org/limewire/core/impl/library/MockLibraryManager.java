@@ -10,11 +10,16 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListListener;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileList;
 
+import com.google.inject.Singleton;
 
-public class MockLibraryManager implements LibraryManager {
+
+@Singleton
+public class MockLibraryManager implements ShareListManager, LibraryManager, RemoteLibraryManager {
 
     private FileListAdapter allFileList;
     private FileListAdapter gnutellaList;

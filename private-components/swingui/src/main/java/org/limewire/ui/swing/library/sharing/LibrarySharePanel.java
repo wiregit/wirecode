@@ -47,7 +47,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.SharingSettings;
@@ -60,6 +60,7 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -112,7 +113,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     private JXPanel mainPanel;
     
-    private LibraryManager libraryManager;
+    private ShareListManager libraryManager;
     
     private LocalFileList gnutellaList;
     
@@ -165,7 +166,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     
     @Inject
-    public LibrarySharePanel(LibraryManager libraryManager) {
+    public LibrarySharePanel(ShareListManager libraryManager) {
         GuiUtils.assignResources(this);
         
         
@@ -527,12 +528,16 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     @Override
     public void handleEvent(final RosterEvent event) {
-        if(event.getType().equals(User.EventType.USER_ADDED)) {              
-            addFriend(new SharingTarget(event.getSource()));
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            removeFriend(new SharingTarget(event.getSource()));
-        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-        }
+        SwingUtils.invokeLater(new Runnable() {
+            public void run() {
+                if(event.getType().equals(User.EventType.USER_ADDED)) {              
+                    addFriend(new SharingTarget(event.getSource()));
+                } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+                    removeFriend(new SharingTarget(event.getSource()));
+                } //else if(event.getType().equals(User.EventType.USER_UPDATED)) {
+//                }
+            }
+        });
     }   
     
     @EventSubscriber
@@ -608,9 +613,9 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     private boolean isShared(FileItem fileItem, SharingTarget friend){
         if(friend == GNUTELLA_SHARE){
-            return gnutellaList.getModel().contains(fileItem);
+            return gnutellaList.getSwingModel().contains(fileItem);
         }
-        return friendListMap.get(friend).getModel().contains(fileItem);
+        return friendListMap.get(friend).getSwingModel().contains(fileItem);
     }   
     
     private static class LibraryShareTableFormat implements WritableTableFormat<SharingTarget> {

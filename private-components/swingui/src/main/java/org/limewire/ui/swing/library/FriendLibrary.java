@@ -17,7 +17,7 @@ public class FriendLibrary<T extends FileItem> extends JPanel {
     public FriendLibrary(FileList<T> fileList) {
         setLayout(new BorderLayout());
 
-        table = new LibraryTable<T>(fileList.getModel()); 
+        table = new LibraryTable<T>(fileList.getSwingModel()); 
         JScrollPane scrollPane = new JScrollPane(table);
         
         add(scrollPane, BorderLayout.CENTER);

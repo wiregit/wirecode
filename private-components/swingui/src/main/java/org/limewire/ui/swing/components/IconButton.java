@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Insets;
+
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -24,9 +26,21 @@ public class IconButton extends JButton {
         init();
     }
     
+    public IconButton(Icon icon, Icon rolloverIcon, Icon pressedIcon) {
+        super(icon);
+        init();
+        setRolloverIcon(rolloverIcon);
+        setPressedIcon(pressedIcon);
+    }
+    
     private void init() {
-        setBorder(null);
+        setMargin(new Insets(0, 0, 0, 0));
+        setBorderPainted(false);
         setContentAreaFilled(false);
+        setFocusPainted(false);
+        setRolloverEnabled(true);
+        setHideActionText(true);
+        setBorder(null);
         setOpaque(false);
         setHorizontalTextPosition(SwingConstants.CENTER);
         setVerticalTextPosition(SwingConstants.BOTTOM);

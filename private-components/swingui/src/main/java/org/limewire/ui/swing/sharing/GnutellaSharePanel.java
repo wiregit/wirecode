@@ -13,7 +13,7 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
@@ -63,14 +63,14 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     MultiButtonTableCellRendererEditor renderer;
     
     @Inject
-    public GnutellaSharePanel(LibraryManager libraryManager, IconManager iconManager, SharingEmptyPanel emptyPanel, ThumbnailManager thumbnailManager) {
+    public GnutellaSharePanel(ShareListManager libraryManager, IconManager iconManager, SharingEmptyPanel emptyPanel, ThumbnailManager thumbnailManager) {
         GuiUtils.assignResources(this); 
         
         this.thumbnailManager = thumbnailManager;
         this.iconManager = iconManager;
         
         this.fileList = libraryManager.getGnutellaShareList();
-        this.fileList.getModel().addListEventListener(new ListEventListener<LocalFileItem>(){
+        this.fileList.getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>(){
             @Override
             public void listChanged(ListEvent<LocalFileItem> listChanges) {
                 final int size = listChanges.getSourceList().size();
@@ -129,7 +129,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     
     private void createCenterCards(SharingHeaderPanel headerPanel, JPanel cardPanel) {
 
-        FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getModel(), 
+        FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getSwingModel(), 
                 new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         
         createTable(filteredList);

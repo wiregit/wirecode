@@ -4,7 +4,7 @@ import ca.odell.glazedlists.EventList;
 
 public interface RemoteFileList extends FileList<RemoteFileItem> {
     
-    public EventList<RemoteFileItem> getModel();
+    public EventList<RemoteFileItem> getSwingModel();
     
     public void addFile(RemoteFileItem file);
     

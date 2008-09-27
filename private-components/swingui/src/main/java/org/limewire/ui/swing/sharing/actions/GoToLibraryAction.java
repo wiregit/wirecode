@@ -4,13 +4,13 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 
 public class GoToLibraryAction extends AbstractAction {
     
-    private LibraryManager libraryManager;
+    private ShareListManager libraryManager;
     
-    public GoToLibraryAction(LibraryManager libraryManager) {
+    public GoToLibraryAction(ShareListManager libraryManager) {
         this.libraryManager = libraryManager;
     }
 

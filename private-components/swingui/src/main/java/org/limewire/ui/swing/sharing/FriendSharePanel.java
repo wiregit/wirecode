@@ -21,6 +21,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -48,7 +49,6 @@ import org.limewire.xmpp.api.client.User;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -67,31 +67,35 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     
     private ViewSelectionPanel viewSelectionPanel;
     
-    private CardLayout viewCardLayout;
+    private final CardLayout viewCardLayout;
 
-    private FriendNameTable friendTable;
+    private final FriendNameTable friendTable;
     private SharingFancyPanel sharingFancyPanel;
 
     private MultiButtonTableCellRendererEditor editor;
     private MultiButtonTableCellRendererEditor renderer;
 
-    private EventList<FriendItem> friendsList;
+    private final EventList<FriendItem> friendsList;
     
-    private LibraryManager libraryManager;
-    private IconManager iconManager;
-    private ThumbnailManager thumbnailManager;
+    private final LibraryManager libraryManager;
+    private final ShareListManager shareListManager;
+    private final IconManager iconManager;
+    private final ThumbnailManager thumbnailManager;
     
-    private FriendSharingHeaderPanel headerPanel;
+    private final FriendSharingHeaderPanel headerPanel;
     
     private SharingTableFormat sharingTableFormat;
     private IconLabelRenderer iconLabelRenderer;
     
     @Inject
-    public FriendSharePanel(LibraryManager libraryManager, SharingFriendEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager, ThumbnailManager thumbnailManager) {        
+    public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager,
+            SharingFriendEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager,
+            ThumbnailManager thumbnailManager) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
         
         this.libraryManager = libraryManager;
+        this.shareListManager = shareListManager;
         this.iconManager = iconManager;
         this.thumbnailManager = thumbnailManager;
 
@@ -100,8 +104,8 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         cardPanel.setLayout(viewCardLayout);
         cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
 
-        friendsList = GlazedLists.threadSafeList(new BasicEventList<FriendItem>());               
-        friendTable = new FriendNameTable(friendsList, new FriendTableFormat(), libraryManager, navigator);
+        friendsList = new BasicEventList<FriendItem>();               
+        friendTable = new FriendNameTable(friendsList, new FriendTableFormat(), libraryManager, shareListManager, navigator);
         
         headerPanel = createHeader(cardPanel);
 
@@ -204,9 +208,9 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                     headerPanel.setFriendName(friendItem.getFriend().getRenderName());
                     emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
       
-                    LocalFileList fileList = libraryManager.getOrCreateFriendShareList(friendItem.getFriend());
+                    LocalFileList fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
                     emptyPanel.setUserFileList(fileList);
-                    EventList<LocalFileItem> filteredList = filter(fileList.getModel());
+                    EventList<LocalFileItem> filteredList = filter(fileList.getSwingModel());
                     table.setModel(new SharingTableModel(filteredList, fileList,sharingTableFormat));
                     TableColumn tc = table.getColumn(6);
                     tc.setCellEditor(editor);
@@ -228,7 +232,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                     if(currentList != null) {
                         currentList.removeListEventListener(this);
                     }
-                    currentList = fileList.getModel();
+                    currentList = fileList.getSwingModel();
                     currentList.addListEventListener(this);
                     
                     if(currentList.size() > 0) {
@@ -259,12 +263,16 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     }
 
     @Override
-    public void handleEvent(RosterEvent event) {
+    public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
-            LocalFileList fileList = libraryManager.getOrCreateFriendShareList(event.getSource());
-            friendsList.add(new FriendItemImpl(event.getSource(), fileList.getModel()));
+            final LocalFileList fileList = shareListManager.getOrCreateFriendShareList(event.getSource());
+            SwingUtils.invokeLater(new Runnable() {
+                public void run() {
+                    friendsList.add(new FriendItemImpl(event.getSource(), fileList.getSwingModel()));                    
+                }
+            });
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            libraryManager.removeFriendShareList(event.getSource());
+            shareListManager.removeFriendShareList(event.getSource());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   

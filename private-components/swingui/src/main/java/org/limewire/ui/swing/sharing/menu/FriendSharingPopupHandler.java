@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.friends.FriendItem;
 import org.limewire.ui.swing.sharing.friends.FriendNameTable;
@@ -33,14 +33,14 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
     
     private FriendNameTable table;
     private final FriendSharingActionHandler actionHandler;
-    private final LibraryManager libraryManager;
+    private final ShareListManager libraryManager;
     
     protected final MenuListener menuListener;
 
     private FriendItem currentFriend;
     private LocalFileList friendFileList;
     
-    public FriendSharingPopupHandler(FriendNameTable table, FriendSharingActionHandler handler, LibraryManager libraryManager) {
+    public FriendSharingPopupHandler(FriendNameTable table, FriendSharingActionHandler handler, ShareListManager libraryManager) {
         this.table = table;
         this.actionHandler = handler;
         this.libraryManager = libraryManager;

@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.io.Address;
@@ -27,13 +27,13 @@ import com.google.inject.Singleton;
 public class LibraryRosterListener implements RegisteringEventListener<RosterEvent> {
     public static final Log LOG = LogFactory.getLog(LibraryRosterListener.class);
     
-    private final LibraryManager libraryManager;
+    private final RemoteLibraryManager remoteLibraryManager;
     private final BrowseFactory browseFactory;
 
     @Inject
-    public LibraryRosterListener(BrowseFactory browseFactory, LibraryManager libraryManager) {
+    public LibraryRosterListener(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager) {
         this.browseFactory = browseFactory;
-        this.libraryManager = libraryManager;
+        this.remoteLibraryManager = remoteLibraryManager;
     }
 
     @Inject
@@ -58,7 +58,7 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                 if(presence.getType().equals(Presence.Type.available)) {                    
                     if(presence instanceof LimePresence) {
                         if(!libraryExists.getAndSet(true)) {
-                            final RemoteFileList list = libraryManager.getOrCreateFriendLibrary(user);
+                            final RemoteFileList list = remoteLibraryManager.getOrCreateFriendLibrary(user);
                             Address address = ((LimePresence)presence).getAddress();
                             LOG.debugf("browsing {0} ...", presence.getJID());
                             browseFactory.createBrowse(address).start(new BrowseListener() {
@@ -74,7 +74,7 @@ public class LibraryRosterListener implements RegisteringEventListener<RosterEve
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     if(libraryExists.getAndSet(false)) {
-                        libraryManager.removeFriendLibrary(user);
+                        remoteLibraryManager.removeFriendLibrary(user);
                     }
                 }                
             }   

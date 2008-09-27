@@ -31,7 +31,7 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.logging.Log;
@@ -77,7 +77,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private final String friendId;
     private final MessageWriter writer;
     private final ChatFriend chatFriend;
-    private final LibraryManager libraryManager;
+    private final ShareListManager libraryManager;
     private final IconManager iconManager;
     private final FriendSharingDisplay friendSharingDisplay;
     private ResizingInputPanel inputPanel;
@@ -85,7 +85,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, 
-            LibraryManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay) {
+            ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.conversationName = chatFriend.getName();
@@ -330,7 +330,7 @@ public class ConversationPane extends JPanel implements Displayable {
         public void drop(DropTargetDropEvent dtde) {
             super.drop(dtde);
             if (fileList.size() > 0) {
-                for(LocalFileItem item : fileList.getModel()) {
+                for(LocalFileItem item : fileList.getSwingModel()) {
                     offerFile(item);
                 }
                 fileList.clear();
@@ -342,6 +342,11 @@ public class ConversationPane extends JPanel implements Displayable {
         private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
         
         @Override
+        public EventList<LocalFileItem> getSwingModel() {
+            return eventList;
+        }
+        
+        @Override
         public EventList<LocalFileItem> getModel() {
             return eventList;
         }
@@ -350,7 +355,7 @@ public class ConversationPane extends JPanel implements Displayable {
         public void addFile(File file) {
             LocalFileList friendList = libraryManager.getOrCreateFriendShareList(chatFriend.getFriend());
             friendList.addFile(file);
-            for (LocalFileItem item : friendList.getModel()) {
+            for (LocalFileItem item : friendList.getSwingModel()) {
                 if (file.getPath().equals(item.getFile().getPath())) {
                     eventList.add(item);
                 }

@@ -28,6 +28,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.MediaSlider;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -163,24 +164,24 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         
         ActionListener playerListener = new ButtonListener();
 
-        backButton = GuiUtils.createIconButton(backIcon, backIconRollover, backIconPressed);
+        backButton = new IconButton(backIcon, backIconRollover, backIconPressed);
         backButton.addActionListener(playerListener);
         backButton.setActionCommand(BACK);
         
-        playButton = GuiUtils.createIconButton(playIcon, playIconRollover, playIconPressed);
+        playButton = new IconButton(playIcon, playIconRollover, playIconPressed);
         playButton.addActionListener(playerListener);
         playButton.setActionCommand(PLAY);
 
-        pauseButton = GuiUtils.createIconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
+        pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
         pauseButton.addActionListener(playerListener);
         pauseButton.setActionCommand(PAUSE);
         pauseButton.setVisible(false);
 
-        forwardButton = GuiUtils.createIconButton(forwardIcon, forwardIconRollover, forwardIconPressed);
+        forwardButton = new IconButton(forwardIcon, forwardIconRollover, forwardIconPressed);
         forwardButton.addActionListener(playerListener);
         forwardButton.setActionCommand(FORWARD);
 
-        closeButton = GuiUtils.createIconButton(closeIcon, closeIconRollover, closeIconPressed);
+        closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
         closeButton.addActionListener(playerListener);
         closeButton.setActionCommand(CLOSE);
 

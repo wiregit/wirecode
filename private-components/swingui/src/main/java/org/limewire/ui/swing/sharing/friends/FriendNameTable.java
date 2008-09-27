@@ -10,6 +10,7 @@ import javax.swing.ListSelectionModel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.menu.FriendSharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
@@ -30,7 +31,8 @@ public class FriendNameTable extends JXTable {
     
     private EventTableModel<FriendItem> tableModel;
     
-    public FriendNameTable(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat, LibraryManager libraryManager, Navigator navigator) {
+    public FriendNameTable(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat,
+            LibraryManager libraryManager, ShareListManager shareListManager, Navigator navigator) {
         GuiUtils.assignResources(this);
         
         SortedList<FriendItem> friendList = new SortedList<FriendItem>(eventList, new FriendComparator());       
@@ -51,7 +53,7 @@ public class FriendNameTable extends JXTable {
         getColumn(1).setWidth(30);
         getColumn(1).setPreferredWidth(30);
         
-        final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), libraryManager);
+        final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), shareListManager);
         
         addMouseListener(new MouseAdapter() {
             

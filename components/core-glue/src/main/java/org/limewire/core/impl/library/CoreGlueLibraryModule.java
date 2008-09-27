@@ -3,6 +3,8 @@ package org.limewire.core.impl.library;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.inject.AbstractModule;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
@@ -17,6 +19,8 @@ public class CoreGlueLibraryModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(LibraryManager.class).to(LibraryManagerImpl.class);
+        bind(RemoteLibraryManager.class).to(LibraryManagerImpl.class);
+        bind(ShareListManager.class).to(LibraryManagerImpl.class);
         bind(LibraryRosterListener.class);
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("friendLibraries")).to(FriendLibraryAutoCompleter.class);
         bind(FriendSearcher.class);

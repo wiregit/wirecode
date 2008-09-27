@@ -143,16 +143,18 @@ public class ShareDropTarget implements DropTargetListener {
      * @return true if the file is allowed, false otherwise.
      */
     private boolean isAllowed(String fileExtension) {
-        if(!alwaysShareDocuments && !SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
-            MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
-            if(type == null || type.getSchema().equals(MediaType.SCHEMA_DOCUMENTS)) {
-                return false;
+        if(fileExtension != null) {        
+            if(!alwaysShareDocuments && !SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
+                MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
+                if(type == null || type.getSchema().equals(MediaType.SCHEMA_DOCUMENTS)) {
+                    return false;
+                }
             }
-        }
-        if(!SharingSettings.PROGRAM_SHARING_ENABLED.getValue()) {
-            MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
-            if(type == null || type.getSchema().equals(MediaType.SCHEMA_PROGRAMS))
-                return false;
+            if(!SharingSettings.PROGRAM_SHARING_ENABLED.getValue()) {
+                MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
+                if(type == null || type.getSchema().equals(MediaType.SCHEMA_PROGRAMS))
+                    return false;
+            }
         }
         return true;
     }

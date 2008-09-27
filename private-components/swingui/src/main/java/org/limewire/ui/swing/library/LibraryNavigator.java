@@ -18,7 +18,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendRemoteLibraryEvent;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.listener.EventListener;
@@ -49,7 +49,7 @@ public class LibraryNavigator extends JPanel {
 
     @Inject
     LibraryNavigator(Navigator navigator, MyLibraryPanel libraryPanel,
-            ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport, LibraryManager libraryManager
+            ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport, ShareListManager libraryManager
             ) {
         GuiUtils.assignResources(this);
 

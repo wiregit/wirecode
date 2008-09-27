@@ -36,7 +36,7 @@ public class MyLibraryPanel extends JPanel {
     public MyLibraryPanel(LibraryManager libraryManager, final LibrarySharePanel sharePanel){
         setLayout(new BorderLayout());
 
-        table = new LibraryTable<LocalFileItem>(libraryManager.getLibraryManagedList().getModel()); 
+        table = new LibraryTable<LocalFileItem>(libraryManager.getLibraryManagedList().getSwingModel()); 
         table.enableSharing(sharePanel);
                 
         final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>() {});

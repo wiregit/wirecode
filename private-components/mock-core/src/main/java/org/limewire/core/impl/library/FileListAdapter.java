@@ -16,6 +16,11 @@ public class FileListAdapter implements LocalFileList {
     private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
     
     @Override
+    public EventList<LocalFileItem> getSwingModel() {
+        return eventList;
+    }
+    
+    @Override
     public EventList<LocalFileItem> getModel() {
         return eventList;
     }

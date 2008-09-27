@@ -55,7 +55,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.library.FileList;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.ItemNotifyable;
@@ -113,7 +113,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private final WeakHashMap<String, ChatFriend> idToFriendMap;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
-    private final LibraryManager libraryManager;
+    private final ShareListManager libraryManager;
     private final FriendSharingDisplay friendSharing;
     private final JScrollPane scrollPane;
     private final Timer idleTimer;
@@ -124,7 +124,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
 
     @Inject
-    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, LibraryManager libraryManager, FriendSharingDisplay friendSharing) {
+    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, ShareListManager libraryManager, FriendSharingDisplay friendSharing) {
         super(new BorderLayout());
         this.icons = icons;
         this.chatFriends = new BasicEventList<ChatFriend>();

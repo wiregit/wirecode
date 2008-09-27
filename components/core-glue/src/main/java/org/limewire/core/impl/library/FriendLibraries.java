@@ -23,6 +23,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+// TODO -- this class is not thread safe.  It needs to synchronize on access to & from libraries.
+
 @Singleton
 public class FriendLibraries {
     private final Map<String, StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>> libraries;

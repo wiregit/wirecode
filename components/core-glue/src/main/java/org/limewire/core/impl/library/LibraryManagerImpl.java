@@ -1,7 +1,9 @@
 package org.limewire.core.impl.library;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,11 +21,15 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
+import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,7 +41,7 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LocalFileDetailsFactory;
 
 @Singleton
-class LibraryManagerImpl implements LibraryManager {
+class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibraryManager {
     
     private final FileManager fileManager;
     private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
@@ -43,10 +49,10 @@ class LibraryManagerImpl implements LibraryManager {
     private final LibraryFileList libraryFileList;
     private final GnutellaFileList gnutellaFileList;
     
-    private final ConcurrentHashMap<String, LocalFileList> friendLocalFileLists;
+    private final ConcurrentHashMap<String, LocalFileListImpl> friendLocalFileLists;
     
     private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener; 
-    private final ConcurrentHashMap<String, RemoteFileList> friendLibraryFileLists;
+    private final ConcurrentHashMap<String, RemoteFileListImpl> friendLibraryFileLists;
     private final LocalFileDetailsFactory detailsFactory;
 
     @Inject
@@ -57,8 +63,8 @@ class LibraryManagerImpl implements LibraryManager {
 
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
-        friendLocalFileLists = new ConcurrentHashMap<String, LocalFileList>();
-        friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileList>();
+        friendLocalFileLists = new ConcurrentHashMap<String, LocalFileListImpl>();
+        friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileListImpl>();
     }
 
     @Override
@@ -92,7 +98,9 @@ class LibraryManagerImpl implements LibraryManager {
     
     @Override
     public Collection<LocalFileList> getAllFriendShareLists() {
-        return friendLocalFileLists.values();
+        // No clue why this has to be multiple lines -- but compile failure otherwise.
+        Collection<? extends LocalFileList> list = friendLocalFileLists.values();
+        return Collections.unmodifiableCollection(list);
     }
     
     @Override
@@ -115,6 +123,7 @@ class LibraryManagerImpl implements LibraryManager {
     @Override
     public void removeFriendShareList(Friend friend) {
         fileManager.removeFriendFileList(friend.getId());
+        // TODO: Should we clean up friendLocalFileLists?
     }
     
     //////////////////////////////////////////////////////
@@ -123,8 +132,8 @@ class LibraryManagerImpl implements LibraryManager {
 
     @Override
     public RemoteFileList getOrCreateFriendLibrary(Friend friend) {
-        RemoteFileList newList = new FriendLibraryFileList();
-        RemoteFileList existing = friendLibraryFileLists.putIfAbsent(friend.getId(), newList);
+        RemoteFileListImpl newList = new FriendLibraryFileList();
+        RemoteFileListImpl existing = friendLibraryFileLists.putIfAbsent(friend.getId(), newList);
         
         if(existing == null) {
             friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_ADDED, newList, friend));
@@ -136,9 +145,10 @@ class LibraryManagerImpl implements LibraryManager {
     
     @Override
     public void removeFriendLibrary(Friend friend) {
-        RemoteFileList list = friendLibraryFileLists.remove(friend.getId());
+        RemoteFileListImpl list = friendLibraryFileLists.remove(friend.getId());
         if(list != null) {
             friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_REMOVED, list, friend));
+            list.dispose();
         }
     }
     
@@ -326,6 +336,7 @@ class LibraryManagerImpl implements LibraryManager {
     
     private abstract class LocalFileListImpl implements LocalFileList {
         protected final EventList<LocalFileItem> eventList;
+        private EventList<LocalFileItem> swingEventList;
         
         LocalFileListImpl() {
             eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
@@ -335,6 +346,16 @@ class LibraryManagerImpl implements LibraryManager {
         public EventList<LocalFileItem> getModel() {
             return eventList;
         }
+        
+        @Override
+        public EventList<LocalFileItem> getSwingModel() {
+            assert EventQueue.isDispatchThread();
+            if(swingEventList == null) {
+                swingEventList = GlazedListsSwing.swingThreadProxyList(eventList);
+            }
+            return swingEventList;
+        }
+        
         
         void remove(File file) {
             
@@ -348,6 +369,7 @@ class LibraryManagerImpl implements LibraryManager {
     
     private abstract class RemoteFileListImpl implements RemoteFileList {
         protected final EventList<RemoteFileItem> eventList;
+        protected volatile TransformedList<RemoteFileItem, RemoteFileItem> swingEventList;
         
         RemoteFileListImpl() {
             eventList = GlazedLists.threadSafeList(new BasicEventList<RemoteFileItem>());
@@ -357,6 +379,22 @@ class LibraryManagerImpl implements LibraryManager {
         public EventList<RemoteFileItem> getModel() {
             return eventList;
         }
+        
+        @Override
+        public EventList<RemoteFileItem> getSwingModel() {
+            assert EventQueue.isDispatchThread();
+            if(swingEventList == null) {
+                swingEventList = GlazedListsSwing.swingThreadProxyList(eventList);
+            }
+            return swingEventList;
+        }
+        
+        void dispose() {
+            if(swingEventList != null) {
+                swingEventList.dispose();
+            }
+        }
+        
         
         @Override
         public int size() {

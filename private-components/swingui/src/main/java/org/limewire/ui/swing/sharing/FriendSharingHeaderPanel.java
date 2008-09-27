@@ -9,15 +9,15 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-import net.miginfocom.swing.MigLayout;
 
 public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     

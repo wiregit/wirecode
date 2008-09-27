@@ -8,7 +8,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryListEventType;
 import org.limewire.core.api.library.LibraryListListener;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -29,7 +29,7 @@ public class FilesSharingSummaryPanel extends JPanel {
     private final JButton friendButton;
           
     @Inject
-    FilesSharingSummaryPanel(final LibraryManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
+    FilesSharingSummaryPanel(final ShareListManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
             FriendSharePanel friendSharePanel, Navigator navigator) {
         GuiUtils.assignResources(this);
         
@@ -42,13 +42,13 @@ public class FilesSharingSummaryPanel extends JPanel {
                 case FILE_REMOVED:
                     SwingUtils.invokeLater(new Runnable() {
                         public void run() {
-                            gnutellaButton.setText(String.valueOf(libraryManager.getGnutellaShareList().size()));
+                            gnutellaButton.setText(GuiUtils.toLocalizedInteger(libraryManager.getGnutellaShareList().size()));
                             int size = 0;
                             // TODO: This is wrong -- it double counts files shared with two friends
                             for(FileList list : libraryManager.getAllFriendShareLists()) {
                                 size += list.size();
                             }
-                            friendButton.setText(String.valueOf(size));
+                            friendButton.setText(GuiUtils.toLocalizedInteger(size));
                         }
                     });
                     break;
@@ -62,14 +62,14 @@ public class FilesSharingSummaryPanel extends JPanel {
         
         NavItem gnutellaNav = navigator.createNavItem(NavCategory.SHARING, GnutellaSharePanel.NAME, gnutellaSharePanel);
         gnutellaButton = new IconButton(NavigatorUtils.getNavAction(gnutellaNav));
-        gnutellaButton.setHideActionText(true);
         gnutellaButton.setName("FilesSharingSummaryPanel.gnutella");
+        gnutellaButton.setText("0");
         new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaShareList());
         
         NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME, friendSharePanel);
         friendButton = new IconButton(NavigatorUtils.getNavAction(friendNav));
-        friendButton.setHideActionText(true);
         friendButton.setName("FilesSharingSummaryPanel.friends");   
+        friendButton.setText("0");
 		
 		setLayout(new MigLayout("insets 0 0 0 0", "[grow]", ""));
 

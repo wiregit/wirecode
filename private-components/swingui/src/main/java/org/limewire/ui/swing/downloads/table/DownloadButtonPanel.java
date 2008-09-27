@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -57,24 +58,24 @@ public class DownloadButtonPanel extends JPanel {
 	    super(new FlowLayout(FlowLayout.LEADING, 0,0));
 	    GuiUtils.assignResources(this);		
 
-		pauseButton = GuiUtils.createIconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
+		pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
 		pauseButton.setActionCommand(DownloadActionHandler.PAUSE_COMMAND);
 		pauseButton.addActionListener(actionListener);
 		pauseButton.setToolTipText(I18n.tr("Pause"));		
 		
 
-		cancelButton = GuiUtils.createIconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
+		cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
 		cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
 		cancelButton.addActionListener(actionListener);
         cancelButton.setToolTipText(I18n.tr("Cancel Download"));
 
-		resumeButton = GuiUtils.createIconButton(resumeIcon, resumeIconRollover, resumeIconPressed);
+		resumeButton = new IconButton(resumeIcon, resumeIconRollover, resumeIconPressed);
 		resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
 		resumeButton.addActionListener(actionListener);
 		resumeButton.setVisible(false);
         resumeButton.setToolTipText(I18n.tr("Resume"));
 		
-		tryAgainButton = GuiUtils.createIconButton(tryAgainIcon, tryAgainIconRollover, tryAgainIconPressed);
+		tryAgainButton = new IconButton(tryAgainIcon, tryAgainIconRollover, tryAgainIconPressed);
 		tryAgainButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
 		tryAgainButton.addActionListener(actionListener);
 		tryAgainButton.setToolTipText(I18n.tr("Try Again"));
