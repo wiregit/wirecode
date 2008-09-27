@@ -196,7 +196,7 @@ public class GuiUtils {
 	/**
 	 * Inject fields from AppFrame.properties into object. Fields to be injected
 	 * should be annotated <code>@Resource</code> and defined in AppFrame.properties as
-	 * <code><Object>.<field> = <data></code>
+	 * <code>ClassNameWithoutPackage.variableName=resource</code>
 	 * 
 	 * @param object the object whose fields will be injected
 	 */

@@ -3,11 +3,13 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
@@ -16,18 +18,18 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.Search;
@@ -38,6 +40,7 @@ import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.TextFieldWithEnterButton;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.home.HomePanel;
@@ -50,7 +53,6 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -59,7 +61,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 @Singleton
-class TopPanel extends JPanel implements SearchNavigator {
+class TopPanel extends JXPanel implements SearchNavigator {
     
     private final FancyTabList searchList;
     private final Navigator navigator;
@@ -68,11 +70,11 @@ class TopPanel extends JPanel implements SearchNavigator {
     // TODO: This needs to be controlled by some other code eventually.
     private final boolean programEnabled = true;
     
-    @Resource private Icon enterUpIcon;
-    @Resource private Icon enterOverIcon;
-    @Resource private Icon enterDownIcon;
-    @Resource private Icon homeIcon;
-    @Resource private Icon storeIcon;
+    @Resource private Color topGradient;
+    @Resource private Color bottomGradient;
+    
+    @Resource private Color borderColor;
+    @Resource private int borderHeight;
     
     private final NavItem homeNav;
 
@@ -82,16 +84,22 @@ class TopPanel extends JPanel implements SearchNavigator {
                     @Named("friendLibraries") AutoCompleteDictionary friendLibraries,
                     HomePanel homePanel,
                     StorePanel storePanel) {
+        GuiUtils.assignResources(this);
         this.navigator = navigator;
         
         setMinimumSize(new Dimension(0, 40));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         setPreferredSize(new Dimension(1024, 40));
         
-	    GuiUtils.assignResources(this);
+        setBackgroundPainter(new MattePainter(
+                new GradientPaint(new Point2D.Double(0, 0), topGradient, 
+                        new Point2D.Double(0, 1), bottomGradient,
+                        false), true));
+        
         textField = new TextFieldWithEnterButton(
-            15, I18n.tr("Search..."), enterUpIcon, enterOverIcon, enterDownIcon, friendLibraries);
+            I18n.tr("Search..."), friendLibraries);
         textField.setMaximumSize(120);
+        textField.setName("TopPanel.searchInput");
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
         combo.removeItem(SearchCategory.OTHER);
@@ -141,22 +149,22 @@ class TopPanel extends JPanel implements SearchNavigator {
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);
         NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
-        homeButton.setIcon(homeIcon);
-        FontUtils.changeSize(homeButton, -2);
+        homeButton.setName("TopPanel.homeButton");
+        homeButton.setText(I18n.tr("Home"));
         JButton storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
-        storeButton.setIcon(storeIcon);
-        FontUtils.changeSize(storeButton, -2);
+        storeButton.setName("TopPanel.storeButton");
+        storeButton.setText(I18n.tr("Store"));
         
         setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.weighty = 1;
                 
-        gbc.insets = new Insets(5, 10, 0, 0);
+        gbc.insets = new Insets(5, 10, 2, 0);
         gbc.fill = GridBagConstraints.NONE;
         add(homeButton, gbc);
         
-        gbc.insets = new Insets(5, 10, 0, 0);
+        gbc.insets = new Insets(5, 10, 2, 0);
         gbc.fill = GridBagConstraints.NONE;
         add(storeButton, gbc);
         
@@ -164,14 +172,16 @@ class TopPanel extends JPanel implements SearchNavigator {
         gbc.fill = GridBagConstraints.NONE;
         add(search, gbc);
         
-        gbc.insets = new Insets(5, 0, 0, 5);
+        gbc.insets = new Insets(5, 0, 0, 0);
         add(combo, gbc);
         
+        //gbc.gridx = GridBagConstraints.RELATIVE;
         add(textField, gbc);
         
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1;
         gbc.insets = new Insets(5, 0, 0, 0);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
 
         searchList = new FancyTabList();
         searchList.setCloseAllText(I18n.tr("Close all searches"));
@@ -189,6 +199,14 @@ class TopPanel extends JPanel implements SearchNavigator {
         searchList.setMaxTotalTabs(10);
         searchList.setName("TopPanel.SearchList");
         add(searchList, gbc);
+        
+        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        add(Line.createHorizontalLine(borderColor, borderHeight), gbc);
+        
     };
 
     @Override

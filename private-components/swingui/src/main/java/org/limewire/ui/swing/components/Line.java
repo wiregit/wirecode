@@ -5,54 +5,63 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 
 import javax.swing.JComponent;
-import javax.swing.UIManager;
 
 /**
  * A component that draws a line.
  */
 public class Line extends JComponent {
     
-    private Color color;
-	private Color uiColor;
-    
-    /**
-     * Creates a line that uses a <tt>color</tt>.
-     */
-    public Line(Color color) {
-        this(color, 1);
+    public static Line createHorizontalLine(Color color, int height) {
+        return new Line(true, color, height);
+    }
+
+    public static Line createHorizontalLine(Color color) {
+        return new Line(true, color, 1);
     }
     
-    /**
-     * Creates a line <tt>height</tt> pixels high that uses a <tt>color</tt>.
-     */
-    public Line(Color color, int height) {
+    public static Line createHorizontalLine() {
+        return new Line(true, Color.BLACK, 1);
+    }
+    
+    public static Line createVerticalLine(Color color, int width) {
+        return new Line(false, color, width);
+    }
+    
+    public static Line createVerticalLine(Color color) {
+        return new Line(false, color, 1);
+    }
+    
+    public static Line createVerticalLine() {
+        return new Line(false, Color.BLACK, 1);
+    }
+
+    private boolean horizontal;
+    private Color color;
+
+    private Line(boolean horizontal, Color color, int dimension) {
         if(color == null)
             throw new IllegalArgumentException("color must not be null");
         
-        setColor(color);
-        initSize(height);
+        this.horizontal = horizontal;
+        this.color = color;
+        initSize(horizontal, dimension);
     }
-    
-    /**
-     * Creates a line that uses a color from the current theme.
-     */
-	public Line() {
-	    this(1);
-    }
-	
-	/**
-	 * Creates a line <tt>height</tt> pixels high, that uses a color from the
-	 * current theme.
-	 */
-	public Line(int height) {
-	    uiColor = UIManager.getColor("controlShadow");
-	    initSize(height);
-	}
        
-    private void initSize(int height) {
-        setPreferredSize(new Dimension(1, height));
-        setMaximumSize(new Dimension(Short.MAX_VALUE, height));		
+    private void initSize(boolean horizontal, int dimension) {
+        if(horizontal) {
+            setPreferredSize(new Dimension(1, dimension));
+            setMinimumSize(new Dimension(0, dimension));
+            setMaximumSize(new Dimension(Short.MAX_VALUE, dimension));
+        } else {
+            setPreferredSize(new Dimension(dimension, 1));
+            setMinimumSize(new Dimension(dimension, 0));
+            setMaximumSize(new Dimension(dimension, Short.MAX_VALUE));       
+        }
 	}
+    
+    public void setThickness(int dimension) {
+        initSize(horizontal, dimension);
+    }
 
     public void setColor(Color color) {
         this.color = color;
@@ -66,21 +75,9 @@ public class Line extends JComponent {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Color oldColor = g.getColor();
-        if (uiColor != null) {
-        	g.setColor(uiColor);
-        } else if (color != null) {
-        	g.setColor(color);
-        } // fall back to default foreground color
+        g.setColor(color);
         g.fillRect(0, 0, getWidth(), getHeight());
         g.setColor(oldColor);
-    }
- 
-    @Override
-    public void updateUI() {
-    	super.updateUI();
-    	if (uiColor != null) {
-    		uiColor = UIManager.getColor("controlShadow");
-    	}
     }
     
 }

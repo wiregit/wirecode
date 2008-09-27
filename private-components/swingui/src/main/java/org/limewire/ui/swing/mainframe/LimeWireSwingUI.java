@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.mainframe;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -10,9 +9,7 @@ import java.awt.event.ComponentEvent;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
-import org.jdesktop.application.Resource;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.player.PlayerPanel;
@@ -26,12 +23,6 @@ public class LimeWireSwingUI extends JPanel {
     
     private final TopPanel topPanel;
     private final TrayNotifier trayNotifier;
-    
-    /**
-	 * The color of the lines separating the GUI panels
-	 */
-	@Resource
-    private Color lineColor;
     
 	@Inject
     public LimeWireSwingUI(
@@ -48,14 +39,7 @@ public class LimeWireSwingUI extends JPanel {
         setLayout(layout);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        
-        // Line above the top area
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;        
-        add(new Line(lineColor), gbc);
-        
+                
         // The top panel
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
@@ -63,28 +47,14 @@ public class LimeWireSwingUI extends JPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.gridheight = 1;
         add(topPanel, gbc);
-        
-        // Line below the top panel
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        add(new Line(lineColor), gbc);
-        
+                
         // The left panel
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.weightx = 0;
         gbc.weighty = 1;
         gbc.gridwidth = 1;
         gbc.gridheight = 3;
-        add(leftPanel, gbc);        
-        
-        // Line between left & main panel
-        gbc.fill = GridBagConstraints.VERTICAL;
-        gbc.weightx = 0;
-        gbc.weighty = 1;
-        gbc.gridwidth = GridBagConstraints.RELATIVE;
-        add(new Line(lineColor), gbc);
+        add(leftPanel, gbc);
         
         // The main panel
         gbc.fill = GridBagConstraints.BOTH;
@@ -100,14 +70,7 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.add(playerPanel, JLayeredPane.PALETTE_LAYER);
         layeredPane.addComponentListener(new PanelResizer(playerPanel));
         add(layeredPane, gbc);
-        
-        // Line below the left & main panel
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        add(new Line(lineColor), gbc);
-        
+                
         // The statusbar
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;

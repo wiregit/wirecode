@@ -67,7 +67,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         unShareButton.setEnabled(false);
     
         // black seperator
-        Line line = new Line(Color.BLACK, 3);
+        Line line = Line.createHorizontalLine(Color.BLACK, 3);
         
         final JPopupMenu menu = new JPopupMenu();
         menu.add(new JMenuItem("Item"));

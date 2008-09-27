@@ -1,8 +1,7 @@
 package org.limewire.ui.swing;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -13,10 +12,11 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.ui.swing.components.DropDownListAutoCompleteTextField;
@@ -39,21 +39,18 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
     
     /**
      * Creates a FilteredTextField that displays a given number of columns.
-     * @param columns the number of visible columns in the text field
      * @param promptText the prompt text to be displayed in the text field
      *                   (pass null to omit)
-     * @param icon the Icon to be display on the button
      */
     public TextFieldWithEnterButton(
-            int columns, String promptText,
-            Icon upIcon, Icon overIcon, Icon downIcon, AutoCompleteDictionary friendLibraries) {
+            String promptText, AutoCompleteDictionary friendLibraries) {
         
         this.promptText = promptText;
         
-        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        setLayout(new MigLayout("insets 0 2 0 2"));
         
         // Configure the JTextField.
-        textField = new DropDownListAutoCompleteTextField(columns);
+        textField = new DropDownListAutoCompleteTextField(999);
         textField.setDictionary(friendLibraries);
         prompt();
         textField.addFocusListener(this);
@@ -77,29 +74,32 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
                 updateEmpty();
             }
         });
-        add(textField);
+        add(textField, "grow, aligny top");
         
         // Configure the JButton.
-        button = new JButton(upIcon);
-        button.setEnabled(false);
-        button.setRolloverIcon(overIcon);
-        button.setPressedIcon(downIcon);
+        button = new JButton();
         button.setBorderPainted(false);
+        button.setOpaque(false);
         button.setContentAreaFilled(false);
-        button.setPreferredSize(
-            getButtonSize(new Icon[] { upIcon, overIcon, downIcon }));
+        button.setMargin(new Insets(0, 0, 0, 0));
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
                 notifyListeners();
             }
         });
-        add(button);
+        add(button, "grow");
         
         // Fix borders.
-        Border border = textField.getBorder();
         textField.setBorder(null);
-        setBorder(border);
+    }
+    
+    public void setIcon(Icon icon) {
+        button.setIcon(icon);
+    }
+    
+    public void setIconRollover(Icon icon) {
+        button.setRolloverIcon(icon);
     }
     
     /**
@@ -129,18 +129,6 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
     @Override
     public void focusLost(FocusEvent e) {
         if (empty) prompt();
-    }
-    
-    private Dimension getButtonSize(Icon[] icons) {
-        int width = 0;
-        int height = 0;
-        
-        for (Icon icon : icons) {
-            width = Math.max(width, icon.getIconWidth());
-            height = Math.max(height, icon.getIconHeight());
-        }
-        
-        return new Dimension(width, height);
     }
 
     /**
@@ -203,6 +191,5 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      */
     private void updateEmpty() {
         empty = textField.getText().length() == 0;
-        button.setEnabled(!empty);
     }
 }

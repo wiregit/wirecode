@@ -2,16 +2,13 @@ package org.limewire.ui.swing.library;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import net.miginfocom.swing.MigLayout;
@@ -26,10 +23,12 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.table.ClearCellRenderer;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -40,7 +39,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class LibraryNavigator extends JPanel {
 
-    private final JLabel titleLabel;
+    private final SectionHeading titleLabel;
 
     private final JXTable itemList;
 
@@ -54,9 +53,11 @@ public class LibraryNavigator extends JPanel {
             ) {
         GuiUtils.assignResources(this);
 
+        setOpaque(false);
+        
         this.navigator = navigator;
 
-        this.titleLabel = new JLabel(I18n.tr("Library"));
+        this.titleLabel = new SectionHeading(I18n.tr("Libraries"));
         this.listModel = new DefaultTableModel();
         this.itemList = new JXTable(listModel);
         itemList.setRolloverEnabled(true);
@@ -65,6 +66,7 @@ public class LibraryNavigator extends JPanel {
         itemList.setShowGrid(false, false);
         listModel.setColumnCount(3);
         itemList.getColumnExt(0).setPreferredWidth(10);
+        itemList.getColumnExt(0).setCellRenderer(new ClearCellRenderer());
         itemList.getColumnExt(1).setPreferredWidth(135);
         itemList.getColumnExt(1).setCellRenderer(new FriendCellRenderer());
         itemList.getColumnExt(2).setVisible(false);
@@ -73,14 +75,11 @@ public class LibraryNavigator extends JPanel {
                 Color.BLACK));
 
         titleLabel.setName("LibraryNavigator.titleLabel");
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(
-                titleLabel.getFont().getSize() + 2f));
-        titleLabel.setOpaque(false);
 
         itemList.setOpaque(false);
 
         setLayout(new MigLayout("insets 0"));
-        add(titleLabel, "gapleft 5, gapbottom 5, alignx left, wrap");
+        add(titleLabel, "gapbottom 5, growx, alignx left, aligny top,  wrap");
         add(itemList, "alignx left, aligny top");
 
         final NavItem myLibraryItem = navigator.createNavItem(NavCategory.LIBRARY,
@@ -143,25 +142,6 @@ public class LibraryNavigator extends JPanel {
     private void clearSelection(NavItem navItem) {
         int row = getRowForNavItem(navItem);
         itemList.getSelectionModel().removeSelectionInterval(row, row);
-    }
-
-    private class FriendCellRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-            String render = "";
-            Friend friend = (Friend)value;
-            if(friend != null) {
-                render = friend.getName();
-                if(render == null) {
-                    render = friend.getId();
-                }
-            }
-            JComponent renderer = (JComponent) super.getTableCellRendererComponent(table,
-                    render, isSelected, hasFocus, row, column);
-            FontUtils.bold(renderer);
-            return renderer;
-        }
     }
 
     private int getRowForNavItem(NavItem navItem) {
@@ -229,6 +209,27 @@ public class LibraryNavigator extends JPanel {
         @Override
         public String getRenderName() {
             return getName();
+        }
+    }
+    
+
+
+    private static class FriendCellRenderer extends ClearCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            String render = "";
+            Friend friend = (Friend)value;
+            if(friend != null) {
+                render = friend.getName();
+                if(render == null) {
+                    render = friend.getId();
+                }
+            }
+            JComponent renderer = (JComponent) super.getTableCellRendererComponent(table,
+                    render, isSelected, hasFocus, row, column);
+            FontUtils.bold(renderer);
+            return renderer;
         }
     }
 }

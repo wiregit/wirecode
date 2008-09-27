@@ -4,9 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -15,11 +15,9 @@ import java.awt.event.MouseListener;
 import java.util.Comparator;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
@@ -29,6 +27,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
+import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
@@ -61,7 +60,7 @@ public class DownloadSummaryPanel extends JPanel {
     private JTable table;
 
 	
-	private JLabel titleLabel;
+	private SectionHeading titleLabel;
 	private JLabel moreLabel;
 	private JLabel completeLabel;
 	private EventList<DownloadItem> allList;
@@ -77,8 +76,8 @@ public class DownloadSummaryPanel extends JPanel {
     
     private CardLayout cardLayout;
 
-    @Resource
-    private Icon warningIcon;
+//    @Resource
+//    private Icon warningIcon;
 
     @Resource
     private Color moreColor;
@@ -104,6 +103,8 @@ public class DownloadSummaryPanel extends JPanel {
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, Navigator navigator) {
 	    GuiUtils.assignResources(this);
 	    
+	    setOpaque(false);
+	    
         this.allList = GlazedListsSwing.swingThreadProxyList(downloadListManager.getDownloads());
 
         setLayout(new BorderLayout());
@@ -117,9 +118,8 @@ public class DownloadSummaryPanel extends JPanel {
         unfinishedList = new FilterList<DownloadItem>(allList, new DownloadStateExcluder(DownloadState.DONE));
         warningList = new FilterList<DownloadItem>(allList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		
-		titleLabel = new JLabel();
-		titleLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-        FontUtils.changeStyle(titleLabel, Font.BOLD);
+		titleLabel = new SectionHeading(I18n.tr("Downloads"));
+		titleLabel.setName("DownloadSummaryPanel.titleLabel");
 		add(titleLabel, BorderLayout.NORTH);
 		moreLabel = new JLabel("<html><u>" + I18n.tr("More...") + "</u></html>", JLabel.RIGHT);
 		moreLabel.setForeground(moreColor);
@@ -244,14 +244,12 @@ public class DownloadSummaryPanel extends JPanel {
             if (selected) {
                 setBackground(highlightColor);
                 setBorder(BorderFactory.createLoweredBevelBorder());
-                titleLabel.setForeground(highlightFontColor);
                 moreLabel.setForeground(highlightFontColor);
                 completeLabel.setForeground(highlightFontColor);
                 downloadStatusPanelRenderer.setForeground(highlightFontColor);
             } else {
              //   setBackground(Color.WHITE);
                 setBorder(null);
-                titleLabel.setForeground(fontColor);
                 moreLabel.setForeground(moreColor);
                 completeLabel.setForeground(allCompleteColor);
                 downloadStatusPanelRenderer.setForeground(fontColor);
@@ -319,11 +317,12 @@ public class DownloadSummaryPanel extends JPanel {
 	}
 	
 	private void setWarningVisible(boolean visible){
-	    if(visible){
-	        titleLabel.setIcon(warningIcon);
-	    } else {
-	        titleLabel.setIcon(null);
-	    }
+	    // TODO: What to do about warnings
+//	    if(visible){
+//	        titleLabel.setIcon(warningIcon);
+//	    } else {
+//	        titleLabel.setIcon(null);
+//	    }
 	}
 	
 	private class DownloadStatusPanelRenderer extends JPanel implements
@@ -349,6 +348,7 @@ public class DownloadSummaryPanel extends JPanel {
 			gbc.anchor = GridBagConstraints.WEST;
 			nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
 			nameLabel.setOpaque(false);
+			gbc.insets = new Insets(0, 15, 0, 0);
 			add(nameLabel, gbc);
 
 			gbc.gridx = 1;

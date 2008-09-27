@@ -78,7 +78,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         unShareAllButton.setEnabled(false);
 
         // black seperator
-        Line line = new Line(Color.BLACK, 3);
+        Line line = Line.createHorizontalLine(Color.BLACK, 3);
         
         // create the table
         table = createTable(eventList, fileList, tableFormat, dropTarget);
