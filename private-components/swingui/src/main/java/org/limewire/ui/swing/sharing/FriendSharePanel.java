@@ -48,6 +48,7 @@ import org.limewire.xmpp.api.client.User;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -74,7 +75,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     private MultiButtonTableCellRendererEditor editor;
     private MultiButtonTableCellRendererEditor renderer;
 
-    private EventList<FriendItem> eventList;
+    private EventList<FriendItem> friendsList;
     
     private LibraryManager libraryManager;
     private IconManager iconManager;
@@ -99,8 +100,8 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         cardPanel.setLayout(viewCardLayout);
         cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
 
-        eventList = new BasicEventList<FriendItem>();               
-        friendTable = new FriendNameTable(eventList, new FriendTableFormat(), libraryManager, navigator);
+        friendsList = GlazedLists.threadSafeList(new BasicEventList<FriendItem>());               
+        friendTable = new FriendNameTable(friendsList, new FriendTableFormat(), libraryManager, navigator);
         
         headerPanel = createHeader(cardPanel);
 
@@ -261,7 +262,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
             LocalFileList fileList = libraryManager.getOrCreateFriendShareList(event.getSource());
-            eventList.add(new FriendItemImpl(event.getSource(), fileList.getModel()));
+            friendsList.add(new FriendItemImpl(event.getSource(), fileList.getModel()));
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
             libraryManager.removeFriendShareList(event.getSource());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
@@ -270,7 +271,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
-        eventList.clear();
+        friendsList.clear();
     }
     
     private EventList<LocalFileItem> filter(EventList<LocalFileItem> list) {
