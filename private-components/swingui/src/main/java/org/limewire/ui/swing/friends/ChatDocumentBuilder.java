@@ -125,15 +125,16 @@ class ChatDocumentBuilder {
         if (message.getType() == Type.FileOffer) {
             StringBuilder bldr = new StringBuilder();
             FileMetaData offeredFile = message.getFileOffer();
-            bldr.append(tr("wants to share a file with you")).append("<br/>")
+            bldr.append(tr("{0} wants to share a file with you", message.getSenderName()))
+                .append("<br/>")
                 .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"")
                 .append(offeredFile.getId())
                 .append("\"/><input type=\"submit\" value=\"")
                 .append(offeredFile.getName())
                 .append("\"/></form><br/>")
-                .append(tr("Download it now, or get it from his")).append(" <a href=\"")
-                .append(LIBRARY_LINK)
-                .append("\">").append(tr("Library")).append("</a> ").append(tr("later"));
+                // {0} and {1} are HTML tags that make Library a link
+                .append(tr("Download it now, or get it from their {0}Library{1} later.","<a href=\"" + LIBRARY_LINK + "\">",
+                "</a>"));
                 
             return bldr.toString();
         }

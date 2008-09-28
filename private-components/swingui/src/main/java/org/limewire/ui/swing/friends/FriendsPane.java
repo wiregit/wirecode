@@ -262,7 +262,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 if (column == 0) {
                     return "name";
                 }
-                throw new UnsupportedOperationException(tr("Too many columns expected in friends chat table. Tried getting column: ") + column);
+                throw new IllegalArgumentException("Too many columns expected in friends chat table. Tried getting column: " + column);
             }
 
             @Override
@@ -270,7 +270,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 if (column == 0) {
                     return chatFriend.getName();
                 }
-                throw new UnsupportedOperationException(tr("Couldn't find value for unknown friends chat table column: ") + column);
+                throw new IllegalArgumentException("Couldn't find value for unknown friends chat table column: " + column);
             }
         };
         
@@ -854,9 +854,9 @@ public class FriendsPane extends JPanel implements FriendRemover {
             }
             
             int sharedFileCount = getSharedFileCount(chatFriend);
-            item.setText(buildString(tr("View Files I'm sharing with them")," (", sharedFileCount, ")"));
+            item.setText(tr("View Files I'm sharing with them ({0})", sharedFileCount));
             if (sharedFileCount == 0) {
-                item.setToolTipText(buildString(chatFriend.getName(), " ", tr("isn't using LimeWire. Tell them about it to see their Library")));
+                item.setToolTipText(tr("{0} isn't using LimeWire. Tell them about it to see their Library", chatFriend.getName()));
             }
         }
 
@@ -868,14 +868,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
             FileList sharedFileList = libraryManager.getOrCreateFriendShareList(chatFriend.getFriend());
             sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
             return sharedFileCount;
-        }
-        
-        private String buildString(Object... arguments) {
-            StringBuilder bldr = new StringBuilder();
-            for(Object arg : arguments) {
-                bldr.append(arg);
-            }
-            return bldr.toString();
         }
     }
     

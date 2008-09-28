@@ -44,7 +44,7 @@ class SystemTrayNotifier implements TrayNotifier {
     	    GuiUtils.assignResources(this);
     		tray = SystemTray.getSystemTray();
     		popupMenu = buildPopupMenu();
-    		trayIcon = buildTrayIcon(I18n.tr("LimeWire"));
+    		trayIcon = buildTrayIcon("LimeWire");
     		notificationWindow = buildNotificationWindow();
 	    } else {
 	        tray = null;

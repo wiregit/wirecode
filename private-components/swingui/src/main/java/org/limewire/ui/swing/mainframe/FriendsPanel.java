@@ -152,12 +152,7 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
 
     private String getNoticeForMessage(MessageReceivedEvent event) {
         Message message = event.getMessage();
-        StringBuilder builder = new StringBuilder();
-        builder.append(tr("Chat from "))
-            .append(message.getSenderName())
-            .append(" - ")
-            .append(tr("LimeWire 5"));
-        return builder.toString();
+        return tr("Chat from {0} - LimeWire 5", message.getSenderName());
     }
     
     private JFrame getApplicationFrame() {

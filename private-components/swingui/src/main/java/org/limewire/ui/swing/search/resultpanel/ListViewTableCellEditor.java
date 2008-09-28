@@ -468,7 +468,7 @@ implements TableCellEditor, TableCellRenderer {
 
     private String getHideShowSimilarFilesButtonText() {
         int similarResultsCount = getSimilarResultsCount();
-        return hyperlinkText(tr(isShowingSimilarResults() ? "Hide" : "Show"), 
+        return hyperlinkText(isShowingSimilarResults() ? tr("Hide") : tr("Show"), 
                 " ", similarResultsCount, " ", tr(similarResultsCount > 1 ? "similar files" : "similar file"));
     }
 

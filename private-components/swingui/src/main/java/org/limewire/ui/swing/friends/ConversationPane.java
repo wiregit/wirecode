@@ -34,6 +34,7 @@ import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -44,6 +45,7 @@ import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
@@ -62,11 +64,10 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 /**
- * @author Mario Aquino, Object Computing, Inc.
- * 
+ *
  */
 public class ConversationPane extends JPanel implements Displayable {
-    private static final String DISABLED_LIBRARY_TOOLTIP = tr(" isn't using LimeWire. Tell them about it to see their Library");
+    private static final String DISABLED_LIBRARY_TOOLTIP = I18nMarker.marktr("{0} isn't using LimeWire. Tell them about it to see their Library");
     private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private static final Color BACKGROUND_COLOR = Color.WHITE;
@@ -233,7 +234,7 @@ public class ConversationPane extends JPanel implements Displayable {
         JXButton libraryButton = new JXButton(new LibraryAction());
         if (!chatFriend.isSignedInToLimewire()) {
             libraryButton.setEnabled(false);
-            libraryButton.setToolTipText(chatFriend.getName() + DISABLED_LIBRARY_TOOLTIP);
+            libraryButton.setToolTipText(I18n.tr(DISABLED_LIBRARY_TOOLTIP, chatFriend.getName()));
         }
         panel.add(libraryButton, BorderLayout.NORTH);
         inputPanel = new ResizingInputPanel(writer);
