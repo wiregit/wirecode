@@ -17,7 +17,7 @@
         <do.setup-private-properties component="swingui">
 			<add-src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-				<pathelement location="${limewire.lib.jars}/swingx-0.9.3.jar"/>
+				<pathelement location="${limewire.lib.jars}/swingx-0.9.4.jar"/>
 				<pathelement location="${limewire.lib.jars}/AppFramework.jar"/>
 				<pathelement location="${limewire.lib.jars}/EventBus-1.2b.jar"/>
 				<pathelement location="${limewire.lib.jars}/forms.jar"/>

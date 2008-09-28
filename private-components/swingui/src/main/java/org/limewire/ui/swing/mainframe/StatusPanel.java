@@ -6,31 +6,36 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.Random;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.AvailableOption;
 import org.limewire.ui.swing.friends.AwayOption;
@@ -45,6 +50,7 @@ import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -53,7 +59,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMessageListener {
+public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenMessageListener {
     private static final String OFFLINE = "offline";
     private final IconLibrary icons;
     private JXButton friendsButton;
@@ -65,21 +71,38 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMe
     private JCheckBoxMenuItem availablePopupItem;
     private JCheckBoxMenuItem awayPopupItem;
     private final UnseenMessageFlasher flasher;
+    
+    @Resource private Color topGradient;
+    @Resource private Color bottomGradient;
+    
+    @Resource private Color topBorderColor;
+    @Resource private Color belowTopBorderColor;
+    @Resource private int height;
 
     @Inject
     public StatusPanel(final TrayNotifier trayNotifier, final IconManager iconManager, IconLibrary icons, AudioPlayer player) {
+        GuiUtils.assignResources(this);
         this.icons = icons;
         
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        setBackground(Color.GRAY);
-        add(new JLabel("status"));
-        add(Box.createHorizontalGlue());
+        setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
+        add(Line.createHorizontalLine(topBorderColor, 1), "span, grow, wrap");
+        add(Line.createHorizontalLine(belowTopBorderColor, 1), "span, grow, wrap");
+        
+        setMinimumSize(new Dimension(0, height + 2));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
+        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
+        
+        setBackgroundPainter(new MattePainter<JXButton>(
+                new GradientPaint(new Point2D.Double(0, 0), topGradient, 
+                        new Point2D.Double(0, 1), bottomGradient,
+                        false), true));
+        
         add(new JButton(new AbstractAction("Error Test") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new RuntimeException("Test Error");
             }
-        }));
+        }), "gapbefore push");
 
         add(new JButton(new AbstractAction("Tray Test") {
             @Override
@@ -104,10 +127,10 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMe
                     trayNotifier.showMessage(notification);               
                 }
             }
-        }));
+        }), "gapbefore push");
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
         miniPlayerPanel.setVisible(false);
-        add(miniPlayerPanel);
+        add(miniPlayerPanel, "gapbefore push");
 
         JMenuBar menuBar = new JMenuBar();
         Color whiteBackground = Color.WHITE;
@@ -122,7 +145,7 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMe
         menuPanel.add(menuBar, BorderLayout.WEST);
         menuPanel.setBackground(whiteBackground);
         
-        add(menuPanel);
+        add(menuPanel, "gapbefore push");
         
         statusMenu = new JMenu();
         statusMenu.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -149,10 +172,6 @@ public class StatusPanel extends JPanel implements FriendsCountUpdater, UnseenMe
         availabilityButtonGroup.add(awayPopupItem);
         
         updateStatus(SIGN_IN, icons.getEndChat(), OFFLINE);
-
-        setMinimumSize(new Dimension(0, 20));
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
-        setPreferredSize(new Dimension(1024, 20));
         
         this.flasher = new UnseenMessageFlasher(friendsButton);
         

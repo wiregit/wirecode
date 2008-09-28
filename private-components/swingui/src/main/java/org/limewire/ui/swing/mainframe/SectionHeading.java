@@ -43,8 +43,8 @@ public class SectionHeading extends JXPanel {
         label.setFont(textFont);
         label.setForeground(textColor);
         
-        setLayout(new MigLayout("insets 0", "[grow]", ""));
-        add(label, "grow, gapleft 4, gaptop 4, alignx left, aligny center, wrap");
+        setLayout(new MigLayout("insets 0, gap 0", "[grow]", ""));
+        add(label, "grow, gapleft 4, gaptop 4, gapbottom 4, alignx left, aligny center, wrap");
         
         setBackgroundPainter(new MattePainter(
                 new GradientPaint(new Point2D.Double(0, 0), topGradient, 

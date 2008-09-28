@@ -11,7 +11,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import org.jdesktop.swingx.RolloverProducer;
+import org.jdesktop.swingx.rollover.RolloverProducer;
 
 /**
  * A {@link TableCellRenderer} that only paints if the cell is

@@ -4,12 +4,12 @@ import java.awt.Insets;
 
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.SwingConstants;
 
+import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.util.GuiUtils;
 
-public class IconButton extends JButton {
+public class IconButton extends JXButton {
 
     public IconButton(Action a) {
         super(a);

@@ -78,8 +78,8 @@ public class LibraryNavigator extends JPanel {
 
         itemList.setOpaque(false);
 
-        setLayout(new MigLayout("insets 0"));
-        add(titleLabel, "gapbottom 5, growx, alignx left, aligny top,  wrap");
+        setLayout(new MigLayout("insets 0, gap 0"));
+        add(titleLabel, "growx, alignx left, aligny top,  wrap");
         add(itemList, "alignx left, aligny top");
 
         final NavItem myLibraryItem = navigator.createNavItem(NavCategory.LIBRARY,
