@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.action;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
@@ -12,7 +10,7 @@ public abstract class AbstractTextAction extends TextAction {
     private final String[] actions;
 
     public AbstractTextAction(String name, String... actions) {
-        super(tr(name));
+        super(name);
         this.actions = actions;
     }
 

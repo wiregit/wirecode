@@ -66,6 +66,7 @@ import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -777,14 +778,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
         protected final FriendContext context;
         
         public AbstractContextAction(String name, FriendContext context) {
-            super(tr(name));
+            super(name);
             this.context = context;
         }
     }
     
     private class OpenChat extends AbstractContextAction {
         public OpenChat(FriendContext context) {
-            super("Open Chat", context);
+            super(I18n.tr("Open Chat"), context);
         }
 
         @Override
@@ -798,7 +799,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     
     private class ViewLibrary extends AbstractContextAction {
         public ViewLibrary(FriendContext context) {
-            super("View Library", context);
+            super(I18n.tr("View Library"), context);
         }
         
         @Override
@@ -880,7 +881,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     
     private class RemoveFriend extends AbstractContextAction {
         public RemoveFriend(FriendContext context) {
-            super("Remove friend from list", context);
+            super(I18n.tr("Remove friend from list"), context);
         }
 
         @Override
@@ -891,7 +892,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     
     private class CloseChat extends AbstractContextAction {
         public CloseChat(FriendContext context) {
-            super("Close chat (closes the current chat window)", context);
+            super(I18n.tr("Close chat (closes the current chat window)"), context);
         }
 
         @Override

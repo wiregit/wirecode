@@ -4,10 +4,12 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.text.JTextComponent;
 
+import org.limewire.ui.swing.util.I18n;
+
 public class DeleteAction extends AbstractSelectionRequiredTextAction {
 
     public DeleteAction(JTextComponent component) {
-        super("Delete", component);
+        super(I18n.tr("Delete"), component);
     }
 
     @Override
