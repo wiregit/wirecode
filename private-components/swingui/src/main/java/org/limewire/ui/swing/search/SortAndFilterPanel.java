@@ -190,17 +190,19 @@ public class SortAndFilterPanel extends JXPanel {
         viewGroup.add(tableViewToggleButton);
     }
     
-    public SortedList<VisualSearchResult> getFilteredAndSortedList(
+    public EventList<VisualSearchResult> getFilteredAndSortedList(
         EventList<VisualSearchResult> simpleList) {
 
         // Create a list that is filtered by a text field.
-        EventList<VisualSearchResult> filteredList =
-            new FilterList<VisualSearchResult>(simpleList, editor);
+        
 
         // Created a SortedList that doesn't have a Comparator yet.
         final SortedList<VisualSearchResult> sortedList =
-            new SortedList<VisualSearchResult>(filteredList, null);
+            new SortedList<VisualSearchResult>(simpleList, getFloatComparator(PropertyKey.RELEVANCE, false));
 
+        EventList<VisualSearchResult> filteredList =
+            new FilterList<VisualSearchResult>(sortedList, editor);
+        
         ItemListener listener = new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -222,7 +224,7 @@ public class SortAndFilterPanel extends JXPanel {
         // Trigger the initial sort.
         sortCombo.setSelectedItem(RELEVANCE_ITEM);
 
-        return sortedList;
+        return filteredList;
     }
 
     private static Comparator<VisualSearchResult> getDateComparator(
