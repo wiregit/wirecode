@@ -76,7 +76,7 @@ public class StringTrie<V> {
      * Indicates whenever search keys are case-sensitive or not.
      * If true, keys will be canonicalized to lowercase.
      */
-    private boolean ignoreCase;
+    private final boolean ignoreCase;
 
     /**
      * Constructs a new, empty tree.
@@ -416,7 +416,7 @@ public class StringTrie<V> {
         }
      }
 
-    public class NodeIterator extends UnmodifiableIterator<TrieNode<V>> {
+    private  class NodeIterator extends UnmodifiableIterator<TrieNode<V>> {
         /** Stack for DFS. Push and pop from back. */
         private ArrayList<Iterator<TrieNode<V>>> stack = new ArrayList<Iterator<TrieNode<V>>>();
         /** The next node to return. */
@@ -427,7 +427,7 @@ public class StringTrie<V> {
          * Creates a new iterator that yields all the nodes of start and its
          * children that have values (ignoring internal nodes).
          */
-        public NodeIterator(TrieNode<V> start, boolean withNulls) {
+        private NodeIterator(TrieNode<V> start, boolean withNulls) {
             this.withNulls = withNulls;
             if (withNulls || start.getValue() != null) {
                 nextNode = start;

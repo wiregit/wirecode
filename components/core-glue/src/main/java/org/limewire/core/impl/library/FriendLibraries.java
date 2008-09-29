@@ -3,10 +3,11 @@ package org.limewire.core.impl.library;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
@@ -17,21 +18,19 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-// TODO -- this class is not thread safe.  It needs to synchronize on access to & from libraries.
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 @Singleton
 public class FriendLibraries {
-    private final Map<String, StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>> libraries;
+    private final ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>> libraries;
     private static final Log LOG = LogFactory.getLog(FriendLibraries.class);
 
     FriendLibraries() {
-        this.libraries = new ConcurrentHashMap<String, StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
+        this.libraries = new ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
     }
     
     @Inject void register(ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport) {
@@ -40,11 +39,11 @@ public class FriendLibraries {
             public void handleEvent(FriendRemoteLibraryEvent event) {
                 switch(event.getType()) {
                 case FRIEND_LIBRARY_ADDED:
-                    StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new StringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
-                    LOG.debugf("adding friend library " + event.getFriend() + " to index");
-                    libraries.put(event.getFriend().getId(), trie);
-                    // TODO race condition?
-                    event.getFileList().getModel().addListEventListener(new LibraryListener(trie));
+                    LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);               
+                    if(libraries.putIfAbsent(event.getFriend().getId(), trie) == null) {
+                        LOG.debugf("adding friend library " + event.getFriend() + " to index");
+                        event.getFileList().getModel().addListEventListener(new LibraryListener(trie));
+                    }
                     break;
                 case FRIEND_LIBRARY_REMOVED:
                     LOG.debugf("removing friend library " + event.getFriend() + " from index");
@@ -56,9 +55,9 @@ public class FriendLibraries {
 
     class LibraryListener implements ListEventListener<RemoteFileItem> {
 
-        final StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library;
+        final LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library;
 
-        LibraryListener(StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library) {
+        LibraryListener(LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library) {
             this.library = library;
         }
 
@@ -72,13 +71,13 @@ public class FriendLibraries {
                         String word = st.nextToken();
                         LOG.debugf("\t {0}", word);
                         ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-                        synchronized (library) {
-                            filesForWord = library.get(word);
-                            if(filesForWord == null) {
-                                filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                                library.add(word, filesForWord);
-                            }
+                        library.getLock().writeLock().lock();
+                        filesForWord = library.get(word);
+                        if(filesForWord == null) {
+                            filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                            library.add(word, filesForWord);
                         }
+                        library.getLock().writeLock().unlock();
                         filesForWord.add(newFile);
                     }
                 } else if(listChanges.getType() == ListEvent.DELETE) {
@@ -88,13 +87,13 @@ public class FriendLibraries {
                     while(st.hasMoreElements()) {
                         String word = st.nextToken();
                        ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-                        synchronized (library) {
-                            filesForWord = library.get(word);
-                            if(filesForWord == null) {
-                                filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                                library.add(word, filesForWord);
-                            }
+                       library.getLock().writeLock().lock(); 
+                        filesForWord = library.get(word);
+                        if(filesForWord == null) {
+                            filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                            library.add(word, filesForWord);
                         }
+                        library.getLock().writeLock().unlock();
                         filesForWord.remove(newFile);
                     }
                 }
@@ -102,18 +101,14 @@ public class FriendLibraries {
         }
     }
 
-    public RemoteFileItem lookup(String s) {
-        Iterator<RemoteFileItem> it = iterator(s);
-        if (!it.hasNext())
-            return null;
-        return it.next();
-    }
-
     @SuppressWarnings("unchecked")
     public Iterator<RemoteFileItem> iterator() {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
-        for(StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library : libraries.values()) {
-            iterators.add(iterator(library.getIterator()));
+        for(LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library : libraries.values()) {
+            library.getLock().readLock().lock();
+            Iterator<ConcurrentLinkedQueue<RemoteFileItem>> libraryResultsCopy = copy(library.getIterator());
+            library.getLock().readLock().unlock();
+            iterators.add(iterator(libraryResultsCopy));      
         }
         return new MultiIterator<RemoteFileItem>(iterators.toArray(new Iterator[iterators.size()]));
     }
@@ -122,22 +117,43 @@ public class FriendLibraries {
     private Iterator<RemoteFileItem> iterator(final Iterator<ConcurrentLinkedQueue<RemoteFileItem>> iterator) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();        
         while(iterator.hasNext()) {
-            iterators.add(iterator(iterator.next()));
+            iterators.add(iterator.next().iterator());
         }
         return new MultiIterator<RemoteFileItem>(iterators.toArray(new Iterator[iterators.size()]));
-    }
-
-    private Iterator<RemoteFileItem> iterator(ConcurrentLinkedQueue<RemoteFileItem> remoteFileItems) {
-        return remoteFileItems.iterator();
     }
 
     @SuppressWarnings("unchecked")
     public Iterator<RemoteFileItem> iterator(String s) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
-        for(StringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library : libraries.values()) {
-            iterators.add(iterator(library.getPrefixedBy(s)));
+        for(LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library : libraries.values()) {
+            library.getLock().readLock().lock();
+            Iterator<ConcurrentLinkedQueue<RemoteFileItem>> libraryResultsCopy = copy(library.getPrefixedBy(s));
+            library.getLock().readLock().unlock();
+            iterators.add(iterator(libraryResultsCopy));            
         }
         return new MultiIterator<RemoteFileItem>(iterators.toArray(new Iterator[iterators.size()]));
+    }
+
+    private Iterator<ConcurrentLinkedQueue<RemoteFileItem>> copy(Iterator<ConcurrentLinkedQueue<RemoteFileItem>> prefixedBy) {
+        List<ConcurrentLinkedQueue<RemoteFileItem>> copy = new ArrayList<ConcurrentLinkedQueue<RemoteFileItem>>();
+        while(prefixedBy.hasNext()) {
+            copy.add(prefixedBy.next());
+        }
+        return copy.iterator();
+    }
+
+    class LockableStringTrie<V> extends StringTrie<V> {
+
+        final ReadWriteLock lock;
+        
+        public LockableStringTrie(boolean ignoreCase) {
+            super(ignoreCase);
+            lock = new ReentrantReadWriteLock();
+        }
+        
+        ReadWriteLock getLock() {
+            return lock;
+        }
     }
 }
 

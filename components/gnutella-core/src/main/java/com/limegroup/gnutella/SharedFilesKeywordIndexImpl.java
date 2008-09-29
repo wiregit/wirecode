@@ -120,9 +120,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         //Trie requires that getPrefixedBy(String, int, int) passes
         //an already case-changed string.  Both search & urnSearch
         //do this kind of match, so we canonicalize the case for them.
-        synchronized (keywordTrie) {
-            str = keywordTrie.canonicalCase(str);
-        }
+        str = keywordTrie.canonicalCase(str);
         IntSet matches = search(str, null, request.desiresPartialResults());
         if(request.getQueryUrns().size() > 0)
             matches = urnSearch(request.getQueryUrns(),matches);
