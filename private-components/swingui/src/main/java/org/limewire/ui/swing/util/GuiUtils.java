@@ -6,9 +6,11 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -20,13 +22,19 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.ui.swing.mainframe.AppFrame;
 
+import com.limegroup.gnutella.gui.GUIUtils;
+
 
 public class GuiUtils {
 
+    private static final Log LOG = LogFactory.getLog(GUIUtils.class);
+    
     /**
      * Localizable Number Format constant for the current default locale
      * set at init time.
@@ -323,4 +331,71 @@ public class GuiUtils {
         button.setHideActionText(true);
         return button;
     }  
+    
+    /**
+     * Using a little reflection here for a lack of any better way 
+     * to access locale-specific char codes for menu mnemonics.
+     * We could at least defer this in the future.
+     *
+     * @param str the key for the locale-specific char resource to
+     *  look up -- the key as it appears in the locale-specific
+     *  properties file
+     * @return the code for the passed-in key as defined in 
+     *  <tt>java.awt.event.KeyEvent</tt>, or -1 if no key code
+     *  could be found
+     */
+    public static int getCodeForCharKey(String str) {
+        int charCode = -1;
+        String charStr = str.toUpperCase(Locale.US);
+        if(charStr.length()>1) return -1;
+        try {
+            Field charField = KeyEvent.class.getField("VK_"+charStr);
+            charCode = charField.getInt(KeyEvent.class);
+        } catch (NoSuchFieldException e) {
+            LOG.error("can't get key for: " + charStr, e);
+        } catch (SecurityException e) {
+            LOG.error("can't get key for: " + charStr, e);
+        } catch (IllegalAccessException e) {
+            LOG.error("can't get key for: " + charStr, e);
+        }
+        return charCode;
+    }
+    
+    private static int getAmpersandPosition(String text) {
+        int index = -1;
+        while ((index = text.indexOf('&', index + 1)) != -1) {
+            if (index < text.length() - 1 && Character.isLetterOrDigit(text.charAt(index + 1))) {
+                break;
+            }
+        }
+        return index;
+    }
+    
+    /**
+     * Strips the first ampersand '&' in <code>text</code> that appears
+     * before a letter or digit.
+     * 
+     * @return the original text if there is no such ampersand
+     */
+    public static String stripAmpersand(String text) {
+        int index = getAmpersandPosition(text);
+        if (index >= 0) {
+            return text.substring(0, index) + text.substring(index + 1);
+        }
+        return text;
+    }
+    
+    /**
+     * Finds the first ampersand '&' in <code>text</code> that appears
+     * before a letter or a digit and returns the key code for the letter
+     * or digit after it.
+     */
+    public static int getMnemonicKeyCode(String text) {
+        // parse out mnemonic key
+        int index = getAmpersandPosition(text);
+        if (index >= 0) {
+            return GUIUtils.getCodeForCharKey(text.substring(index + 1, index + 2));
+        }
+        return -1;
+    }
 }
