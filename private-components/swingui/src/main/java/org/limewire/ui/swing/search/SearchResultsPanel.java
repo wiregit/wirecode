@@ -83,7 +83,7 @@ public class SearchResultsPanel extends JPanel {
         this.scrollPane = new SearchScrollPane();
         this.scrollablePanel = new ScrollablePanel();
 
-        final SortedList<VisualSearchResult> filteredList =
+        final EventList<VisualSearchResult> filteredList =
             sortAndFilterPanel.getFilteredAndSortedList(newVisibleFilterList(eventList));
         
         // The ResultsContainerFactory create method takes two parameters
