@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import static org.limewire.util.Objects.compareToNull;
+
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -215,8 +217,7 @@ public class SortAndFilterPanel extends JXPanel {
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Long v1 = (Long) vsr1.getProperty(key);
                 Long v2 = (Long) vsr2.getProperty(key);
-                return v1 == null ? 0 :
-                    ascending ? v1.compareTo(v2) : v2.compareTo(v1);
+                return compareNullCheck(v1, v2, ascending);
             }
         };
     }
@@ -229,8 +230,7 @@ public class SortAndFilterPanel extends JXPanel {
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Float v1 = (Float) vsr1.getProperty(key);
                 Float v2 = (Float) vsr2.getProperty(key);
-                return v1 == null ? 0 :
-                    ascending ? v1.compareTo(v2) : v2.compareTo(v1);
+                return compareNullCheck(v1, v2, ascending);
             }
         };
     }
@@ -243,8 +243,7 @@ public class SortAndFilterPanel extends JXPanel {
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Long v1 = (Long) vsr1.getProperty(key);
                 Long v2 = (Long) vsr2.getProperty(key);
-                return v1 == null ? 0 :
-                    ascending ? v1.compareTo(v2) : v2.compareTo(v1);
+                return compareNullCheck(v1, v2, ascending);
             }
         };
     }
@@ -257,12 +256,11 @@ public class SortAndFilterPanel extends JXPanel {
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 String v1 = (String) vsr1.getProperty(key);
                 String v2 = (String) vsr2.getProperty(key);
-                return v1 == null ? 0 :
-                    ascending ? v1.compareTo(v2) : v2.compareTo(v1);
+                return compareNullCheck(v1, v2, ascending);
             }
         };
     }
-
+    
     private Comparator<VisualSearchResult> getComparator(String item) {
 
         if ("Album".equals(item)) {
@@ -288,9 +286,7 @@ public class SortAndFilterPanel extends JXPanel {
                 @Override
                 public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    String v1 = vsr1.getMediaType();
-                    String v2 = vsr2.getMediaType();
-                    return v1 == null ? 0 : v1.compareTo(v2);
+                    return compareToNull(vsr1.getMediaType(), vsr2.getMediaType());
                 }
             };
         }
@@ -326,9 +322,7 @@ public class SortAndFilterPanel extends JXPanel {
                 @Override
                 public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    Long v1 = vsr1.getSize();
-                    Long v2 = vsr2.getSize();
-                    return v2.compareTo(v1);
+                    return compareToNull(vsr2.getSize(), vsr1.getSize());
                 }
             };
         }
@@ -338,9 +332,7 @@ public class SortAndFilterPanel extends JXPanel {
                 @Override
                 public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    Long v1 = vsr1.getSize();
-                    Long v2 = vsr2.getSize();
-                    return v1.compareTo(v2);
+                    return compareToNull(vsr1.getSize(), vsr2.getSize());
                 }
             };
         }
@@ -351,7 +343,11 @@ public class SortAndFilterPanel extends JXPanel {
 
         throw new IllegalArgumentException("unknown item \"" + item + '"');
     }
-
+    
+    private static int compareNullCheck(Comparable c1, Comparable c2, boolean ascending) {
+        return ascending ? compareToNull(c1, c2) : compareToNull(c2, c1);
+    }
+    
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
         sortCombo.addItem(FRIEND_ITEM);
