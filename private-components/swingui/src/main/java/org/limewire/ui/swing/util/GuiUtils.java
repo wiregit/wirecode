@@ -28,12 +28,9 @@ import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.ui.swing.mainframe.AppFrame;
 
-import com.limegroup.gnutella.gui.GUIUtils;
-
-
 public class GuiUtils {
 
-    private static final Log LOG = LogFactory.getLog(GUIUtils.class);
+    private static final Log LOG = LogFactory.getLog(GuiUtils.class);
     
     /**
      * Localizable Number Format constant for the current default locale
@@ -394,7 +391,7 @@ public class GuiUtils {
         // parse out mnemonic key
         int index = getAmpersandPosition(text);
         if (index >= 0) {
-            return GUIUtils.getCodeForCharKey(text.substring(index + 1, index + 2));
+            return getCodeForCharKey(text.substring(index + 1, index + 2));
         }
         return -1;
     }
