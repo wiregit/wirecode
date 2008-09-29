@@ -2,8 +2,8 @@ package org.limewire.ui.swing.action;
 
 import javax.swing.Icon;
 
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.gui.GUIUtils;
+import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 /**
  * Abstract class that allows the name of the action to have an ampersand to 
@@ -30,8 +30,8 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
         // parse out mnemonic key for action name
         if (key.equals(NAME)) {
             String name = (String)newValue;
-            newValue = GUIUtils.stripAmpersand(name);
-            int mnemonicKeyCode = GUIUtils.getMnemonicKeyCode(name);
+            newValue = GuiUtils.stripAmpersand(name);
+            int mnemonicKeyCode = GuiUtils.getMnemonicKeyCode(name);
             if (mnemonicKeyCode != -1) { 
             	super.putValue(MNEMONIC_KEY, mnemonicKeyCode);
             }
@@ -43,7 +43,7 @@ public abstract class AbstractAction extends javax.swing.AbstractAction {
      * Swing thread-safe way to enable/disable the action from any thread. 
      */
     public void setEnabledLater(final boolean enabled) {
-        GUIMediator.safeInvokeLater(new Runnable() {
+        SwingUtils.invokeLater(new Runnable() {
             public void run() {
                 setEnabled(enabled);
             }
