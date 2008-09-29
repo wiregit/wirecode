@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search;
 
+import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.util.Objects.compareToNull;
 
 import java.awt.Color;
@@ -49,8 +50,23 @@ import com.google.inject.Inject;
  */
 public class SortAndFilterPanel extends JXPanel {
 
-    private static final String FRIEND_ITEM = "Friend (a-z)";
-    private static final String RELEVANCE_ITEM = "Relevance";
+    private final String COMPANY = tr("Company");
+    private final String PLATFORM = tr("Platform");
+    private final String TYPE = tr("Type");
+    private final String DATE_CREATED = tr("Date created (more recent)");
+    private final String QUALITY = tr("Quality");
+    private final String YEAR = tr("Year");
+    private final String FILE_EXTENSION = tr("File extension");
+    private final String TITLE = tr("Title");
+    private final String LENGTH = tr("Length");
+    private final String ALBUM = tr("Album");
+    private final String ARTIST = tr("Artist");
+    private final String SIZE_LOW_TO_HIGH = tr("Size (low to high)");
+    private final String SIZE_HIGH_TO_LOW = tr("Size (high to low)");
+    private final String FILE_TYPE = tr("File type");
+    private final String NAME = tr("Name");
+    private final String FRIEND_ITEM = tr("Friend (a-z)");
+    private final String RELEVANCE_ITEM = tr("Relevance");
     private static final int FILTER_WIDTH = 10;
 
     private ChatLoginState chatLoginState;
@@ -67,7 +83,7 @@ public class SortAndFilterPanel extends JXPanel {
 
     private final JComboBox sortCombo = new JComboBox();
     
-    private final JLabel sortLabel = new JLabel("Sort by:");
+    private final JLabel sortLabel = new JLabel(tr("Sort by:"));
     private final JTextField filterBox = new FilteredTextField(FILTER_WIDTH);
     private final JToggleButton listViewToggleButton = new JToggleButton();
     private final JToggleButton tableViewToggleButton = new JToggleButton();
@@ -263,25 +279,25 @@ public class SortAndFilterPanel extends JXPanel {
     
     private Comparator<VisualSearchResult> getComparator(String item) {
 
-        if ("Album".equals(item)) {
+        if (ALBUM.equals(item)) {
             return getStringComparator(PropertyKey.ALBUM_TITLE, true);
         }
 
-        if ("Artist".equals(item)) {
+        if (ARTIST.equals(item)) {
             return getStringComparator(PropertyKey.ARTIST_NAME, true);
         }
 
-        if ("Company".equals(item)) {
+        if (COMPANY.equals(item)) {
             return getStringComparator(PropertyKey.COMPANY, true);
         }
 
-        if ("Date created (more recent)".equals(item)) {
+        if (DATE_CREATED.equals(item)) {
             return getDateComparator(PropertyKey.DATE_CREATED, false);
         }
 
-        if ("File extension".equals(item)
-            || "File type".equals(item)
-            || "Type".equals(item)) {
+        if (FILE_EXTENSION.equals(item)
+            || FILE_TYPE.equals(item)
+            || TYPE.equals(item)) {
             return new SimilarResultsGroupingComparator() {
                 @Override
                 public int doCompare(
@@ -295,21 +311,21 @@ public class SortAndFilterPanel extends JXPanel {
             return null; // TODO: RMV What to do here?
         }
 
-        if ("Length".equals(item)) {
+        if (LENGTH.equals(item)) {
             return getLongComparator(PropertyKey.LENGTH, true);
         }
 
-        if ("Name".equals(item)
+        if (NAME.equals(item)
             || "Filename".equals(item)
-            || "Title".equals(item)) {
+            || TITLE.equals(item)) {
             return getStringComparator(PropertyKey.NAME, true);
         }
 
-        if ("Platform".equals(item)) {
+        if (PLATFORM.equals(item)) {
             return getStringComparator(PropertyKey.PLATFORM, true);
         }
 
-        if ("Quality".equals(item)) {
+        if (QUALITY.equals(item)) {
             return getLongComparator(PropertyKey.QUALITY, false);
         }
 
@@ -317,7 +333,7 @@ public class SortAndFilterPanel extends JXPanel {
             return getFloatComparator(PropertyKey.RELEVANCE, false);
         }
 
-        if ("Size (high to low)".equals(item)) {
+        if (SIZE_HIGH_TO_LOW.equals(item)) {
             return new SimilarResultsGroupingComparator() {
                 @Override
                 public int doCompare(
@@ -327,7 +343,7 @@ public class SortAndFilterPanel extends JXPanel {
             };
         }
 
-        if ("Size (low to high)".equals(item)) {
+        if (SIZE_LOW_TO_HIGH.equals(item)) {
             return new SimilarResultsGroupingComparator() {
                 @Override
                 public int doCompare(
@@ -337,11 +353,11 @@ public class SortAndFilterPanel extends JXPanel {
             };
         }
 
-        if ("Year".equals(item)) {
+        if (YEAR.equals(item)) {
             return getLongComparator(PropertyKey.YEAR, true);
         }
 
-        throw new IllegalArgumentException("unknown item \"" + item + '"');
+        throw new IllegalArgumentException(tr("unknown item \"{0}\"", item));
     }
     
     private static int compareNullCheck(Comparable c1, Comparable c2, boolean ascending) {
@@ -412,44 +428,44 @@ public class SortAndFilterPanel extends JXPanel {
         switch (category) {
             case ALL:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "File type",
-                    "Size (high to low)", "Size (low to high)"
+                    RELEVANCE_ITEM, NAME, FILE_TYPE,
+                    SIZE_HIGH_TO_LOW, SIZE_LOW_TO_HIGH
                 };
                 break;
             case AUDIO:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "Artist", "Album", "Length",
-                    "Quality"
+                    RELEVANCE_ITEM, NAME, ARTIST, ALBUM, LENGTH,
+                    QUALITY
                 };
                 break;
             case VIDEO:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Title", "File extension", "Length",
-                    "Year", "Quality"
+                    RELEVANCE_ITEM, TITLE, FILE_EXTENSION, LENGTH,
+                    YEAR, QUALITY
                 };
                 break;
             case IMAGE:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "File extension",
-                    "Date created (more recent)"
+                    RELEVANCE_ITEM, NAME, FILE_EXTENSION,
+                    DATE_CREATED
                 };
                 break;
             case DOCUMENT:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "Title", "Type",
-                    "Size (low to high)", "Date created (more recent)"
+                    RELEVANCE_ITEM, NAME, TITLE, TYPE,
+                    SIZE_LOW_TO_HIGH, DATE_CREATED
                 };
                 break;
             case PROGRAM:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "Size (low to high)",
-                    "Platform", "Company"
+                    RELEVANCE_ITEM, NAME, SIZE_LOW_TO_HIGH,
+                    PLATFORM, COMPANY
                 };
                 break;
             default:
                 items = new String[] {
-                    RELEVANCE_ITEM, "Name", "Type",
-                    "Size (high to low)", "Size (low to high)"
+                    RELEVANCE_ITEM, NAME, TYPE,
+                    SIZE_HIGH_TO_LOW, SIZE_LOW_TO_HIGH
                 };
                 break;
         }
