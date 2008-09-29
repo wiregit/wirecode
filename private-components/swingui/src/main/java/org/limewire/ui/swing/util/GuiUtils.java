@@ -2,7 +2,6 @@ package org.limewire.ui.swing.util;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,8 +13,6 @@ import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
@@ -314,20 +311,6 @@ public class GuiUtils {
         return "<html><table width=\"" + width + "\"><tr><td>" + text
                 + "</td></tr></table></html>";
     }
-    
-    public static JButton createIconButton(Icon icon, Icon rolloverIcon, Icon pressedIcon) {
-        JButton button = new JButton();
-        button.setMargin(new Insets(0, 0, 0, 0));
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        button.setFocusPainted(false);
-        button.setRolloverEnabled(true);
-        button.setIcon(icon);
-        button.setRolloverIcon(rolloverIcon);
-        button.setPressedIcon(pressedIcon);
-        button.setHideActionText(true);
-        return button;
-    }  
     
     /**
      * Using a little reflection here for a lack of any better way 
