@@ -38,17 +38,17 @@ public class I18n {
     public static final String trc(String comment, String text) {
         return i18n.trc(comment, text);
     }
-    
+
     /**
      * Returns the translated singular or plural form of the strings.  For the plural form, 
-     * will perform parameter substitution '{0}' for any present in the plural string.
+     * will perform variable substitution '{0}' for any present in the plural string.
      * @param singularText
      * @param pluralText
      * @param number
      * @return
      */
     public static final String trn(String singularText, String pluralText, long number) {
-        return i18n.trn(singularText.replace("'", "''"), i18n.tr(pluralText, number), number);
+        return trn(singularText, pluralText, number, number);
     }
 
     public static final String trn(String singularText, String pluralText, long number, Object...args) {
