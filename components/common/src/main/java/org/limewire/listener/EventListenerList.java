@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.Objects;
@@ -63,7 +64,7 @@ public class EventListenerList<E> implements ListenerSupport<E> {
     
     private static final class ListenerProxy<E> implements EventListener<E> {
         private final EventListener<E> delegate;
-        private volatile Boolean swingProxy = null;
+        private volatile DispatchType type = DispatchType.UNKNOWN;
         
         public ListenerProxy(EventListener<E> delegate) {
             this.delegate = delegate;
@@ -71,26 +72,20 @@ public class EventListenerList<E> implements ListenerSupport<E> {
         
         @Override
         public void handleEvent(final E event) {
-            if(swingProxy == null) {
-                swingProxy = analyze(delegate, event);                
+            // Note: this is not thread-safe, but it is OK to analyze multiple times.
+            if(type == DispatchType.UNKNOWN) {
+                type = analyze(delegate, event);                
             }
             
-            if(swingProxy.booleanValue() && !EventQueue.isDispatchThread()) {
-                EventQueue.invokeLater(new Runnable() {
-                    public void run() {
-                        delegate.handleEvent(event);
-                    }
-                });
-            } else {
-                delegate.handleEvent(event);
-            }
+            type.dispatch(delegate, event);
         }
         
         /**
          * Loops through all 'handleEvent' methods whose parameter type can match event's
-         * classes & superclasses.  When one is found, see if it is annotated with @SwingProxy.
+         * classes & superclasses.  When one is found, see if it is annotated with {@link SwingEDTEvent} or
+         * {@link BlockingEvent}.
          */
-        private Boolean analyze(EventListener<E> delegate, E event) {
+        private DispatchType analyze(EventListener<E> delegate, E event) {
             Class<?> eventClass = event.getClass();
             Method method = null;
             while(eventClass != null) {
@@ -105,9 +100,60 @@ public class EventListenerList<E> implements ListenerSupport<E> {
             if(method == null) {
                 throw new IllegalStateException("Unable to find method!");
             }
-
-            return method.getAnnotation(SwingEDTEvent.class) != null;
+            
+            if(method.getAnnotation(SwingEDTEvent.class) != null) {
+                return DispatchType.SWING;
+            } else if(method.getAnnotation(BlockingEvent.class) != null) {
+                return DispatchType.BLOCKING;
+            } else {
+                return DispatchType.INLINE;
+            }
         }
+        
+
+        private static enum DispatchType {
+            UNKNOWN() {
+                @Override
+                <E> void dispatch(EventListener<E> listener, E event) {
+                    throw new IllegalStateException("unknown dispatch!");
+                }
+            }
+
+            ,
+            INLINE() {
+                @Override
+                <E> void dispatch(EventListener<E> listener, E event) {
+                    listener.handleEvent(event);
+                }
+            },
+            SWING() {
+                @Override
+                <E> void dispatch(final EventListener<E> listener, final E event) {
+                    if(EventQueue.isDispatchThread()) {
+                        listener.handleEvent(event);
+                    } else {
+                        EventQueue.invokeLater(new Runnable() {
+                            public void run() {
+                                listener.handleEvent(event);
+                            }
+                        });
+                    }
+                }
+            },
+            BLOCKING() {
+                @Override
+                <E> void dispatch(final EventListener<E> listener, final E event) {
+                    ThreadExecutor.startThread(new Runnable() {
+                        public void run() {
+                            listener.handleEvent(event);
+                        }
+                    }, "BlockingEvent");
+                }
+            };
+
+            abstract <E> void dispatch(EventListener<E> listener, E event);
+
+        };
         
     }
 }
