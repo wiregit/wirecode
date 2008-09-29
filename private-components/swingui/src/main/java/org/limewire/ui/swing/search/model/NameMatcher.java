@@ -12,7 +12,9 @@ public class NameMatcher implements SearchResultMatcher {
                 for (SearchResult result2 : o2.getCoreSearchResults()) {
                     String name2 = (String) result2.getProperty(SearchResult.PropertyKey.NAME);
                     if (name2 != null) {
-                       return name1.equalsIgnoreCase(name2);
+                       if(name1.equalsIgnoreCase(name2)) {
+                           return true;
+                       }
                     }
                 }
             }
