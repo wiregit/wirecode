@@ -38,12 +38,21 @@ public class ObjectsTest extends BaseTestCase {
         list.add(null);
         list.add("2");
         
-        Collections.sort(list, Objects.getComparator());
+        Collections.sort(list, Objects.getComparator(true));
         
         Assert.assertEquals(null, list.get(0));
         Assert.assertEquals(null, list.get(1));
         Assert.assertEquals("1", list.get(2));
         Assert.assertEquals("2", list.get(3));
-        Assert.assertEquals("3", list.get(4));   
+        Assert.assertEquals("3", list.get(4));
+        
+        Collections.sort(list, Objects.getComparator(false));
+        
+        Assert.assertEquals("1", list.get(0));
+        Assert.assertEquals("2", list.get(1));
+        Assert.assertEquals("3", list.get(2));
+        Assert.assertEquals(null, list.get(3));
+        Assert.assertEquals(null, list.get(4));
+        
     }
 }
