@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
-import static org.limewire.ui.swing.util.I18n.tr;
+import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -86,6 +86,7 @@ implements TableCellEditor, TableCellRenderer {
 
     private VisualSearchResult vsr;
     private JComponent similarResultIndentation;
+    private JPanel indentablePanel;
 
     @Inject
     public ListViewTableCellEditor(
@@ -105,7 +106,6 @@ implements TableCellEditor, TableCellRenderer {
      */
     private String highlightMatches(String sourceText) {
         boolean haveSearchText = searchText != null && searchText.length() > 0;
-        LOG.debugf("haveSearchText = {0}", haveSearchText);
 
         // If there is no search or filter text then return sourceText as is.
         if (!haveSearchText)
@@ -193,10 +193,9 @@ implements TableCellEditor, TableCellRenderer {
 
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, int column) {
-        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0}", row);
 
         vsr = (VisualSearchResult) value;
-        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0} {1} {2}", row, vsr.getCoreSearchResults().get(0).getUrn(), vsr.isVisible());
+        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0} urn: {1}", row, vsr.getCoreSearchResults().get(0).getUrn());
         category = vsr.getCategory();
 
         similarButton.setVisible(getSimilarResultsCount() > 0);
@@ -230,6 +229,8 @@ implements TableCellEditor, TableCellRenderer {
 
         markAsJunk(junkButton.isSelected());
 
+        LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
+        
         populatePanel((VisualSearchResult) value);
         setBackground(isSelected);
 
@@ -333,7 +334,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private Component makeIndentablePanel(Component component) {
-        JPanel wrapperPanel = new JPanel(new BorderLayout()) {
+        indentablePanel = new JPanel(new BorderLayout()) {
             @Override
             public Dimension getMinimumSize() {
                 return getPreferredSize();
@@ -346,11 +347,11 @@ implements TableCellEditor, TableCellRenderer {
                 return size;
             }
         };
-        wrapperPanel.setOpaque(false);
+        indentablePanel.setOpaque(false);
         similarResultIndentation = new JComponent(){};
-        wrapperPanel.add(similarResultIndentation, BorderLayout.WEST);
-        wrapperPanel.add(component, BorderLayout.CENTER);
-        return wrapperPanel;
+        similarResultIndentation.setPreferredSize(new Dimension(SIMILARITY_INDENTATION, 0));
+        indentablePanel.add(component, BorderLayout.CENTER);
+        return indentablePanel;
     }
 
     private void markAsJunk(boolean junk) {
@@ -407,9 +408,11 @@ implements TableCellEditor, TableCellRenderer {
     private void populatePanel(VisualSearchResult vsr) {
         if (vsr == null) return;
         
-        Dimension indentSize = new Dimension(
-                vsr.getSimilarityParent() != null ? SIMILARITY_INDENTATION : 0, 0);
-        similarResultIndentation.setPreferredSize(indentSize);
+        if (vsr.getSimilarityParent() != null) {
+            indentablePanel.add(similarResultIndentation, BorderLayout.WEST);
+        } else {
+            indentablePanel.remove(similarResultIndentation);
+        }
         
         actionButtonPanel.setDownloadingDisplay(vsr);
 
@@ -469,15 +472,9 @@ implements TableCellEditor, TableCellRenderer {
     private String getHideShowSimilarFilesButtonText() {
         int similarResultsCount = getSimilarResultsCount();
         if (isShowingSimilarResults()) {
-            if (similarResultsCount > 1) {
-                return hyperlinkText(tr("Hide {0} similar files", similarResultsCount));
-            }
-            return hyperlinkText(tr("Hide 1 similar file"));
+            return hyperlinkText(trn("Hide 1 similar file", "Hide {0} similar files", similarResultsCount));
         }
-        if (similarResultsCount > 1) {
-            return hyperlinkText(tr("Show {0} similar files", similarResultsCount));
-        }
-        return hyperlinkText(tr("Show 1 similar file"));
+        return hyperlinkText(trn("Show 1 similar file", "Show {0} similar files", similarResultsCount));
     }
 
     static class PropertyMatch {
