@@ -2,7 +2,6 @@ package org.limewire.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 import junit.framework.Assert;
 
