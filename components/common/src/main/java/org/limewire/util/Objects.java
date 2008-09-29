@@ -1,5 +1,7 @@
 package org.limewire.util;
 
+import java.util.Comparator;
+
 /** A utility class designed to easily perform simple Object checks. */
 public class Objects {
     
@@ -25,5 +27,37 @@ public class Objects {
             return false;
         }
         return o1.equals(o2);
+    }
+
+    /**
+     * Compares two objects using the compareTo method of o1. 
+     * This method provides the convenience of null checking the objects, 
+     * before making the comparison.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Comparable> int compareToNull(T o1, T o2) {
+        if(o1 == o2) {
+            return 0;
+        } else if(o1 == null) {
+            return -1;
+        } else if(o2 == null) {
+            return 1;
+        } else {
+            return o1.compareTo(o2);
+        }
+    }
+    
+    /**
+     * Builds an returns a generic comparator that will compare objects 
+     * using the Objects.compareToNull method.
+     */
+    public static <T extends Comparable> Comparator<T> getComparator()
+    {
+        return new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return Objects.compareToNull(o1, o2);
+            }
+        };
     }
 }
