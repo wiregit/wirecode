@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-22 11:30-0400\n"
+"POT-Creation-Date: 2008-09-29 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -195,11 +195,11 @@ msgstr ""
 msgid "Browse Host Handler"
 msgstr ""
 
-#: core/com/limegroup/gnutella/ConnectionAcceptorGlue.java:63
+#: core/com/limegroup/gnutella/ConnectionAcceptorGlue.java:59
 msgid "Connection Dispatching"
 msgstr ""
 
-#: core/com/limegroup/gnutella/ConnectionManagerImpl.java:399
+#: core/com/limegroup/gnutella/ConnectionManagerImpl.java:395
 msgid "Connection Management"
 msgstr ""
 
@@ -237,7 +237,7 @@ msgid ""
 "to 'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/FileManagerImpl.java:296
+#: core/com/limegroup/gnutella/FileManagerImpl.java:301
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:814
 msgid "Shared Files"
 msgstr ""
@@ -262,7 +262,7 @@ msgstr ""
 msgid "Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/NetworkManagerImpl.java:126
+#: core/com/limegroup/gnutella/NetworkManagerImpl.java:129
 msgid "Network Management"
 msgstr ""
 
@@ -368,7 +368,7 @@ msgstr ""
 msgid "OOB Query Handler"
 msgstr ""
 
-#: core/com/limegroup/gnutella/messages/StaticMessages.java:48
+#: core/com/limegroup/gnutella/messages/StaticMessages.java:43
 msgid "Static Messages"
 msgstr ""
 
