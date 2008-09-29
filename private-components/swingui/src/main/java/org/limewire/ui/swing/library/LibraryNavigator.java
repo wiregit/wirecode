@@ -23,6 +23,7 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -118,6 +119,7 @@ public class LibraryNavigator extends JPanel {
 
         friendLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
             @Override
+            @SwingEDTEvent
             public void handleEvent(FriendRemoteLibraryEvent event) {
                 switch (event.getType()) {
                 case FRIEND_LIBRARY_ADDED:

@@ -19,6 +19,4 @@ public class EventMulticasterImpl<E> implements EventMulticaster<E> {
     public boolean removeListener(EventListener<E> eventListener) {
         return listeners.removeListener(eventListener);        
     }
-    
-    
 }

@@ -5,6 +5,7 @@ package org.limewire.listener;
  */
 public interface EventListener<E> {
     
-    public void handleEvent(E event);
+    // DO NOT CHANGE THIS METHOD NAME WITHOUT CHANGING EventListenerList's annotation inspection
+    public void handleEvent(E event); 
 
 }
