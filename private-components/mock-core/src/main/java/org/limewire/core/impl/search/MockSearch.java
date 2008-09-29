@@ -1,12 +1,9 @@
 package org.limewire.core.impl.search;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
@@ -16,7 +13,6 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
@@ -365,116 +361,7 @@ public class MockSearch implements Search {
         handleSponsoredResults(sponsored, sponsored2);
     }
 
-    private static class MockSearchResult implements Cloneable, SearchResult {
-
-        private List<RemoteHost> sources = new ArrayList<RemoteHost>();
-
-        private Map<PropertyKey, Object> properties =
-            new HashMap<PropertyKey, Object>();
-
-        private String description;
-        private String extension;
-        private String urn;
-        private Category resultType;
-        private long size;
-
-        public void addSource(String host) {
-            sources.add(new MockRemoteHost(host));
-        }
-
-        @Override
-        protected Object clone() throws CloneNotSupportedException {
-            MockSearchResult copy = (MockSearchResult) super.clone();
-
-            // Copy contents of all the collection fields so they aren't shared.
-
-            copy.sources = new ArrayList<RemoteHost>();
-            for (RemoteHost rh : sources) copy.sources.add(rh);
-
-            copy.properties = new HashMap<PropertyKey, Object>();
-            for (PropertyKey key : properties.keySet()) {
-                copy.properties.put(key, properties.get(key));
-            }
-
-            return copy;
-        }
-
-        @Override
-        public String getDescription() {
-            return description;
-        }
-
-        @Override
-        public String getFileExtension() {
-            return extension;
-        }
-
-        @Override
-        public Map<PropertyKey, Object> getProperties() {
-            return properties;
-        }
-
-        @Override
-        public Object getProperty(PropertyKey key) {
-             return getProperties().get(key);
-        }
-
-        @Override
-        public Category getCategory() {
-            return resultType;
-        }
-
-        @Override
-        public long getSize() {
-            return size;
-        }
-
-        @Override
-        public List<RemoteHost> getSources() {
-            return sources;
-        }
-
-        @Override
-        public String getUrn() {
-            return urn;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public void setExtension(String extension) {
-            this.extension = extension;
-        }
-
-        public void setProperty(PropertyKey key, Object value) {
-            properties.put(key, value);
-        }
-
-        public void setResultType(Category resultType) {
-            this.resultType = resultType;
-        }
-
-        public void setSize(long size) {
-            this.size = size;
-        }
-
-        public void setUrn(String urn) {
-            this.urn = urn;
-        }
-
-        @Override
-        public String toString() {
-            return getClass().getName() + ": " + getProperty(PropertyKey.NAME);
-        }
-
-        @Override
-        public boolean isSpam() {
-            return false;
-        }
-    }
-
-    private static class MockRemoteHost implements RemoteHost {
+    static class MockRemoteHost implements RemoteHost {
         private final String description;
 
         public MockRemoteHost(String description) {
