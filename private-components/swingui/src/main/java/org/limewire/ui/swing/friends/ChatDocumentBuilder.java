@@ -8,8 +8,6 @@ import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 
-import com.limegroup.gnutella.gui.I18n;
-
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
@@ -101,11 +99,11 @@ class ChatDocumentBuilder {
     private static void appendIsTypingMessage(StringBuilder builder, String senderName, ChatState chatState, boolean friendSignedOff) {
         String stateMessage = null;
         if (friendSignedOff) {
-            stateMessage = I18n.tr("{0} has signed off", senderName);
+            stateMessage = tr("{0} has signed off", senderName);
         } else if (chatState == ChatState.composing) {
-            stateMessage = I18n.tr("{0} is typing a message...", senderName);
+            stateMessage = tr("{0} is typing a message...", senderName);
         } else if (chatState == ChatState.paused) {
-            stateMessage = I18n.tr("{0} has entered text", senderName);
+            stateMessage = tr("{0} has entered text", senderName);
         } else {
             return;
         }
