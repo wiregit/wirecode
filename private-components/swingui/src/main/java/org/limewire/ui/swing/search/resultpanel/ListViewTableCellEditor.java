@@ -468,8 +468,16 @@ implements TableCellEditor, TableCellRenderer {
 
     private String getHideShowSimilarFilesButtonText() {
         int similarResultsCount = getSimilarResultsCount();
-        return hyperlinkText(isShowingSimilarResults() ? tr("Hide") : tr("Show"), 
-                " ", similarResultsCount, " ", tr(similarResultsCount > 1 ? "similar files" : "similar file"));
+        if (isShowingSimilarResults()) {
+            if (similarResultsCount > 1) {
+                return hyperlinkText(tr("Hide {0} similar files", similarResultsCount));
+            }
+            return hyperlinkText(tr("Hide 1 similar file"));
+        }
+        if (similarResultsCount > 1) {
+            return hyperlinkText(tr("Show {0} similar files", similarResultsCount));
+        }
+        return hyperlinkText(tr("Show 1 similar file"));
     }
 
     static class PropertyMatch {
