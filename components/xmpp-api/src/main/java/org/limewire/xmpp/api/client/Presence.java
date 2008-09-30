@@ -1,5 +1,7 @@
 package org.limewire.xmpp.api.client;
 
+import org.limewire.i18n.I18nMarker;
+
 /**
  * Represents xmpp <code><presence></code> messages.
  */
@@ -10,7 +12,22 @@ public interface Presence {
     }
     
     enum Mode {
-        chat, available, away, xa, dnd
+        chat(I18nMarker.marktr("Chatting")),
+        available(I18nMarker.marktr("Available")),
+        away(I18nMarker.marktr("Idle")),
+        xa(I18nMarker.marktr("Idle")),
+        dnd(I18nMarker.marktr("Away"));
+
+        private final String name;
+
+        Mode(String name) {
+            this.name = name;
+        }
+
+
+        public String toString() {
+            return name;
+        }
     }
     
     public static final int MIN_PRIORITY = -127;

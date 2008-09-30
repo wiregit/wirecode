@@ -79,7 +79,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     private Packet getPresenceForMode(Presence.Mode mode) {
         org.jivesoftware.smack.packet.Presence presence = new org.jivesoftware.smack.packet.Presence(
                 org.jivesoftware.smack.packet.Presence.Type.available);
-        presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.toString()));
+        presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.name()));
         return presence;
     }
 

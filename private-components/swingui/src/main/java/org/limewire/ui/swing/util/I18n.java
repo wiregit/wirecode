@@ -9,11 +9,11 @@ public class I18n {
     private static final String BASENAME = "org.limewire.i18n.Messages";
     private static org.xnap.commons.i18n.I18n i18n = I18nFactory.getI18n(I18n.class, BASENAME);
     
-    public static final void setLocale(Locale locale) {
+    public static void setLocale(Locale locale) {
        i18n.setResources(BASENAME, locale, ClassLoader.getSystemClassLoader());
     }    
     
-    public static final String tr(String text) {
+    public static String tr(String text) {
         return i18n.tr(text);
     }
 
@@ -26,16 +26,16 @@ public class I18n {
      * @param text the text to translate
      * @param locale the locale to look up the translation for
      */
-    public static final String trl(String text, Locale locale) {
+    public static String trl(String text, Locale locale) {
         org.xnap.commons.i18n.I18n i18n = I18nFactory.getI18n(I18n.class, BASENAME, locale, I18nFactory.NO_CACHE);
         return i18n.tr(text);
     }
 
-    public static final String tr(String text, Object... args) {
+    public static String tr(String text, Object... args) {
         return i18n.tr(text.replace("'", "''"), args);
     }
 
-    public static final String trc(String comment, String text) {
+    public static String trc(String comment, String text) {
         return i18n.trc(comment, text);
     }
 
@@ -47,11 +47,11 @@ public class I18n {
      * @param number
      * @return
      */
-    public static final String trn(String singularText, String pluralText, long number) {
+    public static String trn(String singularText, String pluralText, long number) {
         return trn(singularText, pluralText, number, number);
     }
 
-    public static final String trn(String singularText, String pluralText, long number, Object...args) {
+    public static String trn(String singularText, String pluralText, long number, Object...args) {
         return i18n.trn(singularText.replace("'", "''"), pluralText.replace("'", "''"), number, args);
     }
 

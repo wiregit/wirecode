@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.mainframe;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -24,8 +22,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
@@ -51,12 +47,16 @@ import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenMessageListener {
@@ -181,7 +181,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
         loggedIn = true;
-        updateStatus(FRIENDS, FriendsUtil.getIcon(Mode.available, icons), Mode.available.toString());
+        updateStatus(FRIENDS, FriendsUtil.getIcon(Mode.available, icons), I18n.tr(Mode.available.toString()));
         statusMenu.setEnabled(true);
     }
     
@@ -202,7 +202,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
     @EventSubscriber
     public void handleStatusChange(SelfAvailabilityUpdateEvent event) {
         Mode newMode = event.getNewMode();
-        updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons), newMode.toString());
+        updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons), I18n.tr(newMode.toString()));
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
                             (newMode == Mode.away || newMode == Mode.xa) ? awayPopupItem.getModel() : null;
         if (model != null) {
