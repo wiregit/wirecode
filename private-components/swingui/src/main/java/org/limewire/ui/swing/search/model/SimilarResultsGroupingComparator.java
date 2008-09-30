@@ -20,19 +20,20 @@ public abstract class SimilarResultsGroupingComparator implements Comparator<Vis
 
         boolean spam1 = o1.isSpam();
         boolean spam2 = o2.isSpam();
-        
-        //spam should go to the bottom of the list
-        int compare = new Boolean(spam1).compareTo(spam2);
-        
+
+        // spam should go to the bottom of the list
+        int compare = Boolean.valueOf(spam1).compareTo(Boolean.valueOf(spam2));
+
         if (compare == 0) {
-            //if both match, try our comparison algorithm
+            // if both match, try our comparison algorithm
             compare = doCompare(parent1, parent2);
         }
 
         if (compare == 0 && parent1 != parent2) {
-            //if both still match, and have differant parents, sort by the parents identity hashcode
-            compare = new Integer(System.identityHashCode(parent1)).compareTo(new Integer(System
-                    .identityHashCode(parent2)));
+            // if both still match, and have differant parents, sort by the
+            // parents identity hashcode
+            compare = Integer.valueOf(System.identityHashCode(parent1)).compareTo(
+                    Integer.valueOf(System.identityHashCode(parent2)));
         }
         return compare;
     }
