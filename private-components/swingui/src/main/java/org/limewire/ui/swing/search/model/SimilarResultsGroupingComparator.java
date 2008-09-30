@@ -21,10 +21,13 @@ public abstract class SimilarResultsGroupingComparator implements Comparator<Vis
         int compare = doCompare(parent1, parent2);
 
         if (compare == 0 && parent1 != parent2) {
+            compare = new Boolean(parent1.isSpam()).compareTo(parent2.isSpam());
+        }
+
+        if (compare == 0 && parent1 != parent2) {
             compare = new Integer(System.identityHashCode(parent1)).compareTo(new Integer(System
                     .identityHashCode(parent2)));
         }
-
         return compare;
     }
 
