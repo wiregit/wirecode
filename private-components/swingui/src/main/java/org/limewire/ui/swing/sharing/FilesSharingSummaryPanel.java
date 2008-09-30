@@ -16,10 +16,13 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.core.api.library.FileList;
-import org.limewire.core.api.library.LibraryListEventType;
-import org.limewire.core.api.library.LibraryListListener;
+import org.limewire.core.api.library.FriendShareListEvent;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -29,7 +32,10 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 
@@ -43,34 +49,9 @@ public class FilesSharingSummaryPanel extends JPanel {
     private final ShareButton friendButton;
           
     @Inject
-    FilesSharingSummaryPanel(final ShareListManager libraryManager, GnutellaSharePanel gnutellaSharePanel, 
-            FriendSharePanel friendSharePanel, Navigator navigator) {
+    FilesSharingSummaryPanel(final ShareListManager shareListManager, GnutellaSharePanel gnutellaSharePanel, 
+            FriendSharePanel friendSharePanel, Navigator navigator, ListenerSupport<FriendShareListEvent> shareSupport) {
         GuiUtils.assignResources(this);
-        
-        // TODO: This doesn't get events for adding friend shares.
-        // TODO: This is apparently giving events for new managed files,
-        //       not shared files.
-        libraryManager.addLibraryLisListener(new LibraryListListener() {
-            @Override
-            public void handleLibraryListEvent(LibraryListEventType type) {
-                switch(type) {
-                case FILE_ADDED:
-                case FILE_REMOVED:
-                    SwingUtils.invokeLater(new Runnable() {
-                        public void run() {
-                            gnutellaButton.setText(GuiUtils.toLocalizedInteger(libraryManager.getGnutellaShareList().size()));
-                            int size = 0;
-                            // TODO: This is wrong -- it double counts files shared with two friends
-                            for(FileList list : libraryManager.getAllFriendShareLists()) {
-                                size += list.size();
-                            }
-                            friendButton.setText(GuiUtils.toLocalizedInteger(size));
-                        }
-                    });
-                    break;
-                }
-            }
-        });
         
         setOpaque(false);
         title = new SectionHeading(I18n.tr("Files I'm Sharing"));
@@ -81,7 +62,7 @@ public class FilesSharingSummaryPanel extends JPanel {
         gnutellaButton.setName("FilesSharingSummaryPanel.gnutella");
         gnutellaButton.setText("0");
         gnutellaButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        new ShareDropTarget(gnutellaButton, libraryManager.getGnutellaShareList());
+        new ShareDropTarget(gnutellaButton, shareListManager.getGnutellaShareList());
         
         NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME, friendSharePanel);
         friendButton = new ShareButton(NavigatorUtils.getNavAction(friendNav));
@@ -94,6 +75,55 @@ public class FilesSharingSummaryPanel extends JPanel {
         add(title, "span, wrap");
         add(gnutellaButton, "alignx left");
         add(friendButton, "alignx right");
+        
+        shareListManager.getGnutellaShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>() {
+            @Override
+            public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                gnutellaButton.setText(GuiUtils.toLocalizedInteger(shareListManager.getGnutellaShareList().size()));                
+            }
+        });
+        shareSupport.addListener(new ShareListListener());
+    }
+    
+    // TODO: This is wrong -- it double counts files that are shared with two people.
+    private class ShareListListener implements EventListener<FriendShareListEvent>, ListEventListener<LocalFileItem> {
+        private int count = 0;
+        
+        @Override
+        @SwingEDTEvent
+        public void handleEvent(FriendShareListEvent event) {
+            LocalFileList list = event.getFileList();
+            EventList<LocalFileItem> model = list.getModel();
+            switch(event.getType()) {
+            case FRIEND_SHARE_LIST_ADDED:
+                updateCount(model.size());
+                model.addListEventListener(this);
+                break;
+            case FRIEND_SHARE_LIST_REMOVED:
+                updateCount(-model.size());
+                model.removeListEventListener(this);
+                break;
+            }
+        }
+        
+        @Override
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            int count = 0;
+            if(!listChanges.isReordering()) {
+                while(listChanges.next()) {
+                    switch(listChanges.getType()) {
+                    case ListEvent.INSERT: count++; break;
+                    case ListEvent.DELETE: count--; break;
+                    }
+                }
+            }
+            updateCount(count);
+        }
+        
+        private void updateCount(int incremenet) {
+            count += incremenet;
+            friendButton.setText(GuiUtils.toLocalizedInteger(count));
+        }
     }
     
     /**

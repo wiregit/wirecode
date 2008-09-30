@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.library.FriendRemoteLibraryEvent;
+import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
@@ -25,9 +26,13 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("friendLibraries")).to(FriendLibraryAutoCompleter.class);
         bind(FriendSearcher.class);
         
-        EventMulticaster<FriendRemoteLibraryEvent> friendMulticaster = new EventMulticasterImpl<FriendRemoteLibraryEvent>(); 
-        bind(new TypeLiteral<EventListener<FriendRemoteLibraryEvent>>(){}).toInstance(friendMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FriendRemoteLibraryEvent>>(){}).toInstance(friendMulticaster);
+        EventMulticaster<FriendRemoteLibraryEvent> friendLibraryMulticaster = new EventMulticasterImpl<FriendRemoteLibraryEvent>(); 
+        bind(new TypeLiteral<EventListener<FriendRemoteLibraryEvent>>(){}).toInstance(friendLibraryMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FriendRemoteLibraryEvent>>(){}).toInstance(friendLibraryMulticaster);
+        
+        EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
+        bind(new TypeLiteral<EventListener<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
     }
 
 }

@@ -9,12 +9,6 @@ import org.limewire.core.api.friend.Friend;
  */
 public interface ShareListManager {
 
-    // TODO: is this a listener for sharing or managing?
-    void addLibraryLisListener(LibraryListListener libraryListener);
-
-    // TODO: is this a listener for sharing or managing?
-    void removeLibraryListener(LibraryListListener libraryListener);
-
     LocalFileList getGnutellaShareList();
     
     Collection<LocalFileList> getAllFriendShareLists(); 

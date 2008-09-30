@@ -6,16 +6,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendRemoteLibraryEvent;
-import org.limewire.core.api.library.LibraryListEventType;
-import org.limewire.core.api.library.LibraryListListener;
+import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -44,46 +41,30 @@ import com.limegroup.gnutella.LocalFileDetailsFactory;
 class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibraryManager {
     
     private final FileManager fileManager;
-    private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
     
     private final LibraryFileList libraryFileList;
     private final GnutellaFileList gnutellaFileList;
     
     private final ConcurrentHashMap<String, LocalFileListImpl> friendLocalFileLists;
     
-    private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener; 
+    private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener;
+    private final EventListener<FriendShareListEvent> friendShareListEventListener;
     private final ConcurrentHashMap<String, RemoteFileListImpl> friendLibraryFileLists;
     private final LocalFileDetailsFactory detailsFactory;
 
     @Inject
-    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory, EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener) {
+    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory,
+            EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener,
+            EventListener<FriendShareListEvent> friendShareListEventListener) {
         this.fileManager = fileManager;
         this.detailsFactory = detailsFactory;
         this.friendLibraryEventListener = friendLibraryEventListener;
+        this.friendShareListEventListener = friendShareListEventListener;
 
         libraryFileList = new LibraryFileList(fileManager);
         gnutellaFileList = new GnutellaFileList(fileManager);
         friendLocalFileLists = new ConcurrentHashMap<String, LocalFileListImpl>();
         friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileListImpl>();
-    }
-
-    @Override
-    public void addLibraryLisListener(LibraryListListener libraryListener) {
-        Listener listener = new Listener(libraryListener);
-        listeners.add(listener);
-        fileManager.addFileEventListener(listener);
-    }
-    
-    @Override
-    public void removeLibraryListener(LibraryListListener libraryListener) {
-        for(Iterator<Listener> iter = listeners.iterator(); iter.hasNext(); ) {
-            Listener next = iter.next();
-            if(next.listener == libraryListener) {
-                iter.remove();
-                fileManager.removeFileEventListener(next);
-                break;
-            }
-        }
     }
     
     @Override
@@ -109,6 +90,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         LocalFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
         if(existing == null) {
             newList.loadSavedFiles();
+            friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED, newList, friend));
             return newList;
         } else {
             return existing;
@@ -123,7 +105,14 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     @Override
     public void removeFriendShareList(Friend friend) {
         fileManager.removeFriendFileList(friend.getId());
+        
         // TODO: Should we clean up friendLocalFileLists?
+        //       (is there a reason the old code didn't do this?)        
+        LocalFileListImpl list = friendLocalFileLists.remove(friend.getId());
+        if(list != null) {
+            friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED, list, friend));
+            list.dispose();
+        }
     }
     
     //////////////////////////////////////////////////////
@@ -149,26 +138,6 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         if(list != null) {
             friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_REMOVED, list, friend));
             list.dispose();
-        }
-    }
-    
-    private static class Listener implements FileEventListener {
-        private final LibraryListListener listener;
-        
-        Listener(LibraryListListener listener) {
-            this.listener = listener;
-        }
-        
-        @Override
-        public void handleFileEvent(FileManagerEvent evt) {
-            switch(evt.getType()) {
-            case REMOVE_FILE:
-                listener.handleLibraryListEvent(LibraryListEventType.FILE_REMOVED);
-                break;
-            case ADD_FILE:
-                listener.handleLibraryListEvent(LibraryListEventType.FILE_ADDED);
-                break;
-            }
         }
     }
     
@@ -340,7 +309,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     
     private abstract class LocalFileListImpl implements LocalFileList {
         protected final EventList<LocalFileItem> eventList;
-        private EventList<LocalFileItem> swingEventList;
+        protected volatile TransformedList<LocalFileItem, LocalFileItem> swingEventList;
         
         LocalFileListImpl() {
             eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
@@ -358,6 +327,12 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
                 swingEventList = GlazedListsSwing.swingThreadProxyList(eventList);
             }
             return swingEventList;
+        }
+        
+        void dispose() {
+            if(swingEventList != null) {
+                swingEventList.dispose();
+            }
         }
         
         
