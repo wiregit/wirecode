@@ -22,16 +22,16 @@ import org.limewire.ui.swing.util.I18n;
 public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     
     @Resource
-    Icon downIcon;
+    private Icon downIcon;
     
     private LibraryButton libraryButton;
     private JButton shareButton;
     
-    private SharingAddAction musicAction;
-    private SharingAddAction videoAction;
-    private SharingAddAction imageAction;
+    private final SharingAddAction musicAction;
+    private final SharingAddAction videoAction;
+    private final SharingAddAction imageAction;
     
-    private JPopupMenu popup;
+    private final JPopupMenu popup;
     
     public FriendSharingHeaderPanel(Icon icon, String staticText, String name,
             ViewSelectionPanel viewPanel, LibraryManager libraryManager) {
@@ -39,10 +39,6 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
                 
         GuiUtils.assignResources(this);
         
-        createMenu(libraryManager);
-    }
-    
-    private void createMenu(LibraryManager libraryManager) {
         musicAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.AUDIO);
         videoAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.VIDEO);
         imageAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.IMAGE);
@@ -82,11 +78,7 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     @Override
     public void setEnabled(boolean value) {
         super.setEnabled(value);
-        if(value) {
-            shareButton.setVisible(true);
-        } else {
-            shareButton.setVisible(false);
-        }
+        shareButton.setEnabled(value);
     }
     
     @Override

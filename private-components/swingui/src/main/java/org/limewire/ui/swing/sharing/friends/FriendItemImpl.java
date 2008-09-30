@@ -4,18 +4,16 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileItem>{
+public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileItem> {
 
     private final Friend friend;
     private final EventList<LocalFileItem> eventList;
-    private FileList friendLibraryList;
     
     private int size = 0;
     
@@ -41,7 +39,7 @@ public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileIt
     }
 
     @Override
-    public int size() {
+    public int getShareListSize() {
         return eventList.size();
     }
 
@@ -51,22 +49,7 @@ public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileIt
         if(newSize != size) {
             int oldSize = size;
             this.size = newSize;
-            support.firePropertyChange("size", oldSize, newSize);
+            support.firePropertyChange("shareListSize", oldSize, newSize);
         }
-    }
-
-    @Override
-    public FileList getLibrary() {
-        return friendLibraryList;
-    }
-
-    @Override
-    public boolean hasLibrary() {
-        return friendLibraryList != null;
-    }
-
-    @Override
-    public void setLibrary(FileList libraryFileList) {
-        this.friendLibraryList = libraryFileList;
     }
 }

@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.friends.FriendItem;
@@ -24,32 +25,31 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
 
     private int popupRow = -1;
     
-    protected JPopupMenu popupMenu;
-    private JMenuItem viewLibraryItem;
-    private JMenuItem musicShareAllItem;
-    private JMenuItem videoShareAllItem;
-    private JMenuItem imageShareAllItem;
-    private JMenuItem unshareAllItem;
+    private final JPopupMenu popupMenu;
+    private final JMenuItem viewLibraryItem;
+    private final JMenuItem musicShareAllItem;
+    private final JMenuItem videoShareAllItem;
+    private final JMenuItem imageShareAllItem;
+    private final JMenuItem unshareAllItem;
     
-    private FriendNameTable table;
+    private final FriendNameTable table;
     private final FriendSharingActionHandler actionHandler;
-    private final ShareListManager libraryManager;
+    private final RemoteLibraryManager remoteLibraryManager;
+    private final ShareListManager shareListManager;
     
-    protected final MenuListener menuListener;
+    private final MenuListener menuListener;
 
     private FriendItem currentFriend;
     private LocalFileList friendFileList;
     
-    public FriendSharingPopupHandler(FriendNameTable table, FriendSharingActionHandler handler, ShareListManager libraryManager) {
+    public FriendSharingPopupHandler(FriendNameTable table, FriendSharingActionHandler handler,
+            RemoteLibraryManager remoteLibraryManager, ShareListManager shareListManager) {
         this.table = table;
         this.actionHandler = handler;
-        this.libraryManager = libraryManager;
+        this.shareListManager = shareListManager;
+        this.remoteLibraryManager = remoteLibraryManager;
         this.menuListener = new MenuListener();
         
-        initialize();
-    }
-    
-    protected void initialize() {
         popupMenu = new JPopupMenu();
         
         viewLibraryItem = new JMenuItem(I18n.tr("View Library"));
@@ -92,18 +92,10 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
         
         EventTableModel<FriendItem> model = table.getEventTableModel();
         currentFriend = model.getElementAt(popupRow);
-        if(currentFriend.size() > 0) {
-            unshareAllItem.setEnabled(true);
-        } else {
-            unshareAllItem.setEnabled(false);
-        }
-        if(currentFriend.hasLibrary()) {
-            viewLibraryItem.setEnabled(true);
-        } else {
-            viewLibraryItem.setEnabled(false);
-        }
+        friendFileList = shareListManager.getOrCreateFriendShareList(currentFriend.getFriend());
         
-        friendFileList = libraryManager.getOrCreateFriendShareList(currentFriend.getFriend());
+        unshareAllItem.setEnabled(currentFriend.getShareListSize() > 0);
+        viewLibraryItem.setEnabled(remoteLibraryManager.hasFriendLibrary(currentFriend.getFriend()));
         
         popupMenu.show(component, x, y);
     }

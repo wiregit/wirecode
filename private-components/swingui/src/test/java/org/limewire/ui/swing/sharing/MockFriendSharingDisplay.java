@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.sharing;
 
+import org.limewire.core.api.friend.Friend;
+
 public class MockFriendSharingDisplay implements FriendSharingDisplay {
 
     @Override
@@ -9,13 +11,13 @@ public class MockFriendSharingDisplay implements FriendSharingDisplay {
     }
 
     @Override
-    public void selectFriendInFileSharingList(String friendName) {
+    public void selectFriendInFileSharingList(Friend friend) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void selectFriendLibrary(String friendName) {
+    public void selectFriendLibrary(Friend friend) {
         // TODO Auto-generated method stub
         
     }

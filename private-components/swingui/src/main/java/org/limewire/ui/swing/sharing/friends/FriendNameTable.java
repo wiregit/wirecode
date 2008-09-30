@@ -10,6 +10,7 @@ import javax.swing.ListSelectionModel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.menu.FriendSharingActionHandler;
@@ -32,7 +33,7 @@ public class FriendNameTable extends JXTable {
     private EventTableModel<FriendItem> tableModel;
     
     public FriendNameTable(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat,
-            LibraryManager libraryManager, ShareListManager shareListManager, Navigator navigator) {
+            RemoteLibraryManager remoteLibraryManager, LibraryManager libraryManager, ShareListManager shareListManager, Navigator navigator) {
         GuiUtils.assignResources(this);
         
         SortedList<FriendItem> friendList = new SortedList<FriendItem>(eventList, new FriendComparator());       
@@ -53,7 +54,7 @@ public class FriendNameTable extends JXTable {
         getColumn(1).setWidth(30);
         getColumn(1).setPreferredWidth(30);
         
-        final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), shareListManager);
+        final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), remoteLibraryManager, shareListManager);
         
         addMouseListener(new MouseAdapter() {
             
@@ -90,11 +91,11 @@ public class FriendNameTable extends JXTable {
     private static class FriendComparator implements Comparator<FriendItem> {
         @Override
         public int compare(FriendItem o1, FriendItem o2) {
-            if(o1.size() > 0 && o2.size() > 0) { 
+            if(o1.getShareListSize() > 0 && o2.getShareListSize() > 0) { 
                 return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
-            } else if(o1.size() > 0 && o2.size() <= 0) {
+            } else if(o1.getShareListSize() > 0 && o2.getShareListSize() <= 0) {
                 return -1;
-            } else if(o1.size() <= 0 && o2.size() > 0) {
+            } else if(o1.getShareListSize() <= 0 && o2.getShareListSize() > 0) {
                 return 1;
             } else {
                 return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());

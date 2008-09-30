@@ -829,7 +829,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
             if (chatFriend != null) {
                 //minimize chat
                 new DisplayFriendsEvent(false).publish();
-                friendSharing.selectFriendLibrary(chatFriend.getName());
+                friendSharing.selectFriendLibrary(chatFriend.getFriend());
             }
         }
     }
@@ -845,7 +845,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
             new DisplayFriendsEvent(false).publish();
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                friendSharing.selectFriendInFileSharingList(chatFriend.getID());
+                friendSharing.selectFriendInFileSharingList(chatFriend.getFriend());
             }
         }
 

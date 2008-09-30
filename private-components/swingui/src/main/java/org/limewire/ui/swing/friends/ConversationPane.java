@@ -260,7 +260,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            friendSharingDisplay.selectFriendLibrary(chatFriend.getName());            
+            friendSharingDisplay.selectFriendLibrary(chatFriend.getFriend());            
         }
     }
 

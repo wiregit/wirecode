@@ -6,6 +6,8 @@ import org.limewire.core.api.friend.Friend;
 public interface RemoteLibraryManager {
 
     RemoteFileList getOrCreateFriendLibrary(Friend friend);
+    
+    boolean hasFriendLibrary(Friend friend);
 
     void removeFriendLibrary(Friend friend);
     

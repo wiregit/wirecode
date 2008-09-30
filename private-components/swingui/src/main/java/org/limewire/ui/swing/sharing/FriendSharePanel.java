@@ -19,9 +19,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
@@ -94,6 +96,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     
     @Inject
     public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager,
+            RemoteLibraryManager remoteLibraryManager,
             SharingFriendEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager,
             ThumbnailManager thumbnailManager) {        
         GuiUtils.assignResources(this); 
@@ -111,7 +114,8 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
 
         Connector<FriendItem> connector = GlazedLists.beanConnector(FriendItem.class); 
         friendsList = new ObservableElementList<FriendItem>(new BasicEventList<FriendItem>(), connector);               
-        friendTable = new FriendNameTable(friendsList, new FriendTableFormat(), libraryManager, shareListManager, navigator);
+        friendTable = new FriendNameTable(friendsList, new FriendTableFormat(),
+                remoteLibraryManager, libraryManager, shareListManager, navigator);
         
         headerPanel = createHeader(cardPanel);
 
@@ -326,23 +330,16 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     }
     
     /**
-     * If the friend name exists in the list, this selects
+     * If the friend exists in the list, this selects
      * that friend in the table and shows the appropriate 
      * information on the right.
-     * 
-     * @param name - friend name
      */
-    public void selectFriend(String name) {
+    public void selectFriend(Friend friend) {
         for(int i = 0; i < table.getModel().getRowCount(); i++) {
             FriendItem item = (FriendItem) table.getModel().getValueAt(i, 0);
-            if(item.getFriend().getId().equals(name)) {
-                final int index = i;
-                SwingUtils.invokeLater(new Runnable(){
-                    public void run() {
-                        table.setRowSelectionInterval(index, index);                        
-                    }
-                });
-                return;
+            if(item.getFriend().getId().equals(friend.getId())) {
+                table.setRowSelectionInterval(i, i);
+                break;
             }
         }
     }

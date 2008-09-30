@@ -46,7 +46,7 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
 
         FriendItem item = (FriendItem) value;
         // sharing something
-        if(item.size() > 0) {
+        if(item.getShareListSize() > 0) {
             setBorder(emptyBorder);
             FontUtils.changeStyle(this, Font.BOLD);
             setOpaque(true);
@@ -56,7 +56,7 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
                 setBackground(onlineColor);
         } else { // not sharing something
             // set the border
-            if(row > 0 && ((FriendItem)table.getModel().getValueAt(row - 1, 0)).size() > 0)
+            if(row > 0 && ((FriendItem)table.getModel().getValueAt(row - 1, 0)).getShareListSize() > 0)
                 setBorder(compoundBorder);
             else
                 setBorder(emptyBorder);
@@ -74,8 +74,8 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
             setText(item.getFriend().getRenderName());
         } else {
             setHorizontalAlignment(RIGHT);
-            if( item.size() > 0) 
-                setText(Integer.toString(item.size()));
+            if( item.getShareListSize() > 0) 
+                setText(Integer.toString(item.getShareListSize()));
             else
                 setText("");
         }

@@ -135,15 +135,13 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
     @Override
     public void removeFriendShareList(Friend name) {
         // TODO Auto-generated method stub
-        
-    }
+    }    
     
     @Override
     public LocalFileList getFriendShareList(Friend friend) {
         // TODO Auto-generated method stub
         return null;
     }
-    
     
     ///////////////////////////////////////////////
     //  Accessors for Friend Libraries
@@ -156,5 +154,11 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
 
     @Override
     public void removeFriendLibrary(Friend id) {
+    }
+    
+    @Override
+    public boolean hasFriendLibrary(Friend friend) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

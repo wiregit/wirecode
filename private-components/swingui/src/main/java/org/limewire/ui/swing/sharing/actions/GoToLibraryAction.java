@@ -4,20 +4,24 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.Navigator;
 
 public class GoToLibraryAction extends AbstractAction {
     
-    private ShareListManager libraryManager;
+    private final Friend friend;
+    private final Navigator navigator;
     
-    public GoToLibraryAction(ShareListManager libraryManager) {
-        this.libraryManager = libraryManager;
+    public GoToLibraryAction(Navigator navigator, Friend friend) {
+        this.navigator = navigator;
+        this.friend = friend;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-//        if(libraryManager.containsBuddyLibrary("")) {
-//            //TODO: do something here
-//        }
+        NavItem navItem = navigator.getNavItem(NavCategory.LIBRARY, friend.getId());
+        navItem.select();
     }
 }

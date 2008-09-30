@@ -6,12 +6,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
-
-import ca.odell.glazedlists.FilterList;
 
 public class SharingAddAllAction extends AbstractAction {
 
@@ -55,40 +51,13 @@ public class SharingAddAllAction extends AbstractAction {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(selectMusic) {
-                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(Category.AUDIO));
-                    try {
-                        audio.getReadWriteLock().readLock().lock();
-                        for(LocalFileItem item : audio) {
-                            currentList.addFile(item.getFile());
-                        }
-                    } finally {
-                        audio.getReadWriteLock().readLock().unlock();
-                    }
-                    audio.dispose();
+                    new SharingAddAction(currentList, myLibraryList, Category.AUDIO).actionPerformed(null);
                 }
                 if(selectVideo) {
-                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(Category.VIDEO));
-                    try {
-                        video.getReadWriteLock().readLock().lock();
-                        for(LocalFileItem item : video) {
-                            currentList.addFile(item.getFile());
-                        }
-                    } finally {
-                        video.getReadWriteLock().readLock().unlock();
-                    }
-                    video.dispose();
+                    new SharingAddAction(currentList, myLibraryList, Category.VIDEO).actionPerformed(null);
                 }
                 if(selectImage) {
-                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( myLibraryList.getModel(), new CategoryFilter(Category.IMAGE));
-                    try {
-                        image.getReadWriteLock().readLock().lock();
-                        for(LocalFileItem item : image) {
-                            currentList.addFile(item.getFile());
-                        }
-                    } finally {
-                        image.getReadWriteLock().readLock().unlock();
-                    }
-                    image.dispose();
+                    new SharingAddAction(currentList, myLibraryList, Category.IMAGE).actionPerformed(null);
                 }
             }
         });

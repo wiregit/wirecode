@@ -47,7 +47,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     
     private final ConcurrentHashMap<String, LocalFileListImpl> friendLocalFileLists;
     
-    private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener;
+    private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener; 
     private final EventListener<FriendShareListEvent> friendShareListEventListener;
     private final ConcurrentHashMap<String, RemoteFileListImpl> friendLibraryFileLists;
     private final LocalFileDetailsFactory detailsFactory;
@@ -66,7 +66,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         friendLocalFileLists = new ConcurrentHashMap<String, LocalFileListImpl>();
         friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileListImpl>();
     }
-    
+
     @Override
     public LocalFileList getLibraryManagedList() {
         return libraryFileList;
@@ -96,13 +96,13 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
             return existing;
         }
     }
-    
+
     @Override
     public LocalFileList getFriendShareList(Friend friend) {
         return friendLocalFileLists.get(friend.getId());
     }
 
-    @Override
+    @Override    
     public void removeFriendShareList(Friend friend) {
         fileManager.removeFriendFileList(friend.getId());
         
@@ -130,6 +130,11 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         } else {
             return existing;
         }
+    }
+    
+    @Override
+    public boolean hasFriendLibrary(Friend friend) {
+        return friendLibraryFileLists.get(friend.getId()) != null;
     }
     
     @Override

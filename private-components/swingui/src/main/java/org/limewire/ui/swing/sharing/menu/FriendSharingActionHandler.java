@@ -2,16 +2,12 @@ package org.limewire.ui.swing.sharing.menu;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.sharing.actions.GoToLibraryAction;
+import org.limewire.ui.swing.sharing.actions.SharingAddAction;
 import org.limewire.ui.swing.sharing.friends.FriendItem;
-import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
-
-import ca.odell.glazedlists.FilterList;
 
 public class FriendSharingActionHandler {
     
@@ -33,45 +29,15 @@ public class FriendSharingActionHandler {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {
-                    NavItem navItem = navigator.getNavItem(NavCategory.LIBRARY, item.getFriend().getId());
-                    navItem.select();
+                    new GoToLibraryAction(navigator, item.getFriend()).actionPerformed(null);
                 } else if(actionCommand == SHARE_ALL_VIDEO) {
-                    FilterList<LocalFileItem> video = new FilterList<LocalFileItem>( libraryManager.getLibraryManagedList().getSwingModel(), new CategoryFilter(Category.VIDEO));
-                    try {
-                        video.getReadWriteLock().readLock().lock();
-                        for(LocalFileItem fileItem : video) {
-                            fileList.addFile(fileItem.getFile());
-                        }
-                    } finally {
-                        video.getReadWriteLock().readLock().unlock();
-                    }
-                    video.dispose();
+                    new SharingAddAction(fileList, libraryManager.getLibraryManagedList(), Category.VIDEO).actionPerformed(null);
                 } else if(actionCommand == SHARE_ALL_AUDIO) {
-                    FilterList<LocalFileItem> audio = new FilterList<LocalFileItem>( libraryManager.getLibraryManagedList().getSwingModel(), new CategoryFilter(Category.AUDIO));
-                    try {
-                        audio.getReadWriteLock().readLock().lock();
-                        for(LocalFileItem fileItem : audio) {
-                            fileList.addFile(fileItem.getFile());
-                        }
-                    } finally {
-                        audio.getReadWriteLock().readLock().unlock();
-                    }
-                    audio.dispose();
+                    new SharingAddAction(fileList, libraryManager.getLibraryManagedList(), Category.AUDIO).actionPerformed(null);
                 } else if(actionCommand == SHARE_ALL_IMAGE) {
-                    FilterList<LocalFileItem> image = new FilterList<LocalFileItem>( libraryManager.getLibraryManagedList().getSwingModel(), new CategoryFilter(Category.IMAGE));                 
-                    
-                    try {
-                        image.getReadWriteLock().readLock().lock();
-                        for(LocalFileItem fileItem : image) {
-                            fileList.addFile(fileItem.getFile());
-                        }
-                    } finally {
-                        image.getReadWriteLock().readLock().unlock();
-                    }
-                    image.dispose();
+                    new SharingAddAction(fileList, libraryManager.getLibraryManagedList(), Category.IMAGE).actionPerformed(null);
                 } else if(actionCommand == UNSHARE_ALL) {
-//                    fileList.clear();
-                    //TODO: implement this correctly;
+                    throw new UnsupportedOperationException("TODO: Implement Me");
                 }
             }
         });

@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.sharing;
 
+import org.limewire.core.api.friend.Friend;
+
 public interface FriendSharingDisplay {
 
     /**
@@ -8,14 +10,12 @@ public interface FriendSharingDisplay {
     public void displaySharing();
 
     /**
-     * Displays the "All Friends" friend sharing panel, and selects the friend whose id matches the supplied parameter
-     * @param id
+     * Displays the "All Friends" friend sharing panel, and selects the friend.
      */
-    public void selectFriendInFileSharingList(String id);
+    public void selectFriendInFileSharingList(Friend friend);
     
     /**
-     * Displays the library for the supplied friend name.
-     * @param friendName The name of the friend whose library is to be viewed.  Should use friend ID if name is null.
+     * Displays the library for the supplied friend.
      */
-    public void selectFriendLibrary(String friendName);
+    public void selectFriendLibrary(Friend friend);
 }

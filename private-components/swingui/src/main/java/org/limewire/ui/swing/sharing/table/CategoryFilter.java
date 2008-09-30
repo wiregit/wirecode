@@ -10,7 +10,7 @@ import ca.odell.glazedlists.matchers.Matcher;
  * one category type.
  */
 public class CategoryFilter implements Matcher<FileItem>{
-    private Category category;
+    private final Category category;
     
     public CategoryFilter(Category category) {
         this.category = category;

@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.sharing;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
@@ -23,19 +24,19 @@ public class FriendSharingDisplayImpl implements FriendSharingDisplay {
         displayNavigableItem(NavCategory.SHARING, FriendSharePanel.NAME);
     }
 
-    private void displayNavigableItem(NavCategory navCategory, String name) {
-        NavItem item = navigator.getNavItem(navCategory, name);
+    private void displayNavigableItem(NavCategory navCategory, String id) {
+        NavItem item = navigator.getNavItem(navCategory, id);
         item.select();
     }
     
     @Override
-    public void selectFriendInFileSharingList(String friendId) {
+    public void selectFriendInFileSharingList(Friend friend) {
         displaySharing();
-        friendSharePanel.selectFriend(friendId);
+        friendSharePanel.selectFriend(friend);
     }
 
     @Override
-    public void selectFriendLibrary(String friendName) {
-        displayNavigableItem(NavCategory.LIBRARY, friendName);
+    public void selectFriendLibrary(Friend friend) {
+        displayNavigableItem(NavCategory.LIBRARY, friend.getId());
     }
 }
