@@ -21,6 +21,8 @@ import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
@@ -41,6 +43,8 @@ import com.limegroup.gnutella.LocalFileDetailsFactory;
 
 @Singleton
 class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibraryManager {
+    
+    private static final Log LOG = LogFactory.getLog(LibraryManagerImpl.class);
     
     private final FileManager fileManager;
     
@@ -64,13 +68,11 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         this.detailsFactory = detailsFactory;
         this.friendLibraryEventListener = friendLibraryEventListener;
         this.friendShareListEventListener = friendShareListEventListener;
-
-        combinedFriendShareLists = new CombinedFriendShareList();
-        
-        libraryFileList = new LibraryFileList(fileManager);
-        gnutellaFileList = new GnutellaFileList(fileManager);
-        friendLocalFileLists = new ConcurrentHashMap<String, LocalFileListImpl>();
-        friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileListImpl>();
+        this.combinedFriendShareLists = new CombinedFriendShareList();
+        this.libraryFileList = new LibraryFileList(fileManager);
+        this.gnutellaFileList = new GnutellaFileList(fileManager);
+        this.friendLocalFileLists = new ConcurrentHashMap<String, LocalFileListImpl>();
+        this.friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileListImpl>();
     }
 
     @Override
@@ -90,13 +92,18 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     
     @Override
     public LocalFileList getOrCreateFriendShareList(Friend friend) {
+        LOG.debugf("get|Create library for friend {0}", friend.getId());
         FriendFileListImpl newList = new FriendFileListImpl(fileManager, friend.getId());        
         LocalFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
+        
         if(existing == null) {
-            newList.loadSavedFiles();
+            LOG.debugf("No existing library for friend {0}", friend.getId());
+            newList.commit();
             friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED, newList, friend));
             return newList;
         } else {
+            LOG.debugf("Already an existing lib for friend {0}", friend.getId());
+            newList.dispose();
             return existing;
         }
     }
@@ -129,9 +136,11 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         RemoteFileListImpl existing = friendLibraryFileLists.putIfAbsent(friend.getId(), newList);
         
         if(existing == null) {
+            newList.commit();
             friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_ADDED, newList, friend));
             return newList;
         } else {
+            newList.dispose();
             return existing;
         }
     }
@@ -180,7 +189,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         public void addEvent(FileDesc fileDesc) {
             LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
             lookup.put(fileDesc.getFile(), newItem);
-            eventList.add(newItem);
+            threadSafeList.add(newItem);
         }
 
         @Override
@@ -189,14 +198,14 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
             LocalFileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
             lookup.put(newDesc.getFile(), newItem);
             
-            eventList.remove(old);
-            eventList.add(newItem);
+            threadSafeList.remove(old);
+            threadSafeList.add(newItem);
         }
 
         @Override
         public void removeEvent(FileDesc fileDesc) {
             FileItem old = lookup.remove(fileDesc.getFile());
-            eventList.remove(old);
+            threadSafeList.remove(old);
         }
 
         @Override
@@ -209,34 +218,16 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     private class FriendFileListImpl extends LocalFileListImpl implements FileListListener {
 
         private final FileManager fileManager;
-        private final String name;
-        
+        private final String name;        
         private final Map<File, FileItem> lookup;
+        private volatile boolean committed = false;
         
         FriendFileListImpl(FileManager fileManager, String name) {
-            super(combinedFriendShareLists.createAndAddMemberList());
+            super(combinedFriendShareLists.createMemberList());
             
             this.fileManager = fileManager;
             this.name = name;
-                     
-            this.fileManager.getOrCreateFriendFileList(name).addFileListListener(this);
-            lookup = new ConcurrentHashMap<File, FileItem>();
-        }
-        
-        //TODO: reexamine this. Needs to be loaded on a seperate thread and maybe cleaned up somehow
-        void loadSavedFiles() {
-            com.limegroup.gnutella.FileList fileList =
-                fileManager.getFriendFileList(name);  
-
-              synchronized (fileList.getLock()) {
-                  Iterator<FileDesc> iter = fileList.iterator();
-                  while(iter.hasNext()) {
-                      FileDesc fileDesc = iter.next();
-                      LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
-                      lookup.put(fileDesc.getFile(), newItem);
-                      eventList.add(newItem);
-                  }
-              }
+            this.lookup = new ConcurrentHashMap<File, FileItem>();
         }
         
         @Override
@@ -258,7 +249,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         public void addEvent(FileDesc fileDesc) {
             LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
             lookup.put(fileDesc.getFile(), newItem);
-            eventList.add(newItem);
+            threadSafeList.add(newItem);
         }
 
         @Override
@@ -267,14 +258,43 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
             LocalFileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
             lookup.put(newDesc.getFile(), newItem);
 
-            eventList.remove(oldItem);
-            eventList.add(newItem);
+            threadSafeList.remove(oldItem);
+            threadSafeList.add(newItem);
         }
 
         @Override
         public void removeEvent(FileDesc fileDesc) {
             FileItem old = lookup.remove(fileDesc.getFile());
-            eventList.remove(old);
+            threadSafeList.remove(old);
+        }
+        
+        @Override
+        void dispose() {
+            super.dispose();
+            if(committed) {
+                combinedFriendShareLists.removeMemberList(baseList);
+                fileManager.getOrCreateFriendFileList(name).removeFileListListener(this);
+            }
+        }
+        
+        /* Commits to using this list. */
+        void commit() {
+            committed = true;
+            fileManager.getOrCreateFriendFileList(name).addFileListListener(this);
+            combinedFriendShareLists.addMemberList(baseList);
+            
+            com.limegroup.gnutella.FileList fileList =
+                fileManager.getFriendFileList(name);  
+
+              synchronized (fileList.getLock()) {
+                  Iterator<FileDesc> iter = fileList.iterator();
+                  while(iter.hasNext()) {
+                      FileDesc fileDesc = iter.next();
+                      LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
+                      lookup.put(fileDesc.getFile(), newItem);
+                      threadSafeList.add(newItem);
+                  }
+              }
         }
     }
     
@@ -303,13 +323,13 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         public void handleFileEvent(FileManagerEvent evt) {
             switch(evt.getType()) {
             case ADD_FILE:
-                eventList.add(new CoreLocalFileItem(evt.getNewFileDesc(), detailsFactory));
+                threadSafeList.add(new CoreLocalFileItem(evt.getNewFileDesc(), detailsFactory));
                 break;
             case REMOVE_FILE:
                 remove(evt.getNewFile());
                 break;
             case FILEMANAGER_LOAD_STARTED:
-                eventList.clear();
+                threadSafeList.clear();
                 break;
             }
         }
@@ -321,23 +341,25 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     }
     
     private abstract class LocalFileListImpl implements LocalFileList {
-        protected final EventList<LocalFileItem> eventList;
+        protected final EventList<LocalFileItem> baseList;
+        protected final TransformedList<LocalFileItem, LocalFileItem> threadSafeList;
         protected volatile TransformedList<LocalFileItem, LocalFileItem> swingEventList;
         
         LocalFileListImpl(EventList<LocalFileItem> eventList) {
-            this.eventList = GlazedLists.threadSafeList(eventList);
+            this.baseList = eventList;
+            this.threadSafeList = GlazedLists.threadSafeList(eventList);
         }
         
         @Override
         public EventList<LocalFileItem> getModel() {
-            return eventList;
+            return threadSafeList;
         }
         
         @Override
         public EventList<LocalFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingEventList == null) {
-                swingEventList = GlazedListsSwing.swingThreadProxyList(eventList);
+                swingEventList = GlazedListsSwing.swingThreadProxyList(threadSafeList);
             }
             return swingEventList;
         }
@@ -346,23 +368,20 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
             if(swingEventList != null) {
                 swingEventList.dispose();
             }
-            
-            combinedFriendShareLists.removeMemberList(eventList);
-        }
-        
+            threadSafeList.dispose();
+        }        
         
         void remove(File file) {
-            
         }
         
         @Override
         public int size() {
-            return eventList.size();
+            return threadSafeList.size();
         }
     }
     
     private abstract class RemoteFileListImpl implements RemoteFileList {
-        protected final EventList<RemoteFileItem> eventList;
+        protected final TransformedList<RemoteFileItem, RemoteFileItem> eventList;
         protected volatile TransformedList<RemoteFileItem, RemoteFileItem> swingEventList;
         
         RemoteFileListImpl() {
@@ -387,12 +406,16 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
             if(swingEventList != null) {
                 swingEventList.dispose();
             }
-        }
-        
+            eventList.dispose();
+        }        
         
         @Override
         public int size() {
             return eventList.size();
+        }
+        
+        void commit() {
+            // Add things here after we guarantee we want to use this list.
         }
     }
     
@@ -445,15 +468,17 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
             }
         }
 
-        public EventList<LocalFileItem> createAndAddMemberList() {
-            EventList<LocalFileItem> list = compositeList.createMemberList();
+        public EventList<LocalFileItem> createMemberList() {
+            return compositeList.createMemberList();
+        }
+        
+        public void addMemberList(EventList<LocalFileItem> eventList) {
             compositeList.getReadWriteLock().writeLock().lock();
             try {
-                compositeList.addMemberList(list);
+                compositeList.addMemberList(eventList);
             } finally {
                 compositeList.getReadWriteLock().writeLock().unlock();    
             }
-            return list;
         }
 
         @Override

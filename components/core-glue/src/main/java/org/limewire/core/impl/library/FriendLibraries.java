@@ -41,12 +41,12 @@ public class FriendLibraries {
                 case FRIEND_LIBRARY_ADDED:
                     LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);               
                     if(libraries.putIfAbsent(event.getFriend().getId(), trie) == null) {
-                        LOG.debugf("adding friend library " + event.getFriend() + " to index");
+                        LOG.debugf("adding friend library {0} to index", event.getFriend());
                         event.getFileList().getModel().addListEventListener(new LibraryListener(trie));
                     }
                     break;
                 case FRIEND_LIBRARY_REMOVED:
-                    LOG.debugf("removing friend library " + event.getFriend() + " from index");
+                    LOG.debugf("removing friend library {0} from index", event.getFriend());
                     libraries.remove(event.getFriend().getId());
                 }
             }

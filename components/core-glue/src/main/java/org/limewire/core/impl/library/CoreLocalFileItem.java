@@ -259,4 +259,9 @@ public class CoreLocalFileItem implements LocalFileItem {
         return getFile().equals(((CoreLocalFileItem) obj).getFile());
     }
     
+    @Override
+    public String toString() {
+        return "CoreLocalFileItem for: " + fileDesc;
+    }
+    
 }

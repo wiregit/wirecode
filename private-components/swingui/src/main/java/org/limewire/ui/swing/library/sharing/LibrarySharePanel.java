@@ -47,12 +47,13 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
@@ -60,7 +61,6 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -527,17 +527,13 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     
     @Override
+    @SwingEDTEvent
     public void handleEvent(final RosterEvent event) {
-        SwingUtils.invokeLater(new Runnable() {
-            public void run() {
-                if(event.getType().equals(User.EventType.USER_ADDED)) {              
-                    addFriend(new SharingTarget(event.getSource()));
-                } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-                    removeFriend(new SharingTarget(event.getSource()));
-                } //else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-//                }
-            }
-        });
+        if(event.getType().equals(User.EventType.USER_ADDED)) {              
+            addFriend(new SharingTarget(event.getSource()));
+        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+            removeFriend(new SharingTarget(event.getSource()));
+        }
     }   
     
     @EventSubscriber

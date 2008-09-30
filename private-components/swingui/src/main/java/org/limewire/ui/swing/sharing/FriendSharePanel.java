@@ -27,6 +27,7 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.images.ThumbnailManager;
@@ -45,7 +46,6 @@ import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -310,14 +310,11 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     }
 
     @Override
+    @SwingEDTEvent
     public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
-            final LocalFileList fileList = shareListManager.getOrCreateFriendShareList(event.getSource());
-            SwingUtils.invokeLater(new Runnable() {
-                public void run() {
-                    friendsList.add(new FriendItemImpl(event.getSource(), fileList.getSwingModel()));                    
-                }
-            });
+            LocalFileList fileList = shareListManager.getOrCreateFriendShareList(event.getSource());
+            friendsList.add(new FriendItemImpl(event.getSource(), fileList.getSwingModel()));
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
             shareListManager.removeFriendShareList(event.getSource());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
