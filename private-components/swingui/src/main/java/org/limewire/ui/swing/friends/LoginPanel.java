@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 
@@ -29,6 +27,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
@@ -259,36 +258,34 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         }
         
         public void actionPerformed(ActionEvent e) {
+            String userNameFieldValue = userNameField.getText().trim();
+            final String serviceName = networkGroup.getSelection().getActionCommand();
+            if (GMAIL_SERVICE_NAME.equals(serviceName)) {
+                // TODO handle empty String
+                if(!userNameFieldValue.endsWith("@gmail.com")) {
+                    // TODO ignoreCase?
+                    userNameFieldValue += "@gmail.com";
+                }
+            }
+            final String userName = userNameFieldValue;
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
-                    synchronized (LoginPanel.this) {
-                        String userName = userNameField.getText().trim();
-                        String serviceName = networkGroup.getSelection().getActionCommand();
-                        if (GMAIL_SERVICE_NAME.equals(serviceName)) {
-                            // TODO handle empty String
-                            if(!userName.endsWith("@gmail.com")) {
-                                // TODO ignoreCase?
-                                userName += "@gmail.com";
+                    try {
+                        xmppEventHandler.login(serviceName, userName,
+                                new String(passwordField.getPassword()), rememberMeCheckbox.isSelected());
+
+                        //Reset the top panel incase the last go-round was a bad password or
+                        //network error case.
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                setTopPanelMessage(normalTopPanel());
                             }
-                        }
-                        try {
-                            xmppEventHandler.login(serviceName, userName, 
-                                    new String(passwordField.getPassword()), rememberMeCheckbox.isSelected());
-                            
-                            //Reset the top panel incase the last go-round was a bad password or 
-                            //network error case.
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    setTopPanelMessage(normalTopPanel());
-                                }
-                            });
-                            
-                        } catch (XMPPException e1) {
-                            LOG.error("Unable to login", e1);
-                            
-                            loginFailed(e1);
-                        }
+                        });
+
+                    } catch (XMPPException e1) {
+                        LOG.error("Unable to login", e1);
+                        loginFailed(e1);
                     }
                 }
             }, "xmpp-login");            
