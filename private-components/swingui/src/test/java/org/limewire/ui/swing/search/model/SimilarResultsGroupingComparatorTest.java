@@ -6,16 +6,17 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 public class SimilarResultsGroupingComparatorTest extends TestCase {
-    private static final String NON_PARENT = "nonParent";
+    private static final String NON_PARENT_1 = "nonParent1";
+    private static final String NON_PARENT_2 = "nonParent2";
     private static final String SIMILAR1 = "similar1";
     private static final String SIMILAR2 = "similar2";
     private static final String PARENT = "parent";
     private ArrayList<VisualSearchResult> results;
     private MockVisualSearchResult parent;
-    private ArrayList<VisualSearchResult> similarResults;
     private VisualSearchResult simResult1;
     private VisualSearchResult simResult2;
-    private MockVisualSearchResult nonParent;
+    private MockVisualSearchResult nonParent1;
+    private MockVisualSearchResult nonParent2;
     private SimilarResultsGroupingComparator comparator;
 
     @Override
@@ -23,44 +24,41 @@ public class SimilarResultsGroupingComparatorTest extends TestCase {
         comparator = new SimilarResultsGroupingComparator() {
             @Override
             protected int doCompare(VisualSearchResult result1, VisualSearchResult result2) {
-                return result1.getDescription().compareTo(result2.getDescription());
+                return 0;
             }
         };
 
         results = new ArrayList<VisualSearchResult>();
         parent = new MockVisualSearchResult(PARENT);
-        similarResults = new ArrayList<VisualSearchResult>();
-        parent.setSimilarResults(similarResults);
-        simResult1 = MockSimilarResultsFactory.newMockVisualSearchResult(parent, SIMILAR1);
-        similarResults.add(simResult1);
-        simResult2 = MockSimilarResultsFactory.newMockVisualSearchResult(parent, SIMILAR2);
-        similarResults.add(simResult2);
-        nonParent = new MockVisualSearchResult(NON_PARENT);
+        simResult1 = new MockVisualSearchResult(SIMILAR1, parent);
+        simResult2 = new MockVisualSearchResult(SIMILAR2, parent);
+        nonParent1 = new MockVisualSearchResult(NON_PARENT_1);
+        nonParent2 = new MockVisualSearchResult(NON_PARENT_2);
     }
 
     public void testSorting1() {
-        populate(simResult2, parent, nonParent, simResult1);
-        assertOrder(NON_PARENT, PARENT, SIMILAR2, SIMILAR1);
+        populate(nonParent2, simResult2, parent, nonParent1, simResult1);
+        assertOrder(NON_PARENT_1, PARENT, SIMILAR2, SIMILAR1, NON_PARENT_2);
     }
 
     public void testSorting2() {
-        populate(nonParent, simResult2, parent, simResult1);
-        assertOrder(NON_PARENT, PARENT, SIMILAR2, SIMILAR1);
+        populate(nonParent1, simResult2, parent, simResult1, nonParent2);
+        assertOrder(NON_PARENT_1, NON_PARENT_2, PARENT, SIMILAR2, SIMILAR1);
     }
 
     public void testSorting3() {
-        populate(simResult2, simResult1, parent, nonParent);
-        assertOrder(NON_PARENT, PARENT, SIMILAR2, SIMILAR1);
+        populate(simResult2, simResult1, parent, nonParent1, nonParent2);
+        assertOrder(NON_PARENT_2, PARENT, SIMILAR2, SIMILAR1, NON_PARENT_1);
     }
 
     public void testSorting4() {
-        populate(simResult1, simResult2, nonParent, parent);
-        assertOrder(NON_PARENT, PARENT, SIMILAR1, SIMILAR2);
+        populate(simResult1, simResult2, nonParent1, parent, nonParent2);
+        assertOrder(NON_PARENT_2, PARENT, SIMILAR1, SIMILAR2, NON_PARENT_1);
         
         results.clear();
 
-        populate(parent, simResult2, nonParent, simResult1);
-        assertOrder(NON_PARENT, PARENT, SIMILAR2, SIMILAR1);
+        populate(parent, nonParent2, simResult2, nonParent1, simResult1);
+        assertOrder(NON_PARENT_2, PARENT, SIMILAR2, SIMILAR1, NON_PARENT_1);
     }
     
     private void populate(VisualSearchResult... results) {

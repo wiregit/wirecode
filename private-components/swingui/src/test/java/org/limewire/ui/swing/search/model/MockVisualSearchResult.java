@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.search.model;
 
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -12,12 +12,18 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 
 public class MockVisualSearchResult implements VisualSearchResult {
-    private List<VisualSearchResult> similarResults;
+    private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();
     private String description;
+    private VisualSearchResult similarityParent;
     
     public MockVisualSearchResult(String description) {
         this.description = description;
-        this.similarResults = Collections.emptyList();
+    }
+
+    public MockVisualSearchResult(String description, VisualSearchResult parent) {
+        this(description);
+        this.similarityParent = parent;
+        parent.getSimilarResults().add(this);
     }
 
     @Override
@@ -84,9 +90,9 @@ public class MockVisualSearchResult implements VisualSearchResult {
     
     @Override
     public VisualSearchResult getSimilarityParent() {
-        return null;
+        return similarityParent;
     }
-
+    
     @Override
     public long getSize() {
         // TODO Auto-generated method stub
@@ -135,12 +141,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
         return false;
     }
 
-//    @Override
-//    public void setChildrenVisible(boolean childrenVisible) {
-//        // TODO Auto-generated method stub
-//        
-//    }
-
     @Override
     public boolean isSpam() {
         return false;
@@ -156,5 +156,10 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public void setChildrenVisible(boolean childrenVisible) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public String toString() {
+        return description;
     }
 }
