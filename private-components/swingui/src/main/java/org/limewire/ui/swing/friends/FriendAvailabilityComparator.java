@@ -1,11 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.xmpp.api.client.Presence.Mode.available;
-import static org.limewire.xmpp.api.client.Presence.Mode.away;
-import static org.limewire.xmpp.api.client.Presence.Mode.chat;
-import static org.limewire.xmpp.api.client.Presence.Mode.dnd;
-import static org.limewire.xmpp.api.client.Presence.Mode.xa;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -13,7 +7,8 @@ import java.util.Comparator;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 class FriendAvailabilityComparator implements Comparator<ChatFriend> {
-    private static ArrayList<Mode> ORDERED = new ArrayList<Mode>(Arrays.asList(new Mode[]{chat, available, away, xa, dnd})); 
+
+    private static ArrayList<Mode> ORDERED = new ArrayList<Mode>(Arrays.asList(Mode.values())); 
     
     @Override
     public int compare(ChatFriend a, ChatFriend b) {

@@ -60,7 +60,8 @@ import net.miginfocom.swing.MigLayout;
 
 @Singleton
 public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenMessageListener {
-    private static final String OFFLINE = "offline";
+    
+    private final String OFFLINE = tr("Offline");
     private final IconLibrary icons;
     private JXButton friendsButton;
     private JMenu statusMenu;
@@ -189,7 +190,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
     private void updateStatus(String buttonText, Icon icon, String status) {
         friendsButton.setText(buttonText);
         statusMenu.setIcon(icon);
-        statusMenu.setToolTipText(tr(status + " - click to set status"));
+        statusMenu.setToolTipText(tr("{0} - click to set status", status));
     }
     
     @EventSubscriber

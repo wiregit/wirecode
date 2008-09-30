@@ -11,12 +11,17 @@ public interface Presence {
         available, unavailable, subscribe, subscribed, unsubscribe, unsubscribed, error
     }
     
+    /**
+     * The actual presence status. 
+     */
     enum Mode {
-        chat(I18nMarker.marktr("Chatting")),
+        // lower case enum values to allow direct mapping from to the Mode enum
+        // defined in smack
+        chat(I18nMarker.marktr("Free to chat")),
         available(I18nMarker.marktr("Available")),
-        away(I18nMarker.marktr("Idle")),
-        xa(I18nMarker.marktr("Idle")),
-        dnd(I18nMarker.marktr("Away"));
+        away(I18nMarker.marktr("Away")),
+        xa(I18nMarker.marktr("Away for a while")),
+        dnd(I18nMarker.marktr("Do not disturb"));
 
         private final String name;
 

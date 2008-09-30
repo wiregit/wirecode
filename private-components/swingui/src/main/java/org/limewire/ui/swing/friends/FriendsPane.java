@@ -191,14 +191,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
         @Override
         public void actionPerformed(ActionEvent e) {
             Mode mode = currentMode.get();
-            if(mode == null || !mode.equals(Mode.dnd)) {
+            if(mode != Mode.dnd) {
                 new SelfAvailabilityUpdateEvent(Mode.xa).publish();
             }
         }
         
         public void resetAvailability() {
             Mode mode = currentMode.get();
-            if(mode == null || !mode.equals(Mode.available)) {
+            if(mode != Mode.available) {
                 new SelfAvailabilityUpdateEvent(Mode.available).publish();
             }
         }
