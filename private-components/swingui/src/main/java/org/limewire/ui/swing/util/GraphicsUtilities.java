@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.3 2008-09-18 20:11:13 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.4 2008-09-30 19:50:52 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -230,13 +230,8 @@ public class GraphicsUtilities {
      */
     public static BufferedImage loadCompatibleImage(URL resource)
             throws IOException {
-        BufferedImage image = ImageIO.read(resource);
-        BufferedImage image2 = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);  
-        Graphics g = image2.getGraphics();  
-        g.drawImage(image, 0, 0, null);  
-        g.dispose();
-        
-        return toCompatibleImage(image2);
+        BufferedImage image = ImageIO.read(resource);       
+        return toCompatibleImage(image);
     }
 
     /**
@@ -429,13 +424,13 @@ public class GraphicsUtilities {
         int previousHeight = height;
 
         do {
-            if (isWidthGreater) {
+            if (width > maxTargetWidth) {
                 width /= 2;
                 if (width < maxTargetWidth) {
                     width = maxTargetWidth;
                 }
                 height = (int) (width / ratioWH);
-            } else {
+            } else if (height > maxTargetHeight) {
                 height /= 2;
                 if (height < maxTargetHeight) {
                     height = maxTargetHeight;
@@ -458,7 +453,7 @@ public class GraphicsUtilities {
             previousHeight = height;
 
             thumb = temp;
-        } while (isWidthGreater ? (maxTargetWidth != width) : (maxTargetHeight != height));
+        } while ( (width > maxTargetWidth) || (height > maxTargetHeight));
 
         g2.dispose();
 

@@ -119,9 +119,8 @@ public class ThumbnailCallable implements Callable<Void> {
             handleUpdate(errorIcon);
             return null;
         } 
-
         // if the image is larger than our viewport, resize the image before saving
-        if(image.getWidth() > ImageLocalFileItem.WIDTH || image.getHeight() > ImageLocalFileItem.HEIGHT) {
+        if(image.getWidth() > ImageLocalFileItem.WIDTH || image.getHeight() > ImageLocalFileItem.HEIGHT) { 
             //TODO: this can be optimized for pictures within one step away from the target size
             //TODO: this seems to fail regularly if width > 2 * height or height > 2 * width
             image = GraphicsUtilities.createRatioPreservedThumbnail(image, ImageLocalFileItem.WIDTH, ImageLocalFileItem.HEIGHT);
