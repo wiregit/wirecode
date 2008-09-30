@@ -26,8 +26,10 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     @Override
     public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult eventItem) {
         for (VisualSearchResult result : results) {
-            if (result != eventItem && searchResultComparator.matches(result, eventItem)) {
-                update(eventItem, result);
+            if (result != eventItem) {
+                if (searchResultComparator.matches(result, eventItem)) {
+                        update(eventItem, result);
+                }
             }
         }
     }
