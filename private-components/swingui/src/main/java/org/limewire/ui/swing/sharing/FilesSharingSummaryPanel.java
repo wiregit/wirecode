@@ -93,7 +93,7 @@ public class FilesSharingSummaryPanel extends JPanel {
         @SwingEDTEvent
         public void handleEvent(FriendShareListEvent event) {
             LocalFileList list = event.getFileList();
-            EventList<LocalFileItem> model = list.getModel();
+            EventList<LocalFileItem> model = list.getSwingModel();
             switch(event.getType()) {
             case FRIEND_SHARE_LIST_ADDED:
                 updateCount(model.size());
