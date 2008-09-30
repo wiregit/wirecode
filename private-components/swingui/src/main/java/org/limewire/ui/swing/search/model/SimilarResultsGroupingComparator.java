@@ -18,13 +18,19 @@ public abstract class SimilarResultsGroupingComparator implements Comparator<Vis
         parent1 = parent1 == null ? o1 : parent1;
         parent2 = parent2 == null ? o2 : parent2;
 
-        int compare = doCompare(parent1, parent2);
-
-        if (compare == 0 && parent1 != parent2) {
-            compare = new Boolean(parent1.isSpam()).compareTo(parent2.isSpam());
+        boolean spam1 = o1.isSpam();
+        boolean spam2 = o2.isSpam();
+        
+        //spam should go to the bottom of the list
+        int compare = new Boolean(spam1).compareTo(spam2);
+        
+        if (compare == 0) {
+            //if both match, try our comparison algorithm
+            compare = doCompare(parent1, parent2);
         }
 
         if (compare == 0 && parent1 != parent2) {
+            //if both still match, and have differant parents, sort by the parents identity hashcode
             compare = new Integer(System.identityHashCode(parent1)).compareTo(new Integer(System
                     .identityHashCode(parent2)));
         }

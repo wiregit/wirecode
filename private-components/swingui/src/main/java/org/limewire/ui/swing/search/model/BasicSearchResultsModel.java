@@ -88,7 +88,7 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
         @Override
         public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
-            SearchResultAdapter adapter = new SearchResultAdapter(sourceValue);
+            VisualSearchResult adapter = new SearchResultAdapter(sourceValue);
 
             resultCount.addAndGet(adapter.getSources().size());
             return adapter;

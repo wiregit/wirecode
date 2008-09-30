@@ -55,4 +55,10 @@ public interface VisualSearchResult {
     boolean isSpam();
     
     void setSpam(boolean spam);
+
+    public void addSimilarSearchResult(VisualSearchResult similarResult);
+
+    public void removeSimilarSearchResult(VisualSearchResult result);
+
+    public void setSimilarityParent(VisualSearchResult parent);
 }

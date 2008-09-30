@@ -162,4 +162,13 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public String toString() {
         return description;
     }
+
+    public void removeSimilarSearchResult(VisualSearchResult result) {
+    }
+
+    public void addSimilarSearchResult(VisualSearchResult similarResult) {
+    }
+
+    public void setSimilarityParent(VisualSearchResult parent) {
+    }
 }

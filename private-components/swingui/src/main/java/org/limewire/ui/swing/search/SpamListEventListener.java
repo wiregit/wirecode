@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.ui.swing.search.model.SimilarResultsDetector;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
@@ -15,13 +16,17 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
 
     private final SpamManager spamManager;
 
-    public SpamListEventListener(SpamManager spamManager) {
+    private final SimilarResultsDetector similarResultsDetector;
+
+    public SpamListEventListener(SpamManager spamManager,
+            SimilarResultsDetector similarResultsDetector) {
         this.spamManager = spamManager;
+        this.similarResultsDetector = similarResultsDetector;
     }
 
     @Override
     public void listChanged(ListEvent<VisualSearchResult> listChanges) {
-        EventList<VisualSearchResult> eventList = listChanges.getSourceList();
+        final EventList<VisualSearchResult> eventList = listChanges.getSourceList();
 
         while (listChanges.next()) {
             boolean added = listChanges.getType() == ListEvent.INSERT;
@@ -40,14 +45,59 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                                             .getCoreSearchResults()) {
                                         spamManager.handleUserMarkedSpam(searchResult);
                                     }
+                                    VisualSearchResult parent = visualSearchResult
+                                            .getSimilarityParent();
+                                    if (parent == null) {
+                                        //null parent means you are the parent
+                                        pickNewParent(visualSearchResult);
+                                    } else {
+                                        removeItemFromPArent(visualSearchResult, parent);
+                                    }
                                 } else {
                                     for (SearchResult searchResult : visualSearchResult
                                             .getCoreSearchResults()) {
                                         spamManager.handleUserMarkedGood(searchResult);
                                     }
+                                    similarResultsDetector.detectSimilarResult(eventList, visualSearchResult);
                                 }
                             }
                         }
+                    }
+
+                    private void removeItemFromPArent(final VisualSearchResult visualSearchResult,
+                            VisualSearchResult parent) {
+                        parent.removeSimilarSearchResult(visualSearchResult);
+                        visualSearchResult.setSimilarityParent(null);
+                        visualSearchResult.setChildrenVisible(false);
+                        visualSearchResult.setVisible(true);
+                    }
+
+                    private void pickNewParent(final VisualSearchResult visualSearchResult) {
+                        VisualSearchResult newParent = null;
+                        if (visualSearchResult.getSimilarResults().size() > 0) {
+                            newParent = visualSearchResult.getSimilarResults().get(
+                                    0);
+                            newParent.setSimilarityParent(null);
+                            visualSearchResult.removeSimilarSearchResult(newParent);
+
+                        }
+
+                        for (VisualSearchResult simResult : visualSearchResult
+                                .getSimilarResults()) {
+                            visualSearchResult.removeSimilarSearchResult(simResult);
+                            if (newParent != null) {
+                                newParent.addSimilarSearchResult(simResult);
+                            }
+                            simResult.setSimilarityParent(newParent);
+                        }
+
+                        if (newParent != null) {
+                            newParent.setChildrenVisible(visualSearchResult
+                                    .isChildrenVisible());
+                            newParent.setVisible(true);
+                        }
+                        visualSearchResult.setChildrenVisible(false);
+                        visualSearchResult.setVisible(true);
                     }
 
                 });

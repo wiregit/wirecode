@@ -27,8 +27,10 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
     public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult eventItem) {
         for (VisualSearchResult result : results) {
             if (result != eventItem) {
-                if (searchResultComparator.matches(result, eventItem)) {
+                if (!result.isSpam() && !eventItem.isSpam()) {
+                    if (searchResultComparator.matches(result, eventItem)) {
                         update(eventItem, result);
+                    }
                 }
             }
         }
@@ -75,10 +77,10 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      * updated to be a child of the given parent.
      */
     private void updateParent(VisualSearchResult child, VisualSearchResult parent) {
-        ((SearchResultAdapter) parent).setSimilarityParent(null);
+        parent.setSimilarityParent(null);
         if (child != null && child != parent) {
-            ((SearchResultAdapter) child).setSimilarityParent(parent);
-            ((SearchResultAdapter) parent).addSimilarSearchResult(child);
+            child.setSimilarityParent(parent);
+            parent.addSimilarSearchResult(child);
             moveChildren(child, parent);
         }
     }
@@ -87,11 +89,11 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
      * Moves the children from the child to the parent.
      */
     private void moveChildren(VisualSearchResult child, VisualSearchResult parent) {
-        ((SearchResultAdapter) child).removeSimilarSearchResult(parent);
+        child.removeSimilarSearchResult(parent);
         for (VisualSearchResult item : child.getSimilarResults()) {
             updateParent(item, parent);
-            ((SearchResultAdapter) child).removeSimilarSearchResult(item);
-            ((SearchResultAdapter) parent).addSimilarSearchResult(item);
+            child.removeSimilarSearchResult(item);
+            parent.addSimilarSearchResult(item);
         }
     }
 

@@ -115,7 +115,7 @@ public class MockSearchResult implements Cloneable, SearchResult {
 
     @Override
     public String toString() {
-        return getClass().getName() + ": " + getProperty(PropertyKey.NAME);
+        return getClass().getName() + ": " + getProperty(PropertyKey.NAME) + "spam: " + spam;
     }
 
     @Override
