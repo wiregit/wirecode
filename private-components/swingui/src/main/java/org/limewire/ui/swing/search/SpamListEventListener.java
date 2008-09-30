@@ -97,6 +97,8 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                             newParent.setVisible(true);
                         }
                         visualSearchResult.setChildrenVisible(false);
+                        //toggle visibility to ensure a repaint
+                        visualSearchResult.setVisible(false);
                         visualSearchResult.setVisible(true);
                     }
 
