@@ -18,11 +18,8 @@ import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -33,7 +30,6 @@ import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -79,51 +75,16 @@ public class FilesSharingSummaryPanel extends JPanel {
         shareListManager.getGnutellaShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>() {
             @Override
             public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                gnutellaButton.setText(GuiUtils.toLocalizedInteger(shareListManager.getGnutellaShareList().size()));                
+                gnutellaButton.setText(GuiUtils.toLocalizedInteger(listChanges.getSourceList().size()));                
+            }
+        });        
+
+        shareListManager.getCombinedFriendShareLists().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>() {
+            @Override
+            public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                friendButton.setText(GuiUtils.toLocalizedInteger(listChanges.getSourceList().size()));
             }
         });
-        shareSupport.addListener(new ShareListListener());
-    }
-    
-    // TODO: This is wrong -- it double counts files that are shared with two people.
-    private class ShareListListener implements EventListener<FriendShareListEvent>, ListEventListener<LocalFileItem> {
-        private int count = 0;
-        
-        @Override
-        @SwingEDTEvent
-        public void handleEvent(FriendShareListEvent event) {
-            LocalFileList list = event.getFileList();
-            EventList<LocalFileItem> model = list.getSwingModel();
-            switch(event.getType()) {
-            case FRIEND_SHARE_LIST_ADDED:
-                updateCount(model.size());
-                model.addListEventListener(this);
-                break;
-            case FRIEND_SHARE_LIST_REMOVED:
-                updateCount(-model.size());
-                model.removeListEventListener(this);
-                break;
-            }
-        }
-        
-        @Override
-        public void listChanged(ListEvent<LocalFileItem> listChanges) {
-            int count = 0;
-            if(!listChanges.isReordering()) {
-                while(listChanges.next()) {
-                    switch(listChanges.getType()) {
-                    case ListEvent.INSERT: count++; break;
-                    case ListEvent.DELETE: count--; break;
-                    }
-                }
-            }
-            updateCount(count);
-        }
-        
-        private void updateCount(int incremenet) {
-            count += incremenet;
-            friendButton.setText(GuiUtils.toLocalizedInteger(count));
-        }
     }
     
     /**

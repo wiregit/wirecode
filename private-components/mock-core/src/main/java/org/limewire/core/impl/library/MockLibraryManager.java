@@ -1,7 +1,5 @@
 package org.limewire.core.impl.library;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +7,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileList;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -108,13 +107,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
         files.addFileItem(allFileList.getModel().get(1));
         files.addFileItem(allFileList.getModel().get(2));
         files.addFileItem(allFileList.getModel().get(3));
-    }
-    
-    @Override
-    public Collection<LocalFileList> getAllFriendShareLists() {
-        return Collections.emptyList();
-    }
-    
+    }    
 
     @Override
     public LocalFileList getLibraryManagedList() {
@@ -125,6 +118,12 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
     @Override
     public LocalFileList getGnutellaShareList() {
         return gnutellaList;
+    }
+        
+       @Override
+    public FileList<LocalFileItem> getCombinedFriendShareLists() {
+        // TODO Auto-generated method stub
+        return null;
     }
     
     @Override
