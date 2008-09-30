@@ -161,6 +161,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
+import com.limegroup.gnutella.net.address.ConnectableConnector;
 import com.limegroup.gnutella.net.address.FirewalledAddressSerializer;
 import com.limegroup.gnutella.net.address.SameNATAddressResolver;
 import com.limegroup.gnutella.routing.QRPUpdater;
@@ -384,6 +385,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(DaapManager.class);
         bind(FirewalledAddressSerializer.class);
         bind(SameNATAddressResolver.class);
+        bind(ConnectableConnector.class);
         
         bind(FileManager.class).to(FileManagerImpl.class);
     }

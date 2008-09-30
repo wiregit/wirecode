@@ -1,4 +1,4 @@
-package org.limewire.net.address;
+package com.limegroup.gnutella.net.address;
 
 import java.io.IOException;
 
@@ -7,6 +7,7 @@ import org.limewire.io.Connectable;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
 import org.limewire.net.SocketsManager.ConnectType;
+import org.limewire.net.address.AddressConnector;
 import org.limewire.nio.observer.ConnectObserver;
 
 import com.google.inject.Inject;
