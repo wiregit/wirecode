@@ -4,7 +4,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.ListSelectionModel;
-import javax.swing.table.TableModel;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -86,17 +85,6 @@ public class SharingTable extends StripedJXTable {
             }
 
         });
-    }
-    
-    @Override
-    public void setModel(TableModel newModel) {
-        if(getModel() instanceof SharingTableModel) {
-            SharingTableModel model = (SharingTableModel)getModel();
-            if(model != null) {
-                model.dispose();
-            }
-        }
-        super.setModel(newModel);
     }
     
     @Override

@@ -162,8 +162,12 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         @Override
         public void handleFileEvent(FileManagerEvent evt) {
             switch(evt.getType()) {
-            case REMOVE_FILE: listener.handleLibraryListEvent(LibraryListEventType.FILE_REMOVED);
-            case ADD_FILE: listener.handleLibraryListEvent(LibraryListEventType.FILE_ADDED);
+            case REMOVE_FILE:
+                listener.handleLibraryListEvent(LibraryListEventType.FILE_REMOVED);
+                break;
+            case ADD_FILE:
+                listener.handleLibraryListEvent(LibraryListEventType.FILE_ADDED);
+                break;
             }
         }
     }

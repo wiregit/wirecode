@@ -29,6 +29,7 @@ import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
 import org.limewire.ui.swing.sharing.table.SharingFancyMultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.sharing.table.SharingFancyTable;
+import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -146,7 +147,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         removeAction.setEventList(eventList);
         removeAction.setFileList(fileList);
         
-        table.setModel(eventList, fileList, tableFormat);
+        table.setModel(new SharingTableModel(eventList, fileList, tableFormat));
         setRenderers();
 
         int size = eventList.size();

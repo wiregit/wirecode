@@ -5,13 +5,13 @@ import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Circle;
 import org.limewire.ui.swing.components.NumberedHyperLinkButton;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -55,53 +55,6 @@ public class SharingShortcutPanel extends JPanel {
         this.models = model;
     }
     
-    private class SharingListEventListener implements ListEventListener<LocalFileItem> {
-
-        private ButtonCircleComponent button;
-        private boolean alwaysShow;
-        
-        public SharingListEventListener(ButtonCircleComponent button) {
-            this(button, true);
-        }
-        
-        public SharingListEventListener(ButtonCircleComponent button, boolean alwaysShow) {
-            this.button = button;
-            this.alwaysShow = alwaysShow;
-        }
-        
-        @Override
-        public void listChanged(ListEvent<LocalFileItem> listChanges) {
-            final int size = listChanges.getSourceList().size();
-            SwingUtils.invokeLater(new Runnable(){
-                public void run() {
-                    button.setNumberLabel(size);  
-                    if(!alwaysShow) {
-                        if(size == 0)// && button.isVisible())
-                            button.setVisible(false);
-                        else// if(!button.isVisible())
-                            button.setVisible(true);
-                    }
-                }
-            });
-        }
-    }
-//    
-//    private class LinkSettingListener implements SettingListener {
-//
-//        private JComponent component;
-//        private BooleanSetting setting;
-//        
-//        public LinkSettingListener(JComponent component, BooleanSetting setting) {
-//            this.component = component;
-//            this.setting = setting;
-//        }
-//        
-//        @Override
-//        public void settingChanged(SettingEvent evt) {
-//            this.component.setVisible(setting.getValue());
-//        }
-//    }
-    
     public static enum CircleLocation {
         LEFT, RIGHT, NONE;
     }
@@ -134,7 +87,7 @@ public class SharingShortcutPanel extends JPanel {
         private void createButton(String name, Action action, boolean alwaysShown) {
             button = new NumberedHyperLinkButton(name, action);
             button.setDisplayNumber(0);
-            listener = new SharingListEventListener(this, alwaysShown);
+            listener = new SharingListEventListener(alwaysShown);
             model.addListEventListener(listener);
         }
         
@@ -144,8 +97,15 @@ public class SharingShortcutPanel extends JPanel {
 //        }
         
         public void setModel(EventList<LocalFileItem> newModel) {
-            if(model != null)
-                model.removeListEventListener(listener);
+            if(model != null) {
+                final EventList<LocalFileItem> toRemove = model;
+                SwingUtilities.invokeLater(new Runnable() {
+                     @Override
+                    public void run() {
+                         toRemove.removeListEventListener(listener);
+                    }
+                });
+            }
             this.model = newModel;
             model.addListEventListener(listener);
             button.setDisplayNumber(model.size());
@@ -153,6 +113,34 @@ public class SharingShortcutPanel extends JPanel {
         
         public void setNumberLabel(int size) {
             button.setDisplayNumber(size);
+        }
+        
+
+        
+        private class SharingListEventListener implements ListEventListener<LocalFileItem> {
+            private boolean alwaysShow;
+            
+            public SharingListEventListener() {
+                this(true);
+            }
+            
+            public SharingListEventListener(boolean alwaysShow) {
+                this.alwaysShow = alwaysShow;
+            }
+            
+            @Override
+            public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                if(listChanges.getSourceList() == model) {                    
+                    final int size = listChanges.getSourceList().size();
+                    setNumberLabel(size);  
+                    if(!alwaysShow) {
+                        if(size == 0)// && button.isVisible())
+                            button.setVisible(false);
+                        else// if(!button.isVisible())
+                            button.setVisible(true);
+                    }
+                }
+            }
         }
     }
 }

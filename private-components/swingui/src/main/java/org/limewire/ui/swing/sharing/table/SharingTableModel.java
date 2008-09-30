@@ -4,7 +4,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
@@ -18,12 +17,6 @@ public class SharingTableModel extends EventTableModel<LocalFileItem> {
         super(sharedItems, tableFormat);
         this.sharedItems = sharedItems;
         this.fileList = fileList;
-    }
-    
-    public void dispose() {
-        if(sharedItems instanceof TransformedList) {
-            ((TransformedList)sharedItems).dispose();
-        }
     }
     
     public void removeFile(int index) { 

@@ -10,6 +10,7 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
@@ -49,6 +50,10 @@ import org.limewire.xmpp.api.client.User;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -104,7 +109,8 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         cardPanel.setLayout(viewCardLayout);
         cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
 
-        friendsList = new BasicEventList<FriendItem>();               
+        Connector<FriendItem> connector = GlazedLists.beanConnector(FriendItem.class); 
+        friendsList = new ObservableElementList<FriendItem>(new BasicEventList<FriendItem>(), connector);               
         friendTable = new FriendNameTable(friendsList, new FriendTableFormat(), libraryManager, shareListManager, navigator);
         
         headerPanel = createHeader(cardPanel);
@@ -174,18 +180,41 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         return list;
     }
     
+    // TODO: There's a lot of funkiness with disposing of listeners here --
+    //       all of this is necessary because the change that triggers
+    //       selection (and thus this' valueChanged method) also triggers
+    //       a listChanged on all the filters & listeners that are installed
+    //       here.  However, the selection-listening change is installed first
+    //       (and there's no way around that, because the selection listening
+    //        is what triggers other listeners), so it hears the changes first.
+    //       In most cases, a selectionChanged will cause a subsequent list
+    //       to want to dispose its listening or remove a listener -- usually
+    //       this is OK, except GlazedLists keeps track of what wanted to listen
+    //       when the event was triggered and will *always* inform those listeners,
+    //       even if they're unregistered by the time it comes around to notifying
+    //       them.  In some cases, this causes an NPE (such as FilterList), in others
+    //       it causes incorrect logic temporarily (setting properties based on
+    //       an old source list).
+    //       To workaround this, we have to invokeLater the listener removal and
+    //       have special checks that make sure when we hear a listChanged event,
+    //       the source list is correct.
+    //       Another approach would be to add an in-between EventList that just forwards
+    //       list-changed events, but does *not* forward them if the list unregistered
+    //       for listening by the time it comes to forwarding the event.
     private class FriendSelectionListener implements ListSelectionListener, ListEventListener<LocalFileItem> {
 
-        private JTable friend;
-        private FriendSharingHeaderPanel headerPanel;
-        private SharingFriendEmptyPanel emptyPanel;
-        private JPanel cardPanel;
-        private String name = "";
+        private final JTable friend;
+        private final FriendSharingHeaderPanel headerPanel;
+        private final SharingFriendEmptyPanel emptyPanel;
+        private final JPanel cardPanel;
         
         private ShareDropTarget emptyDropTarget;
         private ShareDropTarget dropTarget;
         
         private EventList<LocalFileItem> currentList;
+        private TransformedList<LocalFileItem, LocalFileItem> filteredList;
+        
+        private String lastRenderedId = "";
         
         public FriendSelectionListener(JTable table, FriendSharingHeaderPanel headerPanel, SharingFriendEmptyPanel emptyPanel, JPanel cardPanel) {
             this.friend = table;
@@ -197,62 +226,76 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         
         @Override
         public void valueChanged(ListSelectionEvent e) { 
-            if(!e.getValueIsAdjusting()) {
-                int index = friend.getSelectedRow();
-                if( index >= 0 && index < friend.getModel().getRowCount()) {
-                    FriendItem friendItem = (FriendItem) friend.getModel().getValueAt(index, 0);
-                    if(friendItem.getFriend().equals(name))
-                        return;
-                    
-                    name = friendItem.getFriend().getRenderName();
-                    headerPanel.setFriendName(friendItem.getFriend().getRenderName());
-                    emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
-      
-                    LocalFileList fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
-                    emptyPanel.setUserFileList(fileList);
-                    EventList<LocalFileItem> filteredList = filter(fileList.getSwingModel());
-                    table.setModel(new SharingTableModel(filteredList, fileList,sharingTableFormat));
-                    TableColumn tc = table.getColumn(6);
-                    tc.setCellEditor(editor);
-                    tc.setCellRenderer(renderer);
-                    tc = table.getColumn(0);
-                    tc.setCellRenderer(iconLabelRenderer);
-                    sharingFancyPanel.setModel(filteredList, fileList);
-                    headerPanel.setModel(fileList);           
-                    
-                    if(dropTarget == null) {
-                        dropTarget = new ShareDropTarget(FriendSharePanel.this, fileList, true);
-                        emptyDropTarget = new ShareDropTarget(emptyPanel, fileList, true);
-                        
-                    } else {
-                        dropTarget.setModel(fileList);
-                        emptyDropTarget.setModel(fileList);
-                    }
-                    
-                    if(currentList != null) {
-                        currentList.removeListEventListener(this);
-                    }
-                    currentList = fileList.getSwingModel();
-                    currentList.addListEventListener(this);
-                    
-                    if(currentList.size() > 0) {
-                        viewSelectionPanel.setEnabled(true);
-                        headerPanel.setEnabled(true);
-                    } else {
-                        viewSelectionPanel.setEnabled(false);
-                        headerPanel.setEnabled(false);
-                    }
-                    viewCardLayout.show(cardPanel, viewSelectionPanel.getSelectedButton());
-                }
+            if(e.getValueIsAdjusting()) {
+                return;
             }
+        
+            int index = friend.getSelectedRow();
+            if(index == -1) {
+                return;
+            }
+            
+            FriendItem friendItem = (FriendItem) friend.getModel().getValueAt(index, 0);
+            if(friendItem.getFriend().getId().equals(lastRenderedId)) {
+                return;
+            }
+            
+            lastRenderedId = friendItem.getFriend().getId();
+            
+            headerPanel.setFriendName(friendItem.getFriend().getRenderName());
+            emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
+
+            LocalFileList fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
+            if(currentList != null) {
+                assert filteredList != null;
+                final TransformedList<LocalFileItem, LocalFileItem> toDispose = filteredList;
+                final EventList<LocalFileItem> toDispose2 = currentList;
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        toDispose.dispose();
+                        toDispose2.removeListEventListener(FriendSelectionListener.this);
+                    }
+                });
+            } else {
+                assert filteredList == null;
+            }
+            
+            currentList = fileList.getSwingModel();
+            filteredList = new FilterList<LocalFileItem>(currentList, 
+                    new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
+            currentList.addListEventListener(this);
+            
+            emptyPanel.setUserFileList(fileList);
+            table.setModel(new SharingTableModel(filteredList, fileList,sharingTableFormat));
+            TableColumn tc = table.getColumn(6);
+            tc.setCellEditor(editor);
+            tc.setCellRenderer(renderer);
+            tc = table.getColumn(0);
+            tc.setCellRenderer(iconLabelRenderer);
+            sharingFancyPanel.setModel(filteredList, fileList);
+            headerPanel.setModel(fileList);           
+            
+            if(dropTarget == null) {
+                dropTarget = new ShareDropTarget(FriendSharePanel.this, fileList, true);
+                emptyDropTarget = new ShareDropTarget(emptyPanel, fileList, true);                
+            } else {
+                dropTarget.setModel(fileList);
+                emptyDropTarget.setModel(fileList);
+            }
+            
+            viewSelectionPanel.setEnabled(currentList.size() > 0);
+            headerPanel.setEnabled(currentList.size() > 0);
+            viewCardLayout.show(cardPanel, viewSelectionPanel.getSelectedButton());
         }
 
         @Override
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
-            if(listChanges.getSourceList().size() > 0) {
-                viewSelectionPanel.setEnabled(true);
-            } else {
-                viewSelectionPanel.setEnabled(false);
+            // We only care about change events on the current list --
+            // due to the way we reuse 'this' as a listener and how
+            // events are queued up & sent from GlazedLists, it's possible
+            // that we get an event for a list that's no longer ours.
+            if(listChanges.getSourceList() == currentList) {
+                viewSelectionPanel.setEnabled(currentList.size() > 0);
             }
         }
     }
@@ -282,12 +325,6 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         friendsList.clear();
     }
     
-    private EventList<LocalFileItem> filter(EventList<LocalFileItem> list) {
-        return new FilterList<LocalFileItem>(list, 
-              new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
-
-    }
-    
     /**
      * If the friend name exists in the list, this selects
      * that friend in the table and shows the appropriate 
@@ -298,7 +335,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     public void selectFriend(String name) {
         for(int i = 0; i < table.getModel().getRowCount(); i++) {
             FriendItem item = (FriendItem) table.getModel().getValueAt(i, 0);
-            if(item.getFriend().equals(name)) {
+            if(item.getFriend().getId().equals(name)) {
                 final int index = i;
                 SwingUtils.invokeLater(new Runnable(){
                     public void run() {

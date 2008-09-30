@@ -48,6 +48,8 @@ public class FilesSharingSummaryPanel extends JPanel {
         GuiUtils.assignResources(this);
         
         // TODO: This doesn't get events for adding friend shares.
+        // TODO: This is apparently giving events for new managed files,
+        //       not shared files.
         libraryManager.addLibraryLisListener(new LibraryListListener() {
             @Override
             public void handleLibraryListEvent(LibraryListEventType type) {
