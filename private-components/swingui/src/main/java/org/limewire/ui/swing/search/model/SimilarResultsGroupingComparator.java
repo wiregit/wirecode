@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search.model;
 import java.util.Comparator;
 
 public abstract class SimilarResultsGroupingComparator implements Comparator<VisualSearchResult> {
-
     @Override
     public int compare(VisualSearchResult o1, VisualSearchResult o2) {
         VisualSearchResult parent1 = o1.getSimilarityParent();
@@ -16,11 +15,22 @@ public abstract class SimilarResultsGroupingComparator implements Comparator<Vis
             return -1;
         }
 
-        return doCompare(parent1 == null ? o1 : parent1, parent2 == null ? o2 : parent2);
+        parent1 = parent1 == null ? o1 : parent1;
+        parent2 = parent2 == null ? o2 : parent2;
+
+        int compare = doCompare(parent1, parent2);
+
+        if (compare == 0 && parent1 != parent2) {
+            compare = new Integer(System.identityHashCode(parent1)).compareTo(new Integer(System
+                    .identityHashCode(parent2)));
+        }
+
+        return compare;
     }
 
     /**
      * Secondary comparison as defined by criteria determined in subclasses.
+     * 
      * @param o1
      * @param o2
      * @return
