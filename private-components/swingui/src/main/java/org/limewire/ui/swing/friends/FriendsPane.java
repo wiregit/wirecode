@@ -1,8 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -20,6 +17,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -44,8 +42,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import net.miginfocom.swing.MigLayout;
-
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
@@ -63,16 +60,21 @@ import org.limewire.ui.swing.action.PopupDecider;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
+import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.User;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -84,9 +86,7 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.EventTableModel;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -117,7 +117,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private final ShareListManager libraryManager;
     private final FriendSharingDisplay friendSharing;
     private final JScrollPane scrollPane;
-    private final Timer idleTimer;
+    private final IdleTimer idleTimer;
     private final JLabel unseenMessageCountPopupLabel = new JLabel();
     private Popup unseenMessageCountPopup;
     private String myID;
@@ -157,14 +157,19 @@ public class FriendsPane extends JPanel implements FriendRemover {
         
     }
 
+    @EventSubscriber
+    public void handlePresenceChange(SelfAvailabilityUpdateEvent event) {
+        idleTimer.setCurrentMode(event.getNewMode());
+    }
+
     private static class IdleTimer extends Timer {
-        private SelfAvailabilityAction availabilityAction;
+        private AutomatedAvailabilityAction availabilityAction;
         
         public IdleTimer() {
-            this(TWENTY_MINUTES_IN_MILLIS, new SelfAvailabilityAction());
+            this(TWENTY_MINUTES_IN_MILLIS, new AutomatedAvailabilityAction());
         }
         
-        public IdleTimer(int delay, SelfAvailabilityAction listener) {
+        public IdleTimer(int delay, AutomatedAvailabilityAction listener) {
             super(delay, listener);
             this.availabilityAction = listener;
         }
@@ -174,22 +179,32 @@ public class FriendsPane extends JPanel implements FriendRemover {
             super.restart();
             availabilityAction.resetAvailability();
         }
+
+        public void setCurrentMode(Mode newMode) {
+            availabilityAction.setCurrentMode(newMode);
+        }
     }
     
-    private static class SelfAvailabilityAction implements ActionListener {
-        private boolean hasChangedAvailability;
+    private static class AutomatedAvailabilityAction implements ActionListener {
+        private AtomicReference<Mode> currentMode = new AtomicReference<Mode>();
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            new SelfAvailabilityUpdateEvent(Mode.xa).publish();
-            hasChangedAvailability = true;
+            Mode mode = currentMode.get();
+            if(mode == null || !mode.equals(Mode.dnd)) {
+                new SelfAvailabilityUpdateEvent(Mode.xa).publish();
+            }
         }
         
         public void resetAvailability() {
-            if (hasChangedAvailability) {
+            Mode mode = currentMode.get();
+            if(mode == null || !mode.equals(Mode.available)) {
                 new SelfAvailabilityUpdateEvent(Mode.available).publish();
-                hasChangedAvailability = false;
             }
+        }
+
+        public void setCurrentMode(Mode newMode) {
+            currentMode.set(newMode);
         }
     }
 
