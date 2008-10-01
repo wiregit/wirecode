@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
@@ -36,7 +37,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -140,11 +140,11 @@ public class MainDownloadPanel extends JPanel {
 		cardLayout.show(cardPanel, NO_CATEGORY);
 		
 		
-		final EventList<DownloadItem> pausableList = new FilterList<DownloadItem>(downloadMediator.getFilteredList(), 
+		final EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
 		        new PausableMatcher());
-		final EventList<DownloadItem> resumableList = new FilterList<DownloadItem>(downloadMediator.getFilteredList(), 
+		final EventList<DownloadItem> resumableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
                 new ResumableMatcher());
-		final EventList<DownloadItem> doneList = new FilterList<DownloadItem>(downloadMediator.getFilteredList(), 
+		final EventList<DownloadItem> doneList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
                         new DownloadStateMatcher(DownloadState.DONE));
 		
 		pausableList.addListEventListener(new ListEventListener<DownloadItem>() {

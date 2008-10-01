@@ -9,6 +9,7 @@ import javax.swing.ListSelectionModel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
@@ -36,7 +37,7 @@ public class FriendNameTable extends JXTable {
             RemoteLibraryManager remoteLibraryManager, LibraryManager libraryManager, ShareListManager shareListManager, Navigator navigator) {
         GuiUtils.assignResources(this);
         
-        SortedList<FriendItem> friendList = new SortedList<FriendItem>(eventList, new FriendComparator());       
+        SortedList<FriendItem> friendList = GlazedListsFactory.sortedList(eventList, new FriendComparator());       
         tableModel = new EventTableModel<FriendItem>(friendList, tableFormat);
         
         setModel(tableModel);

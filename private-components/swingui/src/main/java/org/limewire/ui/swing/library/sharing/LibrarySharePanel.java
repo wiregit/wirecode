@@ -44,6 +44,7 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
@@ -68,7 +69,6 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
@@ -194,7 +194,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         
         shareLabel = new JLabel(I18n.tr("Currently sharing with"));
         
-        shareFriendList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+        shareFriendList = GlazedListsFactory.threadSafeList(GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
        
         shareTable = new ToolTipTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(1)));
         shareTable.setTableHeader(null);
@@ -231,8 +231,8 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
         //have no guarantee about the order of sorting and selecting
         final TextMatcherEditor<SharingTarget>textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
-        noShareFriendList = GlazedLists.threadSafeList(new SortedList<SharingTarget>(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
-        noShareFilterList = new FilterList<SharingTarget>(noShareFriendList, textMatcher);
+        noShareFriendList = GlazedLists.threadSafeList(GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+        noShareFilterList = GlazedListsFactory.filterList(noShareFriendList, textMatcher);
         
         inputField.addActionListener(new ActionListener() {
             @Override

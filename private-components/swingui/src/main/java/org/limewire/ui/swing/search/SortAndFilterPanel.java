@@ -24,6 +24,7 @@ import javax.swing.JToggleButton;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
@@ -35,7 +36,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
@@ -198,10 +198,10 @@ public class SortAndFilterPanel extends JXPanel {
 
         // Created a SortedList that doesn't have a Comparator yet.
         final SortedList<VisualSearchResult> sortedList =
-            new SortedList<VisualSearchResult>(simpleList, getFloatComparator(PropertyKey.RELEVANCE, false));
+            GlazedListsFactory.sortedList(simpleList, getFloatComparator(PropertyKey.RELEVANCE, false));
 
         EventList<VisualSearchResult> filteredList =
-            new FilterList<VisualSearchResult>(sortedList, editor);
+            GlazedListsFactory.filterList(sortedList, editor);
         
         ItemListener listener = new ItemListener() {
             @Override

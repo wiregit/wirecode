@@ -51,6 +51,7 @@ import org.jdesktop.swingx.decorator.BorderHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.logging.Log;
@@ -135,8 +136,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
         this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
         this.friendSharing = friendSharing;
-        ObservableElementList<ChatFriend> observableList = new ObservableElementList<ChatFriend>(chatFriends, GlazedLists.beanConnector(ChatFriend.class));
-        SortedList<ChatFriend> sortedFriends = new SortedList<ChatFriend>(observableList,  new FriendAvailabilityComparator());
+        ObservableElementList<ChatFriend> observableList = GlazedListsFactory.observableElementList(chatFriends, GlazedLists.beanConnector(ChatFriend.class));
+        SortedList<ChatFriend> sortedFriends = GlazedListsFactory.sortedList(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
         
         addPopupMenus(friendsTable);
@@ -265,7 +266,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         };
         
         final TextMatcherEditor<ChatFriend> editor = new TextMatcherEditor<ChatFriend>(friendFilterator);
-        final FilterList<ChatFriend> filter = new FilterList<ChatFriend>(friendsList, editor);
+        final FilterList<ChatFriend> filter = GlazedListsFactory.filterList(friendsList, editor);
         
         TableFormat<ChatFriend> format = new AbstractTableFormat<ChatFriend>(tr("Name")) {
             @Override

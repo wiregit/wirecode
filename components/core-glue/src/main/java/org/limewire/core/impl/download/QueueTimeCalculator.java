@@ -4,12 +4,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
@@ -25,7 +24,7 @@ public class QueueTimeCalculator {
     public QueueTimeCalculator(EventList<DownloadItem> downloadItems) {
        
 
-        downloadingList = new FilterList<DownloadItem>(downloadItems, new DownloadStateMatcher(
+        downloadingList = GlazedListsFactory.filterList(downloadItems, new DownloadStateMatcher(
                 DownloadState.DOWNLOADING));
 
         Comparator<DownloadItem> dlComparator = new Comparator<DownloadItem>() {
@@ -35,7 +34,7 @@ public class QueueTimeCalculator {
             }
         };
 
-        downloadingList = new SortedList<DownloadItem>(downloadingList, dlComparator);
+        downloadingList = GlazedListsFactory.sortedList(downloadingList, dlComparator);
 
     }
 

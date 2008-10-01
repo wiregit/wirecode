@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingUtilities;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -31,11 +32,11 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
     public BasicSearchResultsModel() {
         allSearchResults = new BasicEventList<SearchResult>();
-        GroupingList<SearchResult> groupingListUrns = new GroupingList<SearchResult>(
+        GroupingList<SearchResult> groupingListUrns = GlazedListsFactory.groupingList(
                 allSearchResults, new UrnComparator());
-        groupedUrnResults = new FunctionList<List<SearchResult>, VisualSearchResult>(
+        groupedUrnResults = GlazedListsFactory.functionList(
                 groupingListUrns, new SearchResultGrouper(resultCount));
-        observableList = new ObservableElementList<VisualSearchResult>(groupedUrnResults,
+        observableList = GlazedListsFactory.observableElementList(groupedUrnResults,
                 GlazedLists.beanConnector(VisualSearchResult.class));
     }
 

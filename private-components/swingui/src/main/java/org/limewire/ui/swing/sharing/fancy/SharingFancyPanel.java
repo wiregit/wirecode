@@ -17,6 +17,7 @@ import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.VerticalLayout;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -84,12 +85,12 @@ public class SharingFancyPanel extends JPanel {
             }
         });
         
-        filterLists.put(Category.AUDIO, new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.AUDIO)));
-        filterLists.put(Category.VIDEO, new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.VIDEO)));
-        filterLists.put(Category.IMAGE, new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.IMAGE)));
-        filterLists.put(Category.DOCUMENT, new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.DOCUMENT)));
-        filterLists.put(Category.PROGRAM, new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.PROGRAM)));
-        filterLists.put(Category.OTHER, new FilterList<LocalFileItem>(eventList, new CategoryFilter(Category.OTHER)));
+        filterLists.put(Category.AUDIO, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.AUDIO)));
+        filterLists.put(Category.VIDEO, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.VIDEO)));
+        filterLists.put(Category.IMAGE, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.IMAGE)));
+        filterLists.put(Category.DOCUMENT, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.DOCUMENT)));
+        filterLists.put(Category.PROGRAM, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.PROGRAM)));
+        filterLists.put(Category.OTHER, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.OTHER)));
     }
     
     public SharingFancyPanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, LocalFileList originalList, IconManager iconManager, ThumbnailManager thumbnailManager) {

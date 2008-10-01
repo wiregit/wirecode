@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadListener;
@@ -55,8 +56,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
-	    downloadItems = GlazedLists.threadSafeList(
-	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));
+	    downloadItems = GlazedListsFactory.threadSafeList(
+	            GlazedListsFactory.observableElementList(new BasicEventList<DownloadItem>(), downloadConnector));
 	    this.queueTimeCalculator = new QueueTimeCalculator(downloadItems);
 	    listenerList.addDownloadListener(new CoreDownloadListener(downloadItems, queueTimeCalculator));
 	    

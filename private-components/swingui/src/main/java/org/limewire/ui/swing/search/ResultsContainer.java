@@ -10,6 +10,7 @@ import javax.swing.Action;
 import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -103,7 +104,7 @@ public class ResultsContainer extends JXPanel {
     
     private FilterList<VisualSearchResult> filter(
         final Category category, EventList<VisualSearchResult> eventList) {
-        return new FilterList<VisualSearchResult>(
+        return GlazedListsFactory.filterList(
             eventList, new Matcher<VisualSearchResult>() {
             @Override
             public boolean matches(VisualSearchResult item) {

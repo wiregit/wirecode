@@ -13,6 +13,7 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -130,7 +131,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     
     private void createCenterCards(SharingHeaderPanel headerPanel, JPanel cardPanel) {
 
-        FilterList<LocalFileItem> filteredList = new FilterList<LocalFileItem>(fileList.getSwingModel(), 
+        FilterList<LocalFileItem> filteredList = GlazedListsFactory.filterList(fileList.getSwingModel(), 
                 new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
         
         createTable(filteredList);

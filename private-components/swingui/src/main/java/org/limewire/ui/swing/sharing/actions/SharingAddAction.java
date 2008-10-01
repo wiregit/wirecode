@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
@@ -39,7 +40,7 @@ public class SharingAddAction extends AbstractAction {
             return; 
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
-                FilterList<LocalFileItem> filter = new FilterList<LocalFileItem>(libraryList.getModel(), new CategoryFilter(category));
+                FilterList<LocalFileItem> filter = GlazedListsFactory.filterList(libraryList.getModel(), new CategoryFilter(category));
                 try {
                     filter.getReadWriteLock().readLock().lock();
                     for(LocalFileItem item : filter) {

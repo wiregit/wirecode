@@ -1,7 +1,5 @@
 package org.limewire.core.impl.mozilla;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.MozillaSettings;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownloadManager;
@@ -13,7 +11,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class LimeMozillaOverrides {
 
-    private static final Log LOG = LogFactory.getLog(LimeMozillaOverrides.class);
+//    private static final Log LOG = LogFactory.getLog(LimeMozillaOverrides.class);
 
     private final LimeMozillaDownloadManagerListenerImpl downloadManagerListener;
 

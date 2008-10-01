@@ -14,6 +14,7 @@
         <do.setup-properties component="collection">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+				<pathelement location="${limewire.lib.jars}/glazedlists-1.7.0_java15.jar"/>				
 			    <path refid="build.limewire.components.common.buildpath"/>
 			</src-classpath>
         </do.setup-properties>

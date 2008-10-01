@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
@@ -27,10 +28,7 @@ import org.limewire.logging.LogFactory;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.UniqueList;
-import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -347,7 +345,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         
         LocalFileListImpl(EventList<LocalFileItem> eventList) {
             this.baseList = eventList;
-            this.threadSafeList = GlazedLists.threadSafeList(eventList);
+            this.threadSafeList = GlazedListsFactory.threadSafeList(eventList);
         }
         
         @Override
@@ -359,7 +357,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         public EventList<LocalFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingEventList == null) {
-                swingEventList = GlazedListsSwing.swingThreadProxyList(threadSafeList);
+                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeList);
             }
             return swingEventList;
         }
@@ -385,7 +383,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         protected volatile TransformedList<RemoteFileItem, RemoteFileItem> swingEventList;
         
         RemoteFileListImpl() {
-            eventList = GlazedLists.threadSafeList(new BasicEventList<RemoteFileItem>());
+            eventList = GlazedListsFactory.threadSafeList(new BasicEventList<RemoteFileItem>());
         }
         
         @Override
@@ -397,7 +395,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         public EventList<RemoteFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingEventList == null) {
-                swingEventList = GlazedListsSwing.swingThreadProxyList(eventList);
+                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList);
             }
             return swingEventList;
         }
@@ -445,7 +443,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         
         public CombinedFriendShareList() {
             compositeList = new CompositeList<LocalFileItem>();
-            threadSafeUniqueList = new UniqueList<LocalFileItem>(GlazedLists.threadSafeList(compositeList),
+            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(compositeList),
                     new Comparator<LocalFileItem>() {
                 @Override
                 public int compare(LocalFileItem o1, LocalFileItem o2) {
@@ -490,7 +488,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         public EventList<LocalFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
-                swingList = GlazedListsSwing.swingThreadProxyList(threadSafeUniqueList);
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
             }
             return swingList;
         }

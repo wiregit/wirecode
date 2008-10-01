@@ -21,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
@@ -38,12 +39,10 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import com.google.inject.Inject;
 
@@ -105,7 +104,7 @@ public class DownloadSummaryPanel extends JPanel {
 	    
 	    setOpaque(false);
 	    
-        this.allList = GlazedListsSwing.swingThreadProxyList(downloadListManager.getDownloads());
+        this.allList = GlazedListsFactory.swingThreadProxyEventList(downloadListManager.getDownloads());
 
         setLayout(new BorderLayout());
                 
@@ -115,8 +114,8 @@ public class DownloadSummaryPanel extends JPanel {
         completeLabel.setForeground(allCompleteColor);
         completePanel.add(completeLabel);
         
-        unfinishedList = new FilterList<DownloadItem>(allList, new DownloadStateExcluder(DownloadState.DONE));
-        warningList = new FilterList<DownloadItem>(allList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
+        unfinishedList = GlazedListsFactory.filterList(allList, new DownloadStateExcluder(DownloadState.DONE));
+        warningList = GlazedListsFactory.filterList(allList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		
 		titleLabel = new SectionHeading(I18n.tr("Downloads"));
 		titleLabel.setName("DownloadSummaryPanel.titleLabel");
@@ -136,9 +135,9 @@ public class DownloadSummaryPanel extends JPanel {
 		    
 		};
 		
-		SortedList<DownloadItem> sortedList = new SortedList<DownloadItem>(allList, comparator);		
+		SortedList<DownloadItem> sortedList = GlazedListsFactory.sortedList(allList, comparator);		
 		
-		chokeList = new RangeList<DownloadItem>(sortedList);
+		chokeList = GlazedListsFactory.rangeList(sortedList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
 		table = new JTable(new DownloadTableModel(chokeList));
 		table.setShowHorizontalLines(false);

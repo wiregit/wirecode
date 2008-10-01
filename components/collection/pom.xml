@@ -20,6 +20,11 @@
       <version>${limewire.version}</version>
     </dependency>
     <dependency>
+    	<groupId>net.java.dev.glazedlists</groupId>
+    	<artifactId>glazedlists_java15</artifactId>
+    	<version>1.7.0</version>
+    </dependency>    
+    <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>

@@ -16,6 +16,7 @@ import javax.swing.Scrollable;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
@@ -25,7 +26,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.assistedinject.Assisted;
@@ -132,7 +132,7 @@ public class SearchResultsPanel extends JPanel {
     
     private EventList<VisualSearchResult> newVisibleFilterList(
             EventList<VisualSearchResult> eventList) {
-        return new FilterList<VisualSearchResult>(eventList, new Matcher<VisualSearchResult>() {
+        return GlazedListsFactory.filterList(eventList, new Matcher<VisualSearchResult>() {
             @Override
             public boolean matches(VisualSearchResult item) {
                 boolean visible = item.isVisible();

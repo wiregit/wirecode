@@ -19,6 +19,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -52,9 +53,7 @@ import org.limewire.xmpp.api.client.User;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.event.ListEvent;
@@ -114,7 +113,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
 
         Connector<FriendItem> connector = GlazedLists.beanConnector(FriendItem.class); 
-        friendsList = new ObservableElementList<FriendItem>(new BasicEventList<FriendItem>(), connector);               
+        friendsList = GlazedListsFactory.observableElementList(new BasicEventList<FriendItem>(), connector);               
         friendTable = new FriendNameTable(friendsList, new FriendTableFormat(),
                 remoteLibraryManager, libraryManager, shareListManager, navigator);
         
@@ -266,7 +265,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             }
             
             currentList = fileList.getSwingModel();
-            filteredList = new FilterList<LocalFileItem>(currentList, 
+            filteredList = GlazedListsFactory.filterList(currentList, 
                     new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
             currentList.addListEventListener(this);
             

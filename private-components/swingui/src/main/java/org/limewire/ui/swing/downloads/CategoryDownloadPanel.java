@@ -23,6 +23,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.CompoundHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.Highlighter;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
@@ -34,7 +35,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -125,7 +125,7 @@ public class CategoryDownloadPanel extends JPanel {
 			DownloadState... states) {
 		final JXCollapsiblePane collapsePane = new JXCollapsiblePane();
 		collapsePane.setLayout(new BorderLayout());
-		EventList<DownloadItem> filterList = new FilterList<DownloadItem>(list, new DownloadStateMatcher(states));
+		EventList<DownloadItem> filterList = GlazedListsFactory.filterList(list, new DownloadStateMatcher(states));
 		
 		final DownloadTable table = new FancyDownloadTable(filterList);
 		tables.add(table);
