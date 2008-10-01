@@ -41,7 +41,6 @@ public abstract class BaseResultPanel extends JXPanel {
     private final EventList<VisualSearchResult> baseEventList;
     private ConfigurableTable<VisualSearchResult> resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
-    private final Navigator navigator;
     private final Search search;
     private final SearchResultDownloader searchResultDownloader;
     
@@ -56,19 +55,18 @@ public abstract class BaseResultPanel extends JXPanel {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
-        this.navigator = navigator;
         
         setLayout(layout);
                 
-        configureList(eventList, preserver);
-        configureTable(eventList, tableFormat);
+        configureList(eventList, preserver, navigator);
+        configureTable(eventList, tableFormat, navigator);
  
         add(resultsList, ModeListener.Mode.LIST.name());
         add(resultsTable, ModeListener.Mode.TABLE.name());
         setMode(ModeListener.Mode.LIST);
     }
     
-    private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver) {
+    private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator) {
         // We're using a MouseableTable with one column instead of JList
         // because that will allow us to display buttons with rollover icons.
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
@@ -129,7 +127,7 @@ public abstract class BaseResultPanel extends JXPanel {
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,
-        final ResultsTableFormat<VisualSearchResult> tableFormat) {
+        final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator) {
         resultsTable = new ConfigurableTable<VisualSearchResult>(true);
 
         resultsTable.setEventList(eventList);
