@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,9 +39,12 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.RegisteringEventListener;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressConnector;
+import org.limewire.net.address.AddressEvent;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
@@ -65,9 +69,9 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
@@ -76,7 +80,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  * Handles sending out pushes and awaiting incoming GIVs.
  */
 @Singleton
-public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHandlerRegistry, AddressConnector {
+public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHandlerRegistry, AddressConnector, RegisteringEventListener<AddressEvent> {
 
     private static final Log LOG = LogFactory.getLog(PushDownloadManager.class);
     
@@ -98,6 +102,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private final Map<byte[], AtomicInteger>  
         UDP_FAILOVER = new TreeMap<byte[], AtomicInteger>(new GUID.GUIDByteComparator());
+    
+    private final AtomicReference<Address> localAddress = new AtomicReference<Address>();
     
 
     /**
@@ -155,7 +161,31 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     public void register(SocketsManager socketsManager) {
         socketsManager.registerConnector(this);
     }
+
+    @Inject
+    public void register(ListenerSupport<AddressEvent> addressEventListenerSupport) {
+        addressEventListenerSupport.addListener(this);
+    }
+
+    public void handleEvent(AddressEvent event) {
+        synchronized (localAddress) {
+            localAddress.set(event.getSource());
+            localAddress.notifyAll();
+        }
+    }
     
+    private void waitForLocalAddress() {
+        synchronized (localAddress) {
+            while(localAddress.get() == null) {
+                try {
+                    localAddress.wait();
+                } catch (InterruptedException e) {
+                    LOG.error(e);
+                }
+            }
+        }
+    }
+
     public boolean isBlocking() {
         return true;
     }
@@ -185,7 +215,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                 -1, address.getFwtVersion(), publicAddress.isTLSCapable());
         PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(address.getClientGuid(), observer);
         pushHandlers.add(handlerAdapter);
-        sendPush(fakeRFD);
+        sendPush(fakeRFD, true);
         scheduleExpirerFor(handlerAdapter, (int)(timeout * 1.5));
     }
     
@@ -208,12 +238,20 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             }
         }, timeout, TimeUnit.MILLISECONDS);
     }
+    
+    public void sendPush(RemoteFileDesc file) {
+        sendPush(file, false);
+    }
 
     /**
      * Sends a push for the given file.
      */
-    public void sendPush(RemoteFileDesc file) {
-        sendPush(file, new NullMultiShutdownable());
+    private void sendPush(RemoteFileDesc file, boolean waitForLocalAddress) {
+        sendPush(file, new NullMultiShutdownable(), waitForLocalAddress);
+    }
+    
+    public void sendPush(RemoteFileDesc file, MultiShutdownable observer) {
+        sendPush(file, observer, false);
     }
 
     /**
@@ -222,14 +260,19 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
      *  hit, containing data about the host we're pushing to
      * @param observer The ConnectObserver to notify of success or failure
+     * @param waitForLocalAddress whether or not to wait for the local address
+     * to be determined
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public void sendPush(RemoteFileDesc file, MultiShutdownable observer) {
+    private void sendPush(RemoteFileDesc file, MultiShutdownable observer, boolean waitForLocalAddress) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Sending push: " + file);
         }
         
+        if(waitForLocalAddress) {
+            waitForLocalAddress();
+        }
         //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = networkManager.getAddress();

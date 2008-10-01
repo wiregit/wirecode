@@ -43,9 +43,9 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -146,15 +146,15 @@ public class BrowseHostHandler {
             browseHost(socket);
             return;
         } catch (IOException ie) {
-            LOG.debug("Error during direct transfer", ie);
+            LOG.debug("Error during browse host", ie);
         } catch (URISyntaxException e) {
-            LOG.debug("Error during direct transfer", e);
+            LOG.debug("Error during browse host", e);
         } catch (HttpException e) {
-            LOG.debug("Error during direct transfer", e);
+            LOG.debug("Error during browse host", e);
         } catch (InterruptedException e) {
-            LOG.debug("Error during direct transfer", e);
+            LOG.debug("Error during browse host", e);
         } catch (TimeoutException e) {
-            LOG.debug("Error during direct transfer", e);
+            LOG.debug("Error during browse host", e);
         }
         failed();
     }

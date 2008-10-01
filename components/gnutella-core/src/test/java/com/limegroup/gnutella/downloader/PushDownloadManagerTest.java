@@ -3,6 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Set;
@@ -85,6 +87,7 @@ public class PushDownloadManagerTest extends LimeTestCase {
             BlockingConnectObserver observer = new BlockingConnectObserver();
             Set<Connectable> proxies = new TreeSet<Connectable>();
             proxies.add(new ConnectableImpl("localhost", 9999, false));
+            networkManager.newPushProxies(proxies);
             GUID guid = new GUID();
             Connectable hostAddress = new ConnectableImpl(new ConnectableImpl("localhost", 1111, false));
             FirewalledAddress address = new FirewalledAddress(new ConnectableImpl("0.0.0.0", 1, false), hostAddress, guid, proxies, 0);
