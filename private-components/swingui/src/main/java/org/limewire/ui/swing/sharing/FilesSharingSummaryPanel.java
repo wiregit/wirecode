@@ -27,6 +27,7 @@ import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
+import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -58,7 +59,7 @@ public class FilesSharingSummaryPanel extends JPanel {
         gnutellaButton.setName("FilesSharingSummaryPanel.gnutella");
         gnutellaButton.setText("0");
         gnutellaButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        new ShareDropTarget(gnutellaButton, shareListManager.getGnutellaShareList());
+        //gnutellaButton.setTransferHandler(new SharingTransferHandler(shareListManager.getGnutellaShareList(), false));
         
         NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME, friendSharePanel);
         friendButton = new ShareButton(NavigatorUtils.getNavAction(friendNav));
