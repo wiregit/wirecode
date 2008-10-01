@@ -100,8 +100,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     }
     
     private void setupEmptyPanel(JPanel emptyPanel) {
-        ShareDropTarget drop = new ShareDropTarget(this, fileList, false);
-        emptyPanel.setDropTarget(drop.getDropTarget());
+        emptyPanel.setTransferHandler(new SharingTransferHandler(fileList,false));
     }
 
     
