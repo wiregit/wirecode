@@ -26,6 +26,7 @@ import org.limewire.ui.swing.ConfigurableTable;
 import org.limewire.ui.swing.StringTableCellRenderer;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.ModeListener;
+import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -51,7 +52,7 @@ public abstract class BaseResultPanel extends JXPanel {
             ResultsTableFormat<VisualSearchResult> tableFormat,
             SearchResultDownloader searchResultDownloader,
             Search search,
-            Navigator navigator) {
+            RowSelectionPreserver preserver, Navigator navigator) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
@@ -59,7 +60,7 @@ public abstract class BaseResultPanel extends JXPanel {
         
         setLayout(layout);
                 
-        configureList(eventList);
+        configureList(eventList, preserver);
         configureTable(eventList, tableFormat);
  
         add(resultsList, ModeListener.Mode.LIST.name());
@@ -67,10 +68,11 @@ public abstract class BaseResultPanel extends JXPanel {
         setMode(ModeListener.Mode.LIST);
     }
     
-    private void configureList(final EventList<VisualSearchResult> eventList) {
+    private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver) {
         // We're using a MouseableTable with one column instead of JList
         // because that will allow us to display buttons with rollover icons.
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
+        preserver.addRowPreservationListener(resultsList);
 
         resultsList.setEventList(eventList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();

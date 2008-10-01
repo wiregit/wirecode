@@ -1,18 +1,14 @@
 package org.limewire.ui.swing;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.swing.EventTableModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
+
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
@@ -21,22 +17,28 @@ import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.limewire.ui.swing.search.RowPresevationListener;
 import org.limewire.ui.swing.table.MouseableTable;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
  * This class is a subclass of JTable that adds features from Glazed Lists.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ConfigurableTable<E> extends MouseableTable {
+public class ConfigurableTable<E> extends MouseableTable implements RowPresevationListener {
 
     private EventList<E> eventList;
-    private EventList<E> originalEventList;
     private EventTableModel<E> tableModel;
     private JMenuItem disabledMenuItem;
     private JPopupMenu headerPopup;
     private TableFormat<E> tableFormat;
     private boolean showHeaders;
+    private E selectedRow;
 
     public ConfigurableTable(boolean showHeaders) {
         this.showHeaders = showHeaders;
@@ -80,10 +82,6 @@ public class ConfigurableTable<E> extends MouseableTable {
 
     public EventList<E> getEventList() {
         return eventList;
-    }
-
-    public EventList<E> getOriginalEventList() {
-        return originalEventList;
     }
 
     /**
@@ -202,15 +200,6 @@ public class ConfigurableTable<E> extends MouseableTable {
     }
 
     /**
-     * Sets the objects whose data should be displayed in this table.
-     * @param objects the objects
-     */
-    public void setData(Collection<E> objects) {
-        originalEventList = eventList = new BasicEventList<E>();
-        for (E object : objects) eventList.add(object);
-    }
-
-    /**
      * Sets the EventList table model from which
      * the data to be displayed is obtained.
      * @param eventList the EventList
@@ -262,5 +251,28 @@ public class ConfigurableTable<E> extends MouseableTable {
         System.out.println("ConfigurableTable: renderer for " + clazz.getName()
             + " is now " + renderer.getClass().getName());
     }
-    
+
+    @Override
+    public void preserveRowSelection() {
+        selectedRow = null;
+        if (isVisible()) {
+            int preservedSelectedRow = getSelectedRow();
+            if (preservedSelectedRow > -1) {
+                selectedRow = eventList.get(preservedSelectedRow);
+            } else {
+                selectedRow = null;
+            }
+        }
+    }
+
+    @Override
+    public void restoreRowSelection() {
+        if (isVisible() && selectedRow != null) {
+            int rowSelection = eventList.indexOf(selectedRow);
+            if (rowSelection > -1) {
+                setRowSelectionInterval(rowSelection, rowSelection);
+            }
+        }
+        selectedRow = null;
+    }
 }

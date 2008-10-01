@@ -48,6 +48,7 @@ public class ResultsContainer extends JXPanel {
     @AssistedInject ResultsContainer(
         @Assisted EventList<VisualSearchResult> eventList, 
         @Assisted Search search,
+        @Assisted RowSelectionPreserver preserver,
         AllResultsPanelFactory allFactory,
         AudioResultsPanelFactory audioFactory,
         VideoResultsPanelFactory videoFactory,
@@ -57,19 +58,19 @@ public class ResultsContainer extends JXPanel {
         ProgramResultsPanelFactory programFactory) {
         
         panelMap.put(SearchCategory.ALL.name(),
-            allFactory.create(eventList, search));
+            allFactory.create(eventList, search, preserver));
         panelMap.put(SearchCategory.AUDIO.name(),
-            audioFactory.create(filter(Category.AUDIO, eventList), search));
+            audioFactory.create(filter(Category.AUDIO, eventList), search, preserver));
         panelMap.put(SearchCategory.VIDEO.name(),
-            videoFactory.create(filter(Category.VIDEO, eventList), search));
+            videoFactory.create(filter(Category.VIDEO, eventList), search, preserver));
         panelMap.put(SearchCategory.IMAGE.name(),
-            imagesFactory.create(filter(Category.IMAGE, eventList), search));
+            imagesFactory.create(filter(Category.IMAGE, eventList), search, preserver));
         panelMap.put(SearchCategory.DOCUMENT.name(),
-            documentsFactory.create(filter(Category.DOCUMENT, eventList), search));
+            documentsFactory.create(filter(Category.DOCUMENT, eventList), search, preserver));
         panelMap.put(SearchCategory.PROGRAM.name(),
-            programFactory.create(filter(Category.PROGRAM, eventList), search));
+            programFactory.create(filter(Category.PROGRAM, eventList), search, preserver));
         panelMap.put(SearchCategory.OTHER.name(),
-            otherFactory.create(filter(Category.OTHER, eventList), search));
+            otherFactory.create(filter(Category.OTHER, eventList), search, preserver));
         
         setLayout(cardLayout);
         

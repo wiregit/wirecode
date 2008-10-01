@@ -26,7 +26,6 @@ import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.assistedinject.Assisted;
@@ -74,7 +73,8 @@ public class SearchResultsPanel extends JPanel {
             @Assisted Search search,
             ResultsContainerFactory containerFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
-            final SortAndFilterPanel sortAndFilterPanel) {        
+            final SortAndFilterPanel sortAndFilterPanel,
+            RowSelectionPreserver preserver) {        
         setBackground(Color.LIGHT_GRAY);
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
@@ -84,12 +84,12 @@ public class SearchResultsPanel extends JPanel {
         this.scrollablePanel = new ScrollablePanel();
 
         final EventList<VisualSearchResult> filteredList =
-            sortAndFilterPanel.getFilteredAndSortedList(newVisibleFilterList(eventList));
+            sortAndFilterPanel.getFilteredAndSortedList(newVisibleFilterList(eventList), preserver);
         
         // The ResultsContainerFactory create method takes two parameters
         // which it passes to the ResultsContainer constructor
         // for the parameters annotated with @Assisted.
-        this.resultsContainer = containerFactory.create(filteredList, search);
+        this.resultsContainer = containerFactory.create(filteredList, search, preserver);
 
         // what is this for?
 //        sortAndFilterPanel.addFilterListener(new SearchFilterListener() {

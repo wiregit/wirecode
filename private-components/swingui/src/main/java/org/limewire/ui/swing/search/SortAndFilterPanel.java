@@ -191,7 +191,7 @@ public class SortAndFilterPanel extends JXPanel {
     }
     
     public EventList<VisualSearchResult> getFilteredAndSortedList(
-        EventList<VisualSearchResult> simpleList) {
+        EventList<VisualSearchResult> simpleList, final RowSelectionPreserver preserver) {
 
         // Create a list that is filtered by a text field.
         
@@ -212,9 +212,9 @@ public class SortAndFilterPanel extends JXPanel {
                     && !item.equals(sortBy)) { // changing sort order
                     Comparator<VisualSearchResult> comparator =
                         getComparator(item);
-                    // TODO: RMV Determine which row, if any, is selected.
+                    preserver.beforeUpdateEvent();
                     sortedList.setComparator(comparator);
-                    // TODO: RMV Restore the row selection.
+                    preserver.afterUpdateEvent();
                     sortBy = item;
                 }
             }

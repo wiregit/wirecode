@@ -25,6 +25,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
+        bind(RowSelectionPreserver.class).to(RowSelectionPreserverImpl.class);
         bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryImpl.class);
         
         bind(SearchResultsPanelFactory.class).toProvider(

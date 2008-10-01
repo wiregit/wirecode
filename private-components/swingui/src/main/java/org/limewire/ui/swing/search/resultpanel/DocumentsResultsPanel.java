@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
@@ -20,8 +21,9 @@ public class DocumentsResultsPanel extends BaseResultPanel {
         DocumentTableFormat tableFormat,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search,
+        @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
         super(tr("Documents from Everyone"), eventList, tableFormat,
-            searchResultDownloader, search, navigator);
+            searchResultDownloader, search, preserver, navigator);
     }
 }
