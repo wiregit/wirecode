@@ -28,7 +28,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.sharing.SharingShortcutPanel;
-import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
+import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.table.CategoryFilter;
 import org.limewire.ui.swing.sharing.table.SharingFancyAudioTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingFancyDefaultTableFormat;
@@ -74,7 +74,7 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
     
     private IconLabelRenderer iconLabelRenderer;
     
-    private ShareDropTarget drop;
+    private final SharingTransferHandler transferHandler;
     
     private final EnumMap<Category, FilterList<LocalFileItem>> filterLists = new EnumMap<Category, FilterList<LocalFileItem>>(Category.class);
     
@@ -105,17 +105,17 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
         this.scrollPane = scrollPane;
         this.scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
-        drop = new ShareDropTarget(this, originalList, false);
+        this.transferHandler = new SharingTransferHandler(originalList, false);
 
         createFilteredLists(eventList);
         
-        musicTable = new SharingFancyTablePanel(music, filterLists.get(Category.AUDIO), new SharingFancyAudioTableFormat(), drop.getDropTarget(), originalList, audioIcon);
-        videoTable = new SharingFancyTablePanel(video, filterLists.get(Category.VIDEO), new SharingFancyDefaultTableFormat(),false, drop.getDropTarget(), originalList, videoIcon);
-        imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE), drop.getDropTarget(), originalList, imageIcon, thumbnailManager);
-        documentTable = new SharingFancyTablePanel(doc, filterLists.get(Category.DOCUMENT), new SharingFancyIconTableFormat(), false, drop.getDropTarget(), originalList, documentIcon);
-        programTable = new SharingFancyTablePanel(program, filterLists.get(Category.PROGRAM), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget(), originalList, appIcon);
-        otherTable = new SharingFancyTablePanel(other, filterLists.get(Category.OTHER), new SharingFancyDefaultTableFormat(), drop.getDropTarget(), originalList, appIcon);
-              
+        musicTable = new SharingFancyTablePanel(music, filterLists.get(Category.AUDIO), new SharingFancyAudioTableFormat(), transferHandler, originalList, audioIcon);
+        videoTable = new SharingFancyTablePanel(video, filterLists.get(Category.VIDEO), new SharingFancyDefaultTableFormat(),false, transferHandler, originalList, videoIcon);
+        imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE), transferHandler, originalList, imageIcon, thumbnailManager);
+        documentTable = new SharingFancyTablePanel(doc, filterLists.get(Category.DOCUMENT), new SharingFancyIconTableFormat(), false, transferHandler, originalList, documentIcon);
+        programTable = new SharingFancyTablePanel(program, filterLists.get(Category.PROGRAM), new SharingFancyDefaultTableFormat(), false, transferHandler, originalList, appIcon);
+        otherTable = new SharingFancyTablePanel(other, filterLists.get(Category.OTHER), new SharingFancyDefaultTableFormat(), transferHandler, originalList, appIcon);
+        
         TableColumn tc = documentTable.getTable().getColumn(0);
         iconLabelRenderer = new IconLabelRenderer(iconManager);
         tc.setCellRenderer(iconLabelRenderer);
@@ -135,9 +135,9 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
                 new boolean[]{true,true,true,true,false,false});
 
        setLayout(new VerticalLayout());
-
+        
        add(shortcuts);
-       
+        
        add(musicTable);
        add(videoTable);
        add(imageList);
@@ -145,7 +145,7 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
        add(programTable);
        add(otherTable);
 
-       this.setDropTarget(drop.getDropTarget());
+       this.setTransferHandler(transferHandler);
     }
     
     private List<EventList<LocalFileItem>> getFilteredListsInOrderOf(Category... categories) {
@@ -171,7 +171,8 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
         TableColumn tc = documentTable.getTable().getColumn(0);
         tc.setCellRenderer(iconLabelRenderer);
         
-        drop.setModel(fileList);
+        transferHandler.setModel(fileList);
+        
         scrollPane.getViewport().setViewPosition(new Point(0, 0));
         shortcuts.setModel(getFilteredListsInOrderOf(
                 Category.AUDIO, Category.VIDEO,

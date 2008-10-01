@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
@@ -57,12 +58,12 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     private SharingRemoveAllAction removeAction;
     private EventList<LocalFileItem> currentEventList;
     
-    public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon) {
-        this(name, eventList, tableFormat, true, dropTarget, fileList, panelIcon);
+    public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon) {
+        this(name, eventList, tableFormat, true, transferHandler, fileList, panelIcon);
     }
     
     public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, 
-            boolean paintTableHeader, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon) {
+            boolean paintTableHeader, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon) {
         
         this.tableFormat = tableFormat;
         this.currentEventList = eventList;
@@ -82,7 +83,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         Line line = Line.createHorizontalLine(Color.BLACK, 3);
         
         // create the table
-        table = createTable(eventList, fileList, tableFormat, dropTarget);
+        table = createTable(eventList, fileList, tableFormat, transferHandler);
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remainign space
         setLayout(new MigLayout("insets 10 25 0 10",     //layout contraints
@@ -106,10 +107,10 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         setVisible(false);
     }
     
-    private SharingFancyTable createTable(EventList<LocalFileItem> eventList, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat, DropTarget dropTarget) {
+    private SharingFancyTable createTable(EventList<LocalFileItem> eventList, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat, TransferHandler transferHandler) {
         if( table == null) {
             table = new SharingFancyTable(eventList, fileList, tableFormat);
-            table.setDropTarget(dropTarget);
+            table.setTransferHandler(transferHandler);
             table.setSortable(false);
             
             TableMouseListener tableMouseListener = new TableMouseListener(table);

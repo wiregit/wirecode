@@ -2,7 +2,6 @@ package org.limewire.ui.swing.sharing.fancy;
 
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.awt.dnd.DropTarget;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -14,6 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.TransferHandler;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -53,7 +53,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     
     private static final String unshareAll = I18n.tr("Unshare All");
     
-    public SharingFancyListPanel(String name, EventList<LocalFileItem> eventList, DropTarget dropTarget, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager) {       
+    public SharingFancyListPanel(String name, EventList<LocalFileItem> eventList, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager) {       
         setBackground(Color.WHITE);
         
         this.currentEventList = eventList;
@@ -68,7 +68,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         Line line = Line.createHorizontalLine(Color.BLACK, 3);
         
         imageList = new ImageList(eventList, fileList, thumbnailManager);
-        imageList.setDropTarget(dropTarget);  
+        imageList.setTransferHandler(transferHandler);
         
         layerButton = new UnshareButton(new SharingRemoveListAction(imageList));
         layerButton.setSize(60, 30);

@@ -21,7 +21,7 @@ import org.limewire.util.MediaType;
  */
 public class SharingTransferHandler extends TransferHandler {
 
-    private final LocalFileList fileList;
+    private LocalFileList fileList;
 
     private final boolean alwaysShareDocuments;
 
@@ -67,7 +67,8 @@ public class SharingTransferHandler extends TransferHandler {
         return true;
     }
 
-    private void handleDrop(Transferable transferable, LocalFileList fileList) throws UnsupportedFlavorException, IOException {
+    private void handleDrop(Transferable transferable, LocalFileList fileList)
+            throws UnsupportedFlavorException, IOException {
         final LocalFileList currentModel = fileList;
         final File[] droppedFiles = DNDUtils.getFiles(transferable);
 
@@ -75,7 +76,8 @@ public class SharingTransferHandler extends TransferHandler {
 
         // perform the file IO operations on its own thread.
         // TODO: give feedback for failed adds.\
-        //TODO this code is duplicated from ShareDropTarget -- need to refactor both classes
+        // TODO this code is duplicated from ShareDropTarget -- need to refactor
+        // both classes
         BackgroundExecutorService.schedule(new Runnable() {
             public void run() {
                 for (int i = 0; i < droppedFiles.length; i++) {
@@ -130,5 +132,9 @@ public class SharingTransferHandler extends TransferHandler {
             }
         }
         return true;
+    }
+
+    public void setModel(LocalFileList fileList) {
+        this.fileList = fileList;
     }
 }
