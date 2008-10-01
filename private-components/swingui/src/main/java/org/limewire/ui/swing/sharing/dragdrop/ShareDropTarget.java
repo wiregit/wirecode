@@ -107,6 +107,7 @@ public class ShareDropTarget implements DropTargetListener {
                         for(File file : acceptedFiles) {       
                             currentModel.addFile(file);
                         }
+                        dropCompleted();
                     }
                 });
 
@@ -117,6 +118,14 @@ public class ShareDropTarget implements DropTargetListener {
           } else {
           		dtde.rejectDrop();
           }
+    }
+    
+    /**
+     * Notification method for subclasses to indicate that all
+     * files accepted by the drop have been added to the model.
+     */
+    protected void dropCompleted() {
+        //no-op
     }
 
     @Override

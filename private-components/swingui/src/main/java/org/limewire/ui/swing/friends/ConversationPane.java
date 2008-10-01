@@ -10,7 +10,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -31,9 +30,9 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -328,8 +327,7 @@ public class ConversationPane extends JPanel implements Displayable {
         }
 
         @Override
-        public void drop(DropTargetDropEvent dtde) {
-            super.drop(dtde);
+        protected void dropCompleted() {
             if (fileList.size() > 0) {
                 for(LocalFileItem item : fileList.getSwingModel()) {
                     offerFile(item);
