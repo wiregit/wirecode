@@ -19,6 +19,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.RowPresevationListener;
 import org.limewire.ui.swing.table.MouseableTable;
 
@@ -31,7 +33,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class ConfigurableTable<E> extends MouseableTable implements RowPresevationListener {
-
+    private final Log LOG = LogFactory.getLog(getClass());
     private EventList<E> eventList;
     private EventTableModel<E> tableModel;
     private JMenuItem disabledMenuItem;
@@ -240,16 +242,14 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
     public void setDefaultEditor(Class clazz, TableCellEditor editor) {
         super.setDefaultEditor(clazz, editor);
         if (clazz != String.class) return;
-        System.out.println("ConfigurableTable: editor for " + clazz.getName()
-            + " is now " + editor.getClass().getName());
+        LOG.debugf("ConfigurableTable: editor for {0} is now {1}", clazz.getName() + editor.getClass().getName());
     }
 
     @Override
     public void setDefaultRenderer(Class clazz, TableCellRenderer renderer) {
         super.setDefaultRenderer(clazz, renderer);
         if (clazz != String.class) return;
-        System.out.println("ConfigurableTable: renderer for " + clazz.getName()
-            + " is now " + renderer.getClass().getName());
+        LOG.debugf("ConfigurableTable: renderer for {0} is now {1}", clazz.getName(), renderer.getClass().getName());
     }
 
     @Override
