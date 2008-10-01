@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.limewire.http.URIUtils;
+import org.limewire.util.URIUtils;
 
 
 /**

@@ -10,10 +10,10 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.http.URIUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.NameValue;
+import org.limewire.util.URIUtils;
 
 import com.limegroup.bittorrent.BTData;
 import com.limegroup.bittorrent.BTData.BTFileData;

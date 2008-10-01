@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.sharing.dragdrop;
 
 import java.awt.Component;
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -16,6 +15,7 @@ import java.util.List;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
+import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
@@ -84,16 +84,17 @@ public class ShareDropTarget implements DropTargetListener {
 
             try {
                 final LocalFileList currentModel = fileList;
-                final List droppedFiles = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor); 
+                final File[] droppedFiles = DNDUtils.getFiles(transferable); 
                 
                 final List<File> acceptedFiles = new ArrayList<File>();
           
                 // perform the file IO operations on its own thread. 
-                //TODO: give feedback for failed adds.
+                //TODO: give feedback for failed adds.\
+               
                 BackgroundExecutorService.schedule(new Runnable(){
                     public void run() {
-                        for(int i = droppedFiles.size()-1; i >= 0; i--) { 
-                            File file = (File)droppedFiles.get(i);
+                        for(int i = 0; i < droppedFiles.length; i++) { 
+                            File file = droppedFiles[i];
                             if(file == null)
                                 continue;
                             if(file.isDirectory()) {
@@ -152,7 +153,7 @@ public class ShareDropTarget implements DropTargetListener {
      * @return true if the file is allowed, false otherwise.
      */
     private boolean isAllowed(String fileExtension) {
-        if(fileExtension != null) {        
+        if(!fileExtension.isEmpty()) {        
             if(!alwaysShareDocuments && !SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
                 MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
                 if(type == null || type.getSchema().equals(MediaType.SCHEMA_DOCUMENTS)) {

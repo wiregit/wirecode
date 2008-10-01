@@ -1,12 +1,12 @@
-package org.limewire.http;
+package org.limewire.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import junit.framework.Test;
 
-import org.limewire.http.URIUtils;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.URIUtils;
 
 public class URIUtilsTest extends BaseTestCase {
     public URIUtilsTest(String name) {

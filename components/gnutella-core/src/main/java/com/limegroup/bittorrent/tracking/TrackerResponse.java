@@ -214,7 +214,7 @@ class TrackerResponse {
 					+ t_ip);
 		InetAddress addr;
 		try {
-			String ipS = new String((byte [])t_ip, org.limewire.http.Constants.ASCII_ENCODING);
+			String ipS = new String((byte [])t_ip, org.limewire.util.Constants.ASCII_ENCODING);
 			addr = InetAddress.getByName(ipS);
 		} catch (UnknownHostException uhe) {
 			throw new ValueException("bad tracker response - bad peer ip "

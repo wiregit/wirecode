@@ -11,12 +11,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpConnectionParams;
-import org.limewire.http.URIUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
+import org.limewire.util.URIUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.bittorrent.ManagedTorrent;
@@ -116,12 +116,12 @@ public class TrackerImpl implements Tracker {
 		try {
 			String infoHash = URLEncoder.encode(
 					StringUtils.getASCIIString(context.getMetaInfo().getInfoHash()),
-					org.limewire.http.Constants.ASCII_ENCODING);
+					org.limewire.util.Constants.ASCII_ENCODING);
 			addGetField(buf, "info_hash", infoHash);
 
 			String peerId = URLEncoder
 					.encode(StringUtils.getASCIIString(applicationServices.getMyBTGUID()),
-							org.limewire.http.Constants.ASCII_ENCODING);
+							org.limewire.util.Constants.ASCII_ENCODING);
 			addGetField(buf, "peer_id", peerId);
 
 			addGetField(buf, "key", key);

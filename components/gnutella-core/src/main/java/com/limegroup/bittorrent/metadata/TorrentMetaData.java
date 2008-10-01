@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.http.URIUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.NameValue;
 import org.limewire.util.StringUtils;
+import org.limewire.util.URIUtils;
 
 import com.limegroup.bittorrent.BTData;
 import com.limegroup.bittorrent.BTData.BTFileData;

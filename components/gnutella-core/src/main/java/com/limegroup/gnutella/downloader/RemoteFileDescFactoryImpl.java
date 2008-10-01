@@ -12,13 +12,13 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpHead;
-import org.limewire.http.URIUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.util.URIUtils;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;

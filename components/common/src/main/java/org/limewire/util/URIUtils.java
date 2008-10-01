@@ -1,4 +1,4 @@
-package org.limewire.http;
+package org.limewire.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -6,13 +6,14 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.StringTokenizer;
 
-import org.limewire.service.ErrorService;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 /**
  * Utilities for URIs
  */
 public class URIUtils {
-    
+    private static final Log LOG = LogFactory.getLog(URIUtils.class);
     private static final String RESERVED = ";/?:@&=+$,";
 
     /**
@@ -70,7 +71,7 @@ public class URIUtils {
                     encodedURL.append(URLEncoder.encode(s, Constants.ASCII_ENCODING));
                 } catch (UnsupportedEncodingException e1) {
                     // should never happen
-                    ErrorService.error(e1);
+                   LOG.error(e1.getMessage(), e1);
                 }
             }
         }

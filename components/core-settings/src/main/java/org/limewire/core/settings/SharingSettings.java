@@ -208,7 +208,7 @@ public class SharingSettings extends LimeProps {
     		return DIRECTORY_FOR_SAVING_FILES.getValue();
     	}
     	String extension = FileUtils.getFileExtension(fileName);
-    	if (extension == null) {
+    	if (extension.equals("")) {
     		return DIRECTORY_FOR_SAVING_FILES.getValue();
     	}
         MediaType type = MediaType.getMediaTypeForExtension(extension);

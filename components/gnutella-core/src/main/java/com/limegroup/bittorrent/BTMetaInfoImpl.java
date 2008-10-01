@@ -14,8 +14,8 @@ import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.http.URIUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.util.URIUtils;
 
 import com.limegroup.bittorrent.disk.BlockRangeMap;
 import com.limegroup.gnutella.FileDesc;

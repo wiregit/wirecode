@@ -206,19 +206,19 @@ public class FileUtils {
      * 
      * @param name the file name <tt>String</tt> from which the extension
      *  should be extracted
-     * @return the file extension string, or <tt>null</tt> if the extension
+     * @return the file extension string, or <tt>empty string</tt> if the extension
      *   could not be extracted
      */
     public static String getFileExtension(String name) {
         int index = name.lastIndexOf(".");
-        if(index == -1) return null;
+        if(index == -1) return "";
         
         // the file must have a name other than the extension
-        if(index == 0) return null;
+        if(index == 0) return "";
         
         // if the last character of the string is the ".", then there's
         // no extension
-        if(index == (name.length()-1)) return null;
+        if(index == (name.length()-1)) return "";
         
         return name.substring(index+1);
     }

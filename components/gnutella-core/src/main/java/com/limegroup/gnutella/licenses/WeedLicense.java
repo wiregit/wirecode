@@ -5,9 +5,9 @@ import java.net.URISyntaxException;
 import java.net.URI;
 import java.net.URL;
 
-import org.limewire.http.URIUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.service.ErrorService;
+import org.limewire.util.URIUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 

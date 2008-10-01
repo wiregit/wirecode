@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.limewire.http.URIUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.GUID;

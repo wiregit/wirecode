@@ -219,7 +219,7 @@ public class ConversationPane extends JPanel implements Displayable {
                 JButton button = (JButton)component;
                 String buttonText = button.getText();
                 String extension = FileUtils.getFileExtension(buttonText);
-                if (extension != null) {
+                if (!extension.isEmpty()) {
                     Icon icon = iconManager.getIconForExtension(extension);
                     button.setIcon(icon);
                 }

@@ -50,7 +50,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	static {
 		try {
 			BITTORRENT_PROTOCOL_BYTES = BITTORRENT_PROTOCOL
-					.getBytes(org.limewire.http.Constants.ASCII_ENCODING);
+					.getBytes(org.limewire.util.Constants.ASCII_ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			ErrorService.error(e);
 		}
