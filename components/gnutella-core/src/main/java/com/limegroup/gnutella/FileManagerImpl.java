@@ -1008,7 +1008,6 @@ public class FileManagerImpl implements FileManager, Service {
                 
                 if (finished) {
                     tryToFinish();
-                    _data.save();
                 }
             }
             

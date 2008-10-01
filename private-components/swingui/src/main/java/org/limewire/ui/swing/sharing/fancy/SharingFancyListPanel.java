@@ -12,9 +12,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
@@ -68,9 +66,6 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     
         // black seperator
         Line line = Line.createHorizontalLine(Color.BLACK, 3);
-        
-        final JPopupMenu menu = new JPopupMenu();
-        menu.add(new JMenuItem(I18n.tr("Item")));
         
         imageList = new ImageList(eventList, fileList, thumbnailManager);
         imageList.setDropTarget(dropTarget);  
