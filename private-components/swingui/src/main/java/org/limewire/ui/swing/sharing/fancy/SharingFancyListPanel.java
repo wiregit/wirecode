@@ -104,6 +104,8 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         
         JScrollPane scrollPane = new JScrollPane(imageList);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         JXLayer<JComponent> l = new JXLayer<JComponent>(scrollPane, new  AbstractLayerUI<JComponent>());
         l.getGlassPane().setLayout(null);
         l.getGlassPane().add(layerButton);

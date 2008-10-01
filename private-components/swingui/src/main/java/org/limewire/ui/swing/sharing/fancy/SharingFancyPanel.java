@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.sharing.fancy;
 
+import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -12,6 +14,8 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
@@ -19,6 +23,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.ImageLocalFileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
@@ -36,7 +41,7 @@ import org.limewire.ui.swing.util.IconManager;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 
-public class SharingFancyPanel extends JPanel {
+public class SharingFancyPanel extends JPanel implements Scrollable {
 
     @Resource
     private Icon audioIcon;
@@ -98,6 +103,7 @@ public class SharingFancyPanel extends JPanel {
         GuiUtils.assignResources(this); 
         
         this.scrollPane = scrollPane;
+        this.scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
         drop = new ShareDropTarget(this, originalList, false);
 
@@ -109,7 +115,7 @@ public class SharingFancyPanel extends JPanel {
         documentTable = new SharingFancyTablePanel(doc, filterLists.get(Category.DOCUMENT), new SharingFancyIconTableFormat(), false, drop.getDropTarget(), originalList, documentIcon);
         programTable = new SharingFancyTablePanel(program, filterLists.get(Category.PROGRAM), new SharingFancyDefaultTableFormat(), false, drop.getDropTarget(), originalList, appIcon);
         otherTable = new SharingFancyTablePanel(other, filterLists.get(Category.OTHER), new SharingFancyDefaultTableFormat(), drop.getDropTarget(), originalList, appIcon);
-        
+              
         TableColumn tc = documentTable.getTable().getColumn(0);
         iconLabelRenderer = new IconLabelRenderer(iconManager);
         tc.setCellRenderer(iconLabelRenderer);
@@ -129,9 +135,9 @@ public class SharingFancyPanel extends JPanel {
                 new boolean[]{true,true,true,true,false,false});
 
        setLayout(new VerticalLayout());
-        
+
        add(shortcuts);
-        
+       
        add(musicTable);
        add(videoTable);
        add(imageList);
@@ -197,6 +203,63 @@ public class SharingFancyPanel extends JPanel {
 
                 scrollPane.getViewport().setViewPosition(new Point(parentContainer.getLocation().x, position));
             }
+        }
+    }
+    
+    /**
+     * Overrides getPreferredSize. getPreferredSize is used by scrollable to 
+     * determine how big to make the scrollableViewPort. Uses the parent 
+     * component to set the appropriate size thats currently visible. This
+     * prevents the image list from growing too wide and never shrinking again.
+     */
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension dimension = super.getPreferredSize();
+        if (getParent() == null)
+            return dimension;
+        return new Dimension(getParent().getWidth(), dimension.height);
+    }
+
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return getPreferredSize();
+    }
+
+    @Override
+    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return getPosition(visibleRect, orientation, direction);
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportHeight() {
+        return false;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+        return false;
+    }
+
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return getPosition(visibleRect, orientation, direction);
+    }
+    
+    /**
+     * Scrolls to the appropriate location based on the height of a thumbnail image.
+     */
+    private int getPosition(Rectangle visibleRect, int orientation, int direction) {
+        int currentPosition = 0;
+        if (orientation == SwingConstants.HORIZONTAL)
+            currentPosition = visibleRect.x;
+        else
+            currentPosition = visibleRect.y;
+    
+        if (direction < 0) {
+            int newPosition = currentPosition - (currentPosition / ImageLocalFileItem.HEIGHT) * ImageLocalFileItem.HEIGHT;
+            return (newPosition == 0) ? ImageLocalFileItem.HEIGHT : newPosition;
+        } else {
+            return ((currentPosition / ImageLocalFileItem.HEIGHT) + 1) * ImageLocalFileItem.HEIGHT - currentPosition;
         }
     }
 }
