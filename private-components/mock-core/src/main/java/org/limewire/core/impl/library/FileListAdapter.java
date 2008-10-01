@@ -10,14 +10,16 @@ import org.limewire.core.api.library.FileItem;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 
 public class FileListAdapter implements LocalFileList {
 
     private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
+    private final EventList<LocalFileItem> swingEventList = new SwingThreadProxyEventList<LocalFileItem>(eventList);
     
     @Override
     public EventList<LocalFileItem> getSwingModel() {
-        return eventList;
+        return swingEventList;
     }
     
     @Override

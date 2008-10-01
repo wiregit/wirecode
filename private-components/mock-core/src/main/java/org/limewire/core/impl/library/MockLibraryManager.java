@@ -120,12 +120,11 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
         return gnutellaList;
     }
         
-       @Override
+    @Override
     public FileList<LocalFileItem> getCombinedFriendShareLists() {
-        // TODO Auto-generated method stub
-        return null;
+        return new FileListAdapter();
     }
-    
+
     @Override
     public LocalFileList getOrCreateFriendShareList(Friend name) {
         return new FileListAdapter();
