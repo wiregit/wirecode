@@ -70,7 +70,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         Line line = Line.createHorizontalLine(Color.BLACK, 3);
         
         final JPopupMenu menu = new JPopupMenu();
-        menu.add(new JMenuItem("Item"));
+        menu.add(new JMenuItem(I18n.tr("Item")));
         
         imageList = new ImageList(eventList, fileList, thumbnailManager);
         imageList.setDropTarget(dropTarget);  

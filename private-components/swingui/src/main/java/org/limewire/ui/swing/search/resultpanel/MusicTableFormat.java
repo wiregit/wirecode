@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -22,13 +24,10 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int TRACK_INDEX = 8;
 
     public MusicTableFormat() {
-        super(ACTION_INDEX, ACTION_INDEX);
-
-        columnNames = new String[] {
-            "Name", "Artist", "Album", "Length", "Quality",
-            "", "Bitrate", "Genre", "Track", "Relevance",
-            "People with file", "Owner", "Extension", "Sample rate"
-        };
+        super(ACTION_INDEX, ACTION_INDEX,
+                tr("Name"), tr("Artist"), tr("Album"), tr("Length"), tr("Quality"),
+                "", tr("Bitrate"), tr("Genre"), tr("Track"), tr("Relevance"),
+                tr("People with file"), tr("Owner"), tr("Extension"), tr("Sample Rate"));
     }
 
     @Override

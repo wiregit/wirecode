@@ -1,27 +1,15 @@
 package org.limewire.ui.swing.sharing.table;
 
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.gui.TableFormat;
-
-public class SharingFancyIconTableFormat implements TableFormat<LocalFileItem> {
+public class SharingFancyIconTableFormat extends AbstractTableFormat<LocalFileItem> {
   
-    public static final String[] columnLabels = new String[] {I18n.tr("Name"), ""};
+    public SharingFancyIconTableFormat() {
+        super(I18n.tr("Name"), "");
+    }
     
-    @Override
-    public int getColumnCount() {
-        return columnLabels.length;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        if(column < 0 || column >= columnLabels.length)
-            throw new IllegalStateException("Unknown column:" + column);
-
-        return columnLabels[column];
-    }
-
     @Override
     public Object getColumnValue(LocalFileItem fileItem, int column) {
         if(column == 0) return fileItem;

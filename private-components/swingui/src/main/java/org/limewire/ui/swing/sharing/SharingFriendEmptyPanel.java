@@ -16,6 +16,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
 import org.limewire.ui.swing.sharing.friends.FriendUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -43,11 +44,9 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
     
     private SharingAddAllAction addAllAction;
     
-    private final String title = "You are not sharing anything with ";
-    private final String buttonText = "Shared with ";
-    
-    private final String textPart1 = "To share with ";
-    private final String textPart2 = ", drag files here, or use the shortcuts below to share files";
+    private static final String TITLE_TEMPLATE = I18nMarker.marktr("You are not sharing anything with {0}");
+    private static final String BUTTON_TEXT_TEMPLATE = I18nMarker.marktr("Shared with {0}");
+    private static final String TEXT_TEMPLATE = "To share with {0}, drag files here, or use the shortcuts below to share files.";
     
     @Inject
     public SharingFriendEmptyPanel(LibraryManager libraryManager) {
@@ -89,9 +88,9 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
     }
     
     private void setText(String friendName) {
-        text.setText(textPart1 + friendName + textPart2);
-        shareButton.setText(buttonText + friendName);
-        titleLabel.setText( title + friendName);
+        text.setText(I18n.tr(TEXT_TEMPLATE, friendName));
+        shareButton.setText(I18n.tr(BUTTON_TEXT_TEMPLATE, friendName));
+        titleLabel.setText(I18n.tr(TITLE_TEMPLATE, friendName));
     }
     
     private class SharingCheckBox extends JCheckBox {

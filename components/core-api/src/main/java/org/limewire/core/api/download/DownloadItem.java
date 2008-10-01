@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.i18n.I18nMarker;
 
 /**
  * A single download
@@ -12,7 +13,24 @@ import org.limewire.core.api.Category;
 public interface DownloadItem {	
 
 	public static enum ErrorState {
-        NONE, DISK_PROBLEM, CORRUPT_FILE, FILE_NOT_SHARABLE, UNABLE_TO_CONNECT
+	    NONE(I18nMarker.marktr("No problems.")),
+	    DISK_PROBLEM(I18nMarker.marktr("There is a disk problem.")),
+	    CORRUPT_FILE(I18nMarker.marktr("The file is corrupted")),
+	    FILE_NOT_SHARABLE(I18nMarker.marktr("The File is not shareable")),
+	    UNABLE_TO_CONNECT(I18nMarker.marktr("Trouble connecting to people"));
+	    
+	    private final String message;
+
+        private ErrorState(String message) {
+            this.message = message;
+        }
+        
+        /**
+         * Returns error state message marked for translation.
+         */
+        public String getMessage() {
+            return message;
+        }
     };
     
     public final static long UNKNOWN_TIME = Long.MAX_VALUE;

@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+import static org.limewire.ui.swing.util.I18n.trn;
+
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -9,8 +12,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.*;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
+
 import org.limewire.ui.swing.RoundedBorder;
 
 /**
@@ -68,7 +79,7 @@ public class FromWidget extends JPanel {
     }
 
     private Action getChatAction(final String person) {
-        return new AbstractAction("Chat") {
+        return new AbstractAction(tr("Chat")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fromActions.chatWith(person);
@@ -77,7 +88,7 @@ public class FromWidget extends JPanel {
     }
 
     private Action getLibraryAction(final String person) {
-        return new AbstractAction("View library") {
+        return new AbstractAction(tr("View library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fromActions.viewLibraryOf(person);
@@ -86,7 +97,7 @@ public class FromWidget extends JPanel {
     }
 
     private Action getSharingAction(final String person) {
-        return new AbstractAction("Files I'm Sharing") {
+        return new AbstractAction(tr("Files I'm Sharing")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fromActions.showFilesSharedBy(person);
@@ -119,9 +130,9 @@ public class FromWidget extends JPanel {
 
     private void updateHeaderLabel() {
         String text =
-            people.length == 0 ? "nobody" :
+            people.length == 0 ? tr("nobody") :
             people.length == 1 ? people[0] + DOWN_ARROW :
-            people.length + " people " + DOWN_ARROW;
+            trn("{1}", "{0} people", people.length , people[0]) + DOWN_ARROW;
         headerLabel.setText(text);
         menu.setLabel(text);
         menu.add(text);

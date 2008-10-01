@@ -681,7 +681,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
         @Override
         public String getName() {
-            return I18n.tr("Gnutella Network");
+            return I18n.tr("LimeWire Network");
         }
         
         @Override

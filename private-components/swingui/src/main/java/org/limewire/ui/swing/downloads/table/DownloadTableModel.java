@@ -6,6 +6,8 @@ package org.limewire.ui.swing.downloads.table;
 import java.util.Comparator;
 
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
@@ -31,20 +33,13 @@ public class DownloadTableModel extends EventTableModel<DownloadItem> {
 	}
 	
 
-	private static class DownloadTableFormat implements	AdvancedTableFormat<DownloadItem>, WritableTableFormat<DownloadItem> {
+	private static class DownloadTableFormat extends AbstractAdvancedTableFormat<DownloadItem> implements WritableTableFormat<DownloadItem> {
 
-		public int getColumnCount() {
-			return COLUMN_COUNT;
-		}
+	    public DownloadTableFormat() {
+	        super(I18n.tr("Download Item"));
+	    }
 
-		public String getColumnName(int column) {
-			if (column == 0)
-				return "Download Item";
-
-			throw new IllegalStateException("Column "+ column + " out of bounds");
-		}
-
-		@Override
+	    @Override
 		public Object getColumnValue(DownloadItem baseObject, int column) {
 			if (column == 0)
 				return baseObject;

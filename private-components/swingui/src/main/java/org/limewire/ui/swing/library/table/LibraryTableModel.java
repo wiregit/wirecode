@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.library.table;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import org.limewire.core.api.library.FileItem;
+import org.limewire.ui.swing.table.AbstractTableFormat;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public class LibraryTableModel<T extends FileItem>  extends EventTableModel<T> {
@@ -15,7 +17,6 @@ public class LibraryTableModel<T extends FileItem>  extends EventTableModel<T> {
     public static final int CREATED_COL = SIZE_COL + 1;
     public static final int MODIFIED_COL = CREATED_COL + 1;
     public static final int SHARE_COL = MODIFIED_COL + 1;
-    private static final int COLUMN_COUNT = SHARE_COL + 1;
     
     public LibraryTableModel(EventList<T> libraryItems) {
         super(libraryItems, new LibraryTableFormat<T>());
@@ -26,22 +27,10 @@ public class LibraryTableModel<T extends FileItem>  extends EventTableModel<T> {
         return libraryItems.get(index);
     }
     
-    private static class LibraryTableFormat<T extends FileItem> implements TableFormat<T> {
+    private static class LibraryTableFormat<T extends FileItem>  extends AbstractTableFormat<T> {
 
-        @Override
-        public int getColumnCount() {
-            return COLUMN_COUNT;
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            if(column == NAME_COL) return "Name";
-            else if(column == SIZE_COL) return "Size";
-            else if(column == CREATED_COL) return "Created";
-            else if(column == MODIFIED_COL) return "Modified";
-            else if(column == SHARE_COL) return "";
-            
-            throw new IllegalStateException("Unknown column:" + column);
+        public LibraryTableFormat() {
+            super(tr("Name"), tr("Size"), tr("Created"), tr("Modified"), "");
         }
 
         @Override

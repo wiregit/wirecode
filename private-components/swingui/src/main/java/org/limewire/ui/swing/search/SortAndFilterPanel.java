@@ -158,7 +158,7 @@ public class SortAndFilterPanel extends JXPanel {
         listViewToggleButton.setPressedIcon(listViewPressedIcon);
         listViewToggleButton.setSelected(true);
         listViewToggleButton.setMargin(insets);
-        listViewToggleButton.setToolTipText("List view");
+        listViewToggleButton.setToolTipText(tr("List view"));
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -173,7 +173,7 @@ public class SortAndFilterPanel extends JXPanel {
         tableViewToggleButton.setIcon(tableViewUnpressedIcon);
         tableViewToggleButton.setPressedIcon(tableViewPressedIcon);
         tableViewToggleButton.setMargin(insets);
-        tableViewToggleButton.setToolTipText("Table view");
+        tableViewToggleButton.setToolTipText(tr("Table view"));
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -318,6 +318,8 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         if (NAME.equals(item)
+                // TODO ?? explain where untranslated filename comes from, or
+                // is this a bug?
             || "Filename".equals(item)
             || TITLE.equals(item)) {
             return getStringComparator(PropertyKey.NAME, true);
@@ -359,7 +361,7 @@ public class SortAndFilterPanel extends JXPanel {
             return getLongComparator(PropertyKey.YEAR, true);
         }
 
-        throw new IllegalArgumentException(tr("unknown item \"{0}\"", item));
+        throw new IllegalArgumentException("unknown item " +  item);
     }
     
     private static int compareNullCheck(Comparable c1, Comparable c2, boolean ascending) {

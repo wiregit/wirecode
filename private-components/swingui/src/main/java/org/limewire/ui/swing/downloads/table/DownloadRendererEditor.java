@@ -28,7 +28,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -328,7 +327,7 @@ public class DownloadRendererEditor extends JPanel implements
 		buttonPanel.updateButtons(state);
 		if(state == DownloadState.ERROR){
 		    linkButton.setVisible(true);
-		    linkButton.setText("<html><u>" + getErrorMessage(item.getErrorState()) + "</u></html>");
+		    linkButton.setText("<html><u>" + I18n.tr(item.getErrorState().getMessage()) + "</u></html>");
 		} else {
 		    linkButton.setVisible(false);
 		}
@@ -367,21 +366,27 @@ public class DownloadRendererEditor extends JPanel implements
 		case CONNECTING:
 			return I18n.tr("Connecting...");
 		case DOWNLOADING:
-			//TODO : uploaders in DownloadItem & plural
-			return I18n.tr("Downloading {0} of {1} ({2}) from {3} people", 
-							GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
-							GuiUtils.rate2speed(item.getDownloadSpeed()), item.getDownloadSourceCount() );
+			//TODO : uploaders in DownloadItem & plural, not sure if this TODO is addressed
+		    // with adding proper plural handling?
+		    // {0}: current file size, {2} final file size, {3}, number of people
+			return I18n.trn("Downloading {0} of {1} ({2}) from {3} person",
+			        "Downloading {0} of {1} ({2}) from {3} people",
+			        item.getDownloadSourceCount(),
+			        GuiUtils.toUnitbytes(item.getCurrentSize()), 
+			        GuiUtils.toUnitbytes(item.getTotalSize()),
+			        GuiUtils.rate2speed(item.getDownloadSpeed()), 
+			        item.getDownloadSourceCount());
 		case STALLED:
 			return I18n
 					.tr("Stalled - {0} of {1} ({2}%) from 0 people",
-							new Object[] { GuiUtils.toUnitbytes(item.getCurrentSize()),
-					        GuiUtils.toUnitbytes(item.getTotalSize() ), item.getPercentComplete()});
+					        GuiUtils.toUnitbytes(item.getCurrentSize()),
+					        GuiUtils.toUnitbytes(item.getTotalSize() ), item.getPercentComplete());
 		case ERROR:			
             return I18n.tr("Unable to download: ");
 		case PAUSED:
-			return I18n.tr("Paused - {0} of {1} ({2}%)", new Object[] {
+			return I18n.tr("Paused - {0} of {1} ({2}%)", 
 			        GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
-			        item.getPercentComplete()});
+			        item.getPercentComplete());
         case LOCAL_QUEUED:
             long queueTime = item.getRemainingQueueTime();
             if(queueTime == DownloadItem.UNKNOWN_TIME){
@@ -390,27 +395,12 @@ public class DownloadRendererEditor extends JPanel implements
                 return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
             }
         case REMOTE_QUEUED:
-            return I18n.tr("Queued - {0} people ahead of you for this file", item.getQueuePosition());
+            return I18n.trn("Queued - {0} person ahead of you for this file",
+                    "Queued - {0} people ahead of you for this file",
+                    item.getQueuePosition(), item.getQueuePosition());
 		default:
 		    throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
 		}
 		
 	}
-	
-	private String getErrorMessage(ErrorState errorState){
-	    switch (errorState) {
-        case CORRUPT_FILE:
-            return I18n.tr("the file is corrupted");
-        case DISK_PROBLEM:
-            return I18n.tr("there is a disk problem");
-        case FILE_NOT_SHARABLE:
-            return I18n.tr("the file is not sharable ");
-        case UNABLE_TO_CONNECT:
-            return I18n.tr("trouble connecting to people");
-        default:
-            throw new IllegalArgumentException("Unknown ErrorState: " + errorState);
-        }
-	}
-	
-
 }

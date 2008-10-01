@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Component;
+
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -20,12 +23,8 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int TYPE_INDEX = 1;
 
     public AllTableFormat() {
-        super(ACTION_INDEX, ACTION_INDEX);
-
-        columnNames = new String[] {
-            "Name", "Type", "Size", "",
-            "Relevance", "Extension", "People with file", "Owner"
-        };
+        super(ACTION_INDEX, ACTION_INDEX, tr("Name"), tr("Type"), tr("Size"), "",
+                tr("Relevance"), tr("Extension"), tr("People with file"), tr("Owner"));
     }
 
     @Override

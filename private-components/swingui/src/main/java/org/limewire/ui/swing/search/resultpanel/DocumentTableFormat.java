@@ -1,7 +1,10 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Component;
 import java.util.Calendar;
+
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -21,12 +24,9 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     private static final int TYPE_INDEX = 1;
 
     public DocumentTableFormat() {
-        super(ACTION_INDEX, ACTION_INDEX);
-
-        columnNames = new String[] {
-            "Name", "Type", "Size", "Date created", "", "Relevance",
-            "Extension", "People with file", "Owner", "Author"
-        };
+        super(ACTION_INDEX, ACTION_INDEX,
+                tr("Name"), tr("Type"), tr("Size"), tr("Date created"), "", tr("Relevance"),
+                tr("Extension"), tr("People with File"), tr("Owner"), tr("Author"));
     }
 
     @Override

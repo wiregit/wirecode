@@ -63,6 +63,7 @@ import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
+import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
@@ -266,20 +267,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         final TextMatcherEditor<ChatFriend> editor = new TextMatcherEditor<ChatFriend>(friendFilterator);
         final FilterList<ChatFriend> filter = new FilterList<ChatFriend>(friendsList, editor);
         
-        TableFormat<ChatFriend> format = new TableFormat<ChatFriend>() {
-            @Override
-            public int getColumnCount() {
-                return 1;
-            }
-
-            @Override
-            public String getColumnName(int column) {
-                if (column == 0) {
-                    return "name";
-                }
-                throw new IllegalArgumentException("Too many columns expected in friends chat table. Tried getting column: " + column);
-            }
-
+        TableFormat<ChatFriend> format = new AbstractTableFormat<ChatFriend>(tr("Name")) {
             @Override
             public Object getColumnValue(ChatFriend chatFriend, int column) {
                 if (column == 0) {

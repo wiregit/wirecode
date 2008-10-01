@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.home;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -19,7 +21,7 @@ public class RecentActivityPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        JLabel title = new JLabel("Recent Activity");
+        JLabel title = new JLabel(tr("Recent Activity"));
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         add(title, gbc);
         

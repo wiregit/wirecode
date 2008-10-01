@@ -45,6 +45,7 @@ import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
@@ -138,7 +139,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.LIST_SELECTED), 
                 new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.TABLE_SELECTED));
         
-        FriendSharingHeaderPanel headerPanel = new FriendSharingHeaderPanel(sharingIcon, "Sharing with ", "", viewSelectionPanel, libraryManager);
+        FriendSharingHeaderPanel headerPanel = new FriendSharingHeaderPanel(sharingIcon, I18n.tr("Sharing with {0}"), "", viewSelectionPanel, libraryManager);
         return headerPanel;
     }
     

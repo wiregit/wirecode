@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.downloads.table;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -23,10 +25,10 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
+import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 /**
@@ -62,10 +64,8 @@ public class SimpleDownloadTable extends DownloadTable {
         }
     }
     
-    private static class SimpleDownloadTableFormat
-    implements AdvancedTableFormat<DownloadItem>, WritableTableFormat<DownloadItem> {
-        private String[] columns = new String[] {"Category", "Title", "State", "Percent", 
-                "Current Size", "Total Size", "DownloadSpeed", "Actions"};
+    private static class SimpleDownloadTableFormat extends AbstractAdvancedTableFormat<DownloadItem> implements WritableTableFormat<DownloadItem> {
+
         private static final int CATEGORY = 0;
         private static final int TITLE = CATEGORY + 1;
         private static final int STATE = TITLE + 1;
@@ -76,17 +76,12 @@ public class SimpleDownloadTable extends DownloadTable {
         private static final int ACTIONS = DOWNLOAD_SPEED + 1;
         
 
-        public int getColumnCount() {
-            return columns.length;
+        public SimpleDownloadTableFormat() {
+            super(tr("Category"), tr("Title"), tr("State"), tr("Percent"), 
+                    tr("Current Size"), tr("Total Size"), tr("Download Speed"),
+                    tr("Actions"));
         }
-
-        public String getColumnName(int column) {
-            if(column < 0 || column >= columns.length)
-                throw new IllegalStateException("Column "+ column + " out of bounds");
-
-            return columns[column];
-        }
-
+        
         @Override
         public Object getColumnValue(DownloadItem baseObject, int column) {
             switch (column) {
@@ -120,15 +115,11 @@ public class SimpleDownloadTable extends DownloadTable {
 
         @Override
         public boolean isEditable(DownloadItem baseObject, int column) {
-            if(column < 0 || column >= columns.length)
-                throw new IllegalStateException("Column "+ column + " out of bounds");
             return true;
         }
 
         @Override
         public DownloadItem setColumnValue(DownloadItem baseObject, Object editedValue, int column) {
-            if(column < 0 || column >= columns.length)
-                throw new IllegalStateException("Column "+ column + " out of bounds");
             return baseObject;
         }
 

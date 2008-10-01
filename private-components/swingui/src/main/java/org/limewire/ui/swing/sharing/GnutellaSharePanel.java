@@ -26,6 +26,7 @@ import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -40,7 +41,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class GnutellaSharePanel extends GenericSharingPanel {
 
-    public static final String NAME = "LimeWire Network";
+    public static final String NAME = I18n.tr("LimeWire Network");
     
     @Resource
     protected Icon cancelIcon;
@@ -123,7 +124,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, tableCardLayout, ViewSelectionPanel.LIST_SELECTED), 
                 new ItemAction(cardPanel, tableCardLayout, ViewSelectionPanel.TABLE_SELECTED));
         
-        SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, "Sharing with the ", "LimeWire Network", viewSelectionPanel);
+        SharingHeaderPanel headerPanel = new SharingHeaderPanel(sharingIcon, I18n.tr("Sharing with the {0}"), NAME, viewSelectionPanel);
         return headerPanel;
     }
     

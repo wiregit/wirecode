@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
+import java.text.MessageFormat;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -33,6 +34,16 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
     protected JTextField filterBox;
     protected ViewSelectionPanel viewSelectionPanel;
     
+    /**
+     * Constructs sharing header panel.
+     * 
+     * @param icon
+     * @param staticText is expected to contain the place holder '{0}' which
+     * is replaced by the argument <code>name</code>, or through 
+     * {@link #setFriendName(String)}
+     * @param name
+     * @param viewPanel
+     */
     public SharingHeaderPanel(Icon icon, String staticText, String name, ViewSelectionPanel viewPanel) {
         GuiUtils.assignResources(this);
         
@@ -41,7 +52,7 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
         this.staticText = staticText;
         this.viewSelectionPanel = viewPanel;
         createComponents();
-        createComponents(icon, staticText + name);
+        createComponents(icon, MessageFormat.format(staticText, name));
         layoutComponents();
     }
     
@@ -67,7 +78,7 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
     
     @Override
     public void setFriendName(String name) {
-        descriptionLabel.setText(staticText + name);
+        descriptionLabel.setText(MessageFormat.format(staticText, name));
     }
 
     @Override

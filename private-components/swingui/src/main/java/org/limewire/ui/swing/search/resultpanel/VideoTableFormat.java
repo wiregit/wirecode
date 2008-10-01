@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -24,13 +26,10 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int YEAR_INDEX = 3;
 
     public VideoTableFormat() {
-        super(ACTION_INDEX, ACTION_INDEX);
-
-        columnNames = new String[] {
-            "Name", "Extension", "Length", "Year", "Quality", "",
-            "Relevance", "People with file", "Owner", "Rating",
-            "Comments", "Height", "Width", "Bitrate"
-        };
+        super(ACTION_INDEX, ACTION_INDEX,
+                tr("Name"), tr("Extension"), tr("Length"), tr("Year"), tr("Quality"), "",
+                tr("Relevance"), tr("People with File"), tr("Owner"), tr("Rating"),
+                tr("Comments"), tr("Height"), tr("Width"), tr("Bitrate"));
     }
 
     @Override

@@ -125,6 +125,7 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         
         private void setTooltip() {
             if(isEnabled()) {
+                // {0}: name of the friend
                 setToolTipText(I18n.tr("View the files {0} is sharing with you.",friend));
             } else {
                 setToolTipText(I18n.tr("{0} isn't logged in through LimeWire.",friend));

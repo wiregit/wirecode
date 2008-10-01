@@ -62,6 +62,10 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
         return safe(user.getName(), user.getId());
     }
     
+    /**
+     * Returns <code>str2</code> if <code>str</code> is either
+     * null or empty, otherwise returns <code>str</code>. 
+     */
     private String safe(String str, String str2) {
         return (str == null || "".equals(str)) ? str2 : str;
     }

@@ -92,8 +92,9 @@ public class ChatPanel extends JPanel implements Displayable {
             .append("<h2>").append(tr("Now What?")).append("</h2>")
             .append("<ul>");
             if (!isSharingWithFriends) {
-                bldr.append("<li>").append(tr("Share files with your friends "))
-                .append("<a href=\"all_friends_share_list\">").append("here").append("</a></li>");
+                // {0} and {1} are surrounding html tags to make 'here' a  link
+                bldr.append("<li>").append(tr("Share files with your friends {0}here{1}",
+                        "<a href=\"all_friends_share_list\">", "</a></li>"));
             }
             
             if (!hasFriendsOnLimeWire) {
@@ -110,6 +111,7 @@ public class ChatPanel extends JPanel implements Displayable {
     }
     
     private String getRecentUpdatesText() {
+        // TODO
         return "Replace me with an HTML doc describing recent updates to LimeWire 5";
     }
 

@@ -1,34 +1,37 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import ca.odell.glazedlists.gui.AdvancedTableFormat;
-import ca.odell.glazedlists.gui.WritableTableFormat;
-import com.google.inject.Inject;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.Comparator;
+
 import javax.swing.Icon;
 import javax.swing.JLabel;
+
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
 import org.limewire.ui.swing.util.IconManager;
+
+import ca.odell.glazedlists.gui.WritableTableFormat;
+
+import com.google.inject.Inject;
 
 /**
  * This class is the base class for each of the TableFormat classes
  * that describe the various table views of search results.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public abstract class ResultsTableFormat<E>
-implements AdvancedTableFormat<E>, WritableTableFormat<E> {
+public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<E> implements WritableTableFormat<E> {
 
     private IconManager iconManager;
-    protected String[] columnNames;
     protected VisualSearchResult vsr;
     protected int actionColumnIndex;
     private int lastVisibleColumnIndex;
 
-    ResultsTableFormat(int actionColumnIndex, int lastVisibleColumnIndex) {
+    ResultsTableFormat(int actionColumnIndex, int lastVisibleColumnIndex, String...columnNames) {
+        super(columnNames);
         this.actionColumnIndex = actionColumnIndex;
         this.lastVisibleColumnIndex = lastVisibleColumnIndex;
     }
@@ -48,14 +51,6 @@ implements AdvancedTableFormat<E>, WritableTableFormat<E> {
 
     public Comparator getColumnComparator(int index) {
         return null;
-    }
-
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    public String getColumnName(int index) {
-        return columnNames[index];
     }
 
     protected Component getIconLabel(VisualSearchResult vsr) {

@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
@@ -18,7 +20,7 @@ public class OtherResultsPanel extends BaseResultPanel {
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search,
         Navigator navigator) {
-        super("Other from Everyone", eventList, tableFormat,
+        super(tr("Other from Everyone"), eventList, tableFormat,
             searchResultDownloader, search, navigator);
     }
 }
