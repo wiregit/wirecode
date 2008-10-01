@@ -9,6 +9,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -18,8 +19,10 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 
 import org.limewire.ui.swing.RoundedBorder;
@@ -34,17 +37,19 @@ public class FromWidget extends JPanel {
     private static final char DOWN_ARROW = '\u25BC';
     private static final int R = 8; // rounded border corner radius
 
-    private Border border = new RoundedBorder(R);
-    private Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
-    private FromActions fromActions = new FromActionsMockImpl();
-    private JLabel headerLabel = new JLabel();
-    private JPanel headerPanel =
+    private final Border border = new RoundedBorder(R);
+    private final Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
+    private final FromActions fromActions = new FromActionsMockImpl();
+    private final JLabel headerLabel = new JLabel();
+    private final JPanel headerPanel =
         new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-    private JPopupMenu menu;
+    private final JPopupMenu menu;
+    private final MenuHider menuHider;
     private String[] people;
 
     public FromWidget() {
         menu = new JPopupMenu();
+        menuHider =  new MenuHider();
         menu.setBorder(border);
 
         configureHeader();
@@ -58,14 +63,7 @@ public class FromWidget extends JPanel {
         headerPanel.setBorder(noBorder);
         headerPanel.setOpaque(false);
         
-        menu.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (menu.isVisible()) {
-                    menu.setVisible(false);
-                }
-            }
-        });
+        menu.addMouseListener(menuHider);
 
         headerLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -160,12 +158,42 @@ public class FromWidget extends JPanel {
         } else {
             for (String person : people) {
                 JMenu submenu = new JMenu(person);
-                //submenu.setBorder(border);
-                submenu.add(getChatAction(person));
-                submenu.add(getLibraryAction(person));
+                submenu.addMouseListener(menuHider);
+                JMenuItem chatItem = new JMenuItem(getChatAction(person));
+                chatItem.addMouseListener(menuHider);
+                submenu.add(chatItem);
+                JMenuItem libraryItem = new JMenuItem(getLibraryAction(person));
+                libraryItem.addMouseListener(menuHider);
+                submenu.add(libraryItem);
 
                 menu.add(submenu);
             }
+        }
+    }
+    
+    /**
+     * This mouse listener is intended to hide the 'From' menu after the mouse
+     * has left all popup menu items display for this menu. 
+     */
+    private class MenuHider extends MouseAdapter {
+        private Timer hideTimer = new Timer(200, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (menu.isVisible()) {
+                    menu.setVisible(false);
+                }
+                ((Timer)e.getSource()).stop();
+            }
+        });
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            hideTimer.stop();
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            hideTimer.start();
         }
     }
 }
