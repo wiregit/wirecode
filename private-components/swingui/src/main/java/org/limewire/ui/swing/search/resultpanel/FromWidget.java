@@ -57,6 +57,15 @@ public class FromWidget extends JPanel {
         headerPanel.add(headerLabel);
         headerPanel.setBorder(noBorder);
         headerPanel.setOpaque(false);
+        
+        menu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (menu.isVisible()) {
+                    menu.setVisible(false);
+                }
+            }
+        });
 
         headerLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -66,7 +75,9 @@ public class FromWidget extends JPanel {
 
             @Override
             public void mouseExited(MouseEvent e) {
-                if (!menu.isVisible()) headerPanel.setBorder(noBorder);
+                if (!menu.isVisible()) {
+                    headerPanel.setBorder(noBorder);
+                }
             }
 
             @Override
@@ -145,7 +156,6 @@ public class FromWidget extends JPanel {
             String person = people[0];
             menu.add(getChatAction(person));
             menu.add(getLibraryAction(person));
-            menu.addSeparator();
             menu.add(getSharingAction(person));
         } else {
             for (String person : people) {
