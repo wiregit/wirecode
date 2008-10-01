@@ -42,7 +42,7 @@ implements TableCellEditor, TableCellRenderer {
         
         panel = new ActionButtonPanel(navigator);
         
-        JToggleButton junkButton = panel.getJunkButton();
+        JToggleButton junkButton = panel.getSpamButton();
         junkButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -63,13 +63,10 @@ implements TableCellEditor, TableCellRenderer {
         vsr = (VisualSearchResult) value;
         panel.setVisualSearchResult(vsr);
         panel.setRow(row);
-        panel.setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
+        boolean spam = vsr.isSpam();
+        panel.setAlpha(spam ? 0.2f : 1.0f);
 
-        // If the VisualSearchResult for the current row is currently
-        // marked as junk then display the junkButton as pressed.
-        JToggleButton junkButton = panel.getJunkButton();
-        boolean junk = vsr.isSpam(); // isJunk(vsr);
-        junkButton.setSelected(junk);
+        panel.getSpamButton().setSelected(spam);
 
         return panel;
     }

@@ -56,7 +56,7 @@ public class ListViewTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
-    private static final int SIMILARITY_INDENTATION = 20;
+    private static final int SIMILARITY_INDENTATION = 50;
     private final Log LOG = LogFactory.getLog(getClass());
     private final Color SELECTED_COLOR = Color.GREEN;
 
@@ -204,7 +204,7 @@ implements TableCellEditor, TableCellRenderer {
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, column);
         
-        final JToggleButton junkButton = actionButtonPanel.getJunkButton();
+        final JToggleButton junkButton = actionButtonPanel.getSpamButton();
         
         if (thePanel == null) {
             thePanel = makePanel();

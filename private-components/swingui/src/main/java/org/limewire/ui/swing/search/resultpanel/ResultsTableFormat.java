@@ -8,6 +8,7 @@ import java.util.Comparator;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -24,7 +25,6 @@ import com.google.inject.Inject;
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<E> implements WritableTableFormat<E> {
-
     private IconManager iconManager;
     protected VisualSearchResult vsr;
     protected int actionColumnIndex;
@@ -59,7 +59,7 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
 
         String name = (String) getProperty(PropertyKey.NAME);
 
-        JLabel label = new JLabel(name, icon, JLabel.LEFT);
+        JXLabel label = new JXLabel(name, icon, JLabel.LEFT);
 
         Font font = label.getFont().deriveFont(Font.PLAIN);
         label.setFont(font);

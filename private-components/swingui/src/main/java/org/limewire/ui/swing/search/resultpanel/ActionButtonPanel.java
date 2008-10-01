@@ -202,7 +202,7 @@ public class ActionButtonPanel extends JXPanel {
      * Gets the "Mark as Junk" button.
      * @return the button
      */
-    public JToggleButton getJunkButton() {
+    public JToggleButton getSpamButton() {
         return junkButton;
     }
 
