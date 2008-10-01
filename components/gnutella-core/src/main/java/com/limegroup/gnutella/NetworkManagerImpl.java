@@ -283,6 +283,7 @@ public class NetworkManagerImpl implements NetworkManager {
                 fireAddressChange(newDirectAddress);
             }
         } else {
+            directAddress = null;
             fireNullAddressEvent();
         }
     }
@@ -308,7 +309,7 @@ public class NetworkManagerImpl implements NetworkManager {
         FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
         boolean changed = false;
         synchronized (addressLock) {
-            if (!newAddress.equals(firewalledAddress)) {
+            if (!newAddress.equals(firewalledAddress) && directAddress == null) {
                 firewalledAddress = newAddress;
                 changed = true;
             }

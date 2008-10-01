@@ -168,6 +168,26 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(new ConnectableImpl("199.199.199.199", 5001, true), addressChangedListener.events.get(0).getSource());        
     }
     
+    public void testDirectConnectionAddressSupressesPushProxyAddressEvent() throws IOException {
+        assertEquals(0, addressChangedListener.events.size());
+        AcceptorImpl acceptor = (AcceptorImpl)injector.getInstance(Acceptor.class);
+        
+        acceptor.setExternalAddress(InetAddress.getByAddress(new byte[] { (byte)129, 0, 0, 1 }));
+        acceptor.setListeningPort(5000);
+        acceptor.setIncoming(true);
+        assertEquals(1, addressChangedListener.events.size());
+        
+        assertEquals(new ConnectableImpl("129.0.0.1", 5000, true), addressChangedListener.events.get(0).getSource());
+        addressChangedListener.events.clear();        
+        
+        NetworkManager networkManager = injector.getInstance(NetworkManager.class);
+        assertEquals(0, addressChangedListener.events.size());
+        Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
+        proxies.add(new ConnectableImpl("199.199.199.199", 5000, true));
+        networkManager.newPushProxies(proxies);
+        assertEquals(0, addressChangedListener.events.size());
+    }
+    
     public void testPushProxyAddressEvent() throws IOException {
         ApplicationServices applicationServices = injector.getInstance(ApplicationServices.class);
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
