@@ -42,6 +42,7 @@ import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.NoOpAction;
+import org.limewire.ui.swing.components.SearchBar;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -173,10 +174,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         add(search, gbc);
         
         gbc.insets = new Insets(5, 0, 0, 0);
-        add(combo, gbc);
-        
-        //gbc.gridx = GridBagConstraints.RELATIVE;
-        add(textField, gbc);
+                
+        add(new SearchBar(combo, textField));
         
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1;
