@@ -10,7 +10,6 @@ import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
@@ -19,7 +18,6 @@ import ca.odell.glazedlists.swing.EventTableModel;
 public class DownloadTableModel extends EventTableModel<DownloadItem> {
 	
 	private static final long serialVersionUID = 4079559883623594683L;
-	private static final int COLUMN_COUNT = 1;
 	private EventList<DownloadItem> downloadItems;
 
 	public DownloadTableModel(EventList<DownloadItem> downloadItems) {
