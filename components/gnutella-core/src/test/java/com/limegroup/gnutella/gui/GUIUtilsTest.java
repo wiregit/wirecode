@@ -64,7 +64,7 @@ public class GUIUtilsTest extends GUIBaseTestCase {
 
     public void testLaunchFileWithoutExtension() {
         File file = new File("extensionless");
-        assertNull(FileUtils.getFileExtension(file));
+        assertEquals("", FileUtils.getFileExtension(file));
         GUIUtils.launchOrEnqueueFile(file, false);
     }
     

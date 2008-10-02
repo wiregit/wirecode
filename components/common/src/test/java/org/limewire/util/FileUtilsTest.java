@@ -54,7 +54,7 @@ public final class FileUtilsTest extends BaseTestCase {
         };
 
         for (File nullFile : nullFiles) {
-            assertNull("extension should be null",
+            assertEquals("extension should be empty string","",
                     FileUtils.getFileExtension(nullFile));
         }
     }

@@ -476,7 +476,7 @@ public class FileUtils {
                         shouldAdd = true;
                     else {
                         String ext = FileUtils.getFileExtension(currFile);
-                        for (int j = 0; (j < filter.length) && (ext != null); j++) {
+                        for (int j = 0; (j < filter.length) && (!ext.isEmpty()); j++) {
                             if (ext.equalsIgnoreCase(filter[j]))  {
                                 shouldAdd = true;
                                 

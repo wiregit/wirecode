@@ -94,7 +94,7 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
     /** Creates MetaData for the file, if possible. */  
     public MetaReader getMetaReader(File file) {
         String extension = FileUtils.getFileExtension(file);
-        if (extension != null) {
+        if (!extension.isEmpty()) {
             MetaReader reader = readerByExtension.get(extension.toLowerCase(Locale.US));
             return reader;
         }

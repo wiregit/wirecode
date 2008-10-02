@@ -164,7 +164,7 @@ public class NativeFileIconController implements FileIconController {
             return VIEW.getIcon(f);
         } else {
             String extension = FileUtils.getFileExtension(f);
-            if (extension != null)
+            if (!extension.isEmpty())
                 return getIconForExtension(extension);
             else
                 return null;

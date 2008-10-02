@@ -583,7 +583,7 @@ public final class DaapManager implements FileEventListener {
             song.setHasVideo(null, true);
         }
         
-        if (ext != null) {
+        if (!ext.isEmpty()) {
             // Note: This is required for formats other than MP3
             // For example AAC (.m4a) files won't play if no
             // format is set. As far as I can tell from the iTunes

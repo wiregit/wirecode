@@ -18,7 +18,7 @@ public class BasicFileIconController implements FileIconController {
             return null;
         
         String extension = FileUtils.getFileExtension(f);
-        if(extension != null)
+        if(!extension.isEmpty())
             return getIconForExtension(extension);
         else
             return null;

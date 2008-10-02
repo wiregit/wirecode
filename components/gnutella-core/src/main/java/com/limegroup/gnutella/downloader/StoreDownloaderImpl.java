@@ -269,7 +269,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         }
 
         String ext = FileUtils.getFileExtension(defaultSaveFile);
-        if (ext != null)
+        if (!ext.isEmpty())
             return currentFileName + "." + ext;
         else  // no extension, shouldn't happen
             return defaultSaveFile.getName();
