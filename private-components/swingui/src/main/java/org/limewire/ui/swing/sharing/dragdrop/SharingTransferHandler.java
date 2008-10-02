@@ -55,33 +55,34 @@ public class SharingTransferHandler extends TransferHandler {
         if (!DNDUtils.containsFileFlavors(info)) {
             return false;
         }
-
-        try {
-            Transferable transferable = info.getTransferable();
-            transferable.getTransferData(DNDUtils.URIFlavor);
-            final File[] droppedFiles = DNDUtils.getFiles(transferable);
-            for (int i = 0; i < droppedFiles.length; i++) {
-                File fileOrDirectory = droppedFiles[i];
-                if (hasValidFiles(fileOrDirectory)) {
-                    LOG.debug("DND valid file found.");
-                    lastDragOk = true;
-                    return true;
-                }
-            }
-            LOG.debug("DND valid file not found.");
-            lastDragOk = false;
-        } catch (java.awt.dnd.InvalidDnDOperationException e) {
-            LOG.debugf("Transferable not available, check lastDrag: {0}", Boolean
-                    .valueOf(lastDragOk), e);
-            return lastDragOk;
-        } catch (UnsupportedFlavorException e) {
-            LOG.debug(e.getMessage(), e);
-            return false;
-        } catch (IOException e) {
-            LOG.debug(e.getMessage(), e);
-            return false;
-        }
-        return false;
+        return true;
+//
+//        try {
+//            Transferable transferable = info.getTransferable();
+//            transferable.getTransferData(DNDUtils.URIFlavor);
+//            final File[] droppedFiles = DNDUtils.getFiles(transferable);
+//            for (int i = 0; i < droppedFiles.length; i++) {
+//                File fileOrDirectory = droppedFiles[i];
+//                if (hasValidFiles(fileOrDirectory)) {
+//                    LOG.debug("DND valid file found.");
+//                    lastDragOk = true;
+//                    return true;
+//                }
+//            }
+//            LOG.debug("DND valid file not found.");
+//            lastDragOk = false;
+//        } catch (java.awt.dnd.InvalidDnDOperationException e) {
+//            LOG.debugf("Transferable not available, check lastDrag: {0}", Boolean
+//                    .valueOf(lastDragOk), e);
+//            return lastDragOk;
+//        } catch (UnsupportedFlavorException e) {
+//            LOG.debug(e.getMessage(), e);
+//            return false;
+//        } catch (IOException e) {
+//            LOG.debug(e.getMessage(), e);
+//            return false;
+//        }
+//        return false;
     }
 
     /**
