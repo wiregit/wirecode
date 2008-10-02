@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
@@ -18,6 +19,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -102,6 +104,13 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
                 selectedColumn.setVisible(!visible);
 
                 managePopup();
+                
+                Action action = getActionMap().get(JXTable.PACKALL_ACTION_COMMAND);
+                if (action != null) {
+                    action.actionPerformed(
+                            new ActionEvent(ConfigurableTable.this, 0, 
+                                    JXTable.PACKALL_ACTION_COMMAND));
+                }
             }
         };
 
