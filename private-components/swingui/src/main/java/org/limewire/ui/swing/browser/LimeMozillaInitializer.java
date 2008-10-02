@@ -23,7 +23,7 @@ import org.mozilla.browser.impl.WindowCreator;
 public class LimeMozillaInitializer {
 
     private static final Log LOG = LogFactory.getLog(LimeMozillaInitializer.class);
-        
+
     private LimeMozillaInitializer() {
     }
 
@@ -48,7 +48,7 @@ public class LimeMozillaInitializer {
         }
 
         installFlashLinux(xulInstallPath);
-        
+
         String newLibraryPath = System.getProperty("java.library.path") + File.pathSeparator
                 + xulInstallPath.getAbsolutePath();
         System.setProperty("java.library.path", newLibraryPath);
@@ -70,48 +70,62 @@ public class LimeMozillaInitializer {
         if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
     }
-    
-    private static void installFlashLinux(File xulInstallPath) {
-        File pluginsDir = new File(xulInstallPath,"/xulrunner/plugins");
 
-        if(OSUtils.isLinux()) {
-            for(File file : pluginsDir.listFiles()) {
-                if(file.isFile() && file.getName().contains("flash")) {
-                    return;//flash already installed
+    private static void installFlashLinux(File xulInstallPath) {
+        File pluginsDir = new File(xulInstallPath, "/xulrunner/plugins");
+
+        if (OSUtils.isLinux()) {
+            for (File file : pluginsDir.listFiles()) {
+                if (file.isFile() && file.getName().contains("flash")) {
+                    return;// flash already installed
                 }
             }
-            
-            
-            File[] possibleFlashLocations = new File[]{new File("/usr/lib/firefox/plugins"), new File("/usr/lib/mozilla/plugins"), new File("/usr/lib/iceweasle"), new File("/usr/lib/xulrunner")};
-            for(File flashLocation : possibleFlashLocations) {
-                if(flashLocation.exists() && flashLocation.isDirectory()) {
+
+            File[] possibleFlashLocations = new File[] { new File("/usr/lib/firefox/plugins"),
+                    new File("/usr/lib/mozilla/plugins"), new File("/usr/lib/iceweasle"),
+                    new File("/usr/lib/xulrunner") };
+            for (File flashLocation : possibleFlashLocations) {
+                if (flashLocation.exists() && flashLocation.isDirectory()) {
                     boolean foundFlash = false;
-                    for(File flashFile : flashLocation.listFiles()) {
-                        if(flashFile.getName().contains("flash")) {
-                            
-                            //TODO make sure we are not using a file we cannot support, ie 64 bit running in 32 bit jvm
-                            
+                    for (File flashFile : flashLocation.listFiles()) {
+                        if (flashFile.getName().contains("flash")) {
+                            // TODO make sure we are not using a file we cannot
+                            // support, ie 64 bit running in 32 bit jvm
+
                             File linkTarget = new File(pluginsDir, "/" + flashFile.getName());
-                            //using a symlink instead of copying, debian had issues with copying the library.
-                            String command = "ln -s " + flashFile.getAbsolutePath() + " " + linkTarget.getAbsolutePath();
+                            // using a symlink instead of copying, debian had
+                            // issues with copying the library.
                             try {
-                                Runtime.getRuntime().exec(command);
+                                createSymbolicLink(flashFile, linkTarget);
                                 foundFlash = true;
                             } catch (IOException e) {
                                 LOG.debug(e.getMessage(), e);
+                            } catch (InterruptedException e) {
+                                LOG.debug(e.getMessage(), e);
                             }
-                            
-                            
-                            //continue looping because there might be more than 1 file at this location for flash to work
+                            // continue looping because there might be more than
+                            // 1 file at this location for flash to work
                         }
                     }
-                    if(foundFlash) {
-                        //flash was found at another location and copied
+                    if (foundFlash) {
+                        // flash was found at another location and copied
                         break;
                     }
                 }
-            }            
+            }
         }
+    }
+
+    /**
+     * Tries to create a symbolic link from the source to the target
+     * destinations. Returning the exit code of the command run.
+     */
+    private static int createSymbolicLink(File source, File target) throws IOException,
+            InterruptedException {
+        String command = "ln -s " + source.getAbsolutePath() + " " + target.getAbsolutePath();
+        Process process = Runtime.getRuntime().exec(command);
+        process.waitFor();
+        return process.exitValue();
     }
 
     private static String getResourceName() {
