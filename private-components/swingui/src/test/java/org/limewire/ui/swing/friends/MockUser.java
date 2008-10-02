@@ -47,4 +47,8 @@ public class MockUser implements User {
     public Map<String, Presence> getPresences() {
         return new HashMap<String, Presence>();
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

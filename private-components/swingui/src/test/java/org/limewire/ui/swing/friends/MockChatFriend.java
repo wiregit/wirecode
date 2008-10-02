@@ -35,6 +35,10 @@ class MockChatFriend implements ChatFriend {
             public String getRenderName() {
                 return name;
             }
+
+            public void setName(String name) {
+                MockChatFriend.this.name = name;
+            }
         };
     }
 
