@@ -962,4 +962,21 @@ public class FileUtils {
         String md5 = new BigInteger(1, digest).toString(16);
         return md5;
     }
+    
+    /**
+     * Tries to create a symbolic link from the source to the target
+     * destinations. Returning the exit code of the command run.
+     * 
+     * @throws UnsupportedOperationException if this method is run on an os other than linux.
+     */
+    public static int createSymbolicLink(File source, File target) throws IOException,
+            InterruptedException {
+        if(!OSUtils.isLinux()) {
+            throw new UnsupportedOperationException("Creating Symbolic links is only supported on linux.");
+        }
+        String[] command = {"ln","-s",source.getAbsolutePath(),target.getAbsolutePath()};
+        Process process = Runtime.getRuntime().exec(command);
+        process.waitFor();
+        return process.exitValue();
+    }
 }

@@ -81,7 +81,7 @@ public class LimeMozillaInitializer {
                 }
             }
 
-            File[] possibleFlashLocations = new File[] { new File("/usr/lib/firefox/plugins"),
+            File[] possibleFlashLocations = new File[] { new File("/usr/lib/flash-plugin/"), new File("/usr/lib/firefox/plugins"),
                     new File("/usr/lib/mozilla/plugins"), new File("/usr/lib/iceweasle"),
                     new File("/usr/lib/xulrunner") };
             for (File flashLocation : possibleFlashLocations) {
@@ -96,7 +96,7 @@ public class LimeMozillaInitializer {
                             // using a symlink instead of copying, debian had
                             // issues with copying the library.
                             try {
-                                createSymbolicLink(flashFile, linkTarget);
+                                FileUtils.createSymbolicLink(flashFile, linkTarget);
                                 foundFlash = true;
                             } catch (IOException e) {
                                 LOG.debug(e.getMessage(), e);
@@ -114,18 +114,6 @@ public class LimeMozillaInitializer {
                 }
             }
         }
-    }
-
-    /**
-     * Tries to create a symbolic link from the source to the target
-     * destinations. Returning the exit code of the command run.
-     */
-    private static int createSymbolicLink(File source, File target) throws IOException,
-            InterruptedException {
-        String command = "ln -s " + source.getAbsolutePath() + " " + target.getAbsolutePath();
-        Process process = Runtime.getRuntime().exec(command);
-        process.waitFor();
-        return process.exitValue();
     }
 
     private static String getResourceName() {
