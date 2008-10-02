@@ -107,7 +107,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         tableCardLayout = new CardLayout();
         nonEmptyPanel = new JPanel();
         nonEmptyPanel.setLayout(new BorderLayout());
-        
+        nonEmptyPanel.setTransferHandler(new SharingTransferHandler(fileList,false));
         JPanel cardPanel = new JPanel();
         cardPanel.setLayout(tableCardLayout);
         
