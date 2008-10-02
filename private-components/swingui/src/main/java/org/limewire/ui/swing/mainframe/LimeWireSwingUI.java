@@ -7,10 +7,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.JLayeredPane;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -23,17 +25,20 @@ public class LimeWireSwingUI extends JPanel {
     
     private final TopPanel topPanel;
     private final TrayNotifier trayNotifier;
+    private final JMenuBar menuBar;
     
 	@Inject
     public LimeWireSwingUI(
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, FriendsPanel friendsPanel,
-            TrayNotifier trayNotifier, AudioPlayer player) {
+            TrayNotifier trayNotifier, AudioPlayer player,
+            LimeMenuBar limeMenuBar) {
     	GuiUtils.assignResources(this);
     	        
     	this.trayNotifier = trayNotifier;
     	this.topPanel = topPanel;
+    	this.menuBar = limeMenuBar;
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -95,8 +100,12 @@ public class LimeWireSwingUI extends JPanel {
     public TrayNotifier getTrayNotifier() {
         return trayNotifier;
     }
+
+    public JMenuBar getMenuBar() {
+        return menuBar;
+    }
     
-    private class MainPanelResizer extends ComponentAdapter {
+    private static class MainPanelResizer extends ComponentAdapter {
         private final MainPanel target;
 
         public MainPanelResizer(MainPanel target) {
@@ -110,7 +119,7 @@ public class LimeWireSwingUI extends JPanel {
         }
     }
     
-    private class PanelResizer extends ComponentAdapter {
+    private static class PanelResizer extends ComponentAdapter {
         private final Resizable target;
         
         public PanelResizer(Resizable target) {

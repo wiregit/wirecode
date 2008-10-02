@@ -70,10 +70,10 @@ public class AppFrame extends SingleFrameApplication {
 
         Injector localInjector = createInjector();
 
-        getMainFrame().setJMenuBar(new LimeMenuBar());
-
         LimeWireSwingUI ui = localInjector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
+        getMainFrame().setJMenuBar(ui.getMenuBar());
+        
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
         addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(Application.class)));
         

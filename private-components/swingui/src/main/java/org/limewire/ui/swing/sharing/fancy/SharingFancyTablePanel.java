@@ -2,7 +2,6 @@ package org.limewire.ui.swing.sharing.fancy;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.dnd.DropTarget;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;

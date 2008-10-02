@@ -97,8 +97,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                         new Point2D.Double(0, 1), bottomGradient,
                         false), true));
         
-        textField = new TextFieldWithEnterButton(
-            I18n.tr("Search..."), friendLibraries);
+        textField = new TextFieldWithEnterButton(I18n.tr("Search..."), friendLibraries);
         textField.setMaximumSize(120);
         textField.setName("TopPanel.searchInput");
         

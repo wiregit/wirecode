@@ -3,8 +3,6 @@ package com.limegroup.gnutella.downloader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Set;

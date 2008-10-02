@@ -22,4 +22,10 @@ public class MockApplication implements Application {
         
     }
     
+    @Override
+    public boolean isTestingVersion() {
+        // TODO Auto-generated method stub
+        return true;
+    }
+    
 }

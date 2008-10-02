@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.mainframe;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -8,20 +10,19 @@ import java.awt.GradientPaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
-import java.io.File;
-import java.util.Random;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
@@ -44,34 +45,26 @@ import org.limewire.ui.swing.friends.SignoffAction;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
-import org.limewire.ui.swing.tray.Notification;
-import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
-import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import net.miginfocom.swing.MigLayout;
-
 @Singleton
 public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenMessageListener {
     
-    private final String OFFLINE = tr("Offline");
     private final IconLibrary icons;
-    private JXButton friendsButton;
-    private JMenu statusMenu;
-    private String SIGN_IN = tr("Sign in");
-    private String FRIENDS = tr("Friends");
-    private boolean loggedIn;
-    private ButtonGroup availabilityButtonGroup;
-    private JCheckBoxMenuItem availablePopupItem;
-    private JCheckBoxMenuItem awayPopupItem;
+    private final JXButton friendsButton;
+    private final JMenu statusMenu;
+    private final ButtonGroup availabilityButtonGroup;
+    private final JCheckBoxMenuItem availablePopupItem;
+    private final JCheckBoxMenuItem awayPopupItem;
     private final UnseenMessageFlasher flasher;
+
+    private boolean loggedIn;
     
     @Resource private Color topGradient;
     @Resource private Color bottomGradient;
@@ -81,13 +74,13 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
     @Resource private int height;
 
     @Inject
-    public StatusPanel(final TrayNotifier trayNotifier, final IconManager iconManager, IconLibrary icons, AudioPlayer player) {
+    public StatusPanel(IconLibrary icons, AudioPlayer player) {
         GuiUtils.assignResources(this);
         this.icons = icons;
         
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
-        add(Line.createHorizontalLine(topBorderColor, 1), "span, grow, wrap");
-        add(Line.createHorizontalLine(belowTopBorderColor, 1), "span, grow, wrap");
+        add(Line.createHorizontalLine(topBorderColor, 1), "aligny top, span, grow, wrap");
+        add(Line.createHorizontalLine(belowTopBorderColor, 1), "aligny top, span, grow, wrap");
         
         setMinimumSize(new Dimension(0, height + 2));
         setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
@@ -97,38 +90,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
                 new GradientPaint(new Point2D.Double(0, 0), topGradient, 
                         new Point2D.Double(0, 1), bottomGradient,
                         false), true));
-        
-        add(new JButton(new AbstractAction("Error Test") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new RuntimeException("Test Error");
-            }
-        }), "gapbefore push");
-
-        add(new JButton(new AbstractAction("Tray Test") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (new Random().nextBoolean()) {
-                    Icon icon = iconManager.getIconForFile(new File("limewire.exe"));
-                    Notification notification = new Notification(
-                            "This is a very looooooooooooooooooooooooooooooooong message.",
-                            icon, this);
-                    trayNotifier.showMessage(notification);
-                } else if (new Random().nextBoolean()) {
-                    Icon icon = iconManager.getIconForFile(new File("limewire.html"));
-                    Notification notification = new Notification(
-                            "This is a another very loooong  loooong loooong loooong loooong loooong loooong loooong loooong message.",
-                            icon, this);
-                    trayNotifier.showMessage(notification);               
-                } else {
-                    Icon icon = iconManager.getIconForFile(new File("limewire.html"));
-                    Notification notification = new Notification(
-                            "Short message.",
-                            icon, this);
-                    trayNotifier.showMessage(notification);               
-                }
-            }
-        }), "gapbefore push");
+ 
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
         miniPlayerPanel.setVisible(false);
         add(miniPlayerPanel, "gapbefore push");
@@ -156,7 +118,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
         statusMenu.setBackground(whiteBackground);
         statusMenu.setBorderPainted(false);
         menuBar.add(statusMenu);
-        friendsButton = new JXButton(new FriendsAction(SIGN_IN));
+        friendsButton = new JXButton(new FriendsAction(I18n.tr("Sign In")));
         friendsButton.setBackgroundPainter(new RectanglePainter<JXButton>(whiteBackground, whiteBackground));
         menuPanel.add(friendsButton, BorderLayout.EAST);
         
@@ -172,7 +134,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
         availabilityButtonGroup.add(availablePopupItem);
         availabilityButtonGroup.add(awayPopupItem);
         
-        updateStatus(SIGN_IN, icons.getEndChat(), OFFLINE);
+        updateStatus(I18n.tr("Sign In"), icons.getEndChat(), I18n.tr("Offline"));
         
         this.flasher = new UnseenMessageFlasher(friendsButton);
         
@@ -182,7 +144,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
         loggedIn = true;
-        updateStatus(FRIENDS, FriendsUtil.getIcon(Mode.available, icons), I18n.tr(Mode.available.toString()));
+        updateStatus(I18n.tr("Friends"), FriendsUtil.getIcon(Mode.available, icons), I18n.tr(Mode.available.toString()));
         statusMenu.setEnabled(true);
     }
     
@@ -196,7 +158,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
     @EventSubscriber
     public void handleSignoffEvent(SignoffEvent event) {
         loggedIn = false;
-        updateStatus(SIGN_IN, icons.getEndChat(), OFFLINE);
+        updateStatus(I18n.tr("Sign In"), icons.getEndChat(), I18n.tr("Offline"));
         statusMenu.setEnabled(false);
     }
     
@@ -217,7 +179,7 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
             @Override
             public void run() {
                 if (loggedIn) {
-                    friendsButton.setText(FRIENDS + " (" + count + ")");        
+                    friendsButton.setText(I18n.tr("Friends ({0})", count));        
                 }
             }
         });

@@ -14,12 +14,11 @@ import javax.swing.table.TableColumn;
 
 import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
-import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.table.SharingTable;

@@ -35,5 +35,10 @@ class ApplicationImpl implements Application {
         lifecycleManager.shutdown();
     }
     
+    @Override
+    public boolean isTestingVersion() {
+        return LimeWireUtils.isTestingVersion();
+    }
+    
 
 }

@@ -8,6 +8,9 @@ public interface Application {
      */
     String getUniqueUrl(String baseUrl);
     
+    /** Returns true if the application is in a 'testing' version. */
+    public boolean isTestingVersion();
+    
     /**
      * Starts the core services of the application.
      */
