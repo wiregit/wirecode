@@ -9,7 +9,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.sharing.table.CategoryFilter;
+import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.FilterList;

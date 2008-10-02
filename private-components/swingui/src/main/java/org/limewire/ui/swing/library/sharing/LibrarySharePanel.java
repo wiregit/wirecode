@@ -55,7 +55,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.RoundedBorder;
+import org.limewire.ui.swing.components.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.table.MouseableTable;

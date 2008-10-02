@@ -31,7 +31,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
@@ -90,9 +89,11 @@ public class ActionButtonPanel extends JXPanel {
                         NavCategory.DOWNLOAD,
                         MainDownloadPanel.NAME).select();
                 } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
-                    navigator.getNavItem(
-                        NavCategory.LIBRARY,
-                        MyLibraryPanel.NAME).select();
+                    throw new UnsupportedOperationException("Implement Me Properly!");                    
+//                    navigator.getNavItem(
+//                        NavCategory.LIBRARY,
+//                        MyLibraryPanel.NAME).select();
+                    
                 }
             }
         });

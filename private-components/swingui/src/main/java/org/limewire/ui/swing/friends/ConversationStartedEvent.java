@@ -3,7 +3,7 @@ package org.limewire.ui.swing.friends;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.ui.swing.AbstractEDTEvent;
+import org.limewire.ui.swing.event.AbstractEDTEvent;
 import org.limewire.xmpp.api.client.MessageWriter;
 
 public class ConversationStartedEvent extends AbstractEDTEvent {

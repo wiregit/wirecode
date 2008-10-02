@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JWindow;
 import javax.swing.border.Border;
+
 
 /**
  * This class implements a popup menu that has rounded corners

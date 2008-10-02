@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.sound;
 
 import java.io.File;
 import java.io.IOException;

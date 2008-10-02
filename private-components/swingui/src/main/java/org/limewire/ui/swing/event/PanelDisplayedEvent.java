@@ -2,7 +2,6 @@ package org.limewire.ui.swing.event;
 
 import java.awt.Component;
 
-import org.limewire.ui.swing.AbstractEDTEvent;
 
 
 public class PanelDisplayedEvent extends AbstractEDTEvent {

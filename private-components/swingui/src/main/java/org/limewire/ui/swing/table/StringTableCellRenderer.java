@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.table;
 
 import java.awt.Component;
 import java.awt.FlowLayout;

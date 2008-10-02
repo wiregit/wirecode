@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Insets;
@@ -19,7 +19,6 @@ import javax.swing.text.AbstractDocument;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.AutoCompleteDictionary;
-import org.limewire.ui.swing.components.DropDownListAutoCompleteTextField;
 
 /**
  * This is a custom component that includes a JTextField and a JButton.

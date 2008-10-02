@@ -19,6 +19,9 @@ public interface NavItem {
     
     /** Removes a NavItemListener. */
     void removeNavItemListener(NavItemListener listener);
+    
+    /** Returns true if this NavItem is currently selected. */
+    boolean isSelected();
 
 
 }

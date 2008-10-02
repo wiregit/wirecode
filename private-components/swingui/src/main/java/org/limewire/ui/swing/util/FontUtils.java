@@ -25,6 +25,10 @@ public class FontUtils {
     public static void bold(JComponent component) {
         changeStyle(component, Font.BOLD);
     }
+    
+    public static void plain(JComponent component) {
+        changeStyle(component, Font.PLAIN);
+    }
 
     public static void underline(JComponent component) {
         Font font = component.getFont();

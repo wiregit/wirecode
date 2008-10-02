@@ -25,7 +25,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 
-import org.limewire.ui.swing.RoundedBorder;
+import org.limewire.ui.swing.components.RoundedBorder;
 
 /**
  * This widget is used in the search results list view.

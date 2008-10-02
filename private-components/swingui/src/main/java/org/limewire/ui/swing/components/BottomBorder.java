@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.components;
 
 import java.awt.Component;
 import java.awt.Graphics;

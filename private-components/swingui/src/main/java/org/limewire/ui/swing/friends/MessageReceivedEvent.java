@@ -2,7 +2,7 @@ package org.limewire.ui.swing.friends;
 
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.AbstractEDTEvent;
+import org.limewire.ui.swing.event.AbstractEDTEvent;
 
 public class MessageReceivedEvent extends AbstractEDTEvent {
     private static final String TOPIC_PREFIX = "chat-";

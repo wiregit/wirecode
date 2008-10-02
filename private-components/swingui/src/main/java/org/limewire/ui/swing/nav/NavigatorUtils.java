@@ -24,7 +24,7 @@ public class NavigatorUtils {
      * @return
      */
     public static Action getNavAction(final NavItem item) {
-        return new AbstractAction(item.getId()) {
+        return new AbstractAction() {
             {
                 item.addNavItemListener(new NavItemListener() {
                     public void itemRemoved() {

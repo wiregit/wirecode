@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.event;
 
 import org.bushe.swing.event.EventService;
 import org.bushe.swing.event.EventServiceLocator;

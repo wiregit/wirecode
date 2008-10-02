@@ -251,23 +251,13 @@ public class GuiUtils {
     }   
 
     
-    /**
-     * Returns the int as a hex string.
-     */
-    public static String toHex(int i) {
+    /** Returns the int as a hex string. */
+    private static String toHex(int i) {
         String hex = Integer.toHexString(i).toUpperCase(Locale.US);
         if (hex.length() == 1)
             return "0" + hex;
         else
             return hex;
-    }
-    /**
-     * Convert a hex string to a color object
-     */
-    public static Color hexToColor(String hexString){
-        int decimalColor;
-        decimalColor = Integer.parseInt(hexString, 16);
-        return new Color(decimalColor);
     }
     
     /**

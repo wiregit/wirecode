@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.table;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -24,7 +24,6 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.RowPresevationListener;
-import org.limewire.ui.swing.table.MouseableTable;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -107,10 +106,10 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
                 
                 Action action = getActionMap().get(JXTable.PACKALL_ACTION_COMMAND);
                 if (action != null) {
-                    action.actionPerformed(
-                            new ActionEvent(ConfigurableTable.this, 0, 
-                                    JXTable.PACKALL_ACTION_COMMAND));
-                }
+	                action.actionPerformed(
+	                	new ActionEvent(ConfigurableTable.this, 0,
+	                					JXTable.PACKALL_ACTION_COMMAND));
+	            }
             }
         };
 

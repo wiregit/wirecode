@@ -22,14 +22,14 @@ import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.ConfigurableTable;
-import org.limewire.ui.swing.StringTableCellRenderer;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.table.ConfigurableTable;
+import org.limewire.ui.swing.table.StringTableCellRenderer;
 
 import ca.odell.glazedlists.EventList;
 

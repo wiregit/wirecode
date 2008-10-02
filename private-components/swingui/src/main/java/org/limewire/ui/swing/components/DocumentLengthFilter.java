@@ -1,4 +1,4 @@
-package org.limewire.ui.swing;
+package org.limewire.ui.swing.components;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;

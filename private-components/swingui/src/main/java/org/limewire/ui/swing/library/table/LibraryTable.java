@@ -12,42 +12,30 @@ import javax.swing.JComponent;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 
-import org.jdesktop.swingx.JXTable;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileTransferable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 
-import ca.odell.glazedlists.EventList;
-
-
-
-public class LibraryTable<T extends FileItem> extends MouseableTable {
+public class LibraryTable extends MouseableTable {
     
     private LibrarySharePanel librarySharePanel;
     private MultiButtonTableCellRendererEditor shareEditor;
-
+    
+    private boolean enableSharing;
 
     private TableColors tableColors;
     
-    public LibraryTable(EventList<T> libraryItems) {
-        super(new LibraryTableModel<T>(libraryItems));
-                
+    public LibraryTable() {
         tableColors = new TableColors();
-        
-        
         setStripesPainted(true);
-        
         setColumnControlVisible(true);
-        
         setShowHorizontalLines(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
         setFillsViewportHeight(true);
         setDragEnabled(true);
-        
        
         setTransferHandler(new TransferHandler(){
             @Override
@@ -57,11 +45,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             
             @Override
             public Transferable createTransferable(JComponent comp) {
-                JXTable table = (JXTable) comp;
-                int indices[] = table.getSelectedRows();
+                int indices[] = getSelectedRows();
                 List<File> files = new ArrayList<File>();
                 for(int i = 0; i < indices.length; i++) {
-                    LocalFileItem item = (LocalFileItem)((LibraryTableModel)table.getModel()).getFileItem(indices[i]);
+                    LocalFileItem item = (LocalFileItem)((LibraryTableModel)getModel()).getFileItem(indices[i]);
                     files.add(item.getFile());
                 }
                 return new FileTransferable(files);
@@ -69,15 +56,26 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         });
     }
     
+    public void setModel(LibraryTableModel newModel) {
+        if(getModel() instanceof LibraryTableModel) {
+            ((LibraryTableModel)getModel()).dispose();
+        }        
+        super.setModel(newModel);
+        
+        if(enableSharing) {
+            List<Action> actionList = new ArrayList<Action>();
+            actionList.add(new ShareAction("+"));
+            shareEditor = new MultiButtonTableCellRendererEditor(actionList);
+            getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellEditor(shareEditor);
+            getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellRenderer(new MultiButtonTableCellRendererEditor(actionList));
+            getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setPreferredWidth(shareEditor.getPreferredSize().width);
+            getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setWidth(shareEditor.getPreferredSize().width);
+        }
+    }
+    
     public void enableSharing(LibrarySharePanel librarySharePanel){
         this.librarySharePanel = librarySharePanel;
-        List<Action> actionList = new ArrayList<Action>();
-        actionList.add(new ShareAction("+"));
-        shareEditor = new MultiButtonTableCellRendererEditor(actionList);
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellEditor(shareEditor);
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellRenderer(new MultiButtonTableCellRendererEditor(actionList));
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setPreferredWidth(shareEditor.getPreferredSize().width);
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setWidth(shareEditor.getPreferredSize().width);
+        this.enableSharing = true;
     }
     
     private class ShareAction extends AbstractAction {

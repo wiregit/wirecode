@@ -37,13 +37,13 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.ui.swing.TextFieldWithEnterButton;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SearchBar;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.components.TextFieldWithEnterButton;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -282,6 +282,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
             @Override
             public void removeNavItemListener(NavItemListener listener) {
                 item.removeNavItemListener(listener);
+            }
+            
+            @Override
+            public boolean isSelected() {
+                return item.isSelected();
             }
         };
     }

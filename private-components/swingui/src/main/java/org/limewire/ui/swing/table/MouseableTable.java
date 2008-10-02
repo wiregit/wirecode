@@ -185,7 +185,7 @@ public class MouseableTable extends StripedJXTable {
     
     @Override
     public boolean isCellEditable(int row, int col) {
-        if (row >= getRowCount() || col >= getColumnCount()){
+        if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
             return false;
         }
     	return getColumnModel().getColumn(col).getCellEditor() != null;

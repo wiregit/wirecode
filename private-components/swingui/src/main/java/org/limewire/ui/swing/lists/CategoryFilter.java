@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.sharing.table;
+package org.limewire.ui.swing.lists;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;

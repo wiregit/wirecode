@@ -2,6 +2,7 @@ package org.limewire.ui.swing;
 
 import org.limewire.ui.swing.friends.LimeWireUiFriendsModule;
 import org.limewire.ui.swing.images.LimeWireUIImagesModule;
+import org.limewire.ui.swing.library.LimeWireUiLibraryModule;
 import org.limewire.ui.swing.mainframe.LimeWireUiMainframeModule;
 import org.limewire.ui.swing.nav.LimeWireUiNavModule;
 import org.limewire.ui.swing.player.LimeWireUiPlayerModule;
@@ -23,5 +24,6 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiPlayerModule());
         install(new LimeWireUISharingModule());
         install(new LimeWireUIImagesModule());
+        install(new LimeWireUiLibraryModule());
     }
 }

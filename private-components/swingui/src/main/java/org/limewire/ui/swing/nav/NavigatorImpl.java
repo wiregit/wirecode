@@ -155,5 +155,10 @@ class NavigatorImpl implements Navigator {
                 listener.itemRemoved();
             }
         }
+        
+        @Override
+        public boolean isSelected() {
+            return selectedItem == this;
+        }
     }
 }

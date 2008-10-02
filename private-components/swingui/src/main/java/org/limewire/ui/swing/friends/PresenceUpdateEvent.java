@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.friends;
 
-import org.limewire.ui.swing.AbstractEDTEvent;
+import org.limewire.ui.swing.event.AbstractEDTEvent;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 
