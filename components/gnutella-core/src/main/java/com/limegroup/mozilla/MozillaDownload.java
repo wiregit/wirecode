@@ -37,7 +37,7 @@ public interface MozillaDownload extends BandwidthTracker {
     /**
      * Returns the target save file for the download.
      */
-    File getSaveFile();
+    File getIncompleteFile();
 
     /**
      * Indicator if the download is complete or not.
@@ -107,4 +107,6 @@ public interface MozillaDownload extends BandwidthTracker {
      * Returns indicator that the download is CANCELLED.
      */
     boolean isCancelled();
+
+    void setDiskError();
 }

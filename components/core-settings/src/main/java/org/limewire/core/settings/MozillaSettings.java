@@ -1,11 +1,6 @@
 package org.limewire.core.settings;
 
-import java.io.File;
-
-import org.limewire.setting.FileSetting;
 import org.limewire.setting.StringSetting;
-import org.limewire.util.SystemUtils;
-import org.limewire.util.SystemUtils.SpecialLocations;
 
 /**
  * Settings to override mozilla default behavior.
@@ -14,13 +9,6 @@ public class MozillaSettings extends LimeProps {
 
     private MozillaSettings() {
     }
-
-    /**
-     * The default download directory for the mozilla downloads.
-     */
-    public static final FileSetting DOWNLOAD_DIR = FACTORY.createFileSetting(
-            "MOZILLA_DOWNLOAD_DIR", new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)
-                    + "/mozdownloads"));
 
     /**
      * The list of mime-types to automatically download. Mime-types in this list

@@ -3,8 +3,10 @@ package com.limegroup.mozilla;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -123,12 +125,16 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
 
     @Override
     public File getDownloadFragment() {
-        return getFile();
+        //not really used for this downloader
+        return getIncompleteFile();
     }
 
     @Override
     public File getFile() {
-        return getSaveFile();
+        if(isCompleted()) {
+            return getSaveFile();
+        }
+        return getIncompleteFile();
     }
 
     @Override
@@ -168,8 +174,13 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
 
     @Override
     public File getSaveFile() {
-        return download.getSaveFile();
+        File saveFile = new File(SharingSettings.getSaveDirectory(), getIncompleteFile().getName());
+        return saveFile;
     }
+    
+    private File getIncompleteFile() {
+        return download.getIncompleteFile();
+    } 
 
     @Override
     public URN getSha1Urn() {
@@ -352,6 +363,17 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
         if (status == DownloadStatus.COMPLETE || status == DownloadStatus.INVALID
                 || status == DownloadStatus.ABORTED) {
             downloadManager.remove(this, false);
+        }
+
+        if (status == DownloadStatus.COMPLETE) {
+            //move the finished file from the incomplete directory to the Save directory.
+            File downloadedFile = getIncompleteFile();
+            File savedFile = getSaveFile();
+            FileUtils.forceDelete(savedFile);
+            boolean success = FileUtils.forceRename(downloadedFile, savedFile);
+           if(!success) {
+               download.setDiskError();
+           }
         }
     }
 

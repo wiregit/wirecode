@@ -228,7 +228,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
     }
 
     @Override
-    public File getSaveFile() {
+    public File getIncompleteFile() {
         return saveFile;
     }
 
@@ -356,6 +356,11 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
         boolean cancelled = downloadStatus == DownloadStatus.ABORTED
                 || downloadStatus == DownloadStatus.INVALID;
         return cancelled;
+    }
+
+    @Override
+    public synchronized void setDiskError() {
+        state.set(nsIDownloadManager.DOWNLOAD_DIRTY);
     }
 
 }

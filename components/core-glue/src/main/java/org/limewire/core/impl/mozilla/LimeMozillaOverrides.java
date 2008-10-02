@@ -1,6 +1,7 @@
 package org.limewire.core.impl.mozilla;
 
 import org.limewire.core.settings.MozillaSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.mozilla.browser.XPCOMUtils;
 import org.mozilla.interfaces.nsIDownloadManager;
 import org.mozilla.interfaces.nsIPrefService;
@@ -31,7 +32,7 @@ public class LimeMozillaOverrides {
         // opening
         prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
         prefService.getBranch("browser.download.").setIntPref("folderList", 2);
-        String downloadDir = MozillaSettings.DOWNLOAD_DIR.getValue().getAbsolutePath();
+        String downloadDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue().getAbsolutePath();
         prefService.getBranch("browser.download.").setCharPref("dir", downloadDir);
         prefService.getBranch("browser.download.manager.").setBoolPref("showWhenStarting", 0);
         prefService.getBranch("browser.download.manager.").setBoolPref("showAlertOnComplete", 0);
