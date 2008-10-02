@@ -47,6 +47,8 @@ public class LimeMozillaInitializer {
             }
         }
 
+        installFlashLinux(xulInstallPath);
+        
         String newLibraryPath = System.getProperty("java.library.path") + File.pathSeparator
                 + xulInstallPath.getAbsolutePath();
         System.setProperty("java.library.path", newLibraryPath);
@@ -67,6 +69,37 @@ public class LimeMozillaInitializer {
 
         if (LOG.isDebugEnabled())
             LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
+    }
+    
+    private static void installFlashLinux(File xulInstallPath) {
+        File pluginsDir = new File(xulInstallPath,"/xulrunner/plugins");
+
+        if(OSUtils.isLinux()) {
+            for(File file : pluginsDir.listFiles()) {
+                if(file.isFile() && file.getName().contains("flash")) {
+                    return;//flash already installed
+                }
+            }
+            
+            
+            File[] possibleFlashLocations = new File[]{new File("/usr/lib/firefox/plugins"), new File("/usr/lib/iceweasle"), new File("/usr/lib/xulrunner")};
+            for(File flashLocation : possibleFlashLocations) {
+                if(flashLocation.exists() && flashLocation.isDirectory()) {
+                    boolean foundFlash = false;
+                    for(File file : flashLocation.listFiles()) {
+                        if(file.getName().contains("flash")) {
+                            FileUtils.copy(file, new File(pluginsDir, "/" + file.getName()));
+                            foundFlash = true;
+                            //continue looping because there might be more than 1 file at this location for flash to work
+                        }
+                    }
+                    if(foundFlash) {
+                        //flash was found at another location and copied
+                        break;
+                    }
+                }
+            }            
+        }
     }
 
     private static String getResourceName() {
