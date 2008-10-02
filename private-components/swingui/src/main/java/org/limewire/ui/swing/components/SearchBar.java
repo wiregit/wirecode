@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 
@@ -72,6 +73,7 @@ public class SearchBar extends JXPanel {
          */
         @Override
         protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
+            Shape oldClip = g.getClip();
             Area rightShape = new Area(
                     new RoundRectangle2D.Float(leftComponent.getWidth() + ARC_WIDTH, 0, object.getWidth() - leftComponent.getWidth() - ARC_WIDTH, 
                             object.getHeight(), ARC_WIDTH, object.getHeight()));
@@ -83,6 +85,10 @@ public class SearchBar extends JXPanel {
             g.fill(leftArea);
             g.setColor(rightColor);
             g.fill(rightShape);
+            //get rid of artifacts on left side of right shape.  drawing full right shape would leave artifacts on right side.
+            g.setClip(rightShape.getBounds().x, rightShape.getBounds().y, ARC_WIDTH, object.getHeight());
+            g.draw(rightShape);
+            g.setClip(oldClip);
         }
     }
     
