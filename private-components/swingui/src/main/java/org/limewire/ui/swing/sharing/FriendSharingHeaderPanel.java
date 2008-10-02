@@ -1,10 +1,11 @@
 package org.limewire.ui.swing.sharing;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
@@ -12,9 +13,11 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -25,7 +28,7 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     private Icon downIcon;
     
     private LibraryButton libraryButton;
-    private JButton shareButton;
+    private JXButton shareButton;
     
     private final SharingAddAction musicAction;
     private final SharingAddAction videoAction;
@@ -69,10 +72,15 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     @Override
     protected void createComponents() {
         libraryButton = new LibraryButton(I18n.tr("Library"));
-        libraryButton.setEnabled(false);
-        shareButton = new JButton(I18n.tr("Share"), downIcon);       
+        libraryButton.setPreferredSize(new Dimension(50, 21));
+//        libraryButton.setEnabled(false);
+        libraryButton.setForeground(Color.WHITE);
+        libraryButton.setBackgroundPainter(new ButtonPainter());
+        
+        shareButton = new JXButton(I18n.tr("Share"), downIcon);       
         shareButton.setVisible(false);
         shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
+        shareButton.setBackgroundPainter(new ButtonPainter());
     }
     
     @Override
@@ -105,11 +113,12 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         libraryButton.setFriend(name);
     }
     
-    private class LibraryButton extends JButton {
+    private class LibraryButton extends JXButton {
         private String friend;
         
         public LibraryButton(String text) {
             super(text);
+            setFocusPainted(false);
         }
         
         @Override
