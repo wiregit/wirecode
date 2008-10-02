@@ -26,6 +26,10 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     
     @Resource
     private Icon downIcon;
+    @Resource
+    private int buttonHeight;
+    @Resource
+    private int buttonWidth;
     
     private LibraryButton libraryButton;
     private JXButton shareButton;
@@ -72,7 +76,7 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     @Override
     protected void createComponents() {
         libraryButton = new LibraryButton(I18n.tr("Library"));
-        libraryButton.setPreferredSize(new Dimension(50, 21));
+        libraryButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
 //        libraryButton.setEnabled(false);
         libraryButton.setForeground(Color.WHITE);
         libraryButton.setBackgroundPainter(new ButtonPainter());
