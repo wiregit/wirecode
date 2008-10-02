@@ -23,7 +23,6 @@ import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -80,7 +79,8 @@ public class SearchResultsPanel extends JPanel {
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         sponsoredResultsPanel.setVisible(false);
         this.sortAndFilterPanel = sortAndFilterPanel;
-        this.scrollPane = new SearchScrollPane();
+        this.scrollPane = new JScrollPane();
+        scrollPane.setBorder(null);
         this.scrollablePanel = new ScrollablePanel();
 
         final EventList<VisualSearchResult> filteredList =
