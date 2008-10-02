@@ -116,7 +116,14 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
     }
     
-
+    public void testSetName() throws InterruptedException {
+        assertEquals("buddy2", rosterListener.users.get("limebuddy2@gmail.com").getName());
+        rosterListener.users.get("limebuddy2@gmail.com").setName("foo");
+        Thread.sleep(3 * 1000);
+        assertEquals("foo", rosterListener.users.get("limebuddy2@gmail.com").getName());
+        rosterListener.users.get("limebuddy2@gmail.com").setName("buddy2");
+    }
+    
     public void testDetectLimePresences() throws InterruptedException, UnknownHostException {
         assertEquals(1, rosterListener.roster.size());
         assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
@@ -129,7 +136,7 @@ public class XMPPServiceTest extends BaseTestCase {
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
-        Thread.sleep(1000);
+        Thread.sleep(1000 * 2);
         
         assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
         assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
@@ -139,7 +146,8 @@ public class XMPPServiceTest extends BaseTestCase {
         Connectable address = (Connectable)buddy2.getAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
-        assertEquals(true, address.isTLSCapable());
+        assertEquals(true, address.isTLSCapable()); 
+        assertTrue(new String(buddy2.getAuthToken()).startsWith("limebuddy1@gmail.com"));
         
         assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
         assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
@@ -150,6 +158,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
+        assertTrue(new String(buddy1.getAuthToken()).startsWith("limebuddy2@gmail.com"));
     }
     
     public void testUserLogout() throws InterruptedException {

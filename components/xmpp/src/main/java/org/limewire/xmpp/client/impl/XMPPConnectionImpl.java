@@ -34,6 +34,8 @@ import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
 
@@ -53,6 +55,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     private final Map<String, UserImpl> users;
     protected volatile AddressIQListener addressIQListener;
     protected FileTransferIQListener fileTransferIQListener;
+    protected AuthTokenIQListener authTokenIQListener;
     protected volatile AddressEvent lastEvent;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
@@ -114,6 +117,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 rosterListeners.removeListener(addressIQListener.getRosterListener());
                 addressIQListener = null;
                 fileTransferIQListener = null;
+                authTokenIQListener = null;
                 users.clear();
                 LOG.info("disconnected.");
             }
@@ -154,7 +158,10 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                         }
                         if(ProviderManager.getInstance().getIQProvider("file-transfer", "jabber:iq:lw-file-transfer") == null) {
                             ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());    
-                        }                           
+                        }    
+                        if(ProviderManager.getInstance().getIQProvider("auth-token", "jabber:iq:lw-auth-token") == null) {
+                            ProviderManager.getInstance().addIQProvider("auth-token", "jabber:iq:lw-auth-token", new AuthTokenIQProvider());    
+                        }
                     }
                     
                     ChatStateManager.getInstance(connection);
@@ -171,7 +178,11 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     XMPPConnectionImpl.this.rosterListeners.addListener(addressIQListener.getRosterListener());
 
                     fileTransferIQListener = new FileTransferIQListener(fileOfferListener);
-                    connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());                    
+                    connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());  
+                    
+                    authTokenIQListener = new AuthTokenIQListener(connection);
+                    XMPPConnectionImpl.this.rosterListeners.addListener(authTokenIQListener.getRosterListener());
+                    connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());     
                 }
             }
         });

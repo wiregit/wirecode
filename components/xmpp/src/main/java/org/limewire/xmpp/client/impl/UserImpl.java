@@ -20,13 +20,13 @@ public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
 
     private final String id;
-    private AtomicReference<String> name;
+    private AtomicReference<RosterEntry> rosterEntry;
     private final ConcurrentHashMap<String, Presence> presences;
     private final CopyOnWriteArrayList<PresenceListener> presenceListeners;
 
     UserImpl(String id, RosterEntry rosterEntry) {
         this.id = id;
-        this.name = new AtomicReference<String>(rosterEntry.getName());
+        this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
         this.presences = new ConcurrentHashMap<String, Presence>(); 
         this.presenceListeners = new CopyOnWriteArrayList<PresenceListener>();
     }
@@ -36,12 +36,12 @@ public class UserImpl implements User {
     }
 
     public String getName() {
-        return name.get();
+        return rosterEntry.get().getName();
     }
     
     @Override
     public String getRenderName() {
-        String visualName = name.get();
+        String visualName = rosterEntry.get().getName();
         if(visualName == null) {
             return id;
         } else {
@@ -50,7 +50,16 @@ public class UserImpl implements User {
     }
     
     void setRosterEntry(RosterEntry rosterEntry) {
-        name.set(rosterEntry.getName());
+        this.rosterEntry.set(rosterEntry);
+    }
+    
+    public void setName(final String name) {
+        Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
+            public void run() {
+                UserImpl.this.rosterEntry.get().setName(name);    
+            }
+        }), "set-name-thread-" + toString());
+        t.start();
     }
 
     public Map<String, Presence> getPresences() {
@@ -92,7 +101,7 @@ public class UserImpl implements User {
     }
 
     public String toString() {
-        return StringUtils.toString(this, id, name);
+        return StringUtils.toString(this, id, rosterEntry.get().getName());
     }
 
     void updatePresence(Presence updatedPresence) {

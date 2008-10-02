@@ -13,6 +13,8 @@ import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.ExceptionalAddressIQ;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQ;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 
 import com.google.inject.internal.base.Objects;
@@ -22,6 +24,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
     
     private Address address;
+    private byte [] authToken;
     
     LimePresenceImpl(Presence presence, XMPPConnection connection) {
         super(presence, connection);
@@ -40,6 +43,14 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         this.address = address;
     }
     
+    public byte [] getAuthToken() {
+        return authToken;
+    }
+    
+    public void setAuthToken(byte [] authToken) {
+        this.authToken = authToken;
+    }
+    
     void subscribeAndWaitForAddress() throws InvalidDataException {
         if(LOG.isInfoEnabled()) {
             LOG.info("getting address from " + getJID() + " ...");
@@ -48,15 +59,29 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         addressIQ.setType(IQ.Type.GET);
         addressIQ.setTo(getJID());
         addressIQ.setPacketID(IQ.nextID());
-        final PacketCollector collector = connection.createPacketCollector(
+        final PacketCollector addressCollector = connection.createPacketCollector(
             new PacketIDFilter(addressIQ.getPacketID()));         
         connection.sendPacket(addressIQ);
-        final AddressIQ response = (AddressIQ) collector.nextResult();
+        final AddressIQ response = (AddressIQ) addressCollector.nextResult();
         if (response instanceof ExceptionalAddressIQ) {
             throw new InvalidDataException(((ExceptionalAddressIQ)response).getException());
         }
         address = response.getAddress();
-        collector.cancel();
+        addressCollector.cancel();
+        
+        final AuthTokenIQ authTokenIQ = new AuthTokenIQ();
+        authTokenIQ.setType(IQ.Type.GET);
+        authTokenIQ.setTo(getJID());
+        authTokenIQ.setPacketID(IQ.nextID());
+        final PacketCollector authTokenCollector = connection.createPacketCollector(
+            new PacketIDFilter(authTokenIQ.getPacketID()));         
+        connection.sendPacket(authTokenIQ);
+        final AuthTokenIQ authTokenResponse = (AuthTokenIQ) authTokenCollector.nextResult();
+        if (authTokenResponse instanceof AuthTokenIQProvider.ExceptionalAuthTokenIQ) {
+            throw new InvalidDataException(((AuthTokenIQProvider.ExceptionalAuthTokenIQ)authTokenResponse).getException());
+        }
+        authToken = authTokenResponse.getAuthToken();
+        authTokenCollector.cancel();
     }
 
     public void offerFile(FileMetaData file) {

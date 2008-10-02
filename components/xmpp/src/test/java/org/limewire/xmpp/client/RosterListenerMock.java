@@ -3,16 +3,17 @@ package org.limewire.xmpp.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
-import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.listener.EventListener;
-import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.xmpp.api.client.User;
 
 public class RosterListenerMock implements EventListener<RosterEvent> {
+    public HashMap<String, User> users = new HashMap<String, User>();
     public HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
     IncomingChatListenerMock listener = new IncomingChatListenerMock();
@@ -28,7 +29,8 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
     }
 
     private void userAdded(User user) {
-        System.out.println("user added: " + user.getId());            
+        System.out.println("user added: " + user.getId()); 
+        users.put(user.getId(), user);
         if(roster.get(user.getId()) == null) {
             roster.put(user.getId(), new ArrayList<Presence>());
         }

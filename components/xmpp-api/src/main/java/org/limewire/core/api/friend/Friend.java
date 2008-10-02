@@ -22,4 +22,5 @@ public interface Friend {
      */
     public String getRenderName();
 
+    void setName(String name);
 }

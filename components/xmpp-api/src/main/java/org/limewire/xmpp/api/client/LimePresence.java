@@ -19,4 +19,6 @@ public interface LimePresence extends Presence {
      * to the lime friend
      */
     public Address getAddress();
+
+    byte [] getAuthToken();
 }
