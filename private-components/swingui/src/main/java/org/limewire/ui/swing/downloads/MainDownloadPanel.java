@@ -211,10 +211,12 @@ public class MainDownloadPanel extends JPanel {
 		public DownloadSettingsPanel() {
 			super(new BorderLayout());
 			
-		       setBackgroundPainter(new MattePainter(
-		                new GradientPaint(new Point2D.Double(0, 0), topGradient, 
-		                        new Point2D.Double(0, 1), bottomGradient,
-		                        false), true));
+			MattePainter painter = new MattePainter(
+                    new GradientPaint(new Point2D.Double(0, 0), topGradient, 
+                            new Point2D.Double(0, 1), bottomGradient,
+                            false), true);
+			
+			setBackgroundPainter(painter);
 
 			pauseAllButton = new JButton(pauseAction);	
 			resumeAllButton = new JButton(resumeAction);
@@ -270,8 +272,9 @@ public class MainDownloadPanel extends JPanel {
 			
 			Insets insets = new Insets(5,5,5,5);
 			
-			JPanel titlePanel = new JPanel(new GridBagLayout());
-			titlePanel.setOpaque(false);
+			JXPanel titlePanel = new JXPanel(new GridBagLayout());
+			titlePanel.setOpaque(true);
+			titlePanel.setBackgroundPainter(painter);
 			
 			gbc.gridx = 0;
             gbc.gridy = 0;
@@ -284,10 +287,11 @@ public class MainDownloadPanel extends JPanel {
 			JPanel restPanel = new JPanel();
 			restPanel.setOpaque(false);
 			
-            gbc.gridx = 0;
+         /*   gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.insets = insets;
             restPanel.add(buttonPanel, gbc);          
+           */
             
             gbc.gridx++;
             gbc.gridy = 0;
@@ -305,8 +309,10 @@ public class MainDownloadPanel extends JPanel {
 			gbc.anchor = GridBagConstraints.LINE_END;
 			restPanel.add(searchBar, gbc);
 			
+			/*
 			gbc.gridx++;
 			restPanel.add(viewSelectionPanel, gbc);
+            */
 
 			add(titlePanel, BorderLayout.WEST);
             add(restPanel, BorderLayout.EAST);
