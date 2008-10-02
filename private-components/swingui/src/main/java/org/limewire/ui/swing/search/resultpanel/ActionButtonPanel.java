@@ -7,9 +7,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -118,7 +118,7 @@ public class ActionButtonPanel extends JXPanel {
         };
         calculateHeight();
 
-        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        setLayout(new GridLayout(1, 3));
         addButtonsToPanel();
 
         // Set the tooltip delay to zero only when the mouse is over this panel.
