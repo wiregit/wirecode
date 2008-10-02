@@ -82,15 +82,26 @@ public class LimeMozillaInitializer {
             }
             
             
-            File[] possibleFlashLocations = new File[]{new File("/usr/lib/firefox/plugins"), new File("/usr/lib/iceweasle"), new File("/usr/lib/xulrunner")};
+            File[] possibleFlashLocations = new File[]{new File("/usr/lib/firefox/plugins"), new File("/usr/lib/mozilla/plugins"), new File("/usr/lib/iceweasle"), new File("/usr/lib/xulrunner")};
             for(File flashLocation : possibleFlashLocations) {
                 if(flashLocation.exists() && flashLocation.isDirectory()) {
                     boolean foundFlash = false;
-                    for(File file : flashLocation.listFiles()) {
-                        if(file.getName().contains("flash")) {
-                            //TODO make sure we are not copying a file we cannot support, ie 64 bit running in 32 bit jvm
-                            FileUtils.copy(file, new File(pluginsDir, "/" + file.getName()));
-                            foundFlash = true;
+                    for(File flashFile : flashLocation.listFiles()) {
+                        if(flashFile.getName().contains("flash")) {
+                            
+                            //TODO make sure we are not using a file we cannot support, ie 64 bit running in 32 bit jvm
+                            
+                            File linkTarget = new File(pluginsDir, "/" + flashFile.getName());
+                            //using a symlink instead of copying, debian had issues with copying the library.
+                            String command = "ln -s " + flashFile.getAbsolutePath() + " " + linkTarget.getAbsolutePath();
+                            try {
+                                Runtime.getRuntime().exec(command);
+                                foundFlash = true;
+                            } catch (IOException e) {
+                                LOG.debug(e.getMessage(), e);
+                            }
+                            
+                            
                             //continue looping because there might be more than 1 file at this location for flash to work
                         }
                     }
