@@ -688,6 +688,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         public String getRenderName() {
             return getName();
         }
+
+        public void setName(String name) {
+            
+        }
     }
  
 }

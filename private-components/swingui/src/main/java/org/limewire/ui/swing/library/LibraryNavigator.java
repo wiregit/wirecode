@@ -212,6 +212,10 @@ public class LibraryNavigator extends JPanel {
         public String getRenderName() {
             return getName();
         }
+
+        public void setName(String name) {
+            
+        }
     }
     
 
