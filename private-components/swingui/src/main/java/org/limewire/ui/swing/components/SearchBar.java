@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.border.EmptyBorder;
@@ -29,12 +29,13 @@ public class SearchBar extends JXPanel {
         GuiUtils.assignResources(this);
         comboBox.setPreferredSize(new Dimension(104, 18));
         textField.setPreferredSize(new Dimension(242, 18));
+       // setPreferredSize(new Dimension(346, 22));
         add(comboBox);
         add(textField);
 
-        SearchComboUI comboUI = new SearchComboUI();
+        SearchComboUI comboUI = new SearchComboUI(buttonIcon);
         comboBox.setUI(comboUI);
-        comboUI.init(buttonIcon);
+        comboUI.init();
         comboBox.setOpaque(false);
         textField.setOpaque(false);
         setOpaque(false);
@@ -80,19 +81,13 @@ public class SearchBar extends JXPanel {
     private static class SearchComboUI extends BasicComboBoxUI{
 //      TODO move to properties
         private Color leftColor = Color.decode("#bfd8e9");
+        private Icon buttonIcon;
         
-        public void init(Icon buttonIcon){
-            //TODO this isn't working - need to look at BasicComboBoxUI
-            arrowButton.setMargin(new Insets(0, 0, 0, 0));
-            arrowButton.setBorderPainted(false);
-            arrowButton.setContentAreaFilled(false);
-            arrowButton.setFocusPainted(false);
-            arrowButton.setRolloverEnabled(true);
-            arrowButton.setHideActionText(true);
-            arrowButton.setBorder(null);
-            arrowButton.setOpaque(false);
-            arrowButton.setIcon(buttonIcon);
-            
+        public SearchComboUI(Icon buttonIcon){
+            this.buttonIcon = buttonIcon;
+        }
+        
+        public void init(){
             if(editor instanceof JComponent){
                 JComponent comp = (JComponent)editor;
                 comp.setBorder(new EmptyBorder(0,0,0,0));
@@ -104,5 +99,10 @@ public class SearchBar extends JXPanel {
             comboBox.setBackground(leftColor);
         }
         
+        protected JButton createArrowButton() {
+            JButton button = new IconButton(buttonIcon);
+            button.setName("ComboBox.arrowButton");
+            return button;
+        }
     }
 }
