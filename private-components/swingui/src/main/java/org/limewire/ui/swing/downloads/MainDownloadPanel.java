@@ -6,12 +6,14 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GradientPaint;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.geom.Point2D;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -23,6 +25,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.MattePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -189,28 +193,46 @@ public class MainDownloadPanel extends JPanel {
 	}
 	
     
-	private class DownloadSettingsPanel extends JPanel {
+    
+	
+	private class DownloadSettingsPanel extends JXPanel {
 
+	    
+	    private Color topGradient = new Color(0x63,0x63,0x63);
+	    private Color bottomGradient = new Color(0x2e,0x2e,0x2e);
+	    	    
 		private final JButton pauseAllButton;
 		private final JButton resumeAllButton;
-		private final JButton clearFinishedButton;
+	    private final JButton clearFinishedButton;
 		private final JCheckBox categorizeCheckBox;
 		private final JTextField searchBar;
 		private final JLabel titleLabel;
 		
 		public DownloadSettingsPanel() {
-			super(new GridBagLayout());
+			super(new BorderLayout());
+			
+		       setBackgroundPainter(new MattePainter(
+		                new GradientPaint(new Point2D.Double(0, 0), topGradient, 
+		                        new Point2D.Double(0, 1), bottomGradient,
+		                        false), true));
 
 			pauseAllButton = new JButton(pauseAction);	
 			resumeAllButton = new JButton(resumeAction);
 			clearFinishedButton = new JButton(clearAction);
 			categorizeCheckBox = new JCheckBox(categorizeAction);
+
 			titleLabel = new JLabel(I18n.tr("Downloads"));
-			FontUtils.changeStyle(titleLabel, Font.BOLD);
 			FontUtils.changeSize(titleLabel, 5);
+			FontUtils.changeStyle(titleLabel, Font.PLAIN);
+			titleLabel.setForeground(Color.WHITE);
+
+			categorizeCheckBox.setOpaque(false);
+			categorizeCheckBox.setForeground(Color.WHITE);
+			FontUtils.changeStyle(categorizeCheckBox, Font.PLAIN);
+			
 			searchBar = downloadMediator.getFilterTextField();
 			Dimension dim = searchBar.getPreferredSize();
-			searchBar.setPreferredSize(new Dimension(150, dim.height));
+            searchBar.setPreferredSize(new Dimension(150, dim.height));
 			
 
 	        ItemListener tableListener = new ItemListener() {
@@ -241,44 +263,54 @@ public class MainDownloadPanel extends JPanel {
 			GridBagConstraints gbc = new GridBagConstraints();
 
 			JPanel buttonPanel = new JPanel(new FlowLayout());
+			buttonPanel.setOpaque(false);
 			buttonPanel.add(pauseAllButton);
 			buttonPanel.add(resumeAllButton);
 			
+			
 			Insets insets = new Insets(5,5,5,5);
 			
-			gbc.gridx = 0;
-			gbc.gridy = 0;
-			gbc.weightx = .5;
-			gbc.insets = insets;
-			gbc.fill = GridBagConstraints.NONE;
-			gbc.anchor = GridBagConstraints.LINE_START;
-			add(titleLabel, gbc);
+			JPanel titlePanel = new JPanel(new GridBagLayout());
+			titlePanel.setOpaque(false);
 			
+			gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.weightx = .5;
+            gbc.insets = insets;
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.LINE_START;
+            titlePanel.add(titleLabel,gbc);
+			
+			JPanel restPanel = new JPanel();
+			restPanel.setOpaque(false);
+			
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.insets = insets;
+            restPanel.add(buttonPanel, gbc);          
             
             gbc.gridx++;
             gbc.gridy = 0;
             gbc.insets = insets;
-            add(buttonPanel, gbc);          
-            
-            gbc.gridx++;
-            gbc.gridy = 0;
-            gbc.insets = insets;
-            add(categorizeCheckBox, gbc);
+            restPanel.add(categorizeCheckBox, gbc);
 
 			gbc.gridx++;
 			gbc.gridy = 0;
 			gbc.insets = insets;
-			add(clearFinishedButton, gbc);
+			restPanel.add(clearFinishedButton, gbc);
 			
 			gbc.gridx++;
 			gbc.gridy = 0;
 			gbc.insets = insets;
 			gbc.anchor = GridBagConstraints.LINE_END;
-			add(searchBar, gbc);
+			restPanel.add(searchBar, gbc);
 			
 			gbc.gridx++;
-			add(viewSelectionPanel, gbc);
-	
+			restPanel.add(viewSelectionPanel, gbc);
+
+			add(titlePanel, BorderLayout.WEST);
+            add(restPanel, BorderLayout.EAST);
+
 		}
 		
 		public boolean isCategorized(){
