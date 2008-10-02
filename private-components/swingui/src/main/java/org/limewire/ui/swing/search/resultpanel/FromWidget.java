@@ -120,7 +120,7 @@ public class FromWidget extends JPanel {
 
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.insets = new Insets(R, 0, 0, 0);
-        add(new JLabel("From "), gbc);
+        add(new JLabel(tr("From ")), gbc);
 
         gbc.insets.top = 0;
         add(headerPanel, gbc);
