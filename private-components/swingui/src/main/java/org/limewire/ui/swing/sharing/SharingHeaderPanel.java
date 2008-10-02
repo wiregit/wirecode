@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.sharing;
 
-import java.awt.Color;
 import java.text.MessageFormat;
 
 import javax.swing.Icon;
@@ -11,6 +10,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.search.FilteredTextField;
 import org.limewire.ui.swing.sharing.friends.FriendUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -47,7 +47,7 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
     public SharingHeaderPanel(Icon icon, String staticText, String name, ViewSelectionPanel viewPanel) {
         GuiUtils.assignResources(this);
         
-        setBackground(Color.LIGHT_GRAY);
+        setBackgroundPainter(new SubpanelPainter());
     
         this.staticText = staticText;
         this.viewSelectionPanel = viewPanel;
