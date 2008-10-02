@@ -65,7 +65,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * this class tests the handling of udp head requests and responses.
  */
-@SuppressWarnings({"unchecked", "unused", "null"})
+@SuppressWarnings({"unchecked", "null"})
 public class HeadTest extends LimeTestCase {
 
 	

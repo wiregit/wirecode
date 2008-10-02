@@ -52,7 +52,6 @@ public class PushEndpointManagerImplTest extends BaseTestCase {
         pushEndpointManager = new PushEndpointManagerImpl(pushEndpointCache, pushEndpointFinder);
     }
     
-    @SuppressWarnings({ "cast", "unchecked" })
     public void testNoSearchIfPushEndpointInCache() throws Exception {
         final GUID guid = new GUID();
         final IpPortSet proxies = new IpPortSet(new IpPortImpl("192.168.1.1:4545"));

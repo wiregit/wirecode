@@ -58,7 +58,6 @@ public class StorableTest extends MojitoTestCase {
         setLocalIsPrivate(false);
     }
 
-    @SuppressWarnings("null")
     public void testStorableModel() throws Exception {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         

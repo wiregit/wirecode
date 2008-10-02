@@ -43,7 +43,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  *  This test only covers Ultrapeer behavior - leaves don't participate in
  *  server side connect back stuff.
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "cast" } )
 public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
 	/**

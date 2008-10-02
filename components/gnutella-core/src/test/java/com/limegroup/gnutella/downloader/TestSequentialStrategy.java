@@ -13,7 +13,6 @@ import org.limewire.collection.Range;
  * 
  * This is not well tested; it's just here as a testing stub. 
  */
-@SuppressWarnings( { "unchecked", "cast" } )
 public class TestSequentialStrategy implements SelectionStrategy {
     public Range pickAssignment(IntervalSet availableBytes,
             IntervalSet neededBytes,

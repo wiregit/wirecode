@@ -52,7 +52,7 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
  *                             LEAF[0]
  *
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "cast" } )
 public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     private final int MAX_RESULTS = SearchResultHandler.MAX_RESULTS;

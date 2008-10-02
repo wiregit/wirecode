@@ -83,7 +83,6 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         super(name);
     }
     
-    @SuppressWarnings("unused")
     public final void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(

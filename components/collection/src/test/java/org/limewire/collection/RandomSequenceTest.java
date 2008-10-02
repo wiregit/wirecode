@@ -6,7 +6,6 @@ import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
-@SuppressWarnings("unchecked")
 public class RandomSequenceTest extends BaseTestCase {
     
     public RandomSequenceTest(String name) {

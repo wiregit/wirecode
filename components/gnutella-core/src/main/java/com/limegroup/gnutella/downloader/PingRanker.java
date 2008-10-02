@@ -103,7 +103,6 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
     
     @Override
-    @SuppressWarnings("unchecked")
     public synchronized boolean addToPool(Collection<? extends RemoteFileDesc> c)  {
         List<? extends RemoteFileDesc> l;
         if (c instanceof List)

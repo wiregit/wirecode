@@ -5,7 +5,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import junit.framework.Test;
 
 
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "cast" } )
 public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase { 
     //Most of this code assumes a window factor W of 7 days.
 

@@ -179,7 +179,6 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * link to determine the file length. This is a blocking call!
      * </p>
      */
-    @SuppressWarnings("deprecation")
     private RemoteFileDesc createRemoteFileDesc(String defaultURL,
         String filename, URN urn)
             throws IOException, HttpException, InterruptedException, URISyntaxException {

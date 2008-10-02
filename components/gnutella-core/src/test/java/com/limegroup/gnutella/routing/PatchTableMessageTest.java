@@ -17,7 +17,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Unit tests for PatchTableMessage
  */
-@SuppressWarnings( { "unchecked", "cast" } )
 public class PatchTableMessageTest extends LimeTestCase {
         
 	private MessageFactory messageFactory;
@@ -73,7 +72,7 @@ public class PatchTableMessageTest extends LimeTestCase {
         message[16]=Message.F_ROUTE_TABLE_UPDATE;            //function code
         message[17]=(byte)1;                                 //TTL
         message[19]=(byte)7;                                 //payload length
-        message[23+0]=(byte)RouteTableMessage.PATCH_VARIANT; //patch variant
+        message[23+0]=RouteTableMessage.PATCH_VARIANT;       //patch variant
         message[23+1]=(byte)1;                               //sequence 1...
         message[23+2]=(byte)0xFF;                            //...of 255
         message[23+3]=PatchTableMessage.COMPRESSOR_DEFLATE;                       //comrpessor

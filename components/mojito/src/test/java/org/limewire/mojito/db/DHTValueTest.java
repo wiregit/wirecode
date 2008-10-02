@@ -61,7 +61,6 @@ public class DHTValueTest extends MojitoTestCase {
         setLocalIsPrivate(false);
     }
 
-    @SuppressWarnings("null")
     public void testLocationCount() throws Exception {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         

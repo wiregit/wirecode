@@ -33,7 +33,7 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "cast" } )
 public class VendorMessageSupportTest extends LimeTestCase {
     
     private String _remoteHost = "localhost";

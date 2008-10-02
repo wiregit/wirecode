@@ -27,7 +27,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *
  * ULTRAPEER_1  ----  ULTRAPEER_2
  */
-@SuppressWarnings("unchecked")
 public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
 
 

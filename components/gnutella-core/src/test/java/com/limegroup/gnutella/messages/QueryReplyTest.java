@@ -1651,7 +1651,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         private static int off2;
         private static int len2;
 
-        @SuppressWarnings("deprecation")
         protected Object engineGetParameter(String arg0) throws InvalidParameterException {
             return null;
         }
@@ -1668,7 +1667,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         protected void engineInitVerify(PublicKey arg0) throws InvalidKeyException {
         }
 
-        @SuppressWarnings("deprecation")
         protected void engineSetParameter(String arg0, Object arg1) throws InvalidParameterException {
         }
 

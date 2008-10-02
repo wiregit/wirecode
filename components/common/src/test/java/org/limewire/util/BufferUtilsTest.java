@@ -5,7 +5,6 @@ import java.util.Random;
 
 import junit.framework.Test;
 
-@SuppressWarnings( { "unchecked", "cast" } )
 public class BufferUtilsTest extends BaseTestCase {
     
     public BufferUtilsTest(String name) {

@@ -8,7 +8,6 @@ import junit.framework.TestSuite;
 
 import org.limewire.util.BaseTestCase;
 
-@SuppressWarnings("unchecked")
 public class OnewayExchangerTest extends BaseTestCase {
     
     public OnewayExchangerTest(String name) {

@@ -745,6 +745,7 @@ public class FileUtils {
      * This is a workaround for Sun Bug: 6325169: createTempFile occasionally
      * fails (throwing an IOException).
      */
+    @SuppressWarnings("null")
     public static File createTempFile(String prefix, String suffix, File directory) throws IOException {
         IOException iox = null;
         
@@ -765,6 +766,7 @@ public class FileUtils {
      * This is a workaround for Sun Bug: 6325169: createTempFile occasionally
      * fails (throwing an IOException).
      */
+    @SuppressWarnings("null")
     public static File createTempFile(String prefix, String suffix) throws IOException {
         IOException iox = null;
         

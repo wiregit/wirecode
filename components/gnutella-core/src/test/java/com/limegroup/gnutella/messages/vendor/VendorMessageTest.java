@@ -26,7 +26,7 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.FileDescStub;
 
 
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "cast" } )
 public class VendorMessageTest extends BaseTestCase {
     
     private SecurityToken token;

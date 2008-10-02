@@ -33,7 +33,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *  This test only covers Ultrapeer behavior - leaves don't participate in
  *  server side connect back stuff.
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "cast" } )
 public final class ServerSideIntermediateRedirectTest 
     extends ServerSideTestCase {
 

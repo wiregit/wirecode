@@ -534,7 +534,6 @@ public final class QueryUnicaster implements Service {
     
     /** removes all Unicast Endpoints, reset associated members
      */
-    @SuppressWarnings("unused") // used by tests
     void resetUnicastEndpointsAndQueries() {
         LOG.debug("Resetting unicast endpoints.");        
         synchronized (_queries) {

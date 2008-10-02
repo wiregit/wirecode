@@ -34,7 +34,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
 /**
  * A simple FileManager that shares one file of (near) infinite length.
  */
-@SuppressWarnings("unchecked")
 @Singleton
 public class FileManagerStub extends FileManagerImpl {
 

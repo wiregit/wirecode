@@ -16,7 +16,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Unit tests for ResetTableMessage
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "cast" } )
 public class ResetTableMessageTest extends LimeTestCase {
         
 	private MessageFactory messageFactory;

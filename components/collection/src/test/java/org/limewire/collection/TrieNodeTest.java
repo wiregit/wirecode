@@ -10,7 +10,7 @@ import org.limewire.util.BaseTestCase;
 /**
  * Tests TrieNode.
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "unchecked" } )
 public class TrieNodeTest extends BaseTestCase {
     public TrieNodeTest(String name) {
         super(name);
