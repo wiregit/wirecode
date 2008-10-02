@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.swing.TransferHandler.TransferSupport;
+
 import org.limewire.util.URIUtils;
 
 /**
@@ -49,30 +51,12 @@ public class DNDUtils {
     }
 
     /**
-     * Returns true if the flavor is contained in the array.
-     * 
-     * @param array
-     * @param flavor
-     * @return
-     */
-    public static boolean contains(DataFlavor[] array, DataFlavor flavor) {
-        for (int i = 0; i < array.length; i++) {
-            if (flavor.equals(array[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Checks for {@link DataFlavor#javaFileListFlavor} and
-     * {@link FileTransferable#URIFlavor} for unix systems.
-     * 
-     * @param flavors
-     * @return
+     * {@link DNDUtils#URIFlavor} for unix systems.
      */
-    public static boolean containsFileFlavors(DataFlavor[] flavors) {
-        return contains(flavors, DataFlavor.javaFileListFlavor) || contains(flavors, URIFlavor);
+    public static boolean containsFileFlavors(TransferSupport transferSupport) {
+        return transferSupport.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                || transferSupport.isDataFlavorSupported(URIFlavor);
     }
 
     /**
@@ -81,16 +65,14 @@ public class DNDUtils {
      * @param transferable
      * @return an empty array if the transferable does not contain any data that
      *         can be interpreted as a list of files
-     * @throws UnsupportedFlavorException
-     * @throws IOException
      */
     @SuppressWarnings("unchecked")
     public static File[] getFiles(Transferable transferable) throws UnsupportedFlavorException,
             IOException {
-        if (contains(transferable.getTransferDataFlavors(), DataFlavor.javaFileListFlavor)) {
+        if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             return ((List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor))
                     .toArray(new File[0]);
-        } else if (contains(transferable.getTransferDataFlavors(), URIFlavor)) {
+        } else if (transferable.isDataFlavorSupported(URIFlavor)) {
             return getFiles(getURIs(transferable));
         }
         return new File[0];
