@@ -88,6 +88,7 @@ public class LimeMozillaInitializer {
                     boolean foundFlash = false;
                     for(File file : flashLocation.listFiles()) {
                         if(file.getName().contains("flash")) {
+                            //TODO make sure we are not copying a file we cannot support, ie 64 bit running in 32 bit jvm
                             FileUtils.copy(file, new File(pluginsDir, "/" + file.getName()));
                             foundFlash = true;
                             //continue looping because there might be more than 1 file at this location for flash to work
