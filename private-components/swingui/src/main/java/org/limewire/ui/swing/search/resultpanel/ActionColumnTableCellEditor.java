@@ -59,7 +59,7 @@ implements TableCellEditor, TableCellRenderer {
         JTable table, Object value, boolean isSelected,
         int row, int column) {
         
-        panel = getPanel(table);
+        ActionButtonPanel panel = getPanel(table);
         vsr = (VisualSearchResult) value;
         panel.setVisualSearchResult(vsr);
         panel.setRow(row);
