@@ -1,8 +1,10 @@
 package org.limewire.ui.swing.sharing;
 
+import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ItemListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JPanel;
@@ -34,6 +36,9 @@ public class ViewSelectionPanel extends JPanel {
         
         listViewToggleButton = new SelectionButton(listViewUnpressedIcon, listViewPressedIcon, true, "List View", list);
         tableViewToggleButton = new SelectionButton(tableViewUnpressedIcon, tableViewPressedIcon, false, "Table View", table);
+        
+        // setOpaque(false);
+        setBorder(BorderFactory.createLineBorder(Color.BLACK));
         
         ButtonGroup viewGroup = new ButtonGroup();
         viewGroup.add(listViewToggleButton);
