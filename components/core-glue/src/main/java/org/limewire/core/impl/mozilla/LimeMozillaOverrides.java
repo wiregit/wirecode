@@ -34,6 +34,7 @@ public class LimeMozillaOverrides {
         prefService.getBranch("browser.download.manager.").setBoolPref("showWhenStarting", 0);
         prefService.getBranch("browser.download.manager.").setBoolPref("showAlertOnComplete", 0);
         
+        //prevents mozilla from beiing in offline mode inside of limewire.
         prefService.getBranch("browser.").setBoolPref("offline", 0);
         prefService.getBranch("network.").setBoolPref("online", 1);
         
