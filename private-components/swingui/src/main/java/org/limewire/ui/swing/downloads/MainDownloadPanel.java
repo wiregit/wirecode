@@ -15,13 +15,13 @@ import java.awt.event.ItemListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.border.LineBorder;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
@@ -132,15 +132,15 @@ public class MainDownloadPanel extends JPanel {
 		
 	    final SimpleDownloadTable simpleTable = new SimpleDownloadTable(downloadMediator.getFilteredList());
         simpleTable.setName(TABLE);
-        cardPanel.add(new JScrollPane(simpleTable), simpleTable.getName());
+        JScrollPane pane = new JScrollPane(simpleTable);
+        pane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        cardPanel.add(pane, simpleTable.getName());
 		
 
 		settingsPanel = new DownloadSettingsPanel();
-		settingsPanel.setBorder(new LineBorder(Color.BLACK, 1, false));
 		add(settingsPanel, BorderLayout.NORTH);
 		
 		cardLayout.show(cardPanel, NO_CATEGORY);
-		
 		
 		final EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
 		        new PausableMatcher());
@@ -193,12 +193,7 @@ public class MainDownloadPanel extends JPanel {
     
     
 	
-	private class DownloadSettingsPanel extends JXPanel {
-
-	    
-	    private Color topGradient = new Color(0x63,0x63,0x63);
-	    private Color bottomGradient = new Color(0x2e,0x2e,0x2e);
-	    	    
+	private class DownloadSettingsPanel extends JXPanel {	    	    
 		private final JButton pauseAllButton;
 		private final JButton resumeAllButton;
 	    private final JButton clearFinishedButton;

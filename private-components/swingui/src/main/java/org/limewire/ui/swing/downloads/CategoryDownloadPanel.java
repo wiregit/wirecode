@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -77,7 +78,9 @@ public class CategoryDownloadPanel extends JPanel {
                 new ColorHighlighter(HighlightPredicate.EVEN, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground));
       
 		setLayout(new BorderLayout());
-		add(new JScrollPane(tablePanel));
+        JScrollPane pane = new JScrollPane(tablePanel);
+        pane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+		add(pane);
 		 		
 		addTable(list, I18n.tr("Finished"), DownloadState.DONE,
 				DownloadState.FINISHING);

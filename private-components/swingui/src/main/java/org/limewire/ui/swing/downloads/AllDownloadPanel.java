@@ -2,6 +2,7 @@ package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -28,7 +29,8 @@ public class AllDownloadPanel extends JPanel {
 
 		table = new FancyDownloadTable(list);
 		table.setTableHeader(null);
-		add(new JScrollPane(table), BorderLayout.CENTER);
+		JScrollPane pane = new JScrollPane(table);
+		pane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+		add(pane, BorderLayout.CENTER);
 	}
-
 }
