@@ -71,7 +71,7 @@ public class SharingTransferHandler extends TransferHandler {
             lastDragOk = false;
         } catch (java.awt.dnd.InvalidDnDOperationException e) {
             LOG.debugf("Transferable not available, check lastDrag: {0}", Boolean
-                    .valueOf(lastDragOk), e);
+                    .valueOf(lastDragOk));
             return lastDragOk;
         } catch (UnsupportedFlavorException e) {
             LOG.debug(e.getMessage(), e);
