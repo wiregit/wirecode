@@ -123,7 +123,7 @@ class ChatDocumentBuilder {
         if (message.getType() == Type.FileOffer) {
             StringBuilder bldr = new StringBuilder();
             FileMetaData offeredFile = message.getFileOffer();
-            bldr.append(tr("{0} wants to share a file with you", message.getSenderName()))
+            bldr.append(tr("wants to share a file with you"))
                 .append("<br/>")
                 .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"")
                 .append(offeredFile.getId())

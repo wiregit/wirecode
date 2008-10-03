@@ -104,7 +104,7 @@ public class ChatDocumentBuilderTest extends TestCase {
         StringBuilder conversation = new StringBuilder();
         conversation.append("<div class=\"them\">you:</div>wants to share a file with you<br/>")
                     .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"heynow-fileid\"/><input type=\"submit\" value=\"Foo doc.doc\"/></form><br/>")
-                    .append("Download it now, or get it from his <a href=\"#library\">Library</a> later<br/>");
+                    .append("Download it now, or get it from their <a href=\"#library\">Library</a> later.<br/>");
         
         MockChatFriend friend = new MockChatFriend(null, null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();

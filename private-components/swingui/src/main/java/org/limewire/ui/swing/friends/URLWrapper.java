@@ -9,6 +9,7 @@ import org.limewire.logging.LogFactory;
 
 class URLWrapper {
     private static final Log LOG = LogFactory.getLog(URLWrapper.class);
+    private static Pattern REGEX;
 
     /**
      * This method uses a regular expression to detect URLs in the input text and wraps
@@ -17,7 +18,45 @@ class URLWrapper {
      * @return HTML encoded version of the input string
      */
     public static String wrap(String input) {
-        //This regular expression was borrowed from Mastering Regular Expressions (2nd Edition)
+        Matcher matcher = getRegex().matcher(input);
+        StringBuilder bldr = new StringBuilder();
+        int index = 0;
+        while (matcher.find()) {
+            MatchResult result = matcher.toMatchResult();
+
+            int startIndex = result.start();
+            bldr.append(input.substring(index, startIndex));
+            String url = result.group();
+            bldr.append("<a href=\"");
+            if (url.matches("magnet://.*")) {
+                //no-op guard to prevent appending http://
+            } else if (!url.matches("http[s]?://.*")) {
+                bldr.append("http://");
+            }
+            bldr.append(url).append("\">");
+            bldr.append(url);
+            bldr.append("</a>");
+            index = matcher.end();
+
+            LOG.debugf("Start: {0} url: {1} end: {2}", startIndex, url, matcher.end());
+        }
+        
+        bldr.append(input.substring(index, input.length()));
+
+        String message = bldr.toString();
+        LOG.debugf("Transformed message: {0}", message);
+        return message;
+    }
+    
+    private static Pattern getRegex() {
+        if (REGEX == null) {
+            REGEX = buildRegex();
+        }
+        return REGEX;
+    }
+
+    private static Pattern buildRegex() {
+      //This regular expression was borrowed from Mastering Regular Expressions (2nd Edition)
         String SubDomain  = "(?i:[a-z0-9]|[a-z0-9][-a-z0-9]*[a-z0-9])";
         String TopDomains = "(?x-i:com\\b         \n" +
                             "     |aero\\b        \n" +    
@@ -64,34 +103,6 @@ class URLWrapper {
           "  (?: " + UrlPath + ")?                               \n"+
           ")";
           
-        Pattern regex = Pattern.compile(Url);
-        Matcher matcher = regex.matcher(input);
-        StringBuilder bldr = new StringBuilder();
-        int index = 0;
-        while (matcher.find()) {
-            MatchResult result = matcher.toMatchResult();
-
-            int startIndex = result.start();
-            bldr.append(input.substring(index, startIndex));
-            String url = result.group();
-            bldr.append("<a href=\"");
-            if (url.matches("magnet://.*")) {
-                //no-op guard to prevent appending http://
-            } else if (!url.matches("http[s]?://.*")) {
-                bldr.append("http://");
-            }
-            bldr.append(url).append("\">");
-            bldr.append(url);
-            bldr.append("</a>");
-            index = matcher.end();
-
-            LOG.debugf("Start: {0} url: {1} end: {2}", startIndex, url, matcher.end());
-        }
-        
-        bldr.append(input.substring(index, input.length()));
-
-        String message = bldr.toString();
-        LOG.debugf("Transformed message: {0}", message);
-        return message;
+        return Pattern.compile(Url);
     }
 }
