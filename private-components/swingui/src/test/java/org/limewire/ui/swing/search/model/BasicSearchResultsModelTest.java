@@ -620,41 +620,41 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertSame(child, parent.getSimilarResults().get(0));
     }
 
-    public void testGroupingByName2UrnsNameComesLateWithEditDistance() {
-        SearchResultsModel model = new BasicSearchResultsModel();
-        model.getGroupedSearchResults()
-                .addListEventListener(
-                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
-                                new NameMatcher())));
-
-        TestSearchResult testResult1 = new TestSearchResult("1", "file name");
-        TestSearchResult testResult2 = new TestSearchResult("2", "other2 file");
-        TestSearchResult testResult3 = new TestSearchResult("1", "file name");
-        // other file for urn1 is coming in late
-        TestSearchResult testResult4 = new TestSearchResult("1", "other1 file");
-
-        model.addSearchResult(testResult1);
-        model.addSearchResult(testResult2);
-        model.addSearchResult(testResult3);
-        model.addSearchResult(testResult4);
-
-        List<VisualSearchResult> results = model.getGroupedSearchResults();
-        Assert.assertEquals(2, results.size());
-        VisualSearchResult group0 = results.get(0);
-        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        Assert.assertEquals(1, similarResults0.size());
-        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
-        Assert.assertEquals(3, coreResults0.size());
-
-        VisualSearchResult group1 = results.get(1);
-        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, similarResults1.size());
-        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
-        Assert.assertEquals(1, coreResults1.size());
-
-        Assert.assertNull(group0.getSimilarityParent());
-        Assert.assertEquals(group0, group1.getSimilarityParent());
-    }
+//    public void testGroupingByName2UrnsNameComesLateWithEditDistance() {
+//        SearchResultsModel model = new BasicSearchResultsModel();
+//        model.getGroupedSearchResults()
+//                .addListEventListener(
+//                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
+//                                new NameMatcher())));
+//
+//        TestSearchResult testResult1 = new TestSearchResult("1", "file name");
+//        TestSearchResult testResult2 = new TestSearchResult("2", "other2 file");
+//        TestSearchResult testResult3 = new TestSearchResult("1", "file name");
+//        // other file for urn1 is coming in late
+//        TestSearchResult testResult4 = new TestSearchResult("1", "other1 file");
+//
+//        model.addSearchResult(testResult1);
+//        model.addSearchResult(testResult2);
+//        model.addSearchResult(testResult3);
+//        model.addSearchResult(testResult4);
+//
+//        List<VisualSearchResult> results = model.getGroupedSearchResults();
+//        Assert.assertEquals(2, results.size());
+//        VisualSearchResult group0 = results.get(0);
+//        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+//        Assert.assertEquals(1, similarResults0.size());
+//        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+//        Assert.assertEquals(3, coreResults0.size());
+//
+//        VisualSearchResult group1 = results.get(1);
+//        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+//        Assert.assertEquals(0, similarResults1.size());
+//        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+//        Assert.assertEquals(1, coreResults1.size());
+//
+//        Assert.assertNull(group0.getSimilarityParent());
+//        Assert.assertEquals(group0, group1.getSimilarityParent());
+//    }
     
     public class TestSearchResult implements SearchResult {
 
