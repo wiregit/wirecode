@@ -157,7 +157,7 @@ public class SharingTransferHandler extends TransferHandler {
     }
 
     /**
-     * Checks if the given file or directory has any valid files.
+     * Checks if the given file or directory has any valid files. Subdirectories are ignored.
      */
     private boolean hasValidFiles(File fileOrDirectory) {
         if (isAllowed(fileOrDirectory)) {
@@ -185,14 +185,6 @@ public class SharingTransferHandler extends TransferHandler {
     }
 
     /**
-     * Checks if the given file is allowed. Delegating to isAllowed(String
-     * fileExtension).
-     */
-    private boolean isAllowed(File file) {
-        return !file.isDirectory() && isAllowed(FileUtils.getFileExtension(file.getName()));
-    }
-
-    /**
      * Tests whether the file is droppable. If the file is of type Program or
      * Document, the validity is based on SharingSettings, otherwise the file is
      * accepted.
@@ -200,7 +192,11 @@ public class SharingTransferHandler extends TransferHandler {
      * @param fileExtension - the file extension to test
      * @return true if the file is allowed, false otherwise.
      */
-    private boolean isAllowed(String fileExtension) {
+    private boolean isAllowed(File file) {
+        if(file.isDirectory()) {
+            return false;
+        }
+        String fileExtension = FileUtils.getFileExtension(file.getName());
         if (!fileExtension.isEmpty()) {
             if (!alwaysShareDocuments && !SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
                 MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
