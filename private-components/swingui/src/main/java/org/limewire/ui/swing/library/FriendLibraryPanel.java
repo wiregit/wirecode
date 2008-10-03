@@ -17,8 +17,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-//TODO: this should be package-private, but Guice gives an error right now.
-public class FriendLibraryPanel extends JPanel implements Disposable {
+class FriendLibraryPanel extends JPanel implements Disposable {
    
     public final LibraryTable table;
     
