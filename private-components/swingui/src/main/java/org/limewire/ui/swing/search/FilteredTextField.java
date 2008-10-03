@@ -3,13 +3,17 @@ package org.limewire.ui.swing.search;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.JTextField;
+import javax.swing.border.Border;
+
 
 /**
  * This class is a special text field used for filtering search results.
@@ -29,6 +33,30 @@ public class FilteredTextField extends JTextField implements FocusListener {
         
         //focusLost(null);
         addFocusListener(this);
+        this.setOpaque(false);
+        this.setBorder(new TextBorder());
+        
+        
+    }
+    
+    class TextBorder implements Border{
+
+        @Override
+        public Insets getBorderInsets(Component c) {
+            return new Insets(2,10,2,12);
+        }
+
+        @Override
+        public boolean isBorderOpaque() {
+            return false;
+        }
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            g.setColor(Color.black);
+            g.drawRoundRect(0, 0, c.getWidth()-1, c.getHeight()-1, 10, (c.getHeight()-1) / 2);                
+        }
+        
     }
     
     @Override
@@ -60,13 +88,17 @@ public class FilteredTextField extends JTextField implements FocusListener {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+        g.setColor(Color.white);
+        g.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, (getHeight()-1) / 2);
         
+        super.paintComponent(g);
+
         boolean valueEntered = getText().length() > 0;
         if (!hasFocus() && !valueEntered) {
+           
             g.setColor(Color.LIGHT_GRAY);
             FontMetrics fm = g.getFontMetrics();
-            int x = 2; // using previous translate
+            int x = 10; // using previous translate
             int y = fm.getAscent() + 2;
             g.drawString(PROMPT_TEXT, x, y);
         }
