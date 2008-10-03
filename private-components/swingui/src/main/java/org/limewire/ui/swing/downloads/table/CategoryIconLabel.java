@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.OSUtils;
 
 public class CategoryIconLabel extends JLabel {
     
@@ -27,7 +28,11 @@ public class CategoryIconLabel extends JLabel {
     @Resource
     private Icon smallDocumentIcon;
     @Resource
-    private Icon smallProgramIcon;
+    private Icon smallProgramIconWinVista;
+    @Resource
+    private Icon smallProgramIconWinXP;
+    @Resource
+    private Icon smallProgramIconOSX;
     @Resource
     private Icon smallOtherIcon;
     
@@ -38,28 +43,48 @@ public class CategoryIconLabel extends JLabel {
     @Resource
     private Icon largeVideoIcon;
     @Resource
-    private Icon largeDocumentIcon;
+    private Icon largeProgramIconWinVista;
     @Resource
-    private Icon largeProgramIcon;
+    private Icon largeProgramIconWinXP;
+    @Resource
+    private Icon largeProgramIconOSX;
+    @Resource
+    private Icon largeDocumentIcon;
     @Resource
     private Icon largeOtherIcon;
     
     public CategoryIconLabel(Size size) {
         GuiUtils.assignResources(this);
+        
         if (size == Size.LARGE) {
             audioIcon = largeAudioIcon;
             imageIcon = largeImageIcon;
             videoIcon = largeVideoIcon;
             documentIcon = largeDocumentIcon;
-            programIcon = largeProgramIcon;
             otherIcon = largeOtherIcon;
+            
+            if (OSUtils.isAnyMac()) {
+                programIcon = largeProgramIconOSX;
+            } else if (OSUtils.isWindowsVista()) {
+                programIcon = largeProgramIconWinVista;
+            } else {
+                programIcon = largeProgramIconWinXP;
+            }
+             
         } else {
             audioIcon = smallAudioIcon;
             imageIcon = smallImageIcon;
             videoIcon = smallVideoIcon;
             documentIcon = smallDocumentIcon;
-            programIcon = smallProgramIcon;
             otherIcon = smallOtherIcon;
+            
+            if (OSUtils.isAnyMac()) {
+                programIcon = smallProgramIconOSX;
+            } else if (OSUtils.isWindowsVista()) {
+                programIcon = smallProgramIconWinVista;
+            } else {
+                programIcon = smallProgramIconWinXP;
+            }
         }
     }
     

@@ -27,6 +27,7 @@ import javax.swing.border.LineBorder;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.MattePainter;
+import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -34,6 +35,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.SimpleDownloadTable;
+import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.sharing.ViewSelectionPanel;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
@@ -211,10 +213,7 @@ public class MainDownloadPanel extends JPanel {
 		public DownloadSettingsPanel() {
 			super(new BorderLayout());
 			
-			MattePainter painter = new MattePainter(
-                    new GradientPaint(new Point2D.Double(0, 0), topGradient, 
-                            new Point2D.Double(0, 1), bottomGradient,
-                            false), true);
+			Painter painter = new SubpanelPainter();
 			
 			setBackgroundPainter(painter);
 
@@ -273,8 +272,7 @@ public class MainDownloadPanel extends JPanel {
 			Insets insets = new Insets(5,5,5,5);
 			
 			JXPanel titlePanel = new JXPanel(new GridBagLayout());
-			titlePanel.setOpaque(true);
-			titlePanel.setBackgroundPainter(painter);
+			titlePanel.setOpaque(false);
 			
 			gbc.gridx = 0;
             gbc.gridy = 0;
