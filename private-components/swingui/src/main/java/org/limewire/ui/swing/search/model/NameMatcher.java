@@ -29,6 +29,9 @@ public class NameMatcher implements SearchResultMatcher {
      * are compared for equality. If they are not equal, we find out how
      * different they are by a percentage difference. If within the difference
      * threshold we consider the strings equal.
+     * 
+     * TODO will probably want to make the percentage we check against scale
+     * with the length of the string.
      */
     private boolean matches(String name1, String name2) {
         name1 = cleanString(name1);
