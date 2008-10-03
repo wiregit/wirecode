@@ -8,6 +8,8 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 public class NavigatorUtils {
+    
+    public static final String NAV_ITEM = "limewire.navigator.NAV_ITEM";
 
     private NavigatorUtils() {
     }
@@ -44,6 +46,8 @@ public class NavigatorUtils {
                         }
                     }
                 });
+                
+                putValue(NAV_ITEM, item);
             }
 
             @Override

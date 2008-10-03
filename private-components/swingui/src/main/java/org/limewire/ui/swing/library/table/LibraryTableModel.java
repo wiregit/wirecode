@@ -10,7 +10,6 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 public class LibraryTableModel<T extends FileItem>  extends EventTableModel<T> {
 
-
     private final EventList<? extends FileItem> libraryItems;
     public static final int NAME_COL = 0;
     public static final int SIZE_COL = NAME_COL + 1;

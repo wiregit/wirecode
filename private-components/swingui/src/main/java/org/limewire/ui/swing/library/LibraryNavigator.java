@@ -3,7 +3,6 @@ package org.limewire.ui.swing.library;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -14,18 +13,17 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JViewport;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXCollapsiblePane;
-import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -39,6 +37,7 @@ import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
+import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.FontUtils;
@@ -55,12 +54,13 @@ import com.google.inject.Singleton;
 public class LibraryNavigator extends JPanel {
 
     private final SectionHeading titleLabel;
-    private final List<FriendLibraryNavPanel> friendNavPanels = new ArrayList<FriendLibraryNavPanel>();
+    private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
 
     @Inject
-    LibraryNavigator(Navigator navigator, LibraryManager libraryManager,
+    LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
             ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport,
-            MyLibraryPanel myLibraryPanel, final FriendLibraryPanel friendLibraryPanel) {
+            MyLibraryFactory myLibraryFactory, 
+            final FriendLibraryFactory friendLibraryFactory) {
         GuiUtils.assignResources(this);
 
         setOpaque(false);
@@ -70,160 +70,171 @@ public class LibraryNavigator extends JPanel {
 
         setLayout(new MigLayout("insets 0, gap 0"));
         add(titleLabel, "growx, alignx left, aligny top,  wrap");
-        
-        final NavItem meNav = navigator.createNavItem(NavCategory.LIBRARY, "Me", myLibraryPanel.getComponent());
-        final NavItem friendNav = navigator.createNavItem(NavCategory.LIBRARY, "Friends", friendLibraryPanel.getComponent());
-        
-        add(new MyLibraryNavPanel(meNav, myLibraryPanel, libraryManager.getLibraryManagedList().getSwingModel()),
-                "alignx left, aligny top, growx, wrap");
+       
+        addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel())));
 
         friendLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
             @Override
             @SwingEDTEvent
             public void handleEvent(FriendRemoteLibraryEvent event) {
-                FriendLibraryNavPanel panel;
                 switch (event.getType()) {
                 case FRIEND_LIBRARY_ADDED:
-                    panel = new FriendLibraryNavPanel(event.getFriend(), friendNav, friendLibraryPanel, event.getFileList().getSwingModel());
-                    friendNavPanels.add(panel);
-                    add(panel, "alignx left, aligny top, growx, wrap");
-                    validate();
+                    addNavPanel(new NavPanel(event.getFriend(),
+                            createFriendCategories(navigator, event.getFriend(), 
+                                    friendLibraryFactory, event.getFileList().getSwingModel())));
                     break;
                 case FRIEND_LIBRARY_REMOVED:
-                    for(Iterator<FriendLibraryNavPanel> i = friendNavPanels.iterator(); i.hasNext(); ) {
-                        panel = i.next();
-                        if(panel.getFriend().getId().equals(event.getFriend().getId())) {
-                            i.remove();
-                            remove(panel);
-                            panel.dispose();
-                            validate();
-                            break;
-                        }
-                    }
-                    if(friendNav.isSelected() && friendNavPanels.isEmpty()) {
-                        meNav.select();
-                    }
+                    removeNavPanelForFriend(event.getFriend());
                     break;
                 }
             }
         });
         
-        friendNav.addNavItemListener(new NavItemListener() {
+        navigator.addNavigationListener(new NavigationListener() {
             @Override
-            public void itemRemoved() {
-                throw new IllegalStateException("cannot remove friends library.");
+            public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {
             }
-
+        
             @Override
-            public void itemSelected(boolean selected) {
-                if (!selected) {
-                    for (FriendLibraryNavPanel nav : friendNavPanels) {
-                        nav.collapse();
-                    }
+            public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {
+            }
+        
+            @Override
+            public void itemSelected(NavCategory category, NavItem navItem, JComponent panel) {
+                if(category != NavCategory.LIBRARY) {
+                    collapseOthersAndExpandThis(null);
                 }
             }
         });
     }
     
-    private static class MyLibraryNavPanel extends JXPanel {
-        public MyLibraryNavPanel(NavItem navItem, LibraryPanel<LocalFileItem> libraryPanel, EventList<LocalFileItem> eventList) {
-            super(new MigLayout("insets 0, gap 0, fill"));
-            setOpaque(false);
-        
-            final CategoriesPanel categories = new CategoriesPanel<LocalFileItem>(libraryPanel, eventList);
-            categories.setAnimated(false);
-            categories.setCollapsed(true);
-            categories.setAnimated(true);
-            JXLabel me = new ActionLabel(NavigatorUtils.getNavAction(navItem), false);
-            me.setText(I18n.tr("Me"));
-            navItem.addNavItemListener(new NavItemListener() {
-                @Override
-                public void itemRemoved() {
-                    throw new IllegalStateException("cannot remove my library.");
-                }
-                
-                @Override
-                public void itemSelected(boolean selected) {
-                    categories.ensureSelected();
-                    categories.setCollapsed(!selected);
-                }
-            });
-            add(me, "gapbefore 5, grow, wrap");
-            add(categories, "gapbefore 10, grow, wrap");
-        }
+    private void addNavPanel(NavPanel panel) {
+        navPanels.add(panel);
+        add(panel, "alignx left, aligny top, growx, wrap");
     }
     
-    private void collapseOtherFriendNavs(FriendLibraryNavPanel selected) {
-        for (FriendLibraryNavPanel nav : friendNavPanels) {
-            if (nav != selected) {
-                nav.collapse();
+    private void removeNavPanelForFriend(Friend friend) {
+        for(Iterator<NavPanel> i = navPanels.iterator(); i.hasNext(); ) {
+            NavPanel panel = i.next();
+            if(panel.getFriend() != Me.ME && panel.getFriend().getId().equals(friend.getId())) {
+                i.remove();
+                remove(panel);
+                panel.dispose();
+                break;
+            }
+        }
+        repaint(); // Must forcibly paint, otherwise might not redraw w/o panel.
+    }
+    
+    private void collapseOthersAndExpandThis(Friend friend) {
+        for(NavPanel panel : navPanels) {
+            if(friend == null || !panel.getFriend().getId().equals(friend.getId())) {
+                panel.collapse();
+            } else {
+                panel.expand();
             }
         }
     }
     
-    private class FriendLibraryNavPanel extends JXPanel {
-        private final Friend friend;
+    private Map<Category, Action> createMyCategories(Navigator navigator, MyLibraryFactory factory, EventList<LocalFileItem> eventList) {
+        EnumMap<Category, Action> categories = new EnumMap<Category, Action>(Category.class);
+        for(Category category : Category.values()) {
+            categories.put(category, createMyCategoryAction(navigator, factory, category, eventList));
+        }
+        return categories;
+    }
+    
+    private Action createMyCategoryAction(Navigator navigator, MyLibraryFactory factory, Category category, EventList<LocalFileItem> eventList) {
+        FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
+        JComponent component = factory.createMyLibrary(category, filtered);
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, "__@internal@__" + "/" + category, component);
+        Action action = NavigatorUtils.getNavAction(navItem);
+        return decorateAction(action, navItem, (Disposable)component, category, filtered, Me.ME);
+    }
+    
+    private Map<Category, Action> createFriendCategories(Navigator navigator, Friend friend, FriendLibraryFactory factory, EventList<RemoteFileItem> eventList) {
+        EnumMap<Category, Action> categories = new EnumMap<Category, Action>(Category.class);
+        for(Category category : Category.values()) {
+            categories.put(category, createFriendCategoryAction(navigator, friend, factory, category, eventList));
+        }
+        return categories;
+    }
+    
+    private Action createFriendCategoryAction(Navigator navigator, Friend friend, FriendLibraryFactory factory, Category category, EventList<RemoteFileItem> eventList) {
+        FilterList<RemoteFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
+        JComponent component = factory.createFriendLibrary(friend, category, filtered);
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, friend.getId() + "/" + category, component);
+        Action action = NavigatorUtils.getNavAction(navItem);
+        return decorateAction(action, navItem, (Disposable)component, category, filtered, friend);
+    }
+    
+    private Action decorateAction(Action action, NavItem navItem, final Disposable disposable,
+            final Category category, final FilterList<?> filterList, final Friend friend) {
+        action.putValue(Action.NAME, I18n.tr(category.toString()));
+        navItem.addNavItemListener(new NavItemListener() {
+            @Override
+            public void itemRemoved() {
+                filterList.dispose();
+                disposable.dispose();
+            }
+            
+            @Override
+            public void itemSelected(boolean selected) {
+                if(selected) {
+                    collapseOthersAndExpandThis(friend);
+                }
+            }
+        });
+        return action;
+    }
+    
+    private class NavPanel extends JXPanel {
         private final CategoriesPanel categories;
+        private final Friend friend;
         
-        public FriendLibraryNavPanel(Friend friend, NavItem navItem, FriendLibraryPanel libraryPanel, EventList<RemoteFileItem> eventList) {
+        public NavPanel(Friend friend, Map<Category, Action> actions) {
             super(new MigLayout("insets 0, gap 0, fill"));
             setOpaque(false);
-        
+            this.categories = new CategoriesPanel(actions);
             this.friend = friend;
-            this.categories = new CategoriesPanel<RemoteFileItem>(libraryPanel, eventList);
             categories.setAnimated(false);
             categories.setCollapsed(true);
             categories.setAnimated(true);
-            ActionLabel me = new ActionLabel(NavigatorUtils.getNavAction(navItem), false);
-            me.setText(friend.getRenderName());
-            me.addActionListener(new ActionListener() {
+            ActionLabel me = new ActionLabel(new AbstractAction(friend.getRenderName()) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    expand();
+                    categories.ensureSelected();
                 }
-            });
+            }, false);
             add(me, "gapbefore 5, grow, wrap");
             add(categories, "gapbefore 10, grow, wrap");
+            
         }
         
-        public Friend getFriend() {
-            return friend;
+        public void expand() {
+            categories.setCollapsed(false);
         }
-        
-        public CategoriesPanel getCategories() {
-            return categories;
+
+        public void dispose() {
+            categories.dispose();
         }
         
         public void collapse() {
             categories.setCollapsed(true);
         }
         
-        public void expand() {        
-            categories.ensureSelected();
-            categories.setCollapsed(false);
-            collapseOtherFriendNavs(FriendLibraryNavPanel.this);
-        }
-        
-        public void dispose() {
-            categories.dispose();
-        }
-
-        public void setName(String name) {
-            
+        public Friend getFriend() {
+            return friend;
         }
     }
     
-    private static class CategoriesPanel<T extends FileItem> extends JXCollapsiblePane {
-        private final Map<Category, CategoryButton> categories;
-        private Category selected = null;
+    private static class CategoriesPanel extends JXCollapsiblePane {
+        private final Map<Category, Action> categories;
+        private Action lastSelectedAction = null;
         
-        public CategoriesPanel(LibraryPanel<T> libraryPanel, EventList<T> eventList) {
+        public CategoriesPanel(Map<Category, Action> categoryActions) {
+            this.categories = categoryActions;
             setOpaque(false);
-            this.categories = new EnumMap<Category, CategoryButton>(Category.class);
-            for(Category category : Category.values()) {
-                categories.put(category, 
-                               new CategoryButton<T>(libraryPanel, eventList, category, this));
-            }
             
             JXPanel panel = new JXPanel(new MigLayout("gap 0, insets 0, fill")) {
                 @Override
@@ -232,7 +243,16 @@ public class LibraryNavigator extends JPanel {
                 }
             };
             for(Category category : Category.getCategoriesInOrder()) {
-                panel.add(categories.get(category), "grow, wrap");
+                Action action = categories.get(category);
+                action.addPropertyChangeListener(new PropertyChangeListener() {
+                    @Override
+                    public void propertyChange(PropertyChangeEvent evt) {
+                        if(evt.getPropertyName().equals(Action.SELECTED_KEY) && Boolean.TRUE.equals(evt.getNewValue())) {
+                            lastSelectedAction = (Action)evt.getSource(); 
+                        }
+                    }
+                });
+                panel.add(new CategoryLabel(action), "grow, wrap");
             }
             setContentPane(panel);
             // The below is a hack in order to set the viewport transparent.
@@ -240,51 +260,25 @@ public class LibraryNavigator extends JPanel {
             viewport.setOpaque(false);
         }
         
-        public void ensureSelected() {
-            if(selected == null) {
-                categories.get(Category.AUDIO).getAction().putValue(Action.SELECTED_KEY, true);
-            } else {
-                for(CategoryButton button : categories.values()) {
-                    // Refresh the selection.
-                    if(button.isSelected()) {
-                        button.refreshSelection();
-                    }
-                }
-            }
-        }
-        
-        public void setSelected(Category category) {
-            this.selected = category;
-            for(CategoryButton button : categories.values()) {
-                button.getAction().putValue(Action.SELECTED_KEY, selected == button.getCategory());
-            }
-        }
-        
         public void dispose() {
-            for(CategoryButton button : categories.values()) {
-                button.dispose();
+            for(Action action : categories.values()) {
+                NavItem item = (NavItem)action.getValue(NavigatorUtils.NAV_ITEM);
+                item.remove();
+            }
+        }
+
+        public void ensureSelected() {
+            if(lastSelectedAction == null) {
+                categories.get(Category.AUDIO).putValue(Action.SELECTED_KEY, true);
+            } else {
+                lastSelectedAction.putValue(Action.SELECTED_KEY, true);
             }
         }
     }
     
-    private static class CategoryButton<T extends FileItem> extends ActionLabel {
-        private final Category category;
-        private final FilterList<T> eventList;
-        private final LibraryPanel<T> libraryPanel;
-        private final CategoriesPanel<T> categoriesPanel;
-        
-        public CategoryButton(LibraryPanel<T> libPanel, EventList<T> evList,
-                Category cat, CategoriesPanel<T> catPanel) {
-            super(new AbstractAction(I18n.tr(cat.toString())) {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    putValue(SELECTED_KEY, true);
-                }
-            }, false);
-            this.libraryPanel = libPanel;      
-            this.category = cat;
-            this.eventList = GlazedListsFactory.filterList(evList, new CategoryFilter(category));
-            this.categoriesPanel = catPanel;
+    private static class CategoryLabel extends ActionLabel {
+        public CategoryLabel(Action action) {
+            super(action, false);
             
             setFont(new Font("Arial", Font.PLAIN, 11));
             setForeground(Color.decode("#313131"));
@@ -293,36 +287,41 @@ public class LibraryNavigator extends JPanel {
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                         if(evt.getNewValue().equals(Boolean.TRUE)) {
-                            refreshSelection();
                             setBackground(Color.decode("#93AAD1"));
                             setForeground(Color.WHITE);
-                            FontUtils.bold(CategoryButton.this);
+                            FontUtils.bold(CategoryLabel.this);
                             setOpaque(true);
                         } else {
                             setOpaque(false);
                             setForeground(Color.decode("#313131"));
-                            FontUtils.plain(CategoryButton.this);
+                            FontUtils.plain(CategoryLabel.this);
                         }
                     }
                 }
             });
         }
-        
-        public Category getCategory() {
-            return category;
+    }
+    
+    private static class Me implements Friend {
+        private static final Me ME = new Me();
+
+        @Override
+        public String getId() {
+            return "__@internal@__";
         }
-        
-        public boolean isSelected() {
-            return Boolean.TRUE.equals(getAction().getValue(Action.SELECTED_KEY));
+
+        @Override
+        public String getName() {
+            return null;
         }
-        
-        public void refreshSelection() {
-            libraryPanel.setCategory(category, eventList);
-            categoriesPanel.setSelected(category);
+
+        @Override
+        public String getRenderName() {
+            return I18n.tr("Me");
         }
-        
-        public void dispose() {
-            eventList.dispose();
+
+        @Override
+        public void setName(String name) {
         }
     }
 }
