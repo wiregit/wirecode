@@ -12,8 +12,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class LimeMozillaOverrides {
 
-//    private static final Log LOG = LogFactory.getLog(LimeMozillaOverrides.class);
-
     private final LimeMozillaDownloadManagerListenerImpl downloadManagerListener;
 
     @Inject
@@ -28,8 +26,7 @@ public class LimeMozillaOverrides {
                 "@mozilla.org/preferences-service;1", nsIPrefService.class);
 
         // set default downloads to desktop, we are going to override this with
-        // our own download manager This will prevent the save dialogue from
-        // opening
+        // our own download manager
         prefService.getBranch("browser.download.").setBoolPref("useDownloadDir", 1);
         prefService.getBranch("browser.download.").setIntPref("folderList", 2);
         String downloadDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue().getAbsolutePath();
