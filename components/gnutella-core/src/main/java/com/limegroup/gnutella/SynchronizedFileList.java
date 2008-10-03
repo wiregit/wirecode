@@ -120,6 +120,48 @@ public class SynchronizedFileList implements FileListPackage {
         }
     }
     
+    @Override
+    public boolean isAddNewAudioAlways() {
+        synchronized (mutex) {
+            return fileList.isAddNewAudioAlways();
+        }
+    }
+
+    @Override
+    public boolean isAddNewImageAlways() {
+        synchronized (mutex) {
+            return fileList.isAddNewImageAlways();
+        }
+    }
+
+    @Override
+    public boolean isAddNewVideoAlways() {
+        synchronized (mutex) {
+            return fileList.isAddNewVideoAlways();
+        }
+    }
+
+    @Override
+    public void setAddNewAudioAlways(boolean value) {
+        synchronized (mutex) {
+            fileList.setAddNewAudioAlways(value);
+        }
+    }
+
+    @Override
+    public void setAddNewImageAlways(boolean value) {
+        synchronized (mutex) {
+            fileList.setAddNewImageAlways(value);
+        }
+    }
+
+    @Override
+    public void setAddNewVideoAlways(boolean value) {
+        synchronized (mutex) {
+            fileList.setAddNewVideoAlways(value);
+        }
+    }
+    
     /////////// backwards compatibility /////////////////////////
 
     public File[] getIndividualFiles() {

@@ -410,6 +410,94 @@ public class SharingSettings extends LimeProps {
     }
     
     /**
+     * A list of all friend names with whom all images in the library will be shared with.
+     * When a friend exists in this list, all new images added to the library will automatically
+     * be shared with that friend. 
+     */
+    public static StringArraySetting SHARE_NEW_IMAGES_ALWAYS =
+        FACTORY.createStringArraySetting("SHARE_NEW_IMAGES_ALWAYS", new String[0]);
+    
+    /**
+     * Returns true if this friend is sharing all images and new images, false
+     * otherwise.
+     */
+    public static final boolean containsFriendShareNewImages(String id) {
+        String[] names = SHARE_NEW_IMAGES_ALWAYS.getValue();
+        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
+        return nameList.contains(id);
+    }
+    
+    /**
+     * A list of all friend names with whom all audio files in the library will be shared with.
+     * When a friend exists in this list, all new audio files added to the library will automatically
+     * be shared with that friend. 
+     */
+    public static StringArraySetting SHARE_NEW_AUDIO_ALWAYS =
+        FACTORY.createStringArraySetting("SHARE_NEW_AUDIO_ALWAYS", new String[0]);
+        
+    /**
+     * Returns true if this friend is sharing all audio files and new audio files,
+     * false otherwise.
+     */
+    public static final boolean containsFriendShareNewAudio(String id) {
+        String[] names = SHARE_NEW_AUDIO_ALWAYS.getValue();
+        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
+        return nameList.contains(id);
+    }
+    
+    /**
+     * A list of all friend names with whom all videos in the library will be shared with.
+     * When a friend exists in this list, all new videos added to the library will automatically
+     * be shared with that friend. 
+     */
+    public static StringArraySetting SHARE_NEW_VIDEO_ALWAYS =
+        FACTORY.createStringArraySetting("SHARE_NEW_VIDEO_ALWAYS", new String[0]);
+    
+    
+    /**
+     * Returns true if this friend is sharing all videos and new video files,
+     * false otherwise.
+     */
+    public static final boolean containsFriendShareNewVideo(String id) {
+        String[] names = SHARE_NEW_VIDEO_ALWAYS.getValue();
+        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
+        return nameList.contains(id);
+    }
+    
+    /**
+     * Adds a friend to the list of names to always files with. 
+     * @param id - name of the friend to share with
+     * @return true if the name was added, false if the name already existed.
+     */
+    public static final boolean addFriendShareNewFiles(StringArraySetting stringArray, String id) {
+        String[] names = stringArray.getValue();
+        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
+        if(nameList.contains(id))
+            return false;
+        else {
+            nameList.add(id);
+            stringArray.setValue(nameList.toArray(new String[nameList.size()]));
+            return true;
+        }
+    }
+    
+    /**
+     * Removes a friend from the list of names to always share files with. This friend
+     * will no longer automatically share new files of this type that are added to the library. This
+     * will not remove current files that are already shared with the friend.
+     * @param id - friend to remove
+     */
+    public static final void removeFiendShareNewFiles(StringArraySetting stringArray, String id) {
+        String[] names = stringArray.getValue();
+        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
+        nameList.remove(id);
+        
+        if(nameList.size() != names.length) {
+            stringArray.setValue(nameList.toArray(new String[nameList.size()]));
+        }
+    }
+    
+    /**
      * Whether to allow Documents to be shared.
      */
     public static final BooleanSetting DOCUMENT_SHARING_ENABLED =

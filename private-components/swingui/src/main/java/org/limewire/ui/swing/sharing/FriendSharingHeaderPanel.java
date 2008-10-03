@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
-import javax.swing.JMenuItem;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
@@ -15,8 +15,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -34,6 +34,10 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     private LibraryButton libraryButton;
     private JXButton shareButton;
     
+    private final JCheckBoxMenuItem audioMenu;
+    private final JCheckBoxMenuItem videoMenu;
+    private final JCheckBoxMenuItem imageMenu;
+    
     private final SharingAddAction musicAction;
     private final SharingAddAction videoAction;
     private final SharingAddAction imageAction;
@@ -50,13 +54,13 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         videoAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.VIDEO);
         imageAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.IMAGE);
         
-        JMenuItem audioMenu = new JMenuItem(I18n.tr("All music in My Library"));
+        audioMenu = new JCheckBoxMenuItem(I18n.tr("All music in My Library"));
         audioMenu.addActionListener(musicAction);
         
-        JMenuItem videoMenu = new JMenuItem(I18n.tr("All videos in My Library"));
+        videoMenu = new JCheckBoxMenuItem(I18n.tr("All videos in My Library"));
         videoMenu.addActionListener(videoAction);
         
-        JMenuItem imageMenu = new JMenuItem(I18n.tr("All images in My Library"));
+        imageMenu = new JCheckBoxMenuItem(I18n.tr("All images in My Library"));
         imageMenu.addActionListener(imageAction);
         
         popup = new JPopupMenu();
@@ -67,8 +71,14 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         shareButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!popup.isVisible())
+                if(!popup.isVisible()) {
+                	//set the checkboxes to their selection value
+                    audioMenu.setSelected(musicAction.getUserFileList().isAddNewAudioAlways());
+                    videoMenu.setSelected(videoAction.getUserFileList().isAddNewVideoAlways());
+                    imageMenu.setSelected(imageAction.getUserFileList().isAddNewImageAlways());
+                    
                     popup.show(shareButton, 0, shareButton.getHeight());
+                }
             }
         });
     }
@@ -83,6 +93,7 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         
         shareButton = new JXButton(I18n.tr("Share"), downIcon);       
         shareButton.setVisible(false);
+        shareButton.setForeground(Color.WHITE);
         shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
         shareButton.setBackgroundPainter(new ButtonPainter());
     }
@@ -90,7 +101,7 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     @Override
     public void setEnabled(boolean value) {
         super.setEnabled(value);
-        shareButton.setEnabled(value);
+        shareButton.setVisible(value);
     }
     
     @Override
@@ -105,7 +116,7 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         add(viewSelectionPanel);
     }
     
-    public void setModel(LocalFileList fileList) {
+    public void setModel(FriendFileList fileList) {
         musicAction.setUserFileList(fileList);
         videoAction.setUserFileList(fileList);
         imageAction.setUserFileList(fileList);

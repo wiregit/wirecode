@@ -254,12 +254,12 @@ public class FileManagerImpl implements FileManager, Service {
         
         sharedFileList = new SynchronizedFileList(new SharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl(this, _data.SPECIAL_STORE_FILES));
-        allFriendsFileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList("All")));
+        allFriendsFileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList("All"), "All"));
         incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl(this, new HashSet<File>()));
         
         synchronized(this) {
             for(String name : SharingSettings.SHARED_FRIEND_LIST_NAMES.getValue()) {
-                friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name))));
+                friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name), name)));
             }
         }
         
@@ -356,7 +356,7 @@ public class FileManagerImpl implements FileManager, Service {
         if(fileList == null) {
             SharingSettings.addFriendListName(name);
             _data.addFriendList(name);
-            fileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name)));
+            fileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name), name));
             friendFileLists.put(name, fileList);
         }
         return fileList;

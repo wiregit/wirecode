@@ -6,14 +6,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GradientPaint;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.geom.Point2D;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -26,7 +24,6 @@ import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
@@ -76,7 +73,6 @@ public class MainDownloadPanel extends JPanel {
     };
 
     private final Action resumeAction = new AbstractAction(I18n.tr("Resume All")) {
-        @Override
         public void actionPerformed(ActionEvent e) {
             BackgroundExecutorService.schedule(new Runnable(){
                 public void run() {

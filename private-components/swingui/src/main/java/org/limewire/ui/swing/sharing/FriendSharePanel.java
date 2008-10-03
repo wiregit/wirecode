@@ -21,6 +21,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -125,6 +126,23 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         
         FriendSelectionListener friendSelectionListener = new FriendSelectionListener(friendTable, headerPanel, emptyPanel, cardPanel);
         friendTable.getSelectionModel().addListSelectionListener(friendSelectionListener);
+        //if the list is populated for the first time, select the first friend
+        friendsList.addListEventListener(new ListEventListener<FriendItem>(){
+            int oldSize = 0;
+            @Override
+            public void listChanged(ListEvent<FriendItem> listChanges) {
+                if(listChanges.getSourceList().size() != oldSize) {
+                    if(oldSize == 0) {
+                        SwingUtilities.invokeLater(new Runnable(){
+                            public void run() {
+                                if(friendTable.getModel().getRowCount() > 0)
+                                    friendTable.getSelectionModel().setSelectionInterval(0, 0);
+                            }
+                        });
+                    }
+                    oldSize = listChanges.getSourceList().size();
+                }
+            }});
         
         
         setLayout(new MigLayout("insets 0 0 0 0", "[150!]0[grow]","[grow]"));
@@ -249,7 +267,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             headerPanel.setFriendName(friendItem.getFriend().getRenderName());
             emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
 
-            LocalFileList fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
+            FriendFileList fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
             if(currentList != null) {
                 assert filteredList != null;
                 final TransformedList<LocalFileItem, LocalFileItem> toDispose = filteredList;

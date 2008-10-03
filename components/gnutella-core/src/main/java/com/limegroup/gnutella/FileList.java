@@ -101,6 +101,45 @@ public interface FileList {
      * Removes any listeners this list might be holding prior to its destruction.
      */
     public void cleanupListeners();
+    
+    /**
+     * Changes the smart sharing value for images. If true, all new images added to
+     * the library will be shared with this list, if false, new images added to 
+     * the library will not be automatically shared with this list but current images
+     * will not be removed.
+     */
+    public void setAddNewImageAlways(boolean value);
+    
+    /**
+     * Returns true if image files are being smartly shraed with this friend, false otherwise.
+     */
+    public boolean isAddNewImageAlways();
+    
+    /**
+     * Changes the smart sharing value for audio files. If true, all new audio files added to
+     * the library will be shared with this list, if false, new audio files added to 
+     * the library will not be automatically shared with this list but current audio files
+     * will not be removed.
+     */
+    public void setAddNewAudioAlways(boolean value);
+    
+    /**
+     * Returns true if audio files are being smartly shared with this friend, false otherwise.
+     */
+    public boolean isAddNewAudioAlways();
+    
+    /**
+     * Changes the smart sharing value for videos. If true, all new videos added to
+     * the library will be shared with this list, if false, new videos added to 
+     * the library will not be automatically shared with this list but current videos
+     * will not be removed.
+     */
+    public void setAddNewVideoAlways(boolean value);
+    
+    /**
+     * Returns true if videos are being smartly shared with this friend, false otherwise.
+     */
+    public boolean isAddNewVideoAlways();
         
     ///// BELOW for backwards compatibility with LW 4.x. Notion of an individual file ////
     /////   does not exist in 5.x  ////

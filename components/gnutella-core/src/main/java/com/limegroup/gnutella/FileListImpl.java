@@ -354,6 +354,19 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
         fileManager.removeFileEventListener(this);
     }
     
+    @Override
+    public void setAddNewImageAlways(boolean value) {}
+    @Override
+    public boolean isAddNewImageAlways(){return false;}
+    @Override
+    public void setAddNewAudioAlways(boolean value){}
+    @Override
+    public boolean isAddNewAudioAlways(){return false;}
+    @Override
+    public void setAddNewVideoAlways(boolean value){}
+    @Override
+    public boolean isAddNewVideoAlways(){return false;}
+    
     ///// BELOW for backwards compatibility with LW 4.x. Notion of an individual file ////
     /////   does not exist in 5.x  
     ///// Do Not Add anything below this line

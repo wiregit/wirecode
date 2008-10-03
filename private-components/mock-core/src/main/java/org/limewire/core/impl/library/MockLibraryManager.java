@@ -6,6 +6,7 @@ import java.util.Map;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -21,14 +22,14 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
 
     private FileListAdapter allFileList;
     private FileListAdapter gnutellaList;
-    private FileListAdapter friendList;
+    private FriendFileListAdapter friendList;
     
     private Map<String, LocalFileList> friendMap;
     
     public MockLibraryManager() {
         allFileList = new FileListAdapter();
         gnutellaList = new FileListAdapter();
-        friendList = new FileListAdapter();
+        friendList = new FriendFileListAdapter();
         
         friendMap = new HashMap<String, LocalFileList>();
 
@@ -126,8 +127,8 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
     }
 
     @Override
-    public LocalFileList getOrCreateFriendShareList(Friend name) {
-        return new FileListAdapter();
+    public FriendFileList getOrCreateFriendShareList(Friend name) {
+        return new FriendFileListAdapter();
     }
 
     @Override
@@ -136,7 +137,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
     }    
     
     @Override
-    public LocalFileList getFriendShareList(Friend friend) {
+    public FriendFileList getFriendShareList(Friend friend) {
         // TODO Auto-generated method stub
         return null;
     }

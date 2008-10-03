@@ -6,8 +6,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JCheckBox;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 public class SharingAddAllAction extends AbstractAction {
 
@@ -15,7 +15,7 @@ public class SharingAddAllAction extends AbstractAction {
     private JCheckBox videoBox;
     private JCheckBox imageBox;
     
-    private LocalFileList userList;
+    private FriendFileList userList;
     private LocalFileList myLibraryList;
     
     public SharingAddAllAction(JCheckBox musicBox, JCheckBox videoBox, JCheckBox imageBox) {
@@ -28,14 +28,8 @@ public class SharingAddAllAction extends AbstractAction {
         this.myLibraryList = libraryList;
     }
     
-    public void setUserLibrary(LocalFileList userList) {
+    public void setUserLibrary(FriendFileList userList) {
         this.userList = userList;
-    }
-
-    private void reset() {
-        musicBox.setSelected(false);
-        videoBox.setSelected(false);
-        imageBox.setSelected(false);
     }
     
     @Override
@@ -43,24 +37,8 @@ public class SharingAddAllAction extends AbstractAction {
         if(myLibraryList == null || userList == null)
             return;
         
-        final LocalFileList currentList = userList;
-        final boolean selectMusic = musicBox.isSelected();
-        final boolean selectVideo = videoBox.isSelected();
-        final boolean selectImage = imageBox.isSelected();
-        
-        BackgroundExecutorService.schedule(new Runnable(){
-            public void run() {
-                if(selectMusic) {
-                    new SharingAddAction(currentList, myLibraryList, Category.AUDIO).actionPerformed(null);
-                }
-                if(selectVideo) {
-                    new SharingAddAction(currentList, myLibraryList, Category.VIDEO).actionPerformed(null);
-                }
-                if(selectImage) {
-                    new SharingAddAction(currentList, myLibraryList, Category.IMAGE).actionPerformed(null);
-                }
-            }
-        });
-        reset();
+        new SharingAddAction(userList, myLibraryList, Category.AUDIO).update(musicBox.isSelected());
+        new SharingAddAction(userList, myLibraryList, Category.VIDEO).update(videoBox.isSelected());
+        new SharingAddAction(userList, myLibraryList, Category.IMAGE).update(imageBox.isSelected());
     }
 }

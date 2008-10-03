@@ -5,12 +5,13 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.friends.FriendItem;
 import org.limewire.ui.swing.sharing.friends.FriendNameTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -27,9 +28,9 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
     
     private final JPopupMenu popupMenu;
     private final JMenuItem viewLibraryItem;
-    private final JMenuItem musicShareAllItem;
-    private final JMenuItem videoShareAllItem;
-    private final JMenuItem imageShareAllItem;
+    private final JCheckBoxMenuItem musicShareAllItem;
+    private final JCheckBoxMenuItem videoShareAllItem;
+    private final JCheckBoxMenuItem imageShareAllItem;
     private final JMenuItem unshareAllItem;
     
     private final FriendNameTable table;
@@ -40,7 +41,7 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
     private final MenuListener menuListener;
 
     private FriendItem currentFriend;
-    private LocalFileList friendFileList;
+    private FriendFileList friendFileList;
     
     public FriendSharingPopupHandler(FriendNameTable table, FriendSharingActionHandler handler,
             RemoteLibraryManager remoteLibraryManager, ShareListManager shareListManager) {
@@ -56,15 +57,15 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
         viewLibraryItem.setActionCommand(FriendSharingActionHandler.VIEW_LIBRARY);
         viewLibraryItem.addActionListener(menuListener);
         
-        musicShareAllItem = new JMenuItem(I18n.tr("Share all music"));
+        musicShareAllItem = new JCheckBoxMenuItem(I18n.tr("Share all music"));
         musicShareAllItem.setActionCommand(FriendSharingActionHandler.SHARE_ALL_AUDIO);
         musicShareAllItem.addActionListener(menuListener);
         
-        videoShareAllItem = new JMenuItem(I18n.tr("Share all videos"));
+        videoShareAllItem = new JCheckBoxMenuItem(I18n.tr("Share all videos"));
         videoShareAllItem.setActionCommand(FriendSharingActionHandler.SHARE_ALL_VIDEO);
         videoShareAllItem.addActionListener(menuListener);
         
-        imageShareAllItem = new JMenuItem(I18n.tr("Share all images"));
+        imageShareAllItem = new JCheckBoxMenuItem(I18n.tr("Share all images"));
         imageShareAllItem.setActionCommand(FriendSharingActionHandler.SHARE_ALL_IMAGE);
         imageShareAllItem.addActionListener(menuListener);
         
@@ -93,9 +94,15 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
         EventTableModel<FriendItem> model = table.getEventTableModel();
         currentFriend = model.getElementAt(popupRow);
         friendFileList = shareListManager.getOrCreateFriendShareList(currentFriend.getFriend());
-        
-        unshareAllItem.setEnabled(currentFriend.getShareListSize() > 0);
+
+        //if friend signed on through LW, make library view enabled
         viewLibraryItem.setEnabled(remoteLibraryManager.hasFriendLibrary(currentFriend.getFriend()));
+        //display if always share types are selected already
+        musicShareAllItem.setSelected(friendFileList.isAddNewAudioAlways());
+        videoShareAllItem.setSelected(friendFileList.isAddNewVideoAlways());
+        imageShareAllItem.setSelected(friendFileList.isAddNewImageAlways());
+        //if sharing something, enable clear all selection
+        unshareAllItem.setEnabled(currentFriend.getShareListSize() > 0);
         
         popupMenu.show(component, x, y);
     }

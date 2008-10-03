@@ -13,9 +13,9 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
 import org.limewire.ui.swing.sharing.friends.FriendUpdate;
@@ -106,12 +106,6 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
     @Override
     public void setFriendName(String name) {
         setText(name);
-        
-        // when changing the user name, reset checkboxes to false to 
-        //  prevent accidental sharing
-        audioCheckBox.setSelected(false);
-        videoCheckBox.setSelected(false);
-        imageCheckBox.setSelected(false);
     }
 
     @Override
@@ -119,7 +113,13 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
 //        addAllAction.setUserLibrary(model);
     }
     
-    public void setUserFileList(LocalFileList fileList) {
+    public void setUserFileList(FriendFileList fileList) {
+        // when changing the user name, reset checkboxes to false to 
+        //  prevent accidental sharing
+        audioCheckBox.setSelected(fileList.isAddNewAudioAlways());
+        videoCheckBox.setSelected(fileList.isAddNewVideoAlways());
+        imageCheckBox.setSelected(fileList.isAddNewImageAlways());
+        
         addAllAction.setUserLibrary(fileList);
     }
     

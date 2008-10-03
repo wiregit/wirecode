@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.sharing.menu;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.actions.GoToLibraryAction;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
@@ -25,7 +25,7 @@ public class FriendSharingActionHandler {
         this.libraryManager = libraryManager;
     }
     
-    public void performAction(final String actionCommand, final LocalFileList fileList, final FriendItem item) {
+    public void performAction(final String actionCommand, final FriendFileList fileList, final FriendItem item) {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == VIEW_LIBRARY) {

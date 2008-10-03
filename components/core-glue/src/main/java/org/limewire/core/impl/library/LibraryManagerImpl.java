@@ -12,6 +12,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
@@ -51,7 +52,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     
     private final CombinedFriendShareList combinedFriendShareLists;
     
-    private final ConcurrentHashMap<String, LocalFileListImpl> friendLocalFileLists;
+    private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
     
     private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener; 
     private final EventListener<FriendShareListEvent> friendShareListEventListener;
@@ -69,7 +70,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         this.combinedFriendShareLists = new CombinedFriendShareList();
         this.libraryFileList = new LibraryFileList(fileManager);
         this.gnutellaFileList = new GnutellaFileList(fileManager);
-        this.friendLocalFileLists = new ConcurrentHashMap<String, LocalFileListImpl>();
+        this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
         this.friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileListImpl>();
     }
 
@@ -89,10 +90,10 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     }
     
     @Override
-    public LocalFileList getOrCreateFriendShareList(Friend friend) {
+    public FriendFileList getOrCreateFriendShareList(Friend friend) {
         LOG.debugf("get|Create library for friend {0}", friend.getId());
         FriendFileListImpl newList = new FriendFileListImpl(fileManager, friend.getId());        
-        LocalFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
+        FriendFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
         
         if(existing == null) {
             LOG.debugf("No existing library for friend {0}", friend.getId());
@@ -107,7 +108,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     }
 
     @Override
-    public LocalFileList getFriendShareList(Friend friend) {
+    public FriendFileList getFriendShareList(Friend friend) {
         return friendLocalFileLists.get(friend.getId());
     }
 
@@ -117,7 +118,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         
         // TODO: Should we clean up friendLocalFileLists?
         //       (is there a reason the old code didn't do this?)        
-        LocalFileListImpl list = friendLocalFileLists.remove(friend.getId());
+        FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
         if(list != null) {
             friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED, list, friend));
             list.dispose();
@@ -213,7 +214,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     }
 
     
-    private class FriendFileListImpl extends LocalFileListImpl implements FileListListener {
+    private class FriendFileListImpl extends LocalFileListImpl implements FriendFileList, FileListListener {
 
         private final FileManager fileManager;
         private final String name;        
@@ -294,7 +295,31 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
                   }
               }
         }
-    }
+        
+        public boolean isAddNewAudioAlways() {
+            return fileManager.getFriendFileList(name).isAddNewAudioAlways();
+        }
+        
+        public void setAddNewAudioAlways(boolean value) {
+            fileManager.getFriendFileList(name).setAddNewAudioAlways(value);
+        }
+        
+        public boolean isAddNewVideoAlways() {
+            return fileManager.getFriendFileList(name).isAddNewVideoAlways();
+        }
+        
+        public void setAddNewVideoAlways(boolean value) {
+            fileManager.getFriendFileList(name).setAddNewVideoAlways(value);
+        }
+        
+        public boolean isAddNewImageAlways() {
+            return fileManager.getFriendFileList(name).isAddNewImageAlways();
+        }
+        
+        public void setAddNewImageAlways(boolean value) {
+            fileManager.getFriendFileList(name).setAddNewImageAlways(value);
+        }
+    } 
     
     private class LibraryFileList extends LocalFileListImpl implements FileEventListener {
 
