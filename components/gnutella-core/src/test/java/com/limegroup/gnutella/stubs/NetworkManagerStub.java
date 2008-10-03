@@ -8,6 +8,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressEvent;
 
 import com.google.inject.AbstractModule;
@@ -215,6 +216,10 @@ public class NetworkManagerStub implements NetworkManager {
     
     public void fireEvent(AddressEvent event) {
         listeners.broadcast(event);
+    }
+    
+    public ListenerSupport<AddressEvent> getListenerSupport() {
+        return listeners;
     }
     
     public String getServiceName() {

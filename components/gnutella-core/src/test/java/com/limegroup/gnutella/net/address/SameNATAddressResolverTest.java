@@ -3,6 +3,7 @@ package com.limegroup.gnutella.net.address;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.BlockingAddressResolutionObserver;
 import org.limewire.util.BaseTestCase;
 
@@ -21,8 +22,10 @@ public class SameNATAddressResolverTest extends BaseTestCase {
     protected void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
         resolver = new SameNATAddressResolver(networkManagerStub);
+        resolver.register(networkManagerStub.getListenerSupport());
         networkManagerStub.setExternalAddress(new byte[] { (byte)129, 0, 0, 1 });
         networkManagerStub.setAddress(new byte[] { (byte)192, (byte)168, 0, 1});
+        networkManagerStub.fireEvent(new AddressEvent(new Address(){}, Address.EventType.ADDRESS_CHANGED));
     }
     
     public void testCanResolve() {
