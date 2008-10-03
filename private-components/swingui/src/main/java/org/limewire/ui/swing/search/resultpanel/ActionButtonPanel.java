@@ -45,8 +45,8 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class ActionButtonPanel extends JXPanel {
 
-    private static final String[] TOOLTIPS =
-        { "Download", "More Info", "Mark as Junk" };
+    private final String[] TOOLTIPS =
+        { tr("Download"), tr("More Info"), tr("Mark as Junk") };
     
     private static final int DOWNLOAD = 0;    
     private static final int MORE_INFO = 1;    

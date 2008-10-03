@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 
@@ -28,20 +30,21 @@ public class SearchResultMenu extends JPopupMenu {
 
 //        this.navigator = navigator;
 
-        add(new AbstractAction("Download") {
+        add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
                 brp.download(vsr, row);
             }
         });
 
-        add(new AbstractAction("Mark as junk") {
+        add(new AbstractAction(tr("Mark as junk")) {
             public void actionPerformed(ActionEvent e) {
                 vsr.setSpam(true);
             }
         });
 
-        add(new AbstractAction("Copy link to clipboard") {
+        add(new AbstractAction(tr("Copy link to clipboard")) {
             public void actionPerformed(ActionEvent e) {
+                //TODO
                 throw new UnsupportedOperationException("Implement Me Properly!");
             }
         });
@@ -63,8 +66,9 @@ public class SearchResultMenu extends JPopupMenu {
 
         addSeparator();
 
-        add(new AbstractAction("Properties") {
+        add(new AbstractAction(tr("Properties")) {
             public void actionPerformed(ActionEvent e) {
+                //TODO
                 throw new UnsupportedOperationException("Implement Me Properly!");
             }
         });
@@ -73,14 +77,16 @@ public class SearchResultMenu extends JPopupMenu {
     private void addSubmenu(RemoteHost host) {
         JMenu menu = new JMenu(host.getHostDescription());
 
-        menu.add(new AbstractAction("View library") {
+        menu.add(new AbstractAction(tr("View library")) {
             public void actionPerformed(ActionEvent e) {
+                //TODO
                 throw new UnsupportedOperationException("Implement Me Properly!");
             }
         });
 
-        menu.add(new AbstractAction("Chat") {
+        menu.add(new AbstractAction(tr("Chat")) {
             public void actionPerformed(ActionEvent e) {
+                //TODO
                 throw new UnsupportedOperationException("Implement Me Properly!");
             }
         });

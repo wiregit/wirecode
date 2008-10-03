@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -11,7 +13,7 @@ public class ListViewTableFormat
 extends ResultsTableFormat<VisualSearchResult> {
 
     public ListViewTableFormat() {
-        super(1, 0, "not used");
+        super(1, 0, tr("not used"));
     }
 
     @Override

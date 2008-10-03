@@ -46,12 +46,12 @@ public abstract class BaseResultPanel extends JXPanel {
     
     private Scrollable visibileComponent;
     
-    BaseResultPanel(String title,
-            EventList<VisualSearchResult> eventList,
+    BaseResultPanel(EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
             SearchResultDownloader searchResultDownloader,
             Search search,
-            RowSelectionPreserver preserver, Navigator navigator) {
+            RowSelectionPreserver preserver,
+            Navigator navigator) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;

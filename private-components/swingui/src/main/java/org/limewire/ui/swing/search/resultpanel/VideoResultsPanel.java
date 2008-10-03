@@ -20,7 +20,7 @@ public class VideoResultsPanel extends BaseResultPanel {
         @Assisted Search search,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
-        super("Video from Everyone", eventList, new VideoTableFormat(),
-            searchResultDownloader, search, preserver, navigator);
+        super(eventList, new VideoTableFormat(), searchResultDownloader,
+            search, preserver, navigator);
     }
 }

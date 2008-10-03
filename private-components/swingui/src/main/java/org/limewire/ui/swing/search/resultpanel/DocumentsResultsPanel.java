@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.ui.swing.util.I18n.tr;
 
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
@@ -23,7 +22,7 @@ public class DocumentsResultsPanel extends BaseResultPanel {
         @Assisted Search search,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
-        super(tr("Documents from Everyone"), eventList, tableFormat,
-            searchResultDownloader, search, preserver, navigator);
+        super(eventList, tableFormat, searchResultDownloader,
+            search, preserver, navigator);
     }
 }

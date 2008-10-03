@@ -21,7 +21,7 @@ public class AllResultsPanel extends BaseResultPanel {
         @Assisted Search search,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
-        super("All Results from Everyone", eventList,
-            tableFormat, searchResultDownloader, search, preserver, navigator);
+        super(eventList, tableFormat,
+            searchResultDownloader, search, preserver, navigator);
     }
 }

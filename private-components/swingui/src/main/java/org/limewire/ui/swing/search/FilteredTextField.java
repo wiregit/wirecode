@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -16,7 +18,7 @@ import javax.swing.JTextField;
  */
 public class FilteredTextField extends JTextField implements FocusListener {
     
-    private String PROMPT_TEXT = "Filter results...";
+    private String PROMPT_TEXT = tr("Filter results...");
     
     /**
      * Creates a FilteredTextField that displays a given number of columns.

@@ -20,7 +20,7 @@ public class ImagesResultsPanel extends BaseResultPanel {
         @Assisted Search search,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
-        super("Images from Everyone", eventList, new ImageTableFormat(),
-            searchResultDownloader, search, preserver, navigator);
+        super(eventList, new ImageTableFormat(), searchResultDownloader,
+            search, preserver, navigator);
     }
 }

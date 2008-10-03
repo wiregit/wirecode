@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -47,28 +49,28 @@ class SearchTabItems {
         this.searchActionMaps = new ArrayList<TabActionMap>();
         switch(category) {
         case ALL:
-            addCategory(I18n.tr("All"), SearchCategory.ALL);
-            addCategory(I18n.tr("Music"), SearchCategory.AUDIO);
-            addCategory(I18n.tr("Videos"), SearchCategory.VIDEO);
-            addCategory(I18n.tr("Images"), SearchCategory.IMAGE);
-            addCategory(I18n.tr("Documents"), SearchCategory.DOCUMENT);
-            addCategory(I18n.tr("Programs"), SearchCategory.PROGRAM);
-            addCategory(I18n.tr("Other"), SearchCategory.OTHER);
+            addCategory(tr("All"), SearchCategory.ALL);
+            addCategory(tr("Music"), SearchCategory.AUDIO);
+            addCategory(tr("Videos"), SearchCategory.VIDEO);
+            addCategory(tr("Images"), SearchCategory.IMAGE);
+            addCategory(tr("Documents"), SearchCategory.DOCUMENT);
+            addCategory(tr("Programs"), SearchCategory.PROGRAM);
+            addCategory(tr("Other"), SearchCategory.OTHER);
             break;
         case AUDIO:
-            addCategory(I18n.tr("Music results"), SearchCategory.AUDIO);
+            addCategory(tr("Music results"), SearchCategory.AUDIO);
             break;
         case VIDEO:
-            addCategory(I18n.tr("Video results"), SearchCategory.VIDEO);
+            addCategory(tr("Video results"), SearchCategory.VIDEO);
             break;
         case IMAGE:
-            addCategory(I18n.tr("Image results"), SearchCategory.IMAGE);
+            addCategory(tr("Image results"), SearchCategory.IMAGE);
             break;
         case DOCUMENT:
-            addCategory(I18n.tr("Document results"), SearchCategory.DOCUMENT);
+            addCategory(tr("Document results"), SearchCategory.DOCUMENT);
             break;
         case PROGRAM:
-            addCategory(I18n.tr("Program results"), SearchCategory.PROGRAM);
+            addCategory(tr("Program results"), SearchCategory.PROGRAM);
             break;
         default:
             throw new IllegalArgumentException("invalid category: " + category);

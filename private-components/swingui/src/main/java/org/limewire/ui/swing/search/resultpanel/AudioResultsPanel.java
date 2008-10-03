@@ -20,7 +20,7 @@ public class AudioResultsPanel extends BaseResultPanel {
         @Assisted Search search,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
-        super("Audio from Everyone", eventList, new MusicTableFormat(),
-            searchResultDownloader, search, preserver, navigator);
+        super(eventList, new MusicTableFormat(), searchResultDownloader,
+            search, preserver, navigator);
     }
 }

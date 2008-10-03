@@ -21,7 +21,7 @@ public class ProgramResultsPanel extends BaseResultPanel {
         @Assisted Search search,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
-        super("Programs from Everyone", eventList, tableFormat,
-            searchResultDownloader, search, preserver, navigator);
+        super(eventList, tableFormat, searchResultDownloader,
+            search, preserver, navigator);
     }
 }

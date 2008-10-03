@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Component;
 import java.awt.Font;
 import javax.swing.Icon;
@@ -23,7 +25,7 @@ public class IconTableCellRenderer implements TableCellRenderer {
         if (value instanceof Icon) {
             label.setIcon((Icon) value);
         } else {
-            label.setText(value == null ? "none" : value.toString());
+            label.setText(value == null ? tr("none") : value.toString());
 
             // Change the font so it's not bold.
             Font font = label.getFont().deriveFont(Font.PLAIN);
