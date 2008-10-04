@@ -6,10 +6,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.GradientPaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Point2D;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -28,11 +26,9 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.AvailableOption;
 import org.limewire.ui.swing.friends.AwayOption;
@@ -44,6 +40,7 @@ import org.limewire.ui.swing.friends.SelfAvailabilityUpdateEvent;
 import org.limewire.ui.swing.friends.SignoffAction;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import org.limewire.ui.swing.painter.StatusBarPainter;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -66,11 +63,6 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
 
     private boolean loggedIn;
     
-    @Resource private Color topGradient;
-    @Resource private Color bottomGradient;
-    
-    @Resource private Color topBorderColor;
-    @Resource private Color belowTopBorderColor;
     @Resource private int height;
 
     @Inject
@@ -79,17 +71,12 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
         this.icons = icons;
         
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
-        add(Line.createHorizontalLine(topBorderColor, 1), "aligny top, span, grow, wrap");
-        add(Line.createHorizontalLine(belowTopBorderColor, 1), "aligny top, span, grow, wrap");
-        
+   
         setMinimumSize(new Dimension(0, height + 2));
         setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
         setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
         
-        setBackgroundPainter(new MattePainter<JXButton>(
-                new GradientPaint(new Point2D.Double(0, 0), topGradient, 
-                        new Point2D.Double(0, 1), bottomGradient,
-                        false), true));
+        setBackgroundPainter(new StatusBarPainter());
  
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
         miniPlayerPanel.setVisible(false);
