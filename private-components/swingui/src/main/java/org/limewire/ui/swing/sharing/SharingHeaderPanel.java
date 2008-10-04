@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.sharing;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.text.MessageFormat;
 
 import javax.swing.Icon;
@@ -8,6 +10,7 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.painter.SubpanelPainter;
@@ -34,6 +37,13 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
     protected JTextField filterBox;
     protected ViewSelectionPanel viewSelectionPanel;
     
+    @Resource
+    private int height;
+    @Resource
+    private Color fontColor;
+    @Resource 
+    private float fontSize;
+    
     /**
      * Constructs sharing header panel.
      * 
@@ -54,6 +64,10 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
         createComponents();
         createComponents(icon, MessageFormat.format(staticText, name));
         layoutComponents();
+        
+        setMinimumSize(new Dimension(0, height + 2));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
+        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
     }
     
     public JTextField getFilterBox() {
@@ -65,15 +79,17 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
     
     private void createComponents(Icon icon, String text) {
         descriptionLabel = new JLabel(text, icon, JLabel.LEFT);
+        descriptionLabel.setForeground(fontColor);
+        descriptionLabel.setFont(descriptionLabel.getFont().deriveFont(fontSize));
         filterBox = new FilteredTextField(FILTER_WIDTH);
     }
     
     protected void layoutComponents() {
-        setLayout(new MigLayout());
+        setLayout(new MigLayout("insets 0 0 0 0", "", ""));
 
-        add(descriptionLabel, "push");
+        add(descriptionLabel, "gapx 5, push");
         add(filterBox);
-        add(viewSelectionPanel);
+        add(viewSelectionPanel, "gapafter 5");
     }
     
     @Override

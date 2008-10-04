@@ -30,6 +30,12 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     private int buttonHeight;
     @Resource
     private int buttonWidth;
+    @Resource
+    protected int height;
+    @Resource
+    private Color fontColor;
+    @Resource 
+    private float fontSize;
     
     private LibraryButton libraryButton;
     private JXButton shareButton;
@@ -49,6 +55,9 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         super(icon, staticText, name, viewPanel);
                 
         GuiUtils.assignResources(this);
+        
+        descriptionLabel.setForeground(fontColor);
+        descriptionLabel.setFont(descriptionLabel.getFont().deriveFont(fontSize));
         
         musicAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.AUDIO);
         videoAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.VIDEO);
@@ -81,19 +90,23 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
                 }
             }
         });
+        
+        setMinimumSize(new Dimension(0, height + 2));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
+        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
     }
     
     @Override
-    protected void createComponents() {
+    protected void createComponents() {        
         libraryButton = new LibraryButton(I18n.tr("Library"));
         libraryButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
 //        libraryButton.setEnabled(false);
-        libraryButton.setForeground(Color.WHITE);
+        libraryButton.setForeground(fontColor);
         libraryButton.setBackgroundPainter(new ButtonPainter());
         
         shareButton = new JXButton(I18n.tr("Share"), downIcon);       
         shareButton.setVisible(false);
-        shareButton.setForeground(Color.WHITE);
+        shareButton.setForeground(fontColor);
         shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
         shareButton.setBackgroundPainter(new ButtonPainter());
     }
@@ -106,14 +119,14 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     
     @Override
     protected void layoutComponents() {
-        setLayout(new MigLayout());
+        setLayout(new MigLayout("insets 0 0 0 0"));
 
-        add(descriptionLabel);
+        add(descriptionLabel, "gapx 5");
         add(libraryButton);
         add(shareButton,"push");
         
         add(filterBox);
-        add(viewSelectionPanel);
+        add(viewSelectionPanel, "gapafter 5");
     }
     
     public void setModel(FriendFileList fileList) {
