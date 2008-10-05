@@ -49,6 +49,7 @@ public class ResultsContainer extends JXPanel {
     @AssistedInject ResultsContainer(
         @Assisted EventList<VisualSearchResult> eventList, 
         @Assisted Search search,
+        @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         AllResultsPanelFactory allFactory,
         AudioResultsPanelFactory audioFactory,
@@ -59,19 +60,19 @@ public class ResultsContainer extends JXPanel {
         ProgramResultsPanelFactory programFactory) {
         
         panelMap.put(SearchCategory.ALL.name(),
-            allFactory.create(eventList, search, preserver));
+            allFactory.create(eventList, search, searchInfo, preserver));
         panelMap.put(SearchCategory.AUDIO.name(),
-            audioFactory.create(filter(Category.AUDIO, eventList), search, preserver));
+            audioFactory.create(filter(Category.AUDIO, eventList), search, searchInfo, preserver));
         panelMap.put(SearchCategory.VIDEO.name(),
-            videoFactory.create(filter(Category.VIDEO, eventList), search, preserver));
+            videoFactory.create(filter(Category.VIDEO, eventList), search, searchInfo, preserver));
         panelMap.put(SearchCategory.IMAGE.name(),
-            imagesFactory.create(filter(Category.IMAGE, eventList), search, preserver));
+            imagesFactory.create(filter(Category.IMAGE, eventList), search, searchInfo, preserver));
         panelMap.put(SearchCategory.DOCUMENT.name(),
-            documentsFactory.create(filter(Category.DOCUMENT, eventList), search, preserver));
+            documentsFactory.create(filter(Category.DOCUMENT, eventList), search, searchInfo, preserver));
         panelMap.put(SearchCategory.PROGRAM.name(),
-            programFactory.create(filter(Category.PROGRAM, eventList), search, preserver));
+            programFactory.create(filter(Category.PROGRAM, eventList), search, searchInfo, preserver));
         panelMap.put(SearchCategory.OTHER.name(),
-            otherFactory.create(filter(Category.OTHER, eventList), search, preserver));
+            otherFactory.create(filter(Category.OTHER, eventList), search, searchInfo, preserver));
         
         setLayout(cardLayout);
         

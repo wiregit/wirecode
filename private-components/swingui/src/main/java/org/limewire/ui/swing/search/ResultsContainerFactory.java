@@ -9,5 +9,5 @@ public interface ResultsContainerFactory {
 
     public ResultsContainer create(
         EventList<VisualSearchResult> visualSearchResults,
-        Search search, RowSelectionPreserver preserver);
+        Search search, SearchInfo searchInfo, RowSelectionPreserver preserver);
 }

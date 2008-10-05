@@ -4,6 +4,7 @@ import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
+import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
@@ -18,9 +19,10 @@ public class VideoResultsPanel extends BaseResultPanel {
         @Assisted EventList<VisualSearchResult> eventList,
         SearchResultDownloader searchResultDownloader,
         @Assisted Search search,
+        @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator) {
         super(eventList, new VideoTableFormat(), searchResultDownloader,
-            search, preserver, navigator);
+            search, searchInfo, preserver, navigator);
     }
 }

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
+import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.BorderLayout;
@@ -60,8 +61,6 @@ implements TableCellEditor, TableCellRenderer {
     private final Log LOG = LogFactory.getLog(getClass());
     private final Color SELECTED_COLOR = Color.GREEN;
 
-    private final String SEARCH_TEXT_COLOR = "red";
-
     public static final int HEIGHT = 60;
     public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
@@ -90,9 +89,10 @@ implements TableCellEditor, TableCellRenderer {
 
     @Inject
     public ListViewTableCellEditor(
-        ActionColumnTableCellEditor actionEditor) {
+        ActionColumnTableCellEditor actionEditor, String searchText) {
 
         this.actionEditor = actionEditor;
+        this.searchText = searchText;
         FontUtils.changeSize(similarButton, -2.0F);
 
         GuiUtils.assignResources(this);
@@ -110,52 +110,8 @@ implements TableCellEditor, TableCellRenderer {
         // If there is no search or filter text then return sourceText as is.
         if (!haveSearchText)
             return sourceText;
-
-        String lowerText = sourceText.toLowerCase();
-        if (haveSearchText)
-            searchText = searchText.toLowerCase();
-
-        int searchIndex = haveSearchText ? lowerText.indexOf(searchText) : -1;
-
-        boolean foundSearchText = searchIndex != -1;
-
-        // If sourceText doesn't contains searchText or filterText
-        // then return sourceText as is.
-        if (!foundSearchText)
-            return sourceText;
-
-        // We know that either the search text or the filter text was found
-        // at this point.
-        // Get the index of the first one found.
-        int index = searchIndex;
-
-        String result = "<html>";
-
-        while (index != -1) {
-            int matchLength = searchText.length();
-            String match = sourceText.substring(index, index + matchLength);
-            String color = SEARCH_TEXT_COLOR;
-
-            result += sourceText.substring(0, index);
-            result += "<span style='color:" + color + "; font-weight:bold'>";
-            result += match;
-            result += "</span>";
-
-            // Find the next occurrences.
-
-            sourceText = sourceText.substring(index + matchLength);
-            lowerText = lowerText.substring(index + matchLength);
-
-            searchIndex = haveSearchText ? lowerText.indexOf(searchText) : -1;
-
-            foundSearchText = searchIndex != -1;
-
-            index = searchIndex;
-        }
-
-        result += sourceText; // tack on the remaining sourceText
-        LOG.debugf("highlighted text is {0}", result);
-        return result;
+        
+        return SearchHighlightUtil.highlight(searchText, sourceText);
     }
 
     private PropertyMatch getPropertyMatch(VisualSearchResult vsr) {
@@ -176,7 +132,7 @@ implements TableCellEditor, TableCellRenderer {
         for (PropertyKey key : props.keySet()) {
             String value = vsr.getPropertyString(key);
 
-            if (value.toLowerCase().contains(searchText)) {
+            if (value.toLowerCase().contains(searchText.toLowerCase())) {
                 String betterKey = key.toString().toLowerCase();
                 betterKey = betterKey.replace('_', ' ');
                 return new PropertyMatch(betterKey, value);
@@ -264,7 +220,7 @@ implements TableCellEditor, TableCellRenderer {
             }
         });
 
-        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[left]0", "0[]0[]0")) {
+        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0[]0")) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -384,7 +340,9 @@ implements TableCellEditor, TableCellRenderer {
             heading = name + "." + vsr.getFileExtension();
         }
 
-        headingLabel.setText(highlightMatches(heading));
+        String highlightMatches = highlightMatches(heading);
+        LOG.debugf("Heading: {0} highlightedMatches: {1}", heading, highlightMatches);
+        headingLabel.setText(highlightMatches);
     }
 
     private String getProperty(VisualSearchResult vsr, PropertyKey key) {
@@ -450,10 +408,12 @@ implements TableCellEditor, TableCellRenderer {
             break;
         default:
             subheading = "{application name}"
-                + " - " + vsr.getProperty(PropertyKey.FILE_SIZE) + "MB";
+                + " - " + vsr.getProperty(PropertyKey.FILE_SIZE) + tr("MB");
         }
 
-        subheadingLabel.setText(highlightMatches(subheading));
+        String highlightMatches = highlightMatches(subheading);
+        LOG.debugf("Subheading: {0} highlightedMatches: {1}", subheading, highlightMatches);
+        subheadingLabel.setText(highlightMatches);
     }
 
     private void setBackground(boolean isSelected) {

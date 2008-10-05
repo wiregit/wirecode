@@ -89,7 +89,7 @@ public class SearchResultsPanel extends JPanel {
         // The ResultsContainerFactory create method takes two parameters
         // which it passes to the ResultsContainer constructor
         // for the parameters annotated with @Assisted.
-        this.resultsContainer = containerFactory.create(filteredList, search, preserver);
+        this.resultsContainer = containerFactory.create(filteredList, search, searchInfo, preserver);
 
         // what is this for?
 //        sortAndFilterPanel.addFilterListener(new SearchFilterListener() {
