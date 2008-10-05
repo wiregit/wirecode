@@ -132,7 +132,7 @@ implements TableCellEditor, TableCellRenderer {
         for (PropertyKey key : props.keySet()) {
             String value = vsr.getPropertyString(key);
 
-            if (value.toLowerCase().contains(searchText.toLowerCase())) {
+            if (value != null && value.toLowerCase().contains(searchText.toLowerCase())) {
                 String betterKey = key.toString().toLowerCase();
                 betterKey = betterKey.replace('_', ' ');
                 return new PropertyMatch(betterKey, value);
