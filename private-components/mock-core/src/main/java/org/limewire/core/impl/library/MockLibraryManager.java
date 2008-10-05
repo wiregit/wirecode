@@ -10,15 +10,13 @@ import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.RemoteFileList;
-import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 
 import com.google.inject.Singleton;
 
 
 @Singleton
-public class MockLibraryManager implements ShareListManager, LibraryManager, RemoteLibraryManager {
+public class MockLibraryManager implements ShareListManager, LibraryManager {
 
     private FileListAdapter allFileList;
     private FileListAdapter gnutellaList;
@@ -140,24 +138,5 @@ public class MockLibraryManager implements ShareListManager, LibraryManager, Rem
     public FriendFileList getFriendShareList(Friend friend) {
         // TODO Auto-generated method stub
         return null;
-    }
-    
-    ///////////////////////////////////////////////
-    //  Accessors for Friend Libraries
-    ///////////////////////////////////////////////
-
-    @Override
-    public RemoteFileList getOrCreateFriendLibrary(Friend id) {
-        return null;
-    }
-
-    @Override
-    public void removeFriendLibrary(Friend id) {
-    }
-    
-    @Override
-    public boolean hasFriendLibrary(Friend friend) {
-        // TODO Auto-generated method stub
-        return false;
     }
 }

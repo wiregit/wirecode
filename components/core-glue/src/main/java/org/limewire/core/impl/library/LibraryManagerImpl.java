@@ -13,23 +13,14 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.FriendRemoteLibraryEvent;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.library.RemoteFileList;
-import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.CompositeList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TransformedList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,8 +31,13 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LocalFileDetailsFactory;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.CompositeList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+
 @Singleton
-class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibraryManager {
+class LibraryManagerImpl implements ShareListManager, LibraryManager {
     
     private static final Log LOG = LogFactory.getLog(LibraryManagerImpl.class);
     
@@ -53,25 +49,20 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
     private final CombinedFriendShareList combinedFriendShareLists;
     
     private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
-    
-    private final EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener; 
+
     private final EventListener<FriendShareListEvent> friendShareListEventListener;
-    private final ConcurrentHashMap<String, RemoteFileListImpl> friendLibraryFileLists;
     private final LocalFileDetailsFactory detailsFactory;
 
     @Inject
     LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory,
-            EventListener<FriendRemoteLibraryEvent> friendLibraryEventListener,
             EventListener<FriendShareListEvent> friendShareListEventListener) {
         this.fileManager = fileManager;
         this.detailsFactory = detailsFactory;
-        this.friendLibraryEventListener = friendLibraryEventListener;
         this.friendShareListEventListener = friendShareListEventListener;
         this.combinedFriendShareLists = new CombinedFriendShareList();
         this.libraryFileList = new LibraryFileList(fileManager);
         this.gnutellaFileList = new GnutellaFileList(fileManager);
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
-        this.friendLibraryFileLists = new ConcurrentHashMap<String, RemoteFileListImpl>();
     }
 
     @Override
@@ -121,39 +112,6 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
         if(list != null) {
             friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED, list, friend));
-            list.dispose();
-        }
-    }
-    
-    //////////////////////////////////////////////////////
-    //  Accessors for friend Libraries (Files being shared with you)
-    /////////////////////////////////////////////////////
-
-    @Override
-    public RemoteFileList getOrCreateFriendLibrary(Friend friend) {
-        RemoteFileListImpl newList = new FriendLibraryFileList();
-        RemoteFileListImpl existing = friendLibraryFileLists.putIfAbsent(friend.getId(), newList);
-        
-        if(existing == null) {
-            newList.commit();
-            friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_ADDED, newList, friend));
-            return newList;
-        } else {
-            newList.dispose();
-            return existing;
-        }
-    }
-    
-    @Override
-    public boolean hasFriendLibrary(Friend friend) {
-        return friendLibraryFileLists.get(friend.getId()) != null;
-    }
-    
-    @Override
-    public void removeFriendLibrary(Friend friend) {
-        RemoteFileListImpl list = friendLibraryFileLists.remove(friend.getId());
-        if(list != null) {
-            friendLibraryEventListener.handleEvent(new FriendRemoteLibraryEvent(FriendRemoteLibraryEvent.Type.FRIEND_LIBRARY_REMOVED, list, friend));
             list.dispose();
         }
     }
@@ -403,63 +361,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager, RemoteLibr
         }
     }
     
-    private abstract class RemoteFileListImpl implements RemoteFileList {
-        protected final TransformedList<RemoteFileItem, RemoteFileItem> eventList;
-        protected volatile TransformedList<RemoteFileItem, RemoteFileItem> swingEventList;
-        
-        RemoteFileListImpl() {
-            eventList = GlazedListsFactory.threadSafeList(new BasicEventList<RemoteFileItem>());
-        }
-        
-        @Override
-        public EventList<RemoteFileItem> getModel() {
-            return eventList;
-        }
-        
-        @Override
-        public EventList<RemoteFileItem> getSwingModel() {
-            assert EventQueue.isDispatchThread();
-            if(swingEventList == null) {
-                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList);
-            }
-            return swingEventList;
-        }
-        
-        void dispose() {
-            if(swingEventList != null) {
-                swingEventList.dispose();
-            }
-            eventList.dispose();
-        }        
-        
-        @Override
-        public int size() {
-            return eventList.size();
-        }
-        
-        void commit() {
-            // Add things here after we guarantee we want to use this list.
-        }
-    }
-    
-    private class FriendLibraryFileList extends RemoteFileListImpl {
 
-
-        public void addFile(RemoteFileItem file) {
-            eventList.add(file);
-        }
-
-        public void removeFile(RemoteFileItem file) {
-            eventList.remove(file);
-        }
-        
-        public void clear() {
-            
-        }
-        //TODO: add new accessors appropriate for creating FileItems based on
-        //      lookups. May also need to subclass CoreFileItem appropriate for
-        //      friend library info.
-    }
     
     private class CombinedFriendShareList implements FileList<LocalFileItem> {
         private final CompositeList<LocalFileItem> compositeList;

@@ -17,14 +17,12 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JViewport;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FriendRemoteLibraryEvent;
+import org.limewire.core.api.library.FriendLibraryEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -44,11 +42,12 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 public class LibraryNavigator extends JPanel {
@@ -58,7 +57,7 @@ public class LibraryNavigator extends JPanel {
 
     @Inject
     LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
-            ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport,
+            ListenerSupport<FriendLibraryEvent> friendLibrarySupport,
             MyLibraryFactory myLibraryFactory, 
             final FriendLibraryFactory friendLibraryFactory) {
         GuiUtils.assignResources(this);
@@ -73,18 +72,19 @@ public class LibraryNavigator extends JPanel {
        
         addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel())));
 
-        friendLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
+        friendLibrarySupport.addListener(new EventListener<FriendLibraryEvent>() {
             @Override
             @SwingEDTEvent
-            public void handleEvent(FriendRemoteLibraryEvent event) {
+            public void handleEvent(FriendLibraryEvent event) {
                 switch (event.getType()) {
-                case FRIEND_LIBRARY_ADDED:
-                    addNavPanel(new NavPanel(event.getFriend(),
-                            createFriendCategories(navigator, event.getFriend(), 
-                                    friendLibraryFactory, event.getFileList().getSwingModel())));
+                case LIBRARY_ADDED:
+                    Friend friend = event.getFriendLibrary().getFriend();
+                    addNavPanel(new NavPanel(friend,
+                                createFriendCategories(navigator, friend,
+                                        friendLibraryFactory, event.getFriendLibrary().getSwingModel())));
                     break;
-                case FRIEND_LIBRARY_REMOVED:
-                    removeNavPanelForFriend(event.getFriend());
+                case LIBRARY_REMOVED:
+                    removeNavPanelForFriend(event.getFriendLibrary().getFriend());
                     break;
                 }
             }

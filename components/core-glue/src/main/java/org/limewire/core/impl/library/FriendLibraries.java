@@ -11,7 +11,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
-import org.limewire.core.api.library.FriendRemoteLibraryEvent;
+import org.limewire.core.api.library.FriendLibraryEvent;
+import org.limewire.core.api.library.PresenceLibraryEvent;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -33,21 +34,28 @@ public class FriendLibraries {
         this.libraries = new ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
     }
     
-    @Inject void register(ListenerSupport<FriendRemoteLibraryEvent> friendLibrarySupport) {
-        friendLibrarySupport.addListener(new EventListener<FriendRemoteLibraryEvent>() {
+    @Inject void register(ListenerSupport<FriendLibraryEvent> friendLibrarySupport) {
+        friendLibrarySupport.addListener(new EventListener<FriendLibraryEvent>() {
             @Override
-            public void handleEvent(FriendRemoteLibraryEvent event) {
+            public void handleEvent(FriendLibraryEvent event) {
                 switch(event.getType()) {
-                case FRIEND_LIBRARY_ADDED:
-                    LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);               
-                    if(libraries.putIfAbsent(event.getFriend().getId(), trie) == null) {
-                        LOG.debugf("adding friend library {0} to index", event.getFriend());
-                        event.getFileList().getModel().addListEventListener(new LibraryListener(trie));
-                    }
-                    break;
-                case FRIEND_LIBRARY_REMOVED:
-                    LOG.debugf("removing friend library {0} from index", event.getFriend());
-                    libraries.remove(event.getFriend().getId());
+                case LIBRARY_ADDED:
+                    event.getFriendLibrary().addListener(new EventListener<PresenceLibraryEvent>() {
+                        public void handleEvent(PresenceLibraryEvent event) {
+                            switch(event.getType()) {
+                            case LIBRARY_ADDED:
+                                LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
+                                if(libraries.putIfAbsent(event.getLibrary().getPresence().getJID(), trie) == null) {
+                                    LOG.debugf("adding library for presence {0} to index", event.getLibrary().getPresence().getJID());
+                                    event.getLibrary().getModel().addListEventListener(new LibraryListener(trie));
+                                }
+                                break;
+                            case LIBRARY_REMOVED:
+                                LOG.debugf("removing library for presence {0} from index", event.getLibrary().getPresence());
+                                libraries.remove(event.getLibrary().getPresence().getJID());
+                            }
+                        }
+                    });
                 }
             }
         });
