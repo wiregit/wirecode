@@ -8,7 +8,7 @@ import org.limewire.core.api.Category;
 public interface FileItem {
     
     public static enum Keys {
-        IMAGE, TITLE, AUTHOR, ALBUM, LENGTH, GENRE, BITRATE, TRACK, SAMPLE_RATE
+        IMAGE, TITLE, AUTHOR, ALBUM, LENGTH, GENRE, BITRATE, TRACK, SAMPLE_RATE, YEAR, RATING, COMMENTS, HEIGHT, MISCELLANEOUS
     }
     
     String getName();

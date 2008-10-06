@@ -21,8 +21,13 @@ import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.table.AudioLibraryTable;
+import org.limewire.ui.swing.library.table.DocumentTableFormat;
+import org.limewire.ui.swing.library.table.ImageTableFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
-import org.limewire.ui.swing.library.table.LibraryTableModel;
+import org.limewire.ui.swing.library.table.OtherTableFormat;
+import org.limewire.ui.swing.library.table.ProgramTableFormat;
+import org.limewire.ui.swing.library.table.VideoTableFormat;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventTableModel;
@@ -31,15 +36,21 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 class MyLibraryPanel extends JPanel implements Disposable {
-    private final LibraryTable table;
+    private final LibraryTable<LocalFileItem> table;
+    private final LibraryHeaderPanel header;
+    private LibrarySharePanel sharePanel;
     
     @AssistedInject
     public MyLibraryPanel(@Assisted Category category,
                           @Assisted EventList<LocalFileItem> eventList,
                           final LibrarySharePanel sharePanel){
+        this.sharePanel = sharePanel;
+        
         setLayout(new BorderLayout());
 
-        table = new LibraryTable(new LibraryTableModel<LocalFileItem>(eventList)); 
+        header = new LibraryHeaderPanel(category);
+        //TODO: filterlist 
+        table = createTable(category, eventList);
         table.enableSharing(sharePanel);
                 
         final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>() {});
@@ -79,15 +90,43 @@ class MyLibraryPanel extends JPanel implements Disposable {
                         sharePanel.setVisible(false);
                     }
                 }
-            }};
+            }
+        };
         Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
 
         add(scrollPane, BorderLayout.CENTER);
+        add(header, BorderLayout.NORTH);
     }
     
     public void dispose() {
         ((EventTableModel)table.getModel()).dispose();
+        if(sharePanel != null){
+            sharePanel.dispose();
+        }
     }
+    
+
+    private LibraryTable<LocalFileItem> createTable(Category category,
+            EventList<LocalFileItem> eventList) {
+        switch (category) {
+        case AUDIO:
+            return new AudioLibraryTable<LocalFileItem>(eventList);
+        case VIDEO:
+            return new LibraryTable<LocalFileItem>(eventList, new VideoTableFormat<LocalFileItem>());
+        case DOCUMENT:
+        	return new LibraryTable<LocalFileItem>(eventList, new DocumentTableFormat<LocalFileItem>());
+        case IMAGE:
+        	return new LibraryTable<LocalFileItem>(eventList, new ImageTableFormat<LocalFileItem>());
+        case OTHER:
+        	return new LibraryTable<LocalFileItem>(eventList, new OtherTableFormat<LocalFileItem>());
+        case PROGRAM:
+        	return new LibraryTable<LocalFileItem>(eventList, new ProgramTableFormat<LocalFileItem>());
+        }
+        
+        throw new IllegalArgumentException("Unknown category: " + category);
+    }
+
+ 
     
     
 }

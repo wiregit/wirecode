@@ -30,13 +30,23 @@ public class FilteredTextField extends JTextField implements FocusListener {
      */
     public FilteredTextField(int columns) {
         super(columns);
-        
+        init();
+    }
+    
+    public FilteredTextField() {
+        super();
+        init();
+    }
+    
+    private void init(){
         //focusLost(null);
         addFocusListener(this);
         this.setOpaque(false);
         this.setBorder(new TextBorder());
-        
-        
+    }
+    
+    public void setPromptText(String text){
+        PROMPT_TEXT = text;
     }
     
     class TextBorder implements Border{

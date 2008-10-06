@@ -7,26 +7,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 
+import org.jdesktop.swingx.table.TableColumnExt;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileTransferable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
-import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
+import org.limewire.ui.swing.util.I18n;
 
-public class LibraryTable extends MouseableTable {
+import ca.odell.glazedlists.EventList;
+
+public class LibraryTable<T extends FileItem> extends MouseableTable {
     
     private LibrarySharePanel librarySharePanel;
-    private MultiButtonTableCellRendererEditor shareEditor;
+    private ShareTableRendererEditor shareEditor;
+    private LibraryTableFormat<T> format;
+
+
 
     private TableColors tableColors;
-    
-    public LibraryTable(LibraryTableModel model) {
-        super(model);
+    public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format) {
+        super(new LibraryTableModel<T>(libraryItems, format));
+        
+        this.format = format;
+
         tableColors = new TableColors();
         setStripesPainted(true);
         setColumnControlVisible(true);
@@ -57,18 +65,28 @@ public class LibraryTable extends MouseableTable {
     
     public void enableSharing(LibrarySharePanel librarySharePanel) {
         this.librarySharePanel = librarySharePanel;
-        List<Action> actionList = new ArrayList<Action>();
-        actionList.add(new ShareAction("+"));
-        shareEditor = new MultiButtonTableCellRendererEditor(actionList);
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellEditor(shareEditor);
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setCellRenderer(
-                new MultiButtonTableCellRendererEditor(actionList));
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setPreferredWidth(
-                shareEditor.getPreferredSize().width);
-        getColumnModel().getColumn(LibraryTableModel.SHARE_COL).setWidth(
-                shareEditor.getPreferredSize().width);
+        shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
+        getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new ShareTableRendererEditor(null));
+        getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(shareEditor.getPreferredSize().width);
+        getColumnModel().getColumn(format.getActionColumn()).setWidth(shareEditor.getPreferredSize().width);
+        setRowHeight(shareEditor.getPreferredSize().height);
+        hideColumns();
     }
-
+    
+    public void enableDownloading(){
+        //TODO:set action column for friend tables
+        hideColumns();
+    }
+    
+    //TODO: this is quite brittle.  only works if column indexes are in descending order - need to do it a different way
+    protected void hideColumns(){
+        int[] hiddenColumns = format.getDefaultHiddenColums();
+        for (int i = 0; i < hiddenColumns.length; i++) {
+            ((TableColumnExt) getColumnModel().getColumn(hiddenColumns[i])).setVisible(false);
+        }
+    }
+    
     private class ShareAction extends AbstractAction {
         
         public ShareAction(String text){
