@@ -273,6 +273,14 @@ public class FancyTabList extends JXPanel {
         props.setCloseOtherText(closeOtherText);
         closeOtherAction.putValue(Action.NAME, closeOtherText);
     }
+    
+    public void setUnderlineColor(Color underlineColor) {
+        props.setUnderlineColor(underlineColor);
+    }
+    
+    public void setUnderlineHoverColor(Color underlineHoverColor) {
+        props.setUnderlineHoverColor(underlineHoverColor);
+    }
 
     /**
      * Sets the painter to be used when the tab is rolled over.

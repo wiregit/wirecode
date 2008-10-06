@@ -47,6 +47,7 @@ public class FancyTab extends JXPanel {
     private final AbstractButton removeButton;
     private final JXBusyLabel busyLabel;
     private final JLabel additionalText;
+    private final Line underline;
     private final FancyTabProperties props;
     
     private static enum TabState {
@@ -65,13 +66,14 @@ public class FancyTab extends JXPanel {
     private Icon removeRolloverIcon;
     
     private Icon removeArmedIcon;
-    private Icon removeEmptyIcon = new EmptyIcon(16, 16);
+    private Icon removeEmptyIcon;
 
     public FancyTab(TabActionMap actionMap,
             ButtonGroup group,
             FancyTabProperties fancyTabProperties) {
         GuiUtils.assignResources(this);
         removeArmedIcon = new ShiftedIcon(1, 1, removeRolloverIcon);
+        removeEmptyIcon = new EmptyIcon(removeActiveIcon.getIconWidth(), removeActiveIcon.getIconHeight());
         
         this.tabActions = actionMap;
         this.props = fancyTabProperties;
@@ -79,6 +81,7 @@ public class FancyTab extends JXPanel {
         this.additionalText = createAdditionalText();
         this.removeButton = createRemoveButton();
         this.busyLabel = createBusyLabel();
+        this.underline = Line.createHorizontalLine(props.getUnderlineColor());
 
         if (group != null) {
             group.add(mainButton);
@@ -106,13 +109,14 @@ public class FancyTab extends JXPanel {
 
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
         
-        setLayout(new MigLayout("insets 0, gap 0, fill, hidemode 3"));        
-        add(busyLabel, "gapbefore 4, dock west, aligny center");
-        add(mainButton, "gapbefore 4, gapafter 4, aligny center, width min(pref,30):pref:max");
-        add(additionalText, "gap after 4, aligny center");
-        if(props.isRemovable()) {
-            add(removeButton, "gapafter 4, aligny center, dock east");
-        }
+        setLayout(new MigLayout("insets 0, filly, gapy 0, hidemode 1"));        
+        add(busyLabel, "gapbefore 4, alignx left, aligny bottom");
+        add(mainButton, "aligny bottom, width min(pref,30):pref:max, split 1");
+        add(additionalText, "aligny bottom");
+        add(removeButton, "gapafter 4, aligny bottom, alignx right, wrap");
+        // TODO: this edges a bit over the right if additionalText is invisible
+        add(underline, "skip 1, span 2, growx, aligny top, gapafter 0");
+
     }
 
     @Override
@@ -308,21 +312,23 @@ public class FancyTab extends JXPanel {
             this.currentState = tabState;
             switch(tabState) {
             case SELECTED:
-//                FontUtils.removeUnderline(mainButton);
-//                FontUtils.removeUnderline(additionalText);
+                underline.setVisible(false);
                 mainButton.setForeground(props.getSelectionColor());
                 additionalText.setForeground(props.getSelectionColor());
                 this.setBackgroundPainter(props.getSelectedPainter());
                 removeButton.setIcon(removeActiveIcon);
                 break;
             case BACKGROUND:
-//                underline();
+                underline.setVisible(true);
+                underline.setColor(props.getUnderlineColor());
                 mainButton.setForeground(props.getNormalColor());
                 additionalText.setForeground(props.getNormalColor());
                 this.setBackgroundPainter(props.getNormalPainter());
                 removeButton.setIcon(removeEmptyIcon);
                 break;
             case ROLLOVER:
+                underline.setVisible(true);
+                underline.setColor(props.getUnderlineHoverColor());
                 setBackgroundPainter(props.getHighlightPainter());
                 removeButton.setIcon(removeInactiveIcon);
                 break;

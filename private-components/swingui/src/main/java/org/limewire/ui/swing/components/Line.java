@@ -11,8 +11,8 @@ import javax.swing.JComponent;
  */
 public class Line extends JComponent {
     
-    public static Line createHorizontalLine(Color color, int height) {
-        return new Line(true, color, height);
+    public static Line createHorizontalLine(Color color, int thickness) {
+        return new Line(true, color, thickness);
     }
 
     public static Line createHorizontalLine(Color color) {
@@ -23,8 +23,8 @@ public class Line extends JComponent {
         return new Line(true, Color.BLACK, 1);
     }
     
-    public static Line createVerticalLine(Color color, int width) {
-        return new Line(false, color, width);
+    public static Line createVerticalLine(Color color, int thickness) {
+        return new Line(false, color, thickness);
     }
     
     public static Line createVerticalLine(Color color) {
@@ -38,29 +38,29 @@ public class Line extends JComponent {
     private boolean horizontal;
     private Color color;
 
-    private Line(boolean horizontal, Color color, int dimension) {
+    private Line(boolean horizontal, Color color, int thickness) {
         if(color == null)
             throw new IllegalArgumentException("color must not be null");
         
         this.horizontal = horizontal;
         this.color = color;
-        initSize(horizontal, dimension);
+        initSize(horizontal, thickness);
     }
        
-    private void initSize(boolean horizontal, int dimension) {
+    private void initSize(boolean horizontal, int thickness) {
         if(horizontal) {
-            setPreferredSize(new Dimension(1, dimension));
-            setMinimumSize(new Dimension(0, dimension));
-            setMaximumSize(new Dimension(Short.MAX_VALUE, dimension));
+            setPreferredSize(new Dimension(1, thickness));
+            setMinimumSize(new Dimension(0, thickness));
+            setMaximumSize(new Dimension(Short.MAX_VALUE, thickness));
         } else {
-            setPreferredSize(new Dimension(dimension, 1));
-            setMinimumSize(new Dimension(dimension, 0));
-            setMaximumSize(new Dimension(dimension, Short.MAX_VALUE));       
+            setPreferredSize(new Dimension(thickness, 1));
+            setMinimumSize(new Dimension(thickness, 0));
+            setMaximumSize(new Dimension(thickness, Short.MAX_VALUE));       
         }
 	}
     
-    public void setThickness(int dimension) {
-        initSize(horizontal, dimension);
+    public void setThickness(int thickness) {
+        initSize(horizontal, thickness);
     }
 
     public void setColor(Color color) {

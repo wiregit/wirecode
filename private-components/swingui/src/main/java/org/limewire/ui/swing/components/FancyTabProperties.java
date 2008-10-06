@@ -20,6 +20,8 @@ public class FancyTabProperties implements Cloneable {
     private String closeOneText;
     private String closeAllText;
     private String closeOtherText;
+    private Color underlineColor;
+    private Color underlineHoverColor;
 
     FancyTabProperties() {
         highlightPainter = new RectanglePainter<JXButton>(2, 2, 2, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY);
@@ -31,6 +33,8 @@ public class FancyTabProperties implements Cloneable {
         closeOneText = I18n.tr("Close Tab");
         closeAllText = I18n.tr("Close All Tabs");
         closeOtherText = I18n.tr("Close Other Tabs");
+        underlineColor = Color.BLUE;
+        underlineHoverColor = Color.CYAN;
     }
     
     public FancyTabProperties clone() {
@@ -119,6 +123,22 @@ public class FancyTabProperties implements Cloneable {
 
     public void setCloseOtherText(String closeOtherText) {
         this.closeOtherText = closeOtherText;
+    }
+
+    public Color getUnderlineColor() {
+        return underlineColor;
+    }
+
+    public Color getUnderlineHoverColor() {
+        return underlineHoverColor;
+    }
+
+    public void setUnderlineColor(Color underlineColor) {
+        this.underlineColor = underlineColor;
+    }
+
+    public void setUnderlineHoverColor(Color underlineHoverColor) {
+        this.underlineHoverColor = underlineHoverColor;
     }
 
 
