@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Date;
+
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileItem.Keys;
+import org.limewire.ui.swing.util.I18n;
 
-import com.limegroup.gnutella.gui.I18n;
 
 public class DocumentTableFormat<T extends FileItem> implements LibraryTableFormat<T> {
     public static final int NAME_COL = 0;
@@ -47,9 +49,9 @@ public class DocumentTableFormat<T extends FileItem> implements LibraryTableForm
          case AUTHOR_COL:
              return baseObject.getProperty(Keys.AUTHOR);
          case CREATED_COL:
-             return baseObject.getCreationTime();
+             return new Date(baseObject.getCreationTime());
          case MODIFIED_COL:
-             return baseObject.getLastModifiedTime();
+             return new Date();
          case NAME_COL:
              return baseObject.getName();
          case ACTION_COL:
