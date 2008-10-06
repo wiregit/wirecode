@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-29 11:30-0400\n"
+"POT-Creation-Date: 2008-10-06 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,20 +23,24 @@ msgid "All Types"
 msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
 msgid "Documents"
 msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:42
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 msgid "Programs"
 msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:43
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:11
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
 msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:44
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:12
 #: core/com/limegroup/gnutella/daap/DaapManager.java:179
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
@@ -44,7 +48,33 @@ msgid "Video"
 msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:45
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:13
 msgid "Images"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
+msgid "Other"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:16
+msgid "No problems."
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:17
+msgid "There is a disk problem."
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:18
+msgid "The file is corrupted"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:19
+msgid "The File is not shareable"
+msgstr ""
+
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:20
+msgid "Trouble connecting to people"
 msgstr ""
 
 #: components/core-settings/src/main/java/org/limewire/core/settings/StartupAdSettings.java:41
@@ -170,6 +200,28 @@ msgstr ""
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 msgid "Statistic Management"
+msgstr ""
+
+#. lower case enum values to allow direct mapping from to the Mode enum
+#. defined in smack
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:20
+msgid "Free to chat"
+msgstr ""
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:21
+msgid "Available"
+msgstr ""
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:22
+msgid "Away"
+msgstr ""
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
+msgid "Away for a while"
+msgstr ""
+
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
+msgid "Do not disturb"
 msgstr ""
 
 #: core/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
@@ -6143,10 +6195,6 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
-msgid "Other"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:292
