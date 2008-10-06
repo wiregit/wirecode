@@ -207,6 +207,11 @@ public class GuiUtils {
 				.injectFields(object);
 	}
     
+	/** Disables or re-enables the action hand from drawing. */
+	public static void setActionHandDrawingDisabled(JComponent component, boolean disabled) {
+	    component.putClientProperty("limewire.actionHand.disabled", disabled);
+	}
+	
     /**
      * Returns a {@link MouseListener} that listens for events
      * and changes the mouse into a hand (or out of a hand)
@@ -219,8 +224,10 @@ public class GuiUtils {
             @Override
             public void mouseEntered(MouseEvent e) {
                 JComponent comp = (JComponent) e.getComponent();
-                comp.getTopLevelAncestor()
-                        .setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                if(!Boolean.TRUE.equals(comp.getClientProperty("limewire.actionHand.disabled"))) {
+                    comp.getTopLevelAncestor()
+                            .setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
             }
 
             @Override

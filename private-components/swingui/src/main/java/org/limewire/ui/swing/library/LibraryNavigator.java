@@ -1,24 +1,36 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JViewport;
+import javax.swing.KeyStroke;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
@@ -30,6 +42,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.ActionLabel;
+import org.limewire.ui.swing.components.ShiftedIcon;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -38,22 +51,32 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import net.miginfocom.swing.MigLayout;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class LibraryNavigator extends JPanel {
 
     private final SectionHeading titleLabel;
     private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
+    
+    @Resource private Icon audioIcon;
+    @Resource private Icon videoIcon;
+    @Resource private Icon imageIcon;
+    @Resource private Icon appIcon;
+    @Resource private Icon documentIcon;
+    
+    @Resource private Color selectedBackground;
+    @Resource private Font selectedTextFont;
+    @Resource private Color selectedTextColor;
+    @Resource private Font textFont;
+    @Resource private Color textColor;
 
     @Inject
     LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
@@ -113,6 +136,37 @@ public class LibraryNavigator extends JPanel {
         add(panel, "alignx left, aligny top, growx, wrap");
     }
     
+    private void moveDown() {
+        ListIterator<NavPanel> iter = navPanels.listIterator();
+        while(iter.hasNext()) {
+            NavPanel panel = iter.next();
+            if(panel.hasSelection()) {
+                if(!panel.incrementSelection()) {
+                    if(iter.hasNext()) {
+                        iter.next().selectFirst();
+                    }
+                }
+                break;
+            }
+        }
+    }
+    
+    private void moveUp() {
+        ListIterator<NavPanel> iter = navPanels.listIterator();
+        while(iter.hasNext()) {
+            NavPanel panel = iter.next();
+            if(panel.hasSelection()) {
+                if(!panel.decrementSelection()) {
+                    iter.previous(); // back us up a step.
+                    if(iter.hasPrevious()) {
+                        iter.previous().selectLast();
+                    }
+                }
+                break;
+            }
+        }
+    }
+    
     private void removeNavPanelForFriend(Friend friend) {
         for(Iterator<NavPanel> i = navPanels.iterator(); i.hasNext(); ) {
             NavPanel panel = i.next();
@@ -137,8 +191,8 @@ public class LibraryNavigator extends JPanel {
     }
     
     private Map<Category, Action> createMyCategories(Navigator navigator, MyLibraryFactory factory, EventList<LocalFileItem> eventList) {
-        EnumMap<Category, Action> categories = new EnumMap<Category, Action>(Category.class);
-        for(Category category : Category.values()) {
+        Map<Category, Action> categories = new LinkedHashMap<Category, Action>();
+        for(Category category : Category.getCategoriesInOrder()) {
             categories.put(category, createMyCategoryAction(navigator, factory, category, eventList));
         }
         return categories;
@@ -153,8 +207,8 @@ public class LibraryNavigator extends JPanel {
     }
     
     private Map<Category, Action> createFriendCategories(Navigator navigator, Friend friend, FriendLibraryFactory factory, EventList<RemoteFileItem> eventList) {
-        EnumMap<Category, Action> categories = new EnumMap<Category, Action>(Category.class);
-        for(Category category : Category.values()) {
+        Map<Category, Action> categories = new LinkedHashMap<Category, Action>();
+        for(Category category : Category.getCategoriesInOrder()) {
             categories.put(category, createFriendCategoryAction(navigator, friend, factory, category, eventList));
         }
         return categories;
@@ -185,12 +239,33 @@ public class LibraryNavigator extends JPanel {
                 }
             }
         });
+        switch (category) {
+        case AUDIO:
+            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, audioIcon));
+            break;
+        case DOCUMENT:
+            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, documentIcon));
+            break;
+        case IMAGE:
+            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, imageIcon));
+            break;
+        case OTHER:
+            action.putValue(Action.SMALL_ICON, new EmptyIcon(26 + 16, 16));
+            break;
+        case PROGRAM:
+            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, appIcon));
+            break;
+        case VIDEO:
+            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, videoIcon));
+            break;
+        }
         return action;
     }
     
     private class NavPanel extends JXPanel {
         private final CategoriesPanel categories;
         private final Friend friend;
+        private final ActionLabel categoryLabel;
         
         public NavPanel(Friend friend, Map<Category, Action> actions) {
             super(new MigLayout("insets 0, gap 0, fill"));
@@ -200,19 +275,44 @@ public class LibraryNavigator extends JPanel {
             categories.setAnimated(false);
             categories.setCollapsed(true);
             categories.setAnimated(true);
-            ActionLabel me = new ActionLabel(new AbstractAction(friend.getRenderName()) {
+            categoryLabel = new ActionLabel(new AbstractAction(friend.getRenderName()) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     categories.ensureSelected();
+                    getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
                 }
             }, false);
-            add(me, "gapbefore 5, grow, wrap");
-            add(categories, "gapbefore 10, grow, wrap");
+            categoryLabel.setForeground(textColor);
+            categoryLabel.setFont(textFont);
+            add(categoryLabel, "gapbefore 12, gaptop 7, grow, wrap");
+            add(categories, "grow, wrap"); // the gap here is implicit in the width of the icon
+                                           // see decorateAction
             
         }
         
+        public void selectFirst() {
+            categories.selectFirst();
+        }
+
+        public boolean incrementSelection() {
+            return categories.incrementSelection();
+        }
+
+        public void selectLast() {
+            categories.selectLast();
+        }
+
+        public boolean decrementSelection() {
+            return categories.decrementSelection();
+        }
+
+        public boolean hasSelection() {
+            return categories.hasSelection();
+        }
+
         public void expand() {
             categories.setCollapsed(false);
+            GuiUtils.setActionHandDrawingDisabled(categoryLabel, true);
         }
 
         public void dispose() {
@@ -221,6 +321,7 @@ public class LibraryNavigator extends JPanel {
         
         public void collapse() {
             categories.setCollapsed(true);
+            GuiUtils.setActionHandDrawingDisabled(categoryLabel, false);
         }
         
         public Friend getFriend() {
@@ -228,7 +329,7 @@ public class LibraryNavigator extends JPanel {
         }
     }
     
-    private static class CategoriesPanel extends JXCollapsiblePane {
+    private class CategoriesPanel extends JXCollapsiblePane {
         private final Map<Category, Action> categories;
         private Action lastSelectedAction = null;
         
@@ -242,24 +343,91 @@ public class LibraryNavigator extends JPanel {
                     return false;
                 }
             };
-            for(Category category : Category.getCategoriesInOrder()) {
+            for(Category category : categories.keySet()) {
                 Action action = categories.get(category);
                 action.addPropertyChangeListener(new PropertyChangeListener() {
                     @Override
                     public void propertyChange(PropertyChangeEvent evt) {
                         if(evt.getPropertyName().equals(Action.SELECTED_KEY) && Boolean.TRUE.equals(evt.getNewValue())) {
-                            lastSelectedAction = (Action)evt.getSource(); 
+                            lastSelectedAction = (Action)evt.getSource();
+                            requestFocus();
                         }
                     }
                 });
-                panel.add(new CategoryLabel(action), "grow, wrap");
+                CategoryLabel label = new CategoryLabel(action);
+                label.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        requestFocus();
+                    }
+                });
+                panel.add(label, "grow, wrap");
             }
             setContentPane(panel);
             // The below is a hack in order to set the viewport transparent.
             JViewport viewport = (JViewport)getComponent(0);
             viewport.setOpaque(false);
+                        
+            getActionMap().put(MoveDown.KEY, new MoveDown());
+            getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), MoveDown.KEY);
+            
+            getActionMap().put(MoveUp.KEY, new MoveUp());
+            getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), MoveUp.KEY);
         }
         
+        public boolean hasSelection() {
+            for(Action action : categories.values()) {
+                if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public boolean decrementSelection() {
+            List<Action> actions = new ArrayList<Action>(categories.values());
+            ListIterator<Action> iter = actions.listIterator();
+            while(iter.hasNext()) {
+                Action action = iter.next();
+                if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+                    iter.previous(); // back us up a step.
+                    if(iter.hasPrevious()) {
+                        iter.previous().actionPerformed(null);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public void selectLast() {
+            LinkedList<Action> actions = new LinkedList<Action>(categories.values());
+            actions.getLast().actionPerformed(null);
+        }
+
+        public boolean incrementSelection() {
+            List<Action> actions = new ArrayList<Action>(categories.values());
+            ListIterator<Action> iter = actions.listIterator();
+            while(iter.hasNext()) {
+                Action action = iter.next();
+                if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+                    if(iter.hasNext()) {
+                        iter.next().actionPerformed(null);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public void selectFirst() {
+            categories.values().iterator().next().actionPerformed(null);
+        }
+
         public void dispose() {
             for(Action action : categories.values()) {
                 NavItem item = (NavItem)action.getValue(NavigatorUtils.NAV_ITEM);
@@ -276,29 +444,51 @@ public class LibraryNavigator extends JPanel {
         }
     }
     
-    private static class CategoryLabel extends ActionLabel {
+    private class CategoryLabel extends ActionLabel {
         public CategoryLabel(Action action) {
             super(action, false);
             
-            setFont(new Font("Arial", Font.PLAIN, 11));
-            setForeground(Color.decode("#313131"));
+            setFont(textFont);
+            setForeground(textColor);
+            setIconTextGap(6);
+            setMinimumSize(new Dimension(0, 22));
+            setMaximumSize(new Dimension(Short.MAX_VALUE, 22));
+            setPreferredSize(new Dimension(500, 22));
             
             getAction().addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                         if(evt.getNewValue().equals(Boolean.TRUE)) {
-                            setBackground(Color.decode("#93AAD1"));
-                            setForeground(Color.WHITE);
-                            FontUtils.bold(CategoryLabel.this);
+                            setBackground(selectedBackground);
+                            setForeground(selectedTextColor);
+                            setFont(selectedTextFont);
                             setOpaque(true);
                         } else {
                             setOpaque(false);
-                            setForeground(Color.decode("#313131"));
-                            FontUtils.plain(CategoryLabel.this);
+                            setForeground(textColor);
+                            setFont(textFont);
                         }
                     }
                 }
             });
+        }
+    }
+    
+    private class MoveDown extends AbstractAction {
+        final static String KEY = "MOVE_DOWN";
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            moveDown();
+        }
+    }
+    
+    private class MoveUp extends AbstractAction {
+        final static String KEY = "MOVE_UP";
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            moveUp();
         }
     }
     

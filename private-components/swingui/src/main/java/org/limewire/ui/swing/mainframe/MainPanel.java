@@ -67,7 +67,9 @@ class MainPanel extends JPanel {
                 LOG.debugf("Selected item {0}", navItem);
                 if(navItem != null) {
                     cardLayout.show(MainPanel.this, asString(navItem));
-                    keyToComponents.get(asString(navItem)).requestFocusInWindow();
+                    // TODO: This breaks focus in the nav, so cannot scroll
+                    //       up/down.  Need to figure out what to do properly here.
+                    //keyToComponents.get(asString(navItem)).requestFocusInWindow();
                 }
             }
         });
