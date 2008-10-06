@@ -16,11 +16,11 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
-import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
-import javax.swing.GroupLayout.Group;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -44,28 +44,15 @@ public class FancyTabList extends JXPanel {
     private FancyTabProperties props;
     private int maxTotalTabs = 10;
     private int maxVisibleTabs;
-    
-    private LayoutStyle layoutStyle;
-
-    private int minimumWidth;
-    private int maximumWidth;
-    private int preferredWidth;
         
     @Resource
     private Icon moreTriangle;
     
-    public static enum LayoutStyle {
-        FIXED, FLOWED;
-    }
-    
     public FancyTabList(Iterable<? extends TabActionMap> actionMaps) {
         GuiUtils.assignResources(this);
         setOpaque(false);
+        setLayout(new MigLayout("insets 0, gap 0, filly, hidemode 2"));  
                 
-        minimumWidth = 30;
-        maximumWidth = 150;
-        preferredWidth = 150;
-        layoutStyle = LayoutStyle.FIXED;
         maxVisibleTabs = Integer.MAX_VALUE;
         
         props = new FancyTabProperties();
@@ -161,66 +148,6 @@ public class FancyTabList extends JXPanel {
     public List<FancyTab> getTabs() {
         return Collections.unmodifiableList(tabs);
     }
-    
-    /**
-     * Renders the tabs in a fixed layout, using the given minimum, preferred
-     * and maximum width.
-     */
-    private void layoutFixed() {
-        GroupLayout layout = new GroupLayout(this);
-        setLayout(layout);
-
-        layout.setAutoCreateGaps(false);
-        layout.setAutoCreateContainerGaps(false);
-        
-        Group horGroup = layout.createSequentialGroup();
-        layout.setHorizontalGroup(horGroup);
-        
-        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
-        layout.setVerticalGroup(layout.createSequentialGroup()
-                .addGroup(verGroup));
-        
-        for (FancyTab tab : getPendingVisibleTabs()) {
-            horGroup.addComponent(tab, minimumWidth, preferredWidth, maximumWidth);
-            verGroup.addComponent(tab, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
-        }
-        
-        if (tabs.size() > maxVisibleTabs) {
-            JComponent more = new FancyTabMoreButton(tabs, moreTriangle, props);
-            horGroup.addComponent(more);
-            verGroup.addComponent(more);
-        }
-    }
-    
-    /**
-     * Renders the tabs in a flowed layout, placing each tab next to each other,
-     * using the given insets around each tab.
-     */
-    private void layoutFlowed() {
-        GroupLayout layout = new GroupLayout(this);
-        setLayout(layout);
-
-        layout.setAutoCreateGaps(false);
-        layout.setAutoCreateContainerGaps(false);
-        
-        Group horGroup = layout.createSequentialGroup();
-        layout.setHorizontalGroup(horGroup);
-        
-        Group verGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
-        layout.setVerticalGroup(
-            layout.createSequentialGroup().addGroup(verGroup));
-        
-        for (FancyTab tab : getPendingVisibleTabs()) {
-            horGroup.addComponent(tab);
-            verGroup.addComponent(tab, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
-        }
-        
-        if (tabs.size() > maxVisibleTabs) {
-            JComponent more = new FancyTabMoreButton(tabs, moreTriangle, props);
-            horGroup.addComponent(more);
-            verGroup.addComponent(more);
-        }
-    }
 
     private void recreateTabs() {
         List<TabActionMap> actionMaps = new ArrayList<TabActionMap>(tabs.size());
@@ -269,28 +196,6 @@ public class FancyTabList extends JXPanel {
         }
         layoutTabs();
     }
-    
-    /**
-     * Renders the tabs in a fixed layout, using the given minimum, preferred
-     * and maximum width.
-     */
-    public void setFixedLayout(int min, int pref, int max) {
-        this.layoutStyle = LayoutStyle.FIXED;
-        this.minimumWidth = min;
-        this.maximumWidth = max;
-        this.preferredWidth = pref;
-        layoutTabs();
-    }
-    
-    /**
-     * Renders the tabs in a flowed layout, placing each tab next to each other,
-     * using the given insets around each tab.
-     */
-    public void setFlowedLayout() {
-        this.layoutStyle = LayoutStyle.FLOWED;
-        layoutTabs();
-    }
-    
     public void setMaxTotalTabs(int max) {
         this.maxTotalTabs = max;
     }
@@ -343,16 +248,16 @@ public class FancyTabList extends JXPanel {
 
     /** Removes all visible tabs and lays them out again. */
     private void layoutTabs() {
-        removeAll();
-        
-        switch(layoutStyle) {
-        case FIXED:
-            layoutFixed();
-            break;
-        case FLOWED:
-            layoutFlowed();
-            break;
+        removeAll();      
+        for (FancyTab tab : getPendingVisibleTabs()) {
+            add(tab, "growy");
+        }        
+        if (tabs.size() > maxVisibleTabs) {
+            JComponent more = new FancyTabMoreButton(tabs, moreTriangle, props);
+            add(more);
         }
+        revalidate();
+        repaint();
     }
     
     public void setCloseAllText(String closeAllText) {
@@ -414,7 +319,7 @@ public class FancyTabList extends JXPanel {
     /** Sets the font used to render the tab's text. */
     public void setTextFont(Font font) {
         for (FancyTab tab : tabs) {
-            tab.setFont(font);
+            tab.setTextFont(font);
         }
         props.setTextFont(font);
     }

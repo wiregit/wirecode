@@ -21,6 +21,9 @@ public class TabActionMap {
     /** A property in the main action that can indicate business. */
     public static final String BUSY_KEY = "busy.indicator";
     
+    /** A property in the main action that can indicate 'newness'. */
+    public static final String NEW_HINT = "new.indicator";
+    
     private final Action main;
     private final Action remove;
     private final Action moreText;

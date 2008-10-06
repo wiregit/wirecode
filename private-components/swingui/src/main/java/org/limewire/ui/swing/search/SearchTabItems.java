@@ -86,7 +86,6 @@ class SearchTabItems {
         }
 
         searchTab = new FancyTabList(searchActionMaps);
-        searchTab.setFlowedLayout();
         searchTab.setHighlightPainter(new RectanglePainter<JXButton>(
             2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
         
@@ -103,7 +102,6 @@ class SearchTabItems {
         }
 
         Font font = searchTab.getFont().deriveFont(12.0f);
-        font = font.deriveFont(Font.BOLD);
         searchTab.setTextFont(font);
         
         // Make sure that we make tabs visible as time goes by.
@@ -159,7 +157,7 @@ class SearchTabItems {
                         SearchCategory searchCategory = SearchCategory.forCategory(added.getCategory());
                         FancyTab tab = categoryToMap.remove(searchCategory);
                         if(tab != null && !tab.isVisible()) {
-                            tab.underline();
+//                            tab.underline();
                             tab.setVisible(true);
                         }
                     }

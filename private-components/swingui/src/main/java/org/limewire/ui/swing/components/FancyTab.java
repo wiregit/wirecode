@@ -20,18 +20,19 @@ import java.beans.PropertyChangeListener;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
-import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JToggleButton.ToggleButtonModel;
 import javax.swing.JToggleButton;
-import javax.swing.LayoutStyle;
 import javax.swing.SwingUtilities;
+import javax.swing.JToggleButton.ToggleButtonModel;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.ui.swing.search.resultpanel.SearchTabPopup;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -55,22 +56,22 @@ public class FancyTab extends JXPanel {
     private TabState currentState;
     
     @Resource
-    private Icon removeSelectedIcon;
-
+    private Icon removeActiveIcon;
+    
     @Resource
-    private Icon removeArmedIcon;
+    private Icon removeInactiveIcon;
 
     @Resource
     private Icon removeRolloverIcon;
     
-    //@Resource // Currently not picked up -- background is not shown.
-    private Icon removeBackgroundIcon = null;
+    private Icon removeArmedIcon;
+    private Icon removeEmptyIcon = new EmptyIcon(16, 16);
 
     public FancyTab(TabActionMap actionMap,
             ButtonGroup group,
             FancyTabProperties fancyTabProperties) {
-        
         GuiUtils.assignResources(this);
+        removeArmedIcon = new ShiftedIcon(1, 1, removeRolloverIcon);
         
         this.tabActions = actionMap;
         this.props = fancyTabProperties;
@@ -105,41 +106,15 @@ public class FancyTab extends JXPanel {
 
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
         
-        layoutComponents();
-    }
-    
-    private void layoutComponents() {
-        GroupLayout layout = new GroupLayout(this);
-        setLayout(layout);
-        
-        // TODO: mainButton text is getting truncated too soon; could fit more
-        layout.setHorizontalGroup(layout.createSequentialGroup()
-            .addGap(5)
-            .addComponent(busyLabel)
-            .addGap(5)
-            .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-            .addComponent(additionalText)
-            .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)    
-            .addComponent(removeButton)
-            .addGap(5)    
-        );
-        
-        layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.CENTER, true)
-            .addComponent(busyLabel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(mainButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(additionalText, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(removeButton, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            );
+        setLayout(new MigLayout("insets 0, gap 0, fill, hidemode 3"));        
+        add(busyLabel, "gapbefore 4, dock west, aligny center");
+        add(mainButton, "gapbefore 4, gapafter 4, aligny center, width min(pref,30):pref:max");
+        add(additionalText, "gap after 4, aligny center");
+        if(props.isRemovable()) {
+            add(removeButton, "gapafter 4, aligny center, dock east");
+        }
     }
 
-    @Override
-    public void setFont(Font font) {
-        super.setFont(font);
-        if (mainButton != null) mainButton.setFont(font);
-        if (additionalText != null) additionalText.setFont(font);
-    }
-    
     @Override
     public String toString() {
         return "FancyTab for: " + getTitle() + ", " + super.toString();
@@ -189,8 +164,6 @@ public class FancyTab extends JXPanel {
                     if (evt.getPropertyName().equals(Action.NAME)) {
                         if (evt.getNewValue() != null) {
                             String newValue = (String) evt.getNewValue();
-                            //System.out.println("FancyTab: main = " + mainButton.getText());
-                            //System.out.println("FancyTab: newValue = " + newValue);
                             label.setText("(" + newValue + ")");
                             label.setVisible(true);
                         } else {
@@ -210,8 +183,8 @@ public class FancyTab extends JXPanel {
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setRolloverEnabled(true);
-        button.setIcon(removeBackgroundIcon);
-        button.setSelectedIcon(removeSelectedIcon);
+        button.setIcon(removeEmptyIcon);
+        button.setSelectedIcon(removeActiveIcon);
         button.setRolloverIcon(removeRolloverIcon);
         button.setPressedIcon(removeArmedIcon);
         button.setMargin(new Insets(0, 0, 0, 0));
@@ -232,7 +205,7 @@ public class FancyTab extends JXPanel {
     }
     
     AbstractButton createMainButton() {
-        AbstractButton button = new JToggleButton();
+        final AbstractButton button = new JToggleButton();
         button.setModel(new NoToggleModel());
         button.setAction(tabActions.getMainAction());
         button.setActionCommand(TabActionMap.SELECT_COMMAND);
@@ -241,13 +214,27 @@ public class FancyTab extends JXPanel {
         button.setContentAreaFilled(false);
         button.setMargin(new Insets(0, 0, 0, 0));
         button.setToolTipText(getTitle());
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setRolloverEnabled(true);
+        button.setOpaque(false);
 
         if (props.getTextFont() != null) {
             button.setFont(props.getTextFont());
-        } else {
-            FontUtils.changeStyle(button, Font.BOLD);
-            FontUtils.changeSize(button, 2);
         }
+        
+        tabActions.getMainAction().addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals(TabActionMap.NEW_HINT)) {
+                    if(Boolean.TRUE.equals(evt.getNewValue())) {
+                        FontUtils.bold(button);
+                    } else {
+                        FontUtils.plain(button);
+                    }
+                }
+            }
+        });
         
         return button;
     }
@@ -301,28 +288,43 @@ public class FancyTab extends JXPanel {
         group.remove(mainButton);
     }
     
+    public void setTextFont(Font font) {
+        if (mainButton != null) {
+            mainButton.setFont(font);
+        }
+        
+        if (additionalText != null) {
+            additionalText.setFont(font);
+        }
+    }
+
+//  public void underline() {
+//      FontUtils.underline(mainButton);
+//      FontUtils.underline(additionalText);
+//  }
+    
     private void changeState(TabState tabState) {
         if (currentState != tabState) {
             this.currentState = tabState;
             switch(tabState) {
             case SELECTED:
-                FontUtils.removeUnderline(mainButton);
-                FontUtils.removeUnderline(additionalText);
+//                FontUtils.removeUnderline(mainButton);
+//                FontUtils.removeUnderline(additionalText);
                 mainButton.setForeground(props.getSelectionColor());
                 additionalText.setForeground(props.getSelectionColor());
                 this.setBackgroundPainter(props.getSelectedPainter());
-                removeButton.setIcon(removeSelectedIcon);
+                removeButton.setIcon(removeActiveIcon);
                 break;
             case BACKGROUND:
-                underline();
+//                underline();
                 mainButton.setForeground(props.getNormalColor());
                 additionalText.setForeground(props.getNormalColor());
                 this.setBackgroundPainter(props.getNormalPainter());
-                removeButton.setIcon(removeBackgroundIcon);
+                removeButton.setIcon(removeEmptyIcon);
                 break;
             case ROLLOVER:
                 setBackgroundPainter(props.getHighlightPainter());
-                removeButton.setIcon(removeSelectedIcon);
+                removeButton.setIcon(removeInactiveIcon);
                 break;
             }
         }
@@ -418,10 +420,5 @@ public class FancyTab extends JXPanel {
                                     modifiers));
             }
         }
-    }
-
-    public void underline() {
-        FontUtils.underline(mainButton);
-        FontUtils.underline(additionalText);
     }
 }

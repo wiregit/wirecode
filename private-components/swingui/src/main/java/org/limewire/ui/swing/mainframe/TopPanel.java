@@ -3,9 +3,6 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -23,6 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
@@ -135,52 +134,32 @@ class TopPanel extends JXPanel implements SearchNavigator {
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
         homeButton.setName("TopPanel.homeButton");
         homeButton.setText(I18n.tr("Home"));
+        homeButton.setIconTextGap(1);
         JButton storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
         storeButton.setName("TopPanel.storeButton");
         storeButton.setText(I18n.tr("Store"));
+        storeButton.setIconTextGap(1);
         
-        setLayout(new GridBagLayout());
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.weighty = 1;
-                
-        gbc.insets = new Insets(5, 10, 2, 0);
-        gbc.fill = GridBagConstraints.NONE;
-        add(homeButton, gbc);
-        
-        gbc.insets = new Insets(5, 10, 2, 0);
-        gbc.fill = GridBagConstraints.NONE;
-        add(storeButton, gbc);
-        
-        gbc.insets = new Insets(5, 50, 0, 5);
-        gbc.fill = GridBagConstraints.NONE;
-        add(search, gbc);
-        
-        gbc.insets = new Insets(5, 0, 0, 0);
-                
-        add(new SearchBar(combo, textField));
-        
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.weightx = 1;
-        gbc.insets = new Insets(5, 0, 0, 0);
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-
         searchList = new FancyTabList();
+        searchList.setName("TopPanel.SearchList");
+        searchList.setMaxVisibleTabs(3);
+        searchList.setMaxTotalTabs(10);
         searchList.setCloseAllText(I18n.tr("Close all searches"));
         searchList.setCloseOneText(I18n.tr("Close search"));
         searchList.setCloseOtherText(I18n.tr("Close other searches"));
-        searchList.setFixedLayout(50, 120, 120);
         searchList.setRemovable(true);
         searchList.setPreferredSize(
-            new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+                new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         searchList.setSelectionPainter(new RectanglePainter<JXButton>(
-            2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
-        searchList.setHighlightPainter(new RectanglePainter<JXButton>(
-            2, 2, 0, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY));
-        searchList.setMaxVisibleTabs(3);
-        searchList.setMaxTotalTabs(10);
-        searchList.setName("TopPanel.SearchList");
-        add(searchList, gbc);
+                2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
+        searchList.setHighlightPainter(null);
+        
+        setLayout(new MigLayout("gap 0, insets 0, fill", "", "[center]"));        
+        add(homeButton);
+        add(storeButton);
+        add(search, "gapleft 50");
+        add(new SearchBar(combo, textField), "gapleft 5");
+        add(searchList, "gapleft 4, gaptop 6, grow");
     };
 
     @Override
@@ -227,10 +206,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
         return new SearchNavItem() {
             @Override
             public void sourceCountUpdated(int newSourceCount) {
-                moreTextAction.putValue(Action.NAME,
-                    String.valueOf(newSourceCount));
+                if(!item.isSelected()) {
+                    action.putValue(TabActionMap.NEW_HINT, true);
+                }
 
-                if (newSourceCount >= 100) {
+                if (newSourceCount >= 50) {
                     action.killBusy();
                 }
             }
@@ -282,6 +262,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
                         if (evt.getNewValue().equals(Boolean.TRUE)) {
                             SearchAction.this.item.select();
+                            putValue(TabActionMap.NEW_HINT, null);
                         }
                     }
                 }
@@ -316,7 +297,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    busyTimer = new Timer(30000, new ActionListener() {
+                    busyTimer = new Timer(15000, new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);

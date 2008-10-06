@@ -181,7 +181,7 @@ public class SearchResultsPanel extends JPanel {
                 "[][grow]");
         
         setLayout(layout);
-        add(searchTab.getSearchTab(), "push, growy");
+        add(searchTab.getSearchTab(), "growy");
         add(sortAndFilterPanel, "wrap, align right");
         add(scrollPane, "span, grow");
         

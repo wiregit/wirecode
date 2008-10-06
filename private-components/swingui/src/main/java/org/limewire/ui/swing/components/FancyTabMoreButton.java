@@ -13,7 +13,6 @@ import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -66,32 +65,6 @@ public class FancyTabMoreButton extends JXButton {
                 menu.setVisible(false);
             }
         });
-
-        // TODO: RMV This was an attempt to implement part of item 2.7.a
-        // TODO: RMV in the Search Results spec.
-        // TODO: RMV It says that a popup menu should be displayed
-        // TODO: RMV if the user right-clicks an item in the "more" menu.
-        // TODO: RMV That's difficult to implement because when the user
-        // TODO: RMV left or right clicks on a JPopupMenu item,
-        // TODO: RMV the menu is dismissed.
-        /*
-        selectButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                // Find the corresponding FancyTab.
-                String title = selectButton.getText();
-                for (FancyTab tab : tabs) {
-                    String tabTitle = tab.getTitle();
-                    if (tabTitle.equals(title)) {
-                        // Display the popup menu over the tab.
-                        SearchTabPopup menu = new SearchTabPopup(tab);
-                        menu.show(e);
-                        break;
-                    }
-                }
-            }
-        });
-        */
         
         JButton removeButton = tab.createRemoveButton();
         if(props.isRemovable()) {
@@ -104,7 +77,6 @@ public class FancyTabMoreButton extends JXButton {
             });
         }
         
-        JLabel moreText = tab.createAdditionalText();
         JXBusyLabel busyLabel = tab.createBusyLabel();
         
         GroupLayout layout = new GroupLayout(jp);
@@ -121,13 +93,11 @@ public class FancyTabMoreButton extends JXButton {
         horGroup.addGap(5)
                 .addComponent(busyLabel)
                 .addComponent(selectButton, 0, 120, 120)
-                .addComponent(moreText)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(removeButton, 20, 20, 20);
         
         verGroup.addComponent(busyLabel)
                 .addComponent(selectButton)
-                .addComponent(moreText)
                 .addComponent(removeButton, 20, 20, 20);
         
         layout.setHonorsVisibility(busyLabel, false);
