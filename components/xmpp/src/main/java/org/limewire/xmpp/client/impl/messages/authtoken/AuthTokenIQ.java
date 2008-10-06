@@ -47,8 +47,6 @@ public class AuthTokenIQ extends IQ {
                 authTokenElement += " value=\"" + new String(Base64.encodeBase64(authToken), "UTF-8") + "\"/>";
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
         authTokenElement += "</auth-token>";
