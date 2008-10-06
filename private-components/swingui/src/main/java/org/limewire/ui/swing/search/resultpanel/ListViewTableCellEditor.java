@@ -324,7 +324,11 @@ implements TableCellEditor, TableCellRenderer {
         fromWidget.setPeople(people);
     }
 
-    private void populateHeading(VisualSearchResult vsr) {
+    /**
+     * Returns a value to indicate whether the heading was decorated to highlight
+     * parts of the content that match search terms
+     */
+    private boolean populateHeading(VisualSearchResult vsr) {
         String name = getProperty(vsr, PropertyKey.NAME);
         String heading;
         
@@ -343,6 +347,7 @@ implements TableCellEditor, TableCellRenderer {
         String highlightMatches = highlightMatches(heading);
         LOG.debugf("Heading: {0} highlightedMatches: {1}", heading, highlightMatches);
         headingLabel.setText(highlightMatches);
+        return isDifferentLength(heading, highlightMatches);
     }
 
     private String getProperty(VisualSearchResult vsr, PropertyKey key) {
@@ -350,9 +355,9 @@ implements TableCellEditor, TableCellRenderer {
         return property == null ? "?" : property.toString();
     }
 
-    private void populateOther(VisualSearchResult vsr) {
+    private void populateOther(VisualSearchResult vsr, boolean shouldHidePropertyMatches) {
         PropertyMatch pm = getPropertyMatch(vsr);
-        if (pm == null) {
+        if (pm == null || shouldHidePropertyMatches) {
             otherLabel.setText("");
         } else {
             String html = highlightMatches(pm.value);
@@ -374,9 +379,9 @@ implements TableCellEditor, TableCellRenderer {
         
         actionButtonPanel.setDownloadingDisplay(vsr);
 
-        populateHeading(vsr);
-        populateSubheading(vsr);
-        populateOther(vsr);
+        boolean headingDecorated = populateHeading(vsr);
+        boolean subheadingDecorated = populateSubheading(vsr);
+        populateOther(vsr, headingDecorated || subheadingDecorated);
         populateFrom(vsr);
 
         if (getSimilarResultsCount() > 0) {
@@ -384,7 +389,11 @@ implements TableCellEditor, TableCellRenderer {
         }
     }
 
-    private void populateSubheading(VisualSearchResult vsr) {
+    /**
+     * Returns a value to indicate whether the subheading was decorated to highlight
+     * parts of the content that match search terms
+     */
+    private boolean populateSubheading(VisualSearchResult vsr) {
         String subheading;
 
         switch(category) {
@@ -414,6 +423,11 @@ implements TableCellEditor, TableCellRenderer {
         String highlightMatches = highlightMatches(subheading);
         LOG.debugf("Subheading: {0} highlightedMatches: {1}", subheading, highlightMatches);
         subheadingLabel.setText(highlightMatches);
+        return isDifferentLength(subheading, highlightMatches);
+    }
+
+    private boolean isDifferentLength(String str1, String str2) {
+        return str1 != null && str2 != null && str1.length() != str2.length();
     }
 
     private void setBackground(boolean isSelected) {
