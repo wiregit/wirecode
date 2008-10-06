@@ -14,6 +14,14 @@ class SearchHighlightUtil {
     }
 
     public static String highlight(String search, String content) {
+        if (content == null) {
+            return "";
+        }
+        
+        if (search == null) {
+            return content;
+        }
+        
         StringBuilder bldr = new StringBuilder();
         int index = 0;
         Matcher matcher = Pattern.compile("\\b(" + search.replace(" ", "|") + ")", Pattern.CASE_INSENSITIVE).matcher(content);

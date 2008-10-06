@@ -18,8 +18,9 @@ import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -57,9 +58,22 @@ public class ListViewTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
+    private static final String HTML = "<html>";
+    private static final String GRAY_TEXT_COLOR_DIV = "<div color=\"rgb(166,166,166)\">";
+    private static final String CLOSING_HTML_TAG = "</html>";
+    private static final String CLOSING_DIV_HTML = "</div></html>";
     private static final int SIMILARITY_INDENTATION = 50;
     private final Log LOG = LogFactory.getLog(getClass());
     private final Color SELECTED_COLOR = Color.GREEN;
+    private final PropertyKeyComparator AUDIO_COMPARATOR = 
+        new PropertyKeyComparator(PropertyKey.GENRE, PropertyKey.BITRATE, PropertyKey.TRACK_NUMBER, PropertyKey.SAMPLE_RATE);
+    private final PropertyKeyComparator VIDEO_COMPARATOR = 
+        new PropertyKeyComparator(PropertyKey.YEAR, PropertyKey.RATING, PropertyKey.COMMENTS, PropertyKey.HEIGHT, 
+                                  PropertyKey.WIDTH, PropertyKey.BITRATE);
+    private final PropertyKeyComparator DOCUMENTS_COMPARATOR = 
+        new PropertyKeyComparator(PropertyKey.DATE_CREATED, PropertyKey.AUTHOR);
+    private final PropertyKeyComparator PROGRAMS_COMPARATOR = 
+        new PropertyKeyComparator(PropertyKey.PLATFORM, PropertyKey.COMPANY);
 
     public static final int HEIGHT = 60;
     public static final int LEFT_WIDTH = 440;
@@ -118,29 +132,58 @@ implements TableCellEditor, TableCellRenderer {
         if(searchText == null)
             return null;
         
-        // If any data displayed in the headingLabel or subheadingLabel
-        // matches the search or filter criteria,
-        // then the otherLabel isn't needed.
-        // In this case, return an empty string.
-        if (headingLabel.getText().contains(searchText))
-            return null;
-        if (subheadingLabel.getText().contains(searchText))
-            return null;
-
-        // Look for metadata that matches the search criteria.
-        Map<PropertyKey, Object> props = vsr.getProperties();
-        for (PropertyKey key : props.keySet()) {
+        ArrayList<PropertyKey> properties = new ArrayList<PropertyKey>(vsr.getProperties().keySet());
+        Collections.sort(properties, getComparator());
+        for (PropertyKey key : properties) {
             String value = vsr.getPropertyString(key);
 
-            if (value != null && value.toLowerCase().contains(searchText.toLowerCase())) {
+            String propertyMatch = highlightMatches(value);
+            if (value != null && isDifferentLength(value, propertyMatch)) {
                 String betterKey = key.toString().toLowerCase();
                 betterKey = betterKey.replace('_', ' ');
-                return new PropertyMatch(betterKey, value);
+                return new PropertyMatch(betterKey, propertyMatch);
             }
         }
 
         // No match found.
         return null;
+    }
+
+    private Comparator<PropertyKey> getComparator() {
+        switch (category) {
+        case AUDIO:
+            return AUDIO_COMPARATOR;
+        case VIDEO:
+            return VIDEO_COMPARATOR;
+        case DOCUMENT:
+            return DOCUMENTS_COMPARATOR;
+        default:
+            return PROGRAMS_COMPARATOR;
+        }
+    }
+    
+    private static class PropertyKeyComparator implements Comparator<PropertyKey> {
+        private final PropertyKey[] keyOrder;
+
+        public PropertyKeyComparator(PropertyKey... keys) {
+            this.keyOrder = keys;
+        }
+
+        @Override
+        public int compare(PropertyKey o1, PropertyKey o2) {
+            if (o1 == o2) {
+                return 0;
+            }
+            
+            for(PropertyKey key : keyOrder) {
+                if (o1 == key) {
+                    return -1;
+                } else if (o2 == key) {
+                    return 1;
+                }
+            }
+            return 0;
+        }
     }
 
     public Object getCellEditorValue() {
@@ -356,14 +399,19 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populateOther(VisualSearchResult vsr, boolean shouldHidePropertyMatches) {
+        otherLabel.setText("");
+        if (shouldHidePropertyMatches) { 
+            return;
+        }
+        
         PropertyMatch pm = getPropertyMatch(vsr);
-        if (pm == null || shouldHidePropertyMatches) {
-            otherLabel.setText("");
-        } else {
-            String html = highlightMatches(pm.value);
-            String tag = "<html>";
-            // Insert the key, a colon and a space after the html start tag.
-            html = tag + pm.key + ": " + html.substring(tag.length());
+        
+        if (pm != null) {
+            String html = pm.highlightedValue;
+            String tag = HTML;
+            // Insert the following: a div to color the text grey, the key, a colon and a space after the html start tag, then the closing tags.
+            html = tag + GRAY_TEXT_COLOR_DIV + pm.key + ": " + 
+                    html.substring(tag.length(), html.length() - CLOSING_HTML_TAG.length()) + CLOSING_DIV_HTML;
             otherLabel.setText(html);
         }
     }
@@ -451,12 +499,12 @@ implements TableCellEditor, TableCellRenderer {
         return hyperlinkText(trn("Show 1 similar file", "Show {0} similar files", similarResultsCount));
     }
 
-    static class PropertyMatch {
-        String key;
-        String value;
-        PropertyMatch(String key, String value) {
+    private static class PropertyMatch {
+        private final String key;
+        private final String highlightedValue;
+        PropertyMatch(String key, String highlightedProperty) {
             this.key = key;
-            this.value = value;
+            this.highlightedValue = highlightedProperty;
         }
     }
 }

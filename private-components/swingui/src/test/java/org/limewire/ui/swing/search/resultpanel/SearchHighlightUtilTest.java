@@ -9,6 +9,14 @@ public class SearchHighlightUtilTest extends TestCase {
         assertEquals("heynow", highlight("foo bar", "heynow"));
     }
     
+    public void testNullInputString() {
+        assertEquals("", highlight("foo", null));
+    }
+    
+    public void testNullSearchString() {
+        assertEquals("howdy", highlight(null, "howdy"));
+    }
+    
     public void testMatchOneWordSearch() {
         assertEquals("<html>i like <b>foo</b>d</html>", highlight("foo", "i like food"));
     }
