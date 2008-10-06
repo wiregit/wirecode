@@ -21,7 +21,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 
@@ -61,7 +60,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class LibraryNavigator extends JPanel {
+public class LibraryNavigator extends JXPanel {
 
     private final SectionHeading titleLabel;
     private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
