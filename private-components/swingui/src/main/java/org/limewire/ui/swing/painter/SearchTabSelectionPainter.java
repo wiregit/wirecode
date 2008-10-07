@@ -2,39 +2,39 @@ package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Shape;
-import java.awt.geom.Area;
 
 import javax.swing.JComponent;
 
+import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.jdesktop.swingx.painter.AbstractAreaPainter.Style;
 
-public class SearchTabSelectionPainter extends RectanglePainter<JComponent> {
-
-    // TODO: Use resources.
+public class SearchTabSelectionPainter extends CompoundPainter<JComponent> {
+    
+    
     public SearchTabSelectionPainter() {
-        setInsets(new Insets(0, 0, 0, 0));
-        setFillVertical(true);
-        setFillHorizontal(true);
-        setRoundWidth(-10);
-        setRoundHeight(-10);
-        setRounded(true);
-        setBorderWidth(0f);
-        setFillPaint(new GradientPaint(0, 0, new Color(0f, 0f, 0f, 0.32f), 0, 1, Color.decode("#787878")));
-        setBorderPaint(new GradientPaint(0, 0, new Color(0f, 0f, 0f, 0.32f), 0, 1, Color.decode("#787878")));
-        setPaintStretched(true);
-    }
-    
-    @Override
-    public Shape provideShape(Graphics2D g, JComponent comp, int width, int height) {
-        Shape shape = super.provideShape(g, comp, width, height);
-        Area area = new Area(shape);
+        RectanglePainter background = new RectanglePainter();
+        background.setStyle(Style.FILLED);
+        background.setFillPaint(Color.decode("#787878"));
+        background.setRoundHeight(10);
+        background.setRoundWidth(10);
+        background.setFillHorizontal(true);
+        background.setFillVertical(true);
+        background.setRounded(true);
+        background.setPaintStretched(true);
         
-        // TODO: Add the bottom area that curves outwards.
-        return area;
+        RectanglePainter gradient = new RectanglePainter();
+        gradient.setStyle(Style.FILLED);
+        gradient.setFillPaint(new GradientPaint(0, 0, new Color(0f, 0f, 0f, 0.32f), 0, 1, Color.decode("#787878")));
+        gradient.setRoundHeight(10);
+        gradient.setRoundWidth(10);
+        gradient.setFillHorizontal(true);
+        gradient.setFillVertical(true);
+        gradient.setRounded(true);
+        gradient.setPaintStretched(true);
+        
+        setPainters(background,
+                    gradient);
+
     }
-    
-    
 }
