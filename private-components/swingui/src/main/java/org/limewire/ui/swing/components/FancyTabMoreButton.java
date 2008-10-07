@@ -22,13 +22,16 @@ import javax.swing.GroupLayout.SequentialGroup;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.painter.MoreButtonPainter;
 import org.limewire.ui.swing.util.I18n;
 
 public class FancyTabMoreButton extends JXButton {
     
+//    @Resource private int width;
+//    @Resource private int height;
+    
     private final FancyTabProperties props;
     private JPopupMenu menu = new JPopupMenu(I18n.tr("more"));
-//    private List<FancyTab> tabs;
     
     public FancyTabMoreButton(List<FancyTab> tabs,
             Icon triangle,
@@ -36,16 +39,19 @@ public class FancyTabMoreButton extends JXButton {
 
         super(I18n.tr("more"), triangle);
 
-//        this.tabs = tabs;
         this.props = props;
         
+//        setMinimumSize(new Dimension(70, 21));
+//        setMaximumSize(new Dimension(68, 21));
+//        setPreferredSize(new Dimension(68, 21));
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
         setHorizontalTextPosition(SwingConstants.LEFT);        
         setVerticalTextPosition(SwingConstants.CENTER);
-        setBackgroundPainter(props.getNormalPainter());
-        MoreListener listener = new MoreListener(tabs, this);
+        setHorizontalAlignment(SwingConstants.RIGHT);
+        setBackgroundPainter(new MoreButtonPainter());
+        MoreListener listener = new MoreListener(tabs);
         this.addMouseListener(listener);
         this.addActionListener(listener);
     }
@@ -143,12 +149,10 @@ public class FancyTabMoreButton extends JXButton {
     }
     
     private class MoreListener implements MouseListener, ActionListener {
-        private final JXButton button;
         private final List<FancyTab> tabs;
         
-        public MoreListener(List<FancyTab> tabs, JXButton button) {
+        public MoreListener(List<FancyTab> tabs) {
             this.tabs = tabs;
-            this.button = button;
         }
         
         @Override
@@ -166,13 +170,11 @@ public class FancyTabMoreButton extends JXButton {
         @Override
         public void mouseEntered(MouseEvent e) {
             getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            button.setBackgroundPainter(props.getHighlightPainter());
         }
         
         @Override
         public void mouseExited(MouseEvent e) {
             getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
-            button.setBackgroundPainter(props.getNormalPainter());
         }
         
         @Override public void mouseClicked(MouseEvent e) {}

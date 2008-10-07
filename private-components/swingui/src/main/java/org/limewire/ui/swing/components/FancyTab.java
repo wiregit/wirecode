@@ -111,7 +111,7 @@ public class FancyTab extends JXPanel {
         
         setLayout(new MigLayout("insets 0, filly, gapy 0, hidemode 1"));        
         add(busyLabel, "gapbefore 4, alignx left, aligny bottom");
-        add(mainButton, "aligny bottom, width min(pref,30):pref:max, split 1");
+        add(mainButton, "aligny bottom, width min(pref,60):pref:max, split 1");
         add(additionalText, "aligny bottom");
         add(removeButton, "gapafter 4, aligny bottom, alignx right, wrap");
         // TODO: this edges a bit over the right if additionalText is invisible

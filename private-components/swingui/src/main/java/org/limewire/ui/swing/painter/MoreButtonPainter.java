@@ -6,10 +6,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.util.GuiUtils;
 
-/**
- * Background painter for a gradient button. 
- */
-public class ButtonPainter extends AbstractButtonPainter {
+/** Painter for the 'more' button. */
+public class MoreButtonPainter extends AbstractButtonPainter {
     
     @Resource
     private int arcWidth;
@@ -42,7 +40,21 @@ public class ButtonPainter extends AbstractButtonPainter {
     @Resource
     private Color highlightBevelBottomPressed;
     
-    public ButtonPainter() {
+    // Hover state
+    @Resource
+    private Color borderGradientTopHover;
+    @Resource
+    private Color borderGradientBottomHover;
+    @Resource
+    private Color backgroundGradientTopHover;
+    @Resource
+    private Color backgroundGradientBottomHover;
+    @Resource
+    private Color highlightBevelHover;
+    @Resource
+    private Color highlightBevelBottomHover;
+    
+    public MoreButtonPainter() {
         GuiUtils.assignResources(this);
     }
     
@@ -58,6 +70,13 @@ public class ButtonPainter extends AbstractButtonPainter {
             colors.bevelBottom = highlightBevelBottomPressed;
             colors.borderTop = borderGradientTopPressed;
             colors.borderBottom = borderGradientBottomPressed;
+        } else if(button.getModel().isRollover()) {
+            colors.backgroundTop = backgroundGradientTopHover;
+            colors.backgroundBottom = backgroundGradientBottomHover;
+            colors.bevelTop = highlightBevelHover;
+            colors.bevelBottom = highlightBevelBottomHover;
+            colors.borderTop = borderGradientTopHover;
+            colors.borderBottom = borderGradientBottomHover;            
         } else {
             colors.backgroundTop = backgroundGradientTop;
             colors.backgroundBottom = backgroundGradientBottom;
