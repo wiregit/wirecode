@@ -33,7 +33,7 @@ class NavigatorImpl implements Navigator {
     @Override
     public NavItem getNavItem(NavCategory category, String id) {
         for(NavItemImpl item : navItems) {
-            LOG.debugf("Returning NavItem for id {0}", id);
+            LOG.debugf("Returning NavItem for id {0} navItem{1}", id, item);
             if(category.equals(item.category) && id.equals(item.getId())) {
                 return item;
             }
