@@ -95,7 +95,6 @@ implements TableCellEditor, TableCellRenderer {
     private JLabel otherLabel = new JLabel();
     private JXPanel actionPanel = new JXPanel();
     private JXPanel thePanel;
-    private Category category;
 
     private VisualSearchResult vsr;
     private JComponent similarResultIndentation;
@@ -150,7 +149,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private Comparator<PropertyKey> getComparator() {
-        switch (category) {
+        switch (getCategory()) {
         case AUDIO:
             return AUDIO_COMPARATOR;
         case VIDEO:
@@ -195,7 +194,6 @@ implements TableCellEditor, TableCellRenderer {
 
         vsr = (VisualSearchResult) value;
         LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0} urn: {1}", row, vsr.getCoreSearchResults().get(0).getUrn());
-        category = vsr.getCategory();
 
         similarButton.setVisible(getSimilarResultsCount() > 0);
 
@@ -375,7 +373,7 @@ implements TableCellEditor, TableCellRenderer {
         String name = getProperty(vsr, PropertyKey.NAME);
         String heading;
         
-        switch(category) {
+        switch(getCategory()) {
         case AUDIO:
             heading = getProperty(vsr, PropertyKey.ARTIST_NAME) + " - " + name;
             break;
@@ -444,7 +442,7 @@ implements TableCellEditor, TableCellRenderer {
     private boolean populateSubheading(VisualSearchResult vsr) {
         String subheading;
 
-        switch(category) {
+        switch(getCategory()) {
         case AUDIO:
             Object albumTitle = vsr.getProperty(PropertyKey.ALBUM_TITLE);
             String prefix = albumTitle == null ? "" : albumTitle + " - ";
@@ -497,6 +495,10 @@ implements TableCellEditor, TableCellRenderer {
             return hyperlinkText(trn("Hide 1 similar file", "Hide {0} similar files", similarResultsCount));
         }
         return hyperlinkText(trn("Show 1 similar file", "Show {0} similar files", similarResultsCount));
+    }
+
+    private Category getCategory() {
+        return vsr.getCategory();
     }
 
     private static class PropertyMatch {
