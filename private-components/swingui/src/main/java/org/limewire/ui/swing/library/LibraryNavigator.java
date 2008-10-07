@@ -30,16 +30,15 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
+import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FriendLibraryEvent;
+import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.components.ShiftedIcon;
 import org.limewire.ui.swing.lists.CategoryFilter;
@@ -82,7 +81,7 @@ public class LibraryNavigator extends JXPanel {
 
     @Inject
     LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
-            ListenerSupport<FriendLibraryEvent> friendLibrarySupport,
+            RemoteLibraryManager remoteLibraryManager,
             MyLibraryFactory myLibraryFactory, 
             final FriendLibraryFactory friendLibraryFactory) {
         GuiUtils.assignResources(this);
@@ -97,23 +96,22 @@ public class LibraryNavigator extends JXPanel {
        
         addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel())));
 
-        friendLibrarySupport.addListener(new EventListener<FriendLibraryEvent>() {
+        new AbstractListEventListener<FriendLibrary>() {
             @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendLibraryEvent event) {
-                switch (event.getType()) {
-                case LIBRARY_ADDED:
-                    Friend friend = event.getFriendLibrary().getFriend();
-                    addNavPanel(new NavPanel(friend,
-                                createFriendCategories(navigator, friend,
-                                        friendLibraryFactory, event.getFriendLibrary().getSwingModel())));
-                    break;
-                case LIBRARY_REMOVED:
-                    removeNavPanelForFriend(event.getFriendLibrary().getFriend());
-                    break;
-                }
+            protected void itemAdded(FriendLibrary item) {
+                Friend friend = item.getFriend();
+                addNavPanel(new NavPanel(friend,
+                            createFriendCategories(navigator, friend,
+                                    friendLibraryFactory, item.getSwingModel())));
             }
-        });
+            @Override
+            protected void itemRemoved(FriendLibrary item) {
+                removeNavPanelForFriend(item.getFriend());
+            }
+            @Override
+            protected void itemUpdated(FriendLibrary item) {
+            }
+        }.install(remoteLibraryManager.getSwingFriendLibraryList());
         
         navigator.addNavigationListener(new NavigationListener() {
             @Override

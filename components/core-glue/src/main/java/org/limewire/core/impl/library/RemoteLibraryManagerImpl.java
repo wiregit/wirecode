@@ -2,18 +2,13 @@ package org.limewire.core.impl.library;
 
 import java.awt.EventQueue;
 import java.util.Comparator;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendLibrary;
-import org.limewire.core.api.library.FriendLibraryEvent;
 import org.limewire.core.api.library.PresenceLibrary;
-import org.limewire.core.api.library.PresenceLibraryEvent;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.xmpp.api.client.LimePresence;
@@ -22,22 +17,28 @@ import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
+import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.impl.ReadOnlyList;
+import ca.odell.glazedlists.impl.ThreadSafeList;
+import ca.odell.glazedlists.util.concurrent.Lock;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class RemoteLibraryManagerImpl implements RemoteLibraryManager, RegisteringEventListener<RosterEvent> {
-    private final ConcurrentHashMap<String, FriendLibraryImpl> friendLibraryFileLists;
-    private final EventListener<FriendLibraryEvent> friendLibraryEventListener;
+    private final EventList<FriendLibrary> allFriendLibraries;
+    private final EventList<FriendLibrary> readOnlyFriendLibraries;
+    private volatile EventList<FriendLibrary> swingFriendLibraries;
 
     @Inject
-    public RemoteLibraryManagerImpl(EventListener<FriendLibraryEvent> friendLibraryEventListener) {
-        this.friendLibraryFileLists = new ConcurrentHashMap<String, FriendLibraryImpl>();
-        this.friendLibraryEventListener = friendLibraryEventListener;
+    public RemoteLibraryManagerImpl() {
+        allFriendLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>());
+        readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries);
     }
 
     @Inject
@@ -50,6 +51,20 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
             userAdded(event.getSource());
         }
     }
+    
+    @Override
+    public EventList<FriendLibrary> getFriendLibraryList() {
+        return readOnlyFriendLibraries;
+    }
+    
+    @Override
+    public EventList<FriendLibrary> getSwingFriendLibraryList() {
+        assert EventQueue.isDispatchThread();
+        if(swingFriendLibraries == null) {
+            swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries);            
+        }
+        return swingFriendLibraries;
+    }
 
     private void userAdded(final User user) {
         user.addPresenceListener(new PresenceListener() {            
@@ -61,53 +76,82 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
                     }
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                     if(presence instanceof LimePresence) {
-                        FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(user);
-                        friendLibrary.removePresenceLibrary((LimePresence)presence);
-                        // TODO race condition
-                        if(friendLibrary.size() == 0) {
-                            removeFriendLibrary(friendLibrary.getFriend());
+                        FriendLibraryImpl friendLibrary = getFriendLibrary(user);
+                        if(friendLibrary != null) {
+                            friendLibrary.removePresenceLibrary((LimePresence)presence);
+                            // TODO race condition
+                            if(friendLibrary.size() == 0) {
+                                removeFriendLibrary(friendLibrary);
+                            }
                         }
                     }
                 }
             }
         });
     }
+    
+    private FriendLibraryImpl findFriendLibrary(Friend friend) {
+        for(FriendLibrary library : allFriendLibraries) {
+            if(library.getFriend().getId().equals(friend.getId())) {
+                return (FriendLibraryImpl)library;
+            }
+        }
+        return null;
+    }
 
     private FriendLibraryImpl getOrCreateFriendLibrary(Friend friend) {
-        FriendLibraryImpl newList = new FriendLibraryImpl(friend);
-        FriendLibraryImpl existing = friendLibraryFileLists.putIfAbsent(friend.getId(), newList);
-
-        if(existing == null) {
-            newList.commit();
-            friendLibraryEventListener.handleEvent(new FriendLibraryEvent(FriendLibraryEvent.Type.LIBRARY_ADDED, newList));
-            return newList;
-        } else {
-            newList.dispose();
-            return existing;
+        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
+        lock.lock();
+        try {
+            FriendLibraryImpl library = findFriendLibrary(friend);
+            if(library == null) {
+                library = new FriendLibraryImpl(friend);
+                library.commit();
+                allFriendLibraries.add(library);
+            }
+            return library;
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public boolean hasFriendLibrary(Friend friend) {
-        return friendLibraryFileLists.get(friend.getId()) != null;
+        return getFriendLibrary(friend) != null;
     }
-
-    private void removeFriendLibrary(Friend friend) {
-        FriendLibraryImpl list = friendLibraryFileLists.remove(friend.getId());
-        if(list != null) {
-            friendLibraryEventListener.handleEvent(new FriendLibraryEvent(FriendLibraryEvent.Type.LIBRARY_REMOVED, list));
-            list.dispose();
+    
+    private FriendLibraryImpl getFriendLibrary(Friend friend) {
+        Lock lock = allFriendLibraries.getReadWriteLock().readLock();
+        lock.lock();
+        try {
+            return findFriendLibrary(friend);
+        } finally {
+            lock.unlock();
         }
     }
 
-    private class FriendLibraryImpl implements FriendLibrary {
+    private void removeFriendLibrary(FriendLibraryImpl friendLibrary) {
+        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
+        lock.lock();
+        try {
+            allFriendLibraries.remove(friendLibrary);
+            friendLibrary.dispose();
+        } finally {
+            lock.unlock();
+        }
+    }
 
-        private final CompositeList<RemoteFileItem> compositeList;
-        private final EventList<RemoteFileItem> threadSafeUniqueList;
-        private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
-        private final EventListenerList<PresenceLibraryEvent> listeners;
+    private static class FriendLibraryImpl implements FriendLibrary {
         private final Friend friend;
-        private final ConcurrentHashMap<String, PresenceLibraryImpl> presenceLibraryFileLists;
+
+        private final ThreadSafeList<PresenceLibrary> allPresenceLibraries;
+        private final ReadOnlyList<PresenceLibrary> readOnlyPresenceLibraries;
+        
+        private final CompositeList<RemoteFileItem> compositeList;
+        private final UniqueList<RemoteFileItem> threadSafeUniqueList;
+        private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
+
+//        private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
         public FriendLibraryImpl(Friend friend) {
             this.friend = friend;
@@ -119,17 +163,30 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
                     return o1.getName().compareTo(o2.getName());
                 }
             });
-            listeners = new EventListenerList<PresenceLibraryEvent>();
-            presenceLibraryFileLists = new ConcurrentHashMap<String, PresenceLibraryImpl>();
+            
+            allPresenceLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>());
+            readOnlyPresenceLibraries = GlazedListsFactory.readOnlyList(allPresenceLibraries);
         }
-
-        public void addListener(EventListener<PresenceLibraryEvent> presenceLibraryEventEventListener) {
-            listeners.addListener(presenceLibraryEventEventListener);
+        
+        @Override
+        public EventList<PresenceLibrary> getPresenceLibraryList() {
+            return readOnlyPresenceLibraries;
         }
-
-        public boolean removeListener(EventListener<PresenceLibraryEvent> presenceLibraryEventEventListener) {
-            return listeners.removeListener(presenceLibraryEventEventListener);
-        }
+        
+//        @Override
+//        public void addPropertyChangeListener(PropertyChangeListener listener) {
+//            changeSupport.addPropertyChangeListener(listener);
+//        }
+//        
+//        @Override
+//        public void removePropertyChangeListener(PropertyChangeListener listener) {
+//            changeSupport.removePropertyChangeListener(listener);
+//        }
+//        
+//        @Override
+//        public LibraryState getState() {
+//            return null; // TODO: calculate state
+//        }
 
         public Friend getFriend() {
             return friend;
@@ -139,49 +196,82 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
         public void clear() {
             throw new UnsupportedOperationException();
         }
+        
+        private PresenceLibraryImpl findPresenceLibrary(LimePresence presence) {
+            for(PresenceLibrary library : allPresenceLibraries) {
+                if(library.getPresence().getJID().equals(presence.getJID())) {
+                    return (PresenceLibraryImpl)library;
+                }
+            }
+            return null;
+        }
 
-        public void removePresenceLibrary(LimePresence limePresence) {
-            PresenceLibraryImpl list = presenceLibraryFileLists.remove(limePresence.getJID());
-            if(list != null) {
-                removeMemberList(list);
-                list.dispose();
+        private PresenceLibraryImpl getOrCreatePresenceLibrary(LimePresence presence) {
+            PresenceLibraryImpl library;
+            boolean created = false;
+            
+            Lock lock = allPresenceLibraries.getReadWriteLock().writeLock();
+            lock.lock();
+            try {
+                library = findPresenceLibrary(presence);
+                if(library == null) {
+                    created = true;
+                    library = new PresenceLibraryImpl(presence, createMemberList());
+                    allPresenceLibraries.add(library);
+                }
+            } finally {
+                lock.unlock();
+            }
+            
+            if(created) {
+                library.commit();
+                addMemberList(library);
+            }
+            
+            return library;
+        }
+
+        private void removePresenceLibrary(LimePresence presence) {
+            PresenceLibraryImpl removed = null;
+            
+            Lock lock = allPresenceLibraries.getReadWriteLock().writeLock();
+            lock.lock();
+            try {
+                PresenceLibraryImpl presenceLibrary = findPresenceLibrary(presence);
+                if(presenceLibrary != null) {
+                    removed = presenceLibrary;
+                    allPresenceLibraries.remove(presenceLibrary);
+                    presenceLibrary.dispose();
+                }
+            } finally {
+                lock.unlock();
+            }
+            
+            if(removed != null) {
+                removeMemberList(removed);
             }
         }
 
-        public void removeMemberList(PresenceLibrary presenceLibrary) {
+        private void removeMemberList(PresenceLibrary presenceLibrary) {
             compositeList.getReadWriteLock().writeLock().lock();
             try {
                 compositeList.removeMemberList(presenceLibrary.getModel());
             } finally {
                 compositeList.getReadWriteLock().writeLock().unlock();
             }
-            listeners.broadcast(new PresenceLibraryEvent(presenceLibrary, PresenceLibraryEvent.Type.LIBRARY_REMOVED));
         }
 
-        public EventList<RemoteFileItem> createMemberList() {
+        private EventList<RemoteFileItem> createMemberList() {
             return compositeList.createMemberList();
         }
 
-        private void getOrCreatePresenceLibrary(LimePresence limePresence) {
-            PresenceLibraryImpl newList = new PresenceLibraryImpl(limePresence, createMemberList());
-            PresenceLibraryImpl existing = presenceLibraryFileLists.putIfAbsent(limePresence.getJID(), newList);
-
-            if(existing == null) {
-                newList.commit();
-                addMemberList(newList);
-            } else {
-                newList.dispose();
-            }
-        }
-
-        public void addMemberList(PresenceLibrary presenceLibrary) {
+        private void addMemberList(PresenceLibrary presenceLibrary) {
             compositeList.getReadWriteLock().writeLock().lock();
             try {
                 compositeList.addMemberList(presenceLibrary.getModel());
             } finally {
                 compositeList.getReadWriteLock().writeLock().unlock();
             }
-            listeners.broadcast(new PresenceLibraryEvent(presenceLibrary, PresenceLibraryEvent.Type.LIBRARY_ADDED));
         }
 
         @Override
@@ -221,13 +311,17 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
                 swingList.dispose();
             }
             compositeList.dispose();
+            threadSafeUniqueList.dispose();
+            readOnlyPresenceLibraries.dispose();
+            allPresenceLibraries.dispose();
         }
+        
         //TODO: add new accessors appropriate for creating FileItems based on
         //      lookups. May also need to subclass CoreFileItem appropriate for
         //      friend library info.
     }
 
-    private class PresenceLibraryImpl implements PresenceLibrary {
+    private static class PresenceLibraryImpl implements PresenceLibrary {
         protected final TransformedList<RemoteFileItem, RemoteFileItem> eventList;
         protected volatile TransformedList<RemoteFileItem, RemoteFileItem> swingEventList;
         private final LimePresence limePresence;

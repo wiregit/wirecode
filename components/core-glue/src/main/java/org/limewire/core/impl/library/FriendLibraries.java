@@ -11,19 +11,19 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
-import org.limewire.core.api.library.FriendLibraryEvent;
-import org.limewire.core.api.library.PresenceLibraryEvent;
+import org.limewire.collection.glazedlists.AbstractListEventListener;
+import org.limewire.core.api.library.FriendLibrary;
+import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class FriendLibraries {
@@ -34,29 +34,34 @@ public class FriendLibraries {
         this.libraries = new ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
     }
     
-    @Inject void register(ListenerSupport<FriendLibraryEvent> friendLibrarySupport) {
-        friendLibrarySupport.addListener(new EventListener<FriendLibraryEvent>() {
+    @Inject void register(RemoteLibraryManager remoteLibraryManager) {
+        remoteLibraryManager.getFriendLibraryList().addListEventListener(new ListEventListener<FriendLibrary>() {
             @Override
-            public void handleEvent(FriendLibraryEvent event) {
-                switch(event.getType()) {
-                case LIBRARY_ADDED:
-                    event.getFriendLibrary().addListener(new EventListener<PresenceLibraryEvent>() {
-                        public void handleEvent(PresenceLibraryEvent event) {
-                            switch(event.getType()) {
-                            case LIBRARY_ADDED:
+            public void listChanged(ListEvent<FriendLibrary> listChanges) {
+                while(listChanges.next()) {
+                    int type = listChanges.getType();
+                    if(type == ListEvent.INSERT) {
+                        FriendLibrary friendLibrary = listChanges.getSourceList().get(listChanges.getIndex());
+                        new AbstractListEventListener<PresenceLibrary>() {
+                            @Override
+                            protected void itemAdded(PresenceLibrary item) {
                                 LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
-                                if(libraries.putIfAbsent(event.getLibrary().getPresence().getJID(), trie) == null) {
-                                    LOG.debugf("adding library for presence {0} to index", event.getLibrary().getPresence().getJID());
-                                    event.getLibrary().getModel().addListEventListener(new LibraryListener(trie));
+                                if(libraries.putIfAbsent(item.getPresence().getJID(), trie) == null) {
+                                    LOG.debugf("adding library for presence {0} to index", item.getPresence().getJID());
+                                    item.getModel().addListEventListener(new LibraryListener(trie));
                                 }
-                                break;
-                            case LIBRARY_REMOVED:
-                                LOG.debugf("removing library for presence {0} from index", event.getLibrary().getPresence());
-                                libraries.remove(event.getLibrary().getPresence().getJID());
                             }
-                        }
-                    });
-                }
+                            @Override
+                            protected void itemRemoved(PresenceLibrary item) {
+                                LOG.debugf("removing library for presence {0} from index", item.getPresence());
+                                libraries.remove(item.getPresence().getJID());
+                            }
+                            @Override
+                            protected void itemUpdated(PresenceLibrary item) {
+                            }                            
+                        }.install(friendLibrary.getPresenceLibraryList());
+                    }
+                }                
             }
         });
     }
@@ -75,33 +80,42 @@ public class FriendLibraries {
                     RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
                     LOG.debugf("adding file {0}, indexing under:", newFile.getName());
                     StringTokenizer st = new StringTokenizer(newFile.getName());
-                    while(st.hasMoreElements()) {
+                    while (st.hasMoreElements()) {
                         String word = st.nextToken();
                         LOG.debugf("\t {0}", word);
                         ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
                         library.getLock().writeLock().lock();
-                        filesForWord = library.get(word);
-                        if(filesForWord == null) {
-                            filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                            library.add(word, filesForWord);
+                        try {
+                            filesForWord = library.get(word);
+                            if (filesForWord == null) {
+                                filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                                library.add(word, filesForWord);
+                            }
+                        } finally {
+                            library.getLock().writeLock().unlock();
                         }
-                        library.getLock().writeLock().unlock();
                         filesForWord.add(newFile);
                     }
-                } else if(listChanges.getType() == ListEvent.DELETE) {
+                } else if (listChanges.getType() == ListEvent.DELETE) {
+                    // BUG BUG BUG: This is incorrect. The list doesn't have the
+                    // removed item at the index anymore. There's no way to
+                    // access it from the deleted event.
                     RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
                     LOG.debugf("removing file {0} from index", newFile.getName());
                     StringTokenizer st = new StringTokenizer(newFile.getName());
-                    while(st.hasMoreElements()) {
+                    while (st.hasMoreElements()) {
                         String word = st.nextToken();
-                       ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-                       library.getLock().writeLock().lock(); 
-                        filesForWord = library.get(word);
-                        if(filesForWord == null) {
-                            filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                            library.add(word, filesForWord);
+                        ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
+                        library.getLock().writeLock().lock();
+                        try {
+                            filesForWord = library.get(word);
+                            if (filesForWord == null) {
+                                filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                                library.add(word, filesForWord);
+                            }
+                        } finally {
+                            library.getLock().writeLock().unlock();
                         }
-                        library.getLock().writeLock().unlock();
                         filesForWord.remove(newFile);
                     }
                 }
