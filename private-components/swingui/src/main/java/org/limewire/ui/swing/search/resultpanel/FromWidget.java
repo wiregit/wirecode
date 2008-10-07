@@ -9,7 +9,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -22,10 +21,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.Timer;
 import javax.swing.border.Border;
 
+import org.limewire.ui.swing.components.ComponentHider;
 import org.limewire.ui.swing.components.RoundedBorder;
+import org.limewire.ui.swing.util.FontUtils;
 
 /**
  * This widget is used in the search results list view.
@@ -40,16 +40,16 @@ public class FromWidget extends JPanel {
     private final Border border = new RoundedBorder(R);
     private final Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
     private final FromActions fromActions = new FromActionsMockImpl();
-    private final JLabel headerLabel = new JLabel();
+    private final JLabel headerLabel = shrinkFontSize(new JLabel());
     private final JPanel headerPanel =
         new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     private final JPopupMenu menu;
-    private final MenuHider menuHider;
+    private final ComponentHider menuHider;
     private String[] people;
 
     public FromWidget() {
         menu = new JPopupMenu();
-        menuHider =  new MenuHider();
+        menuHider =  new ComponentHider(menu);
         menu.setBorder(border);
 
         configureHeader();
@@ -120,10 +120,16 @@ public class FromWidget extends JPanel {
 
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.insets = new Insets(R, 0, 0, 0);
-        add(new JLabel(tr("From ")), gbc);
+        JLabel fromLabel = new JLabel(tr("From "));
+        add(shrinkFontSize(fromLabel), gbc);
 
         gbc.insets.top = 0;
         add(headerPanel, gbc);
+    }
+
+    private JLabel shrinkFontSize(JLabel label) {
+        FontUtils.changeSize(label, -1.0F);
+        return label;
     }
 
     public void setPeople(List<String> people) {
@@ -168,32 +174,6 @@ public class FromWidget extends JPanel {
 
                 menu.add(submenu);
             }
-        }
-    }
-    
-    /**
-     * This mouse listener is intended to hide the 'From' menu after the mouse
-     * has left all popup menu items display for this menu. 
-     */
-    private class MenuHider extends MouseAdapter {
-        private Timer hideTimer = new Timer(200, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (menu.isVisible()) {
-                    menu.setVisible(false);
-                }
-                ((Timer)e.getSource()).stop();
-            }
-        });
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            hideTimer.stop();
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            hideTimer.start();
         }
     }
 }
