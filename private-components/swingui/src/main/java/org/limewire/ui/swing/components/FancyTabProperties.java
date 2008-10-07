@@ -10,9 +10,9 @@ import org.limewire.ui.swing.util.I18n;
 
 public class FancyTabProperties implements Cloneable {
     
-    private Painter<JXButton> highlightPainter;
-    private Painter<JXButton> normalPainter;
-    private Painter<JXButton> selectedPainter;
+    private Painter<?> highlightPainter;
+    private Painter<?> normalPainter;
+    private Painter<?> selectedPainter;
     private Color selectionColor;
     private Color normalColor;
     private Font textFont;
@@ -53,27 +53,27 @@ public class FancyTabProperties implements Cloneable {
         this.removable = removable;
     }
 
-    public Painter<JXButton> getHighlightPainter() {
+    public Painter<?> getHighlightPainter() {
         return highlightPainter;
     }
 
-    public void setHighlightPainter(Painter<JXButton> highlightPainter) {
+    public void setHighlightPainter(Painter<?> highlightPainter) {
         this.highlightPainter = highlightPainter;
     }
 
-    public Painter<JXButton> getNormalPainter() {
+    public Painter<?> getNormalPainter() {
         return normalPainter;
     }
 
-    public void setNormalPainter(Painter<JXButton> normalPainter) {
+    public void setNormalPainter(Painter<?> normalPainter) {
         this.normalPainter = normalPainter;
     }
 
-    public Painter<JXButton> getSelectedPainter() {
+    public Painter<?> getSelectedPainter() {
         return selectedPainter;
     }
 
-    public void setSelectedPainter(Painter<JXButton> selectedPainter) {
+    public void setSelectedPainter(Painter<?> selectedPainter) {
         this.selectedPainter = selectedPainter;
     }
 

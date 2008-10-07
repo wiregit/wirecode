@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.mainframe;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -23,9 +22,7 @@ import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -44,6 +41,7 @@ import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
+import org.limewire.ui.swing.painter.SearchTabSelectionPainter;
 import org.limewire.ui.swing.painter.TopPanelPainter;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -150,8 +148,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setRemovable(true);
         searchList.setPreferredSize(
                 new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        searchList.setSelectionPainter(new RectanglePainter<JXButton>(
-                2, 2, 0, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
+        searchList.setSelectionPainter(new SearchTabSelectionPainter());
         searchList.setHighlightPainter(null);
         
         setLayout(new MigLayout("gap 0, insets 0, fill", "", "[center]"));        

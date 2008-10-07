@@ -23,7 +23,6 @@ import javax.swing.JPopupMenu;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -285,7 +284,7 @@ public class FancyTabList extends JXPanel {
     /**
      * Sets the painter to be used when the tab is rolled over.
      */
-    public void setHighlightPainter(Painter<JXButton> highlightPainter) {
+    public void setHighlightPainter(Painter<?> highlightPainter) {
         for (FancyTab tab : tabs) {
             if (tab.isHighlighted()) {
                 tab.setBackgroundPainter(highlightPainter);
@@ -295,7 +294,7 @@ public class FancyTabList extends JXPanel {
     }
     
     /** Sets the painter to be used when the tab is selected. */
-    public void setSelectionPainter(Painter<JXButton> selectedPainter) {
+    public void setSelectionPainter(Painter<?> selectedPainter) {
         for (FancyTab tab : tabs) {
             if (tab.isHighlighted()) {
                 tab.setBackgroundPainter(selectedPainter);
