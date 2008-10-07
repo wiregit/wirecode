@@ -35,6 +35,8 @@ import net.miginfocom.swing.MigLayout;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.ui.swing.components.ComponentHider;
+import org.limewire.ui.swing.components.ComponentHider.AdditionalBehavior;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -164,7 +166,15 @@ public class TopPanel extends JPanel {
         signoffMenu.setBackground(getBackground());
         signoffMenu.setBorderPainted(false);
         signoffMenu.setIcon(icons.getCloseChat());
-        signoffMenu.add(new SignoffAction());
+        final JMenuItem signoffItem = signoffMenu.add(new SignoffAction());
+        ComponentHider menuHider = new ComponentHider(signoffMenu.getPopupMenu(), new AdditionalBehavior() {
+            @Override
+            public void componentHidden() {
+                signoffMenu.setSelected(false);
+            }
+        });
+        signoffItem.addMouseListener(menuHider);
+        signoffMenu.addMouseListener(menuHider);
         JMenuBar signoffMenuBar = new JMenuBar();
         signoffMenuBar.setForeground(getForeground());
         signoffMenuBar.setBackground(getBackground());
