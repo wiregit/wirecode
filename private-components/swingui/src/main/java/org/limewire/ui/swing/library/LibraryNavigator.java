@@ -62,8 +62,11 @@ import com.google.inject.Singleton;
 @Singleton
 public class LibraryNavigator extends JXPanel {
 
+    private static final String DIVIDER = "/";
     private final SectionHeading titleLabel;
     private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
+    private static final String NAME = "__@internal@__";
+    public static final String NAME_PREFIX = NAME + DIVIDER;
     
     @Resource private Icon audioIcon;
     @Resource private Icon videoIcon;
@@ -200,7 +203,7 @@ public class LibraryNavigator extends JXPanel {
     private Action createMyCategoryAction(Navigator navigator, MyLibraryFactory factory, Category category, EventList<LocalFileItem> eventList) {
         FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
         JComponent component = factory.createMyLibrary(category, filtered);
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, "__@internal@__" + "/" + category, component);
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, NAME_PREFIX + category, component);
         Action action = NavigatorUtils.getNavAction(navItem);
         return decorateAction(action, navItem, (Disposable)component, category, filtered, Me.ME);
     }
@@ -216,7 +219,7 @@ public class LibraryNavigator extends JXPanel {
     private Action createFriendCategoryAction(Navigator navigator, Friend friend, FriendLibraryFactory factory, Category category, EventList<RemoteFileItem> eventList) {
         FilterList<RemoteFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
         JComponent component = factory.createFriendLibrary(friend, category, filtered);
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, friend.getId() + "/" + category, component);
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, friend.getId() + DIVIDER + category, component);
         Action action = NavigatorUtils.getNavAction(navItem);
         return decorateAction(action, navItem, (Disposable)component, category, filtered, friend);
     }
@@ -496,7 +499,7 @@ public class LibraryNavigator extends JXPanel {
 
         @Override
         public String getId() {
-            return "__@internal@__";
+            return NAME;
         }
 
         @Override
