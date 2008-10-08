@@ -13,6 +13,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
@@ -200,8 +201,11 @@ public class CoreSearch implements Search {
     private class FriendSearchListenerImpl implements FriendSearchListener {
         public void handleFriendResults(Iterator<RemoteFileItem> results) {
             while(results.hasNext()) {
-                RemoteFileDesc rfd = ((CoreRemoteFileItem)results.next()).getRfd();
-                qrListener.handleQueryReply(rfd, null, IpPort.EMPTY_SET);    
+                CoreRemoteFileItem remoteFileItem = (CoreRemoteFileItem)results.next();
+                SearchResult searchResult = remoteFileItem.getSearchResult();
+                for (SearchListener listener : searchListeners) {
+                    listener.handleSearchResult(searchResult);
+                }
             }            
         }
     }

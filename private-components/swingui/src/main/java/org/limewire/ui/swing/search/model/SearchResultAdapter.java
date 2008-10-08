@@ -48,7 +48,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         this.remoteHosts = new TreeSet<RemoteHost>(new Comparator<RemoteHost>() {
             @Override
             public int compare(RemoteHost o1, RemoteHost o2) {
-                return o1.getHostDescription().compareToIgnoreCase(o2.getHostDescription());
+                return o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
             }
         });
         this.visible = true;

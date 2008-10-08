@@ -1,20 +1,16 @@
 package org.limewire.core.api.endpoint;
 
-import org.limewire.io.Address;
+import org.limewire.core.api.friend.FriendPresence;
 
 public interface RemoteHost {
-    
-    String getId();
-    
-    Address getAddress();
-    
-    String getName();
-    
-    String getHostDescription();
-    
+      
     boolean isBrowseHostEnabled();
     
     boolean isChatEnabled();
     
     boolean isSharedFiles();
+    
+    public FriendPresence getFriendPresence();
+
+    String getRenderName();
 }

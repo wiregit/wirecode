@@ -10,8 +10,8 @@ import junit.framework.Assert;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.io.Address;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.EventList;
@@ -698,25 +698,10 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
             List<RemoteHost> sources =new ArrayList<RemoteHost>();
             sources.add(new RemoteHost() {
                 UUID randomUUID = UUID.randomUUID();
-                
+            
                 @Override
-                public String getId() {
-                    return getHostDescription();
-                }
-                
-                @Override
-                public String getHostDescription() {
+                public String getRenderName() {
                     return randomUUID.toString();
-                }
-
-                @Override
-                public Address getAddress() {
-                    return null;
-                }
-
-                @Override
-                public String getName() {
-                    return getHostDescription();
                 }
 
                 @Override
@@ -732,6 +717,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
                 @Override
                 public boolean isSharedFiles() {
                     return false;
+                }
+
+                @Override
+                public FriendPresence getFriendPresence() {
+                    return null;
                 }
             });
             return sources;

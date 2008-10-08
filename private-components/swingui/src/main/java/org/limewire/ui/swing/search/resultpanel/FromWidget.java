@@ -145,7 +145,7 @@ public class FromWidget extends JPanel {
     private void updateHeaderLabel() {
         String text =
             people.size() == 0 ? tr("nobody") :
-            people.size() == 1 ? people.get(0).getName() + DOWN_ARROW :
+            people.size() == 1 ? people.get(0).getRenderName() + DOWN_ARROW :
             tr("{0} people", people.size()) + DOWN_ARROW;
         headerLabel.setText(text);
         menu.setLabel(text);
@@ -170,7 +170,7 @@ public class FromWidget extends JPanel {
         }
           else {
             for (RemoteHost person : people) {
-                JMenu submenu = new JMenu(person.getName());
+                JMenu submenu = new JMenu(person.getRenderName());
                 submenu.addMouseListener(menuHider);
              
                 if(person.isChatEnabled()) {

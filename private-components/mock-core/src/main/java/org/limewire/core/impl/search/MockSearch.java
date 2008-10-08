@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -15,7 +16,6 @@ import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
-import org.limewire.io.Address;
 
 public class MockSearch implements Search {
     public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
@@ -368,26 +368,6 @@ public class MockSearch implements Search {
         }
         
         @Override
-        public String getId() {
-            return getHostDescription();
-        }
-
-        @Override
-        public String getHostDescription() {
-            return description;
-        }
-
-        @Override
-        public Address getAddress() {
-            return null;
-        }
-
-        @Override
-        public String getName() {
-            return getHostDescription();
-        }
-
-        @Override
         public boolean isBrowseHostEnabled() {
             return false;
         }
@@ -400,6 +380,16 @@ public class MockSearch implements Search {
         @Override
         public boolean isSharedFiles() {
             return false;
+        }
+
+        @Override
+        public FriendPresence getFriendPresence() {
+            return null;
+        }
+
+        @Override
+        public String getRenderName() {
+            return description;
         }
     }
 }

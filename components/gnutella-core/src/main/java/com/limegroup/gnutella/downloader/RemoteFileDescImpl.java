@@ -751,8 +751,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     
     @Override
     public Address toAddress() {
-        Connectable publicAddress = new ConnectableImpl(this);
-        Address address = publicAddress;
+        Connectable publicPrivateAddress = new ConnectableImpl(this);
+        Address address = publicPrivateAddress;
         if (isFirewalled()) {
             Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
             for (IpPort ipPort : _pushAddr.getProxies()) {
@@ -763,7 +763,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
                 }
             }
 
-            address = new FirewalledAddress(publicAddress, null, new GUID(getClientGUID()), proxies, _pushAddr
+            address = new FirewalledAddress(publicPrivateAddress, publicPrivateAddress, new GUID(getClientGUID()), proxies, _pushAddr
                     .getFWTVersion());
         }
 

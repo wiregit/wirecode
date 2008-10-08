@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
@@ -37,20 +38,23 @@ class PresenceLibraryBrowser {
             public void listChanged(ListEvent<FriendLibrary> listChanges) {
                 while(listChanges.next()) {
                     if(listChanges.getType() == ListEvent.INSERT) {
-                        FriendLibrary friendLibrary = listChanges.getSourceList().get(listChanges.getIndex());
+                        final FriendLibrary friendLibrary = listChanges.getSourceList().get(listChanges.getIndex());
                         friendLibrary.getPresenceLibraryList().addListEventListener(new ListEventListener<PresenceLibrary>() {
                             @Override
                             public void listChanged(ListEvent<PresenceLibrary> listChanges) {
                                 while(listChanges.next()) {
                                     if(listChanges.getType() == ListEvent.INSERT) {
                                         final PresenceLibrary presenceLibrary = listChanges.getSourceList().get(listChanges.getIndex());
-                                        Address address = presenceLibrary.getPresence().getPresenceAddress();
+                                        final FriendPresence friendPresence = presenceLibrary.getPresence();
+                                        Address address = friendPresence.getPresenceAddress();
                                         presenceLibrary.setState(LibraryState.LOADING);
-                                        LOG.debugf("browsing {0} ...", presenceLibrary.getPresence().getPresenceId());
+                                        LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
                                         browseFactory.createBrowse(address).start(new BrowseListener() {
                                             public void handleBrowseResult(SearchResult searchResult) {
                                                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
-                                                RemoteFileItem file = new CoreRemoteFileItem((RemoteFileDescAdapter)searchResult);
+                                                RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
+                                                remoteFileDescAdapter.setFriendPresence(friendPresence);
+                                                RemoteFileItem file = new CoreRemoteFileItem(remoteFileDescAdapter);
                                                 presenceLibrary.addFile(file);
                                             }
                                             @Override
