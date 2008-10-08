@@ -29,7 +29,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
@@ -62,16 +61,18 @@ import com.google.inject.Singleton;
 public class LibraryNavigator extends JXPanel {
 
     private static final String DIVIDER = "/";
-    private final SectionHeading titleLabel;
-    private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
     private static final String NAME = "__@internal@__";
     public static final String NAME_PREFIX = NAME + DIVIDER;
+
+    private final SectionHeading titleLabel;
+    private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
     
     @Resource private Icon audioIcon;
     @Resource private Icon videoIcon;
     @Resource private Icon imageIcon;
     @Resource private Icon appIcon;
     @Resource private Icon documentIcon;
+    @Resource private Icon otherIcon;
     
     @Resource private Color selectedBackground;
     @Resource private Font selectedTextFont;
@@ -250,7 +251,7 @@ public class LibraryNavigator extends JXPanel {
             action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, imageIcon));
             break;
         case OTHER:
-            action.putValue(Action.SMALL_ICON, new EmptyIcon(26 + 16, 16));
+            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, otherIcon));
             break;
         case PROGRAM:
             action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, appIcon));
