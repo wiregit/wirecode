@@ -21,10 +21,10 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JComponent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.text.JTextComponent;
@@ -32,12 +32,12 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.api.library.ShareListManager;
-import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -68,10 +68,10 @@ import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  *

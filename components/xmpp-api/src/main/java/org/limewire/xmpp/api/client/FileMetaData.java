@@ -1,14 +1,12 @@
 package org.limewire.xmpp.api.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import java.io.IOException;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 /**
