@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Date;
+
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
 
@@ -53,7 +55,7 @@ public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<
         case TYPE_COL:
             return "Verbal description";
         case MODIFIED_COL:
-            return baseObject.getLastModifiedTime();
+            return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:
             return baseObject;
         }
@@ -81,5 +83,4 @@ public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<
         return baseObject;
     }
 
- 
 }

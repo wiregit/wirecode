@@ -12,9 +12,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.TransferHandler;
 
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileTransferable;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.I18n;
@@ -43,7 +45,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
         setFillsViewportHeight(true);
         setDragEnabled(true);
-       
+        
         setTransferHandler(new TransferHandler(){
             @Override
             public int getSourceActions(JComponent comp) {
@@ -74,8 +76,13 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         hideColumns();
     }
     
-    public void enableDownloading(){
-        //TODO:set action column for friend tables
+    public void enableDownloading(DownloadListManager downloadListManager){
+        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(new DownloadAction(I18n.tr("download"), downloadListManager));
+        getColumnModel().getColumn(format.getActionColumn()).setCellEditor(downloadEditor);
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null));
+        getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(downloadEditor.getPreferredSize().width);
+        getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
+        setRowHeight(downloadEditor.getPreferredSize().height);
         hideColumns();
     }
     
@@ -98,6 +105,24 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             librarySharePanel.setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow())));
             librarySharePanel.show(shareEditor, getVisibleRect());
             shareEditor.cancelCellEditing();
+        }
+        
+    }
+    
+    private class DownloadAction extends AbstractAction {
+        //TODO: remove @SuppressWarnings and use this when patch is ready
+        @SuppressWarnings("unused")
+        private DownloadListManager downloadListManager;
+        public DownloadAction(String text, DownloadListManager downloadListManager){
+            super(text);
+            this.downloadListManager = downloadListManager;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow()));
+//            downloadListManager.addDownload(file.getRfd());
+            throw new RuntimeException("download me! " + file.getName());
         }
         
     }

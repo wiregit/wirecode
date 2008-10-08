@@ -7,6 +7,7 @@ import java.awt.Font;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -66,6 +67,10 @@ public class LibraryHeaderPanel extends JXPanel {
         setBackgroundPainter(new SubpanelPainter());
     }
 
+    public JTextComponent getFilterTextField(){
+        return filterField;
+    }
+    
     private String getTitle(Category category) {
         switch (category) {
         case AUDIO:

@@ -85,5 +85,4 @@ public class DocumentTableFormat<T extends FileItem> implements LibraryTableForm
         return baseObject;
     }
 
-
 }

@@ -18,19 +18,17 @@ import javax.swing.ScrollPaneConstants;
 
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
-import org.limewire.ui.swing.library.table.AudioLibraryTable;
-import org.limewire.ui.swing.library.table.DocumentTableFormat;
-import org.limewire.ui.swing.library.table.ImageTableFormat;
 import org.limewire.ui.swing.library.table.LibraryTable;
-import org.limewire.ui.swing.library.table.OtherTableFormat;
-import org.limewire.ui.swing.library.table.ProgramTableFormat;
-import org.limewire.ui.swing.library.table.VideoTableFormat;
+import org.limewire.ui.swing.library.table.LibraryTableFactory;
+import org.limewire.ui.swing.library.table.LibraryTableFactory.Type;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -49,8 +47,10 @@ class MyLibraryPanel extends JPanel implements Disposable {
         setLayout(new BorderLayout());
 
         header = new LibraryHeaderPanel(category);
-        //TODO: filterlist 
-        table = createTable(category, eventList);
+        
+        EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(eventList, 
+                new TextComponentMatcherEditor<LocalFileItem>(header.getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
+        table = LibraryTableFactory.createTable(category, filterList, Type.LOCAL);
         table.enableSharing(sharePanel);
                 
         final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>() {});
@@ -104,29 +104,5 @@ class MyLibraryPanel extends JPanel implements Disposable {
             sharePanel.dispose();
         }
     }
-    
-
-    private LibraryTable<LocalFileItem> createTable(Category category,
-            EventList<LocalFileItem> eventList) {
-        switch (category) {
-        case AUDIO:
-            return new AudioLibraryTable<LocalFileItem>(eventList);
-        case VIDEO:
-            return new LibraryTable<LocalFileItem>(eventList, new VideoTableFormat<LocalFileItem>());
-        case DOCUMENT:
-        	return new LibraryTable<LocalFileItem>(eventList, new DocumentTableFormat<LocalFileItem>());
-        case IMAGE:
-        	return new LibraryTable<LocalFileItem>(eventList, new ImageTableFormat<LocalFileItem>());
-        case OTHER:
-        	return new LibraryTable<LocalFileItem>(eventList, new OtherTableFormat<LocalFileItem>());
-        case PROGRAM:
-        	return new LibraryTable<LocalFileItem>(eventList, new ProgramTableFormat<LocalFileItem>());
-        }
-        
-        throw new IllegalArgumentException("Unknown category: " + category);
-    }
-
- 
-    
-    
+   
 }

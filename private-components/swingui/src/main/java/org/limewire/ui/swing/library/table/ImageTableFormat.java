@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Date;
+
 import org.limewire.core.api.library.FileItem;
 
 
@@ -12,9 +14,9 @@ public class ImageTableFormat<T extends FileItem> implements LibraryTableFormat<
 
     public static final int MODIFIED_COL = CREATED_COL + 1;
 
-    public static final int SHARE_COL = MODIFIED_COL + 1;
+    public static final int ACTION_COL = MODIFIED_COL + 1;
 
-    private static final int COLUMN_COUNT = SHARE_COL + 1;
+    private static final int COLUMN_COUNT = ACTION_COL + 1;
 
     @Override
     public int getColumnCount() {
@@ -31,7 +33,7 @@ public class ImageTableFormat<T extends FileItem> implements LibraryTableFormat<
             return "Created";
         else if (column == MODIFIED_COL)
             return "Modified";
-        else if (column == SHARE_COL)
+        else if (column == ACTION_COL)
             return "Share";
 
         throw new IllegalArgumentException("Unknown column:" + column);
@@ -44,10 +46,10 @@ public class ImageTableFormat<T extends FileItem> implements LibraryTableFormat<
         else if (column == SIZE_COL)
             return baseObject.getSize();
         else if (column == CREATED_COL)
-            return baseObject.getCreationTime();
+            return new Date();
         else if (column == MODIFIED_COL)
-            return baseObject.getLastModifiedTime();
-        else if (column == SHARE_COL)
+            return new Date(baseObject.getLastModifiedTime());
+        else if (column == ACTION_COL)
             return baseObject;
 
         throw new IllegalArgumentException("Unknown column:" + column);
@@ -55,7 +57,7 @@ public class ImageTableFormat<T extends FileItem> implements LibraryTableFormat<
 
     @Override
     public int getActionColumn() {
-        return SHARE_COL;
+        return ACTION_COL;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class ImageTableFormat<T extends FileItem> implements LibraryTableFormat<
 
     @Override
     public boolean isEditable(T baseObject, int column) {
-        return column == SHARE_COL;
+        return column == ACTION_COL;
     }
 
     @Override

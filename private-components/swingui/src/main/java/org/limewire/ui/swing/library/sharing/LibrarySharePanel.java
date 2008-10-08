@@ -574,16 +574,12 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     }
     
     public void dispose() {
-        //TODO proper disposal
-        noShareFilterList.dispose();
-        
         if (noShareFriendList instanceof TransformedList) {
             ((TransformedList) noShareFriendList).dispose();
-        }
+        }       
         
-        if (noShareFriendList instanceof TransformedList) {
-            ((TransformedList) shareFriendList).dispose();
-        }
+        ((EventTableModel)shareTable.getModel()).dispose();
+        ((EventTableModel)friendTable.getModel()).dispose();
     }
     
     private void removeFriend(SharingTarget friend) {

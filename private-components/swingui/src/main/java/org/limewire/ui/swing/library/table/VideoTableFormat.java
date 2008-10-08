@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Date;
+
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.ui.swing.util.I18n;
@@ -87,7 +89,7 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
         case HEIGHT_COL:
             return baseObject.getProperty(Keys.HEIGHT);
         case MODIFIED_COL:
-            return baseObject.getLastModifiedTime();
+            return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:
             return baseObject;
         }
@@ -102,7 +104,7 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { BITRATE_COL, WIDTH_COL, HEIGHT_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
+        return new int[] { BITRATE_COL, WIDTH_COL, HEIGHT_COL, MODIFIED_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
     }
 
     @Override

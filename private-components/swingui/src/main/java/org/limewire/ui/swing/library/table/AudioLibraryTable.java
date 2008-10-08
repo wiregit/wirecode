@@ -13,6 +13,7 @@ public class AudioLibraryTable<T extends FileItem> extends LibraryTable<T> {
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMaxWidth(playEditor.getPreferredSize().width);
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellEditor(playEditor);
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellRenderer(new PlayRendererEditor());
+        getColumnModel().getColumn(AudioTableFormat.LENGTH_COL).setCellRenderer(new TimeRenderer());
         
     }
 
