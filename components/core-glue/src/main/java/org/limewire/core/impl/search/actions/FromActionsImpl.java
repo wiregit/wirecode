@@ -1,17 +1,15 @@
 package org.limewire.core.impl.search.actions;
 
-import java.net.UnknownHostException;
-
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.io.Address;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.core.api.endpoint.RemoteHost;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,19 +53,13 @@ public class FromActionsImpl implements FromActions {
         });
     }
 
-    private void viewLibrary(RemoteHost person, BrowseListener browseListener) {
-        
+    private void viewLibrary(RemoteHost person, BrowseListener browseListener) {        
         //TODO make sure we are supporting all the various address cases.
         //direct connection
         //firewalled connections
         //push proxies
         
-        Address address;
-        try {
-            address = person.getAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
+        Address address = person.getAddress();
         Browse browse = browseFactory.createBrowse(address);
         browse.start(browseListener);
     }

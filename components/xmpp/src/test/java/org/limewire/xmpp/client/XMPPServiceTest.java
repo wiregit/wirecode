@@ -143,7 +143,7 @@ public class XMPPServiceTest extends BaseTestCase {
         LimePresence buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
         assertEquals(Presence.Mode.available, buddy2.getMode());
-        Connectable address = (Connectable)buddy2.getAddress();
+        Connectable address = (Connectable)buddy2.getPresenceAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable()); 
@@ -154,7 +154,7 @@ public class XMPPServiceTest extends BaseTestCase {
         LimePresence buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
         assertEquals(Presence.Mode.available, buddy2.getMode());
-        address = (Connectable)buddy1.getAddress();
+        address = (Connectable)buddy1.getPresenceAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -271,7 +271,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
         LimePresence buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
-        Connectable address = (Connectable)buddy2.getAddress();
+        Connectable address = (Connectable)buddy2.getPresenceAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -280,7 +280,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
         LimePresence buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
-        address = (Connectable)buddy1.getAddress();
+        address = (Connectable)buddy1.getPresenceAddress();
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -294,7 +294,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
         buddy2 = (LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
-        address = (Connectable)buddy2.getAddress();
+        address = (Connectable)buddy2.getPresenceAddress();
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
@@ -303,7 +303,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
         buddy1 = (LimePresence)rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy1.getType());
-        address = (Connectable)buddy1.getAddress();
+        address = (Connectable)buddy1.getPresenceAddress();
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());

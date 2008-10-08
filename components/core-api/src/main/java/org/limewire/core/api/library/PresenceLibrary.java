@@ -2,10 +2,10 @@ package org.limewire.core.api.library;
 
 import java.beans.PropertyChangeListener;
 
-import org.limewire.xmpp.api.client.LimePresence;
+import org.limewire.core.api.friend.FriendPresence;
 
 public interface PresenceLibrary extends RemoteFileList {
-    LimePresence getPresence();
+    FriendPresence getPresence();
 
     /** Returns the current state of this presence library. */
     LibraryState getState();

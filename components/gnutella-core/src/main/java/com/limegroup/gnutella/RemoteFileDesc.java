@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 
@@ -174,6 +173,6 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     
     public boolean isSpam();
 
-    public Address toAddress() throws UnknownHostException;
+    public Address toAddress();
 
 }

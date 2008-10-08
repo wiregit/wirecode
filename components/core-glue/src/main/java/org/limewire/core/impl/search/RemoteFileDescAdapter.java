@@ -1,6 +1,5 @@
 package org.limewire.core.impl.search;
 
-import java.net.UnknownHostException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +18,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -98,22 +98,20 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public Category getCategory() {
         String extension = getFileExtension();
-        if (extension != null) {
-            MediaType type = MediaType.getMediaTypeForExtension(extension);
-            if (type == MediaType.getAudioMediaType()) {
-                return Category.AUDIO;
-            } else if (type == MediaType.getVideoMediaType()) {
-                return Category.VIDEO;
-            } else if (type == MediaType.getImageMediaType()) {
-                return Category.IMAGE;
-            } else if (type == MediaType.getDocumentMediaType()) {
-                return Category.DOCUMENT;
-            } else if (type == MediaType.getProgramMediaType()) {
-                return Category.PROGRAM;
-            }
+        MediaType type = MediaType.getMediaTypeForExtension(extension);
+        if (type == MediaType.getAudioMediaType()) {
+            return Category.AUDIO;
+        } else if (type == MediaType.getVideoMediaType()) {
+            return Category.VIDEO;
+        } else if (type == MediaType.getImageMediaType()) {
+            return Category.IMAGE;
+        } else if (type == MediaType.getDocumentMediaType()) {
+            return Category.DOCUMENT;
+        } else if (type == MediaType.getProgramMediaType()) {
+            return Category.PROGRAM;
+        } else {
+            return Category.OTHER;
         }
-        
-        return Category.OTHER;
     }
 
     public RemoteFileDesc getRfd() {
@@ -133,12 +131,17 @@ public class RemoteFileDescAdapter implements SearchResult {
                 if (index == 0) {
                     return new RemoteHost() {
                         @Override
+                        public String getId() {
+                            return GUID.toHexString(rfd.getClientGUID());
+                        }
+                        
+                        @Override
                         public String getHostDescription() {
                             return rfd.getInetSocketAddress().toString();
                         }
 
                         @Override
-                        public Address getAddress() throws UnknownHostException {
+                        public Address getAddress() {
                             return rfd.toAddress();
                         }
 
@@ -170,6 +173,11 @@ public class RemoteFileDescAdapter implements SearchResult {
                     };
                 } else {
                     return new RemoteHost() {
+                        @Override
+                        public String getId() {
+                            return getHostDescription();
+                        }
+                        
                         @Override
                         public String getHostDescription() {
                             return locs.get(index - 1).getInetSocketAddress().toString();

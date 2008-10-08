@@ -46,15 +46,15 @@ public class FriendLibraries {
                             @Override
                             protected void itemAdded(PresenceLibrary item) {
                                 LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
-                                if(libraries.putIfAbsent(item.getPresence().getJID(), trie) == null) {
-                                    LOG.debugf("adding library for presence {0} to index", item.getPresence().getJID());
+                                if(libraries.putIfAbsent(item.getPresence().getPresenceId(), trie) == null) {
+                                    LOG.debugf("adding library for presence {0} to index", item.getPresence().getPresenceId());
                                     item.getModel().addListEventListener(new LibraryListener(trie));
                                 }
                             }
                             @Override
                             protected void itemRemoved(PresenceLibrary item) {
                                 LOG.debugf("removing library for presence {0} from index", item.getPresence());
-                                libraries.remove(item.getPresence().getJID());
+                                libraries.remove(item.getPresence().getPresenceId());
                             }
                             @Override
                             protected void itemUpdated(PresenceLibrary item) {

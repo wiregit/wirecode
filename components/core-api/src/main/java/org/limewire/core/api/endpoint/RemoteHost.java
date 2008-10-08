@@ -1,12 +1,12 @@
 package org.limewire.core.api.endpoint;
 
-import java.net.UnknownHostException;
-
 import org.limewire.io.Address;
 
 public interface RemoteHost {
     
-    Address getAddress() throws UnknownHostException;
+    String getId();
+    
+    Address getAddress();
     
     String getName();
     

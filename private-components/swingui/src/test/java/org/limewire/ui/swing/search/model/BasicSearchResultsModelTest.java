@@ -697,9 +697,16 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         public List<RemoteHost> getSources() {
             List<RemoteHost> sources =new ArrayList<RemoteHost>();
             sources.add(new RemoteHost() {
+                UUID randomUUID = UUID.randomUUID();
+                
+                @Override
+                public String getId() {
+                    return getHostDescription();
+                }
+                
                 @Override
                 public String getHostDescription() {
-                    return UUID.randomUUID().toString();
+                    return randomUUID.toString();
                 }
 
                 @Override

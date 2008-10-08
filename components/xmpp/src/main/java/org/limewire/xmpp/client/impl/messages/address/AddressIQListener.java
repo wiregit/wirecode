@@ -95,7 +95,7 @@ public class AddressIQListener implements PacketListener {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("updating address on presence " + presence.getJID() + " to " + address);
                 }
-                presence.setAddress(iq.getAddress());
+                presence.setPresenceAddress(iq.getAddress());
             }
         }
     }

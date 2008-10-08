@@ -750,8 +750,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
     
     @Override
-    public Address toAddress() throws UnknownHostException {
-        Connectable publicAddress = new ConnectableImpl(getAddress(), getPort(), isTLSCapable());
+    public Address toAddress() {
+        Connectable publicAddress = new ConnectableImpl(this);
         Address address = publicAddress;
         if (isFirewalled()) {
             Set<Connectable> proxies = new StrictIpPortSet<Connectable>();

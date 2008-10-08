@@ -32,14 +32,20 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
         super(presence, connection);
-        address = Objects.nonNull(limePresence, "limePresence").getAddress();
+        address = Objects.nonNull(limePresence, "limePresence").getPresenceAddress();
     }
     
-    public Address getAddress() {
+    @Override
+    public Address getPresenceAddress() {
         return address;
     }
     
-    public void setAddress(Address address) {
+    @Override
+    public String getPresenceId() {
+        return getJID();
+    }
+    
+    public void setPresenceAddress(Address address) {
         this.address = address;
     }
     

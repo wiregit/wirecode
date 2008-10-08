@@ -366,6 +366,11 @@ public class MockSearch implements Search {
         public MockRemoteHost(String description) {
             this.description = description;
         }
+        
+        @Override
+        public String getId() {
+            return getHostDescription();
+        }
 
         @Override
         public String getHostDescription() {
