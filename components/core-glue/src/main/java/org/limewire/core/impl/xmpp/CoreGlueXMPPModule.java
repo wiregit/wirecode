@@ -12,6 +12,7 @@ import com.google.inject.TypeLiteral;
 public class CoreGlueXMPPModule extends AbstractModule {
     protected void configure() {
         binder().install(new LimeWireXMPPModule());
+        bind(XmppPresenceLibraryAdder.class);
         bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).to(XMPPConfigurationListProvider.class);
         bind(new TypeLiteral<Map<String, XMPPServerSettings.XMPPServerConfiguration>>(){}).toProvider(XMPPServerSettings.XMPPServerConfigs.class);
         bind(new TypeLiteral<Map<String, XMPPUserSettings.XMPPUserConfiguration>>(){}).toProvider(XMPPUserSettings.XMPPUserConfigs.class);

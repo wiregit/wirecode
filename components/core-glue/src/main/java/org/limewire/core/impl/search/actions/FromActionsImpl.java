@@ -1,11 +1,9 @@
 package org.limewire.core.impl.search.actions;
 
-import org.limewire.core.api.browse.Browse;
-import org.limewire.core.api.browse.BrowseFactory;
-import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.io.Address;
 import org.limewire.logging.Log;
@@ -18,11 +16,11 @@ import com.google.inject.Singleton;
 public class FromActionsImpl implements FromActions {
     private static final Log LOG = LogFactory.getLog(FromActionsImpl.class);
 
-    private final BrowseFactory browseFactory;
+    private final RemoteLibraryManager remoteLibraryManager;
 
     @Inject
-    public FromActionsImpl(BrowseFactory browseFactory) {
-        this.browseFactory = browseFactory;
+    public FromActionsImpl(RemoteLibraryManager remoteLibraryManager) {
+        this.remoteLibraryManager = remoteLibraryManager;
     }
 
     @Override
@@ -36,32 +34,35 @@ public class FromActionsImpl implements FromActions {
     }
 
     @Override
-    public void viewLibraryOf(RemoteHost person) {
+    public void viewLibraryOf(final RemoteHost person) {
+        // TODO: Make this work so that friend libraries are jumped to
+        //       instead of browsed!
         LOG.debugf("viewLibraryOf: {0}", person.getName());
-        viewLibrary(person, new BrowseListener() {
+        remoteLibraryManager.addPresenceLibrary(new Friend() {
             @Override
-            public void handleBrowseResult(SearchResult searchResult) {
-                LOG.debugf("Browsed File: {0}", searchResult.getProperty(PropertyKey.NAME));
-                System.out.println("Browsed File: " + searchResult.getProperty(PropertyKey.NAME));
+            public String getId() {
+                return person.getId();
             }
-
             @Override
-            public void browseFinished(boolean success) {
-                LOG.debugf("Browsed Finished.");
-                System.out.println("Browsed Finished.");
+            public String getName() {
+                return person.getName();
+            }
+            @Override
+            public String getRenderName() {
+                return person.getName();
+            }
+            @Override
+            public void setName(String name) {
+            }
+        }, new FriendPresence() {
+            @Override
+            public Address getPresenceAddress() {
+                return person.getAddress();
+            }
+            @Override
+            public String getPresenceId() {
+                return person.getId();
             }
         });
     }
-
-    private void viewLibrary(RemoteHost person, BrowseListener browseListener) {        
-        //TODO make sure we are supporting all the various address cases.
-        //direct connection
-        //firewalled connections
-        //push proxies
-        
-        Address address = person.getAddress();
-        Browse browse = browseFactory.createBrowse(address);
-        browse.start(browseListener);
-    }
-
 }

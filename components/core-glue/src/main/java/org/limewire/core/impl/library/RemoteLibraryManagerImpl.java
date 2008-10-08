@@ -186,6 +186,9 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         @Override
         public LibraryState getState() {
+            if(state == null) {
+                state = calculateState();
+            }
             return state;
         }
         
