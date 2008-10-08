@@ -1,9 +1,12 @@
 package org.limewire.core.api.download;
 
 import java.util.List;
+import java.io.IOException;
 
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.api.client.LimePresence;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 public interface ResultDownloader {
@@ -26,10 +29,10 @@ public interface ResultDownloader {
     /**
      * Adds a download specified by the given remote file desc
      *
-     * @param rfd The remote file desc to start downloading
+     * @param chatFileDesc The chat file metadata
      * @return DownloadItem with which the download can be tracked and controlled
      * @throws SaveLocationException if an error occurs while downloading and saving the
      * file
      */
-    public DownloadItem addDownload(RemoteFileDesc rfd) throws SaveLocationException;
+    public DownloadItem addDownload(LimePresence presence, FileMetaData chatFileDesc) throws IOException;
 }

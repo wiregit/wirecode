@@ -11,12 +11,13 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.api.client.LimePresence;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
-import com.limegroup.gnutella.RemoteFileDesc;
 
 public class MockDownloadListManager implements DownloadListManager {
 	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
@@ -63,7 +64,8 @@ public class MockDownloadListManager implements DownloadListManager {
 	    return mdi;
 	}
 
-    public DownloadItem addDownload(RemoteFileDesc rfds) {
+    @Override
+    public DownloadItem addDownload(LimePresence presence, FileMetaData file) {
         return new MockDownloadItem("download from 1 source", 0,
                 DownloadState.DOWNLOADING, Category.IMAGE);
     }

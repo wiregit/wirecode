@@ -23,5 +23,4 @@ public interface FileMetaData {
     public Set<URN> getURNs() throws IOException;
     public Date getCreateTime();
     public String toXML();
-    public RemoteFileDesc toRemoteFileDesc(LimePresence presence, RemoteFileDescFactory rfdFactory) throws IOException;
 }

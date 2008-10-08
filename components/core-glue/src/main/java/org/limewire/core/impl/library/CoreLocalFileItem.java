@@ -218,34 +218,6 @@ public class CoreLocalFileItem implements LocalFileItem {
             fileMetadata += "</file>";
             return fileMetadata;
         }
-
-        public RemoteFileDesc toRemoteFileDesc(LimePresence presence,
-                                               RemoteFileDescFactory rfdFactory) throws IOException {
-            Connectable publicAddress;
-            Address address = presence.getPresenceAddress();
-            byte[] clientGuid = null;
-            boolean firewalled;
-            Set<Connectable> proxies = null;
-            int fwtVersion = 0;
-            Set<URN> urns = getURNs();
-
-            if (address instanceof FirewalledAddress) {
-                firewalled = true;
-                FirewalledAddress fwAddress = (FirewalledAddress) address;
-                publicAddress = fwAddress.getPublicAddress();
-                clientGuid = fwAddress.getClientGuid().bytes();
-                proxies = fwAddress.getPushProxies();
-                fwtVersion = fwAddress.getFwtVersion();
-            } else {
-                assert address instanceof Connectable;
-                firewalled = false;
-                publicAddress = (Connectable) address;
-            }
-            return rfdFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(),
-                    getIndex(), getName(), getSize(), clientGuid, 0, false, 0, true, null, urns, false,
-                    firewalled, null, proxies, getCreateTime().getTime(), fwtVersion,
-                    publicAddress.isTLSCapable());
-        }
     }
 
     public FileDetails getFileDetails() {

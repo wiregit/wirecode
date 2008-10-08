@@ -130,7 +130,7 @@ class ChatDocumentBuilder {
             bldr.append(isIncoming ? fileOfferReceived : fileOfferSent)
                 .append("<br/>")
                 .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"")
-                .append(offeredFile.toXML())
+                .append(offeredFile.getId())
                 .append("\"/><input type=\"submit\" value=\"")
                 .append(offeredFile.getName())
                 .append(isIncoming ? "\"/>" : ":disabled\"/>")

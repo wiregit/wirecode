@@ -69,10 +69,4 @@ public class MockFileMetadata implements FileMetaData {
         // TODO Auto-generated method stub
         return null;
     }
-
-    public RemoteFileDesc toRemoteFileDesc(LimePresence presence, RemoteFileDescFactory rfdFactory)
-    throws IOException {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

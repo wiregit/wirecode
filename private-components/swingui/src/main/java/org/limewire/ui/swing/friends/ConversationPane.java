@@ -14,9 +14,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -34,7 +33,6 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.ResultDownloader;
-import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
@@ -53,14 +51,12 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.XMLUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -68,10 +64,8 @@ import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.http.HTTPUtils;
 
 /**
  *
@@ -82,7 +76,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private static final Color BACKGROUND_COLOR = Color.WHITE;
     private final ArrayList<Message> messages = new ArrayList<Message>();
-    private final Map<String, FileMetaData> idToFileMetaDataMap = new HashMap<String, FileMetaData>();
+    private final Map<String, FileMetaData> idToFileMetaDataMap = new ConcurrentHashMap<String, FileMetaData>();
     private final JEditorPane editor;
     private final String conversationName;
     private final String friendId;
@@ -93,13 +87,12 @@ public class ConversationPane extends JPanel implements Displayable {
     private final FriendSharingDisplay friendSharingDisplay;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
-    private final RemoteFileDescFactory rfdFactory;
     private final ResultDownloader downloader;
 
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, 
+    public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend,
             ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
-            RemoteFileDescFactory rfdFactory, ResultDownloader downloader) {
+            ResultDownloader downloader) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.conversationName = chatFriend.getName();
@@ -107,15 +100,14 @@ public class ConversationPane extends JPanel implements Displayable {
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
         this.friendSharingDisplay = friendSharingDisplay;
-        this.rfdFactory = rfdFactory;
         this.downloader = downloader;
-        
+
         setLayout(new BorderLayout());
-        
+
         JScrollPane scroll = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setOpaque(false);
         scroll.setBorder(BorderFactory.createEmptyBorder());
-        
+
         //Needed to add margin to the left side of the scrolling chat pane
         JPanel chatWrapper = new JPanel(new GridBagLayout());
         chatWrapper.setBackground(BACKGROUND_COLOR);
@@ -125,7 +117,7 @@ public class ConversationPane extends JPanel implements Displayable {
         constraints.weighty = 1.0;
         constraints.fill = GridBagConstraints.BOTH;
         chatWrapper.add(scroll,constraints);
-        
+
         add(chatWrapper, BorderLayout.CENTER);
 
         editor = new JEditorPane();
@@ -134,7 +126,7 @@ public class ConversationPane extends JPanel implements Displayable {
         editor.addHyperlinkListener(new HyperlinkListener());
         HTMLEditorKit editorKit = (HTMLEditorKit) editor.getEditorKit();
         editorKit.setAutoFormSubmission(false);
-        
+
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
 
         FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, new ShareLocalFileList());
@@ -144,29 +136,29 @@ public class ConversationPane extends JPanel implements Displayable {
         add(footerPanel(writer, chatFriend), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
-        
+
         EventAnnotationProcessor.subscribe(this);
     }
-    
+
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
         LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
         messages.add(message);
         Type type = message.getType();
-        
+
         if (type != Type.Sent) {
             currentChatState = ChatState.active;
         }
-        
+
         if (message.hasFileOffer()) {
             FileMetaData fileOffer = message.getFileOffer();
             idToFileMetaDataMap.put(fileOffer.getId(), fileOffer);
         }
-        
+
         displayMessages();
     }
-    
+
     @RuntimeTopicEventSubscriber(methodName="getChatStateTopicName")
     public void handleChatStateUpdate(String topic, ChatStateEvent event) {
         LOG.debugf("Chat state update for {0} to {1}", event.getFriend().getName(), event.getState());
@@ -175,7 +167,7 @@ public class ConversationPane extends JPanel implements Displayable {
             displayMessages();
         }
     }
-    
+
     @RuntimeTopicEventSubscriber(methodName="getPresenceUpdateTopicName")
     public void handlePresenceUpdate(String topic, PresenceUpdateEvent event) {
         org.limewire.xmpp.api.client.Presence.Type type = event.getPresence().getType();
@@ -187,7 +179,7 @@ public class ConversationPane extends JPanel implements Displayable {
             inputPanel.getInputComponent().setEnabled(true);
         }
     }
-    
+
     public void closeChat() {
         try {
             writer.setChatState(ChatState.gone);
@@ -195,11 +187,11 @@ public class ConversationPane extends JPanel implements Displayable {
             LOG.error("Could not set chat state while closing the conversation", e);
         }
     }
-    
+
     public void destroy() {
         EventAnnotationProcessor.unsubscribe(this);
     }
-    
+
     public String getMessageReceivedTopicName() {
         return MessageReceivedEvent.buildTopic(friendId);
     }
@@ -207,11 +199,11 @@ public class ConversationPane extends JPanel implements Displayable {
     public String getChatStateTopicName() {
         return ChatStateEvent.buildTopic(friendId);
     }
-    
+
     public String getPresenceUpdateTopicName() {
         return PresenceUpdateEvent.buildTopic(friendId);
     }
-    
+
     private void displayMessages() {
         displayMessages(false);
     }
@@ -222,7 +214,7 @@ public class ConversationPane extends JPanel implements Displayable {
         editor.setText(chatDoc);
         decorateFileOfferButtons();
     }
-    
+
     private void decorateFileOfferButtons() {
         //This is a hack to set the file mime-type icon for file offer buttons that may appear in the conversation
         recursiveButtonSearch(editor);
@@ -264,20 +256,20 @@ public class ConversationPane extends JPanel implements Displayable {
         panel.add(libraryButton, BorderLayout.NORTH);
         inputPanel = new ResizingInputPanel(writer);
         panel.add(inputPanel, BorderLayout.CENTER);
-        
+
         JTextComponent inputComponent = inputPanel.getInputComponent();
         FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, new ShareLocalFileList());
         inputComponent.setDropTarget(friendShare.getDropTarget());
-        
+
         return panel;
     }
-    
+
     @Override
     public void handleDisplay() {
         editor.repaint();
         inputPanel.handleDisplay();
     }
-    
+
     private class LibraryAction extends AbstractAction {
         public LibraryAction() {
             super(tr("Library"));
@@ -285,7 +277,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            friendSharingDisplay.selectFriendLibrary(chatFriend.getFriend());            
+            friendSharingDisplay.selectFriendLibrary(chatFriend.getFriend());
         }
     }
 
@@ -299,17 +291,20 @@ public class ConversationPane extends JPanel implements Displayable {
                 LOG.debugf("File offer download requested. FileId: {0}", event.getData());
 
                 // Initiate download of shared file from friend
-                RemoteFileDesc rfd;
-                try {
-                    rfd = extractToRemoteFileDesc(event);
-                } catch (IOException e1) {
-                    LOG.error("Unable to save the download", e1);  //TODO: maybe pop up a dialog
+                DownloadItem item;
+                if (!(chatFriend.getPresence() instanceof LimePresence)) {
+                    LOG.error("Can only download from other LimeWire clients");
                     return;
                 }
 
                 try {
-                    DownloadItem item = downloader.addDownload(rfd);
-                } catch (SaveLocationException e1) {
+                    String fileId = URLDecoder.decode(HTTPUtils.parseValue(event.getData()));
+                    FileMetaData offeredFile = idToFileMetaDataMap.get(fileId);
+
+                    // TODO: what if offered file not in map for any reason?
+                    //       Also, when would we remove items from the map?
+                    item = downloader.addDownload((LimePresence)chatFriend.getPresence(), offeredFile);
+                } catch (IOException e1) {
                     LOG.error("Unable to save the download", e1);  //TODO: maybe pop up a dialog
                 }
 
@@ -319,31 +314,18 @@ public class ConversationPane extends JPanel implements Displayable {
                 if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
                     LOG.debugf("Opening a view to {0}'s library", chatFriend.getName());
                     //TODO: Open the view for this friends' library
-                    
+
                 } else {
                     String linkDescription = e.getDescription();
                     LOG.debugf("Hyperlink clicked: {0}", linkDescription);
                     if (linkDescription.startsWith("magnet")) {
                         //TODO: Need to do something with magnet links
-                        
+
                     } else {
                         NativeLaunchUtils.openURL(e.getURL().toString());
                     }
                 }
             }
-        }
-        
-        private RemoteFileDesc extractToRemoteFileDesc(FormSubmitEvent event) throws IOException {
-
-            String encodedFileMetadata = URLDecoder.decode(HTTPUtils.parseValue(event.getData()));
-            FileMetaData offeredFile = new FileMetaDataImpl(XMLUtils.getDocument(encodedFileMetadata));
-
-            // must be lime on the other side
-            Presence chatPresence = chatFriend.getPresence();
-            assert chatPresence instanceof LimePresence;
-
-            return offeredFile.toRemoteFileDesc((LimePresence)chatPresence, rfdFactory);
-
         }
     }
 

@@ -1,6 +1,7 @@
 package org.limewire.core.impl.download;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +23,11 @@ import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.Connectable;
+import org.limewire.io.Address;
 import org.limewire.setting.FileSetting;
+import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.api.client.LimePresence;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -36,6 +41,8 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 
@@ -125,7 +132,10 @@ public class CoreDownloadListManager implements DownloadListManager {
         return new CoreDownloadItem(downloader, queueTimeCalculator);
 	}
 
-    public DownloadItem addDownload(RemoteFileDesc rfd) throws SaveLocationException {
+    @Override
+    public DownloadItem addDownload(LimePresence presence, FileMetaData fileMeta) throws IOException {
+
+        RemoteFileDesc rfd = createRfdFromChatResult(presence, fileMeta);
         File saveDir = null;
         String fileName = null;
         boolean overwrite = false;
@@ -136,6 +146,35 @@ public class CoreDownloadListManager implements DownloadListManager {
         Downloader downloader = downloadManager.download(files, altLocList, null, overwrite, saveDir, fileName);
 
         return new CoreDownloadItem(downloader, queueTimeCalculator);
+    }
+
+    private RemoteFileDesc createRfdFromChatResult(LimePresence presence, FileMetaData fileMeta) throws IOException {
+        Connectable publicAddress;
+        Address address = presence.getPresenceAddress();
+        byte[] clientGuid = null;
+        boolean firewalled;
+        Set<Connectable> proxies = null;
+        int fwtVersion = 0;
+        Set<URN> urns = fileMeta.getURNs();
+
+        if (address instanceof FirewalledAddress) {
+            firewalled = true;
+            FirewalledAddress fwAddress = (FirewalledAddress) address;
+            publicAddress = fwAddress.getPublicAddress();
+            clientGuid = fwAddress.getClientGuid().bytes();
+            proxies = fwAddress.getPushProxies();
+            fwtVersion = fwAddress.getFwtVersion();
+        } else {
+            assert address instanceof Connectable;
+            firewalled = false;
+            publicAddress = (Connectable) address;
+        }
+
+        return remoteFileDescFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(),
+                fileMeta.getIndex(), fileMeta.getName(), fileMeta.getSize(), clientGuid,
+                0, false, 0, true, null, urns, false,
+                firewalled, null, proxies, fileMeta.getCreateTime().getTime(), fwtVersion,
+                publicAddress.isTLSCapable());
     }
 
 
