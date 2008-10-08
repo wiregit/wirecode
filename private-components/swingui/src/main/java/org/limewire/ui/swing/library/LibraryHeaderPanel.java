@@ -15,6 +15,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.search.FilteredTextField;
@@ -39,12 +40,25 @@ public class LibraryHeaderPanel extends JXPanel {
 
     private JXButton shareAllButton;
 
-    public LibraryHeaderPanel(Category category) {
+    private Category category;
+
+    private Friend friend;
+
+    /**
+     * 
+     * @param category
+     * @param friend the friend whose library is being viewed.  Null for MyLibrary.
+     */
+    public LibraryHeaderPanel(Category category, Friend friend) {
         super(new MigLayout());
         
         GuiUtils.assignResources(this);
         
-        titleLabel = new JLabel(getTitle(category));
+        this.category = category;
+        this.friend = friend;
+         
+        
+        titleLabel = new JLabel(getTitle());
         titleLabel.setForeground(fontColor);
         titleLabel.setFont(headerFont);
 
@@ -54,15 +68,19 @@ public class LibraryHeaderPanel extends JXPanel {
         filterField.setSize(filterField.getPreferredSize());
         filterField.setMaximumSize(filterField.getPreferredSize());
 
-        shareAllButton = new JXButton(I18n.tr("Share All"), shareIcon); 
-        shareAllButton.setForeground(fontColor);
-        shareAllButton.setHorizontalTextPosition(SwingConstants.LEFT);
-        shareAllButton.setBackgroundPainter(new ButtonPainter());
-        shareAllButton.setFont(buttonFont);
-
+        if (isShareButtonShown()) {
+            shareAllButton = new JXButton(I18n.tr("Share All"), shareIcon);
+            shareAllButton.setForeground(fontColor);
+            shareAllButton.setHorizontalTextPosition(SwingConstants.LEFT);
+            shareAllButton.setBackgroundPainter(new ButtonPainter());
+            shareAllButton.setFont(buttonFont);
+        }
+        
         add(titleLabel);
         add(filterField, "pushx, right");
-        add(shareAllButton);
+        if (isShareButtonShown()) {
+            add(shareAllButton);
+        }
         
         setBackgroundPainter(new SubpanelPainter());
     }
@@ -71,22 +89,28 @@ public class LibraryHeaderPanel extends JXPanel {
         return filterField;
     }
     
-    private String getTitle(Category category) {
+    private String getTitle() {
+        String libraryString = (friend == null) ? I18n.tr("My Library") : I18n.tr("{0}'s Library", friend.getRenderName());
+        
         switch (category) {
         case AUDIO:
-            return I18n.tr("My Library - Audio");
+            return I18n.tr("{0} - Audio", libraryString);
         case DOCUMENT:
-            return I18n.tr("My Library - Documents");
+            return I18n.tr("{0} - Documents", libraryString);
         case IMAGE:
-            return I18n.tr("My Library - Images");
+            return I18n.tr("{0} - Images", libraryString);
         case OTHER:
-            return I18n.tr("My Library - Other");
+            return I18n.tr("{0} - Other", libraryString);
         case PROGRAM:
-            return I18n.tr("My Library - Program");
+            return I18n.tr("{0} - Programs", libraryString);
         case VIDEO:
-            return I18n.tr("My Library - Video");
+            return I18n.tr("{0} - Video", libraryString);
         }
         throw new IllegalArgumentException("Unknown category: " + category);
+    }
+    
+    private boolean isShareButtonShown(){
+        return friend == null && category != Category.PROGRAM && category != Category.OTHER && category != Category.DOCUMENT;
     }
 
 }

@@ -51,7 +51,7 @@ class MyLibraryPanel extends JPanel implements Disposable {
         
         setLayout(new BorderLayout());
 
-        header = new LibraryHeaderPanel(category);
+        header = new LibraryHeaderPanel(category, null);
         
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(eventList, 
                 new TextComponentMatcherEditor<LocalFileItem>(header.getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));

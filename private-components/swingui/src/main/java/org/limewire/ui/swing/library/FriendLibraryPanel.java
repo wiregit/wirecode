@@ -32,7 +32,7 @@ class FriendLibraryPanel extends JPanel implements Disposable {
                               DownloadListManager downloadListManager) {
         setLayout(new BorderLayout());
 
-        LibraryHeaderPanel header = new LibraryHeaderPanel(category);
+        LibraryHeaderPanel header = new LibraryHeaderPanel(category, friend);
         
         EventList<RemoteFileItem> filterList = GlazedListsFactory.filterList(eventList, 
                 new TextComponentMatcherEditor<RemoteFileItem>(header.getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
