@@ -5,6 +5,10 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+//import org.limewire.ui.swing.friends.ChatFriend;
+//import org.limewire.ui.swing.friends.ChatFriendImpl;
+//import org.limewire.ui.swing.friends.ChatPanel;
+//import org.limewire.ui.swing.friends.ConversationStartedEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,6 +33,9 @@ public class FromActionsImpl implements FromActions {
     @Override
     public void chatWith(RemoteHost person) {
         LOG.debugf("chatWith: {0}", person.getRenderName());
+//        ChatFriend chatFriend = new ChatFriendImpl();
+//        ConversationStartedEvent conversationStartedEvent = new ConversationStartedEven
+        //conversationStartedEvent.publish
     }
 
     @Override
@@ -56,6 +63,10 @@ public class FromActionsImpl implements FromActions {
         LOG.debugf("getNumberOfSharedFiles: {0}", person.getRenderName());
         FileList fileList = fileManager.getFriendFileList(person.getFriendPresence().getFriend()
                 .getId());
+        
+        if(fileList == null) {
+            return 0;
+        }
         return fileList.size();
     }
 }
