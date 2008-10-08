@@ -15,9 +15,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.Objects;
 
@@ -27,6 +31,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -742,5 +747,26 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     public boolean isSpam() {
         return getSpamRating() >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
                 SearchSettings.QUERY_SPAM_CUTOFF.getValue());
+    }
+    
+    @Override
+    public Address toAddress() throws UnknownHostException {
+        Connectable publicAddress = new ConnectableImpl(getAddress(), getPort(), isTLSCapable());
+        Address address = publicAddress;
+        if (isFirewalled()) {
+            Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
+            for (IpPort ipPort : _pushAddr.getProxies()) {
+                if(ipPort instanceof Connectable) {
+                   proxies.add((Connectable)ipPort);   
+                } else {
+                   proxies.add(new ConnectableImpl(ipPort, false));
+                }
+            }
+
+            address = new FirewalledAddress(publicAddress, null, new GUID(getClientGUID()), proxies, _pushAddr
+                    .getFWTVersion());
+        }
+
+        return address;
     }
 }

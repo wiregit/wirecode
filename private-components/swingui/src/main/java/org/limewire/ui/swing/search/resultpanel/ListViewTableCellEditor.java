@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -41,6 +40,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -87,7 +87,7 @@ implements TableCellEditor, TableCellRenderer {
 
     private ActionColumnTableCellEditor actionEditor;
     private ActionButtonPanel actionButtonPanel;
-    private FromWidget fromWidget = new FromWidget();
+    private FromWidget fromWidget;
     private JLabel itemIconLabel;
     private JXHyperlink similarButton = new JXHyperlink();
     private JLabel headingLabel = new JLabel();
@@ -102,13 +102,14 @@ implements TableCellEditor, TableCellRenderer {
 
     @Inject
     public ListViewTableCellEditor(
-        ActionColumnTableCellEditor actionEditor, String searchText) {
+        ActionColumnTableCellEditor actionEditor, String searchText, FromActions fromActions) {
 
         this.actionEditor = actionEditor;
         this.searchText = searchText;
         FontUtils.changeSize(similarButton, -2.0F);
 
         GuiUtils.assignResources(this);
+        fromWidget = new FromWidget(fromActions);
     }
 
     /**
@@ -357,12 +358,8 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populateFrom(VisualSearchResult vsr) {
-        List<String> people = new ArrayList<String>();
         Collection<RemoteHost> sources = vsr.getSources();
-        for (RemoteHost source : sources) {
-            people.add(source.getHostDescription());
-        }
-        fromWidget.setPeople(people);
+        fromWidget.setPeople(new ArrayList<RemoteHost>(sources));
     }
 
     /**

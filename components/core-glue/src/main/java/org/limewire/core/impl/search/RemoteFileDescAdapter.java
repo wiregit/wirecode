@@ -1,8 +1,8 @@
 package org.limewire.core.impl.search;
 
+import java.net.UnknownHostException;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +10,10 @@ import java.util.Set;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.endpoint.RemoteHostAction;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
@@ -131,25 +133,84 @@ public class RemoteFileDescAdapter implements SearchResult {
                 if (index == 0) {
                     return new RemoteHost() {
                         @Override
-                        public List<RemoteHostAction> getHostActions() {
-                            return Collections.emptyList();
+                        public String getHostDescription() {
+                            return rfd.getInetSocketAddress().toString();
                         }
 
                         @Override
-                        public String getHostDescription() {
-                            return rfd.getInetSocketAddress().toString();
+                        public Address getAddress() throws UnknownHostException {
+                            return rfd.toAddress();
+                        }
+
+                        @Override
+                        public String getName() {
+                            // TODO tie in with jabber code, if buddy return
+                            // buddies name
+                            return getHostDescription();
+                        }
+
+                        @Override
+                        public boolean isBrowseHostEnabled() {
+                            return rfd.isBrowseHostEnabled();
+                        }
+
+                        @Override
+                        public boolean isChatEnabled() {
+                            // TODO tie in with jabber code
+                            // if buddy enable
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isSharedFiles() {
+                            // TODO tie in with jabber code
+                            // if buddy enable
+                            return false;
                         }
                     };
                 } else {
                     return new RemoteHost() {
                         @Override
-                        public List<RemoteHostAction> getHostActions() {
-                            return Collections.emptyList();
+                        public String getHostDescription() {
+                            return locs.get(index - 1).getInetSocketAddress().toString();
                         }
 
                         @Override
-                        public String getHostDescription() {
-                            return locs.get(index - 1).getInetSocketAddress().toString();
+                        public Address getAddress() {
+                            Connectable connectable = null;
+                            IpPort ipPort = locs.get(index - 1);
+                            if (ipPort instanceof Connectable) {
+                                connectable = (Connectable) ipPort;
+                            } else {
+                                connectable = new ConnectableImpl(ipPort, false);
+                            }
+                            return connectable;
+                        }
+
+                        @Override
+                        public String getName() {
+                            // TODO tie in with jabber code, if buddy return
+                            // buddies name
+                            return getHostDescription();
+                        }
+
+                        @Override
+                        public boolean isBrowseHostEnabled() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isChatEnabled() {
+                            // TODO tie in with jabber code
+                            // if buddy enable
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isSharedFiles() {
+                            // TODO tie in with jabber code
+                            // if buddy enable
+                            return false;
                         }
                     };
                 }

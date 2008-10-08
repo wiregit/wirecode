@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
-import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
@@ -23,9 +22,12 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
 
+import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.ui.swing.components.ComponentHider;
 import org.limewire.ui.swing.components.RoundedBorder;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.util.Objects;
 
 /**
  * This widget is used in the search results list view.
@@ -33,25 +35,25 @@ import org.limewire.ui.swing.util.FontUtils;
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class FromWidget extends JPanel {
-
+    
     private static final char DOWN_ARROW = '\u25BC';
     private static final int R = 8; // rounded border corner radius
 
     private final Border border = new RoundedBorder(R);
     private final Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
-    private final FromActions fromActions = new FromActionsMockImpl();
+    private final FromActions fromActions;
     private final JLabel headerLabel = shrinkFontSize(new JLabel());
     private final JPanel headerPanel =
         new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     private final JPopupMenu menu;
     private final ComponentHider menuHider;
-    private String[] people;
+    private List<RemoteHost> people;
 
-    public FromWidget() {
+    public FromWidget(FromActions fromActions) {
         menu = new JPopupMenu();
         menuHider =  new ComponentHider(menu);
         menu.setBorder(border);
-
+        this.fromActions = Objects.nonNull(fromActions, "fromActions");
         configureHeader();
         layoutComponents();
         setOpaque(false);
@@ -80,14 +82,14 @@ public class FromWidget extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (people.length > 0) {
+                if (people.size() > 0) {
                     menu.show((Component) e.getSource(), -R, -R);
                 }
             }
         });
     }
 
-    private Action getChatAction(final String person) {
+    private Action getChatAction(final RemoteHost person) {
         return new AbstractAction(tr("Chat")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -96,7 +98,7 @@ public class FromWidget extends JPanel {
         };
     }
 
-    private Action getLibraryAction(final String person) {
+    private Action getLibraryAction(final RemoteHost person) {
         return new AbstractAction(tr("View library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -105,7 +107,7 @@ public class FromWidget extends JPanel {
         };
     }
 
-    private Action getSharingAction(final String person) {
+    private Action getSharingAction(final RemoteHost person) {
         return new AbstractAction(tr("Files I'm Sharing")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -132,11 +134,8 @@ public class FromWidget extends JPanel {
         return label;
     }
 
-    public void setPeople(List<String> people) {
-        setPeople(people.toArray(new String[]{}));
-    }
 
-    public void setPeople(String[] people) {
+    public void setPeople(List<RemoteHost> people) {
         this.people = people;
         menu.removeAll();
         updateHeaderLabel();
@@ -145,33 +144,52 @@ public class FromWidget extends JPanel {
 
     private void updateHeaderLabel() {
         String text =
-            people.length == 0 ? tr("nobody") :
-            people.length == 1 ? people[0] + DOWN_ARROW :
-            trn("{1}", "{0} people", people.length , people[0]) + DOWN_ARROW;
+            people.size() == 0 ? tr("nobody") :
+            people.size() == 1 ? people.get(0).getName() + DOWN_ARROW :
+            tr("{0} people", people.size()) + DOWN_ARROW;
         headerLabel.setText(text);
         menu.setLabel(text);
         menu.add(text);
     }
 
     private void updateMenus() {
-        if (people.length == 0) return; // menu has no items
+        if (people.size() == 0) return; // menu has no items
 
-        if (people.length == 1) {
-            String person = people[0];
-            menu.add(getChatAction(person));
-            menu.add(getLibraryAction(person));
-            menu.add(getSharingAction(person));
-        } else {
-            for (String person : people) {
-                JMenu submenu = new JMenu(person);
+        if (people.size() == 1) {
+            RemoteHost person = people.get(0);
+            
+            if(person.isChatEnabled()) {
+                menu.add(getChatAction(person));
+            }
+            if(person.isBrowseHostEnabled()) {
+                menu.add(getLibraryAction(person));
+            }
+            if(person.isSharedFiles()) {
+                menu.add(getSharingAction(person));
+            }
+        }
+          else {
+            for (RemoteHost person : people) {
+                JMenu submenu = new JMenu(person.getName());
                 submenu.addMouseListener(menuHider);
-                JMenuItem chatItem = new JMenuItem(getChatAction(person));
-                chatItem.addMouseListener(menuHider);
-                submenu.add(chatItem);
-                JMenuItem libraryItem = new JMenuItem(getLibraryAction(person));
-                libraryItem.addMouseListener(menuHider);
-                submenu.add(libraryItem);
-
+             
+                if(person.isChatEnabled()) {
+                    JMenuItem chatItem = new JMenuItem(getChatAction(person));
+                    chatItem.addMouseListener(menuHider);
+                    submenu.add(chatItem);
+                }
+                
+                if(person.isBrowseHostEnabled()) {                    
+                    JMenuItem libraryItem = new JMenuItem(getLibraryAction(person));
+                    libraryItem.addMouseListener(menuHider);
+                    submenu.add(libraryItem);
+                }
+                
+                if(person.isSharedFiles()) {
+                    JMenuItem shareItem = new JMenuItem(getSharingAction(person));
+                    shareItem.addMouseListener(menuHider);
+                    submenu.add(shareItem);
+                }
                 menu.add(submenu);
             }
         }

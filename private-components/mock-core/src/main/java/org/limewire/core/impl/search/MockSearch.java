@@ -1,14 +1,12 @@
 package org.limewire.core.impl.search;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.endpoint.RemoteHostAction;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -17,6 +15,7 @@ import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
+import org.limewire.io.Address;
 
 public class MockSearch implements Search {
     public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
@@ -369,13 +368,33 @@ public class MockSearch implements Search {
         }
 
         @Override
-        public List<RemoteHostAction> getHostActions() {
-            return Collections.emptyList();
+        public String getHostDescription() {
+            return description;
         }
 
         @Override
-        public String getHostDescription() {
-            return description;
+        public Address getAddress() {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return getHostDescription();
+        }
+
+        @Override
+        public boolean isBrowseHostEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isChatEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isSharedFiles() {
+            return false;
         }
     }
 }

@@ -20,6 +20,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.nav.Navigator;
@@ -53,14 +54,14 @@ public abstract class BaseResultPanel extends JXPanel {
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
-            Navigator navigator) {
+            Navigator navigator, FromActions fromActions) {
         this.baseEventList = eventList;
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
         
         setLayout(layout);
                 
-        configureList(eventList, preserver, navigator, searchInfo);
+        configureList(eventList, preserver, navigator, searchInfo, fromActions);
         configureTable(eventList, tableFormat, navigator);
  
         add(resultsList, ModeListener.Mode.LIST.name());
@@ -69,7 +70,7 @@ public abstract class BaseResultPanel extends JXPanel {
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
-            SearchInfo searchInfo) {
+            SearchInfo searchInfo, FromActions fromActions) {
         // We're using a MouseableTable with one column instead of JList
         // because that will allow us to display buttons with rollover icons.
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
@@ -89,12 +90,12 @@ public abstract class BaseResultPanel extends JXPanel {
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor renderer =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery());
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery(), fromActions);
         resultsList.setDefaultRenderer(VisualSearchResult.class, renderer);
 
         // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor editor =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery());
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery(), fromActions);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         int columnIndex = 0;

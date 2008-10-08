@@ -1,10 +1,12 @@
 package com.limegroup.gnutella;
 
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.Address;
 
 import com.limegroup.gnutella.downloader.DownloadStatsTracker;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
@@ -171,5 +173,7 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     public RemoteHostMemento toMemento();
     
     public boolean isSpam();
+
+    public Address toAddress() throws UnknownHostException;
 
 }

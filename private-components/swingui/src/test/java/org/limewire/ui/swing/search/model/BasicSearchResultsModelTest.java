@@ -10,8 +10,8 @@ import junit.framework.Assert;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.endpoint.RemoteHostAction;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.Address;
 import org.limewire.util.BaseTestCase;
 
 import ca.odell.glazedlists.EventList;
@@ -698,15 +698,33 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
             List<RemoteHost> sources =new ArrayList<RemoteHost>();
             sources.add(new RemoteHost() {
                 @Override
-                public List<RemoteHostAction> getHostActions() {
-                   List<RemoteHostAction> reList = new ArrayList<RemoteHostAction>();
-                   
-                    return reList;
+                public String getHostDescription() {
+                    return UUID.randomUUID().toString();
                 }
 
                 @Override
-                public String getHostDescription() {
-                    return UUID.randomUUID().toString();
+                public Address getAddress() {
+                    return null;
+                }
+
+                @Override
+                public String getName() {
+                    return getHostDescription();
+                }
+
+                @Override
+                public boolean isBrowseHostEnabled() {
+                    return false;
+                }
+
+                @Override
+                public boolean isChatEnabled() {
+                    return false;
+                }
+
+                @Override
+                public boolean isSharedFiles() {
+                    return false;
                 }
             });
             return sources;
