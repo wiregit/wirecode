@@ -8,10 +8,12 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
+import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.ExceptionalAddressIQ;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQ;
@@ -27,16 +29,29 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
     
+    private final User user;
     private Address address;
     private byte [] authToken;
     
-    LimePresenceImpl(Presence presence, XMPPConnection connection) {
+    LimePresenceImpl(Presence presence, XMPPConnection connection, User user) {
         super(presence, connection);
+        this.user = user;
     }
     
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
         super(presence, connection);
         address = Objects.nonNull(limePresence, "limePresence").getPresenceAddress();
+        this.user = limePresence.getUser();
+    }
+    
+    @Override
+    public Friend getFriend() {
+        return getUser();
+    }
+    
+    @Override
+    public User getUser() {
+        return user;
     }
     
     @Override

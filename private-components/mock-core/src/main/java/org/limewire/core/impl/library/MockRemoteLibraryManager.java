@@ -28,7 +28,7 @@ public class MockRemoteLibraryManager implements RemoteLibraryManager {
     }
     
     @Override
-    public PresenceLibrary addPresenceLibrary(Friend friend, FriendPresence presence) {
+    public PresenceLibrary addPresenceLibrary(FriendPresence presence) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -39,7 +39,7 @@ public class MockRemoteLibraryManager implements RemoteLibraryManager {
         
     }
     @Override
-    public void removePresenceLibrary(Friend friend, FriendPresence presence) {
+    public void removePresenceLibrary(FriendPresence presence) {
         // TODO Auto-generated method stub
         
     }

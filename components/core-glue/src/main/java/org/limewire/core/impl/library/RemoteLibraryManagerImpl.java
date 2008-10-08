@@ -59,8 +59,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
     
     @Override
-    public PresenceLibrary addPresenceLibrary(Friend friend, FriendPresence presence) {
-        FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(friend);
+    public PresenceLibrary addPresenceLibrary(FriendPresence presence) {
+        FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());
         return friendLibrary.getOrCreatePresenceLibrary(presence);
     }
     
@@ -77,8 +77,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
     
     @Override
-    public void removePresenceLibrary(Friend friend, FriendPresence presence) {
-        FriendLibraryImpl friendLibrary = getFriendLibrary(friend);
+    public void removePresenceLibrary(FriendPresence presence) {
+        FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
         if (friendLibrary != null) {
             friendLibrary.removePresenceLibrary(presence);
             // TODO race condition

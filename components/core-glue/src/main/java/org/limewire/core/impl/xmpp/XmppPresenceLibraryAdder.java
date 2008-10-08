@@ -36,15 +36,15 @@ class XmppPresenceLibraryAdder implements RegisteringEventListener<RosterEvent> 
         }
     }    
 
-    private void userAdded(final User user) {
+    private void userAdded(User user) {
         user.addPresenceListener(new PresenceListener() {            
             public void presenceChanged(final Presence presence) {
                 if(presence instanceof FriendPresence) {
                     FriendPresence fPresence = (FriendPresence)presence;
                     if(presence.getType().equals(Presence.Type.available)) {
-                        remoteLibraryManager.addPresenceLibrary(user, fPresence);
+                        remoteLibraryManager.addPresenceLibrary(fPresence);
                     } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                        remoteLibraryManager.removePresenceLibrary(user, fPresence);
+                        remoteLibraryManager.removePresenceLibrary(fPresence);
                     }
                 }
             }

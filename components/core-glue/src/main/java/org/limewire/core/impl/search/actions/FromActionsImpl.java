@@ -38,23 +38,7 @@ public class FromActionsImpl implements FromActions {
         // TODO: Make this work so that friend libraries are jumped to
         //       instead of browsed!
         LOG.debugf("viewLibraryOf: {0}", person.getName());
-        remoteLibraryManager.addPresenceLibrary(new Friend() {
-            @Override
-            public String getId() {
-                return person.getId();
-            }
-            @Override
-            public String getName() {
-                return person.getName();
-            }
-            @Override
-            public String getRenderName() {
-                return person.getName();
-            }
-            @Override
-            public void setName(String name) {
-            }
-        }, new FriendPresence() {
+        remoteLibraryManager.addPresenceLibrary(new FriendPresence() {
             @Override
             public Address getPresenceAddress() {
                 return person.getAddress();
@@ -62,6 +46,27 @@ public class FromActionsImpl implements FromActions {
             @Override
             public String getPresenceId() {
                 return person.getId();
+            }
+            
+            @Override
+            public Friend getFriend() {
+                return new Friend() {
+                    @Override
+                    public String getId() {
+                        return person.getId();
+                    }
+                    @Override
+                    public String getName() {
+                        return person.getName();
+                    }
+                    @Override
+                    public String getRenderName() {
+                        return person.getName();
+                    }
+                    @Override
+                    public void setName(String name) {
+                    }
+                };
             }
         });
     }

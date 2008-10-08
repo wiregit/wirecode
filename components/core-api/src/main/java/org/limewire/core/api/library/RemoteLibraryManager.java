@@ -14,7 +14,7 @@ public interface RemoteLibraryManager {
      * is the first with that particular friend, a FriendLibrary
      * is created.
      */
-    PresenceLibrary addPresenceLibrary(Friend friend, FriendPresence presence);
+    PresenceLibrary addPresenceLibrary(FriendPresence presence);
     
     /**
      * Removes a presence from the list of presence libraries
@@ -22,7 +22,7 @@ public interface RemoteLibraryManager {
      * for the given friend, the friend is removed from the list
      * of friend libraries.
      */
-    void removePresenceLibrary(Friend friend, FriendPresence presence);
+    void removePresenceLibrary(FriendPresence presence);
     
     /**
      * Removes the given the entire FriendLibrary for the given Friend,

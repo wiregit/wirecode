@@ -9,6 +9,11 @@ import org.limewire.io.Address;
 public interface FriendPresence {
     
     /**
+     * Returns the containing friend.
+     */
+    Friend getFriend();
+    
+    /**
      * The ID of this specific presence.
      */
     String getPresenceId();
