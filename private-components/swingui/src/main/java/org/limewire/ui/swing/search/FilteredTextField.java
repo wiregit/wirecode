@@ -64,7 +64,7 @@ public class FilteredTextField extends JTextField implements FocusListener {
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             g.setColor(Color.black);
-            g.drawRoundRect(0, 0, c.getWidth()-1, c.getHeight()-1, 10, (c.getHeight()-1) / 2);                
+            g.drawRoundRect(0, 0, c.getWidth()-1, c.getHeight()-1, 10, c.getHeight());                
         }
         
     }
@@ -99,7 +99,7 @@ public class FilteredTextField extends JTextField implements FocusListener {
     @Override
     protected void paintComponent(Graphics g) {
         g.setColor(Color.white);
-        g.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, (getHeight()-1) / 2);
+        g.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());
         
         super.paintComponent(g);
 
