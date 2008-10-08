@@ -14,6 +14,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import org.jdesktop.swingx.JXLabel;
+import org.limewire.ui.swing.action.ActionKeys;
 import org.limewire.ui.swing.util.GuiUtils;
 
 
@@ -127,6 +128,7 @@ public class ActionLabel extends JXLabel  {
             String display = (String) currentAction.getValue(Action.NAME);
             setIcon((Icon) currentAction.getValue(Action.SMALL_ICON));
             setToolTipText((String) currentAction.getValue(Action.SHORT_DESCRIPTION));
+            setVisible(!Boolean.FALSE.equals(currentAction.getValue(ActionKeys.VISIBLE)));
             if(display != null) {
                 setText(display);
             }
@@ -139,6 +141,8 @@ public class ActionLabel extends JXLabel  {
                 setIcon((Icon)evt.getNewValue());
             } else if(id.equals(Action.SHORT_DESCRIPTION)) {
                 setToolTipText((String)evt.getNewValue());
+            } else if(id.equals(ActionKeys.VISIBLE)) {
+                setVisible(!Boolean.FALSE.equals(evt.getNewValue()));
             }
         }   
     }

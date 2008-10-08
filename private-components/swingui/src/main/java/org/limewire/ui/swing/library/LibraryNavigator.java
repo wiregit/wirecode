@@ -12,7 +12,6 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -40,6 +39,7 @@ import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.ui.swing.action.ActionKeys;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.components.ShiftedIcon;
 import org.limewire.ui.swing.lists.CategoryFilter;
@@ -55,6 +55,8 @@ import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -156,11 +158,13 @@ public class LibraryNavigator extends JXPanel {
             NavPanel panel = iter.next();
             if(panel.hasSelection()) {
                 if(!panel.incrementSelection()) {
-                    if(iter.hasNext()) {
-                        iter.next().selectFirst();
+                    while(iter.hasNext()) {
+                        if(iter.next().selectFirst()) {
+                            return; // We selected something!
+                        }
                     }
                 }
-                break;
+                return; // No selection possible.
             }
         }
     }
@@ -172,11 +176,13 @@ public class LibraryNavigator extends JXPanel {
             if(panel.hasSelection()) {
                 if(!panel.decrementSelection()) {
                     iter.previous(); // back us up a step.
-                    if(iter.hasPrevious()) {
-                        iter.previous().selectLast();
+                    while(iter.hasPrevious()) {
+                        if(iter.previous().selectLast()) {
+                            return; // We selected something!
+                        }
                     }
                 }
-                break;
+                return; // No selection possible.
             }
         }
     }
@@ -236,12 +242,29 @@ public class LibraryNavigator extends JXPanel {
         return decorateAction(action, navItem, (Disposable)component, category, filtered, friend);
     }
     
-    private Action decorateAction(Action action, NavItem navItem, final Disposable disposable,
-            final Category category, final FilterList<?> filterList, final Friend friend) {
+    private <T> Action decorateAction(final Action action, NavItem navItem, final Disposable disposable,
+            final Category category, final FilterList<T> filterList, final Friend friend) {
+        final ListEventListener<T> listener;
+        if(friend != Me.ME) {             
+             listener = new ListEventListener<T>() {
+                @Override
+                public void listChanged(ListEvent<T> listChanges) {
+                    action.putValue(ActionKeys.VISIBLE,filterList.size() > 0);
+                }
+            };
+            listener.listChanged(null); // initial sync
+            filterList.addListEventListener(listener);
+        } else {
+            listener = null;
+        }
+        
         action.putValue(Action.NAME, I18n.tr(category.toString()));
         navItem.addNavItemListener(new NavItemListener() {
             @Override
             public void itemRemoved() {
+                if(listener != null) {
+                    filterList.removeListEventListener(listener);
+                }
                 filterList.dispose();
                 disposable.dispose();
             }
@@ -253,26 +276,18 @@ public class LibraryNavigator extends JXPanel {
                 }
             }
         });
+        Icon icon;
         switch (category) {
-        case AUDIO:
-            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, audioIcon));
-            break;
-        case DOCUMENT:
-            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, documentIcon));
-            break;
-        case IMAGE:
-            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, imageIcon));
-            break;
-        case OTHER:
-            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, otherIcon));
-            break;
-        case PROGRAM:
-            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, appIcon));
-            break;
-        case VIDEO:
-            action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, videoIcon));
-            break;
+        case AUDIO:    icon = audioIcon; break;
+        case DOCUMENT: icon = documentIcon; break;
+        case IMAGE:    icon = imageIcon; break;
+        case OTHER:    icon = otherIcon; break;
+        case PROGRAM:  icon = appIcon; break;
+        case VIDEO:    icon = videoIcon; break;
+        default:
+            throw new IllegalArgumentException("invalid category: " + category);
         }
+        action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, icon));
         return action;
     }
     
@@ -297,14 +312,15 @@ public class LibraryNavigator extends JXPanel {
                     getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
                 }
             }, false);
+            categoryLabel.setMinimumSize(new Dimension(30, 0));
             categoryLabel.setForeground(textColor);
             categoryLabel.setFont(textFont);
-            statusIcon = new JXBusyLabel(new Dimension(16, 16));
+            statusIcon = new JXBusyLabel(new Dimension(12, 12));
             statusIcon.setOpaque(false);
-            add(categoryLabel, "gapbefore 12, gaptop 7, grow");
-            add(statusIcon, "gaptop 7, alignx right, gapafter 5, wrap");
+            add(categoryLabel, "gapbefore 12, gaptop 2, grow");
+            add(statusIcon, "gaptop 2, alignx right, gapafter 5, wrap");
             add(categories, "span 2, grow, wrap"); // the gap here is implicit in the width of the icon
-                                           // see decorateAction
+                                                   // see decorateAction
             updateLibraryState(libraryState);
         }
         
@@ -323,16 +339,16 @@ public class LibraryNavigator extends JXPanel {
             }
         }
 
-        public void selectFirst() {
-            categories.selectFirst();
+        public boolean selectFirst() {
+            return categories.selectFirst();
         }
 
         public boolean incrementSelection() {
             return categories.incrementSelection();
         }
 
-        public void selectLast() {
-            categories.selectLast();
+        public boolean selectLast() {
+            return categories.selectLast();
         }
 
         public boolean decrementSelection() {
@@ -370,36 +386,50 @@ public class LibraryNavigator extends JXPanel {
             this.categories = categoryActions;
             setOpaque(false);
             
+            // This must be subclassed because JXCollapsiblePanel forcibly
+            // changes it.
             JXPanel panel = new JXPanel(new MigLayout("gap 0, insets 0, fill")) {
                 @Override
                 public boolean isOpaque() {
                     return false;
                 }
             };
+            PropertyChangeListener changeListener = new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if(evt.getPropertyName().equals(Action.SELECTED_KEY) && Boolean.TRUE.equals(evt.getNewValue())) {
+                        lastSelectedAction = (Action)evt.getSource();
+                        requestFocus();
+                    } else if(evt.getPropertyName().equals(ActionKeys.VISIBLE)) {
+                        // Trigger a new animation for showing the new visibility.
+                        // Otherwise the height is incorrect.
+                        // Must call it twice because setting to the same state
+                        // is ignored.
+                        boolean collapsed = isCollapsed();
+                        setCollapsed(!collapsed);
+                        setCollapsed(collapsed);
+                    }
+                }
+            };
+            ActionListener actionListener = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    requestFocus();
+                }
+            };
             for(Category category : categories.keySet()) {
                 Action action = categories.get(category);
-                action.addPropertyChangeListener(new PropertyChangeListener() {
-                    @Override
-                    public void propertyChange(PropertyChangeEvent evt) {
-                        if(evt.getPropertyName().equals(Action.SELECTED_KEY) && Boolean.TRUE.equals(evt.getNewValue())) {
-                            lastSelectedAction = (Action)evt.getSource();
-                            requestFocus();
-                        }
-                    }
-                });
+                action.addPropertyChangeListener(changeListener);
                 CategoryLabel label = new CategoryLabel(action);
-                label.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        requestFocus();
-                    }
-                });
-                panel.add(label, "grow, wrap");
+                label.addActionListener(actionListener);
+                panel.add(label, "grow, wrap, hidemode 2");
             }
             setContentPane(panel);
-            // The below is a hack in order to set the viewport transparent.
+            
+            // HACK -- Required to set the viewport transparent.
             JViewport viewport = (JViewport)getComponent(0);
             viewport.setOpaque(false);
+            // END HACK
                         
             getActionMap().put(MoveDown.KEY, new MoveDown());
             getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), MoveDown.KEY);
@@ -408,57 +438,93 @@ public class LibraryNavigator extends JXPanel {
             getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), MoveUp.KEY);
         }
         
+        /** Returns true if any item is selected. */
         public boolean hasSelection() {
             for(Action action : categories.values()) {
-                if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+                if(isSelected(action)) {
                     return true;
                 }
             }
             return false;
         }
 
+        /**
+         * Selects the first visible item prior to the selected item
+         * If there is nothing visible prior, this returns false.
+         * Otherwise, returns true.
+         */
         public boolean decrementSelection() {
             List<Action> actions = new ArrayList<Action>(categories.values());
             ListIterator<Action> iter = actions.listIterator();
             while(iter.hasNext()) {
                 Action action = iter.next();
-                if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+                if(isSelected(action)) {
                     iter.previous(); // back us up a step.
-                    if(iter.hasPrevious()) {
-                        iter.previous().actionPerformed(null);
-                        return true;
-                    } else {
-                        return false;
+                    while(iter.hasPrevious()) {
+                        Action previous = iter.previous();
+                        if(isVisible(previous)) {
+                            previous.actionPerformed(null);
+                            return true;
+                        }
                     }
+                    return false;
                 }
             }
             return false;
         }
 
-        public void selectLast() {
-            LinkedList<Action> actions = new LinkedList<Action>(categories.values());
-            actions.getLast().actionPerformed(null);
+        /**
+         * Selects the last visible item & returns true. If there are no visible
+         * items, returns false.
+         */
+        public boolean selectLast() {
+            List<Action> actions = new ArrayList<Action>(categories.values());
+            ListIterator<Action> iter = actions.listIterator(actions.size());
+            while(iter.hasPrevious()) {
+                Action previous = iter.previous();
+                if(isVisible(previous)) {
+                    previous.actionPerformed(null);
+                    return true;
+                }
+            }
+            return false;
         }
 
+        /**
+         * Selects the first visible item after the selected item and returns
+         * true. If there are no visible items after, returns false.
+         */
         public boolean incrementSelection() {
             List<Action> actions = new ArrayList<Action>(categories.values());
             ListIterator<Action> iter = actions.listIterator();
             while(iter.hasNext()) {
                 Action action = iter.next();
-                if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
-                    if(iter.hasNext()) {
-                        iter.next().actionPerformed(null);
-                        return true;
-                    } else {
-                        return false;
+                if(isSelected(action)) {
+                    while(iter.hasNext()) {
+                        Action next = iter.next();
+                        if(isVisible(next)) {
+                            next.actionPerformed(null);
+                            return true;
+                        }
                     }
+                    return false;
                 }
             }
             return false;
         }
 
-        public void selectFirst() {
-            categories.values().iterator().next().actionPerformed(null);
+        /**
+         * Selects the first visible item and returns true. If there are no
+         * visible items, returns false.
+         */
+        public boolean selectFirst() {
+            for(Action action : categories.values()) {
+                if(isVisible(action)) {
+                    action.actionPerformed(null);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void dispose() {
@@ -470,10 +536,22 @@ public class LibraryNavigator extends JXPanel {
 
         public void ensureSelected() {
             if(lastSelectedAction == null) {
-                categories.get(Category.AUDIO).putValue(Action.SELECTED_KEY, true);
+                selectFirst();
             } else {
-                lastSelectedAction.putValue(Action.SELECTED_KEY, true);
+                setSelected(lastSelectedAction, true);
             }
+        }
+        
+        private boolean isVisible(Action action) {
+            return !Boolean.FALSE.equals(action.getValue(ActionKeys.VISIBLE));
+        }
+        
+        private boolean isSelected(Action action) {
+            return Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY));
+        }
+        
+        private void setSelected(Action action, boolean selected) {
+            action.putValue(Action.SELECTED_KEY, selected);
         }
     }
     
