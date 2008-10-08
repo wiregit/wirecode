@@ -22,4 +22,10 @@ public class FromActionsMockImpl implements FromActions {
     public void viewLibraryOf(RemoteHost person) {
         System.out.println("viewing library of " + person);
     }
+
+    @Override
+    public int getNumberOfSharedFiles(RemoteHost person) {
+        System.out.println("get number of shared files of " + person);
+        return 0;
+    }
 }

@@ -115,7 +115,8 @@ public class FromWidget extends JPanel {
     }
 
     private Action getSharingAction(final RemoteHost person) {
-        return new AbstractAction(tr("Files I'm Sharing")) {
+        int numberOfSharedFile = fromActions.getNumberOfSharedFiles(person);
+        return new AbstractAction(tr("Files I'm Sharing ({0})", numberOfSharedFile)) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fromActions.showFilesSharedBy(person);
