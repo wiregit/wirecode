@@ -425,4 +425,10 @@ public final class SearchSettings extends LimeProps {
     public static final BooleanSetting INCLUDE_METADATA_IN_PLAINTEXT_SEARCH =
         FACTORY.createRemoteBooleanSetting("INCLUDE_METADATA_IN_PLAINTEXT_SEARCH",
                 true, "SearchSettings.includeMetadataInPlaintextSearch");
+    
+    /**
+     * Setting for whether or not to group similar results
+     */
+    public static final BooleanSetting GROUP_SIMILAR_RESULTS_ENABLED =
+        FACTORY.createBooleanSetting("GROUP_SIMILAR_RESULTS_ENABLED", true);
 }

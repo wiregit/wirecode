@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 import org.limewire.ui.swing.search.model.GroupingListEventListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
@@ -35,10 +36,11 @@ public class SearchResultsModelFactory {
         SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory
                 .newSimilarResultsDetector();
 
-        GroupingListEventListener groupingListEventListener = new GroupingListEventListener(
+        if(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()) {
+            GroupingListEventListener groupingListEventListener = new GroupingListEventListener(
                 similarResultsDetector);
-        visualSearchResults.addListEventListener(groupingListEventListener);
-
+            visualSearchResults.addListEventListener(groupingListEventListener);
+        }
         SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager,
                 similarResultsDetector);
         visualSearchResults.addListEventListener(spamListEventListener);
