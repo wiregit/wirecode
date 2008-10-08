@@ -26,7 +26,6 @@ public class LibraryDownloadRendererEditor extends TableRendererEditor{
 
         downloadButton = new IconButton(downloadButtonIcon, downloadButtonIcon, downloadButtonPressedIcon);
         downloadButton.addActionListener(downloadAction);
-
         
         add(downloadButton);
     }

@@ -19,6 +19,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -77,13 +78,17 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
     }
     
     public void enableDownloading(DownloadListManager downloadListManager){
-        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(new DownloadAction(I18n.tr("download"), downloadListManager));
+        DownloadAction downloadAction = new DownloadAction(I18n.tr("download"), downloadListManager, this);
+        
+        setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
+        
+        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction);
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(downloadEditor);
         getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(downloadEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
         setRowHeight(downloadEditor.getPreferredSize().height);
-        hideColumns();
+        hideColumns();        
     }
     
     //TODO: this is quite brittle.  only works if column indexes are in descending order - need to do it a different way
@@ -109,20 +114,42 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         
     }
     
-    private class DownloadAction extends AbstractAction {
+    
+    private static class LibraryDownloadDoubleClickHandler implements TableDoubleClickHandler {
+
+        private DownloadAction action;
+
+        public LibraryDownloadDoubleClickHandler(DownloadAction action) {
+            this.action = action;
+        }
+
+        @Override
+        public void handleDoubleClick(int row) {
+            action.download(row);
+        }
+
+    }
+
+    private static class DownloadAction extends AbstractAction {
         //TODO: remove @SuppressWarnings and use this when patch is ready
         @SuppressWarnings("unused")
         private DownloadListManager downloadListManager;
-        public DownloadAction(String text, DownloadListManager downloadListManager){
+        private LibraryTable table;
+        public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table){
             super(text);
             this.downloadListManager = downloadListManager;
+            this.table = table;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow()));
-//            downloadListManager.addDownload(file.getRfd());
-            throw new RuntimeException("download me! " + file.getName());
+            download(table.convertRowIndexToModel(table.getEditingRow()));
+        }
+        
+        public void download(int row){
+            RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel)table.getModel()).getElementAt(row);
+//          downloadListManager.addDownload(file.getRfd());
+          throw new RuntimeException("download me! " + file.getName());
         }
         
     }

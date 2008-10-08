@@ -48,5 +48,4 @@ class FriendLibraryPanel extends JPanel implements Disposable {
     public void dispose() {
         ((EventTableModel)table.getModel()).dispose();
     }
-    
 }

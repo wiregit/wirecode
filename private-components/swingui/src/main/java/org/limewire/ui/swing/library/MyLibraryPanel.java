@@ -10,6 +10,7 @@ import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -24,7 +25,11 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
+import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.library.table.LibraryTableFactory.Type;
+import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.table.TableDoubleClickHandler;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventTableModel;
@@ -52,6 +57,7 @@ class MyLibraryPanel extends JPanel implements Disposable {
                 new TextComponentMatcherEditor<LocalFileItem>(header.getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         table = LibraryTableFactory.createTable(category, filterList, Type.LOCAL);
         table.enableSharing(sharePanel);
+        table.setDoubleClickHandler(new MyLibraryDoubleClickHandler((LibraryTableModel<LocalFileItem>)table.getModel()));
                 
         final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>() {});
         final JScrollPane scrollPane = new JScrollPane(layer);
@@ -103,6 +109,39 @@ class MyLibraryPanel extends JPanel implements Disposable {
         if(sharePanel != null){
             sharePanel.dispose();
         }
+    }
+    
+    private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
+        private LibraryTableModel<LocalFileItem> model;
+
+        public MyLibraryDoubleClickHandler(LibraryTableModel<LocalFileItem> model){
+            this.model = model;
+        }
+
+        @Override
+        public void handleDoubleClick(int row) {
+            File file = ((LocalFileItem)model.getFileItem(row)).getFile();
+            switch (model.getFileItem(row).getCategory()){
+            case AUDIO:
+                if (PlayerUtils.isPlayableFile(file)){
+                    PlayerUtils.play(file);
+                } else {                
+                    NativeLaunchUtils.launchFile(file);
+                }
+                break;
+            case OTHER:
+            case PROGRAM:
+                NativeLaunchUtils.launchExplorer(file);
+                break;
+            case IMAGE:
+                //TODO: image double click
+            case VIDEO:
+            case DOCUMENT:
+                NativeLaunchUtils.launchFile(file);
+            }
+            
+        }
+        
     }
    
 }
