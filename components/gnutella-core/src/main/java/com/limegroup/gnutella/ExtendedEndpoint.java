@@ -47,10 +47,10 @@ public class ExtendedEndpoint extends Endpoint {
     /** The value to use for timeRecorded if unknown.  Doesn't really matter. */
     static final long DEFAULT_TIME_RECORDED=0;
     /** The system time that dailyUptime was encountered, typically when this
-     *  was added to the system, or -1 if we don't know (in which case we'll use
-     *  DEFAULT_UPTIME_RECORDED for calculations) */
-    private volatile long timeRecorded=-1;
-
+     *  was added to the system, or -1 if we don't know (in which case we'll
+     *  use DEFAULT_UPTIME_RECORDED for calculations). This field doesn't seem
+     *  to be used - remove it? */
+    private final long timeRecorded;
 
     /** The value to use for dailyUptime if not reported by the user.
      * Rationale: by looking at version logs, we find that the average session
@@ -66,7 +66,7 @@ public class ExtendedEndpoint extends Endpoint {
     /** The average daily uptime in seconds, as reported by the "DU" GGEP
      *  extension, or -1 if we don't know (in which case we'll use
      *  DEFAULT_DAILY_UPTIME for calculations) */
-    private volatile int dailyUptime=-1;
+    private final int dailyUptime;
 
     /** The number of connection attempts (failures) to record. */
     static final int HISTORY_SIZE=3;
@@ -123,11 +123,13 @@ public class ExtendedEndpoint extends Endpoint {
      */
     public ExtendedEndpoint(String host, int port) { 
         super(host, port);
+        this.dailyUptime=-1;
         this.timeRecorded=now();
     }
     
     public ExtendedEndpoint(InetAddress addr, int port) { 
         super(addr, port);
+        this.dailyUptime=-1;
         this.timeRecorded=now();
     }
     
@@ -139,27 +141,16 @@ public class ExtendedEndpoint extends Endpoint {
     }
     
     /** 
-     * Creates a new ExtendedEndpoint without extended uptime information.  (The
-     * default will be used.)  The creation time is set to the current system
-     * time.  It is assumed that we have not yet attempted a connection to this.  
-     * Does not valid the host address.
-     */
-    public ExtendedEndpoint(String host, int port, boolean strict) { 
-        super(host, port, strict);
-        this.timeRecorded=now();
-    }    
-    
-    /**
-     * creates a new ExtendedEndpoint with the specified locale.
+     * Creates a new ExtendedEndpoint using data read from a file.
+     * It is assumed that we have not yet attempted a connection to this.  
      */
     public ExtendedEndpoint(String host, int port, int dailyUptime,
-                            String locale) {
-        super(host, port);
+                            long timeRecorded, boolean strict) { 
+        super(host, port, strict);
         this.dailyUptime = dailyUptime;
-        this.timeRecorded = now();
-        _clientLocale = locale;
+        this.timeRecorded = timeRecorded;
     }
-
+    
     /**
      * creates a new ExtendedEndpoint with the specified locale
      */
@@ -170,7 +161,7 @@ public class ExtendedEndpoint extends Endpoint {
     
     ////////////////////// Mutators and Accessors ///////////////////////
 
-    /** Returns the system time (in milliseconds) when this' was created. */
+    /** Returns the system time (in milliseconds) when this was created. */
     public long getTimeRecorded() {
         if (timeRecorded<0)
             return DEFAULT_TIME_RECORDED; //don't know
@@ -185,13 +176,6 @@ public class ExtendedEndpoint extends Endpoint {
             return DEFAULT_DAILY_UPTIME;   //don't know
         else
             return dailyUptime;
-    }
-    
-    /**
-     * a setter for the daily uptime.
-     */
-    public void setDailyUptime(int uptime) {
-    	dailyUptime = uptime;
     }
     
     /** A setter for supporting TLS. */
@@ -452,25 +436,26 @@ public class ExtendedEndpoint extends Endpoint {
             }
         }
 
-        //Build endpoint without any optional data.  (We'll set it if possible
-        //later.)
-        ExtendedEndpoint ret=new ExtendedEndpoint(host, port, false);                
-
         //2. Average uptime (optional)
+        int dailyUptime=-1;
         if (linea.length>=2) {
             try {
-                ret.dailyUptime=Integer.parseInt(linea[1].trim());
+                dailyUptime = Integer.parseInt(linea[1].trim());
             } catch (NumberFormatException e) { }
         }
-            
-        //3. Time of pong (optional).  Do NOT use current system tome
-        //   if not set.
-        ret.timeRecorded=DEFAULT_TIME_RECORDED;
+        
+        //3. Time of pong (optional). Do NOT use the system time by default
+        long timeRecorded=DEFAULT_TIME_RECORDED;
         if (linea.length>=3) {
             try {
-                ret.timeRecorded=Long.parseLong(linea[2].trim());
+                timeRecorded=Long.parseLong(linea[2].trim());
             } catch (NumberFormatException e) { }
         }
+        
+        // Build endpoint now that we have the uptime and time of pong; don't
+        // resolve the hostname
+        ExtendedEndpoint ret =
+            new ExtendedEndpoint(host, port, dailyUptime, timeRecorded, false);
 
         //4. Time of successful connects (optional)
         if (linea.length>=4) {

@@ -1553,13 +1553,11 @@ public class HostCatcher implements Service {
                 return;
             }
             
-            long now = System.currentTimeMillis();
-                
             //if we don't need hosts, exit.
-            if(!needsHosts(now))
+            if(!needsHosts())
                 return;
             
-            getHosts(now);
+            getHosts(System.currentTimeMillis());
         }
         
         /**
@@ -1575,7 +1573,7 @@ public class HostCatcher implements Service {
         /**
          * Determines whether or not we need more hosts.
          */
-        private synchronized boolean needsHosts(long now) {
+        private synchronized boolean needsHosts() {
             synchronized(HostCatcher.this) { 
                 return getNumHosts() == 0 ||
                     (!connectionServices.isConnected() && _failures > 100);

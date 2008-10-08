@@ -47,7 +47,13 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         } catch (NumberFormatException e) {
         }
     }
-
+    
+    public void testAssertionsEnabled() {
+        try {
+            assert(false);
+            fail("Assertions are not enabled");
+        } catch (AssertionError expected) {}
+    }
 
     //////////////////////////// Successes and Failures ////////////////////
 
@@ -171,6 +177,17 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(3, e.getDHTVersion());
         assertEquals(DHTMode.ACTIVE, e.getDHTMode());
     }
+   
+   public void testReadWriteUnknown() throws Exception {
+       ExtendedEndpoint e = ExtendedEndpoint.read("127.0.0.1:6348,,\n");
+       assertEquals(ExtendedEndpoint.DEFAULT_DAILY_UPTIME,
+               e.getDailyUptime());
+       assertEquals(ExtendedEndpoint.DEFAULT_TIME_RECORDED,
+               e.getTimeRecorded());
+       StringWriter writer = new StringWriter();
+       e.write(writer);
+       assertTrue(writer.toString().startsWith("127.0.0.1:6348,,0,"));
+   }
 
    public void testReadOldStyle() throws Exception {
         ExtendedEndpoint e=ExtendedEndpoint.read(
