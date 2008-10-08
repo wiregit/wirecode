@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,10 +13,8 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 
 import org.jdesktop.swingx.JXCollapsiblePane;
@@ -137,15 +136,18 @@ public class CategoryDownloadPanel extends JPanel {
 		collapsePane.add(table, BorderLayout.CENTER);
 
 		
-		final JPanel titlePanel = new JPanel(new VerticalLayout());
-		JLabel titleLabel = new JLabel(title);
-		//Set title labels to collapse their tables
-		titleLabel.addMouseListener(getClickListener(collapsePane
-				.getActionMap().get(JXCollapsiblePane.TOGGLE_ACTION)));
-		titlePanel.add(titleLabel);
-		titlePanel.add(new JSeparator());
-		titles.add(titlePanel);
-		tablePanel.add(titlePanel);
+	    // Heading code, temporarily removed for LWC-1571
+		
+		// final JPanel titlePanel = new JPanel(new VerticalLayout());
+		// JLabel titleLabel = new JLabel(title);
+		// Set title labels to collapse their tables
+		// titleLabel.addMouseListener(getClickListener(collapsePane
+		// 		.getActionMap().get(JXCollapsiblePane.TOGGLE_ACTION)));
+		// titlePanel.add(titleLabel);
+		// titlePanel.add(new JSeparator());
+		// titles.add(titlePanel);
+		// tablePanel.add(titlePanel);
+		
 		tablePanel.add(collapsePane);		
 	}
 

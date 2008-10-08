@@ -14,7 +14,7 @@ public class FancyDownloadTable extends DownloadTable {
 	    super(downloadItems); 
 		
 		setShowGrid(false, false);
-
+		
 		DownloadRendererEditor editor = new DownloadRendererEditor();
         editor.initializeEditor(downloadItems);
         getColumnModel().getColumn(0).setCellEditor(editor);
@@ -22,7 +22,7 @@ public class FancyDownloadTable extends DownloadTable {
 		DownloadRendererEditor renderer = new DownloadRendererEditor();		
 		getColumnModel().getColumn(0).setCellRenderer(renderer);
 		
-		setRowHeight(renderer.getPreferredSize().height);
+		setRowHeight(56);
     
     }
 

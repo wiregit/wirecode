@@ -84,7 +84,7 @@ public class DownloadButtonPanel extends JPanel {
 		add(resumeButton);
 		add(pauseButton);
 		add(tryAgainButton);
-		add(cancelButton);
+		// add(cancelButton);
 	}	
 	
 	public void setActionListener(ActionListener actionListener){

@@ -1,11 +1,14 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
@@ -13,12 +16,14 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.border.Border;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
@@ -51,117 +56,266 @@ public class DownloadRendererEditor extends JPanel implements
     
     private DownloadActionHandler actionHandler;
 		
-	private DownloadButtonPanel buttonPanel;
-	private CategoryIconLabel iconLabel;
-	private JLabel titleLabel;
-	private JLabel statusLabel;
-	private LimeProgressBar progressBar;
-    private JButton linkButton;
-	private JLabel timeLabel;
-	private DownloadEditorListener editorListener;
     
+    private JPanel mainFrame;
+    
+    private CardLayout statusViewLayout;
+    private final static String FULL_LAYOUT = "Full download display";
+    private JPanel fullPanel;
+    private final static String MIN_LAYOUT = "Condensed download display";
+    private JPanel minPanel;
+    
+
+    private DownloadButtonPanel minButtonPanel;
+    private CategoryIconLabel minIconLabel;
+    private JLabel minTitleLabel;
+    private JLabel minStatusLabel;
+    private JXHyperlink minLinkButton;
+    
+	private DownloadButtonPanel fullButtonPanel;
+	private CategoryIconLabel fullIconLabel;
+	private JLabel fullTitleLabel;
+	private JLabel fullStatusLabel;
+	private LimeProgressBar fullProgressBar;
+    private JLabel fullTimeLabel;
+	
+	private DownloadEditorListener editorListener;
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
     @Resource
     private Icon warningIcon;
-  
+    
+    private static final int PROGRESS_BAR_WIDTH = 538;
+    
+    private Color itemLabelColour     = new Color(0x21,0x52,0xa6);
+    private Color statusLabelColour   = new Color(0x31,0x31,0x31);
+    private Color stalledLabelColour  = new Color(0xb3,0x1c,0x20);
+    private Color finishedLabelColour = new Color(0x16,0x7e,0x11);
+    private Color linkColour          = new Color(0x2b,0x5b,0xaa);
+    private Color progressBarBorderColour = new Color(0x8a,0x8a,0x8a);
+    
+    private static final Font statusPlain = new Font("Arial", Font.PLAIN, 10);
+    private static final Font statusBold = new Font("Arial", Font.BOLD, 10);
+    
     private List<JComponent> textComponents = new ArrayList<JComponent>();
 
+    
+    
+    private void initComponents() {
+
+        editorListener = new DownloadEditorListener();
+        
+        minIconLabel = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
+        
+        minTitleLabel = new JLabel();
+        minTitleLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        minTitleLabel.setForeground(itemLabelColour);
+        textComponents.add(minTitleLabel);
+
+        minStatusLabel = new JLabel();
+        minStatusLabel.setFont(statusPlain);
+        minStatusLabel.setForeground(statusLabelColour);
+        textComponents.add(minStatusLabel);
+
+        minButtonPanel = new DownloadButtonPanel(editorListener);
+        minButtonPanel.setOpaque(false);
+
+        minLinkButton = new JXHyperlink();
+        minLinkButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
+        minLinkButton.addActionListener(editorListener);
+        minLinkButton.setForeground(linkColour);
+        minLinkButton.setFont(statusPlain);
+                                
+        fullIconLabel = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
+
+        fullTitleLabel = new JLabel();
+        fullTitleLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        fullTitleLabel.setForeground(itemLabelColour);
+        textComponents.add(fullTitleLabel);
+
+        fullStatusLabel = new JLabel();
+        fullStatusLabel.setFont(statusPlain);
+        fullStatusLabel.setForeground(statusLabelColour);
+        textComponents.add(fullStatusLabel);
+
+        fullProgressBar = new LimeProgressBar();
+        Dimension size = new Dimension(PROGRESS_BAR_WIDTH, 16);
+        fullProgressBar.setMaximumSize(size);
+        fullProgressBar.setMinimumSize(size);
+        fullProgressBar.setPreferredSize(size);
+        fullProgressBar.setBorder(BorderFactory.
+                createLineBorder(progressBarBorderColour));
+        
+
+        fullTimeLabel = new JLabel();
+        fullTimeLabel.setFont(statusPlain);
+        
+        fullButtonPanel = new DownloadButtonPanel(editorListener);
+        fullButtonPanel.setOpaque(false);
+    }
+    
+    private void createMinView() {
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        Insets insets = new Insets(0,10,0,0);
+        
+        gbc.insets = insets;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.gridheight = 3;
+        minPanel.add(minIconLabel, gbc);
+        
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight = 1;
+        minPanel.add(minTitleLabel, gbc);
+        
+        gbc.insets = new Insets(0,30,0,0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.gridx = 4;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 2;
+        minPanel.add(minButtonPanel, gbc);  
+        
+        gbc.insets = insets;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 0;
+        minPanel.add(minStatusLabel, gbc);
+       
+        gbc.insets = new Insets(0,0,0,0);
+        gbc.gridx++;
+        minPanel.add(minLinkButton, gbc);
+        
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.gridwidth = 3;
+        gbc.gridheight = 0;
+        minPanel.add(Box.createHorizontalStrut(PROGRESS_BAR_WIDTH-16), gbc);
+            
+    }
+    
+    private void createFullView() {
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        Insets insets = new Insets(0,10,0,0);
+        
+        gbc.insets = insets;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        fullPanel.add(fullIconLabel, gbc);
+        
+        gbc.insets = new Insets(0,5,0,0);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.SOUTHWEST;
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        fullPanel.add(fullTitleLabel, gbc);
+        
+        gbc.insets = new Insets(3,10,0,0);
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.gridwidth = 3;
+        fullPanel.add(fullProgressBar, gbc);
+        
+        gbc.insets = new Insets(0,30,0,0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.SOUTHWEST;
+        gbc.gridx += gbc.gridwidth;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        gbc.weighty = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 2;
+        fullPanel.add(fullButtonPanel, gbc);  
+        
+        gbc.insets = insets;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.gridwidth = 2;
+        gbc.gridheight = 1;
+        fullPanel.add(fullStatusLabel, gbc);
+        
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.gridwidth = 1;
+        fullPanel.add(fullTimeLabel, gbc);    
+    }
+    
 	/**
 	 * Create the panel
 	 */
 	public DownloadRendererEditor() {
 		GuiUtils.assignResources(this);
-		iconLabel = new CategoryIconLabel(CategoryIconLabel.Size.LARGE);
 
-		titleLabel = new JLabel();
-		titleLabel.setFont(new Font("", Font.BOLD, 18));
-		titleLabel.setText("Title - title - title");
-		textComponents.add(titleLabel);
+		statusViewLayout = new CardLayout();
+		mainFrame = new JPanel(statusViewLayout);
+		
+		fullPanel = new JPanel(new GridBagLayout());
+		minPanel  = new JPanel(new GridBagLayout());
+		
+		fullPanel.setOpaque(false);
+	    minPanel.setOpaque(false);
+	    mainFrame.setOpaque(false);
 
-		statusLabel = new JLabel();
-		statusLabel.setFont(new Font("", Font.PLAIN, 9));
-		statusLabel.setText("Downloading 2MB of 4322 MPG from Tom");
-        textComponents.add(statusLabel);
+	    Border blankBorder = BorderFactory.createEmptyBorder();
+	    fullPanel.setBorder(blankBorder);
+        minPanel.setBorder(blankBorder);
+        mainFrame.setBorder(blankBorder);
+        this.setBorder(blankBorder);
 
-		progressBar = new LimeProgressBar();
-		Dimension size = new Dimension(350, 25);
-		progressBar.setMaximumSize(size);
-		progressBar.setMinimumSize(size);
-		progressBar.setPreferredSize(size);
-
-		editorListener = new DownloadEditorListener();
+	    initComponents();
+	    createFullView();
+	    createMinView();
+        
+		this.setLayout(new BorderLayout());
 		
-		linkButton = new JXHyperlink();
-		linkButton.setActionCommand(DownloadActionHandler.LINK_COMMAND);
-        linkButton.setText("link button");
-        linkButton.addActionListener(editorListener);
-
-		timeLabel = new JLabel();
-		timeLabel.setFont(new Font("", Font.PLAIN, 9));
-		timeLabel.setText("13 years remaining");
+		mainFrame.add(fullPanel, FULL_LAYOUT);
+	    mainFrame.add( minPanel, MIN_LAYOUT);
+	    this.statusViewLayout.show(mainFrame, FULL_LAYOUT);
+	        
 		
-		buttonPanel = new DownloadButtonPanel(editorListener);
-		//show color of underlying panel
-		buttonPanel.setOpaque(false);
-
-		setLayout(new GridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.weightx = 0;
-		gbc.weighty = 1;
-		gbc.gridheight = 3;
-		add(iconLabel, gbc);
+	    this.add(this.mainFrame, BorderLayout.WEST);
 		
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.anchor = GridBagConstraints.NORTHWEST;
-		gbc.gridx = 1;
-		gbc.weightx = 1;
-		gbc.weighty = 0;
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		gbc.gridheight = 1;
-		add(titleLabel, gbc);
-		
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.anchor = GridBagConstraints.WEST;
-		gbc.gridx = 1;
-		gbc.gridy = 1;
-		gbc.weightx = 0;
-		gbc.weighty = 0;
-		gbc.gridwidth = 3;
-		add(progressBar, gbc);
-		
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.gridx += gbc.gridwidth;
-        gbc.gridy = 1;
-        gbc.weightx = 1;
-        gbc.weighty = 0;
-        gbc.gridwidth = 1;
-        add(buttonPanel, gbc);  
-		
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.anchor = GridBagConstraints.WEST;
-		gbc.gridx = 1;
-		gbc.gridy = 2;
-		gbc.weightx = 0;
-		gbc.weighty = 0;
-		gbc.gridwidth = 1;
-		add(statusLabel, gbc);
-		
-		gbc.gridx++;
-		add(linkButton, gbc);
-		
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.anchor = GridBagConstraints.EAST;
-		gbc.gridx++;
-		gbc.gridy = 2;
-		gbc.weightx = 0;
-		gbc.weighty = 0;
-		gbc.gridwidth = 1;
-		add(timeLabel, gbc);	
 	}	
 
 	 
@@ -242,33 +396,76 @@ public class DownloadRendererEditor extends JPanel implements
         }
 	}
 	
-	private void updateComponent(DownloadRendererEditor editor, DownloadItem item){
-	    editor.titleLabel.setText(item.getTitle());
-	    
-        if(item.getState() == DownloadState.ERROR || item.getState() == DownloadState.STALLED ){
-            editor.iconLabel.setIcon(warningIcon);
-        } else {
-            editor.iconLabel.setIcon(item.getCategory());           
+	private void updateMin(DownloadRendererEditor editor, DownloadItem item) {
+        
+        editor.minTitleLabel.setText(item.getTitle());
+        
+        switch (item.getState()) {
+        
+        
+        case ERROR :
+        case STALLED :
+            
+            editor.minIconLabel.setIcon(warningIcon);
+            editor.minStatusLabel.setForeground(stalledLabelColour);
+            editor.minStatusLabel.setFont(statusBold);
+            
+            break;
+            
+        case DONE :
+            
+            editor.minIconLabel.setIcon(item.getCategory());
+            editor.minStatusLabel.setForeground(finishedLabelColour);
+            editor.minStatusLabel.setFont(statusBold);
+            
+            break;
+            
+        default :
+            editor.minIconLabel.setIcon(item.getCategory());     
+            editor.minStatusLabel.setForeground(statusLabelColour);
+            editor.minStatusLabel.setFont(statusPlain);
+            
         }
+        
+        
+        editor.minStatusLabel.setText(getMessage(item));
+        
+        updateButtonsMin(item);      
+    }
+    
+	
+	
+	private void updateFull(DownloadRendererEditor editor, DownloadItem item) {
+	    
+	    editor.fullIconLabel.setIcon(item.getCategory());
+        editor.fullTitleLabel.setText(item.getTitle());
         
         long totalSize = item.getTotalSize();
         long curSize = item.getCurrentSize();
         if (curSize < totalSize) {
-            editor.progressBar.setHidden(false);
-            editor.progressBar.setMaximum((int) item.getTotalSize());
-            editor.progressBar.setValue((int) item.getCurrentSize());
-        } else {
-            progressBar.setHidden(true);
+            editor.fullProgressBar.setHidden(false);
+            editor.fullProgressBar.setMaximum((int) item.getTotalSize());
+            editor.fullProgressBar.setValue((int) item.getCurrentSize());
         }
-        editor.statusLabel.setText(getMessage(item));
-        if(item.getState() == DownloadState.DOWNLOADING){
-            editor.timeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
-            editor.timeLabel.setVisible(true);
-        } else {
-            editor.timeLabel.setVisible(false);
-        }
-        updateButtons(item);        
-
+        
+        editor.fullStatusLabel.setText(getMessage(item));
+        
+        editor.fullTimeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
+        editor.fullTimeLabel.setVisible(true);
+         
+        
+        updateButtonsFull(item);      
+	}
+	
+	private void updateComponent(DownloadRendererEditor editor, DownloadItem item){
+	    if (item.getState() == DownloadState.DOWNLOADING) {
+	        editor.statusViewLayout.show(mainFrame, FULL_LAYOUT);
+	        updateFull(editor, item);
+	    } 
+	    else {
+	        editor.statusViewLayout.show(mainFrame, MIN_LAYOUT);
+	        updateMin(editor, item);
+	    }
 	}
 
 
@@ -322,23 +519,43 @@ public class DownloadRendererEditor extends JPanel implements
 		return true;
 	}
 
-	private void updateButtons(DownloadItem item) {
+	   
+    private void updateButtonsMin(DownloadItem item) {
+        DownloadState state = item.getState();
+        minButtonPanel.updateButtons(state);
+        
+        switch (state) {
+        
+            case ERROR :
+                minLinkButton.setVisible(true);
+                minLinkButton.setText("<html><u>" + I18n.tr(item.getErrorState().getMessage()) + "</u></html>");
+                
+                break;
+                
+            case STALLED :
+
+                minLinkButton.setVisible(true);
+                minLinkButton.setText("<html><u>Refresh Now</u></html>");
+
+                break;
+                
+            default:
+                minLinkButton.setVisible(false);
+        }
+    }
+	
+	private void updateButtonsFull(DownloadItem item) {
 	    DownloadState state = item.getState();
-		buttonPanel.updateButtons(state);
-		if(state == DownloadState.ERROR){
-		    linkButton.setVisible(true);
-		    linkButton.setText("<html><u>" + I18n.tr(item.getErrorState().getMessage()) + "</u></html>");
-		} else {
-		    linkButton.setVisible(false);
-		}
+		fullButtonPanel.updateButtons(state);
+
 		if (state == DownloadState.DOWNLOADING) {
-			progressBar.setEnabled(true);
-			progressBar.setHidden(false);
+			fullProgressBar.setEnabled(true);
+			fullProgressBar.setHidden(false);
 		} else if (state == DownloadState.PAUSED) {
-			progressBar.setEnabled(false);
-			progressBar.setHidden(false);
+			fullProgressBar.setEnabled(false);
+			fullProgressBar.setHidden(false);
 		} else {
-			progressBar.setHidden(true);
+			fullProgressBar.setHidden(true);
 		}
 	}
 
@@ -378,9 +595,7 @@ public class DownloadRendererEditor extends JPanel implements
 			        item.getDownloadSourceCount());
 		case STALLED:
 			return I18n
-					.tr("Stalled - {0} of {1} ({2}%) from 0 people",
-					        GuiUtils.toUnitbytes(item.getCurrentSize()),
-					        GuiUtils.toUnitbytes(item.getTotalSize() ), item.getPercentComplete());
+					.tr("Stalled - ");
 		case ERROR:			
             return I18n.tr("Unable to download: ");
 		case PAUSED:

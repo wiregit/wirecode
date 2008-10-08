@@ -10,8 +10,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -33,7 +31,6 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.SimpleDownloadTable;
 import org.limewire.ui.swing.painter.SubpanelPainter;
-import org.limewire.ui.swing.sharing.ViewSelectionPanel;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -102,7 +99,7 @@ public class MainDownloadPanel extends JPanel {
 
     };
     
-    private ViewSelectionPanel viewSelectionPanel;
+//    private ViewSelectionPanel viewSelectionPanel;
     
 	/**
 	 * Create the panel
@@ -204,6 +201,8 @@ public class MainDownloadPanel extends JPanel {
 		public DownloadSettingsPanel() {
 			super(new BorderLayout());
 			
+			this.setPreferredSize(new Dimension(getPreferredSize().width, 34));
+			
 			Painter painter = new SubpanelPainter();
 			
 			setBackgroundPainter(painter);
@@ -223,11 +222,11 @@ public class MainDownloadPanel extends JPanel {
 			FontUtils.changeStyle(categorizeCheckBox, Font.PLAIN);
 			
 			searchBar = downloadMediator.getFilterTextField();
-			Dimension dim = searchBar.getPreferredSize();
-            searchBar.setPreferredSize(new Dimension(150, dim.height));
+			
+            searchBar.setPreferredSize(new Dimension(150,19));
 			
 
-	        ItemListener tableListener = new ItemListener() {
+	        /*ItemListener tableListener = new ItemListener() {
 	            @Override
 	            public void itemStateChanged(ItemEvent e) {
 	                if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -249,6 +248,7 @@ public class MainDownloadPanel extends JPanel {
 	        };
 
 	        viewSelectionPanel = new ViewSelectionPanel(listListener, tableListener);
+	        */
 	        
 	        categorizeAction.setEnabled(true);
 			
