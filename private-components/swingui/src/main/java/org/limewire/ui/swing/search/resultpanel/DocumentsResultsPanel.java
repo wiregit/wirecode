@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 
-import org.limewire.core.api.download.SearchResultDownloader;
+import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.ui.swing.nav.Navigator;
@@ -15,18 +15,18 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 public class DocumentsResultsPanel extends BaseResultPanel {
-        
+
     @AssistedInject
     public DocumentsResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
         DocumentTableFormat tableFormat,
-        SearchResultDownloader searchResultDownloader,
+        ResultDownloader resultDownloader,
         @Assisted Search search,
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
         FromActions fromActions) {
-        super(eventList, tableFormat, searchResultDownloader,
+        super(eventList, tableFormat, resultDownloader,
             search, searchInfo, preserver, navigator, fromActions);
     }
 }

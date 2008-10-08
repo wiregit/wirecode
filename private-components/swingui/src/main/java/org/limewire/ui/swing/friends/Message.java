@@ -7,7 +7,7 @@ import org.limewire.xmpp.api.client.FileMetaData;
  *
  */
 public interface Message {
-    enum Type { Sent, Received, FileOffer };
+    enum Type { Sent, Received };
     
     String getSenderName();
     
@@ -20,10 +20,8 @@ public interface Message {
     Type getType();
     
     long getMessageTimeMillis();
-    
-    /**
-     * 
-     * @return null for message types other than FileOffer
-     */
+
+    boolean hasFileOffer();
+
     FileMetaData getFileOffer();
 }

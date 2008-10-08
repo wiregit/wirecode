@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -124,7 +125,20 @@ public class CoreDownloadListManager implements DownloadListManager {
         return new CoreDownloadItem(downloader, queueTimeCalculator);
 	}
 
-	
+    public DownloadItem addDownload(RemoteFileDesc rfd) throws SaveLocationException {
+        File saveDir = null;
+        String fileName = null;
+        boolean overwrite = false;
+
+        RemoteFileDesc[] files = { rfd };
+        List<RemoteFileDesc> altLocList = Collections.emptyList();
+
+        Downloader downloader = downloadManager.download(files, altLocList, null, overwrite, saveDir, fileName);
+
+        return new CoreDownloadItem(downloader, queueTimeCalculator);
+    }
+
+
 	private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(
             List<? extends SearchResult> searchResults, List<RemoteFileDesc> altList) {
 	    RemoteFileDesc[] rfds = new RemoteFileDesc[searchResults.size()];

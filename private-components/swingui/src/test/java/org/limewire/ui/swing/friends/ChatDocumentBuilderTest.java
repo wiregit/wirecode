@@ -100,17 +100,36 @@ public class ChatDocumentBuilderTest extends TestCase {
         compareOutput(conversation.toString(), null, false, messages);
     }
     
+
+    /**
+     * Testing chat text after receiving file offer
+     */
     public void testBuildChatTextAfterBeingOfferedAFile() {
         StringBuilder conversation = new StringBuilder();
-        conversation.append("<div class=\"them\">you:</div>wants to share a file with you<br/>")
+        conversation.append("<div class=\"them\">you:</div>myName wants to share a file with you<br/>")
                     .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"heynow-fileid\"/><input type=\"submit\" value=\"Foo doc.doc\"/></form><br/>")
                     .append("Download it now, or get it from their <a href=\"#library\">Library</a> later.<br/>");
-        
-        MockChatFriend friend = new MockChatFriend(null, null, Mode.available);
+
+        MockChatFriend friend = new MockChatFriend("myName", null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
-        messages.add(new MockMessage(friend, null, 0, "you", Type.FileOffer, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
-        
+        messages.add(new MockMessage(friend, null, 0, "you", Type.Received, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
+
         compareOutput(conversation.toString(), ChatState.active, false, messages);
+    }
+
+    /**
+     * Testing chat text after sending file offer
+     */
+    public void testBuildChatTextAfterOfferingAFile() {
+        StringBuilder conversation = new StringBuilder();
+        conversation.append("<div class=\"me\">you:</div>Sharing file with myName<br/>")
+                    .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" ")
+                    .append("value=\"heynow-fileid\"/>")
+                    .append("<input type=\"submit\" value=\"Foo doc.doc:disabled\"/></form><br/><br/>");
+
+        MockChatFriend friend = new MockChatFriend("myName", null, Mode.available);
+        ArrayList<Message> messages = new ArrayList<Message>();
+        messages.add(new MockMessage(friend, null, 0, "you", Type.Sent, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
     }
 
     private void compareOutput(String input, String expected) {

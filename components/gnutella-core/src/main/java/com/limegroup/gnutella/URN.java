@@ -419,7 +419,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return a new <tt>URN</tt> built from the specified string
 	 * @throws <tt>IOException</tt> if there is an error
 	 */
-	private static URN createUrnFromString(final String urnString) 
+	public static URN createUrnFromString(final String urnString) 
 		throws IOException {
 		if(!URN.isValidUrn(urnString)) {
 			throw new IOException("invalid urn string: "+urnString);

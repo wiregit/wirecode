@@ -1,10 +1,13 @@
 package org.limewire.xmpp.api.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 public class MockFileMetadata implements FileMetaData {
     private String id;
@@ -56,13 +59,19 @@ public class MockFileMetadata implements FileMetaData {
     }
 
     @Override
-    public Set<URI> getURIs() throws URISyntaxException {
+    public Set<URN> getURNs() throws IOException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String toXML() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public RemoteFileDesc toRemoteFileDesc(LimePresence presence, RemoteFileDescFactory rfdFactory)
+    throws IOException {
         // TODO Auto-generated method stub
         return null;
     }

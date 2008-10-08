@@ -56,4 +56,9 @@ public class MockMessage implements Message {
     public FileMetaData getFileOffer() {
         return fileOffer;
     }
+
+    @Override
+    public boolean hasFileOffer() {
+        return (fileOffer != null);
+    }
 }

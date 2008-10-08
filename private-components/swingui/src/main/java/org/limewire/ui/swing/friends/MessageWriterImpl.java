@@ -4,6 +4,8 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 
 class MessageWriterImpl implements MessageWriter {
     private final String localID;

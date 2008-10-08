@@ -16,6 +16,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
+import com.limegroup.gnutella.RemoteFileDesc;
 
 public class MockDownloadListManager implements DownloadListManager {
 	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
@@ -61,7 +62,12 @@ public class MockDownloadListManager implements DownloadListManager {
 
 	    return mdi;
 	}
-	
+
+    public DownloadItem addDownload(RemoteFileDesc rfds) {
+        return new MockDownloadItem("download from 1 source", 0,
+                DownloadState.DOWNLOADING, Category.IMAGE);
+    }
+
 	public synchronized void addDownload(DownloadItem downloadItem){
 	    downloadItem.addPropertyChangeListener(cancelListener);
 		downloadItems.add(downloadItem);

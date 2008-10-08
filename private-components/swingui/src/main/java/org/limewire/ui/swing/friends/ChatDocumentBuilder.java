@@ -120,20 +120,27 @@ class ChatDocumentBuilder {
 
     private static String processContent(Message message) {
         String messageText = message.getMessageText();
-        if (message.getType() == Type.FileOffer) {
+        if (message.hasFileOffer()) {
             StringBuilder bldr = new StringBuilder();
             FileMetaData offeredFile = message.getFileOffer();
-            bldr.append(tr("wants to share a file with you"))
+            boolean isIncoming = (message.getType() == Message.Type.Received);
+            String fileOfferReceived = tr("{0} wants to share a file with you", message.getFriendID());
+            String fileOfferSent = tr("Sharing file with {0}", message.getFriendID());
+
+            bldr.append(isIncoming ? fileOfferReceived : fileOfferSent)
                 .append("<br/>")
                 .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"")
-                .append(offeredFile.getId())
+                .append(offeredFile.toXML())
                 .append("\"/><input type=\"submit\" value=\"")
                 .append(offeredFile.getName())
-                .append("\"/></form><br/>")
+                .append(isIncoming ? "\"/>" : ":disabled\"/>")
+                .append("</form><br/>");
+
+            if (isIncoming) {
                 // {0} and {1} are HTML tags that make Library a link
-                .append(tr("Download it now, or get it from their {0}Library{1} later.","<a href=\"" + LIBRARY_LINK + "\">",
-                "</a>"));
-                
+                bldr.append(tr("Download it now, or get it from their " +
+                               "{0}Library{1} later.","<a href=\"" + LIBRARY_LINK + "\">", "</a>"));
+            }
             return bldr.toString();
         }
         messageText = messageText.replace("<", "&lt;").replace(">", "&gt;");

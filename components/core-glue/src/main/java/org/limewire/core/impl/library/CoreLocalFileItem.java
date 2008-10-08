@@ -1,6 +1,7 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -17,11 +18,19 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
+import org.limewire.io.Connectable;
+import org.limewire.io.Address;
+import org.limewire.ui.swing.friends.MessageReceivedEvent;
+import org.limewire.ui.swing.friends.MessageImpl;
+import org.limewire.ui.swing.friends.Message;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.LocalFileDetailsFactory;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 public class CoreLocalFileItem implements LocalFileItem {
 
@@ -121,26 +130,14 @@ public class CoreLocalFileItem implements LocalFileItem {
         fileMetaData.setIndex(details.getIndex());
         fileMetaData.setName(details.getFileName());
         fileMetaData.setSize(details.getSize());
-        fileMetaData.setURIs(copy(details.getUrns()));
+        fileMetaData.setURNs(details.getUrns());
 
         presence.offerFile(fileMetaData);
     }
 
-    private Set<URI> copy(Set<URN> urns) {
-        Set<URI> uris = new HashSet<URI>();
-        for(URN urn : urns) {
-            try {
-                uris.add(new URI(urn.toString()));
-            } catch (URISyntaxException e) {
-                //LOG.debugf(e.getMessage(), e);
-            }
-        }
-        return uris;
-    }
-
     private static class FileMetaDataImpl implements FileMetaData {
         private enum Element {
-            id, name, size, description, index, metadata, uris, createTime
+            id, name, size, description, index, metadata, urns, createTime
         }
 
         private final Map<Element, String> data = new HashMap<Element, String>();
@@ -190,21 +187,21 @@ public class CoreLocalFileItem implements LocalFileItem {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        public Set<URI> getURIs() throws URISyntaxException {
-            StringTokenizer st = new StringTokenizer(data.get(Element.uris), " ");
-            HashSet<URI> set = new HashSet<URI>();
-            while(st.hasMoreElements()) {
-                set.add(new URI(st.nextToken()));
+        public Set<URN> getURNs() throws IOException {
+            StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
+            HashSet<URN> set = new HashSet<URN>();
+            while (st.hasMoreElements()) {
+                set.add(URN.createUrnFromString((st.nextToken())));
             }
             return set;
         }
 
-        public void setURIs(Set<URI> uris) {
-            String urisString = "";
-            for(URI uri : uris) {
-                urisString += uri  + " ";
+        public void setURNs(Set<URN> urns) {
+            String urnsString = "";
+            for (URN urn : urns) {
+                urnsString += urn + " ";
             }
-            data.put(Element.uris, urisString);
+            data.put(Element.urns, urnsString);
         }
 
         public Date getCreateTime() {
@@ -227,6 +224,33 @@ public class CoreLocalFileItem implements LocalFileItem {
             return fileMetadata;
         }
 
+        public RemoteFileDesc toRemoteFileDesc(LimePresence presence,
+                                               RemoteFileDescFactory rfdFactory) throws IOException {
+            Connectable publicAddress;
+            Address address = presence.getPresenceAddress();
+            byte[] clientGuid = null;
+            boolean firewalled;
+            Set<Connectable> proxies = null;
+            int fwtVersion = 0;
+            Set<URN> urns = getURNs();
+
+            if (address instanceof FirewalledAddress) {
+                firewalled = true;
+                FirewalledAddress fwAddress = (FirewalledAddress) address;
+                publicAddress = fwAddress.getPublicAddress();
+                clientGuid = fwAddress.getClientGuid().bytes();
+                proxies = fwAddress.getPushProxies();
+                fwtVersion = fwAddress.getFwtVersion();
+            } else {
+                assert address instanceof Connectable;
+                firewalled = false;
+                publicAddress = (Connectable) address;
+            }
+            return rfdFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(),
+                    getIndex(), getName(), getSize(), clientGuid, 0, false, 0, true, null, urns, false,
+                    firewalled, null, proxies, getCreateTime().getTime(), fwtVersion,
+                    publicAddress.isTLSCapable());
+        }
     }
 
     public FileDetails getFileDetails() {

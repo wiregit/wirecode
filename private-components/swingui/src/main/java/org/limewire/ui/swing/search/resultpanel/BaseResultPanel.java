@@ -18,7 +18,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.logging.Log;
@@ -44,19 +43,19 @@ public abstract class BaseResultPanel extends JXPanel {
     private ConfigurableTable<VisualSearchResult> resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
     private final Search search;
-    private final SearchResultDownloader searchResultDownloader;
+    private final org.limewire.core.api.download.ResultDownloader resultDownloader;
     
     private Scrollable visibileComponent;
     
     BaseResultPanel(EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
-            SearchResultDownloader searchResultDownloader,
+            org.limewire.core.api.download.ResultDownloader resultDownloader,
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
             Navigator navigator, FromActions fromActions) {
         this.baseEventList = eventList;
-        this.searchResultDownloader = searchResultDownloader;
+        this.resultDownloader = resultDownloader;
         this.search = search;
         
         setLayout(layout);
@@ -204,7 +203,7 @@ public abstract class BaseResultPanel extends JXPanel {
             // TODO: Need to go through some of the rigor that
             // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
             // went through.. checking for conflicts, etc.
-            DownloadItem di = searchResultDownloader.addDownload(
+            DownloadItem di = resultDownloader.addDownload(
                 search, vsr.getCoreSearchResults());
             di.addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent evt) {

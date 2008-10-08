@@ -12,6 +12,7 @@ import java.awt.Insets;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JComponent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.text.JTextComponent;
@@ -30,9 +32,12 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -48,12 +53,14 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.XMLUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -61,6 +68,10 @@ import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.http.HTTPUtils;
 
 /**
  *
@@ -82,10 +93,13 @@ public class ConversationPane extends JPanel implements Displayable {
     private final FriendSharingDisplay friendSharingDisplay;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
+    private final RemoteFileDescFactory rfdFactory;
+    private final ResultDownloader downloader;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, 
-            ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay) {
+            ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
+            RemoteFileDescFactory rfdFactory, ResultDownloader downloader) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.conversationName = chatFriend.getName();
@@ -93,6 +107,8 @@ public class ConversationPane extends JPanel implements Displayable {
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
         this.friendSharingDisplay = friendSharingDisplay;
+        this.rfdFactory = rfdFactory;
+        this.downloader = downloader;
         
         setLayout(new BorderLayout());
         
@@ -120,7 +136,9 @@ public class ConversationPane extends JPanel implements Displayable {
         editorKit.setAutoFormSubmission(false);
         
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
-        
+
+        FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, new ShareLocalFileList());
+        editor.setDropTarget(friendShare.getDropTarget());
         scroll.getViewport().add(editor);
         
         add(footerPanel(writer, chatFriend), BorderLayout.SOUTH);
@@ -141,7 +159,7 @@ public class ConversationPane extends JPanel implements Displayable {
             currentChatState = ChatState.active;
         }
         
-        if (type == Type.FileOffer) {
+        if (message.hasFileOffer()) {
             FileMetaData fileOffer = message.getFileOffer();
             idToFileMetaDataMap.put(fileOffer.getId(), fileOffer);
         }
@@ -222,6 +240,14 @@ public class ConversationPane extends JPanel implements Displayable {
                 if (!extension.isEmpty()) {
                     Icon icon = iconManager.getIconForExtension(extension);
                     button.setIcon(icon);
+
+                    // Using end of button text to determine whether button shouild be disabled
+                    // then disable it.  This is because JEditorPane does not disable buttons
+                    // disabled in the form html
+                    if (buttonText.endsWith(":disabled")) {
+                        button.setText(buttonText.substring(0, buttonText.lastIndexOf(":disabled")));
+                        button.setEnabled(false);
+                    }
                 }
             }
         }
@@ -271,8 +297,24 @@ public class ConversationPane extends JPanel implements Displayable {
                 FormSubmitEvent event = (FormSubmitEvent) e;
                 //Just pushed the download the file button...
                 LOG.debugf("File offer download requested. FileId: {0}", event.getData());
-                //TODO: Initiate download of shared file from friend
-                
+
+                // Initiate download of shared file from friend
+                RemoteFileDesc rfd;
+                try {
+                    rfd = extractToRemoteFileDesc(event);
+                } catch (IOException e1) {
+                    LOG.error("Unable to save the download", e1);  //TODO: maybe pop up a dialog
+                    return;
+                }
+
+                try {
+                    DownloadItem item = downloader.addDownload(rfd);
+                } catch (SaveLocationException e1) {
+                    LOG.error("Unable to save the download", e1);  //TODO: maybe pop up a dialog
+                }
+
+                // TODO: Track download states by adding listeners to dl item
+
             } else if (EventType.ACTIVATED == e.getEventType()) {
                 if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
                     LOG.debugf("Opening a view to {0}'s library", chatFriend.getName());
@@ -290,6 +332,19 @@ public class ConversationPane extends JPanel implements Displayable {
                 }
             }
         }
+        
+        private RemoteFileDesc extractToRemoteFileDesc(FormSubmitEvent event) throws IOException {
+
+            String encodedFileMetadata = URLDecoder.decode(HTTPUtils.parseValue(event.getData()));
+            FileMetaData offeredFile = new FileMetaDataImpl(XMLUtils.getDocument(encodedFileMetadata));
+
+            // must be lime on the other side
+            Presence chatPresence = chatFriend.getPresence();
+            assert chatPresence instanceof LimePresence;
+
+            return offeredFile.toRemoteFileDesc((LimePresence)chatPresence, rfdFactory);
+
+        }
     }
 
     public void offerFile(LocalFileItem file) {
@@ -301,7 +356,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private class FriendShareDropTarget extends ShareDropTarget {
         private final ShareLocalFileList fileList;
 
-        public FriendShareDropTarget(JTextComponent component, ShareLocalFileList fileList) {
+        public FriendShareDropTarget(JComponent component, ShareLocalFileList fileList) {
             super(component, fileList);
             this.fileList = fileList;
         }
@@ -354,7 +409,7 @@ public class ConversationPane extends JPanel implements Displayable {
         public void addFile(File file) {
             LocalFileList friendList = libraryManager.getOrCreateFriendShareList(chatFriend.getFriend());
             friendList.addFile(file);
-            for (LocalFileItem item : friendList.getSwingModel()) {
+            for (LocalFileItem item : friendList.getModel()) {
                 if (file.getPath().equals(item.getFile().getPath())) {
                     eventList.add(item);
                 }

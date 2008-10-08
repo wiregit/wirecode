@@ -2,7 +2,7 @@ package org.limewire.ui.swing.friends;
 
 import org.limewire.xmpp.api.client.FileMetaData;
 
-class MessageImpl implements Message {
+public class MessageImpl implements Message {
     private final String friendName;
     private final String friendID;
     private final String senderName;
@@ -24,32 +24,44 @@ class MessageImpl implements Message {
         this.messageTimeMillis = System.currentTimeMillis();
         this.fileOffer = fileMetaData;
     }
-    
+
+    @Override
     public String getFriendName() {
         return friendName;
     }
 
+    @Override
     public String getFriendID() {
         return friendID;
     }
 
+    @Override
     public String getMessageText() {
         return message;
     }
 
+    @Override
     public String getSenderName() {
         return senderName;
     }
 
+    @Override
     public Type getType() {
         return type;
     }
 
+    @Override
     public long getMessageTimeMillis() {
         return messageTimeMillis;
     }
 
+    @Override
     public FileMetaData getFileOffer() {
         return fileOffer;
+    }
+
+    @Override
+    public boolean hasFileOffer() {
+        return (fileOffer != null);
     }
 }

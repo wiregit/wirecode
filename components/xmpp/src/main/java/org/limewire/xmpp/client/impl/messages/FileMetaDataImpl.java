@@ -1,8 +1,6 @@
 package org.limewire.xmpp.client.impl.messages;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,14 +8,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.xmpp.api.client.LimePresence;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class FileMetaDataImpl implements FileMetaData {
 
     private enum Element {
-        id, name, size, description, index, metadata, uris, createTime
+        id, name, size, description, index, metadata, urns, createTime
     }
 
     private final Map<Element, String> data = new HashMap<Element, String>();
@@ -35,15 +42,31 @@ public class FileMetaDataImpl implements FileMetaData {
             }
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
     }
+
+    public FileMetaDataImpl(Node fileNode) {
+        Node firstNode = fileNode.getFirstChild();
+        if (!firstNode.getNodeName().equals("file")) {
+            throw new IllegalArgumentException("Invalid XML");
+        }
+        NodeList nodes = firstNode.getChildNodes();
+        int numberOfNodes = nodes.getLength();
+        for (int i=0; i<numberOfNodes; i++) {
+            Node node = nodes.item(i);
+            String key = node.getNodeName();
+            String value = node.getTextContent();
+            data.put(Element.valueOf(key), value);
+        }
+
+    }
     
-    public FileMetaDataImpl(FileMetaData metaData) throws URISyntaxException {
+    public FileMetaDataImpl(FileMetaData metaData) throws IOException {
         setCreateTime(metaData.getCreateTime());
         setDescription(metaData.getDescription());
         setId(metaData.getId());
         setIndex(metaData.getIndex());
         setName(metaData.getName());
         setSize(metaData.getSize());
-        setURIs(metaData.getURIs());
+        setURNs(metaData.getURNs());
     }
     
     public FileMetaDataImpl() {
@@ -95,21 +118,21 @@ public class FileMetaDataImpl implements FileMetaData {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Set<URI> getURIs() throws URISyntaxException {
-        StringTokenizer st = new StringTokenizer(data.get(Element.uris), " ");
-        HashSet<URI> set = new HashSet<URI>();
+    public Set<URN> getURNs() throws IOException {
+        StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
+        HashSet<URN> set = new HashSet<URN>();
         while(st.hasMoreElements()) {
-            set.add(new URI(st.nextToken()));
+            set.add(URN.createUrnFromString((st.nextToken())));
         }
         return set;
     }
     
-    public void setURIs(Set<URI> uris) {
-        String urisString = "";
-        for(URI uri : uris) {
-            urisString += uri  + " ";
+    public void setURNs(Set<URN> urns) {
+        String urnsString = "";
+        for(URN urn : urns) {
+            urnsString += urn  + " ";
         }
-        data.put(Element.uris, urisString);
+        data.put(Element.urns, urnsString);
     }
 
     public Date getCreateTime() {
@@ -130,5 +153,35 @@ public class FileMetaDataImpl implements FileMetaData {
         }
         fileMetadata += "</file>";
         return fileMetadata;
+    }
+
+    public RemoteFileDesc toRemoteFileDesc(LimePresence presence, 
+                                           RemoteFileDescFactory rfdFactory) throws IOException {
+        Connectable publicAddress;
+        Address address = presence.getPresenceAddress();
+        byte[] clientGuid = null;
+        boolean firewalled;
+        Set<Connectable> proxies = null;
+        int fwtVersion = 0;
+        Set<URN> urns = getURNs();
+
+        if (address instanceof FirewalledAddress) {
+            firewalled = true;
+            FirewalledAddress fwAddress = (FirewalledAddress)address;
+            publicAddress = fwAddress.getPublicAddress();
+            clientGuid = fwAddress.getClientGuid().bytes();
+            proxies = fwAddress.getPushProxies();
+            fwtVersion = fwAddress.getFwtVersion();
+        } else {
+            assert address instanceof Connectable;
+            firewalled = false;
+            publicAddress = (Connectable)address;
+        }
+
+        return rfdFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(),
+                getIndex(), getName(), getSize(), clientGuid, 0, false, 0, true, null, urns, false,
+                firewalled, null, proxies, getCreateTime().getTime(), fwtVersion,
+                publicAddress.isTLSCapable());
+
     }
 }

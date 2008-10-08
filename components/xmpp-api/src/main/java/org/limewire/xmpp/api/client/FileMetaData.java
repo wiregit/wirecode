@@ -5,6 +5,11 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+import java.io.IOException;
+
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 /**
  * The file meta-data necessary to do a file exchange
@@ -17,7 +22,8 @@ public interface FileMetaData {
     public String getDescription();
     public long getIndex();
     public Map<String, String> getMetaData();
-    public Set<URI> getURIs() throws URISyntaxException;
+    public Set<URN> getURNs() throws IOException;
     public Date getCreateTime();
     public String toXML();
+    public RemoteFileDesc toRemoteFileDesc(LimePresence presence, RemoteFileDescFactory rfdFactory) throws IOException;
 }
