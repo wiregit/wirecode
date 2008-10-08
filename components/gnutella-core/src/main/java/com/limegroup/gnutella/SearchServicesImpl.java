@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.util.Set;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.io.Address;
@@ -215,11 +216,11 @@ public class SearchServicesImpl implements SearchServices {
     }
 
     @Override
-    public BrowseHostHandler doAsynchronousBrowseHost(final Address address, GUID guid) {
+    public BrowseHostHandler doAsynchronousBrowseHost(final Address address, GUID guid, final BrowseListener browseListener) {
         final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid);
         ThreadExecutor.startThread(new DebugRunnable(new Runnable() {
             public void run() {
-                handler.browseHost(address);
+                handler.browseHost(address, browseListener);
             }
         }), "BrowseHoster" );
         return handler;

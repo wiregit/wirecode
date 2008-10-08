@@ -46,7 +46,7 @@ public class CoreBrowse implements Browse {
         listener = new BrowseResultAdapter(browseListener);
         listenerList.addQueryReplyListener(browseGuid, listener);
         
-        searchServices.doAsynchronousBrowseHost(addr, new GUID(browseGuid));
+        searchServices.doAsynchronousBrowseHost(addr, new GUID(browseGuid), browseListener);
     }
 
     @Override

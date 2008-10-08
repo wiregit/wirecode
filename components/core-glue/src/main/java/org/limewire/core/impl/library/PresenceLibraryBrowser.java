@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.library.FriendLibrary;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -44,12 +45,21 @@ public class PresenceLibraryBrowser {
                                     if(listChanges.getType() == ListEvent.INSERT) {
                                         final PresenceLibrary presenceLibrary = listChanges.getSourceList().get(listChanges.getIndex());
                                         Address address = presenceLibrary.getPresence().getAddress();
+                                        presenceLibrary.setState(LibraryState.LOADING);
                                         LOG.debugf("browsing {0} ...", presenceLibrary.getPresence().getJID());
                                         browseFactory.createBrowse(address).start(new BrowseListener() {
                                             public void handleBrowseResult(SearchResult searchResult) {
                                                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                                                 RemoteFileItem file = new CoreRemoteFileItem((RemoteFileDescAdapter)searchResult);
                                                 presenceLibrary.addFile(file);
+                                            }
+                                            @Override
+                                            public void browseFinished(boolean success) {
+                                                if(success) {
+                                                    presenceLibrary.setState(LibraryState.LOADED);
+                                                } else {
+                                                    presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
+                                                }
                                             }
                                         });
                                     }

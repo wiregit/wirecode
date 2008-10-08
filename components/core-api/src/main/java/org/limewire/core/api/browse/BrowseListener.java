@@ -4,4 +4,5 @@ import org.limewire.core.api.search.SearchResult;
 
 public interface BrowseListener {
     void handleBrowseResult(SearchResult searchResult);
+    void browseFinished(boolean success);
 }

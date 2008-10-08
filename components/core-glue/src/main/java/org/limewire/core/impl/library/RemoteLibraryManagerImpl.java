@@ -1,16 +1,20 @@
 package org.limewire.core.impl.library;
 
 import java.awt.EventQueue;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Comparator;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendLibrary;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
@@ -20,10 +24,14 @@ import org.limewire.xmpp.api.client.User;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.ObservableElementList.Connector;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.ReadOnlyList;
-import ca.odell.glazedlists.impl.ThreadSafeList;
 import ca.odell.glazedlists.util.concurrent.Lock;
 
 import com.google.inject.Inject;
@@ -37,7 +45,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
 
     @Inject
     public RemoteLibraryManagerImpl() {
-        allFriendLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>());
+        Connector<FriendLibrary> connector = GlazedLists.beanConnector(FriendLibrary.class);        
+        allFriendLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>()), connector);
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries);
     }
 
@@ -144,14 +153,15 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
     private static class FriendLibraryImpl implements FriendLibrary {
         private final Friend friend;
 
-        private final ThreadSafeList<PresenceLibrary> allPresenceLibraries;
+        private final ObservableElementList<PresenceLibrary> allPresenceLibraries;
         private final ReadOnlyList<PresenceLibrary> readOnlyPresenceLibraries;
         
         private final CompositeList<RemoteFileItem> compositeList;
         private final UniqueList<RemoteFileItem> threadSafeUniqueList;
         private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
-
-//        private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
+        
+        private final PropertyChangeSupport changeSupport;
+        private volatile LibraryState state;
 
         public FriendLibraryImpl(Friend friend) {
             this.friend = friend;
@@ -164,8 +174,20 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
                 }
             });
             
-            allPresenceLibraries = GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>());
+            changeSupport = new PropertyChangeSupport(this);
+            
+            Connector<PresenceLibrary> connector = GlazedLists.beanConnector(PresenceLibrary.class);            
+            allPresenceLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>()), connector);
             readOnlyPresenceLibraries = GlazedListsFactory.readOnlyList(allPresenceLibraries);
+            
+            allPresenceLibraries.addListEventListener(new ListEventListener<PresenceLibrary>() {
+                @Override
+                public void listChanged(ListEvent<PresenceLibrary> listChanges) {
+                    LibraryState oldState = state;
+                    state = calculateState();
+                    changeSupport.firePropertyChange("state", oldState, state);
+                }
+            });
         }
         
         @Override
@@ -173,20 +195,35 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
             return readOnlyPresenceLibraries;
         }
         
-//        @Override
-//        public void addPropertyChangeListener(PropertyChangeListener listener) {
-//            changeSupport.addPropertyChangeListener(listener);
-//        }
-//        
-//        @Override
-//        public void removePropertyChangeListener(PropertyChangeListener listener) {
-//            changeSupport.removePropertyChangeListener(listener);
-//        }
-//        
-//        @Override
-//        public LibraryState getState() {
-//            return null; // TODO: calculate state
-//        }
+        @Override
+        public LibraryState getState() {
+            return state;
+        }
+        
+        private LibraryState calculateState() {
+            Lock lock = allPresenceLibraries.getReadWriteLock().readLock();
+            lock.lock();
+            try {
+                boolean oneCompleted = false;
+                for(PresenceLibrary library : allPresenceLibraries) {
+                    switch (library.getState()) {
+                    case LOADING:
+                        return LibraryState.LOADING;
+                    case LOADED:
+                        oneCompleted = true;
+                        break;
+
+                    }
+                }
+                if(oneCompleted) {
+                    return LibraryState.LOADED;
+                } else {
+                    return LibraryState.FAILED_TO_LOAD;
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
 
         public Friend getFriend() {
             return friend;
@@ -316,6 +353,19 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
             allPresenceLibraries.dispose();
         }
         
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            changeSupport.addPropertyChangeListener(listener);
+        }
+        
+        public void removePropertyChangeListener(PropertyChangeListener listener) {
+            changeSupport.removePropertyChangeListener(listener);
+        }
+        
+        @Override
+        public String toString() {
+            return StringUtils.toString(this);
+        }
+        
         //TODO: add new accessors appropriate for creating FileItems based on
         //      lookups. May also need to subclass CoreFileItem appropriate for
         //      friend library info.
@@ -325,10 +375,14 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
         protected final TransformedList<RemoteFileItem, RemoteFileItem> eventList;
         protected volatile TransformedList<RemoteFileItem, RemoteFileItem> swingEventList;
         private final LimePresence limePresence;
+        private volatile LibraryState state = LibraryState.LOADING;
+        
+        private final PropertyChangeSupport changeSupport;
 
         PresenceLibraryImpl(LimePresence limePresence, EventList<RemoteFileItem> list) {
             this.limePresence = limePresence;
             eventList = GlazedListsFactory.threadSafeList(list);
+            changeSupport = new PropertyChangeSupport(this);
         }
 
         public LimePresence getPresence() {
@@ -374,6 +428,26 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager, Registeri
         }
 
         public void clear() {
+        }
+        
+        @Override
+        public LibraryState getState() {
+            return state;
+        }
+        
+        @Override
+        public void setState(LibraryState newState) {
+            LibraryState oldState = state;
+            this.state = newState;
+            changeSupport.firePropertyChange("state", oldState, newState);
+        }
+        
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            changeSupport.addPropertyChangeListener(listener);
+        }
+        
+        public void removePropertyChangeListener(PropertyChangeListener listener) {
+            changeSupport.removePropertyChangeListener(listener);
         }
     }
 }

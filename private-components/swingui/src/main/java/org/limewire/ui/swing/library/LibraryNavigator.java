@@ -27,6 +27,7 @@ import javax.swing.KeyStroke;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
@@ -35,6 +36,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -95,7 +97,7 @@ public class LibraryNavigator extends JXPanel {
         setLayout(new MigLayout("insets 0, gap 0"));
         add(titleLabel, "growx, alignx left, aligny top,  wrap");
        
-        addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel())));
+        addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel()), LibraryState.LOADED));
 
         new AbstractListEventListener<FriendLibrary>() {
             @Override
@@ -103,14 +105,17 @@ public class LibraryNavigator extends JXPanel {
                 Friend friend = item.getFriend();
                 addNavPanel(new NavPanel(friend,
                             createFriendCategories(navigator, friend,
-                                    friendLibraryFactory, item.getSwingModel())));
+                                    friendLibraryFactory, item.getSwingModel()),
+                                    item.getState()));
             }
             @Override
             protected void itemRemoved(FriendLibrary item) {
                 removeNavPanelForFriend(item.getFriend());
             }
+            
             @Override
             protected void itemUpdated(FriendLibrary item) {
+                updateNavPanelForFriend(item.getFriend(), item.getState());
             }
         }.install(remoteLibraryManager.getSwingFriendLibraryList());
         
@@ -132,6 +137,14 @@ public class LibraryNavigator extends JXPanel {
         });
     }
     
+    protected void updateNavPanelForFriend(Friend friend, LibraryState state) {
+        for(NavPanel panel : navPanels) {
+            if(panel.getFriend().getId().equals(friend.getId())) {
+                panel.updateLibraryState(state);
+            }
+        }
+    }
+
     private void addNavPanel(NavPanel panel) {
         navPanels.add(panel);
         add(panel, "alignx left, aligny top, growx, wrap");
@@ -267,8 +280,9 @@ public class LibraryNavigator extends JXPanel {
         private final CategoriesPanel categories;
         private final Friend friend;
         private final ActionLabel categoryLabel;
+        private final JXBusyLabel statusIcon;
         
-        public NavPanel(Friend friend, Map<Category, Action> actions) {
+        public NavPanel(Friend friend, Map<Category, Action> actions, LibraryState libraryState) {
             super(new MigLayout("insets 0, gap 0, fill"));
             setOpaque(false);
             this.categories = new CategoriesPanel(actions);
@@ -285,12 +299,30 @@ public class LibraryNavigator extends JXPanel {
             }, false);
             categoryLabel.setForeground(textColor);
             categoryLabel.setFont(textFont);
-            add(categoryLabel, "gapbefore 12, gaptop 7, grow, wrap");
-            add(categories, "grow, wrap"); // the gap here is implicit in the width of the icon
+            statusIcon = new JXBusyLabel(new Dimension(16, 16));
+            statusIcon.setOpaque(false);
+            add(categoryLabel, "gapbefore 12, gaptop 7, grow");
+            add(statusIcon, "gaptop 7, alignx right, gapafter 5, wrap");
+            add(categories, "span 2, grow, wrap"); // the gap here is implicit in the width of the icon
                                            // see decorateAction
-            
+            updateLibraryState(libraryState);
         }
         
+        public void updateLibraryState(LibraryState libraryState) {
+            switch(libraryState) {
+            case FAILED_TO_LOAD:
+                // TODO: Add failure icon.
+            case LOADED:
+                statusIcon.setVisible(false);
+                statusIcon.setBusy(false);
+                break;
+            case LOADING:
+                statusIcon.setVisible(true);
+                statusIcon.setBusy(true);
+                break;
+            }
+        }
+
         public void selectFirst() {
             categories.selectFirst();
         }
@@ -454,7 +486,6 @@ public class LibraryNavigator extends JXPanel {
             setIconTextGap(6);
             setMinimumSize(new Dimension(0, 22));
             setMaximumSize(new Dimension(Short.MAX_VALUE, 22));
-            setPreferredSize(new Dimension(500, 22));
             
             getAction().addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent evt) {

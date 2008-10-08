@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.Set;
 
+import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
@@ -122,6 +123,6 @@ public interface SearchServices {
      * Initiates a non-blocking browse of <code>address</code> with
      * session guid <code>browseGuid</code>.
      */
-    public BrowseHostHandler doAsynchronousBrowseHost(Address address, GUID browseGuid);
+    public BrowseHostHandler doAsynchronousBrowseHost(Address address, GUID browseGuid, BrowseListener browseListener);
 
 }

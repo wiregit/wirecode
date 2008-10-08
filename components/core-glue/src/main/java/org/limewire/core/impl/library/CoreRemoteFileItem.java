@@ -8,6 +8,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 
@@ -63,5 +64,10 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     @Override
     public void setProperty(Keys key, Object value) {
         map.put(key, value);
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 }

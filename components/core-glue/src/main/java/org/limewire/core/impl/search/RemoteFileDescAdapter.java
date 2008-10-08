@@ -15,6 +15,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -169,6 +170,11 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public boolean isSpam() {
         return rfd.isSpam();
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
     
     

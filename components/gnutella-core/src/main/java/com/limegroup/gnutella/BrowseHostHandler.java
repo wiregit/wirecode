@@ -20,6 +20,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
+import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
 import org.limewire.io.Address;
@@ -136,7 +137,7 @@ public class BrowseHostHandler {
         this.pushEndpointFactory = pushEndpointFactory;
     }
 
-    public void browseHost(Address address) {
+    public void browseHost(Address address, BrowseListener browseListener) {
         setState(STARTED);
         setState(CONNECTING);
         BlockingConnectObserver connectObserver = new BlockingConnectObserver();
@@ -144,6 +145,7 @@ public class BrowseHostHandler {
         try {
             Socket socket = connectObserver.getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
             browseHost(socket);
+            browseListener.browseFinished(true);
             return;
         } catch (IOException ie) {
             LOG.debug("Error during browse host", ie);
@@ -156,6 +158,7 @@ public class BrowseHostHandler {
         } catch (TimeoutException e) {
             LOG.debug("Error during browse host", e);
         }
+        browseListener.browseFinished(false);
         failed();
     }
     
