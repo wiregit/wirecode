@@ -35,23 +35,30 @@ import org.limewire.util.Objects;
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class FromWidget extends JPanel {
-    
+
     private static final char DOWN_ARROW = '\u25BC';
+
     private static final int R = 8; // rounded border corner radius
 
     private final Border border = new RoundedBorder(R);
+
     private final Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
+
     private final FromActions fromActions;
+
     private final JLabel headerLabel = shrinkFontSize(new JLabel());
-    private final JPanel headerPanel =
-        new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
+    private final JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
     private final JPopupMenu menu;
+
     private final ComponentHider menuHider;
+
     private List<RemoteHost> people;
 
     public FromWidget(FromActions fromActions) {
         menu = new JPopupMenu();
-        menuHider =  new ComponentHider(menu);
+        menuHider = new ComponentHider(menu);
         menu.setBorder(border);
         this.fromActions = Objects.nonNull(fromActions, "fromActions");
         configureHeader();
@@ -64,7 +71,7 @@ public class FromWidget extends JPanel {
         headerPanel.add(headerLabel);
         headerPanel.setBorder(noBorder);
         headerPanel.setOpaque(false);
-        
+
         menu.addMouseListener(menuHider);
 
         headerLabel.addMouseListener(new MouseAdapter() {
@@ -134,7 +141,6 @@ public class FromWidget extends JPanel {
         return label;
     }
 
-
     public void setPeople(List<RemoteHost> people) {
         this.people = people;
         menu.removeAll();
@@ -143,54 +149,58 @@ public class FromWidget extends JPanel {
     }
 
     private void updateHeaderLabel() {
-        String text =
-            people.size() == 0 ? tr("nobody") :
-            people.size() == 1 ? people.get(0).getRenderName() + DOWN_ARROW :
-            tr("{0} people", people.size()) + DOWN_ARROW;
+        String text = people.size() == 0 ? tr("nobody") : people.size() == 1 ? people.get(0)
+                .getRenderName()
+                + DOWN_ARROW : tr("{0} people", people.size()) + DOWN_ARROW;
         headerLabel.setText(text);
         menu.setLabel(text);
         menu.add(text);
     }
 
     private void updateMenus() {
-        if (people.size() == 0) return; // menu has no items
+        if (people.size() == 0)
+            return; // menu has no items
 
         if (people.size() == 1) {
             RemoteHost person = people.get(0);
-            
-            if(person.isChatEnabled()) {
+
+            if (person.isChatEnabled()) {
                 menu.add(getChatAction(person));
             }
-            if(person.isBrowseHostEnabled()) {
+            if (person.isBrowseHostEnabled()) {
                 menu.add(getLibraryAction(person));
             }
-            if(person.isSharedFiles()) {
+            if (person.isSharedFiles()) {
                 menu.add(getSharingAction(person));
             }
-        }
-          else {
+
+        } else {
             for (RemoteHost person : people) {
-                JMenu submenu = new JMenu(person.getRenderName());
-                submenu.addMouseListener(menuHider);
-             
-                if(person.isChatEnabled()) {
-                    JMenuItem chatItem = new JMenuItem(getChatAction(person));
-                    chatItem.addMouseListener(menuHider);
-                    submenu.add(chatItem);
+                if (person.isBrowseHostEnabled() || person.isChatEnabled()
+                        || person.isSharedFiles()) {
+
+                    JMenu submenu = new JMenu(person.getRenderName());
+                    submenu.addMouseListener(menuHider);
+
+                    if (person.isChatEnabled()) {
+                        JMenuItem chatItem = new JMenuItem(getChatAction(person));
+                        chatItem.addMouseListener(menuHider);
+                        submenu.add(chatItem);
+                    }
+
+                    if (person.isBrowseHostEnabled()) {
+                        JMenuItem libraryItem = new JMenuItem(getLibraryAction(person));
+                        libraryItem.addMouseListener(menuHider);
+                        submenu.add(libraryItem);
+                    }
+
+                    if (person.isSharedFiles()) {
+                        JMenuItem shareItem = new JMenuItem(getSharingAction(person));
+                        shareItem.addMouseListener(menuHider);
+                        submenu.add(shareItem);
+                    }
+                    menu.add(submenu);
                 }
-                
-                if(person.isBrowseHostEnabled()) {                    
-                    JMenuItem libraryItem = new JMenuItem(getLibraryAction(person));
-                    libraryItem.addMouseListener(menuHider);
-                    submenu.add(libraryItem);
-                }
-                
-                if(person.isSharedFiles()) {
-                    JMenuItem shareItem = new JMenuItem(getSharingAction(person));
-                    shareItem.addMouseListener(menuHider);
-                    submenu.add(shareItem);
-                }
-                menu.add(submenu);
             }
         }
     }
