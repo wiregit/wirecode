@@ -12,7 +12,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 public class ListViewTableFormat
 extends ResultsTableFormat<VisualSearchResult> {
 
-    static final int ACTIONS_WIDTH = 170;
+    static final int ACTIONS_WIDTH = 110;
 
     public ListViewTableFormat() {
         super(3, 2, tr("not used"), tr("also not used"), tr("nor this"));

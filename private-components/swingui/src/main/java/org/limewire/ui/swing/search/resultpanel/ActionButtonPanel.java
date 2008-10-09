@@ -189,7 +189,7 @@ public class ActionButtonPanel extends JXPanel {
                 new Dimension(upIcon.getIconWidth(), upIcon.getIconHeight());
             button.setPreferredSize(size);
 
-            add(button, buttonIndex == TOOLTIPS.length ? "wrap" : "");
+            add(button, buttonIndex == TOOLTIPS.length ? "wmax pref, wrap" : "wmax pref");
         }
     }
 
@@ -302,7 +302,7 @@ public class ActionButtonPanel extends JXPanel {
         });
         
         removeAll();
-        setLayout(new MigLayout("insets 0 0 0 0", "0[]0[]0[]0", "0[]0[]0"));
+        setLayout(new MigLayout("insets 0 0 0 0", "[][][]", "[][]"));
         addButtonsToPanel();
         FontUtils.changeSize(downloadingLink, -2.0f);
         add(downloadingLink, "span");
