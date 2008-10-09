@@ -36,6 +36,11 @@ public class FromActionsImpl implements FromActions {
         LOG.debugf("chatWith: {0}", person.getRenderName());
         Friend friend = person.getFriendPresence().getFriend();
         friendsPane.fireConversationStarted(friend);
+
+        // TODO make sure the input box for chat gets focus, the code is
+        // calling requestFocusInWindow, but I think it is gettting some
+        // weirdness because the search window is currently the active one, not
+        // the chat
     }
 
     @Override
