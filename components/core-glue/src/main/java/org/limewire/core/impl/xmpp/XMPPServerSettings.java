@@ -57,7 +57,7 @@ public class XMPPServerSettings extends LimeProps {
             this.host = host;
             this.port = port;
             this.serviceName = serviceName;
-            isDebugEnabled = true;
+            isDebugEnabled = false;
         }
 
         public boolean isDebugEnabled() {
