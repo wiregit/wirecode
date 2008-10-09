@@ -92,7 +92,7 @@ public class LibraryNavigator extends JXPanel {
         GuiUtils.assignResources(this);
 
         setOpaque(false);
-
+        setScrollableTracksViewportHeight(false);
         this.titleLabel = new SectionHeading(I18n.tr("Libraries"));
         titleLabel.setName("LibraryNavigator.titleLabel");
 
