@@ -305,7 +305,7 @@ public class ConversationPane extends JPanel implements Displayable {
                     //       Also, when would we remove items from the map?
                    downloader.addDownload((LimePresence)chatFriend.getPresence(), offeredFile);
                 } catch (IOException e1) {
-                    LOG.error("Unable to save the download", e1);  //TODO: maybe pop up a dialog
+                    throw new RuntimeException("FIX ME", e1);
                 }
 
                 // TODO: Track download states by adding listeners to dl item
