@@ -350,10 +350,10 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
      * information on the right.
      */
     public void selectFriend(Friend friend) {
-        for(int i = 0; i < table.getModel().getRowCount(); i++) {
-            FriendItem item = (FriendItem) table.getModel().getValueAt(i, 0);
+        for(int i = 0; i < friendTable.getModel().getRowCount(); i++) {
+            FriendItem item = (FriendItem) friendTable.getModel().getValueAt(i, 0);
             if(item.getFriend().getId().equals(friend.getId())) {
-                table.setRowSelectionInterval(i, i);
+                friendTable.setRowSelectionInterval(i, i);
                 break;
             }
         }

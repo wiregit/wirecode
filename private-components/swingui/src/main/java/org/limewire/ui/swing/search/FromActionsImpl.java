@@ -3,13 +3,16 @@ package org.limewire.ui.swing.search;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.FriendsPane;
 import org.limewire.ui.swing.library.LibraryNavigator;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.sharing.FriendSharePanel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,13 +29,18 @@ public class FromActionsImpl implements FromActions {
 
     private final LibraryNavigator libraryNavigator;
     
+    private final FriendSharePanel friendSharePanel;
+    
+    private final Navigator navigator;
     @Inject
     public FromActionsImpl(RemoteLibraryManager remoteLibraryManager,
-            ShareListManager shareListManager, FriendsPane friendsPane, LibraryNavigator libraryNavigator) {
+            ShareListManager shareListManager, FriendsPane friendsPane, LibraryNavigator libraryNavigator, FriendSharePanel friendSharePanel, Navigator navigator) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.shareListManager = shareListManager;
         this.friendsPane = friendsPane;
         this.libraryNavigator = libraryNavigator;
+        this.friendSharePanel = friendSharePanel;
+        this.navigator = navigator;
     }
 
     @Override
@@ -51,11 +59,9 @@ public class FromActionsImpl implements FromActions {
     public void showFilesSharedBy(RemoteHost person) {
         LOG.debugf("showFilesSharedBy: {0}", person.getRenderName());
         Friend friend = person.getFriendPresence().getFriend();
-        FriendFileList friendFileList = shareListManager.getFriendShareList(friend);
-        for (LocalFileItem localFileItem : friendFileList.getModel()) {
-            System.out.println(localFileItem.getName());
-        }
-
+        friendSharePanel.selectFriend(friend);
+        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
+        navItem.select();
     }
 
     @Override
