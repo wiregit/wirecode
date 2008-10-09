@@ -63,7 +63,7 @@ public class MockSearch implements Search {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 0; i < 12; i++) {
+                for (int i = 0; i < 2; i++) {
                     try {
                         Thread.sleep((long)(1000 * (Math.random() * 5)));
                     } catch (InterruptedException e) {
@@ -258,7 +258,7 @@ public class MockSearch implements Search {
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
         msr.setSize(1234L);
-        msr.addSource("monica-similar3");
+        msr.addSource("monica-similar3-is-a-loooooooooong-name");
         msr.setUrn("similar-www.solarsystem.net3" + i);
         msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
         msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
