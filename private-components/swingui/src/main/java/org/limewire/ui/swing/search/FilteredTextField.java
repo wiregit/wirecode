@@ -7,7 +7,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
@@ -63,10 +65,9 @@ public class FilteredTextField extends JTextField implements FocusListener {
 
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            g.setColor(Color.black);
-            g.drawRoundRect(0, 0, c.getWidth()-1, c.getHeight()-1, 10, c.getHeight());                
+       
         }
-        
+      
     }
     
     @Override
@@ -98,8 +99,15 @@ public class FilteredTextField extends JTextField implements FocusListener {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        g.setColor(Color.white);
-        g.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());
+        Graphics2D g2 = (Graphics2D) g;
+        
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        g2.setColor(Color.white);
+        g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());
+  
+        g2.setColor(Color.black);
+        g2.drawRoundRect(0, 0, this.getWidth()-1, this.getHeight()-1, 10, this.getHeight());     
         
         super.paintComponent(g);
 

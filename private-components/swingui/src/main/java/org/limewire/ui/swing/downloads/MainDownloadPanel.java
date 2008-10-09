@@ -28,6 +28,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.components.CustomCheckBox;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.SimpleDownloadTable;
 import org.limewire.ui.swing.painter.SubpanelPainter;
@@ -210,7 +211,7 @@ public class MainDownloadPanel extends JPanel {
 			pauseAllButton = new JButton(pauseAction);	
 			resumeAllButton = new JButton(resumeAction);
 			clearFinishedButton = new JButton(clearAction);
-			categorizeCheckBox = new JCheckBox(categorizeAction);
+			categorizeCheckBox = new CustomCheckBox(categorizeAction);
 
 			titleLabel = new JLabel(I18n.tr("Downloads"));
 			FontUtils.changeSize(titleLabel, 5);
