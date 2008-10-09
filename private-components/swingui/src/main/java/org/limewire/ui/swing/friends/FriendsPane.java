@@ -446,7 +446,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         if(chatFriend != null) {
             fireConversationStarted(chatFriend);
         }
-        new DisplayFriendsToggleEvent().publish();
+        new DisplayFriendsToggleEvent(Boolean.TRUE).publish();
     }
     
     private void fireConversationStarted(ChatFriend chatFriend) {
