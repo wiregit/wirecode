@@ -249,5 +249,10 @@ public class CoreLocalFileItem implements LocalFileItem {
     public String toString() {
         return "CoreLocalFileItem for: " + fileDesc;
     }
+
+    @Override
+    public String getFileName() {
+        return getFileDetails().getFileName();
+    }
     
 }

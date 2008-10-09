@@ -47,7 +47,7 @@ public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<
 
         switch (column) {
         case NAME_COL:
-            return baseObject.getName();  
+            return baseObject;  
         case SIZE_COL:
             return baseObject.getSize();
         case FILE_COUNT_COL:

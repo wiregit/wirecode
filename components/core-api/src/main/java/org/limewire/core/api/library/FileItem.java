@@ -12,7 +12,9 @@ public interface FileItem {
     }
     
     String getName();
-
+    
+    String getFileName(); 
+    
     long getSize();
 
     long getCreationTime();

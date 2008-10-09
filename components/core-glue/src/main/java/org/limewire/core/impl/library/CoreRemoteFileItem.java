@@ -32,6 +32,10 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     public String getName() {
         return (String)searchResult.getProperty(SearchResult.PropertyKey.NAME);
     }
+    
+    public String getFileName(){
+        return getRfd().getFileName();
+    }
 
     public long getSize() {
         return searchResult.getSize();

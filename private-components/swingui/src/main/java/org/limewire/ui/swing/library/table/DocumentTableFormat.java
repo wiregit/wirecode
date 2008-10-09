@@ -53,7 +53,7 @@ public class DocumentTableFormat<T extends FileItem> implements LibraryTableForm
          case MODIFIED_COL:
              return new Date();
          case NAME_COL:
-             return baseObject.getName();
+             return baseObject;
          case ACTION_COL:
              return baseObject;
          case SIZE_COL:

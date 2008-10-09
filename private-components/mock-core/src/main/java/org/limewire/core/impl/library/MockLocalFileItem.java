@@ -85,4 +85,9 @@ public class MockLocalFileItem implements LocalFileItem {
     public FileMetaData offer(LimePresence limePresence) {
         return null;
     }
+
+    @Override
+    public String getFileName() {
+        return "FileName.doc";
+    }
 }
