@@ -1,7 +1,6 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,13 +8,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.io.Address;
-import org.limewire.io.Connectable;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
@@ -24,10 +19,7 @@ import org.limewire.xmpp.api.client.LimePresence;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.LocalFileDetailsFactory;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.net.address.FirewalledAddress;
 
 public class CoreLocalFileItem implements LocalFileItem {
 

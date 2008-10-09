@@ -3,14 +3,12 @@ package org.limewire.core.impl.download;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
@@ -24,10 +22,10 @@ import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.Connectable;
-import org.limewire.io.Address;
 import org.limewire.setting.FileSetting;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
@@ -45,8 +43,8 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 
 
 @Singleton

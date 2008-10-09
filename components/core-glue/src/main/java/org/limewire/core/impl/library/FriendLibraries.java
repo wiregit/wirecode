@@ -90,20 +90,20 @@ public class FriendLibraries {
             }
         }
 
-        private void removeFromIndex(RemoteFileItem newFile, String word) {
-            ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-            library.getLock().writeLock().lock();
-            try {
-                filesForWord = library.get(word);
-                if (filesForWord == null) {
-                    filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                    library.add(word, filesForWord);
-                }
-            } finally {
-                library.getLock().writeLock().unlock();
-            }
-            filesForWord.remove(newFile);
-        }
+//        private void removeFromIndex(RemoteFileItem newFile, String word) {
+//            ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
+//            library.getLock().writeLock().lock();
+//            try {
+//                filesForWord = library.get(word);
+//                if (filesForWord == null) {
+//                    filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+//                    library.add(word, filesForWord);
+//                }
+//            } finally {
+//                library.getLock().writeLock().unlock();
+//            }
+//            filesForWord.remove(newFile);
+//        }
 
         private void addToIndex(RemoteFileItem newFile, String word) {
             LOG.debugf("\t {0}", word);

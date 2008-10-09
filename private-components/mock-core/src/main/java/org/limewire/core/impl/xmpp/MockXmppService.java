@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPConnectionListener;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPService;
 

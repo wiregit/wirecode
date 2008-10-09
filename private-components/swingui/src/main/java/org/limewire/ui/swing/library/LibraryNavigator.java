@@ -318,7 +318,7 @@ public class LibraryNavigator extends JXPanel {
             statusIcon = new JXBusyLabel(new Dimension(12, 12));
             statusIcon.setOpaque(false);
             add(categoryLabel, "gapbefore 12, gaptop 2, grow");
-            add(statusIcon, "gaptop 2, alignx right, gapafter 5, wrap");
+            add(statusIcon, "gaptop 2, alignx right, gapafter 4, wrap");
             add(categories, "span 2, grow, wrap"); // the gap here is implicit in the width of the icon
                                                    // see decorateAction
             updateLibraryState(libraryState);
