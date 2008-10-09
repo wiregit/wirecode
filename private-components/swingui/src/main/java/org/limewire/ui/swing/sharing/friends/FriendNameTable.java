@@ -13,14 +13,16 @@ import javax.swing.TransferHandler;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.menu.FriendSharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -38,7 +40,7 @@ public class FriendNameTable extends JXTable {
     private EventTableModel<FriendItem> tableModel;
     
     public FriendNameTable(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat,
-            RemoteLibraryManager remoteLibraryManager, LibraryManager libraryManager, ShareListManager shareListManager, Navigator navigator) {
+            RemoteLibraryManager remoteLibraryManager, LibraryManager libraryManager, final ShareListManager shareListManager, Navigator navigator) {
         GuiUtils.assignResources(this);
         
         SortedList<FriendItem> friendList = GlazedListsFactory.sortedList(eventList, new FriendComparator());       
@@ -61,21 +63,39 @@ public class FriendNameTable extends JXTable {
         
         final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), remoteLibraryManager, shareListManager);
 
+        final SharingTransferHandler sharingTransferHandler = new SharingTransferHandler(null);
         setTransferHandler(new TransferHandler(){
 
             @Override
             public boolean canImport(final TransferSupport support) {
-                SwingUtils.invokeLater(new Runnable(){
-                    public void run() {
-                       JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
-                       int row = dropLocation.getRow();
-                       
-                       if(row != getSelectedRow() && row < tableModel.getRowCount() && row >= 0) {
-                           setRowSelectionInterval(row, row);
-                       }
-                    }
-                });
+               JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
+               int row = dropLocation.getRow();
+               
+               if(row < tableModel.getRowCount() && row >= 0) {
+               
+                   if(row != getSelectedRow()) {
+                       setRowSelectionInterval(row, row);
+                   }
+                   FriendItem friendItem = tableModel.getElementAt(row);
+                   Friend friend = friendItem.getFriend();
+                   FriendFileList friendFileList =  shareListManager.getFriendShareList(friend);
+                   sharingTransferHandler.setModel(friendFileList);   
+                   boolean canImport = sharingTransferHandler.canImport(support);
+                   return canImport;
+               }
+
                return false;
+            }
+            
+            @Override
+            public boolean importData(TransferSupport support) {
+                JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
+                int row = dropLocation.getRow();
+                FriendItem friendItem = tableModel.getElementAt(row);
+                Friend friend = friendItem.getFriend();
+                FriendFileList friendFileList =  shareListManager.getFriendShareList(friend);
+                sharingTransferHandler.setModel(friendFileList);
+                return sharingTransferHandler.importData(support);
             }
         });
         
