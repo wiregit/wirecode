@@ -11,6 +11,7 @@ import javax.swing.JTable;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -29,9 +30,12 @@ public class ShareTableRendererEditor extends TableRendererEditor{
     private JLabel friendsLabel;
     private JLabel friendCountLabel;
     private JButton shareButton;
+    private ShareListManager shareManager;
     
-    public ShareTableRendererEditor(Action shareAction){
+    public ShareTableRendererEditor(Action shareAction, ShareListManager shareManager){
         GuiUtils.assignResources(this);
+        
+        this.shareManager = shareManager;
         
         gnutellaLabel = new JLabel(shareGnutellaIcon);
         friendsLabel = new JLabel(shareFriendsIcon);      
@@ -49,14 +53,14 @@ public class ShareTableRendererEditor extends TableRendererEditor{
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        // TODO Auto-generated method stub
+        gnutellaLabel.setVisible(shareManager.getGnutellaShareList().getModel().contains(value));
         return this;
     }
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        // TODO Auto-generated method stub
+        gnutellaLabel.setVisible(shareManager.getGnutellaShareList().getModel().contains(value));
         return this;
     }
 

@@ -1,23 +1,20 @@
 package org.limewire.ui.swing.library.table;
 
-import java.awt.datatransfer.Transferable;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.AbstractAction;
-import javax.swing.JComponent;
 import javax.swing.ListSelectionModel;
-import javax.swing.TransferHandler;
+import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileTransferable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -47,31 +44,14 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
         setFillsViewportHeight(true);
         setDragEnabled(true);
-        
-        setTransferHandler(new TransferHandler(){
-            @Override
-            public int getSourceActions(JComponent comp) {
-                return COPY;
-            }
-            
-            @Override
-            public Transferable createTransferable(JComponent comp) {
-                int indices[] = getSelectedRows();
-                List<File> files = new ArrayList<File>();
-                for(int i = 0; i < indices.length; i++) {
-                    LocalFileItem item = (LocalFileItem)((LibraryTableModel)getModel()).getFileItem(indices[i]);
-                    files.add(item.getFile());
-                }
-                return new FileTransferable(files);
-            }
-        });
+
     }
     
-    public void enableSharing(LibrarySharePanel librarySharePanel) {
+    public void enableSharing(LibrarySharePanel librarySharePanel, ShareListManager shareManager) {
         this.librarySharePanel = librarySharePanel;
-        shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
+        shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Share")), shareManager);
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new ShareTableRendererEditor(null));
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new ShareTableRendererEditor(null, shareManager));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(shareEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(shareEditor.getPreferredSize().width);
         setRowHeight(shareEditor.getPreferredSize().height);
@@ -79,13 +59,15 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
     }
     
     public void enableDownloading(DownloadListManager downloadListManager){
-        DownloadAction downloadAction = new DownloadAction(I18n.tr("download"), downloadListManager, this);
+        ArrayList<RemoteFileItem> downloadingList = new ArrayList<RemoteFileItem>();
+        
+        DownloadAction downloadAction = new DownloadAction(I18n.tr("download"), downloadListManager, this, downloadingList);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         
-        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction);
+        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction, downloadingList);
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(downloadEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null));
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null, downloadingList));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(downloadEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
         setRowHeight(downloadEditor.getPreferredSize().height);
@@ -134,8 +116,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
     private static class DownloadAction extends AbstractAction {
         private DownloadListManager downloadListManager;
         private LibraryTable table;
-        public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table){
+        private ArrayList<RemoteFileItem> downloadingList;
+        public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table, ArrayList<RemoteFileItem> downloadingList){
             super(text);
+            this.downloadingList = downloadingList;
             this.downloadListManager = downloadListManager;
             this.table = table;
         }
@@ -149,6 +133,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel) table.getModel()).getElementAt(row);
             try {
                 downloadListManager.addDownload(file);
+                downloadingList.add(file);
+                TableCellEditor editor = table.getCellEditor();
+                if (editor != null) {          
+                   editor.cancelCellEditing();
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
