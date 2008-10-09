@@ -3,12 +3,18 @@ package org.limewire.ui.swing.sharing;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.TransferHandler;
 
 import net.miginfocom.swing.MigLayout;
@@ -30,7 +36,6 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -68,17 +73,25 @@ public class FilesSharingSummaryPanel extends JPanel {
         friendButton.setText("0");
         friendButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
         friendButton.setTransferHandler(new TransferHandler() {
-
+            private Timer timer = null;
             @Override
             public boolean canImport(TransferSupport support) {
-                SwingUtils.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
-                    navItem.select();
-                                    
-                }
+ 
+                if(timer == null || !timer.isRunning()) {
+                    timer = new Timer(1000,new ActionListener(){
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Point point =  MouseInfo.getPointerInfo().getLocation();
+                        SwingUtilities.convertPointFromScreen(point, friendButton);
+                        if(friendButton.contains(point)) {
+                            NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
+                            navItem.select();
+                        }
+                    }
                 });
+                timer.setRepeats(false);
+                timer.start();             
+                }
                 return super.canImport(support);
             }
             
