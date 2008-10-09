@@ -72,9 +72,7 @@ public class MouseableTable extends StripedJXTable {
                 
                 // If the cell is editable and
                 // it's not already being edited ...
-                if (isCellEditable(row, col)) {
-                    // Mark commented the following line.
-                    //&& (row != getEditingRow() || col != getEditingColumn())) {
+                if (isCellEditable(row, col) && row != getEditingRow()) {
                     editCellAt(row, col);
                 }
             }
