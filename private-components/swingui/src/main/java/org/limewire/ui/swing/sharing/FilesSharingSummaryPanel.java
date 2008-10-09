@@ -9,6 +9,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
 import javax.swing.JPanel;
+import javax.swing.TransferHandler;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -29,6 +30,7 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -46,7 +48,7 @@ public class FilesSharingSummaryPanel extends JPanel {
           
     @Inject
     FilesSharingSummaryPanel(final ShareListManager shareListManager, GnutellaSharePanel gnutellaSharePanel, 
-            FriendSharePanel friendSharePanel, Navigator navigator, ListenerSupport<FriendShareListEvent> shareSupport) {
+            FriendSharePanel friendSharePanel, final Navigator navigator, ListenerSupport<FriendShareListEvent> shareSupport) {
         GuiUtils.assignResources(this);
         
         setOpaque(false);
@@ -65,6 +67,22 @@ public class FilesSharingSummaryPanel extends JPanel {
         friendButton.setName("FilesSharingSummaryPanel.friends");   
         friendButton.setText("0");
         friendButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
+        friendButton.setTransferHandler(new TransferHandler() {
+
+            @Override
+            public boolean canImport(TransferSupport support) {
+                SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
+                    navItem.select();
+                                    
+                }
+                });
+                return super.canImport(support);
+            }
+            
+        });
 		
 		setLayout(new MigLayout("insets 0, gap 0", "", ""));
 

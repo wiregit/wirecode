@@ -5,7 +5,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Comparator;
 
+import javax.swing.DropMode;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.TransferHandler;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
@@ -17,6 +20,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.menu.FriendSharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -56,6 +60,26 @@ public class FriendNameTable extends JXTable {
         getColumn(1).setPreferredWidth(30);
         
         final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), remoteLibraryManager, shareListManager);
+
+        setTransferHandler(new TransferHandler(){
+
+            @Override
+            public boolean canImport(final TransferSupport support) {
+                SwingUtils.invokeLater(new Runnable(){
+                    public void run() {
+                       JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
+                       int row = dropLocation.getRow();
+                       
+                       if(row != getSelectedRow() && row < tableModel.getRowCount() && row >= 0) {
+                           setRowSelectionInterval(row, row);
+                       }
+                    }
+                });
+               return false;
+            }
+        });
+        
+        setDropMode(DropMode.ON);
         
         addMouseListener(new MouseAdapter() {
             
