@@ -110,7 +110,7 @@ public class CoreLocalFileItem implements LocalFileItem {
         map.put(key, value);
     }
 
-    public void offer(LimePresence presence) {
+    public FileMetaData offer(LimePresence presence) {
         FileDetails details = getFileDetails();
         FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
         fileMetaData.setCreateTime(new Date(details.getCreationTime()));
@@ -120,8 +120,9 @@ public class CoreLocalFileItem implements LocalFileItem {
         fileMetaData.setName(details.getFileName());
         fileMetaData.setSize(details.getSize());
         fileMetaData.setURNs(details.getUrns());
-
         presence.offerFile(fileMetaData);
+
+        return fileMetaData;
     }
 
     private static class FileMetaDataImpl implements FileMetaData {

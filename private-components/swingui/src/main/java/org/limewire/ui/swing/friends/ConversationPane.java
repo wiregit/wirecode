@@ -13,11 +13,10 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.net.URLDecoder;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -296,10 +295,8 @@ public class ConversationPane extends JPanel implements Displayable {
                 }
 
                 try {
-                    // TODO: DCHEN FIX THIS
                     String dataStr = event.getData();
-                    int equalIndex = dataStr.indexOf("=");
-                    String fileIdEncoded = dataStr.substring(equalIndex+1).trim();
+                    String fileIdEncoded = dataStr.substring(dataStr.indexOf("=")+1).trim();
                     String fileId = URLDecoder.decode(fileIdEncoded, "UTF-8");
 
                     FileMetaData offeredFile = idToFileMetaDataMap.get(fileId);
@@ -308,7 +305,7 @@ public class ConversationPane extends JPanel implements Displayable {
                     //       Also, when would we remove items from the map?
                    downloader.addDownload((LimePresence)chatFriend.getPresence(), offeredFile);
                 } catch (IOException e1) {
-                    throw new RuntimeException("FIX ME", e1);
+                    LOG.error("Unable to save the download", e1);  //TODO: maybe pop up a dialog
                 }
 
                 // TODO: Track download states by adding listeners to dl item
@@ -334,7 +331,9 @@ public class ConversationPane extends JPanel implements Displayable {
 
     public void offerFile(LocalFileItem file) {
         if(chatFriend.getPresence() instanceof LimePresence) {
-            file.offer((LimePresence)chatFriend.getPresence());
+            FileMetaData metadata = file.offer((LimePresence)chatFriend.getPresence());
+            new MessageReceivedEvent(new MessageImpl(null, null, friendId,
+                        null, Message.Type.Sent, metadata)).publish();
         }
     }
     
