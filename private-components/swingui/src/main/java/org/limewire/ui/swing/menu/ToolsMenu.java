@@ -9,7 +9,6 @@ import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.gui.GUIUtils;
 
 @Singleton
 public class ToolsMenu extends JMenu {
@@ -26,7 +25,7 @@ public class ToolsMenu extends JMenu {
                     optionDialog = new OptionsDialog();
                 }
                 if(!optionDialog.isVisible()) {
-                    GUIUtils.centerOnScreen(optionDialog);
+//                    GUIUtils.centerOnScreen(optionDialog);
                     optionDialog.setVisible(true);
                 }
             }
