@@ -130,7 +130,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         
         Downloader downloader = downloadManager.download(files, alts, queryGUID, overwrite, saveDir, fileName);
         
-        return new CoreDownloadItem(downloader, queueTimeCalculator);
+        return new CoreDownloadItem(downloader, queueTimeCalculator, true);
 	}
 
     @Override
@@ -146,7 +146,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         Downloader downloader = downloadManager.download(files, altLocList, null, overwrite, saveDir, fileName);
 
-        return new CoreDownloadItem(downloader, queueTimeCalculator);
+        return new CoreDownloadItem(downloader, queueTimeCalculator, true);
     }
 
     private RemoteFileDesc createRfdFromChatResult(LimePresence presence, FileMetaData fileMeta) throws IOException {

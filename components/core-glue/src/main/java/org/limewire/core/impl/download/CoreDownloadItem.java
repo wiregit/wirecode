@@ -24,6 +24,8 @@ public class CoreDownloadItem implements DownloadItem {
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private Downloader downloader;
     private volatile int hashCode = 0;
+    private boolean useCachedSize;
+    private volatile long cachedSize;
     private volatile boolean cancelled = false;
     /**
      * size in bytes.  FINISHING state is only shown for files greater than this size.
@@ -31,15 +33,34 @@ public class CoreDownloadItem implements DownloadItem {
     //set to 0 to show FINISHING state regardless of size
     private final long finishingThreshold = 0;
     private QueueTimeCalculator queueTimeCalculator;
-
+/**
+ * 
+ * Constructs CoreDownloadItem with null QueueTimeCalculator and cached size.  Cached size requires calling fireDataChanged().
+ */
     public CoreDownloadItem(Downloader downloader) {
         this(downloader, null);
     }
-
+/**
+ * 
+ * Constructs CoreDownloadItem with null QueueTimeCalculator and cached size.  Cached size requires calling fireDataChanged().
+ */
     public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator) {
+        this(downloader, queueTimeCalculator, true);
+    }
+
+    /**
+     * 
+     * @param downloader
+     * @param queueTimeCalculator
+     * @param useCachedSize Whether or not to cache the value returned by
+     *        getCurrentSize(). If true, value is updated when fireDataChanged()
+     *        is called.
+     */
+    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator, boolean useCachedSize) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
-
+        this.useCachedSize = useCachedSize;
+        
         downloader.addListener(new EventListener<DownloadStatusEvent>() {
             @Override
             public void handleEvent(DownloadStatusEvent event) {
@@ -56,7 +77,9 @@ public class CoreDownloadItem implements DownloadItem {
         });
     }
 
+    
     void fireDataChanged() {
+        cachedSize = downloader.getAmountRead();
         support.firePropertyChange("state", null, getState());
     }
     
@@ -106,11 +129,14 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public long getCurrentSize() {
-        if(getState() == DownloadState.DONE){
+        if (getState() == DownloadState.DONE) {
             return getTotalSize();
-        } else {
-            return downloader.getAmountRead();
+        } else if (useCachedSize) {
+            return cachedSize;
         }
+        
+        return downloader.getAmountRead();
+
     }
 
     @Override
