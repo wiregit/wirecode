@@ -19,6 +19,6 @@ public class ApplyOptionAction implements ActionListener {
         optionDialog.applyOptions();
         SettingsGroupManager.instance().save();
         
-        optionDialog.setVisible(false);
+        optionDialog.dispose();
     }
 }

@@ -431,4 +431,45 @@ public final class SearchSettings extends LimeProps {
      */
     public static final BooleanSetting GROUP_SIMILAR_RESULTS_ENABLED =
         FACTORY.createBooleanSetting("GROUP_SIMILAR_RESULTS_ENABLED", true);
+    
+    /**
+     * Setting for whether to display search tips based on file in 
+     * friends libraries. If true, tips should be displayed, if false
+     * they should not. 
+     */
+    public static final BooleanSetting POPULATE_SEARCH_BAR_FRIEND_FILES =
+        FACTORY.createBooleanSetting("POPULATE_SEARCH_BAR_FRIEND_FILES", true);
+    
+    /**
+     * Setting for how many suggestions from friends files to display.
+     */
+    public static final IntSetting POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES =
+        FACTORY.createIntSetting("POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES", 4);
+    
+    /**
+     * Setting for whether to display old searches as search tips. If true,
+     * old search will be displayed as tips, if false they won't be displayed
+     */
+    public static final BooleanSetting REMEMBER_OLD_SEARCHES_SEARCH_BAR =
+        FACTORY.createBooleanSetting("REMEMBER_OLD_SEARCHES_SEARCH_BAR", true);
+    
+    /**
+     * Setting for how many old search tips to display.
+     */
+    public static final IntSetting POPULATE_SEARCH_BAR_NUMBER_OLD_SEARCH =
+        FACTORY.createIntSetting("POPULATE_SEARCH_BAR_NUMBER_OLD_SEARCH", 3);
+    
+    /**
+     * Setting for whether to automatically search your friends libraries
+     * when you spawn a gnutella search.
+     */
+    public static final BooleanSetting SEARCH_FRIENDS_LIBRARIES =
+        FACTORY.createBooleanSetting("SEARCH_FRIENDS_LIBRARIES", true);
+    
+    /**
+     * When searching, if a result displayed has already been downloaded,
+     * move that result to the bottom of the screen.
+     */
+    public static final BooleanSetting MOVE_DOWNLOADED_FILES_TO_BOTTOM =
+        FACTORY.createBooleanSetting("MOVE_DOWNLOADED_FILES_TO_BOTTOM", true);
 }

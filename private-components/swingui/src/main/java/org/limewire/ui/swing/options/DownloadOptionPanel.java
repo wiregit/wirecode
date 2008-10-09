@@ -8,7 +8,9 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.iTunesSettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 /**
  * Downloads Option View
@@ -24,7 +26,8 @@ public class DownloadOptionPanel extends OptionPanel {
         
         add(getSharingDownloadsPanel(), "pushx, growx");
         add(getSavingPanel(), "pushx, growx");
-        add(getITunesPanel(), "pushx, growx");
+        if(OSUtils.isAnyMac() || OSUtils.isWindows())
+            add(getITunesPanel(), "pushx, growx");
     }
     
     private OptionPanel getSharingDownloadsPanel() {
@@ -67,6 +70,10 @@ public class DownloadOptionPanel extends OptionPanel {
         getITunesPanel().initOptions();
     }
     
+    /**
+     * Setting for automatically sharing completed and incomplete downloads
+     * with the Gnutella network.
+     */
     private class SharingDownloadsPanel extends OptionPanel {
 
         private JCheckBox shareCompletedDownloadsCheckBox;
@@ -146,6 +153,10 @@ public class DownloadOptionPanel extends OptionPanel {
         }
     }
     
+    /**
+     * Setting for automatically importing songs into your iTunes library. 
+     * NOTE: this is only available on OSX and Windows
+     */
     private class ITunesPanel extends OptionPanel {
 
         private JCheckBox addToITunesCheckBox;
@@ -161,18 +172,17 @@ public class DownloadOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
-
+            iTunesSettings.ITUNES_SUPPORT_ENABLED.setValue(addToITunesCheckBox.isSelected());
         }
 
         @Override
         boolean hasChanged() {
-            // TODO Auto-generated method stub
-            return false;
+            return iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue() != addToITunesCheckBox.isSelected();
         }
 
         @Override
         void initOptions() {
-
+            addToITunesCheckBox.setSelected(iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue());
         }        
     }
 

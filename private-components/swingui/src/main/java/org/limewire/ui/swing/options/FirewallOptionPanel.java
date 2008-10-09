@@ -73,7 +73,8 @@ public class FirewallOptionPanel extends OptionPanel {
         public ListeningPortPanel() {
             super(I18n.tr("Listening Port"));
             
-            portField = new JTextField(10);
+            portField = new JTextField(5);
+            //TODO: change this to an integerTextField
             
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             
@@ -138,7 +139,8 @@ public class FirewallOptionPanel extends OptionPanel {
             buttonGroup.add(portForwardRadioButton);
             buttonGroup.add(doNothingRadioButton);
             
-            portTextField = new JTextField(10);
+            portTextField = new JTextField(5);
+            //TODO: change this to an integerTextField
             
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             

@@ -15,6 +15,6 @@ public class CancelOptionAction implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        optionDialog.setVisible(false);
+        optionDialog.dispose();
     }
 }

@@ -41,6 +41,7 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
     private Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
     
     public ReallyAdvancedOptionPanel() {
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, gapy 10", "fill", "fill"));
         
         list = new JList();

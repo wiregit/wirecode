@@ -12,10 +12,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.ui.swing.util.I18n;
-
-import net.miginfocom.swing.MigLayout;
 
 /**
  * Proxy Option View
@@ -64,8 +64,7 @@ public class ProxyOptionPanel extends OptionPanel {
         buttonGroup.add(httpRadioButton);
         
         proxyTextField = new JTextField(15);
-        portTextField = new JTextField(10);
-        
+        portTextField = new JTextField(5);
         authenticationCheckBox = new JCheckBox();
         authenticationCheckBox.addItemListener(new ProxyButtonListener());
         userNameTextField = new JTextField(15);

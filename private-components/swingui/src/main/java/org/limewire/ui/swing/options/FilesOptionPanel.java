@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -8,6 +11,7 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.settings.DaapSettings;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -183,7 +187,14 @@ public class FilesOptionPanel extends OptionPanel {
             
             shareWithITunesCheckBox = new JCheckBox();
             requirePassWordCheckBox = new JCheckBox();
+            requirePassWordCheckBox.addItemListener(new ItemListener(){
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    passwordField.setEnabled(requirePassWordCheckBox.isSelected());
+                }
+            });
             passwordField = new JPasswordField(30);
+            passwordField.setEnabled(false);
             
             add(shareWithITunesCheckBox, "split");
             add(new JLabel("Share the audio section of my LimeWire on my local network using iTunes"),"wrap");
@@ -195,16 +206,22 @@ public class FilesOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requirePassWordCheckBox.isSelected());
+            
+            //TODO: do some string checking for password length, etc.. see the old DaapSetting usage
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return DaapSettings.DAAP_REQUIRES_PASSWORD.getValue() != requirePassWordCheckBox.isSelected() ||
+                    DaapSettings.DAAP_PASSWORD.getValue() != requirePassWordCheckBox.getText();
         }
 
         @Override
         void initOptions() {
-
+            //TODO: share with init
+            passwordField.setText(DaapSettings.DAAP_PASSWORD.getValue());
+            requirePassWordCheckBox.setSelected(DaapSettings.DAAP_REQUIRES_PASSWORD.getValue());
         }
     }
 }
