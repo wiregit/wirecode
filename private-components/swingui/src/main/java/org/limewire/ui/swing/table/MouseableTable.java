@@ -9,6 +9,7 @@ import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -157,6 +158,14 @@ public class MouseableTable extends StripedJXTable {
 
 		});
 	}
+	//Don't set the cell value when editing is cancelled
+	@Override
+    public void editingStopped(ChangeEvent e) {
+        TableCellEditor editor = getCellEditor();
+        if (editor != null) {          
+            removeEditor();
+        }
+    }
 
     // gets rid of default editor color so that editors are colored by highlighters and selection color is shown
     @Override
