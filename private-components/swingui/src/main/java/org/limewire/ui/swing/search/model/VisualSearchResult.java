@@ -21,8 +21,6 @@ public interface VisualSearchResult {
     BasicDownloadState getDownloadState();
 
     String getFileExtension();
-
-    String getMediaType();
     
     Map<PropertyKey, Object> getProperties();
 

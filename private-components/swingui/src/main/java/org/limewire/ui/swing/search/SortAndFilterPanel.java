@@ -304,7 +304,7 @@ public class SortAndFilterPanel extends JXPanel {
                 @Override
                 public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    return compareToNull(vsr1.getMediaType(), vsr2.getMediaType());
+                    return compareToNull(vsr1.getCategory(), vsr2.getCategory());
                 }
             };
         }

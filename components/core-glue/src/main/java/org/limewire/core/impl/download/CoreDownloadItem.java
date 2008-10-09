@@ -10,6 +10,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
@@ -112,19 +113,7 @@ public class CoreDownloadItem implements DownloadItem {
     @Override
     public Category getCategory() {
         String ext = FileUtils.getFileExtension(downloader.getFile());
-        MediaType type = MediaType.getMediaTypeForExtension(ext);
-        if (type == MediaType.getAudioMediaType()) {
-            return Category.AUDIO;
-        } else if (type == MediaType.getVideoMediaType()) {
-            return Category.VIDEO;
-        } else if (type == MediaType.getImageMediaType()) {
-            return Category.IMAGE;
-        } else if (type == MediaType.getDocumentMediaType()) {
-            return Category.DOCUMENT;
-        } else if (type == MediaType.getProgramMediaType()) {
-            return Category.PROGRAM;
-        }
-        return Category.OTHER;      
+        return MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(ext));        
     }
 
     @Override

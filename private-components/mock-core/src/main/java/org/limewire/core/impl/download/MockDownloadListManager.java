@@ -2,13 +2,13 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 import java.util.List;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
@@ -159,7 +159,7 @@ public class MockDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws IOException {
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
         // TODO Auto-generated method stub
         return null;
     }

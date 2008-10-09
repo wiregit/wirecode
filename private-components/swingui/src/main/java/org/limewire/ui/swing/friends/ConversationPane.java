@@ -12,11 +12,12 @@ import java.awt.Insets;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.net.URLDecoder;
+
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -33,10 +34,12 @@ import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.io.InvalidDataException;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -296,7 +299,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
                 try {
                     String dataStr = event.getData();
-                    String fileIdEncoded = dataStr.substring(dataStr.indexOf("=")+1).trim();
+                    String fileIdEncoded = dataStr.substring(dataStr.indexOf("=") + 1).trim();
                     String fileId = URLDecoder.decode(fileIdEncoded, "UTF-8");
 
                     FileMetaData offeredFile = idToFileMetaDataMap.get(fileId);
@@ -304,8 +307,14 @@ public class ConversationPane extends JPanel implements Displayable {
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
                    downloader.addDownload((LimePresence)chatFriend.getPresence(), offeredFile);
-                } catch (IOException e1) {
-                    throw new RuntimeException("FIX ME", e1);
+                } catch(SaveLocationException sle) {
+                    throw new RuntimeException("FIX ME", sle); // BROKEN
+                } catch (InvalidDataException ide) {
+                    // not exactly broken, but need better behavior --
+                    // this means the FileMetaData we received isn't well-formed.
+                    throw new RuntimeException("FIX ME", ide);
+                } catch(UnsupportedEncodingException uee) {
+                    throw new RuntimeException(uee); // impossible
                 }
 
                 // TODO: Track download states by adding listeners to dl item

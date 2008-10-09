@@ -3,7 +3,6 @@ package org.limewire.core.impl.download;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadListener;
@@ -26,9 +26,12 @@ import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.setting.FileSetting;
+import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 
@@ -118,51 +121,52 @@ public class CoreDownloadListManager implements DownloadListManager {
         if(search != null && search instanceof CoreSearch) {
             queryGUID = ((CoreSearch)search).getQueryGuid();
         }
-                
+        
+        Category category = searchResults.iterator().next().getCategory();
+        return createDownloader(files, alts, queryGUID, saveDir, fileName, overwrite, category);
+	}
+	
+	private CoreDownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
+            GUID queryGuid, File saveDir, String fileName, boolean overwrite, Category category)
+            throws SaveLocationException {
+
         // determine per mediatype directory if saveLocation == null
         // and only pass it through if directory is different from default
         // save directory == !isDefault()
-        if (/*saveDir == null && */ search != null) {
+        //if (saveDir == null &&) {
             FileSetting fs = SharingSettings.getFileSettingForMediaType
-            (MediaTypeConverter.toMediaType(search.getCategory()));
+            (MediaTypeConverter.toMediaType(category));
             if (!fs.isDefault()) {
                 saveDir = fs.getValue();
             }
-        }
-        
-        Downloader downloader = downloadManager.download(files, alts, queryGUID, overwrite, saveDir, fileName);
-        
-        return new CoreDownloadItem(downloader, queueTimeCalculator, true);
-	}
+       // }
 
-
-
-    @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws IOException {
-        return addDownload(((CoreRemoteFileItem)fileItem).getRfd());
-    }
-    
-    @Override
-    public DownloadItem addDownload(LimePresence presence, FileMetaData fileMeta) throws IOException {
-
-        return addDownload(createRfdFromChatResult(presence, fileMeta));
-       
-    }
-    
-    private DownloadItem addDownload(RemoteFileDesc rfd) throws IOException{
-        File saveDir = null;
-        String fileName = null;
-        boolean overwrite = false;
-
-        RemoteFileDesc[] files = { rfd };
-        List<RemoteFileDesc> altLocList = Collections.emptyList();
-
-        Downloader downloader = downloadManager.download(files, altLocList, null, overwrite, saveDir, fileName);
+        Downloader downloader = downloadManager.download(files, alts, queryGuid, overwrite,
+                saveDir, fileName);
 
         return new CoreDownloadItem(downloader, queueTimeCalculator, true);
     }
 
-    private RemoteFileDesc createRfdFromChatResult(LimePresence presence, FileMetaData fileMeta) throws IOException {
+    @Override
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
+        return createDownloader(new RemoteFileDesc[] { ((CoreRemoteFileItem) fileItem).getRfd() },
+                RemoteFileDesc.EMPTY_LIST, null, null, null, false, fileItem.getCategory());
+    }
+    
+    @Override
+    public DownloadItem addDownload(LimePresence presence, FileMetaData fileMeta)
+            throws SaveLocationException, InvalidDataException {
+        Category category = MediaTypeConverter.toCategory(
+                MediaType.getMediaTypeForExtension(
+                        FileUtils.getFileExtension(
+                                fileMeta.getName())));
+        return createDownloader(new RemoteFileDesc[] { createRfdFromChatResult(presence, fileMeta) },
+                RemoteFileDesc.EMPTY_LIST, 
+                null, null, null, false, category);
+    }
+
+    private RemoteFileDesc createRfdFromChatResult(LimePresence presence, FileMetaData fileMeta)
+            throws SaveLocationException, InvalidDataException {
         Connectable publicAddress;
         Address address = presence.getPresenceAddress();
         byte[] clientGuid = null;
@@ -173,7 +177,11 @@ public class CoreDownloadListManager implements DownloadListManager {
         Set<String> urnsAsString = fileMeta.getURNsAsString();
         Set<URN> urns = new HashSet<URN>();
         for (String urnStr : urnsAsString) {
-            urns.add(URN.createUrnFromString(urnStr));
+            try {
+                urns.add(URN.createUrnFromString(urnStr));
+            } catch(IOException iox) {
+                throw new InvalidDataException(iox);
+            }
         }
 
         if (address instanceof FirewalledAddress) {

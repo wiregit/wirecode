@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
@@ -79,19 +80,7 @@ public class CoreLocalFileItem implements LocalFileItem {
     
     private static Category getCategory(File file) {
         String ext = FileUtils.getFileExtension(file);
-        MediaType type = MediaType.getMediaTypeForExtension(ext);
-        if (type == MediaType.getAudioMediaType()) {
-            return Category.AUDIO;
-        } else if (type == MediaType.getVideoMediaType()) {
-            return Category.VIDEO;
-        } else if (type == MediaType.getImageMediaType()) {
-            return Category.IMAGE;
-        } else if (type == MediaType.getDocumentMediaType()) {
-            return Category.DOCUMENT;
-        } else if (type == MediaType.getProgramMediaType()) {
-            return Category.PROGRAM;
-        }
-        return Category.OTHER;   
+        return MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(ext));
     }
     
 //    private void setLimeXMLDocument(LimeXMLDocument document) {

@@ -42,7 +42,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         switch (index) {
             case NAME_INDEX: return getIconLabel(vsr);
-            case TYPE_INDEX: return vsr.getMediaType();
+            case TYPE_INDEX: return vsr.getCategory();
             case SIZE_INDEX: return vsr.getSize();
             case ACTION_INDEX: return vsr;
             case RELEVANCE_INDEX: return getProperty(PropertyKey.RELEVANCE);

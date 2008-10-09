@@ -56,12 +56,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public String getMediaType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Map<PropertyKey, Object> getProperties() {
         // TODO Auto-generated method stub
         return null;

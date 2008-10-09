@@ -43,6 +43,7 @@ public class MediaType implements Serializable {
     public static final String AUDIO = I18nMarker.marktr("Audio");
     public static final String VIDEO = I18nMarker.marktr("Video");
     public static final String IMAGES = I18nMarker.marktr("Images");
+    public static final String OTHER = I18nMarker.marktr("Other");
 
     /**
      * Type for 'any file'
@@ -161,13 +162,29 @@ public class MediaType implements Serializable {
                 "pbm", "pnm", "ppm", "xbm", "xpm", "xwd",
                 "sgi", "fax", "rgb", "ras"
             });
+    
+    /**
+     * Type for 'other'
+     */
+    private static final MediaType TYPE_OTHER = 
+        new MediaType(SCHEMA_OTHER, OTHER, null) {
+            // required SVUID because we're constructing an anonymous class.
+            private static final long serialVersionUID = 2041997774686329401L;
+        
+        @Override
+        public boolean matches(String ext) {
+            return !TYPE_DOCUMENTS.matches(ext) && !TYPE_PROGRAMS.matches(ext) &&
+                   !TYPE_AUDIO.matches(ext) && !TYPE_VIDEO.matches(ext) &&
+                   !TYPE_IMAGES.matches(ext);
+        }
+    };
             
     /**
      * All media types.
      */
     private static final MediaType[] ALL_MEDIA_TYPES =
         new MediaType[] { TYPE_ANY, TYPE_DOCUMENTS, TYPE_PROGRAMS,
-                          TYPE_AUDIO, TYPE_VIDEO, TYPE_IMAGES };     
+                          TYPE_AUDIO, TYPE_VIDEO, TYPE_IMAGES, TYPE_OTHER };     
     
     /**
      * The description of this MediaType.
@@ -409,6 +426,11 @@ public class MediaType implements Serializable {
      */
     public static MediaType getWindowsProgramMediaType() {
         return TYPE_WINDOWS_PROGRAMS;
+    }
+    
+    /** Retrieves the 'Other' media type. */
+    public static MediaType getOtherMediaType() {
+        return TYPE_OTHER;
     }
     
     /**

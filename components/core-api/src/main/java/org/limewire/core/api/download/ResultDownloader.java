@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.InvalidDataException;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 
@@ -25,23 +26,26 @@ public interface ResultDownloader {
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults)
             throws SaveLocationException;
 
-
     /**
      * Adds a download specified by the given remote file desc
-     *
+     * 
      * @param chatFileDesc The chat file metadata
-     * @return DownloadItem with which the download can be tracked and controlled
-     * @throws SaveLocationException if an error occurs while downloading and saving the
-     * file
+     * @return DownloadItem with which the download can be tracked and
+     *         controlled
+     * @throws SaveLocationException if an error occurs while downloading and
+     *         saving the file
+     * @throws InvalidDataException if the FileMetaData is malformed
      */
-    public DownloadItem addDownload(LimePresence presence, FileMetaData chatFileDesc) throws IOException;
+    public DownloadItem addDownload(LimePresence presence, FileMetaData chatFileDesc)
+            throws SaveLocationException, InvalidDataException;
 
     /**
      * Adds a download specified by the given RemoteFileItem
+     * 
      * @throws IOException if an error occurs while downloading and saving the
-     * file
-     *
+     *         file
+     * 
      */
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws IOException;
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException;
 
 }

@@ -21,7 +21,6 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.util.MediaType;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private final Log LOG = LogFactory.getLog(getClass());
@@ -74,14 +73,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     @Override
     public String getFileExtension() {
         return coreResults.get(0).getFileExtension();
-    }
-
-    @Override
-    public String getMediaType() {
-        String ext = getFileExtension();
-        MediaType mediaType = MediaType.getMediaTypeForExtension(ext);
-        // TODO: RMV improve the text returned
-        return mediaType == null ? ext : mediaType.toString();
     }
 
     @Override
