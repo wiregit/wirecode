@@ -85,8 +85,9 @@ public class DownloadRendererEditor extends JPanel implements
     @Resource
     private Icon warningIcon;
     
-    private static final int PROGRESS_BAR_WIDTH = 538;
     
+    // TODO: convert to resources
+    private static final int PROGRESS_BAR_WIDTH =  538;
     private Color itemLabelColour     = new Color(0x21,0x52,0xa6);
     private Color statusLabelColour   = new Color(0x31,0x31,0x31);
     private Color stalledLabelColour  = new Color(0xb3,0x1c,0x20);
@@ -94,8 +95,10 @@ public class DownloadRendererEditor extends JPanel implements
     private Color linkColour          = new Color(0x2b,0x5b,0xaa);
     private Color progressBarBorderColour = new Color(0x8a,0x8a,0x8a);
     
-    private static final Font statusPlain = new Font("Arial", Font.PLAIN, 10);
-    private static final Font statusBold = new Font("Arial", Font.BOLD, 10);
+    
+    
+    private static final Font STATUS_FONT_PLAIN = new Font("Arial", Font.PLAIN, 10);
+    private static final Font STATUS_FONT_BOLD = new Font("Arial", Font.BOLD, 10);
     
     private List<JComponent> textComponents = new ArrayList<JComponent>();
 
@@ -113,7 +116,7 @@ public class DownloadRendererEditor extends JPanel implements
         textComponents.add(minTitleLabel);
 
         minStatusLabel = new JLabel();
-        minStatusLabel.setFont(statusPlain);
+        minStatusLabel.setFont(STATUS_FONT_PLAIN);
         minStatusLabel.setForeground(statusLabelColour);
         textComponents.add(minStatusLabel);
 
@@ -124,7 +127,7 @@ public class DownloadRendererEditor extends JPanel implements
         minLinkButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
         minLinkButton.addActionListener(editorListener);
         minLinkButton.setForeground(linkColour);
-        minLinkButton.setFont(statusPlain);
+        minLinkButton.setFont(STATUS_FONT_PLAIN);
                                 
         fullIconLabel = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
 
@@ -134,7 +137,7 @@ public class DownloadRendererEditor extends JPanel implements
         textComponents.add(fullTitleLabel);
 
         fullStatusLabel = new JLabel();
-        fullStatusLabel.setFont(statusPlain);
+        fullStatusLabel.setFont(STATUS_FONT_PLAIN);
         fullStatusLabel.setForeground(statusLabelColour);
         textComponents.add(fullStatusLabel);
 
@@ -148,7 +151,7 @@ public class DownloadRendererEditor extends JPanel implements
         
 
         fullTimeLabel = new JLabel();
-        fullTimeLabel.setFont(statusPlain);
+        fullTimeLabel.setFont(STATUS_FONT_PLAIN);
         
         fullButtonPanel = new DownloadButtonPanel(editorListener);
         fullButtonPanel.setOpaque(false);
@@ -408,7 +411,7 @@ public class DownloadRendererEditor extends JPanel implements
             
             editor.minIconLabel.setIcon(warningIcon);
             editor.minStatusLabel.setForeground(stalledLabelColour);
-            editor.minStatusLabel.setFont(statusBold);
+            editor.minStatusLabel.setFont(STATUS_FONT_BOLD);
             
             break;
             
@@ -416,14 +419,14 @@ public class DownloadRendererEditor extends JPanel implements
             
             editor.minIconLabel.setIcon(item.getCategory());
             editor.minStatusLabel.setForeground(finishedLabelColour);
-            editor.minStatusLabel.setFont(statusBold);
+            editor.minStatusLabel.setFont(STATUS_FONT_BOLD);
             
             break;
             
         default :
             editor.minIconLabel.setIcon(item.getCategory());     
             editor.minStatusLabel.setForeground(statusLabelColour);
-            editor.minStatusLabel.setFont(statusPlain);
+            editor.minStatusLabel.setFont(STATUS_FONT_PLAIN);
             
         }
         
