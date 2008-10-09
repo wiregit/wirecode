@@ -63,41 +63,7 @@ public class FriendNameTable extends JXTable {
         
         final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), remoteLibraryManager, shareListManager);
 
-        final SharingTransferHandler sharingTransferHandler = new SharingTransferHandler(null);
-        setTransferHandler(new TransferHandler(){
-
-            @Override
-            public boolean canImport(final TransferSupport support) {
-               JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
-               int row = dropLocation.getRow();
-               
-               if(row < tableModel.getRowCount() && row >= 0) {
-               
-                   if(row != getSelectedRow()) {
-                       setRowSelectionInterval(row, row);
-                   }
-                   FriendItem friendItem = tableModel.getElementAt(row);
-                   Friend friend = friendItem.getFriend();
-                   FriendFileList friendFileList =  shareListManager.getFriendShareList(friend);
-                   sharingTransferHandler.setModel(friendFileList);   
-                   boolean canImport = sharingTransferHandler.canImport(support);
-                   return canImport;
-               }
-
-               return false;
-            }
-            
-            @Override
-            public boolean importData(TransferSupport support) {
-                JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
-                int row = dropLocation.getRow();
-                FriendItem friendItem = tableModel.getElementAt(row);
-                Friend friend = friendItem.getFriend();
-                FriendFileList friendFileList =  shareListManager.getFriendShareList(friend);
-                sharingTransferHandler.setModel(friendFileList);
-                return sharingTransferHandler.importData(support);
-            }
-        });
+        setTransferHandler(new FriendTransferHandler(shareListManager));
         
         setDropMode(DropMode.ON);
         
@@ -133,6 +99,55 @@ public class FriendNameTable extends JXTable {
         return tableModel;
     }
     
+    /**
+     * Transfer handler to allow dropping files onto names in the friends list.
+     * 
+     * Delegates to SharingTransferHandler to know if it canImport, or importData.
+     * 
+     * On dragging, the row we are on is selected and checked to see if import is possible.
+     */
+    private final class FriendTransferHandler extends TransferHandler {
+        private final ShareListManager shareListManager;
+
+        private final SharingTransferHandler sharingTransferHandler;
+
+        private FriendTransferHandler(ShareListManager shareListManager) {
+            this.shareListManager = shareListManager;
+            this.sharingTransferHandler = new SharingTransferHandler(null);
+        }
+
+        @Override
+        public boolean canImport(final TransferSupport support) {
+           JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
+           int row = dropLocation.getRow();
+           
+           if(row < tableModel.getRowCount() && row >= 0) {
+               if(row != getSelectedRow()) {
+                   setRowSelectionInterval(row, row);
+               }
+               FriendItem friendItem = tableModel.getElementAt(row);
+               Friend friend = friendItem.getFriend();
+               FriendFileList friendFileList =  shareListManager.getFriendShareList(friend);
+               sharingTransferHandler.setModel(friendFileList);   
+               boolean canImport = sharingTransferHandler.canImport(support);
+               return canImport;
+           }
+
+           return false;
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
+            int row = dropLocation.getRow();
+            FriendItem friendItem = tableModel.getElementAt(row);
+            Friend friend = friendItem.getFriend();
+            FriendFileList friendFileList =  shareListManager.getFriendShareList(friend);
+            sharingTransferHandler.setModel(friendFileList);
+            return sharingTransferHandler.importData(support);
+        }
+    }
+
     private static class FriendComparator implements Comparator<FriendItem> {
         @Override
         public int compare(FriendItem o1, FriendItem o2) {
