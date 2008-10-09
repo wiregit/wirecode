@@ -2,6 +2,7 @@ package org.limewire.core.impl.xmpp;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LocalFileItem;
@@ -14,6 +15,9 @@ import org.limewire.xmpp.api.client.User;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.FileEventListener;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -40,21 +44,36 @@ public class FriendShareListRefresher {
     @Singleton
     static class FriendShareListEventImpl implements RegisteringEventListener<FriendShareListEvent> {
 
+        private static final AtomicBoolean FILE_MANAGER_LOADED = new AtomicBoolean(false);
+
         @Inject
         public void register(ListenerSupport<FriendShareListEvent> friendShareListEventListenerSupport) {
             friendShareListEventListenerSupport.addListener(this);
+        }
+
+        @Inject
+        public void register(FileManager fileManager) {
+            fileManager.addFileEventListener(new FileEventListener() {
+                public void handleFileEvent(FileManagerEvent evt) {
+                    if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
+                        FILE_MANAGER_LOADED.set(true);
+                    }
+                }
+            });
         }
 
         public void handleEvent(final FriendShareListEvent event) {
             if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
                 event.getFileList().getModel().addListEventListener(new ListEventListener<LocalFileItem>() {
                     public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                        User user = users.get(event.getFriend().getId());
-                        if(user != null) {
-                            Map<String,Presence> presences = user.getPresences();
-                            for(Presence presence : presences.values()) {
-                                if(presence instanceof LimePresence) {
-                                    ((LimePresence)presence).sendLibraryRefresh();
+                        if(FILE_MANAGER_LOADED.get()) {
+                            User user = users.get(event.getFriend().getId());
+                            if(user != null) {
+                                Map<String,Presence> presences = user.getPresences();
+                                for(Presence presence : presences.values()) {
+                                    if(presence instanceof LimePresence) {
+                                        ((LimePresence)presence).sendLibraryRefresh();
+                                    }
                                 }
                             }
                         }

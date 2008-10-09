@@ -86,18 +86,6 @@ public class FriendLibraries {
                         String word = st.nextToken();
                         addToIndex(newFile, word);
                     }
-                } else if (listChanges.getType() == ListEvent.DELETE) {
-                    // TODO BUG BUG BUG: This is incorrect. The list doesn't have the
-                    // removed item at the index anymore. There's no way to
-                    // access it from the deleted event.
-                    RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
-                    LOG.debugf("removing file {0} from index", newFile.getName());
-                    removeFromIndex(newFile, newFile.getName());
-                    StringTokenizer st = new StringTokenizer(newFile.getName());
-                    while (st.hasMoreElements()) {
-                        String word = st.nextToken();
-                        removeFromIndex(newFile, word);
-                    }
                 }
             }
         }

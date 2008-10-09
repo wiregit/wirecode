@@ -42,7 +42,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
     public void handleEvent(LibraryChangedEvent event) {
         remoteLibraryManager.removePresenceLibrary(event.getSource());
-        browse(remoteLibraryManager.addPresenceLibrary(event.getSource()), event.getSource());
+        remoteLibraryManager.addPresenceLibrary(event.getSource());
     }
 
     @Inject
