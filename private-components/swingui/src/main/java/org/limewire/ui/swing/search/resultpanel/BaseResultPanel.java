@@ -105,7 +105,7 @@ public abstract class BaseResultPanel extends JXPanel {
             resultsList.setColumnWidth(columnIndex, initialColumnWidth);
         }
         
-        resultsList.getColumnModel().getColumn(2).setMaxWidth(130);
+        resultsList.getColumnModel().getColumn(2).setMaxWidth(ListViewTableFormat.ACTIONS_WIDTH);
 
         resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
 
