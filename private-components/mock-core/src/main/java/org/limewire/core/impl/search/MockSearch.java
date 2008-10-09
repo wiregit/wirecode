@@ -378,7 +378,7 @@ public class MockSearch implements Search {
         }
 
         @Override
-        public boolean isSharedFiles() {
+        public boolean isSharingEnabled() {
             return false;
         }
 

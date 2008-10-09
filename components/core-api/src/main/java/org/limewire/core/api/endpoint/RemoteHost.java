@@ -8,7 +8,7 @@ public interface RemoteHost {
     
     boolean isChatEnabled();
     
-    boolean isSharedFiles();
+    boolean isSharingEnabled();
     
     public FriendPresence getFriendPresence();
 

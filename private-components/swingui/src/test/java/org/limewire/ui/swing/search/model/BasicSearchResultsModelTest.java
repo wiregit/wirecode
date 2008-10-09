@@ -715,7 +715,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
                 }
 
                 @Override
-                public boolean isSharedFiles() {
+                public boolean isSharingEnabled() {
                     return false;
                 }
 

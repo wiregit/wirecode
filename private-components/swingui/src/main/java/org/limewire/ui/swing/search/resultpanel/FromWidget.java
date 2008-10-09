@@ -168,14 +168,14 @@ public class FromWidget extends JPanel {
             if (person.isBrowseHostEnabled()) {
                 menu.add(getLibraryAction(person));
             }
-            if (person.isSharedFiles()) {
+            if (person.isSharingEnabled()) {
                 menu.add(getSharingAction(person));
             }
 
         } else {
             for (RemoteHost person : people) {
                 if (person.isBrowseHostEnabled() || person.isChatEnabled()
-                        || person.isSharedFiles()) {
+                        || person.isSharingEnabled()) {
 
                     JMenu submenu = new JMenu(person.getRenderName());
                     submenu.addMouseListener(menuHider);
@@ -192,7 +192,7 @@ public class FromWidget extends JPanel {
                         submenu.add(libraryItem);
                     }
 
-                    if (person.isSharedFiles()) {
+                    if (person.isSharingEnabled()) {
                         JMenuItem shareItem = new JMenuItem(getSharingAction(person));
                         shareItem.addMouseListener(menuHider);
                         submenu.add(shareItem);

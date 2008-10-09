@@ -179,15 +179,15 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public boolean isChatEnabled() {
-            if (friendPresence != null) {
+            if (friendPresence != null && !friendPresence.getFriend().isAnonymous()) {
                 return true;
             }
             return false;
         }
 
         @Override
-        public boolean isSharedFiles() {
-            if (friendPresence != null) {
+        public boolean isSharingEnabled() {
+            if (friendPresence != null && !friendPresence.getFriend().isAnonymous()) {
                 return true;
             }
 
@@ -275,7 +275,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         }
 
         @Override
-        public boolean isSharedFiles() {
+        public boolean isSharingEnabled() {
             return false;
         }
 
