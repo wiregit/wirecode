@@ -95,8 +95,7 @@ public class NetworkManagerStub implements NetworkManager {
     }
 
     public byte[] getNonForcedAddress() {
-        // TODO Auto-generated method stub
-        return null;
+        return getAddress();
     }
 
     public int getNonForcedPort() {

@@ -74,20 +74,28 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
         waitForLocalAddress();
         byte[] publicAddress = networkManager.getExternalAddress();
         if (!Arrays.equals(publicAddress, address.getPublicAddress().getInetAddress().getAddress())) {
-            LOG.debugf("different public address: {0}", address.getPublicAddress());
+            LOG.debugf("different public address: local = {0}, remote = {1}", toString(publicAddress), address.getPublicAddress());
             observer.resolved(new ResolvedFirewalledAddress(address.getPublicAddress(), address.getPrivateAddress(), address.getClientGuid(), address.getPushProxies(), address.getFwtVersion()));
             return;
         }
-        byte[] privateAddress = networkManager.getAddress();
+        byte[] privateAddress = networkManager.getNonForcedAddress();
         if (NetworkUtils.areInSameSiteLocalNetwork(privateAddress, address.getPrivateAddress().getInetAddress().getAddress())) {
             LOG.debug("addresses behind same NAT!");
             observer.resolved(address.getPrivateAddress());
         } else {
-            LOG.debugf("different site local networks: {0}", address.getPrivateAddress());
+            LOG.debugf("different site local networks: local = {0}, remote = {1}", toString(privateAddress), address.getPrivateAddress());
             observer.resolved(new ResolvedFirewalledAddress(address.getPublicAddress(), address.getPrivateAddress(), address.getClientGuid(), address.getPushProxies(), address.getFwtVersion()));
         }
     }
-    
+
+    private String toString(byte[] publicAddress) {
+        StringBuilder sb = new StringBuilder();
+        for(byte b : publicAddress) {
+            sb.append(b).append(".");
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+
     private void waitForLocalAddress() {
         synchronized (localAddress) {
             while(localAddress.get() == null) {

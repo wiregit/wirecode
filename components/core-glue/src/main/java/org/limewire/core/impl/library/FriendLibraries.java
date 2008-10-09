@@ -25,6 +25,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+
 @Singleton
 public class FriendLibraries {
     private final ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>> libraries;
@@ -49,7 +50,7 @@ public class FriendLibraries {
                                 LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
                                 if(libraries.putIfAbsent(item.getPresence().getPresenceId(), trie) == null) {
                                     LOG.debugf("adding library for presence {0} to index", item.getPresence().getPresenceId());
-                                    item.getModel().addListEventListener(new LibraryListener(trie));
+                                    item.getModel().addListEventListener(new LibraryListener(item.getPresence().getPresenceId(), trie));
                                 }
                             }
                             @Override
@@ -69,9 +70,11 @@ public class FriendLibraries {
 
     class LibraryListener implements ListEventListener<RemoteFileItem> {
 
+        private final String presenceId;
         final LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library;
 
-        LibraryListener(LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library) {
+        LibraryListener(String presenceId, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library) {
+            this.presenceId = presenceId;
             this.library = library;
         }
 
@@ -79,12 +82,14 @@ public class FriendLibraries {
             while(listChanges.next()) {
                 if(listChanges.getType() == ListEvent.INSERT) {
                     RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
-                    LOG.debugf("adding file {0}, indexing under:", newFile.getName());
+                    LOG.debugf("adding file {0} for {1}, indexing under:", newFile.getName(), presenceId);
                     addToIndex(newFile, newFile.getName());
                     StringTokenizer st = new StringTokenizer(newFile.getName());
-                    while (st.hasMoreElements()) {
-                        String word = st.nextToken();
-                        addToIndex(newFile, word);
+                    if(st.countTokens() > 1) {
+                        while (st.hasMoreElements()) {
+                            String word = st.nextToken();
+                            addToIndex(newFile, word);
+                        }
                     }
                 }
             }
