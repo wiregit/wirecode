@@ -302,7 +302,7 @@ public class ActionButtonPanel extends JXPanel {
         });
         
         removeAll();
-        setLayout(new MigLayout("insets 0 0 0 0", "[][][]", "[][]"));
+        setLayout(new MigLayout("insets 0 0 0 0", "[]15[]15[]", "[][]"));
         addButtonsToPanel();
         FontUtils.changeSize(downloadingLink, -2.0f);
         add(downloadingLink, "span");
