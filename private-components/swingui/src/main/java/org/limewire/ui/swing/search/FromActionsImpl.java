@@ -13,7 +13,6 @@ import org.limewire.ui.swing.friends.FriendsPane;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-
 @Singleton
 public class FromActionsImpl implements FromActions {
     private static final Log LOG = LogFactory.getLog(FromActionsImpl.class);

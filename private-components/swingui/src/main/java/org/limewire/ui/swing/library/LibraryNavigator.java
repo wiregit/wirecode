@@ -12,6 +12,8 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -112,6 +114,8 @@ public class LibraryNavigator extends JXPanel {
        
         addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel()), LibraryState.LOADED));
 
+        //add(Line.createHorizontalLine(textColor), "growx, gaptop 4, wrap");
+        
         new AbstractListEventListener<FriendLibrary>() {
             @Override
             protected void itemAdded(FriendLibrary item) {
@@ -159,8 +163,30 @@ public class LibraryNavigator extends JXPanel {
     }
 
     private void addNavPanel(NavPanel panel) {
-        navPanels.add(panel);
-        add(panel, "alignx left, aligny top, growx, wrap");
+        // Find the index where to insert.
+        int idx = Collections.binarySearch(navPanels, panel, new Comparator<NavPanel>() {
+            @Override
+            public int compare(NavPanel o1, NavPanel o2) {
+                Friend f1 = o1.getFriend();
+                Friend f2 = o2.getFriend();
+                if(o1 == o2) {
+                    return 0;
+                } else if(f2 instanceof Me) {
+                    return 1;
+                } else if(f1 instanceof Me) {
+                    return -1;
+                } else if(f1.isAnonymous() && !f2.isAnonymous()) {
+                    return 1;
+                } else if(f2.isAnonymous() && !f1.isAnonymous()) {
+                    return -1;
+                } else {
+                    return f1.getRenderName().compareToIgnoreCase(f2.getRenderName());
+                }
+            }
+        });
+        int insertIdx = idx >= 0 ? idx : -(idx+1);
+        navPanels.add(insertIdx, panel);
+        add(panel, "alignx left, aligny top, growx, wrap", insertIdx+1); // +1 because of title
     }
     
     private void moveDown() {
@@ -354,10 +380,12 @@ public class LibraryNavigator extends JXPanel {
                         }) {
                             @Override
                             public void mouseEntered(MouseEvent e) {
+                                super.mouseEntered(e);
                                 statusIcon.setIcon(removeLibraryHoverIcon);
                             }
                             @Override
                             public void mouseExited(MouseEvent e) {
+                                super.mouseExited(e);
                                 statusIcon.setIcon(removeLibraryIcon);
                             }
                         };
