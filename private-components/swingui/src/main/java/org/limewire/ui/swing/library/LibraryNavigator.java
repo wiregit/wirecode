@@ -237,12 +237,13 @@ public class LibraryNavigator extends JXPanel {
         repaint(); // Must forcibly paint, otherwise might not redraw w/o panel.
     }
     
-    private void collapseOthersAndExpandThis(Friend friend) {
+    public void collapseOthersAndExpandThis(Friend friend) {
         for(NavPanel panel : navPanels) {
             if(friend == null || !panel.getFriend().getId().equals(friend.getId())) {
                 panel.collapse();
             } else {
                 panel.expand();
+                panel.ensureSelected();
             }
         }
     }
@@ -345,7 +346,7 @@ public class LibraryNavigator extends JXPanel {
             categoryLabel = new ActionLabel(new AbstractAction(friend.getRenderName()) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    categories.ensureSelected();
+                    ensureSelected();
                     getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
                 }
             }, false);
@@ -453,6 +454,11 @@ public class LibraryNavigator extends JXPanel {
         public Friend getFriend() {
             return friend;
         }
+        
+        public void ensureSelected() {
+            categories.ensureSelected();
+        }
+        
     }
     
     private class CategoriesPanel extends JXCollapsiblePane {

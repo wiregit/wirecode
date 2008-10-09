@@ -9,6 +9,7 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.FriendsPane;
+import org.limewire.ui.swing.library.LibraryNavigator;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -23,12 +24,15 @@ public class FromActionsImpl implements FromActions {
 
     private final FriendsPane friendsPane;
 
+    private final LibraryNavigator libraryNavigator;
+    
     @Inject
     public FromActionsImpl(RemoteLibraryManager remoteLibraryManager,
-            ShareListManager shareListManager, FriendsPane friendsPane) {
+            ShareListManager shareListManager, FriendsPane friendsPane, LibraryNavigator libraryNavigator) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.shareListManager = shareListManager;
         this.friendsPane = friendsPane;
+        this.libraryNavigator = libraryNavigator;
     }
 
     @Override
@@ -56,10 +60,9 @@ public class FromActionsImpl implements FromActions {
 
     @Override
     public void viewLibraryOf(final RemoteHost person) {
-        // TODO: Make this work so that friend libraries are jumped to
-        // instead of browsed!
         LOG.debugf("viewLibraryOf: {0}", person.getRenderName());
         remoteLibraryManager.addPresenceLibrary(person.getFriendPresence());
+        libraryNavigator.collapseOthersAndExpandThis(person.getFriendPresence().getFriend());
     }
 
     @Override
