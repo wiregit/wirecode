@@ -39,6 +39,11 @@ class MockChatFriend implements ChatFriend {
             public void setName(String name) {
                 MockChatFriend.this.name = name;
             }
+            
+            @Override
+            public boolean isAnonymous() {
+                return false;
+            }
         };
     }
 

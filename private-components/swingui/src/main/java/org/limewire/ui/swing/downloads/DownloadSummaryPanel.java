@@ -28,6 +28,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
+import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -176,7 +177,7 @@ public class DownloadSummaryPanel extends JPanel {
             }
         });
         
-        addMouseListener(GuiUtils.getActionHandListener(new ActionListener(){
+        addMouseListener(new ActionHandListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 item.select();

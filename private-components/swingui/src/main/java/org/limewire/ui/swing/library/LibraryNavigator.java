@@ -7,6 +7,8 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -29,6 +31,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.icon.EmptyIcon;
+import org.jdesktop.swingx.painter.BusyPainter;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
@@ -42,6 +46,7 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.ui.swing.action.ActionKeys;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.components.ShiftedIcon;
+import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -78,11 +83,16 @@ public class LibraryNavigator extends JXPanel {
     @Resource private Icon documentIcon;
     @Resource private Icon otherIcon;
     
+    @Resource private Icon removeLibraryIcon;
+    @Resource private Icon removeLibraryHoverIcon;
+    
     @Resource private Color selectedBackground;
     @Resource private Font selectedTextFont;
     @Resource private Color selectedTextColor;
     @Resource private Font textFont;
     @Resource private Color textColor;
+    
+    private final RemoteLibraryManager remoteLibraryManager;
 
     @Inject
     LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
@@ -90,7 +100,8 @@ public class LibraryNavigator extends JXPanel {
             MyLibraryFactory myLibraryFactory, 
             final FriendLibraryFactory friendLibraryFactory) {
         GuiUtils.assignResources(this);
-
+        this.remoteLibraryManager = remoteLibraryManager;
+        
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
         this.titleLabel = new SectionHeading(I18n.tr("Libraries"));
@@ -284,8 +295,7 @@ public class LibraryNavigator extends JXPanel {
         case OTHER:    icon = otherIcon; break;
         case PROGRAM:  icon = appIcon; break;
         case VIDEO:    icon = videoIcon; break;
-        default:
-            throw new IllegalArgumentException("invalid category: " + category);
+        default:       icon = new EmptyIcon(16, 16); break;
         }
         action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, icon));
         return action;
@@ -296,6 +306,7 @@ public class LibraryNavigator extends JXPanel {
         private final Friend friend;
         private final ActionLabel categoryLabel;
         private final JXBusyLabel statusIcon;
+        private MouseListener removeListener;
         
         public NavPanel(Friend friend, Map<Category, Action> actions, LibraryState libraryState) {
             super(new MigLayout("insets 0, gap 0, fill"));
@@ -319,20 +330,58 @@ public class LibraryNavigator extends JXPanel {
             statusIcon.setOpaque(false);
             add(categoryLabel, "gapbefore 12, gaptop 2, grow");
             add(statusIcon, "gaptop 2, alignx right, gapafter 4, wrap");
-            add(categories, "span 2, grow, wrap"); // the gap here is implicit in the width of the icon
-                                                   // see decorateAction
+            add(categories, "span, grow, wrap"); // the gap here is implicit in the width of the icon
+                                                 // see decorateAction
             updateLibraryState(libraryState);
         }
         
         public void updateLibraryState(LibraryState libraryState) {
             switch(libraryState) {
             case FAILED_TO_LOAD:
-                // TODO: Add failure icon.
+                // TODO: Update state specifically to show failure?
+                //fall through...
             case LOADED:
-                statusIcon.setVisible(false);
-                statusIcon.setBusy(false);
+                if(friend.isAnonymous()) {
+                    statusIcon.setVisible(true);
+                    statusIcon.setBusy(false);
+                    statusIcon.setIcon(removeLibraryIcon);
+                    if(removeListener == null) {
+                        removeListener = new ActionHandListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                remoteLibraryManager.removeFriendLibrary(friend);
+                            }
+                        }) {
+                            @Override
+                            public void mouseEntered(MouseEvent e) {
+                                statusIcon.setIcon(removeLibraryHoverIcon);
+                            }
+                            @Override
+                            public void mouseExited(MouseEvent e) {
+                                statusIcon.setIcon(removeLibraryIcon);
+                            }
+                        };
+                        statusIcon.addMouseListener(removeListener);
+                    }
+                    
+                } else {
+                    if(removeListener != null) {
+                        statusIcon.removeMouseListener(removeListener);
+                        removeListener = null;
+                    }
+                    statusIcon.setVisible(false);
+                    statusIcon.setBusy(false);
+                    statusIcon.setIcon(new EmptyIcon(12, 12));
+                }
                 break;
             case LOADING:
+                if(removeListener != null) {
+                    statusIcon.removeMouseListener(removeListener);
+                    removeListener = null;
+                }
+                BusyPainter painter = statusIcon.getBusyPainter();
+                statusIcon.setIcon(new EmptyIcon(12, 12));
+                statusIcon.setBusyPainter(painter);
                 statusIcon.setVisible(true);
                 statusIcon.setBusy(true);
                 break;
@@ -361,7 +410,7 @@ public class LibraryNavigator extends JXPanel {
 
         public void expand() {
             categories.setCollapsed(false);
-            GuiUtils.setActionHandDrawingDisabled(categoryLabel, true);
+            ActionHandListener.setActionHandDrawingDisabled(categoryLabel, true);
         }
 
         public void dispose() {
@@ -370,7 +419,7 @@ public class LibraryNavigator extends JXPanel {
         
         public void collapse() {
             categories.setCollapsed(true);
-            GuiUtils.setActionHandDrawingDisabled(categoryLabel, false);
+            ActionHandListener.setActionHandDrawingDisabled(categoryLabel, false);
         }
         
         public Friend getFriend() {
@@ -604,6 +653,11 @@ public class LibraryNavigator extends JXPanel {
     
     private static class Me implements Friend {
         private static final Me ME = new Me();
+        
+        @Override
+        public boolean isAnonymous() {
+            return false;
+        }
 
         @Override
         public String getId() {

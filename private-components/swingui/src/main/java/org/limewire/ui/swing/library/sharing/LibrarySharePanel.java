@@ -683,6 +683,11 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     private static class Gnutella implements Friend {
         @Override
+        public boolean isAnonymous() {
+            return false;
+        }
+        
+        @Override
         public String getId() {
             return "_@_internal_@_";
         }

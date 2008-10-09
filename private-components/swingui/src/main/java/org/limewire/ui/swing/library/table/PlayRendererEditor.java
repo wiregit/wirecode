@@ -12,6 +12,7 @@ import javax.swing.JToggleButton;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -43,7 +44,7 @@ public class PlayRendererEditor extends TableRendererEditor {
         playButton.setHideActionText(true);
         playButton.setBorder(null);
         playButton.setOpaque(false);
-        playButton.addMouseListener(GuiUtils.getActionHandListener(new ActionListener(){
+        playButton.addMouseListener(new ActionHandListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (file == null) {

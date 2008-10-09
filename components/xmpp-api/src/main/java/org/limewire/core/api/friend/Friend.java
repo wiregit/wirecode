@@ -8,19 +8,34 @@ package org.limewire.core.api.friend;
 public interface Friend {
     
     /**
-     * @return the id of the user.  user-ids have the form <code>user@host.com</code>
+     * Returns the ID of the user.  This can be any form of unique ID.
+     * For example, an XMPP Friend can be in the form of <code>user@host.com</code>,
+     * whereas a Gnutella Friend can be the clientGUID.
      */
     public String getId();
 
     /**
-     * @return the friendly user given name to the user; can be null.
-     */
+     * Return the friendly user given name to the user, can be null.
+     * For example, an XMPP Friend can be the alias of the user,
+     * where a Gnutella friend can be the IP address.
+     * */
     public String getName();
     
-    /**
-     * Returns the best possible name this can be rendered with.
-     */
+    /** Returns the best possible name this can be rendered with. */
     public String getRenderName();
 
+    /** Sets a new name for this Friend. */
     void setName(String name);
+    
+    /**
+     * Returns true if this is an anonymous friend.
+     * For example, an XMPP Friend is not anonymous -- it is identified
+     * by an email address and is permanent.  A Gnutella Friend is anonymous,
+     * in that their existence is temporary and no long-lasting relationship
+     * exists.
+     * 
+     * Callers can use this to determine if data based on this friend is
+     * permanent or not.
+     */
+    boolean isAnonymous();
 }

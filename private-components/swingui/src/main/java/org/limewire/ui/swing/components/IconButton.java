@@ -7,7 +7,7 @@ import javax.swing.Icon;
 import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.listener.ActionHandListener;
 
 public class IconButton extends JXButton {
 
@@ -45,7 +45,7 @@ public class IconButton extends JXButton {
         setHorizontalTextPosition(SwingConstants.CENTER);
         setVerticalTextPosition(SwingConstants.BOTTOM);
         setIconTextGap(2);
-        addMouseListener(GuiUtils.getActionHandListener(null));
+        addMouseListener(new ActionHandListener());
     }
     
 

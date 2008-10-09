@@ -15,6 +15,7 @@ import javax.swing.UIManager;
 
 import org.jdesktop.swingx.JXLabel;
 import org.limewire.ui.swing.action.ActionKeys;
+import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 
 
@@ -87,7 +88,7 @@ public class ActionLabel extends JXLabel  {
         // add listener
         currentAction = action;
         currentAction.addPropertyChangeListener(getListener());
-        installListener(GuiUtils.getActionHandListener(new ActionListener() {
+        installListener(new ActionHandListener(new ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 currentAction.actionPerformed(e);
                 for(ActionListener listener : actionListeners) {

@@ -15,6 +15,11 @@ public class MockUser implements User {
         this.id = id;
         this.name = name;
     }
+    
+    @Override
+    public boolean isAnonymous() {
+        return false;
+    }
 
     @Override
     public void addPresenceListener(PresenceListener presenceListener) {

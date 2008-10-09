@@ -30,6 +30,11 @@ public class UserImpl implements User {
         this.presences = new ConcurrentHashMap<String, Presence>(); 
         this.presenceListeners = new CopyOnWriteArrayList<PresenceListener>();
     }
+    
+    @Override
+    public boolean isAnonymous() {
+        return false;
+    }
 
     public String getId() {
         return id;

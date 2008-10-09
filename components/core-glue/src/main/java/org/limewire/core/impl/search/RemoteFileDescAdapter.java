@@ -19,6 +19,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -204,18 +205,23 @@ public class RemoteFileDescAdapter implements SearchResult {
                     public Friend getFriend() {
                         return new Friend() {
                             @Override
+                            public boolean isAnonymous() {
+                                return true;
+                            }
+                            
+                            @Override
                             public String getId() {
-                                return rfd.getInetSocketAddress().toString();
+                                return GUID.toHexString(rfd.getClientGUID()); 
                             }
 
                             @Override
                             public String getName() {
-                                return getRenderName();
+                                return rfd.getInetSocketAddress().toString();
                             }
 
                             @Override
                             public String getRenderName() {
-                                return getId();
+                                return getName();
                             }
 
                             @Override
@@ -281,6 +287,10 @@ public class RemoteFileDescAdapter implements SearchResult {
                 @Override
                 public Friend getFriend() {
                     return new Friend() {
+                        @Override
+                        public boolean isAnonymous() {
+                            return true;
+                        }
 
                         @Override
                         public String getId() {

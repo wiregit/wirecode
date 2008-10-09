@@ -79,7 +79,9 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
-                remoteFileDescAdapter.setFriendPresence(friendPresence);
+                if(!friendPresence.getFriend().isAnonymous()) {
+                    remoteFileDescAdapter.setFriendPresence(friendPresence);
+                }
                 RemoteFileItem file = new CoreRemoteFileItem(remoteFileDescAdapter);
                 presenceLibrary.addFile(file);
             }
