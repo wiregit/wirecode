@@ -13,10 +13,11 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.net.URLDecoder;
+
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -32,7 +33,6 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -290,7 +290,6 @@ public class ConversationPane extends JPanel implements Displayable {
                 LOG.debugf("File offer download requested. FileId: {0}", event.getData());
 
                 // Initiate download of shared file from friend
-                DownloadItem item;
                 if (!(chatFriend.getPresence() instanceof LimePresence)) {
                     LOG.error("Can only download from other LimeWire clients");
                     return;
@@ -307,9 +306,9 @@ public class ConversationPane extends JPanel implements Displayable {
 
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
-                    item = downloader.addDownload((LimePresence)chatFriend.getPresence(), offeredFile);
+                   downloader.addDownload((LimePresence)chatFriend.getPresence(), offeredFile);
                 } catch (IOException e1) {
-                    LOG.error("Unable to save the download", e1);  //TODO: maybe pop up a dialog
+                    throw new RuntimeException("FIX ME", e1);
                 }
 
                 // TODO: Track download states by adding listeners to dl item

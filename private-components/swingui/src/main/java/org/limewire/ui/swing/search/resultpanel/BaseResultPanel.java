@@ -20,8 +20,6 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.actions.FromActions;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
@@ -36,7 +34,7 @@ import ca.odell.glazedlists.EventList;
 
 public abstract class BaseResultPanel extends JXPanel {
     public static final int TABLE_ROW_HEIGHT = 26;
-    private final Log LOG = LogFactory.getLog(getClass());
+//    private final Log LOG = LogFactory.getLog(getClass());
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
@@ -227,8 +225,7 @@ public abstract class BaseResultPanel extends JXPanel {
              
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
         } catch (SaveLocationException sle) {
-            // TODO: Do something!
-            LOG.error("Unable to save the download", sle);
+            throw new RuntimeException("FIX ME", sle);
         }
     }
     
