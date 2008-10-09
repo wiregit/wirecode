@@ -12,6 +12,10 @@ import javax.swing.JCheckBox;
 
 public class CustomCheckBox extends JCheckBox{
     
+    // TODO: make resources
+    private int dropOpacity = 150;
+    private Color checkBorder = new Color(0x31,0x31,0x31);
+    
     public CustomCheckBox(Action action) {
         super(action);
         
@@ -31,7 +35,7 @@ public class CustomCheckBox extends JCheckBox{
         
         g2.setFont(this.getFont());
         
-        g2.setColor(new Color(0,0,0,100));
+        g2.setColor(new Color(0,0,0,dropOpacity));
         g2.drawString(label, 16, (int) labelRect.getHeight()+2);
         g2.setColor(Color.WHITE);
         g2.drawString(label, 15, (int) labelRect.getHeight()+1);
@@ -39,7 +43,7 @@ public class CustomCheckBox extends JCheckBox{
         int top = this.getHeight() / 2 - 6;
         
         g2.fillRect(0,top,12,12);
-        g2.setColor(new Color(0x31,0x31,0x31));
+        g2.setColor(checkBorder);
         g2.drawRect(0,top,12,12);
         
         if (this.isSelected()) {
