@@ -30,6 +30,10 @@ public class CustomCheckBox extends JCheckBox{
         Rectangle2D labelRect = this.getFont().getStringBounds(label, g2.getFontRenderContext());
         
         g2.setFont(this.getFont());
+        
+        g2.setColor(new Color(0,0,0,100));
+        g2.drawString(label, 16, (int) labelRect.getHeight()+2);
+        g2.setColor(Color.WHITE);
         g2.drawString(label, 15, (int) labelRect.getHeight()+1);
         
         int top = this.getHeight() / 2 - 6;
