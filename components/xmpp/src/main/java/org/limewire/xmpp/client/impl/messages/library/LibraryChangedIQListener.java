@@ -16,7 +16,6 @@ import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.UserImpl;
-import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class LibraryChangedIQListener implements PacketListener {
@@ -32,7 +31,7 @@ public class LibraryChangedIQListener implements PacketListener {
     }
 
     public void processPacket(Packet packet) {
-        FileTransferIQ iq = (FileTransferIQ)packet;
+        LibraryChangedIQ iq = (LibraryChangedIQ)packet;
         try {
             if(iq.getType().equals(IQ.Type.GET)) {
                 //handleGet(iq);
@@ -54,7 +53,7 @@ public class LibraryChangedIQListener implements PacketListener {
         }
     }
 
-    private void handleSet(FileTransferIQ packet) throws IOException, XmlPullParserException {
+    private void handleSet(LibraryChangedIQ packet) throws IOException, XmlPullParserException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("handling library changed set " + packet.getPacketID());
         }
