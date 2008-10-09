@@ -1,13 +1,9 @@
 package org.limewire.xmpp.api.client;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 public class MockFileMetadata implements FileMetaData {
     private String id;
