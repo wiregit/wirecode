@@ -13,13 +13,12 @@ public class ListViewTableFormat
 extends ResultsTableFormat<VisualSearchResult> {
 
     public ListViewTableFormat() {
-        super(1, 0, tr("not used"));
+        super(3, 2, tr("not used"), tr("also not used"), tr("nor this"));
     }
 
     @Override
     public Class getColumnClass(int index) {
-        return index == 0 ? VisualSearchResult.class :
-            super.getColumnClass(index);
+        return VisualSearchResult.class;
     }
 
     @Override
@@ -30,6 +29,13 @@ extends ResultsTableFormat<VisualSearchResult> {
 
     @Override
     public int getInitialColumnWidth(int index) {
-        return ListViewTableCellEditor.WIDTH;
+        switch(index) {
+        case 0:
+            return 420;
+        case 1:
+            return 150;
+        default:
+            return 130;
+        }
     }
 }

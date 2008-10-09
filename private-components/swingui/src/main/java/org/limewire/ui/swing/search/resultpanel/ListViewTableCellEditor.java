@@ -11,8 +11,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
@@ -27,7 +25,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -47,8 +44,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.google.inject.Inject;
-
 /**
  * This class is responsible for rendering an individual SearchResult
  * in "List View".
@@ -64,7 +59,6 @@ implements TableCellEditor, TableCellRenderer {
     private static final String CLOSING_DIV_HTML = "</div></html>";
     private static final int SIMILARITY_INDENTATION = 50;
     private final Log LOG = LogFactory.getLog(getClass());
-    private final Color SELECTED_COLOR = Color.GREEN;
     private final PropertyKeyComparator AUDIO_COMPARATOR = 
         new PropertyKeyComparator(PropertyKey.GENRE, PropertyKey.BITRATE, PropertyKey.TRACK_NUMBER, PropertyKey.SAMPLE_RATE);
     private final PropertyKeyComparator VIDEO_COMPARATOR = 
@@ -93,14 +87,16 @@ implements TableCellEditor, TableCellRenderer {
     private JLabel headingLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
     private JLabel otherLabel = new JLabel();
-    private JXPanel actionPanel = new JXPanel();
-    private JXPanel thePanel;
+    private JXPanel rightPanel = new JXPanel();
+    private JXPanel editorComponent;
 
     private VisualSearchResult vsr;
+    private int column;
     private JComponent similarResultIndentation;
     private JPanel indentablePanel;
+    private JPanel leftPanel;
+    private JPanel centerPanel;
 
-    @Inject
     public ListViewTableCellEditor(
         ActionColumnTableCellEditor actionEditor, String searchText, FromActions fromActions) {
 
@@ -110,6 +106,8 @@ implements TableCellEditor, TableCellRenderer {
 
         GuiUtils.assignResources(this);
         fromWidget = new FromWidget(fromActions);
+        
+        makePanel();
     }
 
     /**
@@ -191,21 +189,28 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     public Component getTableCellEditorComponent(
-        final JTable table, Object value, boolean isSelected, int row, int column) {
+        final JTable table, Object value, boolean isSelected, int row, final int col) {
 
         vsr = (VisualSearchResult) value;
-        LOG.debugf("ListViewTableCellEditor.getTableCellEditorComponent: row = {0} urn: {1}", row, vsr.getCoreSearchResults().get(0).getUrn());
-
-        similarButton.setVisible(getSimilarResultsCount() > 0);
+        column = col;
+        LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
 
         actionButtonPanel =
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
-                    table, value, isSelected, row, column);
+                    table, value, isSelected, row, col);
         
-        final JToggleButton junkButton = actionButtonPanel.getSpamButton();
-        
-        if (thePanel == null) {
-            thePanel = makePanel();
+        if (editorComponent == null) {
+            editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
+
+                @Override
+                public void setBackground(Color bg) {
+                    super.setBackground(bg);
+                    if (column == 2) {
+                        actionButtonPanel.setBackground(bg);
+                    }
+                }
+            };
+            
             actionButtonPanel.configureForListView(table);
             itemIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -214,25 +219,19 @@ implements TableCellEditor, TableCellRenderer {
                     table.editingStopped(new ChangeEvent(table));
                 }
             });
-            
-            junkButton.addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent e) {
-                    table.editingStopped(new ChangeEvent(table));
-                }
-            });
         }
-
-        actionPanel.removeAll();
-        actionPanel.add(actionButtonPanel);
-
-        markAsJunk(junkButton.isSelected());
 
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
-        populatePanel((VisualSearchResult) value);
-        setBackground(isSelected);
+        populatePanel((VisualSearchResult) value, col);
+        
+        editorComponent.removeAll();
 
-        return thePanel;
+        JPanel panel = col == 0 ? leftPanel : col == 1 ? centerPanel : rightPanel;
+        
+        editorComponent.add(panel);
+
+        return editorComponent;
     }
 
     private int getSimilarResultsCount() {
@@ -252,7 +251,7 @@ implements TableCellEditor, TableCellRenderer {
         return vsr != null && getSimilarResultsCount() > 0 && vsr.isChildrenVisible();
     }
 
-    private Component makeCenterPanel() {
+    private JPanel makeCenterPanel() {
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 boolean toggleVisibility = !isShowingSimilarResults();
@@ -306,32 +305,15 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private JXPanel makePanel() {
-        final JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]push[shrinkprio 50]0", "0[]0")) {
+    private void makePanel() {
+        leftPanel = makeIndentablePanel(makeLeftPanel());
 
-            @Override
-            public void setBackground(Color bg) {
-                super.setBackground(bg);
-                if (actionButtonPanel != null) {
-                    actionButtonPanel.setBackground(bg);
-                }
-            }
-        };
+        centerPanel = makeCenterPanel();
 
-        panel.add(makeIndentablePanel(makeLeftPanel()));
-
-        JPanel rightColumn = new JPanel(new MigLayout("insets 0 0 0 0", "0[][]0", "0[]0"));
-        rightColumn.setOpaque(false);
-        rightColumn.add(makeCenterPanel(), "wmin 250, grow");
-
-        actionPanel.setOpaque(false);
-        rightColumn.add(actionPanel);
-        panel.add(rightColumn);
-
-        return panel;
+        rightPanel.setOpaque(false);
     }
 
-    private Component makeIndentablePanel(Component component) {
+    private JPanel makeIndentablePanel(Component component) {
         indentablePanel = new JPanel(new BorderLayout()) {
             @Override
             public Dimension getMinimumSize() {
@@ -354,7 +336,7 @@ implements TableCellEditor, TableCellRenderer {
 
     private void markAsJunk(boolean junk) {
         float opacity = junk ? 0.2f : 1.0f;
-        thePanel.setAlpha(opacity);
+        editorComponent.setAlpha(opacity);
     }
 
     private void populateFrom(VisualSearchResult vsr) {
@@ -411,25 +393,34 @@ implements TableCellEditor, TableCellRenderer {
         }
     }
 
-    private void populatePanel(VisualSearchResult vsr) {
+    private void populatePanel(VisualSearchResult vsr, int column) {
         if (vsr == null) return;
         
-        if (vsr.getSimilarityParent() != null) {
-            indentablePanel.add(similarResultIndentation, BorderLayout.WEST);
-        } else {
-            indentablePanel.remove(similarResultIndentation);
-        }
-        
-        actionButtonPanel.setDownloadingDisplay(vsr);
+        if (column == 0) {
+            if (vsr.getSimilarityParent() != null) {
+                indentablePanel.add(similarResultIndentation, BorderLayout.WEST);
+            } else {
+                indentablePanel.remove(similarResultIndentation);
+            }
 
-        boolean headingDecorated = populateHeading(vsr);
-        boolean subheadingDecorated = populateSubheading(vsr);
-        populateOther(vsr, headingDecorated || subheadingDecorated);
-        populateFrom(vsr);
-
-        if (getSimilarResultsCount() > 0) {
-            similarButton.setText(getHideShowSimilarFilesButtonText());
+            boolean headingDecorated = populateHeading(vsr);
+            boolean subheadingDecorated = populateSubheading(vsr);
+            populateOther(vsr, headingDecorated || subheadingDecorated);
+            
+        } else if (column == 1) {
+            similarButton.setVisible(getSimilarResultsCount() > 0);
+            populateFrom(vsr);
+            
+            if (getSimilarResultsCount() > 0) {
+                similarButton.setText(getHideShowSimilarFilesButtonText());
+            }
+            
+        } else  { //col 2
+            actionButtonPanel.setDownloadingDisplay(vsr);
+            rightPanel.removeAll();
+            rightPanel.add(actionButtonPanel);
         }
+        markAsJunk(actionButtonPanel.getSpamButton().isSelected());
     }
 
     /**
@@ -471,19 +462,6 @@ implements TableCellEditor, TableCellRenderer {
 
     private boolean isDifferentLength(String str1, String str2) {
         return str1 != null && str2 != null && str1.length() != str2.length();
-    }
-
-    private void setBackground(boolean isSelected) {
-        if (thePanel == null) return;
-
-        Color color = isSelected ? SELECTED_COLOR : Color.WHITE;
-        thePanel.setBackground(color);
-
-        int childCount = thePanel.getComponentCount();
-        for (int i = 0; i < childCount; i++) {
-            Component child = thePanel.getComponent(i);
-            child.setBackground(color);
-        }
     }
 
     private String getHideShowSimilarFilesButtonText() {

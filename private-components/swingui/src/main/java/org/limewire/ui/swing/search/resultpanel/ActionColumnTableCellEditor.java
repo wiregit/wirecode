@@ -8,6 +8,7 @@ import java.util.EventObject;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -41,6 +42,7 @@ implements TableCellEditor, TableCellRenderer {
         if (panel != null) return panel;
         
         panel = new ActionButtonPanel(navigator);
+        panel.setOpaque(false);
         
         JToggleButton junkButton = panel.getSpamButton();
         junkButton.addItemListener(new ItemListener() {
@@ -48,6 +50,7 @@ implements TableCellEditor, TableCellRenderer {
             public void itemStateChanged(ItemEvent event) {
                 boolean junk = event.getStateChange() == ItemEvent.SELECTED;
                 vsr.setSpam(junk);
+                table.editingStopped(new ChangeEvent(table));
             }
         });
         

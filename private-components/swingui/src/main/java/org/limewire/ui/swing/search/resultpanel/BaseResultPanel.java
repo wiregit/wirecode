@@ -70,9 +70,8 @@ public abstract class BaseResultPanel extends JXPanel {
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
             SearchInfo searchInfo, FromActions fromActions) {
-        // We're using a MouseableTable with one column instead of JList
-        // because that will allow us to display buttons with rollover icons.
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
+        resultsList.setShowGrid(false, false);
         preserver.addRowPreservationListener(resultsList);
 
         resultsList.setEventList(eventList);
@@ -87,27 +86,29 @@ public abstract class BaseResultPanel extends JXPanel {
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
 
-        // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor renderer =
             new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery(), fromActions);
-        resultsList.setDefaultRenderer(VisualSearchResult.class, renderer);
+        
+        TableColumnModel tcm = resultsList.getColumnModel();
+        int columnCount = tableFormat.getColumnCount();
+        for (int i = 0; i < columnCount; i++) {
+            TableColumn tc = tcm.getColumn(i);
+            tc.setCellRenderer(renderer);
+        }
 
-        // TODO: RMV Need to use Guice to get an instance.
         ListViewTableCellEditor editor =
             new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery(), fromActions);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
-        int columnIndex = 0;
-        resultsList.setColumnWidth(columnIndex,
-            tableFormat.getInitialColumnWidth(columnIndex));
+        for(int columnIndex = 0; columnIndex < tableFormat.getLastVisibleColumnIndex() + 1; columnIndex++) {        
+            int initialColumnWidth = tableFormat.getInitialColumnWidth(columnIndex);
+            resultsList.setColumnWidth(columnIndex, initialColumnWidth);
+        }
+        
+        resultsList.getColumnModel().getColumn(2).setMaxWidth(130);
 
         resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
 
-        //EventSelectionModel<VisualSearchResult> selectionModel =
-        //    new EventSelectionModel<VisualSearchResult>(eventList);
-        // TODO: RMV The next line breaks everything!
-        //resultsList.setSelectionModel(selectionModel);
-        
         resultsList.addMouseListener(new ResultDownloader());
 
         resultsList.addMouseListener(new MouseAdapter() {

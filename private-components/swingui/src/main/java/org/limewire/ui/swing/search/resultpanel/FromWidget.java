@@ -36,8 +36,6 @@ import org.limewire.util.Objects;
  */
 public class FromWidget extends JPanel {
 
-    private static final char DOWN_ARROW = '\u25BC';
-
     private static final int R = 8; // rounded border corner radius
 
     private final Border border = new RoundedBorder(R);
@@ -151,8 +149,7 @@ public class FromWidget extends JPanel {
 
     private void updateHeaderLabel() {
         String text = people.size() == 0 ? tr("nobody") : people.size() == 1 ? people.get(0)
-                .getRenderName()
-                + DOWN_ARROW : tr("{0} people", people.size()) + DOWN_ARROW;
+                .getRenderName() : tr("{0} people", people.size());
         headerLabel.setText(text);
         menu.setLabel(text);
         menu.add(text);
