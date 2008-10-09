@@ -31,7 +31,6 @@ import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPConnectionListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
@@ -100,7 +99,7 @@ public class XMPPServiceTest extends BaseTestCase {
                 bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(addressEventBroadcaster);
                 bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(new XMPPConnectionConfigurationListProvider(configuration, configuration2));                
                 bind(FileOfferHandlerMock.class).toInstance(fileOfferHandler);
-                bind(XMPPConnectionListener.class).to(XMPPConnectionListenerMock.class);
+                bind(XMPPConnectionListenerMock.class);
             }
         };
         return Arrays.asList(xmppModule, m, new LimeWireNetTestModule());

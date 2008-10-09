@@ -1,21 +1,20 @@
 package org.limewire.xmpp.client;
 
-import org.limewire.xmpp.api.client.XMPPConnectionListener;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.RegisteringEventListener;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class XMPPConnectionListenerMock implements XMPPConnectionListener {
+public class XMPPConnectionListenerMock implements RegisteringEventListener<XMPPConnectionEvent> {
 
-    @Override
-    public void connected(String connectionId) {
-        // TODO Auto-generated method stub
+    public void handleEvent(XMPPConnectionEvent event) {
     }
 
     @Inject
-    public void register(XMPPService xmppService) {
-        xmppService.setConnectionListener(this);
+    public void register(ListenerSupport<XMPPConnectionEvent> listenerSupport) {
+        listenerSupport.addListener(this);
     }
 }

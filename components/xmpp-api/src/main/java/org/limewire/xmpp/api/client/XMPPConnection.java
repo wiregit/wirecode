@@ -1,6 +1,9 @@
 package org.limewire.xmpp.api.client;
 
 public interface XMPPConnection {
+    
+    public enum ConnectionEvent {LOGIN}
+
     public XMPPConnectionConfiguration getConfiguration();
 
     /**

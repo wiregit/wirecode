@@ -18,4 +18,6 @@ public interface LimePresence extends Presence, FriendPresence {
     
     /** Returns the containing user. */
     User getUser();
+
+    void sendLibraryRefresh();
 }

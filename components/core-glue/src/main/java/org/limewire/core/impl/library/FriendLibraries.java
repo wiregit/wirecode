@@ -19,11 +19,11 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 @Singleton
 public class FriendLibraries {
@@ -34,7 +34,8 @@ public class FriendLibraries {
         this.libraries = new ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
     }
     
-    @Inject void register(RemoteLibraryManager remoteLibraryManager) {
+    @Inject
+    void register(RemoteLibraryManager remoteLibraryManager) {
         remoteLibraryManager.getFriendLibraryList().addListEventListener(new ListEventListener<FriendLibrary>() {
             @Override
             public void listChanged(ListEvent<FriendLibrary> listChanges) {
@@ -79,47 +80,57 @@ public class FriendLibraries {
                 if(listChanges.getType() == ListEvent.INSERT) {
                     RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
                     LOG.debugf("adding file {0}, indexing under:", newFile.getName());
+                    addToIndex(newFile, newFile.getName());
                     StringTokenizer st = new StringTokenizer(newFile.getName());
                     while (st.hasMoreElements()) {
                         String word = st.nextToken();
-                        LOG.debugf("\t {0}", word);
-                        ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-                        library.getLock().writeLock().lock();
-                        try {
-                            filesForWord = library.get(word);
-                            if (filesForWord == null) {
-                                filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                                library.add(word, filesForWord);
-                            }
-                        } finally {
-                            library.getLock().writeLock().unlock();
-                        }
-                        filesForWord.add(newFile);
+                        addToIndex(newFile, word);
                     }
                 } else if (listChanges.getType() == ListEvent.DELETE) {
-                    // BUG BUG BUG: This is incorrect. The list doesn't have the
+                    // TODO BUG BUG BUG: This is incorrect. The list doesn't have the
                     // removed item at the index anymore. There's no way to
                     // access it from the deleted event.
                     RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
                     LOG.debugf("removing file {0} from index", newFile.getName());
+                    removeFromIndex(newFile, newFile.getName());
                     StringTokenizer st = new StringTokenizer(newFile.getName());
                     while (st.hasMoreElements()) {
                         String word = st.nextToken();
-                        ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-                        library.getLock().writeLock().lock();
-                        try {
-                            filesForWord = library.get(word);
-                            if (filesForWord == null) {
-                                filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                                library.add(word, filesForWord);
-                            }
-                        } finally {
-                            library.getLock().writeLock().unlock();
-                        }
-                        filesForWord.remove(newFile);
+                        removeFromIndex(newFile, word);
                     }
                 }
             }
+        }
+
+        private void removeFromIndex(RemoteFileItem newFile, String word) {
+            ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
+            library.getLock().writeLock().lock();
+            try {
+                filesForWord = library.get(word);
+                if (filesForWord == null) {
+                    filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                    library.add(word, filesForWord);
+                }
+            } finally {
+                library.getLock().writeLock().unlock();
+            }
+            filesForWord.remove(newFile);
+        }
+
+        private void addToIndex(RemoteFileItem newFile, String word) {
+            LOG.debugf("\t {0}", word);
+            ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
+            library.getLock().writeLock().lock();
+            try {
+                filesForWord = library.get(word);
+                if (filesForWord == null) {
+                    filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                    library.add(word, filesForWord);
+                }
+            } finally {
+                library.getLock().writeLock().unlock();
+            }
+            filesForWord.add(newFile);
         }
     }
 

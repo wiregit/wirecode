@@ -18,60 +18,61 @@ import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.Exceptio
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQ;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
+import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 
 import com.google.inject.internal.base.Objects;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
-    
+
     private final User user;
     private Address address;
     private byte [] authToken;
-    
+
     LimePresenceImpl(Presence presence, XMPPConnection connection, User user) {
         super(presence, connection);
         this.user = user;
     }
-    
+
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
         super(presence, connection);
         address = Objects.nonNull(limePresence, "limePresence").getPresenceAddress();
         this.user = limePresence.getUser();
     }
-    
+
     @Override
     public Friend getFriend() {
         return getUser();
     }
-    
+
     @Override
     public User getUser() {
         return user;
     }
-    
+
     @Override
     public Address getPresenceAddress() {
         return address;
     }
-    
+
     @Override
     public String getPresenceId() {
         return getJID();
     }
-    
+
     public void setPresenceAddress(Address address) {
         this.address = address;
     }
-    
+
     public byte [] getAuthToken() {
         return authToken;
     }
-    
+
     public void setAuthToken(byte [] authToken) {
         this.authToken = authToken;
     }
-    
+
     void subscribeAndWaitForAddress() throws InvalidDataException {
         if(LOG.isInfoEnabled()) {
             LOG.info("getting address from " + getJID() + " ...");
@@ -81,7 +82,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         addressIQ.setTo(getJID());
         addressIQ.setPacketID(IQ.nextID());
         final PacketCollector addressCollector = connection.createPacketCollector(
-            new PacketIDFilter(addressIQ.getPacketID()));         
+            new PacketIDFilter(addressIQ.getPacketID()));
         connection.sendPacket(addressIQ);
         final AddressIQ response = (AddressIQ) addressCollector.nextResult();
         if (response instanceof ExceptionalAddressIQ) {
@@ -89,7 +90,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         }
         address = response.getAddress();
         addressCollector.cancel();
-        
+
         final AuthTokenIQ authTokenIQ = new AuthTokenIQ();
         authTokenIQ.setType(IQ.Type.GET);
         authTokenIQ.setTo(getJID());
@@ -116,4 +117,11 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         connection.sendPacket(transferIQ);
     }
 
+    public void sendLibraryRefresh() {
+        final LibraryChangedIQ libraryChangedIQ = new LibraryChangedIQ();
+        libraryChangedIQ.setType(IQ.Type.SET);
+        libraryChangedIQ.setTo(getJID());
+        libraryChangedIQ.setPacketID(IQ.nextID());
+        connection.sendPacket(libraryChangedIQ);
+    }
 }

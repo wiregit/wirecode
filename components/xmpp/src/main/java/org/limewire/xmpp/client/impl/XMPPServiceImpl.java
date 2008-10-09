@@ -14,10 +14,11 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.FileOfferEvent;
+import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPConnectionListener;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -37,19 +38,24 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
     private final Provider<EventListener<RosterEvent>> rosterListener;
     private final Provider<EventListener<FileOfferEvent>> fileOfferListener;
+    private final Provider<EventListener<LibraryChangedEvent>> libraryChangedListener;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
-    private XMPPConnectionListener connectionListener;
+    private Provider<EventListener<XMPPConnectionEvent>> connectionListener;
     private AddressEvent lastEvent;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
                     Provider<EventListener<RosterEvent>> rosterListener,
                     Provider<EventListener<FileOfferEvent>> fileOfferListener,
+                    Provider<EventListener<LibraryChangedEvent>> libraryChangedListener,
+                    Provider<EventListener<XMPPConnectionEvent>> connectionListener,
                     AddressFactory addressFactory) {
         this.configurations = configurations;
         this.rosterListener = rosterListener;
         this.fileOfferListener = fileOfferListener;
+        this.libraryChangedListener = libraryChangedListener;
+        this.connectionListener = connectionListener;
         this.addressFactory = addressFactory;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
     }
@@ -73,15 +79,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     public void setXmppErrorListener(XMPPErrorListener errorListener) {
         this.errorListener = errorListener;
-    }
-    
-    public void setConnectionListener(XMPPConnectionListener connectionListener) {
-        this.connectionListener = connectionListener;
-    }
-
-    @Override
-    public XMPPConnectionListener getConnectionListener() {
-        return connectionListener;
     }
 
     public void initialize() {
@@ -136,7 +133,8 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
         synchronized (this) {
-            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(), fileOfferListener.get(), this, addressFactory);
+            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(),
+                    fileOfferListener.get(), libraryChangedListener.get(), connectionListener.get(), addressFactory);
             connection.initialize();
             connections.add(connection);
             if(lastEvent != null) {

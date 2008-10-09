@@ -29,16 +29,4 @@ class MockXmppService implements XMPPService {
         // TODO Auto-generated method stub
         
     }
-
-    @Override
-    public void setConnectionListener(XMPPConnectionListener connectionListener) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public XMPPConnectionListener getConnectionListener() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

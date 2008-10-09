@@ -60,8 +60,6 @@ public class FileTransferIQListener implements PacketListener {
     public PacketFilter getPacketFilter() {
         return new PacketFilter(){
             public boolean accept(Packet packet) {
-                System.out.println("Filtering out packets!: From: " + packet.getFrom() + ", " +
-                        "To: " + packet.getTo() + ", " + packet.toXML());
                 return packet instanceof FileTransferIQ;
             }
         };
