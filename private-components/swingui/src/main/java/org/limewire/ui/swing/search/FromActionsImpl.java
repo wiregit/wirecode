@@ -1,10 +1,12 @@
-package org.limewire.core.impl.search.actions;
+package org.limewire.ui.swing.search;
 
 import org.limewire.core.api.endpoint.RemoteHost;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.friends.FriendsPane;
+import org.limewire.xmpp.api.client.Presence;
 //import org.limewire.ui.swing.friends.ChatFriend;
 //import org.limewire.ui.swing.friends.ChatFriendImpl;
 //import org.limewire.ui.swing.friends.ChatPanel;
@@ -12,9 +14,9 @@ import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileList;
-import com.limegroup.gnutella.FileManager;
+//import com.limegroup.gnutella.FileDesc;
+//import com.limegroup.gnutella.FileList;
+//import com.limegroup.gnutella.FileManager;
 
 @Singleton
 public class FromActionsImpl implements FromActions {
@@ -22,17 +24,22 @@ public class FromActionsImpl implements FromActions {
 
     private final RemoteLibraryManager remoteLibraryManager;
 
-    private final FileManager fileManager;
+//    private final FileManager fileManager;
+    
+    private final FriendsPane friendsPane;
 
     @Inject
-    public FromActionsImpl(RemoteLibraryManager remoteLibraryManager, FileManager fileManager) {
+    public FromActionsImpl(RemoteLibraryManager remoteLibraryManager/*, FileManager fileManager*/, FriendsPane friendsPane) {
         this.remoteLibraryManager = remoteLibraryManager;
-        this.fileManager = fileManager;
+//        this.fileManager = fileManager;
+        this.friendsPane = friendsPane;
     }
 
     @Override
     public void chatWith(RemoteHost person) {
         LOG.debugf("chatWith: {0}", person.getRenderName());
+        Friend friend = person.getFriendPresence().getFriend();
+        friendsPane.fireConversationStarted(friend);
 //        ChatFriend chatFriend = new ChatFriendImpl();
 //        ConversationStartedEvent conversationStartedEvent = new ConversationStartedEven
         //conversationStartedEvent.publish
@@ -40,12 +47,12 @@ public class FromActionsImpl implements FromActions {
 
     @Override
     public void showFilesSharedBy(RemoteHost person) {
-        LOG.debugf("showFilesSharedBy: {0}", person.getRenderName());
-        FileList fileList = fileManager.getFriendFileList(person.getFriendPresence().getFriend()
-                .getId());
-        for (FileDesc fileDesc : fileList.getAllFileDescs()) {
-            System.out.println(fileDesc.getFileName());
-        }
+//        LOG.debugf("showFilesSharedBy: {0}", person.getRenderName());
+//        FileList fileList = fileManager.getFriendFileList(person.getFriendPresence().getFriend()
+//                .getId());
+//        for (FileDesc fileDesc : fileList.getAllFileDescs()) {
+//            System.out.println(fileDesc.getFileName());
+//        }
 
     }
 
@@ -59,14 +66,15 @@ public class FromActionsImpl implements FromActions {
 
     @Override
     public int getNumberOfSharedFiles(RemoteHost person) {
-    //TODO because of this method might want to rename the fromActions classes. or move this method.
-        LOG.debugf("getNumberOfSharedFiles: {0}", person.getRenderName());
-        FileList fileList = fileManager.getFriendFileList(person.getFriendPresence().getFriend()
-                .getId());
-        
-        if(fileList == null) {
-            return 0;
-        }
-        return fileList.size();
+//    //TODO because of this method might want to rename the fromActions classes. or move this method.
+//        LOG.debugf("getNumberOfSharedFiles: {0}", person.getRenderName());
+//        FileList fileList = fileManager.getFriendFileList(person.getFriendPresence().getFriend()
+//                .getId());
+//        
+//        if(fileList == null) {
+//            return 0;
+//        }
+//        return fileList.size();
+        return 0;
     }
 }

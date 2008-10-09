@@ -1,4 +1,4 @@
-package org.limewire.core.api.search.actions;
+package org.limewire.ui.swing.search;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 

@@ -2,8 +2,8 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.search.Search;
-import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;

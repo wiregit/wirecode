@@ -52,6 +52,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.logging.Log;
@@ -438,6 +439,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
     
     public void setLoggedInID(String id) {
         this.myID = id;
+    }
+    
+    public void fireConversationStarted(Friend friend) {
+        ChatFriend chatFriend = idToFriendMap.get(friend.getId());
+        if(chatFriend != null) {
+            fireConversationStarted(chatFriend);
+        }
+        new DisplayFriendsToggleEvent().publish();
     }
     
     private void fireConversationStarted(ChatFriend chatFriend) {

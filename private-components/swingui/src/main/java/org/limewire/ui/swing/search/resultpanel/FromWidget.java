@@ -23,9 +23,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.actions.FromActions;
 import org.limewire.ui.swing.components.ComponentHider;
 import org.limewire.ui.swing.components.RoundedBorder;
+import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.util.Objects;
 

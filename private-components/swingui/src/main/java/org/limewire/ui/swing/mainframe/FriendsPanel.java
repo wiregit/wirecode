@@ -101,7 +101,11 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
 
     @EventSubscriber
     public void handleAppear(DisplayFriendsToggleEvent event) {
-        displayFriendsPanel(!isVisible());
+        boolean shouldDisplay = !isVisible();
+        if(event.getVisible() != null) {
+            shouldDisplay = event.getVisible().booleanValue();
+        }
+        displayFriendsPanel(shouldDisplay);
     }
 
     private void displayFriendsPanel(boolean shouldDisplay) {

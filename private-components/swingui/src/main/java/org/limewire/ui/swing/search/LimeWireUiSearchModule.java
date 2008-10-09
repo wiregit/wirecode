@@ -63,5 +63,8 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(VideoResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                 VideoResultsPanelFactory.class, VideoResultsPanel.class));
+        
+        bind(FromActions.class).to(FromActionsImpl.class);
+
     }
 }
