@@ -108,6 +108,12 @@ public final class UISettings extends LimeProps {
     public static final BooleanSetting SHOW_NOTIFICATIONS = 
         FACTORY.createBooleanSetting("SHOW_NOTIFICATIONS", true);
     
+    /**
+     * Setting that globally enables or disables notification sounds.
+     */
+    public static final BooleanSetting PLAY_NOTIFICATION_SOUND =
+        FACTORY.createBooleanSetting("PLAY_NOTIFICATION_SOUND", false);
+    
     /** Whether or not to use network-based images, or just always use built-in ones. */
     private static final BooleanSetting USE_NETWORK_IMAGES = FACTORY.createRemoteBooleanSetting("USE_NETWORK_IMAGES",
            true, "UI.useNetworkImages");

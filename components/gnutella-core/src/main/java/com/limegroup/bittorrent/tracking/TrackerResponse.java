@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
@@ -18,7 +19,6 @@ import org.limewire.util.StringUtils;
 
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.ValueException;
-import com.limegroup.bittorrent.settings.BittorrentSettings;
 
 /**
  * Parses the response from a tracker.

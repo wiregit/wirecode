@@ -10,10 +10,10 @@ import com.google.inject.Singleton;
 public class LimeMenuBar extends JMenuBar {
 
     @Inject
-    LimeMenuBar(HelpMenu helpMenu) {
+    LimeMenuBar(HelpMenu helpMenu, ToolsMenu toolsMenu) {
         add(new JMenu("File"));
         add(new JMenu("Edit"));
-        add(new JMenu("Tools"));
+        add(toolsMenu);
         add(helpMenu);
     }
 

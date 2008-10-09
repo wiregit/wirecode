@@ -18,6 +18,7 @@ import javax.swing.border.Border;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.settings.UISettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.Resizable;
@@ -144,7 +145,7 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
             notifier.showMessage(new Notification(getNoticeForMessage(event)));
             
             URL soundURL = FriendsPanel.class.getResource(MESSAGE_SOUND_PATH);
-            if (soundURL != null) {
+            if (soundURL != null && UISettings.PLAY_NOTIFICATION_SOUND.getValue()) {
                 ThreadExecutor.startThread(new WavSoundPlayer(soundURL.getFile()), "newmessage-sound");
             }
         } 

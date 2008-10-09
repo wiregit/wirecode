@@ -12,6 +12,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.States;
 import org.limewire.collection.NECallable;
+import org.limewire.core.settings.BittorrentSettings;
 
 import junit.framework.Test;
 
@@ -20,7 +21,6 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.Chokable;
-import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;

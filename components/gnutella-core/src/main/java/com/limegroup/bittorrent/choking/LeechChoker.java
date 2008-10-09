@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.NECallable;
+import org.limewire.core.settings.BittorrentSettings;
 
 import com.limegroup.bittorrent.Chokable;
-import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.UploadServices;
 
 /**

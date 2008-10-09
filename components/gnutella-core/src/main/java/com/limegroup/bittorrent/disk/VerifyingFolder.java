@@ -37,10 +37,11 @@ import com.limegroup.bittorrent.handshaking.piecestrategy.EndGamePieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.PartialPieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.PieceStrategy;
 import com.limegroup.bittorrent.handshaking.piecestrategy.RandomPieceStrategy;
-import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
+
+import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.SharingSettings;
 
 /**
