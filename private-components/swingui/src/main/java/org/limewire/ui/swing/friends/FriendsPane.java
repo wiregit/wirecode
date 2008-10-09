@@ -445,8 +445,10 @@ public class FriendsPane extends JPanel implements FriendRemover {
         ChatFriend chatFriend = idToFriendMap.get(friend.getId());
         if(chatFriend != null) {
             fireConversationStarted(chatFriend);
+            new DisplayFriendsToggleEvent(Boolean.TRUE).publish();
+        } else {
+            //TODO notify that chat no longer possible.
         }
-        new DisplayFriendsToggleEvent(Boolean.TRUE).publish();
     }
     
     private void fireConversationStarted(ChatFriend chatFriend) {
