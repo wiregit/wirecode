@@ -16,8 +16,10 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -133,10 +135,21 @@ public class CoreDownloadListManager implements DownloadListManager {
         return new CoreDownloadItem(downloader, queueTimeCalculator, true);
 	}
 
+
+
+    @Override
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws IOException {
+        return addDownload(((CoreRemoteFileItem)fileItem).getRfd());
+    }
+    
     @Override
     public DownloadItem addDownload(LimePresence presence, FileMetaData fileMeta) throws IOException {
 
-        RemoteFileDesc rfd = createRfdFromChatResult(presence, fileMeta);
+        return addDownload(createRfdFromChatResult(presence, fileMeta));
+       
+    }
+    
+    private DownloadItem addDownload(RemoteFileDesc rfd) throws IOException{
         File saveDir = null;
         String fileName = null;
         boolean overwrite = false;
@@ -247,4 +260,5 @@ public class CoreDownloadListManager implements DownloadListManager {
         }
 
     }
+
 }

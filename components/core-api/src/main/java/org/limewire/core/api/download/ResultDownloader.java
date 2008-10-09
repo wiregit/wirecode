@@ -3,6 +3,7 @@ package org.limewire.core.api.download;
 import java.util.List;
 import java.io.IOException;
 
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.xmpp.api.client.FileMetaData;
@@ -34,4 +35,13 @@ public interface ResultDownloader {
      * file
      */
     public DownloadItem addDownload(LimePresence presence, FileMetaData chatFileDesc) throws IOException;
+
+    /**
+     * Adds a download specified by the given RemoteFileItem
+     * @throws IOException if an error occurs while downloading and saving the
+     * file
+     *
+     */
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws IOException;
+
 }

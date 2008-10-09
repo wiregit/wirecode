@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library.table;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,8 +132,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
     }
 
     private static class DownloadAction extends AbstractAction {
-        //TODO: remove @SuppressWarnings and use this when patch is ready
-        @SuppressWarnings("unused")
         private DownloadListManager downloadListManager;
         private LibraryTable table;
         public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table){
@@ -146,10 +145,13 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             download(table.convertRowIndexToModel(table.getEditingRow()));
         }
         
-        public void download(int row){
-            RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel)table.getModel()).getElementAt(row);
-//          downloadListManager.addDownload(file.getRfd());
-          throw new RuntimeException("download me! " + file.getName());
+        public void download(int row) {
+            RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel) table.getModel()).getElementAt(row);
+            try {
+                downloadListManager.addDownload(file);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         
     }
