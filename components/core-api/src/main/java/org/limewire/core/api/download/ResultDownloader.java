@@ -7,7 +7,6 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
-import com.limegroup.gnutella.RemoteFileDesc;
 
 public interface ResultDownloader {
 

@@ -59,7 +59,7 @@ public class MockFileMetadata implements FileMetaData {
     }
 
     @Override
-    public Set<URN> getURNs() throws IOException {
+    public Set<String> getURNsAsString() {
         // TODO Auto-generated method stub
         return null;
     }

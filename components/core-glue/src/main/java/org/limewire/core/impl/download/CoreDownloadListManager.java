@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
@@ -155,7 +158,12 @@ public class CoreDownloadListManager implements DownloadListManager {
         boolean firewalled;
         Set<Connectable> proxies = null;
         int fwtVersion = 0;
-        Set<URN> urns = fileMeta.getURNs();
+
+        Set<String> urnsAsString = fileMeta.getURNsAsString();
+        Set<URN> urns = new HashSet<URN>();
+        for (String urnStr : urnsAsString) {
+            urns.add(URN.createUrnFromString(urnStr));
+        }
 
         if (address instanceof FirewalledAddress) {
             firewalled = true;

@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
@@ -19,9 +18,6 @@ import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider.Exceptio
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQ;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
-import org.limewire.ui.swing.friends.MessageReceivedEvent;
-import org.limewire.ui.swing.friends.MessageImpl;
-import org.limewire.ui.swing.friends.Message;
 
 import com.google.inject.internal.base.Objects;
 
@@ -118,9 +114,6 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         transferIQ.setTo(getJID());
         transferIQ.setPacketID(IQ.nextID());
         connection.sendPacket(transferIQ);
-
-        new MessageReceivedEvent(new MessageImpl(null, null, StringUtils.parseBareAddress(getJID()),
-                null, Message.Type.Sent, file)).publish();
     }
 
 }

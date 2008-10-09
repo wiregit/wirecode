@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.net.URLDecoder;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -64,8 +65,6 @@ import ca.odell.glazedlists.GlazedLists;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.http.HTTPUtils;
 
 /**
  *
@@ -298,7 +297,12 @@ public class ConversationPane extends JPanel implements Displayable {
                 }
 
                 try {
-                    String fileId = URLDecoder.decode(HTTPUtils.parseValue(event.getData()));
+                    // TODO: DCHEN FIX THIS
+                    String dataStr = event.getData();
+                    int equalIndex = dataStr.indexOf("=");
+                    String fileIdEncoded = dataStr.substring(equalIndex+1).trim();
+                    String fileId = URLDecoder.decode(fileIdEncoded, "UTF-8");
+
                     FileMetaData offeredFile = idToFileMetaDataMap.get(fileId);
 
                     // TODO: what if offered file not in map for any reason?

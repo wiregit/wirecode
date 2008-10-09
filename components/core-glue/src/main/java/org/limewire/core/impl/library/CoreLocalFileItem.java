@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
@@ -182,22 +184,22 @@ public class CoreLocalFileItem implements LocalFileItem {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        public Set<URN> getURNs() throws IOException {
-            StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
-            HashSet<URN> set = new HashSet<URN>();
-            while (st.hasMoreElements()) {
-                set.add(URN.createUrnFromString((st.nextToken())));
-            }
-            return set;
+    public Set<String> getURNsAsString() {
+        StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
+        Set<String> set = new HashSet<String>();
+        while(st.hasMoreElements()) {
+            set.add(st.nextToken());
         }
+        return set;
+    }
 
-        public void setURNs(Set<URN> urns) {
-            String urnsString = "";
-            for (URN urn : urns) {
-                urnsString += urn + " ";
-            }
-            data.put(Element.urns, urnsString);
+    public void setURNs(Set<URN> urns) {
+        String urnsString = "";
+        for(URN urn : urns) {
+            urnsString += urn  + " ";
         }
+        data.put(Element.urns, urnsString);
+    }
 
         public Date getCreateTime() {
             return new Date(Long.valueOf(data.get(Element.createTime)));

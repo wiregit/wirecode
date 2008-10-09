@@ -7,17 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.net.URISyntaxException;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.net.address.FirewalledAddress;
-import org.limewire.io.Address;
-import org.limewire.io.Connectable;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.LimePresence;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -43,14 +35,14 @@ public class FileMetaDataImpl implements FileMetaData {
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
     }
     
-    public FileMetaDataImpl(FileMetaData metaData) throws IOException {
+    public FileMetaDataImpl(FileMetaData metaData) throws URISyntaxException {
         setCreateTime(metaData.getCreateTime());
         setDescription(metaData.getDescription());
         setId(metaData.getId());
         setIndex(metaData.getIndex());
         setName(metaData.getName());
         setSize(metaData.getSize());
-        setURNs(metaData.getURNs());
+        setURNs(metaData.getURNsAsString());
     }
     
     public FileMetaDataImpl() {
@@ -102,18 +94,18 @@ public class FileMetaDataImpl implements FileMetaData {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Set<URN> getURNs() throws IOException {
+    public Set<String> getURNsAsString() {
         StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
-        HashSet<URN> set = new HashSet<URN>();
+        Set<String> set = new HashSet<String>();
         while(st.hasMoreElements()) {
-            set.add(URN.createUrnFromString((st.nextToken())));
+            set.add(st.nextToken());
         }
         return set;
     }
-    
-    public void setURNs(Set<URN> urns) {
+
+    public void setURNs(Set<String> urns) {
         String urnsString = "";
-        for(URN urn : urns) {
+        for(String urn : urns) {
             urnsString += urn  + " ";
         }
         data.put(Element.urns, urnsString);
