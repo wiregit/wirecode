@@ -91,6 +91,7 @@ public class LibraryNavigator extends JXPanel {
     @Resource private Color selectedBackground;
     @Resource private Font selectedTextFont;
     @Resource private Color selectedTextColor;
+    @Resource private Font failedTextFont;
     @Resource private Font textFont;
     @Resource private Color textColor;
     
@@ -114,8 +115,6 @@ public class LibraryNavigator extends JXPanel {
        
         addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel()), LibraryState.LOADED));
 
-        //add(Line.createHorizontalLine(textColor), "growx, gaptop 4, wrap");
-        
         new AbstractListEventListener<FriendLibrary>() {
             @Override
             protected void itemAdded(FriendLibrary item) {
@@ -243,7 +242,6 @@ public class LibraryNavigator extends JXPanel {
                 panel.collapse();
             } else {
                 panel.expand();
-                panel.ensureSelected();
             }
         }
     }
@@ -346,10 +344,24 @@ public class LibraryNavigator extends JXPanel {
             categoryLabel = new ActionLabel(new AbstractAction(friend.getRenderName()) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ensureSelected();
+                    categories.ensureSelected();
                     getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
                 }
             }, false);
+            PropertyChangeListener changeListener = new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                   if(categories.isCollapsed()) {
+                       if(evt.getPropertyName().equals(ActionKeys.VISIBLE)) {
+                           ActionHandListener.setActionHandDrawingDisabled(categoryLabel, !categories.isAnyVisible());
+                        }
+                   }
+                }
+            };
+            for(Action action : actions.values()) {
+                action.addPropertyChangeListener(changeListener);
+            }
+            ActionHandListener.setActionHandDrawingDisabled(categoryLabel, !categories.isAnyVisible());
             categoryLabel.setMinimumSize(new Dimension(30, 0));
             categoryLabel.setForeground(textColor);
             categoryLabel.setFont(textFont);
@@ -362,57 +374,73 @@ public class LibraryNavigator extends JXPanel {
             updateLibraryState(libraryState);
         }
         
+        private void busy() {
+            removeEjectListener();
+            BusyPainter painter = statusIcon.getBusyPainter();
+            statusIcon.setIcon(new EmptyIcon(12, 12));
+            statusIcon.setBusyPainter(painter);
+            statusIcon.setVisible(true);
+            statusIcon.setBusy(true);
+        }
+        
+        private void unbusy() {
+            if(friend.isAnonymous()) {
+                statusIcon.setVisible(true);
+                statusIcon.setBusy(false);
+                statusIcon.setIcon(removeLibraryIcon);
+                addEjectListener();
+            } else {
+                removeEjectListener();
+                statusIcon.setVisible(false);
+                statusIcon.setBusy(false);
+                statusIcon.setIcon(new EmptyIcon(12, 12));
+            }
+        }
+        
+        private void removeEjectListener() {
+            if(removeListener != null) {
+                statusIcon.removeMouseListener(removeListener);
+                removeListener = null;
+            }
+        }
+        
+        private void addEjectListener() {
+            if (removeListener == null) {
+                removeListener = new ActionHandListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        remoteLibraryManager.removeFriendLibrary(friend);
+                    }
+                }) {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        super.mouseEntered(e);
+                        statusIcon.setIcon(removeLibraryHoverIcon);
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        super.mouseExited(e);
+                        statusIcon.setIcon(removeLibraryIcon);
+                    }
+                };
+                statusIcon.addMouseListener(removeListener);
+            }
+        }
+        
         public void updateLibraryState(LibraryState libraryState) {
             switch(libraryState) {
             case FAILED_TO_LOAD:
-                // TODO: Update state specifically to show failure?
-                //fall through...
+                categoryLabel.setFont(failedTextFont);
+                unbusy();
+                break;
             case LOADED:
-                if(friend.isAnonymous()) {
-                    statusIcon.setVisible(true);
-                    statusIcon.setBusy(false);
-                    statusIcon.setIcon(removeLibraryIcon);
-                    if(removeListener == null) {
-                        removeListener = new ActionHandListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                remoteLibraryManager.removeFriendLibrary(friend);
-                            }
-                        }) {
-                            @Override
-                            public void mouseEntered(MouseEvent e) {
-                                super.mouseEntered(e);
-                                statusIcon.setIcon(removeLibraryHoverIcon);
-                            }
-                            @Override
-                            public void mouseExited(MouseEvent e) {
-                                super.mouseExited(e);
-                                statusIcon.setIcon(removeLibraryIcon);
-                            }
-                        };
-                        statusIcon.addMouseListener(removeListener);
-                    }
-                    
-                } else {
-                    if(removeListener != null) {
-                        statusIcon.removeMouseListener(removeListener);
-                        removeListener = null;
-                    }
-                    statusIcon.setVisible(false);
-                    statusIcon.setBusy(false);
-                    statusIcon.setIcon(new EmptyIcon(12, 12));
-                }
+                categoryLabel.setFont(textFont);
+                unbusy();
                 break;
             case LOADING:
-                if(removeListener != null) {
-                    statusIcon.removeMouseListener(removeListener);
-                    removeListener = null;
-                }
-                BusyPainter painter = statusIcon.getBusyPainter();
-                statusIcon.setIcon(new EmptyIcon(12, 12));
-                statusIcon.setBusyPainter(painter);
-                statusIcon.setVisible(true);
-                statusIcon.setBusy(true);
+                categoryLabel.setFont(textFont);
+                busy();
                 break;
             }
         }
@@ -438,8 +466,11 @@ public class LibraryNavigator extends JXPanel {
         }
 
         public void expand() {
-            categories.setCollapsed(false);
-            ActionHandListener.setActionHandDrawingDisabled(categoryLabel, true);
+            if(categories.isAnyVisible()) {
+                categories.setCollapsed(false);
+                categories.ensureSelected();
+                ActionHandListener.setActionHandDrawingDisabled(categoryLabel, true);
+            }
         }
 
         public void dispose() {
@@ -448,15 +479,11 @@ public class LibraryNavigator extends JXPanel {
         
         public void collapse() {
             categories.setCollapsed(true);
-            ActionHandListener.setActionHandDrawingDisabled(categoryLabel, false);
+            ActionHandListener.setActionHandDrawingDisabled(categoryLabel, !categories.isAnyVisible());
         }
         
         public Friend getFriend() {
             return friend;
-        }
-        
-        public void ensureSelected() {
-            categories.ensureSelected();
         }
         
     }
@@ -521,6 +548,15 @@ public class LibraryNavigator extends JXPanel {
             getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), MoveUp.KEY);
         }
         
+        public boolean isAnyVisible() {
+            for(Action action : categories.values()) {
+                if(isVisible(action)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /** Returns true if any item is selected. */
         public boolean hasSelection() {
             for(Action action : categories.values()) {
