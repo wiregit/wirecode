@@ -103,10 +103,11 @@ public class FilteredTextField extends JTextField implements FocusListener {
         
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
-        g2.setColor(Color.white);
+        g2.setColor(Color.WHITE);
         g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());
   
-        g2.setColor(Color.black);
+        g2.setColor(new Color(0,0,0,92));
+        
         g2.drawRoundRect(0, 0, this.getWidth()-1, this.getHeight()-1, 10, this.getHeight());     
         
         super.paintComponent(g);

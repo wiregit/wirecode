@@ -26,30 +26,25 @@ public class CustomCheckBox extends JCheckBox{
         
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        
         String label = this.getText();
         Rectangle2D labelRect = this.getFont().getStringBounds(label, g2.getFontRenderContext());
         
         g2.setFont(this.getFont());
-        g2.drawString(label, 13, (int) labelRect.getHeight()+1);
+        g2.drawString(label, 15, (int) labelRect.getHeight()+1);
         
-        int top = this.getHeight() / 2 - 5;
+        int top = this.getHeight() / 2 - 6;
         
-        g2.fillRect(0,top,10,10);
+        g2.fillRect(0,top,12,12);
         g2.setColor(new Color(0x31,0x31,0x31));
-        g2.drawRect(0,top,10,10);
+        g2.drawRect(0,top,12,12);
         
         if (this.isSelected()) {
             g2.setStroke(new BasicStroke(2));
-            // g2.drawLine(3,top + 3, 8, top + 8);
-            // g2.drawLine(8,top + 3, 3, top + 8);
             
-            g2.drawLine(3,top + 3, 7, top + 7);
-            g2.drawLine(7,top + 3, 3, top + 7);
+            g2.drawLine(3,top + 3, 9, top + 9);
+            g2.drawLine(9,top + 3, 3, top + 9);
         }
-        
-        
-           
+             
     }
 
 }
