@@ -3,25 +3,27 @@ package org.limewire.ui.swing.search;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 import ca.odell.glazedlists.EventList;
@@ -35,7 +37,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class SearchResultsPanel extends JPanel {
+public class SearchResultsPanel extends JXPanel {
     private final Log LOG = LogFactory.getLog(getClass());
         
     /**
@@ -43,7 +45,7 @@ public class SearchResultsPanel extends JPanel {
      * of each search results tab.  It displays the numbers of results
      * found for each file type.
      */
-    private final SearchTabItems searchTab;
+    private final SearchTabItems searchTabItems;
     
     /**
      * This is the subpanel that displays the actual search results.
@@ -74,7 +76,14 @@ public class SearchResultsPanel extends JPanel {
             SponsoredResultsPanel sponsoredResultsPanel,
             final SortAndFilterPanel sortAndFilterPanel,
             RowSelectionPreserver preserver) {        
-        setBackground(Color.LIGHT_GRAY);
+
+        RectanglePainter gradientPainter = new RectanglePainter();
+        gradientPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.decode("#787878"), 50.0f, 33.0f, Color.decode("#4c4c4c")));
+        gradientPainter.setBorderPaint(null);
+        gradientPainter.setBorderWidth(0.0f);
+        setBackgroundPainter(gradientPainter);
+        
+        sortAndFilterPanel.setBackgroundPainter(gradientPainter);
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         sponsoredResultsPanel.setVisible(false);
@@ -119,10 +128,10 @@ public class SearchResultsPanel extends JPanel {
             }
         };
         
-        searchTab = new SearchTabItems(searchInfo.getSearchCategory(), eventList);
-        searchTab.addSearchTabListener(listener);
+        searchTabItems = new SearchTabItems(searchInfo.getSearchCategory(), eventList);
+        searchTabItems.addSearchTabListener(listener);
 
-        for (Map.Entry<SearchCategory, Action> entry : searchTab.getResultCountActions()) {
+        for (Map.Entry<SearchCategory, Action> entry : searchTabItems.getResultCountActions()) {
             resultsContainer.synchronizeResultCount(
                 entry.getKey(), entry.getValue());
         }
@@ -181,7 +190,19 @@ public class SearchResultsPanel extends JPanel {
                 "[][grow]");
         
         setLayout(layout);
-        add(searchTab.getSearchTab(), "growy");
+        setMinimumSize(new Dimension(getPreferredSize().width, 33));
+        
+        RectanglePainter tabHighlight = new RectanglePainter();
+        tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, Color.decode("#787878"), 20.0f, 33.0f, Color.decode("#797979")));
+        tabHighlight.setBorderPaint(null);
+        
+        FancyTabList searchTab = searchTabItems.getSearchTab();
+        searchTab.setHighlightPainter(tabHighlight);
+        
+        searchTab.setSelectionPainter(tabHighlight);
+        searchTab.setTabTextSelectedColor(Color.WHITE);
+        
+        add(searchTab, "growy");
         add(sortAndFilterPanel, "wrap, align right");
         add(scrollPane, "span, grow");
         

@@ -76,10 +76,8 @@ public class SortAndFilterPanel extends JXPanel {
 //    private final List<SearchFilterListener> filterListeners =
 //        new CopyOnWriteArrayList<SearchFilterListener>();
 
-    @Resource private Icon listViewPressedIcon;
-    @Resource private Icon listViewUnpressedIcon;
-    @Resource private Icon tableViewPressedIcon;
-    @Resource private Icon tableViewUnpressedIcon;
+    @Resource private Icon listViewIcon;
+    @Resource private Icon tableViewIcon;
 
     private final JComboBox sortCombo = new JComboBox();
     
@@ -103,48 +101,12 @@ public class SortAndFilterPanel extends JXPanel {
     SortAndFilterPanel(ChatLoginState chatLoginState) {
         this.chatLoginState = chatLoginState;
         GuiUtils.assignResources(this);
-        setBackground(Color.LIGHT_GRAY);
         sortLabel.setForeground(Color.WHITE);
         setSearchCategory(SearchCategory.ALL);
         configureViewButtons();
         layoutComponents();
-
-//        filterBox.getDocument().addDocumentListener(new DocumentListener() {
-//            @Override
-//            public void insertUpdate(DocumentEvent e) {
-//                new FilterEvent(filterBox.getText()).publish();
-//            }
-//
-//            @Override
-//            public void removeUpdate(DocumentEvent e) {
-//                new FilterEvent(filterBox.getText()).publish();
-//            }
-//
-//            @Override
-//            public void changedUpdate(DocumentEvent e) {
-//                new FilterEvent(filterBox.getText()).publish();
-//            }
-//        });
-
-//        editor.addMatcherEditorListener(new Listener<VisualSearchResult>() {
-//            public void changedMatcher(Event<VisualSearchResult> arg0) {
-//                for (SearchFilterListener listener : filterListeners) {
-//                    listener.searchFiltered();
-//                }
-//            }
-//        });
-
-//        EventAnnotationProcessor.subscribe(this);
     }
 
-//    public void addFilterListener(SearchFilterListener listener) {
-//        filterListeners.add(listener);
-//    }
-//
-//    public void removeFilterListener(SearchFilterListener listener) {
-//        filterListeners.remove(listener);
-//    }
-    
     public void addModeListener(ModeListener listener) {
         modeListeners.add(listener);
     }
@@ -154,10 +116,11 @@ public class SortAndFilterPanel extends JXPanel {
         
         final SortAndFilterPanel outerThis = this;
         
-        listViewToggleButton.setIcon(listViewUnpressedIcon);
-        listViewToggleButton.setPressedIcon(listViewPressedIcon);
+        listViewToggleButton.setIcon(listViewIcon);
+        listViewToggleButton.setPressedIcon(listViewIcon);
         listViewToggleButton.setSelected(true);
         listViewToggleButton.setMargin(insets);
+        listViewToggleButton.setOpaque(false);
         listViewToggleButton.setToolTipText(tr("List view"));
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
@@ -170,9 +133,10 @@ public class SortAndFilterPanel extends JXPanel {
             }
         });
         
-        tableViewToggleButton.setIcon(tableViewUnpressedIcon);
-        tableViewToggleButton.setPressedIcon(tableViewPressedIcon);
+        tableViewToggleButton.setIcon(tableViewIcon);
+        tableViewToggleButton.setPressedIcon(tableViewIcon);
         tableViewToggleButton.setMargin(insets);
+        tableViewToggleButton.setOpaque(false);
         tableViewToggleButton.setToolTipText(tr("Table view"));
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override

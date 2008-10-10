@@ -43,6 +43,7 @@ import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.OSUtils;
 
 /**
  * This class is responsible for rendering an individual SearchResult
@@ -75,7 +76,15 @@ implements TableCellEditor, TableCellRenderer {
 
     private String searchText;
 
-    @Resource private Icon itemIcon;
+    @Resource private Icon audioIcon;
+    @Resource private Icon videoIcon;
+    @Resource private Icon documentIcon;
+    @Resource private Icon imageIcon;
+    @Resource private Icon applicationXPIcon;
+    @Resource private Icon applicationVistaIcon;
+    @Resource private Icon applicationOSXIcon;
+    @Resource private Icon otherIcon;
+    @Resource private Icon similarResultsIcon;
     
     private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
 
@@ -279,7 +288,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private Component makeLeftPanel() {
-        itemIconLabel = new JLabel(itemIcon);
+        itemIconLabel = new JLabel();
         itemIconLabel.setCursor(
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         itemIconLabel.setOpaque(false);
@@ -328,8 +337,8 @@ implements TableCellEditor, TableCellRenderer {
             }
         };
         indentablePanel.setOpaque(false);
-        similarResultIndentation = new JComponent(){};
-        similarResultIndentation.setPreferredSize(new Dimension(SIMILARITY_INDENTATION, 0));
+        similarResultIndentation = new JLabel(similarResultsIcon);
+        similarResultIndentation.setPreferredSize(new Dimension(SIMILARITY_INDENTATION, similarResultsIcon.getIconWidth()));
         indentablePanel.add(component, BorderLayout.CENTER);
         return indentablePanel;
     }
@@ -402,6 +411,8 @@ implements TableCellEditor, TableCellRenderer {
             } else {
                 indentablePanel.remove(similarResultIndentation);
             }
+            
+            itemIconLabel.setIcon(getIconFor(vsr.getCategory()));
 
             boolean headingDecorated = populateHeading(vsr);
             boolean subheadingDecorated = populateSubheading(vsr);
@@ -421,6 +432,30 @@ implements TableCellEditor, TableCellRenderer {
             rightPanel.add(actionButtonPanel);
         }
         markAsJunk(actionButtonPanel.getSpamButton().isSelected());
+    }
+
+    private Icon getIconFor(Category category) {
+        switch(category) {
+            case AUDIO:
+                return audioIcon;
+            case VIDEO:
+                return videoIcon;
+            case IMAGE:
+                return imageIcon;
+            case DOCUMENT:
+                return documentIcon;
+            case PROGRAM:
+                if (OSUtils.isAnyMac()) {
+                    return applicationOSXIcon;
+                } else if (OSUtils.isWindowsVista()) {
+                    return applicationVistaIcon;
+                } else {
+                    return applicationXPIcon;
+                }
+            case OTHER:
+                return otherIcon;
+        }
+        return null;
     }
 
     /**

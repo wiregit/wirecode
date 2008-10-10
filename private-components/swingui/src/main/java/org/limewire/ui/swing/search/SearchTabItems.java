@@ -15,8 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
@@ -86,10 +84,8 @@ class SearchTabItems {
         }
 
         searchTab = new FancyTabList(searchActionMaps);
-        searchTab.setHighlightPainter(new RectanglePainter<JXButton>(
-            2, 2, 0, 2, 5, 5, true, Color.WHITE, 0f, Color.WHITE));
+        searchTab.setTabTextColor(Color.WHITE);
         
-
         // Make all the tabs except "All" invisible
         // until we get a matching search result.
         if(category == SearchCategory.ALL) {
@@ -101,7 +97,7 @@ class SearchTabItems {
             }
         }
 
-        Font font = searchTab.getFont().deriveFont(12.0f);
+        Font font = searchTab.getFont().deriveFont(11.0f);
         searchTab.setTextFont(font);
         
         // Make sure that we make tabs visible as time goes by.
