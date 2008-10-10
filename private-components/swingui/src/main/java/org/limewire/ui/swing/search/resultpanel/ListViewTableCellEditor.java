@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -41,7 +42,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.OSUtils;
 
@@ -55,9 +55,7 @@ extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
     private static final String HTML = "<html>";
-    private static final String GRAY_TEXT_COLOR_DIV = "<div color=\"rgb(166,166,166)\">";
     private static final String CLOSING_HTML_TAG = "</html>";
-    private static final String CLOSING_DIV_HTML = "</div></html>";
     private static final int SIMILARITY_INDENTATION = 50;
     private final Log LOG = LogFactory.getLog(getClass());
     private final PropertyKeyComparator AUDIO_COMPARATOR = 
@@ -70,7 +68,7 @@ implements TableCellEditor, TableCellRenderer {
     private final PropertyKeyComparator PROGRAMS_COMPARATOR = 
         new PropertyKeyComparator(PropertyKey.PLATFORM, PropertyKey.COMPANY);
 
-    public static final int HEIGHT = 60;
+    public static final int HEIGHT = 56;
     public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
 
@@ -85,6 +83,13 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Icon applicationOSXIcon;
     @Resource private Icon otherIcon;
     @Resource private Icon similarResultsIcon;
+    @Resource private Color headingLabelColor;
+    @Resource private Color subHeadingLabelColor;
+    @Resource private Color metadataLabelColor;
+    @Resource private Font headingFont;
+    @Resource private Font subHeadingFont;
+    @Resource private Font metadataFont;
+    @Resource private Font similarResultsButtonFont;
     
     private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
 
@@ -95,7 +100,7 @@ implements TableCellEditor, TableCellRenderer {
     private JXHyperlink similarButton = new JXHyperlink();
     private JLabel headingLabel = new JLabel();
     private JLabel subheadingLabel = new JLabel();
-    private JLabel otherLabel = new JLabel();
+    private JLabel metadataLabel = new JLabel();
     private JXPanel rightPanel = new JXPanel();
     private JXPanel editorComponent;
 
@@ -111,9 +116,11 @@ implements TableCellEditor, TableCellRenderer {
 
         this.actionEditor = actionEditor;
         this.searchText = searchText;
-        FontUtils.changeSize(similarButton, -2.0F);
 
         GuiUtils.assignResources(this);
+
+        similarButton.setFont(similarResultsButtonFont);
+        
         fromWidget = new FromWidget(fromActions);
         
         makePanel();
@@ -292,19 +299,27 @@ implements TableCellEditor, TableCellRenderer {
         itemIconLabel.setCursor(
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         itemIconLabel.setOpaque(false);
+        
+        headingLabel.setForeground(headingLabelColor);
+        headingLabel.setFont(headingFont);
 
-
-        JXPanel downloadPanel = new JXPanel(new MigLayout());
+        subheadingLabel.setForeground(subHeadingLabelColor);
+        subheadingLabel.setFont(subHeadingFont);
+        
+        metadataLabel.setForeground(metadataLabelColor);
+        metadataLabel.setFont(metadataFont);
+        
+        JXPanel downloadPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]", "0[top]0"));
         downloadPanel.setOpaque(false);
         downloadPanel.add(itemIconLabel);
 
-        JXPanel headingPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0[]0[]0"));
+        JXPanel headingPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]0", "5[]0[]0[]0"));
         headingPanel.setOpaque(false);
         headingPanel.add(headingLabel, "wrap");
         headingPanel.add(subheadingLabel, "wrap");
-        headingPanel.add(otherLabel);
+        headingPanel.add(metadataLabel);
 
-        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[][]0", "0[]0"));
+        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "5[][]0", "0[]0"));
 
         panel.setOpaque(false);
 
@@ -385,7 +400,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populateOther(VisualSearchResult vsr, boolean shouldHidePropertyMatches) {
-        otherLabel.setText("");
+        metadataLabel.setText("");
         if (shouldHidePropertyMatches) { 
             return;
         }
@@ -395,10 +410,10 @@ implements TableCellEditor, TableCellRenderer {
         if (pm != null) {
             String html = pm.highlightedValue;
             String tag = HTML;
-            // Insert the following: a div to color the text grey, the key, a colon and a space after the html start tag, then the closing tags.
-            html = tag + GRAY_TEXT_COLOR_DIV + pm.key + ": " + 
-                    html.substring(tag.length(), html.length() - CLOSING_HTML_TAG.length()) + CLOSING_DIV_HTML;
-            otherLabel.setText(html);
+            // Insert the following: the key, a colon and a space after the html start tag, then the closing tags.
+            html = tag + pm.key + ": " + 
+                    html.substring(tag.length(), html.length() - CLOSING_HTML_TAG.length()) + CLOSING_HTML_TAG;
+            metadataLabel.setText(html);
         }
     }
 

@@ -15,12 +15,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -39,11 +41,16 @@ class SearchTabItems {
     private final List<SearchTabListener> listeners;
     
     private final FancyTabList searchTab;
+    
+    @Resource private Font tabFont;
 
     SearchTabItems(SearchCategory category, EventList<VisualSearchResult> resultsList) {
         this.listeners = new CopyOnWriteArrayList<SearchTabListener>();
         
         this.searchActionMaps = new ArrayList<TabActionMap>();
+        
+        GuiUtils.assignResources(this);
+        
         switch(category) {
         case ALL:
             addCategory(tr("All"), SearchCategory.ALL);
@@ -97,8 +104,7 @@ class SearchTabItems {
             }
         }
 
-        Font font = searchTab.getFont().deriveFont(11.0f);
-        searchTab.setTextFont(font);
+        searchTab.setTextFont(tabFont);
         
         // Make sure that we make tabs visible as time goes by.
         if(category == SearchCategory.ALL) {

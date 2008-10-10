@@ -15,6 +15,7 @@ import javax.swing.Scrollable;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -25,6 +26,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -66,7 +68,12 @@ public class SearchResultsPanel extends JXPanel {
     
     /** The ScrollablePanel that the scroll pane is embedding. */
     private ScrollablePanel scrollablePanel;
-
+    
+    @Resource private Color toolbarTopGradientColor;
+    @Resource private Color toolbarBottomGradientColor;
+    @Resource private Color tabHighlightTopGradientColor;
+    @Resource private Color tabHighlightBottomGradientColor;
+    
     @AssistedInject
     public SearchResultsPanel(
             @Assisted SearchInfo searchInfo,
@@ -77,8 +84,11 @@ public class SearchResultsPanel extends JXPanel {
             final SortAndFilterPanel sortAndFilterPanel,
             RowSelectionPreserver preserver) {        
 
+        GuiUtils.assignResources(this);
+        
         RectanglePainter gradientPainter = new RectanglePainter();
-        gradientPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.decode("#787878"), 50.0f, 33.0f, Color.decode("#4c4c4c")));
+        gradientPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, toolbarTopGradientColor, 
+                                                       50.0f, 33.0f, toolbarBottomGradientColor));
         gradientPainter.setBorderPaint(null);
         gradientPainter.setBorderWidth(0.0f);
         setBackgroundPainter(gradientPainter);
@@ -193,7 +203,8 @@ public class SearchResultsPanel extends JXPanel {
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
         
         RectanglePainter tabHighlight = new RectanglePainter();
-        tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, Color.decode("#787878"), 20.0f, 33.0f, Color.decode("#797979")));
+        tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, tabHighlightTopGradientColor, 
+                                                    20.0f, 33.0f, tabHighlightBottomGradientColor));
         tabHighlight.setBorderPaint(null);
         
         FancyTabList searchTab = searchTabItems.getSearchTab();

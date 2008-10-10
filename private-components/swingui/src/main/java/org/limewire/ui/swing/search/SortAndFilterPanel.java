@@ -4,6 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.util.Objects.compareToNull;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -78,6 +79,7 @@ public class SortAndFilterPanel extends JXPanel {
 
     @Resource private Icon listViewIcon;
     @Resource private Icon tableViewIcon;
+    @Resource private Font sortLabelFont; 
 
     private final JComboBox sortCombo = new JComboBox();
     
@@ -102,6 +104,7 @@ public class SortAndFilterPanel extends JXPanel {
         this.chatLoginState = chatLoginState;
         GuiUtils.assignResources(this);
         sortLabel.setForeground(Color.WHITE);
+        sortLabel.setFont(sortLabelFont);
         setSearchCategory(SearchCategory.ALL);
         configureViewButtons();
         layoutComponents();
