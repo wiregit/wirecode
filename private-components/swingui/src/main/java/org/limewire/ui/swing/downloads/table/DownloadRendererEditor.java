@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -44,7 +45,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 /**
- * Renderer and editor for DownloadTables. Editors must be initialized with 
+ * Renderer and editor for DownloadTables. Editors must be initialised with 
  * <code>editor.initializeEditor(downloadItems)</code>
  */
 public class DownloadRendererEditor extends JPanel implements
@@ -84,6 +85,9 @@ public class DownloadRendererEditor extends JPanel implements
 
     @Resource
     private Icon warningIcon;
+    
+    @Resource
+    private Icon downloadIcon;
     
     
     // TODO: convert to resources
@@ -139,7 +143,14 @@ public class DownloadRendererEditor extends JPanel implements
         fullStatusLabel = new JLabel();
         fullStatusLabel.setFont(STATUS_FONT_PLAIN);
         fullStatusLabel.setForeground(statusLabelColour);
+        fullStatusLabel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        fullStatusLabel.setIconTextGap(0);
+        //fullStatusLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        fullStatusLabel.setIcon(downloadIcon);
+        
         textComponents.add(fullStatusLabel);
+        
+        
 
         fullProgressBar = new LimeProgressBar();
         Dimension size = new Dimension(PROGRESS_BAR_WIDTH, 16);
