@@ -51,7 +51,7 @@ public class ActionButtonPanel extends JXPanel {
     
     private static final int DOWNLOAD = 0;    
     private static final int MORE_INFO = 1;    
-    private static final int MARK_AS_JUNK = 2;    
+    private static final int MARK_AS_SPAM = 2;    
 
     @Resource private Icon downloadDownIcon;
     @Resource private Icon downloadOverIcon;
@@ -59,15 +59,16 @@ public class ActionButtonPanel extends JXPanel {
     @Resource private Icon infoDownIcon;
     @Resource private Icon infoOverIcon;
     @Resource private Icon infoUpIcon;
-    @Resource private Icon junkDownIcon;
-    @Resource private Icon junkOverIcon;
-    @Resource private Icon junkUpIcon;
+    @Resource private Icon spamDownIcon;
+    @Resource private Icon spamOverIcon;
+    @Resource private Icon spamUpIcon;
+    @Resource private Icon spamActiveIcon;
 
     private Icon[][] icons;
     private JButton downloadButton;
     private JXHyperlink downloadingLink = new JXHyperlink();
     private JButton infoButton;
-    private JToggleButton junkButton;
+    private JToggleButton spamButton;
     private int height;
     private VisualSearchResult vsr;
     private int currentRow;
@@ -105,7 +106,7 @@ public class ActionButtonPanel extends JXPanel {
             }
         };
         
-        junkButton = new JToggleButton() {
+        spamButton = new JToggleButton() {
             @Override
             public Point getToolTipLocation(MouseEvent e) {
                 return getToolTipOffset(this);
@@ -113,15 +114,15 @@ public class ActionButtonPanel extends JXPanel {
         };
         
         icons = new Icon[][] {
-            { downloadUpIcon, downloadOverIcon, downloadDownIcon },
-            { infoUpIcon, infoOverIcon, infoDownIcon },
-            { junkUpIcon, junkOverIcon, junkDownIcon }
+            { downloadUpIcon, downloadOverIcon, downloadDownIcon, null },
+            { infoUpIcon, infoOverIcon, infoDownIcon, null},
+            { spamUpIcon, spamOverIcon, spamDownIcon, spamActiveIcon }
         };
         calculateHeight();
 
         setLayout(new GridLayout(1, 3));
         addButtonsToPanel();
-
+        
         // Set the tooltip delay to zero only when the mouse is over this panel.
         addMouseListener(new MouseAdapter() {
             private int delay;
@@ -130,7 +131,7 @@ public class ActionButtonPanel extends JXPanel {
             public void mouseEntered(MouseEvent e) {
                 // Save the previous delay.
                 delay = ToolTipManager.sharedInstance().getInitialDelay();
-                ToolTipManager.sharedInstance().setInitialDelay(0);
+                ToolTipManager.sharedInstance().setInitialDelay(1);
             }
 
             @Override
@@ -171,6 +172,7 @@ public class ActionButtonPanel extends JXPanel {
             Icon upIcon = iconSet[0];
             Icon overIcon = iconSet[1];
             Icon downIcon = iconSet[2];
+            Icon selectedIcon = iconSet[3];
 
             AbstractButton button = getButton(buttonIndex);
             if (button == null) continue; // should never happen
@@ -178,7 +180,7 @@ public class ActionButtonPanel extends JXPanel {
             button.setIcon(upIcon);
             button.setRolloverIcon(overIcon);
             button.setPressedIcon(downIcon);
-            button.setSelectedIcon(downIcon);
+            button.setSelectedIcon(selectedIcon == null ? downIcon : selectedIcon);
 
             button.setToolTipText(TOOLTIPS[buttonIndex++]);
 
@@ -196,15 +198,15 @@ public class ActionButtonPanel extends JXPanel {
     private AbstractButton getButton(int buttonIndex) {
         return buttonIndex == DOWNLOAD ? downloadButton :
             buttonIndex == MORE_INFO ? infoButton :
-            buttonIndex == MARK_AS_JUNK ? junkButton : null;
+            buttonIndex == MARK_AS_SPAM ? spamButton : null;
     }
     
     /**
-     * Gets the "Mark as Junk" button.
+     * Gets the "Mark as Spam" button.
      * @return the button
      */
     public JToggleButton getSpamButton() {
-        return junkButton;
+        return spamButton;
     }
 
     /**
@@ -215,7 +217,7 @@ public class ActionButtonPanel extends JXPanel {
     private Icon getRolloverIcon(int buttonIndex) {
         return buttonIndex == DOWNLOAD ? downloadOverIcon :
             buttonIndex == MORE_INFO ? infoOverIcon :
-            buttonIndex == MARK_AS_JUNK ? junkOverIcon : null;
+            buttonIndex == MARK_AS_SPAM ? spamOverIcon : null;
     }
 
     private Point getToolTipOffset(JComponent component) {
@@ -242,7 +244,7 @@ public class ActionButtonPanel extends JXPanel {
     private Icon getUpIcon(int buttonIndex) {
         return buttonIndex == DOWNLOAD ? downloadUpIcon :
             buttonIndex == MORE_INFO ? infoUpIcon :
-            buttonIndex == MARK_AS_JUNK ? junkUpIcon : null;
+            buttonIndex == MARK_AS_SPAM ? spamUpIcon : null;
     }
 
     @Override

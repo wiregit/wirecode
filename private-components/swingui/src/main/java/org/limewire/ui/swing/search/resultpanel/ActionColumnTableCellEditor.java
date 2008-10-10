@@ -48,8 +48,8 @@ implements TableCellEditor, TableCellRenderer {
         junkButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
-                boolean junk = event.getStateChange() == ItemEvent.SELECTED;
-                vsr.setSpam(junk);
+                boolean spam = event.getStateChange() == ItemEvent.SELECTED;
+                vsr.setSpam(spam);
                 table.editingStopped(new ChangeEvent(table));
             }
         });
