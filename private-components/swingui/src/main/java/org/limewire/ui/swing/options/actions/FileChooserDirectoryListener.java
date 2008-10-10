@@ -10,8 +10,7 @@ import javax.swing.JTextField;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FileChooser;
-
-import com.limegroup.gnutella.gui.I18n;
+import org.limewire.ui.swing.util.I18n;
 
 public class FileChooserDirectoryListener extends AbstractAction {
 

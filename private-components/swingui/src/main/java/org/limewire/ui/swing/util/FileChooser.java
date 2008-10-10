@@ -15,14 +15,10 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.gui.FocusJOptionPane;
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.gui.I18n;
-import com.limegroup.gnutella.gui.MacUtils;
-import com.limegroup.gnutella.gui.MessageService;
 
 public final class FileChooser {
     
@@ -156,7 +152,7 @@ public final class FileChooser {
                 fileChooser.setMultiSelectionEnabled(allowMultiSelect);
                 boolean dispose = false;
                 if(parent == null) {
-                    parent = MessageService.getParentComponent();
+//                    parent = MessageService.getParentComponent();
                     if(parent == null) {
                         dispose = true;
                         parent = FocusJOptionPane.createFocusComponent();
@@ -187,9 +183,9 @@ public final class FileChooser {
             } else {
                 FileDialog dialog;
                 if(mode == JFileChooser.DIRECTORIES_ONLY)
-                    dialog = MacUtils.getFolderDialog();
+                    dialog = MacUtils.getFolderDialog(null);
                 else
-                    dialog = new FileDialog(GUIMediator.getAppFrame(), "");
+                    dialog = new FileDialog(new JFrame(), "");
                 
                 dialog.setTitle(I18n.tr(titleKey));
                 if(filter != null) {
