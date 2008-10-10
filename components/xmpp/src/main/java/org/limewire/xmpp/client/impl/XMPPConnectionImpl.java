@@ -281,7 +281,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                                     if(p instanceof LimePresence) {
                                         user.removePresense(new LimePresenceImpl(presence, connection, user));    
                                     } else {
-                                        user.removePresense(new PresenceImpl(presence, connection));   
+                                        user.removePresense(new PresenceImpl(presence, connection, user));
                                     }                                    
                                 }
                             }
@@ -337,10 +337,10 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     user.addPresense(limePresense);
                 } catch (InvalidDataException e) {
                     LOG.debug("could not parse address data", e);
-                    user.addPresense(new PresenceImpl(presence, connection));
+                    user.addPresense(new PresenceImpl(presence, connection, user));
                 }
             } else {
-                user.addPresense(new PresenceImpl(presence, connection));
+                user.addPresense(new PresenceImpl(presence, connection, user));
             }
         }
 
@@ -350,7 +350,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
             if(currentPresence instanceof LimePresence) {
                 updatedPresence = new LimePresenceImpl(presence, connection, (LimePresence)currentPresence);    
             } else {
-                updatedPresence = new PresenceImpl(presence, connection);   
+                updatedPresence = new PresenceImpl(presence, connection, user);
             }
             user.updatePresence(updatedPresence);
         }

@@ -15,6 +15,7 @@ import org.limewire.ui.swing.sharing.MockFriendSharingDisplay;
 import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.User;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -67,7 +68,8 @@ public class ChatPanelHarness {
         addFriend.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new PresenceUpdateEvent(new MockUser(idField.getText(), nameField.getText()), new MockPresence(Mode.available, moodField.getText(), idField.getText())).publish();
+                User user = new MockUser(idField.getText(), nameField.getText());
+                new PresenceUpdateEvent(new MockPresence(user, Mode.available, moodField.getText(), idField.getText())).publish();
             }
         });
         builder.append(addFriend, 3);
@@ -86,7 +88,8 @@ public class ChatPanelHarness {
     private static void fillWithUnseenMessageAwaitingFriends() {
         for(int i = 0; i < 50; i++) {
             String id = "foo" + i;
-            new PresenceUpdateEvent(new MockUser(id, "foo"), new MockPresence(Mode.available, "hey", id)).publish();
+            User user = new MockUser(id, "foo");
+            new PresenceUpdateEvent(new MockPresence(user, Mode.available, "hey", id)).publish();
         }
         
         for(int i = 0; i < 50; i++) {

@@ -4,16 +4,23 @@ import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.User;
 
 public class MockPresence implements Presence {
     private String status;
+    private final User user;
     private Mode mode;
     private String jid;
     
-    MockPresence(Mode mode, String status, String jid) {
+    MockPresence(User user, Mode mode, String status, String jid) {
+        this.user = user;
         this.mode = mode;
         this.status = status;
         this.jid = jid;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     @Override

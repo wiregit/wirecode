@@ -373,7 +373,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         switch(presence.getType()) {
             case available:
                 if(chatFriend == null) {
-                    final ChatFriendImpl newFriend = new ChatFriendImpl(user, presence);
+                    final ChatFriendImpl newFriend = new ChatFriendImpl(presence);
                     presence.setIncomingChatListener(new IncomingChatListener() {
                         public MessageReader incomingChat(MessageWriter writer) {
                             LOG.debugf("{0} is typing a message", presence.getJID());

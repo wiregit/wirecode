@@ -31,9 +31,9 @@ public class FriendsPaneHarness {
                 int i = 0;
                 for(String name : names) {
                     MockUser user = new MockUser("", name);
-                    MockPresence presence = new MockPresence(randomMode(), "Sort-in", "jid" + i++);
-                    new PresenceUpdateEvent(user, presence).publish();
-                    presences.add(new Duo(user, presence));
+                    MockPresence presence = new MockPresence(user, randomMode(), "Sort-in", "jid" + i++);
+                    new PresenceUpdateEvent(presence).publish();
+                    presences.add(new Duo(presence));
                 }
 
                 frame.pack();
@@ -45,7 +45,7 @@ public class FriendsPaneHarness {
                         while (true) {
                             Duo duo = presences.get(get1to10());
                             duo.presence.setMode(randomMode());
-                            new PresenceUpdateEvent(duo.user, duo.presence).publish();
+                            new PresenceUpdateEvent(duo.presence).publish();
                             try {
                                 Thread.sleep(10000);
                             } catch (InterruptedException e) {
@@ -59,12 +59,10 @@ public class FriendsPaneHarness {
     }
     
     private static class Duo {
-        private MockUser user;
         private MockPresence presence;
-        public Duo(MockUser user, MockPresence presence) {
+        public Duo(MockPresence presence) {
             super();
             this.presence = presence;
-            this.user = user;
         }
     }
 

@@ -26,29 +26,21 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
 
-    private final User user;
     private Address address;
     private byte [] authToken;
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, User user) {
-        super(presence, connection);
-        this.user = user;
+        super(presence, connection, user);
     }
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
-        super(presence, connection);
+        super(presence, connection, limePresence.getUser());
         address = Objects.nonNull(limePresence, "limePresence").getPresenceAddress();
-        this.user = limePresence.getUser();
     }
 
     @Override
     public Friend getFriend() {
         return getUser();
-    }
-
-    @Override
-    public User getUser() {
-        return user;
     }
 
     @Override

@@ -39,9 +39,9 @@ public class FriendsPaneRosterListener implements RegisteringEventListener<Roste
                 LOG.debugf("presenceChanged(). Presence jid: {0} presence-type: {1}", presence.getJID(), presence.getMode());
                 if(presence.getType().equals(Presence.Type.available)) {
                     //TODO: Should distinguish between Sharable/Lime and "regular" presence with 2 event types
-                    new PresenceUpdateEvent(user, presence).publish();
+                    new PresenceUpdateEvent(presence).publish();
                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                    new PresenceUpdateEvent(user, presence).publish();
+                    new PresenceUpdateEvent(presence).publish();
                 } else {
                     // TODO update UI
                 }

@@ -14,6 +14,7 @@ import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.User;
 
 class PresenceImpl implements Presence {
 
@@ -21,10 +22,12 @@ class PresenceImpl implements Presence {
 
     protected final org.jivesoftware.smack.packet.Presence presence;
     protected final org.jivesoftware.smack.XMPPConnection connection;
+    protected final User user;
 
-    PresenceImpl(org.jivesoftware.smack.packet.Presence presence, org.jivesoftware.smack.XMPPConnection connection) {
+    PresenceImpl(org.jivesoftware.smack.packet.Presence presence, org.jivesoftware.smack.XMPPConnection connection, User user) {
         this.presence = presence;
-        this.connection = connection;        
+        this.connection = connection;
+        this.user = user;
     }
 
     public MessageWriter createChat(final MessageReader reader) {
@@ -124,5 +127,10 @@ class PresenceImpl implements Presence {
     public String toString() {
         // TODO add StringUtils.toString(object, Method...)
         return super.toString();
+    }
+
+    @Override
+    public User getUser() {
+        return user;
     }
 }

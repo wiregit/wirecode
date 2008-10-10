@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.friend.Friend;
@@ -11,7 +12,6 @@ import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
@@ -21,28 +21,26 @@ import org.limewire.xmpp.api.client.Presence.Mode;
 public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     private boolean chatting;
     private boolean activeConversation;
-    private final User user;
-    private Presence presence;
+    private AtomicReference<Presence> presence;
     private String status;
     private Mode mode;
     private long chatStartTime;
     private boolean hasUnviewedMessages;
     
-    ChatFriendImpl(User user, Presence presence) {
-        this.user = user;
-        this.presence = presence;
+    ChatFriendImpl(Presence presence) {
+        this.presence = new AtomicReference<Presence>(presence);
         this.status = presence.getStatus();
-        this.mode = presence.getMode();        
+        this.mode = presence.getMode();
     }
     
     @Override
     public Friend getFriend() {
-        return user;
+        return presence.get().getUser();
     }
     
     @Override
     public String getID() {
-        return user.getId();
+        return presence.get().getUser().getId();
     }
 
     @Override
@@ -59,7 +57,7 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public String getName() {
-        return safe(user.getName(), user.getId());
+        return safe(presence.get().getUser().getName(), presence.get().getUser().getId());
     }
     
     /**
@@ -95,7 +93,7 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public MessageWriter createChat(MessageReader reader) {
-        return presence.createChat(reader);
+        return presence.get().createChat(reader);
     }
 
     @Override
@@ -148,22 +146,22 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public boolean jidBelongsTo(String jid) {
-        return user.jidBelongsTo(jid);
+        return presence.get().getUser().jidBelongsTo(jid);
     }
 
     public Presence getPresence() {
-        return presence;
+        return presence.get();
     }
     
     @Override
     public void releasePresence(Presence presence) {
-        if (this.presence.getJID().equals(presence.getJID())) {
-            this.presence = getHighestPriorityPresence();
+        if (this.presence.get().getJID().equals(presence.getJID())) {
+            this.presence.set(getHighestPriorityPresence());
         }
     }
 
     private Presence getHighestPriorityPresence() {
-        Collection<Presence> values = user.getPresences().values();
+        Collection<Presence> values = presence.get().getUser().getPresences().values();
         ArrayList<Presence> presences = new ArrayList<Presence>(values);
         Collections.sort(presences, new PresenceSorter());
         return presences.size() == 0 ? null : presences.get(0);

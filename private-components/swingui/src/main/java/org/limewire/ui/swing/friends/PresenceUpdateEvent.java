@@ -6,16 +6,14 @@ import org.limewire.xmpp.api.client.User;
 
 public class PresenceUpdateEvent extends AbstractEDTEvent {
     private static final String TOPIC_PREFIX = "presence-";
-    private final User user;
     private final Presence presence;
 
-    public PresenceUpdateEvent(User user, Presence presence) {
+    public PresenceUpdateEvent(Presence presence) {
         this.presence = presence;
-        this.user = user;
     }
 
     public User getUser() {
-        return user;
+        return presence.getUser();
     }
 
     public Presence getPresence() {

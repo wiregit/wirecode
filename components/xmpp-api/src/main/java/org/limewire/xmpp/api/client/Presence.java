@@ -6,7 +6,7 @@ import org.limewire.i18n.I18nMarker;
  * Represents xmpp <code><presence></code> messages.
  */
 public interface Presence {
-    
+
     enum Type {
         available, unavailable, subscribe, subscribed, unsubscribe, unsubscribed, error
     }
@@ -38,6 +38,8 @@ public interface Presence {
     public static final int MIN_PRIORITY = -127;
     
     public static final int MAX_PRIORITY = 127;
+
+    public User getUser();
 
     /**
      * the jid of the user.  jid's have the form <code>user@host.com/client</code>
