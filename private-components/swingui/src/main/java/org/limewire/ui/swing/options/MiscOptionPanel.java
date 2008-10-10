@@ -10,14 +10,19 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.UISettings;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Misc Option View
  */
+@Singleton
 public class MiscOptionPanel extends OptionPanel {
 
     private NotificationsPanel notificationsPanel;
     private FriendsChatPanel friendsChatPanel;
     
+    @Inject
     public MiscOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         

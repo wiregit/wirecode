@@ -9,14 +9,19 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Library Option View
  */
+@Singleton
 public class LibraryOptionPanel extends OptionPanel {
 
     private LibraryManagementPanel libraryManagerPanel;
     private SmartSharingPanel smartSharingPanel;
     
+    @Inject
     public LibraryOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         

@@ -14,9 +14,13 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Files Option View
  */
+@Singleton
 public class FilesOptionPanel extends OptionPanel {
 
     private ManageExtensionsPanel manageExtensionsPanel;
@@ -24,9 +28,12 @@ public class FilesOptionPanel extends OptionPanel {
     private LimeWireStorePanel limeWireStorePanel;
     private ITunesPanel iTunesPanel;
     
+    @Inject
     public FilesOptionPanel() {         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
+        setOpaque(false);
+        
         add(getManageExtensionsPanel(), "pushx, growx");
         add(getSaveOptionPanel(), "pushx, growx");
         add(getLimeWireStorePanel(), "pushx, growx");

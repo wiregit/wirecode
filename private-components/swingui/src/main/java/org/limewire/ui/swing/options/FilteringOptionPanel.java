@@ -6,14 +6,19 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Filtering Option View
  */
+@Singleton
 public class FilteringOptionPanel extends OptionPanel {
     
     private BlockHostsPanel blockHostPanel;
     private AllowHostsPanel allowHostsPanel;
     
+    @Inject
     public FilteringOptionPanel() {
         super();
         setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));

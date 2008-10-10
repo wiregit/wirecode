@@ -25,6 +25,7 @@ import org.limewire.ui.swing.options.actions.TabAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
@@ -47,6 +48,13 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     private static final String MISC = I18n.tr("Misc");
     private static final String ADVANCED = I18n.tr("Advanced");
     
+    private LibraryOptionPanel libraryOptionPanel;
+    private SearchOptionPanel searchOptionPanel;
+    private DownloadOptionPanel downloadOptionPanel;
+    private SecurityOptionPanel securityOptionPanel;
+    private MiscOptionPanel miscOptionPanel;
+    private AdvancedOptionPanel advancedOptionPanel;
+    
     private Map<String, OptionTabItem> cards = new HashMap<String,OptionTabItem>();
     private Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
     private OptionTabItem selectedItem;
@@ -61,8 +69,18 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     private JButton okButton;
     private JButton cancelButton;
     
-    public OptionsDialog() {
+    @Inject
+    public OptionsDialog(LibraryOptionPanel libraryOptionPanel, SearchOptionPanel searchOptionPanel, 
+            DownloadOptionPanel downloadOptionPanel, SecurityOptionPanel securityOptionPanel, MiscOptionPanel miscOptionPanel,
+            AdvancedOptionPanel advancedOptionPanel) {
         GuiUtils.assignResources(this); 
+        
+        this.libraryOptionPanel = libraryOptionPanel;
+        this.searchOptionPanel = searchOptionPanel;
+        this.downloadOptionPanel = downloadOptionPanel;
+        this.securityOptionPanel = securityOptionPanel;
+        this.miscOptionPanel = miscOptionPanel;
+        this.advancedOptionPanel = advancedOptionPanel;
         
         setTitle(I18n.tr("Options"));
         setSize(700,600);
@@ -114,12 +132,12 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     }
     
     private void createPanels() {
-        panels.put(LIBRARY, new LibraryOptionPanel());
-        panels.put(SEARCH, new SearchOptionPanel());
-        panels.put(DOWNLOADS, new DownloadOptionPanel());
-        panels.put(SECURITY, new SecurityOptionPanel());
-        panels.put(MISC, new MiscOptionPanel());
-        panels.put(ADVANCED, new AdvancedOptionPanel());
+        panels.put(LIBRARY, libraryOptionPanel);
+        panels.put(SEARCH, searchOptionPanel);
+        panels.put(DOWNLOADS, downloadOptionPanel);
+        panels.put(SECURITY, securityOptionPanel);
+        panels.put(MISC, miscOptionPanel);
+        panels.put(ADVANCED, advancedOptionPanel);
         
         cardPanel.add(panels.get(LIBRARY), LIBRARY);
         cardPanel.add(panels.get(SEARCH), SEARCH);
@@ -183,7 +201,11 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         }
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
-                OptionsDialog o = new OptionsDialog();
+                OptionsDialog o = new OptionsDialog(new LibraryOptionPanel(), new SearchOptionPanel(), new DownloadOptionPanel(), new SecurityOptionPanel(), new MiscOptionPanel(), 
+                        new AdvancedOptionPanel(new FilesOptionPanel(), new ConnectionsOptionPanel(), new SystemOptionPanel(), 
+                                new ReallyAdvancedOptionPanel(new FirewallOptionPanel(), new ProxyOptionPanel(), new NetworkInterfaceOptionPanel(),
+                                        new PerformanceOptionPanel(), new BitTorrentOptionPanel(), 
+                                        new FilteringOptionPanel(), new SpamOptionPanel(null))));
                 o.setVisible(true);
             }
         });

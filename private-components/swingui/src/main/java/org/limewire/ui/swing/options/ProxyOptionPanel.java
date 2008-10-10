@@ -17,9 +17,13 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Proxy Option View
  */
+@Singleton
 public class ProxyOptionPanel extends OptionPanel {
     
     private JRadioButton noProxyRadioButton;
@@ -36,6 +40,7 @@ public class ProxyOptionPanel extends OptionPanel {
     private JTextField userNameTextField;
     private JPasswordField passwordField;
     
+    @Inject
     public ProxyOptionPanel() {
         super();
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));

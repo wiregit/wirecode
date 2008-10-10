@@ -18,9 +18,13 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Search Option View
  */
+@Singleton
 public class SearchOptionPanel extends OptionPanel {
     
     private static final int MAX_FRIEND_SUGGESTIONS = 8;
@@ -30,6 +34,7 @@ public class SearchOptionPanel extends OptionPanel {
     private SearchBarPanel searchBarPanel;
     private SearchResultsPanel searchResultsPanel;
     
+    @Inject
     public SearchOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         

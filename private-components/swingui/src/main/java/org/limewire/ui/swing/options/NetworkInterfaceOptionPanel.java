@@ -10,9 +10,13 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Network Interface Option View
  */
+@Singleton
 public class NetworkInterfaceOptionPanel extends OptionPanel {
 
     private ButtonGroup buttonGroup;
@@ -20,6 +24,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     private JRadioButton limewireChooseRadioButton;
     private JRadioButton meChooseRadioButton;
     
+    @Inject
     public NetworkInterfaceOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         

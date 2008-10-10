@@ -15,15 +15,20 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Firewall Option Panel
  */
 //TODO: convert to numbertextfield
+@Singleton
 public class FirewallOptionPanel extends OptionPanel {
 
     private ListeningPortPanel listeningPortPanel;
     private RouterConfigPanel routerConfigPanel;
     
+    @Inject
     public FirewallOptionPanel() {
         super();
         setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));

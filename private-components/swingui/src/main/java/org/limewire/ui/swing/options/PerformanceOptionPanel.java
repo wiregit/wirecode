@@ -13,9 +13,13 @@ import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Performance Option View
  */
+@Singleton
 public class PerformanceOptionPanel extends OptionPanel {
 
     private final String firstMultiLineLabel = I18n.tr("If your computer has a fast internet connection, LimeWire may act as an \"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you notice performacnce issues.");
@@ -27,6 +31,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     private JCheckBox disableTLS;
     private JCheckBox disableOutOfBandSearchCheckBox;
     
+    @Inject
     public PerformanceOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         

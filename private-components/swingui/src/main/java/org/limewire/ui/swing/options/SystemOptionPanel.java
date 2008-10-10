@@ -10,17 +10,24 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * System Option View
  */
+@Singleton
 public class SystemOptionPanel extends OptionPanel {
 
     private FileAssociationPanel fileAssociationPanel;
     private StartupShutdownPanel startupShutdownPanel;
     private UpdatesBugsPanel updatesBugsPanel;
     
+    @Inject
     public SystemOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        
+        setOpaque(false);
         
         add(getFileAssociationPanel(), "pushx, growx");
         add(getStartupShutdownPanel(), "pushx, growx");

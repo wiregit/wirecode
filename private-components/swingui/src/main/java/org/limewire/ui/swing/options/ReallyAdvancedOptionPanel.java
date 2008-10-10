@@ -19,9 +19,13 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Really Advanced Option View
  */
+@Singleton
 public class ReallyAdvancedOptionPanel extends OptionPanel {
 
     public static final int MULTI_LINE_LABEL_WIDTH = 440;
@@ -34,15 +38,36 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
     private static final String FILTERING = I18n.tr("Filtering");
     private static final String SPAM = I18n.tr("Spam");
     
+    private FirewallOptionPanel firewallOptionPanel;
+    private ProxyOptionPanel proxyOptionPanel;
+    private NetworkInterfaceOptionPanel networkInterfaceOptionPanel;
+    private PerformanceOptionPanel performanceOptionPanel;
+    private BitTorrentOptionPanel bitTorrentOptionPanel;
+    private FilteringOptionPanel filteringOptionPanel;
+    private SpamOptionPanel spamOptionPanel;
+    
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private JList list;
     
     private Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
     
-    public ReallyAdvancedOptionPanel() {
+    @Inject
+    public ReallyAdvancedOptionPanel(FirewallOptionPanel firewallOptionPanel, ProxyOptionPanel proxyOptionPanel, NetworkInterfaceOptionPanel networkInterfaceOptionPanel,
+                                PerformanceOptionPanel performanceOptionPanel, BitTorrentOptionPanel bitTorrentOptionPanel, 
+                                FilteringOptionPanel filteringOptionPanel, SpamOptionPanel spamOptionPanel) {
+        
+        this.firewallOptionPanel = firewallOptionPanel;
+        this.proxyOptionPanel = proxyOptionPanel;
+        this.networkInterfaceOptionPanel = networkInterfaceOptionPanel;
+        this.performanceOptionPanel = performanceOptionPanel;
+        this.bitTorrentOptionPanel = bitTorrentOptionPanel;
+        this.filteringOptionPanel = filteringOptionPanel;
+        this.spamOptionPanel = spamOptionPanel;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, gapy 10", "fill", "fill"));
+        
+        setOpaque(false);
         
         list = new JList();
         list.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -71,13 +96,13 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
     }
     
     private void createPanels() {      
-        panels.put(FIREWALL, new FirewallOptionPanel());
-        panels.put(PROXY, new ProxyOptionPanel());
-        panels.put(NETWORK_INTERFACE, new NetworkInterfaceOptionPanel());
-        panels.put(PERFORMANCE, new PerformanceOptionPanel());
-        panels.put(BITTORRENT, new BitTorrentOptionPanel());
-        panels.put(FILTERING, new FilteringOptionPanel());
-        panels.put(SPAM, new SpamOptionPanel());
+        panels.put(FIREWALL, firewallOptionPanel);
+        panels.put(PROXY, proxyOptionPanel);
+        panels.put(NETWORK_INTERFACE, networkInterfaceOptionPanel);
+        panels.put(PERFORMANCE, performanceOptionPanel);
+        panels.put(BITTORRENT, bitTorrentOptionPanel);
+        panels.put(FILTERING, filteringOptionPanel);
+        panels.put(SPAM, spamOptionPanel);
         
         
         cardPanel.add(panels.get(FIREWALL), FIREWALL);

@@ -8,22 +8,22 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class ToolsMenu extends JMenu {
-
-    private OptionsDialog optionDialog;
     
-    public ToolsMenu() {
+    @Inject
+    public ToolsMenu(final OptionsDialog optionDialog) {
         super(I18n.tr("Tools"));
         
         add(new AbstractAction(I18n.tr("Options")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(optionDialog == null) {
-                    optionDialog = new OptionsDialog();
-                }
+//                if(optionDialog == null) {
+//                    optionDialog = new OptionsDialog();
+//                }
                 if(!optionDialog.isVisible()) {
 //                    GUIUtils.centerOnScreen(optionDialog);
                     optionDialog.setVisible(true);

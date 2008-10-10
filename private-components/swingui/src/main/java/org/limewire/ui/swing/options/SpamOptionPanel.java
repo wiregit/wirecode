@@ -10,16 +10,26 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.spam.SpamManager;
 import org.limewire.ui.swing.util.I18n;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Spam Option View
  */
+@Singleton
 public class SpamOptionPanel extends OptionPanel {
+    
+    private SpamManager spamManager;
     
     private JButton clearSpamButton;
     
-    public SpamOptionPanel() {       
+    @Inject
+    public SpamOptionPanel(SpamManager spamManager) {   
+        this.spamManager = spamManager;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getClearPanel(), "pushx, growx");
@@ -34,7 +44,8 @@ public class SpamOptionPanel extends OptionPanel {
         clearSpamButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-//                spamManager.clearFilterData();
+                //TODO: spam manager needs a isEmpty method added
+                spamManager.clearFilterData();
             }
         });
         

@@ -4,11 +4,15 @@ import java.awt.Color;
 
 import javax.swing.JTabbedPane;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import net.miginfocom.swing.MigLayout;
 
 /**
  * Advanced Option View.
  */
+@Singleton
 public class AdvancedOptionPanel extends OptionPanel {
 
     private FilesOptionPanel filesOptionPanel;
@@ -16,72 +20,48 @@ public class AdvancedOptionPanel extends OptionPanel {
     private SystemOptionPanel systemOptionPanel;
     private ReallyAdvancedOptionPanel reallyAdvancedOptionPanel;
     
-    public AdvancedOptionPanel() {
+    @Inject
+    public AdvancedOptionPanel(FilesOptionPanel filesOptionPanel, ConnectionsOptionPanel connectionsOptionPanel,
+                    SystemOptionPanel systemOptionPanel, ReallyAdvancedOptionPanel reallyAdvancedOptionPanel) {
+        
+        this.filesOptionPanel = filesOptionPanel;
+        this.connectionsOptionPanel = connectionsOptionPanel;
+        this.systemOptionPanel = systemOptionPanel;
+        this.reallyAdvancedOptionPanel = reallyAdvancedOptionPanel;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx", "", ""));
         
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(Color.WHITE);
-        tabbedPane.addTab("Files", getFilesOptionPanel());
-        tabbedPane.addTab("Connections", getConnectionOptionPanel());
-        tabbedPane.addTab("System", getSystemOptionPanel());
-        tabbedPane.addTab("Super Really Advanced", getReallyAdvancedOptionPanel());
+        tabbedPane.addTab("Files", filesOptionPanel);
+        tabbedPane.addTab("Connections", connectionsOptionPanel);
+        tabbedPane.addTab("System", systemOptionPanel);
+        tabbedPane.addTab("Super Really Advanced", reallyAdvancedOptionPanel);
         
         add(tabbedPane, "grow");
-    }
-    
-    private OptionPanel getFilesOptionPanel() {
-        if(filesOptionPanel == null) {
-            filesOptionPanel = new FilesOptionPanel();
-            filesOptionPanel.setOpaque(false);
-        }
-        return filesOptionPanel;
-    }
-    
-    private OptionPanel getConnectionOptionPanel() {
-        if(connectionsOptionPanel == null) {
-            connectionsOptionPanel = new ConnectionsOptionPanel();
-            connectionsOptionPanel.setOpaque(false);
-        }
-        return connectionsOptionPanel;
-    }
-    
-    private OptionPanel getSystemOptionPanel() {
-        if(systemOptionPanel == null) {
-            systemOptionPanel = new SystemOptionPanel();
-            systemOptionPanel.setOpaque(false);
-        }
-        return systemOptionPanel;
-    }
-    
-    private OptionPanel getReallyAdvancedOptionPanel() {
-        if(reallyAdvancedOptionPanel == null) {
-            reallyAdvancedOptionPanel = new ReallyAdvancedOptionPanel();
-            reallyAdvancedOptionPanel.setOpaque(false);
-        }
-        return reallyAdvancedOptionPanel;
     }
 
     @Override
     void applyOptions() {
-        getFilesOptionPanel().applyOptions();
-        getConnectionOptionPanel().applyOptions();
-        getSystemOptionPanel().applyOptions();
-        getReallyAdvancedOptionPanel().applyOptions();
+        filesOptionPanel.applyOptions();
+        connectionsOptionPanel.applyOptions();
+        systemOptionPanel.applyOptions();
+        reallyAdvancedOptionPanel.applyOptions();
     }
 
     @Override
     boolean hasChanged() {
-        return getFilesOptionPanel().hasChanged() || 
-                getConnectionOptionPanel().hasChanged() ||
-                getSystemOptionPanel().hasChanged() ||
-                getReallyAdvancedOptionPanel().hasChanged();
+        return filesOptionPanel.hasChanged() || 
+        connectionsOptionPanel.hasChanged() ||
+                systemOptionPanel.hasChanged() ||
+                reallyAdvancedOptionPanel.hasChanged();
     }
 
     @Override
     void initOptions() {
-        getFilesOptionPanel().initOptions();
-        getConnectionOptionPanel().initOptions();
-        getSystemOptionPanel().initOptions();
-        getReallyAdvancedOptionPanel().initOptions();
+        filesOptionPanel.initOptions();
+        connectionsOptionPanel.initOptions();
+        systemOptionPanel.initOptions();
+        reallyAdvancedOptionPanel.initOptions();
     }
 }

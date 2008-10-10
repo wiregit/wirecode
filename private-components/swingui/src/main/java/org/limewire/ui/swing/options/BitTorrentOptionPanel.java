@@ -10,17 +10,25 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 
 /**
  * BitTorrent Option View
  */
+@Singleton
 public class BitTorrentOptionPanel extends OptionPanel {
+    
+    private static final int MIN = 1;
+    private static final int MAX = 10;
     
     private ButtonGroup buttonGroup;
     
@@ -32,6 +40,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
     private JCheckBox safeChunkCheckBox;
     private JCheckBox experimentCheckBox;
     
+    @Inject
     public BitTorrentOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
@@ -56,8 +65,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
         buttonGroup.add(limewireControl);
         buttonGroup.add(myControl);
         
-        maxUploadSpinner = new JSpinner();
-        minUploadSpinner = new JSpinner();
+        maxUploadSpinner = new JSpinner(new SpinnerNumberModel(MIN, MIN, MAX, 1));
+        minUploadSpinner = new JSpinner(new SpinnerNumberModel(MIN, MIN, MAX, 1));
         safeChunkCheckBox = new JCheckBox();
         experimentCheckBox = new JCheckBox();
 
@@ -81,14 +90,20 @@ public class BitTorrentOptionPanel extends OptionPanel {
     
     @Override
     void applyOptions() {
-        // TODO Auto-generated method stub
-        
+        BittorrentSettings.AUTOMATIC_SETTINGS.setValue(limewireControl.isSelected());
+        BittorrentSettings.TORRENT_MAX_UPLOADS.setValue((Integer)maxUploadSpinner.getModel().getValue());
+        BittorrentSettings.TORRENT_MIN_UPLOADS.setValue((Integer)minUploadSpinner.getModel().getValue());
+        BittorrentSettings.TORRENT_FLUSH_VERIRY.setValue(safeChunkCheckBox.isSelected());
+        BittorrentSettings.TORRENT_USE_MMAP.setValue(experimentCheckBox.isSelected());
     }
     
     @Override
     boolean hasChanged() {
-        //TODO:
-        return false;
+        return BittorrentSettings.AUTOMATIC_SETTINGS.getValue() != limewireControl.isSelected() 
+                || (Integer)maxUploadSpinner.getModel().getValue() != BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()
+                || (Integer)minUploadSpinner.getModel().getValue()!= BittorrentSettings.TORRENT_MIN_UPLOADS.getValue()
+                || BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue() != safeChunkCheckBox.isSelected()
+                || BittorrentSettings.TORRENT_USE_MMAP.getValue() != experimentCheckBox.isSelected();
     }
     
     @Override
@@ -99,8 +114,8 @@ public class BitTorrentOptionPanel extends OptionPanel {
         else
             myControl.setSelected(true);
         
-        //BittorrentSettings.TORRENT_MAX_UPLOADS.getValue()
-        //BittorrentSettings.TORRENT_MIN_UPLOADS.getValue()
+        maxUploadSpinner.getModel().setValue(BittorrentSettings.TORRENT_MAX_UPLOADS.getValue());
+        minUploadSpinner.getModel().setValue(BittorrentSettings.TORRENT_MIN_UPLOADS.getValue());
         safeChunkCheckBox.setSelected(BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue());
         experimentCheckBox.setSelected(BittorrentSettings.TORRENT_USE_MMAP.getValue());
         

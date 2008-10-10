@@ -9,15 +9,20 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Security Option View
  */
+@Singleton
 public class SecurityOptionPanel extends OptionPanel {
 
     private WarningMessagesPanel warningMessagesPanel;
     private UnsafeTypesPanel unsafeTypesPanel;
     private FilteringPanel filteringPanel;
     
+    @Inject
     public SecurityOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         

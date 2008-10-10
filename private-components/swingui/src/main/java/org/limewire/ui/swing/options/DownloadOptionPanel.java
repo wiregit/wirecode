@@ -12,15 +12,20 @@ import org.limewire.core.settings.iTunesSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * Downloads Option View
  */
+@Singleton
 public class DownloadOptionPanel extends OptionPanel {
 
     private SharingDownloadsPanel sharingDownloadsPanel;
     private SavingPanel savingPanel;
     private ITunesPanel iTunesPanel;
     
+    @Inject
     public DownloadOptionPanel() {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
