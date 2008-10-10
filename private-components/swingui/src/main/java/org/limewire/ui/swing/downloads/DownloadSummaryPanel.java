@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -12,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 
 import javax.swing.BorderFactory;
@@ -34,7 +38,6 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -54,13 +57,15 @@ public class DownloadSummaryPanel extends JPanel {
     /**
      * Number of download items displayed in the table
      */
-	private static final int NUMBER_DISPLAYED = 4;
+	private static final int NUMBER_DISPLAYED = 5;
 
+	private static final int LEFT_MARGIN = 8;
 
     private JTable table;
 
 	
 	private SectionHeading titleLabel;
+	private JLabel countLabel;
 	private JLabel moreLabel;
 	private JLabel completeLabel;
 	private EventList<DownloadItem> allList;
@@ -76,22 +81,16 @@ public class DownloadSummaryPanel extends JPanel {
     
     private CardLayout cardLayout;
 
-//    @Resource
-//    private Icon warningIcon;
-
-    @Resource
-    private Color moreColor;
     @Resource
     private Color allCompleteColor;
-
-    @Resource
-    private Color highlightColor;
-    @Resource
-    private Color highlightFontColor;
+    
     @Resource
     private Color fontColor;
 
-
+    // TODO: make resources
+    private Font moreFont = new Font("Arial", Font.PLAIN, 12);
+    private Font itemFont = new Font("Arial", Font.PLAIN, 10);
+    
     private boolean selected;
 
 
@@ -99,6 +98,30 @@ public class DownloadSummaryPanel extends JPanel {
 
 
      
+    private void createMoreLabel() {
+        moreLabel = new JLabel(I18n.tr("see more downloads")) {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                
+                Graphics2D g2 = (Graphics2D) g;
+                
+                int bottom = this.getHeight();
+                
+                String label = this.getText();
+                Rectangle2D labelRect = this.getFont().getStringBounds(label, g2.getFontRenderContext());
+                
+                g.setColor(new Color(0x2b,0x5b,0xaa));
+                g.drawLine(LEFT_MARGIN, bottom-7, (int)labelRect.getWidth()-2, bottom-7);
+            }
+      };
+      
+      moreLabel.setForeground(fontColor);
+      moreLabel.setFont(moreFont);
+      
+      moreLabel.setBorder(BorderFactory.createEmptyBorder(0,LEFT_MARGIN,6,0));
+    }
+    
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, Navigator navigator) {
 	    GuiUtils.assignResources(this);
@@ -120,11 +143,21 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		titleLabel = new SectionHeading(I18n.tr("Downloads"));
 		titleLabel.setName("DownloadSummaryPanel.titleLabel");
+		
+		countLabel = new JLabel("0 ");
+        countLabel.setFont(new Font("Arial",Font.PLAIN,15));
+        countLabel.setForeground(fontColor);
+        
+        titleLabel.add(countLabel, BorderLayout.EAST);
+		
+		
 		add(titleLabel, BorderLayout.NORTH);
-		moreLabel = new JLabel("<html><u>" + I18n.tr("More...") + "</u></html>", JLabel.RIGHT);
-		moreLabel.setForeground(moreColor);
+		
+		
+		createMoreLabel();
 		add(moreLabel, BorderLayout.SOUTH);
-			
+				
+		
 
 		
 		Comparator<DownloadItem> comparator = new Comparator<DownloadItem>(){
@@ -144,6 +177,7 @@ public class DownloadSummaryPanel extends JPanel {
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
+		table.setRowHeight(17);
 		
 		//TODO: sorting
 		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
@@ -152,6 +186,7 @@ public class DownloadSummaryPanel extends JPanel {
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);
         cardPanel.setOpaque(false);
+        cardPanel.setBorder(BorderFactory.createEmptyBorder(7,0,4,0));        
 
         add(cardPanel, BorderLayout.CENTER);
 
@@ -240,19 +275,10 @@ public class DownloadSummaryPanel extends JPanel {
 	private void setSelected(boolean selected) {
 	    if (isSelected() != selected) {
             this.selected = selected;
-            setOpaque(selected);
             if (selected) {
-                setBackground(highlightColor);
-                setBorder(BorderFactory.createLoweredBevelBorder());
-                moreLabel.setForeground(highlightFontColor);
-                completeLabel.setForeground(highlightFontColor);
-                downloadStatusPanelRenderer.setForeground(highlightFontColor);
+                setBorder(BorderFactory.createLineBorder(fontColor));
             } else {
-             //   setBackground(Color.WHITE);
                 setBorder(null);
-                moreLabel.setForeground(moreColor);
-                completeLabel.setForeground(allCompleteColor);
-                downloadStatusPanelRenderer.setForeground(fontColor);
             }
         }
     }
@@ -305,11 +331,11 @@ public class DownloadSummaryPanel extends JPanel {
     }
 
 	private void updateTitle(){
+	    titleLabel.setText(I18n.tr("Downloads"));
+	    
 	    if (unfinishedList.size() > 0) {
-            titleLabel.setText(I18n.tr("Downloads ({0})", unfinishedList.size()));
-        } else {
-            titleLabel.setText(I18n.tr("Downloads"));
-        }
+            countLabel.setText(unfinishedList.size() + " ");
+	    }
 	    
         if (warningList.size() == 0) {
             setWarningVisible(false);
@@ -336,8 +362,9 @@ public class DownloadSummaryPanel extends JPanel {
 			nameLabel = new JLabel();
             percentLabel = new JLabel();
 
-	        FontUtils.changeSize(nameLabel, -1);
-	        FontUtils.changeSize(percentLabel, -1);
+            nameLabel.setFont(itemFont);
+            percentLabel.setFont(itemFont);
+            
 			setOpaque(false);
 			GridBagConstraints gbc = new GridBagConstraints();
 
@@ -348,7 +375,7 @@ public class DownloadSummaryPanel extends JPanel {
 			gbc.anchor = GridBagConstraints.WEST;
 			nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
 			nameLabel.setOpaque(false);
-			gbc.insets = new Insets(0, 15, 0, 0);
+			gbc.insets = new Insets(0, LEFT_MARGIN, 0, 0);
 			add(nameLabel, gbc);
 
 			gbc.gridx = 1;
