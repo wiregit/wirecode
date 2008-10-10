@@ -150,7 +150,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
         
         private final PropertyChangeSupport changeSupport;
-        private volatile LibraryState state;
+        private volatile LibraryState state = LibraryState.LOADING;
 
         public FriendLibraryImpl(Friend friend) {
             this.friend = friend;
@@ -186,9 +186,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         @Override
         public LibraryState getState() {
-            if(state == null) {
-                state = calculateState();
-            }
             return state;
         }
         
