@@ -13,8 +13,8 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.SubpanelPainter;
-import org.limewire.ui.swing.search.FilteredTextField;
 import org.limewire.ui.swing.sharing.friends.FriendUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -29,8 +29,6 @@ import ca.odell.glazedlists.EventList;
  */
 public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
 
-    private static final int FILTER_WIDTH = 10;
-    
     private final String staticText;
     
     protected JLabel descriptionLabel;
@@ -81,7 +79,7 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
         descriptionLabel = new JLabel(text, icon, JLabel.LEFT);
         descriptionLabel.setForeground(fontColor);
         descriptionLabel.setFont(descriptionLabel.getFont().deriveFont(fontSize));
-        filterBox = new FilteredTextField(FILTER_WIDTH);
+        filterBox = new PromptTextField();
     }
     
     protected void layoutComponents() {

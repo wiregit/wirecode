@@ -28,6 +28,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.friends.ChatLoginState;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
@@ -67,7 +68,6 @@ public class SortAndFilterPanel extends JXPanel {
     private final String NAME = tr("Name");
     private final String FRIEND_ITEM = tr("Friend (a-z)");
     private final String RELEVANCE_ITEM = tr("Relevance");
-    private static final int FILTER_WIDTH = 10;
 
     private ChatLoginState chatLoginState;
     
@@ -82,7 +82,7 @@ public class SortAndFilterPanel extends JXPanel {
     private final JComboBox sortCombo = new JComboBox();
     
     private final JLabel sortLabel = new JLabel(tr("Sort by:"));
-    private final JTextField filterBox = new FilteredTextField(FILTER_WIDTH);
+    private final JTextField filterBox = new PromptTextField();
     private final JToggleButton listViewToggleButton = new JToggleButton();
     private final JToggleButton tableViewToggleButton = new JToggleButton();
     

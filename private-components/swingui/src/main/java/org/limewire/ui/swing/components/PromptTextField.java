@@ -1,6 +1,4 @@
-package org.limewire.ui.swing.search;
-
-import static org.limewire.ui.swing.util.I18n.tr;
+package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -16,42 +14,34 @@ import java.awt.event.FocusListener;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
-
-/**
- * This class is a special text field used for filtering search results.
- * 
- * @author R. Mark Volkmann, Object Computing, Inc.
- */
-public class FilteredTextField extends JTextField implements FocusListener {
+public class PromptTextField extends JTextField implements FocusListener {
     
-    private String PROMPT_TEXT = tr("Filter results...");
+    private String promptText;
     
-    /**
-     * Creates a FilteredTextField that displays a given number of columns.
-     * @param columns
-     */
-    public FilteredTextField(int columns) {
-        super(columns);
-        init();
+    public PromptTextField() {
+        this("");
     }
     
-    public FilteredTextField() {
+    public PromptTextField(String promptText) {
         super();
         init();
+        setPromptText(promptText);
     }
     
     private void init(){
-        //focusLost(null);
         addFocusListener(this);
         this.setOpaque(false);
         this.setBorder(new TextBorder());
+        this.setPreferredSize(new Dimension(150, 19));
+        this.setMinimumSize(this.getPreferredSize());
+        this.setSize(this.getPreferredSize());
     }
     
     public void setPromptText(String text){
-        PROMPT_TEXT = text;
+        promptText = text;
     }
     
-    class TextBorder implements Border{
+    private class TextBorder implements Border {
 
         @Override
         public Insets getBorderInsets(Component c) {
@@ -70,10 +60,6 @@ public class FilteredTextField extends JTextField implements FocusListener {
       
     }
     
-    @Override
-    public Dimension getMinimumSize() {
-        return getPreferredSize();
-    }
     
     /**
      * Repaints this component when focus is gained
@@ -112,14 +98,10 @@ public class FilteredTextField extends JTextField implements FocusListener {
         
         super.paintComponent(g);
 
-        boolean valueEntered = getText().length() > 0;
-        if (!hasFocus() && !valueEntered) {
-           
+        if (!hasFocus() && getText().length() == 0) {
             g.setColor(Color.LIGHT_GRAY);
             FontMetrics fm = g.getFontMetrics();
-            int x = 10; // using previous translate
-            int y = fm.getAscent() + 2;
-            g.drawString(PROMPT_TEXT, x, y);
+            g.drawString(promptText, 10, fm.getAscent() + 2);
         }
     }
 }

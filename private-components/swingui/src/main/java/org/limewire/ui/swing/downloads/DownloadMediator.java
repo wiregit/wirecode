@@ -9,8 +9,9 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
-import org.limewire.ui.swing.search.FilteredTextField;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TextFilterator;
@@ -36,7 +37,8 @@ class DownloadMediator {
 	
 		commonBaseList= GlazedListsFactory.filterList(downloadManager.getDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));	
 		commonBaseList = GlazedListsFactory.threadSafeList(commonBaseList);
-		filterField = new FilteredTextField(10);
+		filterField = new PromptTextField(I18n.tr("Filter"));
+		
 		filteredList = GlazedListsFactory.filterList(commonBaseList, 
 				new TextComponentMatcherEditor<DownloadItem>(filterField, new DownloadItemTextFilterator(), true));		
 	}

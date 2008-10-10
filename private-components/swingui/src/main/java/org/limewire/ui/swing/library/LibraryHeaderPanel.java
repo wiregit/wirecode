@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.Icon;
@@ -16,9 +15,9 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.painter.SubpanelPainter;
-import org.limewire.ui.swing.search.FilteredTextField;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -36,7 +35,7 @@ public class LibraryHeaderPanel extends JXPanel {
 
     private JLabel titleLabel;
 
-    private FilteredTextField filterField;
+    private PromptTextField filterField;
 
     private JXButton shareAllButton;
 
@@ -62,11 +61,8 @@ public class LibraryHeaderPanel extends JXPanel {
         titleLabel.setForeground(fontColor);
         titleLabel.setFont(headerFont);
 
-        filterField = new FilteredTextField();
+        filterField = new PromptTextField();
         filterField.setPromptText(I18n.tr("Filter"));
-        filterField.setPreferredSize(new Dimension(148, 17));
-        filterField.setSize(filterField.getPreferredSize());
-        filterField.setMaximumSize(filterField.getPreferredSize());
 
         if (isShareButtonShown()) {
             shareAllButton = new JXButton(I18n.tr("Share All"), shareIcon);
