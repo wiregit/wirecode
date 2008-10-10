@@ -33,8 +33,7 @@ import org.limewire.ui.swing.table.StringTableCellRenderer;
 import ca.odell.glazedlists.EventList;
 
 public abstract class BaseResultPanel extends JXPanel {
-    public static final int TABLE_ROW_HEIGHT = 26;
-//    private final Log LOG = LogFactory.getLog(getClass());
+    private static final int TABLE_ROW_HEIGHT = 26;
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
@@ -106,7 +105,7 @@ public abstract class BaseResultPanel extends JXPanel {
         resultsList.getColumnModel().getColumn(2).setMaxWidth(ListViewTableFormat.ACTIONS_WIDTH);
 
         resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
-
+        
         resultsList.addMouseListener(new ResultDownloader());
 
         resultsList.addMouseListener(new MouseAdapter() {
@@ -142,19 +141,6 @@ public abstract class BaseResultPanel extends JXPanel {
         StringTableCellRenderer stringRenderer =
             new StringTableCellRenderer();
 
-        // TODO: RMV Don't know why this approach of registering renderers
-        // TODO: RMV by class didn't work.
-        /*
-        resultsTable.setDefaultRenderer(Integer.class, stcr);
-        resultsTable.setDefaultRenderer(Long.class, stcr);
-        resultsTable.setDefaultRenderer(String.class, stcr);
-        resultsTable.setDefaultRenderer(
-            Calendar.class, new CalendarTableCellRenderer());
-        resultsTable.setDefaultRenderer(
-            Component.class, new ComponentTableCellRenderer());
-        */
-
-        // TODO: RMV But this way works.
         TableColumnModel tcm = resultsTable.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
         for (int i = 0; i < columnCount; i++) {
@@ -225,6 +211,7 @@ public abstract class BaseResultPanel extends JXPanel {
              
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
         } catch (SaveLocationException sle) {
+            //TODO
             throw new RuntimeException("FIX ME", sle);
         }
     }
