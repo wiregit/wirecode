@@ -4,10 +4,10 @@ package com.limegroup.gnutella.downloader;
 import java.net.URL;
 import java.util.Set;
 
+import org.limewire.core.settings.SpeedConstants;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 

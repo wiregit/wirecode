@@ -16,6 +16,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.SpeedConstants;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 

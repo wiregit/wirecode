@@ -19,6 +19,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.SpeedConstants;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.util.I18n;
 
@@ -101,7 +102,9 @@ public class ConnectionsOptionPanel extends OptionPanel {
             buttonGroup = new ButtonGroup();
             
             broadBandButton = new JRadioButton();
+            broadBandButton.setContentAreaFilled(false);
             dialupButton = new JRadioButton();
+            dialupButton.setContentAreaFilled(false);
             
             buttonGroup.add(broadBandButton);
             buttonGroup.add(dialupButton);
@@ -116,18 +119,29 @@ public class ConnectionsOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            ConnectionSettings.CONNECTION_SPEED.setValue(getSpeed(broadBandButton.isSelected()));
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return ConnectionSettings.CONNECTION_SPEED.getValue() != getSpeed(broadBandButton.isSelected());
         }
 
         @Override
         void initOptions() {
-            ConnectionSettings.CONNECTION_SPEED.getValue();
+            if(ConnectionSettings.CONNECTION_SPEED.getValue() == SpeedConstants.MODEM_SPEED_INT)
+                dialupButton.setSelected(true);
+            else
+                broadBandButton.setSelected(true);
         }
-
+        
+        private int getSpeed(boolean isBroadband) {
+            if(isBroadband) {
+                return SpeedConstants.CABLE_SPEED_INT;
+            } else {
+                return SpeedConstants.MAX_SPEED_INT;
+            }
+        }
     }
     
     private class DownloadsPanel extends OptionPanel {
@@ -147,6 +161,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
             
             maxDownloadSpinner = new JSpinner(new SpinnerNumberModel(MIN_DOWNLOADS, MIN_DOWNLOADS, MAX_DOWNLOADS, 1));
             limitBandWidthCheckBox = new JCheckBox();
+            limitBandWidthCheckBox.setContentAreaFilled(false);
             bandWidthLabel = new JLabel();
             bandWidthLabel.setVisible(false);
             bandWidthSlider = new JSlider(MIN_SLIDER, MAX_SLIDER);
@@ -207,7 +222,9 @@ public class ConnectionsOptionPanel extends OptionPanel {
             
             maxUploadSpinner = new JSpinner(new SpinnerNumberModel(MIN_UPLOADS, MIN_UPLOADS, MAX_UPLOADS, 1));
             uploadBandwidthCheckBox = new JCheckBox();
+            uploadBandwidthCheckBox.setContentAreaFilled(false);
             clearUploadCheckBox = new JCheckBox();
+            clearUploadCheckBox.setContentAreaFilled(false);
             bandWidthLabel = new JLabel();
             bandWidthLabel.setVisible(false);
             bandWidthSlider = new JSlider(MIN_SLIDER, MAX_SLIDER);

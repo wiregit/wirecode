@@ -93,17 +93,17 @@ public class SearchOptionPanel extends OptionPanel {
             add(new JLabel(I18n.tr("By default, search for")), "split");
             add(defaultSearchSpinner, "wrap");
             
-            add(suggestCheckBox, "split");
-            add(new JLabel("Suggest"), "split");
-            add(suggestSpinner,"split");
+            add(suggestCheckBox, "split 4");
+            add(new JLabel("Suggest"));
+            add(suggestSpinner);
             add(new JLabel("files from friends when signed on."), "wrap");
             
-            add(searchTabNumberCheckBox,"split");
-            add(new JLabel("Remember my"), "split");
-            add(searchTabNumberSpinner,"split");
+            add(searchTabNumberCheckBox,"split 4");
+            add(new JLabel("Remember my"));
+            add(searchTabNumberSpinner);
             add(new JLabel("most recent searches"), "push");
             
-            add(clearNowButton);
+            add(clearNowButton, "alignx right");
         }
         
         private void createComponents() {
@@ -115,18 +115,21 @@ public class SearchOptionPanel extends OptionPanel {
             
             
             suggestCheckBox = new JCheckBox();
+            suggestCheckBox.setContentAreaFilled(false);
             suggestSpinner = new JSpinner(new SpinnerNumberModel(MIN, MIN, MAX_FRIEND_SUGGESTIONS, 1));
             suggestSpinner.setEnabled(false);
             suggestCheckBox.addItemListener(new CheckBoxListener(suggestSpinner));
             suggestSpinner.addChangeListener(new SpinnerListener(suggestCheckBox, suggestSpinner));
             
             searchTabNumberCheckBox = new JCheckBox();
+            searchTabNumberCheckBox.setContentAreaFilled(false);
             searchTabNumberSpinner = new JSpinner(new SpinnerNumberModel(MIN, MIN, MAX_RECENT_SEARCHES, 1));
             searchTabNumberSpinner.setEnabled(false);
             searchTabNumberCheckBox.addItemListener(new CheckBoxListener(searchTabNumberSpinner));
             searchTabNumberSpinner.addChangeListener(new SpinnerListener(searchTabNumberCheckBox, searchTabNumberSpinner));
             
             clearNowButton = new JButton(I18n.tr("Clear Now"));
+            clearNowButton.setBorderPainted(false);
         }
         
         @Override
@@ -168,8 +171,11 @@ public class SearchOptionPanel extends OptionPanel {
             super(I18n.tr("Search Result"));
             
             groupSimilarResults = new JCheckBox();
+            groupSimilarResults.setContentAreaFilled(false);
             searchFriendLibrary = new JCheckBox();
+            searchFriendLibrary.setContentAreaFilled(false);
             moveDownloadedFiles = new JCheckBox();
+            moveDownloadedFiles.setContentAreaFilled(false);
             
             add(groupSimilarResults);
             add(new JLabel("Group similar search results"), "wrap");

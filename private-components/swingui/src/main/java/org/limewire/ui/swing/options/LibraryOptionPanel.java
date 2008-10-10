@@ -1,12 +1,18 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -18,11 +24,14 @@ import com.google.inject.Singleton;
 @Singleton
 public class LibraryOptionPanel extends OptionPanel {
 
+    private AppFrame appFrame;
     private LibraryManagementPanel libraryManagerPanel;
     private SmartSharingPanel smartSharingPanel;
     
     @Inject
-    public LibraryOptionPanel() {
+    public LibraryOptionPanel(AppFrame appFrame) {
+        this.appFrame = appFrame;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getLibraryManagerPanel(), "pushx, growx");
@@ -64,12 +73,30 @@ public class LibraryOptionPanel extends OptionPanel {
      * 
      */
     private class LibraryManagementPanel extends OptionPanel {
+        
+        private JDialog dialog;
+        private LibraryManagerOptionPanel libraryOptionPanel;
         private JButton manageLibraryButton;
         
         public LibraryManagementPanel() {
             super(I18n.tr("Library Management"));
             
             manageLibraryButton = new JButton(I18n.tr("Manage Library"));
+            manageLibraryButton.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(dialog == null) {
+                        libraryOptionPanel = new LibraryManagerOptionPanel();
+                        libraryOptionPanel.setPreferredSize(new Dimension(500, 500));
+                        dialog = new JDialog(appFrame.getMainFrame(), I18n.tr("Unsafe types"),true);
+                        dialog.add(libraryOptionPanel);
+                        dialog.setResizable(false);
+                        dialog.pack();
+                    } 
+                    if(!dialog.isVisible())
+                        dialog.setVisible(true);
+                }
+            });
             
             add(new MultiLineLabel(I18n.tr("Your library is a central location to view, share and unshare your files with the LimeWire Network and your friends."), 700), "wrap");
             add(new MultiLineLabel(I18n.tr("LimeWire will scan folders and look for files to add to your library. Scanning folders into your Library will no automatically share them."), 700), "wrap");

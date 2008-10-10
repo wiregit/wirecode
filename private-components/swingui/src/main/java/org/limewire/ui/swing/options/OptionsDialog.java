@@ -19,6 +19,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.TabAction;
@@ -70,9 +71,11 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     private JButton cancelButton;
     
     @Inject
-    public OptionsDialog(LibraryOptionPanel libraryOptionPanel, SearchOptionPanel searchOptionPanel, 
+    public OptionsDialog(AppFrame appFrame, LibraryOptionPanel libraryOptionPanel, SearchOptionPanel searchOptionPanel, 
             DownloadOptionPanel downloadOptionPanel, SecurityOptionPanel securityOptionPanel, MiscOptionPanel miscOptionPanel,
             AdvancedOptionPanel advancedOptionPanel) {
+        super(appFrame.getMainFrame(), I18n.tr("Options"));
+        
         GuiUtils.assignResources(this); 
         
         this.libraryOptionPanel = libraryOptionPanel;
@@ -81,8 +84,7 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         this.securityOptionPanel = securityOptionPanel;
         this.miscOptionPanel = miscOptionPanel;
         this.advancedOptionPanel = advancedOptionPanel;
-        
-        setTitle(I18n.tr("Options"));
+
         setSize(700,600);
         setResizable(false);
         setModalityType(ModalityType.APPLICATION_MODAL);
@@ -201,8 +203,10 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         }
         SwingUtilities.invokeLater(new Runnable(){
             public void run() {
-                OptionsDialog o = new OptionsDialog(new LibraryOptionPanel(), new SearchOptionPanel(), new DownloadOptionPanel(), new SecurityOptionPanel(), new MiscOptionPanel(), 
-                        new AdvancedOptionPanel(new FilesOptionPanel(), new ConnectionsOptionPanel(), new SystemOptionPanel(), 
+                AppFrame appFrame = new AppFrame();
+                
+                OptionsDialog o = new OptionsDialog(appFrame, new LibraryOptionPanel(appFrame), new SearchOptionPanel(), new DownloadOptionPanel(), new SecurityOptionPanel(appFrame), new MiscOptionPanel(), 
+                        new AdvancedOptionPanel(new FilesOptionPanel(appFrame), new ConnectionsOptionPanel(), new SystemOptionPanel(), 
                                 new ReallyAdvancedOptionPanel(new FirewallOptionPanel(), new ProxyOptionPanel(), new NetworkInterfaceOptionPanel(),
                                         new PerformanceOptionPanel(), new BitTorrentOptionPanel(), 
                                         new FilteringOptionPanel(), new SpamOptionPanel(null))));

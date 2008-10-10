@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.core.settings;
 
 /**
  * Constants used for speeds.

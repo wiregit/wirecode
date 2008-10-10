@@ -1,10 +1,17 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -12,6 +19,9 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.DaapSettings;
+import org.limewire.core.settings.SharingSettings;
+import org.limewire.ui.swing.mainframe.AppFrame;
+import org.limewire.ui.swing.options.actions.FileChooserDirectoryListener;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -23,13 +33,17 @@ import com.google.inject.Singleton;
 @Singleton
 public class FilesOptionPanel extends OptionPanel {
 
+    private AppFrame appFrame;
+    
     private ManageExtensionsPanel manageExtensionsPanel;
     private SaveFoldersPanel saveFoldersPanel;
     private LimeWireStorePanel limeWireStorePanel;
     private ITunesPanel iTunesPanel;
     
     @Inject
-    public FilesOptionPanel() {         
+    public FilesOptionPanel(AppFrame appFrame) {    
+        this.appFrame = appFrame;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
         setOpaque(false);
@@ -150,6 +164,10 @@ public class FilesOptionPanel extends OptionPanel {
     
     private class LimeWireStorePanel extends OptionPanel {
 
+        private String currentSaveDirectory;
+        private JDialog dialog;
+        private LWSFileNamingOptionPanel storeOptionPanel;
+        
         private JTextField storePathTextField;
         private JButton browseStorePathButton;
         private JButton configureNamingButton;
@@ -158,8 +176,23 @@ public class FilesOptionPanel extends OptionPanel {
             super(I18n.tr("LimeWire Store"));
             
             storePathTextField = new JTextField(40);
-            browseStorePathButton = new JButton(I18n.tr("Browse"));
+            browseStorePathButton = new JButton(new FileChooserDirectoryListener(this.getRootPane(), storePathTextField));
             configureNamingButton = new JButton(I18n.tr("Configure file naming"));
+            configureNamingButton.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(dialog == null) {
+                        storeOptionPanel = new LWSFileNamingOptionPanel();
+                        storeOptionPanel.setPreferredSize(new Dimension(350, 140));
+                        dialog = new JDialog(appFrame.getMainFrame(), I18n.tr("LimeWire Store File Organization"),true);
+                        dialog.add(storeOptionPanel);
+                        dialog.setResizable(false);
+                        dialog.pack();
+                    } 
+                    if(!dialog.isVisible())
+                        dialog.setVisible(true);
+                }
+            });
             
             add(new JLabel("Save store downloads to:"), "split");
             add(storePathTextField);
@@ -170,16 +203,52 @@ public class FilesOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            final String save = storePathTextField.getText();
+            if(!save.equals(currentSaveDirectory)) {
+                try {
+                    File saveDir = new File(save);
+                    if(!saveDir.isDirectory()) {
+                        if (!saveDir.mkdirs())
+                            throw new IOException();
+                    }
+                    SharingSettings.setSaveLWSDirectory(saveDir);
+                    currentSaveDirectory = save;
+                } catch(IOException ioe) {
+                    //TODO: error message
+//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
+                    storePathTextField.setText(currentSaveDirectory);
+                } catch(NullPointerException npe) {
+                    //TODO: error message
+//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
+                    storePathTextField.setText(currentSaveDirectory);
+                }
+            }
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return !currentSaveDirectory.equals(storePathTextField.getText());
         }
 
         @Override
         void initOptions() {
-
+            try {
+                File file = SharingSettings.getSaveLWSDirectory();
+                if (file == null) {
+                    throw (new FileNotFoundException());
+                }
+                currentSaveDirectory = file.getCanonicalPath();
+                storePathTextField.setText(file.getCanonicalPath());
+            } catch (FileNotFoundException fnfe) {
+                // simply use the empty string if we could not get the save
+                // directory.
+                //TODO: change this to a real setting?? 
+                currentSaveDirectory = "";
+                storePathTextField.setText("");
+            } catch (IOException ioe) {
+                currentSaveDirectory = "";
+                storePathTextField.setText("");
+            }
         }
     }
     

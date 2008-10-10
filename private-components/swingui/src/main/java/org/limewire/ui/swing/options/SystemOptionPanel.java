@@ -7,8 +7,10 @@ import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,20 +59,22 @@ public class SystemOptionPanel extends OptionPanel {
 
     @Override
     void applyOptions() {
-        // TODO Auto-generated method stub
-        
+        getFileAssociationPanel().applyOptions();
+        getStartupShutdownPanel().applyOptions();
+        getUpdatesBugsPanel().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
-        // TODO Auto-generated method stub
-        return false;
+        return getFileAssociationPanel().hasChanged() || getStartupShutdownPanel().hasChanged()
+                || getUpdatesBugsPanel().hasChanged();
     }
 
     @Override
     void initOptions() {
-        // TODO Auto-generated method stub
-        
+        getFileAssociationPanel().initOptions();
+        getStartupShutdownPanel().initOptions();
+        getUpdatesBugsPanel().initOptions();
     }
     
     private class FileAssociationPanel extends OptionPanel {
@@ -83,8 +87,11 @@ public class SystemOptionPanel extends OptionPanel {
             super(I18n.tr("File Associations"));
             
             magnetCheckBox = new JCheckBox();
+            magnetCheckBox.setContentAreaFilled(false);
             torrentCheckBox = new JCheckBox();
+            torrentCheckBox.setContentAreaFilled(false);
             warnCheckBox = new JCheckBox();
+            warnCheckBox.setContentAreaFilled(false);
             
             add(magnetCheckBox);
             add(new JLabel(".magnet files"), "wrap");
@@ -115,6 +122,8 @@ public class SystemOptionPanel extends OptionPanel {
     /**
      * When I press X is not shown for OSX, OSX automatically minimizes on an X
      * If Run at startup || minimize to try is selected, set System tray icon to true
+     * 
+     * TODO: revisit this and check
      */
     private class StartupShutdownPanel extends OptionPanel {
 
@@ -123,41 +132,81 @@ public class SystemOptionPanel extends OptionPanel {
         private JRadioButton exitButton;
         private ButtonGroup buttonGroup;
         
+        private boolean displaySystemTrayIcon = false;
+        private boolean shutdownAfterTransfer = false;
+        
         public StartupShutdownPanel() {
             super(I18n.tr("Startup and Shutdown"));
             
             runAtStartupCheckBox = new JCheckBox();
+            runAtStartupCheckBox.setContentAreaFilled(false);
             minimizeButton = new JRadioButton();
+            minimizeButton.setContentAreaFilled(false);
             exitButton = new JRadioButton();
+            exitButton.setContentAreaFilled(false);
             
             buttonGroup = new ButtonGroup();
-            buttonGroup.add(runAtStartupCheckBox);
+            buttonGroup.add(minimizeButton);
             buttonGroup.add(exitButton);
             
             add(runAtStartupCheckBox, "split");
             add(new JLabel("Run LimeWire on System Startup"), "wrap");
 
-            add(new JLabel("When I press X:"), "wrap");
-            
-            add(minimizeButton, "gapleft 25, split");
-            add(new JLabel("Minimize to system tray"), "gapafter 20");
-            add(exitButton);
-            add(new JLabel("Exit program"));
+            if(!OSUtils.isAnyMac()) {
+                add(new JLabel("When I press X:"), "wrap");
+                
+                add(minimizeButton, "gapleft 25, split");
+                add(new JLabel("Minimize to system tray"), "gapafter 20");
+                add(exitButton);
+                add(new JLabel("Exit program"));
+            }
         }
         
         @Override
         void applyOptions() {
-            //TODO: fix this
+            StartupSettings.RUN_ON_STARTUP.setValue(runAtStartupCheckBox.isSelected());
+            ApplicationSettings.MINIMIZE_TO_TRAY.setValue(minimizeButton.isSelected());
+            
+            // if minimize or run at startup is selected, system tray icon must be shown
+            if((minimizeButton.isSelected() || runAtStartupCheckBox.isSelected()) && OSUtils.supportsTray()) {
+                ApplicationSettings.DISPLAY_TRAY_ICON.setValue(true);
+            } else {
+                ApplicationSettings.DISPLAY_TRAY_ICON.setValue(false);
+            }
+            ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.setValue(false);
         }
 
         @Override
         boolean hasChanged() {
-            return StartupSettings.RUN_ON_STARTUP.getValue() != runAtStartupCheckBox.isSelected();
+            return StartupSettings.RUN_ON_STARTUP.getValue() != runAtStartupCheckBox.isSelected() 
+                    || ApplicationSettings.MINIMIZE_TO_TRAY.getValue() != minimizeButton.isSelected()
+                    || isIconDisplayed() || shutdownAfterTransfer != false;
+        }
+        
+        private boolean isIconDisplayed() {
+            if((runAtStartupCheckBox.isSelected() || minimizeButton.isSelected()) && OSUtils.supportsTray())
+                return displaySystemTrayIcon != true;
+            else 
+                return displaySystemTrayIcon != false;
         }
 
         @Override
         void initOptions() {
+            //TODO: should shutdown after transfer be set to false here??
+            shutdownAfterTransfer = ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.getValue();
+            if(shutdownAfterTransfer) {
+                ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.setValue(false);
+                ApplicationSettings.MINIMIZE_TO_TRAY.setValue(true);
+                shutdownAfterTransfer = false;
+            }
+
             runAtStartupCheckBox.setSelected(StartupSettings.RUN_ON_STARTUP.getValue());
+            minimizeButton.setSelected(ApplicationSettings.MINIMIZE_TO_TRAY.getValue());
+            exitButton.setSelected(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue());
+            
+            //load these to ensure that we override them correctly since they aren't 
+            //  directly accessable in 5.0
+            displaySystemTrayIcon = ApplicationSettings.DISPLAY_TRAY_ICON.getValue();
         }
     }
     
@@ -171,8 +220,11 @@ public class SystemOptionPanel extends OptionPanel {
             super(I18n.tr("Updates and Bugs"));
             
             betaCheckBox = new JCheckBox();
+            betaCheckBox.setContentAreaFilled(false);
             bugCheckBox = new JCheckBox();
+            bugCheckBox.setContentAreaFilled(false);
             bugMessageCheckBox = new JCheckBox();
+            bugMessageCheckBox.setContentAreaFilled(false);
             
             add(betaCheckBox, "split");
             add(new JLabel("Tell me about Beta updates"), "wrap");

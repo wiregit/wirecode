@@ -1,5 +1,10 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.Color;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -9,6 +14,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.iTunesSettings;
+import org.limewire.ui.swing.options.actions.FileChooserDirectoryListener;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
@@ -118,6 +124,8 @@ public class DownloadOptionPanel extends OptionPanel {
     
     private class SavingPanel extends OptionPanel {
 
+        private String currentSaveDirectory;
+        
         private JCheckBox clearDownloadsCheckBox;
         private JTextField downloadSaveTextField;
         private JButton browseSaveLocationButton;
@@ -128,33 +136,76 @@ public class DownloadOptionPanel extends OptionPanel {
             
             clearDownloadsCheckBox = new JCheckBox();
             downloadSaveTextField = new JTextField();
-            browseSaveLocationButton = new JButton(I18n.tr("Browse"));
+            downloadSaveTextField.setEditable(false);
+            downloadSaveTextField.setBackground(Color.WHITE);
+            browseSaveLocationButton = new JButton(new FileChooserDirectoryListener(this.getRootPane(), downloadSaveTextField));
             autoRenameDuplicateFilesCheckBox = new JCheckBox();
             
-            add(clearDownloadsCheckBox, "split");
+            add(clearDownloadsCheckBox, "split 2");
             add(new JLabel("Clear downloads from list when finished"), "wrap");
             
-            add(new JLabel("Save downloads to:"), "split");
-            add(downloadSaveTextField);
+            add(new JLabel("Save downloads to:"), "split 3");
+            add(downloadSaveTextField, "span, growx, push");
             add(browseSaveLocationButton, "wrap");
             
-            add(autoRenameDuplicateFilesCheckBox, "gapleft 25, split");
+            add(autoRenameDuplicateFilesCheckBox, "gapleft 25, split 2");
             add(new JLabel("If the file already exists, download it with a different name"));
         }
         
         @Override
         void applyOptions() {
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
+            final String save = downloadSaveTextField.getText();
+            if(!save.equals(currentSaveDirectory)) {
+                try {
+                    File saveDir = new File(save);
+                    if(!saveDir.isDirectory()) {
+                        if (!saveDir.mkdirs())
+                            throw new IOException();
+                    }
+                    SharingSettings.setSaveDirectory(saveDir);
+                    currentSaveDirectory = save;
+                } catch(IOException ioe) {
+                    //TODO: error message
+//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
+                    downloadSaveTextField.setText(currentSaveDirectory);
+                } catch(NullPointerException npe) {
+                    //TODO: error message
+//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
+                    downloadSaveTextField.setText(currentSaveDirectory);
+                }
+            }
         }
 
         @Override
         boolean hasChanged() {
-            return SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected();
+            return SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected()
+                    || !currentSaveDirectory.equals(downloadSaveTextField.getText());
         }
 
         @Override
         void initOptions() {
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
+
+            //TODO: handle error dialog when download already exists
+            
+            try {
+                File file = SharingSettings.getSaveDirectory();
+                if (file == null) {
+                    throw (new FileNotFoundException());
+                }
+                currentSaveDirectory = file.getCanonicalPath();
+                downloadSaveTextField.setText(file.getCanonicalPath());
+            } catch (FileNotFoundException fnfe) {
+                // simply use the empty string if we could not get the save
+                // directory.
+                //TODO: change this to a real setting?? 
+                currentSaveDirectory = "";
+                downloadSaveTextField.setText("");
+            } catch (IOException ioe) {
+                currentSaveDirectory = "";
+                downloadSaveTextField.setText("");
+            }
         }
     }
     

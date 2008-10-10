@@ -11,10 +11,10 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.SpeedConstants;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 

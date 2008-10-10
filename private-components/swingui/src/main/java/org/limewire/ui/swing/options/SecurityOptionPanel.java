@@ -1,12 +1,18 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.ContentSettings;
+import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -18,12 +24,16 @@ import com.google.inject.Singleton;
 @Singleton
 public class SecurityOptionPanel extends OptionPanel {
 
+    private AppFrame appFrame;
+    
     private WarningMessagesPanel warningMessagesPanel;
     private UnsafeTypesPanel unsafeTypesPanel;
     private FilteringPanel filteringPanel;
     
     @Inject
-    public SecurityOptionPanel() {
+    public SecurityOptionPanel(AppFrame appFrame) {
+        this.appFrame = appFrame;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getWarningMessagesPanel(), "pushx, growx");
@@ -100,12 +110,29 @@ public class SecurityOptionPanel extends OptionPanel {
     
     private class UnsafeTypesPanel extends OptionPanel {
 
+        private JDialog dialog;
+        private UnsafeTypeOptionPanel unsafeOptionPanel;
         private JButton configureButton;
         
         public UnsafeTypesPanel() {
             super(I18n.tr("Unsafe types"));
             
             configureButton = new JButton(I18n.tr("Configure"));
+            configureButton.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(dialog == null) {
+                        unsafeOptionPanel = new UnsafeTypeOptionPanel(null);
+                        unsafeOptionPanel.setPreferredSize(new Dimension(550, 160));
+                        dialog = new JDialog(appFrame.getMainFrame(), I18n.tr("Unsafe types"),true);
+                        dialog.add(unsafeOptionPanel);
+                        dialog.setResizable(false);
+                        dialog.pack();
+                    } 
+                    if(!dialog.isVisible())
+                        dialog.setVisible(true);
+                }
+            });
             
             add(new JLabel("For your safety, LimeWire disables you from:"),"wrap");
             add(new JLabel("-Searching for and sharing Programs with anyone"), "gapleft 25, wrap");

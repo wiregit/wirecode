@@ -6,9 +6,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.SpeedConstants;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SpeedConstants;
 
 public class DownloadQueueTest extends DownloadTestCase {
     private static final Log LOG = LogFactory.getLog(DownloadQueueTest.class);

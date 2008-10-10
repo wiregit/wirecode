@@ -27,7 +27,7 @@ public class LibraryManagerOptionPanel extends JPanel {
     private JButton cancelButton;
     
     public LibraryManagerOptionPanel() {
-        setLayout(new MigLayout("", "[300!][]", ""));
+        setLayout(new MigLayout("debug", "[300!][grow]", ""));
         
         createComponents();
         
