@@ -34,6 +34,8 @@ public class CategoryIconLabel extends JLabel {
     @Resource
     private Icon smallProgramIconOSX;
     @Resource
+    private Icon smallProgramIconLinux;
+    @Resource
     private Icon smallOtherIcon;
     
     @Resource
@@ -48,6 +50,8 @@ public class CategoryIconLabel extends JLabel {
     private Icon largeProgramIconWinXP;
     @Resource
     private Icon largeProgramIconOSX;
+    @Resource
+    private Icon largeProgramIconLinux;
     @Resource
     private Icon largeDocumentIcon;
     @Resource
@@ -67,9 +71,12 @@ public class CategoryIconLabel extends JLabel {
                 programIcon = largeProgramIconOSX;
             } else if (OSUtils.isWindowsVista()) {
                 programIcon = largeProgramIconWinVista;
-            } else {
+            } else if (OSUtils.isWindowsXP()) {
                 programIcon = largeProgramIconWinXP;
+            } else {
+                programIcon = largeProgramIconLinux;
             }
+            
              
         } else {
             audioIcon = smallAudioIcon;
@@ -82,8 +89,10 @@ public class CategoryIconLabel extends JLabel {
                 programIcon = smallProgramIconOSX;
             } else if (OSUtils.isWindowsVista()) {
                 programIcon = smallProgramIconWinVista;
-            } else {
+            } else if (OSUtils.isWindowsXP()) {
                 programIcon = smallProgramIconWinXP;
+            } else {
+                programIcon = smallProgramIconLinux;
             }
         }
     }
