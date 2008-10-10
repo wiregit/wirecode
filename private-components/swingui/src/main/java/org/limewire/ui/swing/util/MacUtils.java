@@ -3,8 +3,6 @@ package org.limewire.ui.swing.util;
 import java.awt.FileDialog;
 import java.awt.Frame;
 
-import net.roydesign.ui.FolderDialog;
-
 
 /**
  * A collection of OSX GUI utilities.
@@ -24,6 +22,7 @@ public final class MacUtils {
         // This class takes advantage of a little know trick in 
         // Apple's VMs to show a real folder dialog, with a 
         // Choose button and all.
-        return new FolderDialog(frame, "");
+//        return new FolderDialog(frame, "");
+        return new FileDialog(frame, "");
     }
 }
