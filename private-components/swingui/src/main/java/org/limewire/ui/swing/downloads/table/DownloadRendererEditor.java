@@ -145,12 +145,9 @@ public class DownloadRendererEditor extends JPanel implements
         fullStatusLabel.setForeground(statusLabelColour);
         fullStatusLabel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         fullStatusLabel.setIconTextGap(0);
-        //fullStatusLabel.setVerticalTextPosition(JLabel.BOTTOM);
         fullStatusLabel.setIcon(downloadIcon);
         
         textComponents.add(fullStatusLabel);
-        
-        
 
         fullProgressBar = new LimeProgressBar();
         Dimension size = new Dimension(PROGRESS_BAR_WIDTH, 16);
@@ -160,7 +157,6 @@ public class DownloadRendererEditor extends JPanel implements
         fullProgressBar.setBorder(BorderFactory.
                 createLineBorder(progressBarBorderColour));
         
-
         fullTimeLabel = new JLabel();
         fullTimeLabel.setFont(STATUS_FONT_PLAIN);
         
