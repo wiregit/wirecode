@@ -104,7 +104,6 @@ public class MockSearch implements Search {
         // Create a search result that will be categorized as "Documents".
         msr = new MockSearchResult();
         name = "Lab19";
-        msr.setDescription(name);
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(4567L);
@@ -124,7 +123,6 @@ public class MockSearch implements Search {
 
         msr = new MockSearchResult();
         name = "Lab19";
-        msr.setDescription(name);
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(4567L);
@@ -142,7 +140,6 @@ public class MockSearch implements Search {
 
         msr = new MockSearchResult();
         name = "Lab19";
-        msr.setDescription(name);
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(4567L);
@@ -161,7 +158,6 @@ public class MockSearch implements Search {
         // Create a search result that will be categorized as "Other".
         msr = new MockSearchResult();
         name = "When Everyone has a Sweet Party and you're invited!";
-        msr.setDescription(name);
         msr.setExtension("tmp");
         msr.setResultType(Category.OTHER);
         msr.setSize(1L);
@@ -180,7 +176,6 @@ public class MockSearch implements Search {
         // Create a search result that will be categorized as "Music".
         msr = new MockSearchResult();
         name = "The Night Won't Last Long";
-        msr.setDescription(name);
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
         msr.setSize(1234L);
@@ -204,7 +199,6 @@ public class MockSearch implements Search {
 
         msr = new MockSearchResult();
         name = "The Night Won't Last Long";
-        msr.setDescription(name);
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
         msr.setSize(1234L);
@@ -228,7 +222,6 @@ public class MockSearch implements Search {
 
         msr = new MockSearchResult();
         name = "The Night Won't Last Long";
-        msr.setDescription(name);
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
         msr.setSize(1234L);
@@ -254,7 +247,6 @@ public class MockSearch implements Search {
 
         msr = new MockSearchResult();
         name = "The Night Won't Last Long";
-        msr.setDescription(name);
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
         msr.setSize(1234L);
@@ -279,7 +271,6 @@ public class MockSearch implements Search {
         // Create a search result that will be categorized as "Video".
         msr = new MockSearchResult();
         name = "Monkey on Skateboard";
-        msr.setDescription(name);
         msr.setExtension("ogm");
         msr.setResultType(Category.VIDEO);
         msr.setSize(9876L);
@@ -306,7 +297,6 @@ public class MockSearch implements Search {
         // Create a search result that will be categorized as "Programs".
         msr = new MockSearchResult();
         name = "SuperSpreadsheet";
-        msr.setDescription(name);
         msr.setExtension("exe");
         msr.setResultType(Category.PROGRAM);
         msr.setSize(8765L);
@@ -326,7 +316,6 @@ public class MockSearch implements Search {
         // Create a search result that will be categorized as "Images".
         msr = new MockSearchResult();
         name = "EightGoldMedals";
-        msr.setDescription(name);
         msr.setExtension("png");
         msr.setResultType(Category.IMAGE);
         msr.setSize(5678L);

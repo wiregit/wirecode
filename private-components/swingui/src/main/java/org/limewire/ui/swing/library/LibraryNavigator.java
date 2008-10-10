@@ -233,6 +233,7 @@ public class LibraryNavigator extends JXPanel {
                 break;
             }
         }
+        invalidate();
         repaint(); // Must forcibly paint, otherwise might not redraw w/o panel.
     }
     

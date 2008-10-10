@@ -456,12 +456,8 @@ public class SortAndFilterPanel extends JXPanel {
         @Override
         public void getFilterStrings(
                 List<String> list, VisualSearchResult vsr) {
-            list.add(vsr.getDescription());
             list.add(vsr.getFileExtension());
             list.add(String.valueOf(vsr.getSize()));
-            
-            //add(list, vsr.getMediaType());
-
             Map<SearchResult.PropertyKey, Object> props = vsr.getProperties();
             for (SearchResult.PropertyKey key : props.keySet()) {
                 String value = vsr.getPropertyString(key);

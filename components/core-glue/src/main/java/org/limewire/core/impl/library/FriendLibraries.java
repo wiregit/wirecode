@@ -112,20 +112,18 @@ public class FriendLibraries {
 
         private void addToIndex(RemoteFileItem newFile, String word) {
             LOG.debugf("\t {0}", word);
-            if(word != null) {
-                ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-                library.getLock().writeLock().lock();
-                try {
-                    filesForWord = library.get(word);
-                    if (filesForWord == null) {
-                        filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-                        library.add(word, filesForWord);
-                    }
-                } finally {
-                    library.getLock().writeLock().unlock();
+            ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
+            library.getLock().writeLock().lock();
+            try {
+                filesForWord = library.get(word);
+                if (filesForWord == null) {
+                    filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                    library.add(word, filesForWord);
                 }
-                filesForWord.add(newFile);
+            } finally {
+                library.getLock().writeLock().unlock();
             }
+            filesForWord.add(newFile);
         }
     }
 

@@ -13,9 +13,11 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
+import org.limewire.util.I18NConvert;
 import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
@@ -28,15 +30,56 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
 public class RemoteFileDescAdapter implements SearchResult {
 
     private final RemoteFileDesc rfd;
-
     private final List<IpPort> locs;
-
-    private FriendPresence friendPresence;
+    private final Map<PropertyKey, Object> properties;    
+    private final Category category;    
+    private final String extension;
+    
+    private volatile FriendPresence friendPresence;    
 
     public RemoteFileDescAdapter(RemoteFileDesc rfd, QueryReply queryReply,
             Set<? extends IpPort> locs) {
         this.rfd = rfd;
         this.locs = new ArrayList<IpPort>(locs);
+        
+        properties = new HashMap<PropertyKey, Object>();
+        LimeXMLDocument doc = rfd.getXMLDocument();
+
+        set(properties, PropertyKey.NAME, FileUtils.getFilenameNoExtension(rfd.getFileName()));
+        set(properties, PropertyKey.DATE_CREATED, rfd.getCreationTime());
+
+        if (doc != null) {
+            if (LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI())) {
+                set(properties, PropertyKey.ALBUM_TITLE, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
+                set(properties, PropertyKey.ARTIST_NAME, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
+                set(properties, PropertyKey.BITRATE, doc.getValue(LimeXMLNames.AUDIO_BITRATE));
+                set(properties, PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.AUDIO_COMMENTS));
+                set(properties, PropertyKey.GENRE, doc.getValue(LimeXMLNames.AUDIO_GENRE));
+                set(properties, PropertyKey.LENGTH, doc.getValue(LimeXMLNames.AUDIO_SECONDS));
+                set(properties, PropertyKey.TRACK_NUMBER, doc.getValue(LimeXMLNames.AUDIO_TRACK));
+                set(properties, PropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
+            } else if (LimeXMLNames.VIDEO_SCHEMA.equals(doc.getSchemaURI())) {
+                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
+                set(properties, PropertyKey.BITRATE, doc.getValue(LimeXMLNames.VIDEO_BITRATE));
+                set(properties, PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.VIDEO_COMMENTS));
+                set(properties, PropertyKey.LENGTH, doc.getValue(LimeXMLNames.VIDEO_LENGTH));
+                set(properties, PropertyKey.HEIGHT, doc.getValue(LimeXMLNames.VIDEO_HEIGHT));
+                set(properties, PropertyKey.WIDTH, doc.getValue(LimeXMLNames.VIDEO_WIDTH));
+                set(properties, PropertyKey.YEAR, doc.getValue(LimeXMLNames.VIDEO_YEAR));
+            } else if (LimeXMLNames.APPLICATION_SCHEMA.equals(doc.getSchemaURI())) {
+                set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.APPLICATION_NAME));
+                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.APPLICATION_PUBLISHER));
+            } else if (LimeXMLNames.DOCUMENT_SCHEMA.equals(doc.getSchemaURI())) {
+                set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.DOCUMENT_TITLE));
+                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.DOCUMENT_AUTHOR));
+            } else if (LimeXMLNames.IMAGE_SCHEMA.equals(doc.getSchemaURI())) {
+                set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.IMAGE_TITLE));
+                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.IMAGE_ARTIST));
+            }
+        }
+        
+        extension = FileUtils.getFileExtension(rfd.getFileName());
+        category = MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(extension));
     }
 
     public List<IpPort> getAlts() {
@@ -44,54 +87,23 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
 
     @Override
-    public String getDescription() {
-        return rfd.toString();
-    }
-
-    @Override
     public String getFileExtension() {
-        return FileUtils.getFileExtension(rfd.getFileName());
+        return extension;
+    }
+    
+    private void set(Map<PropertyKey, Object> map, PropertyKey property, Object value) {
+        // Insert nothing if value is null|empty.
+        if(value != null && !value.toString().isEmpty()) {
+            if(value instanceof String) {
+                value = I18NConvert.instance().compose((String)value);
+            }
+            map.put(property, value);
+        }
     }
 
     @Override
     public Map<PropertyKey, Object> getProperties() {
-        Map<PropertyKey, Object> property = new HashMap<PropertyKey, Object>();
-        LimeXMLDocument doc = rfd.getXMLDocument();
-
-        property.put(PropertyKey.NAME, rfd.getFileName());
-        property.put(PropertyKey.DATE_CREATED, rfd.getCreationTime());
-
-        if (doc != null) {
-            if (LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI())) {
-                property.put(PropertyKey.ALBUM_TITLE, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
-                property.put(PropertyKey.ARTIST_NAME, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
-                property.put(PropertyKey.BITRATE, doc.getValue(LimeXMLNames.AUDIO_BITRATE));
-                property.put(PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.AUDIO_COMMENTS));
-                property.put(PropertyKey.GENRE, doc.getValue(LimeXMLNames.AUDIO_GENRE));
-                property.put(PropertyKey.LENGTH, doc.getValue(LimeXMLNames.AUDIO_SECONDS));
-                property.put(PropertyKey.TRACK_NUMBER, doc.getValue(LimeXMLNames.AUDIO_TRACK));
-                property.put(PropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
-            } else if (LimeXMLNames.VIDEO_SCHEMA.equals(doc.getSchemaURI())) {
-                property.put(PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
-                property.put(PropertyKey.BITRATE, doc.getValue(LimeXMLNames.VIDEO_BITRATE));
-                property.put(PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.VIDEO_COMMENTS));
-                property.put(PropertyKey.LENGTH, doc.getValue(LimeXMLNames.VIDEO_LENGTH));
-                property.put(PropertyKey.HEIGHT, doc.getValue(LimeXMLNames.VIDEO_HEIGHT));
-                property.put(PropertyKey.WIDTH, doc.getValue(LimeXMLNames.VIDEO_WIDTH));
-                property.put(PropertyKey.YEAR, doc.getValue(LimeXMLNames.VIDEO_YEAR));
-            } else if (LimeXMLNames.APPLICATION_SCHEMA.equals(doc.getSchemaURI())) {
-                property.put(PropertyKey.NAME, doc.getValue(LimeXMLNames.APPLICATION));
-                property.put(PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.APPLICATION_PUBLISHER));
-            } else if (LimeXMLNames.DOCUMENT_SCHEMA.equals(doc.getSchemaURI())) {
-                property.put(PropertyKey.NAME, doc.getValue(LimeXMLNames.DOCUMENT));
-                property.put(PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.DOCUMENT_AUTHOR));
-            } else if (LimeXMLNames.IMAGE_SCHEMA.equals(doc.getSchemaURI())) {
-                property.put(PropertyKey.NAME, doc.getValue(LimeXMLNames.IMAGE));
-                property.put(PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.IMAGE_ARTIST));
-            }
-        }
-
-        return property;
+        return properties;
     }
 
     @Override
@@ -101,7 +113,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
     @Override
     public Category getCategory() {
-        return MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(getFileExtension()));
+        return category;
     }
 
     public RemoteFileDesc getRfd() {
@@ -153,9 +165,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
     public void setFriendPresence(FriendPresence friendPresence) {
         this.friendPresence = friendPresence;
-    }
-    
-    
+    }    
     
     private final class RfdRemoteHost implements RemoteHost {
         @Override
@@ -304,7 +314,11 @@ public class RemoteFileDescAdapter implements SearchResult {
                 @Override
                 public Address getPresenceAddress() {
                     IpPort ipPort = locs.get(index - 1);
-                    return new ConnectableImpl(ipPort, false);
+                    if(ipPort instanceof Connectable) {
+                        return ((Connectable)ipPort);
+                    } else {
+                        return new ConnectableImpl(ipPort, false);
+                    }
                 }
 
                 @Override

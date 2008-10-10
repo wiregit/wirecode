@@ -66,11 +66,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     }
 
     @Override
-    public String getDescription() {
-        return coreResults.get(0).getDescription();
-    }
-
-    @Override
     public String getFileExtension() {
         return coreResults.get(0).getFileExtension();
     }

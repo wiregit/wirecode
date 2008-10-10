@@ -13,15 +13,15 @@ import org.limewire.core.api.search.SearchResult.PropertyKey;
 
 public class MockVisualSearchResult implements VisualSearchResult {
     private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();
-    private String description;
+    private String name;
     private VisualSearchResult similarityParent;
     
-    public MockVisualSearchResult(String description) {
-        this.description = description;
+    public MockVisualSearchResult(String name) {
+        this.name = name;
     }
 
-    public MockVisualSearchResult(String description, VisualSearchResult parent) {
-        this(description);
+    public MockVisualSearchResult(String name, VisualSearchResult parent) {
+        this(name);
         this.similarityParent = parent;
         parent.getSimilarResults().add(this);
     }
@@ -36,11 +36,6 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public List<SearchResult> getCoreSearchResults() {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
     }
 
     @Override
@@ -63,8 +58,11 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public Object getProperty(PropertyKey key) {
-        // TODO Auto-generated method stub
-        return null;
+        if(key == PropertyKey.NAME) {
+            return name; 
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -154,7 +152,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public String toString() {
-        return description;
+        return name;
     }
 
     public void removeSimilarSearchResult(VisualSearchResult result) {

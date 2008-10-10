@@ -34,8 +34,6 @@ public interface SearchResult {
         WIDTH,
         YEAR
     }
-
-    String getDescription();
     
     String getFileExtension();
     

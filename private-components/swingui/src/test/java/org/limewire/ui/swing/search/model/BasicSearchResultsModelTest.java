@@ -669,11 +669,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         }
 
         @Override
-        public String getDescription() {
-            return null;
-        }
-
-        @Override
         public String getFileExtension() {
             return null;
         }

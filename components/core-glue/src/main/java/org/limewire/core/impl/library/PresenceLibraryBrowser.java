@@ -83,7 +83,9 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                     remoteFileDescAdapter.setFriendPresence(friendPresence);
                 }
                 RemoteFileItem file = new CoreRemoteFileItem(remoteFileDescAdapter);
-                presenceLibrary.addFile(file);
+                if(file.getName() != null) {
+                    presenceLibrary.addFile(file);
+                }
             }
             @Override
             public void browseFinished(boolean success) {

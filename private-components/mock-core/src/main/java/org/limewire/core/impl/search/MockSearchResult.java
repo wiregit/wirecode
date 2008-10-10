@@ -20,7 +20,6 @@ public class MockSearchResult implements Cloneable, SearchResult {
     private Map<PropertyKey, Object> properties =
         new HashMap<PropertyKey, Object>();
 
-    private String description;
     private String extension;
     private String urn;
     private Category resultType;
@@ -47,11 +46,6 @@ public class MockSearchResult implements Cloneable, SearchResult {
         }
 
         return copy;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
     }
 
     @Override
@@ -87,10 +81,6 @@ public class MockSearchResult implements Cloneable, SearchResult {
     @Override
     public String getUrn() {
         return urn;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public void setExtension(String extension) {

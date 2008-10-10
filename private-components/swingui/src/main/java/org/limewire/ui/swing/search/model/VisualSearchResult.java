@@ -16,8 +16,6 @@ public interface VisualSearchResult {
     
     List<SearchResult> getCoreSearchResults();
 
-    String getDescription();
-
     BasicDownloadState getDownloadState();
 
     String getFileExtension();

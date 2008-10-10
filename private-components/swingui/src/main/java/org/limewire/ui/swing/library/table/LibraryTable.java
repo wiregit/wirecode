@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library.table;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;

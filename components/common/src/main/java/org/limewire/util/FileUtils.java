@@ -189,6 +189,18 @@ public class FileUtils {
     }
     
     /**
+     * Returns the filename without an extension.
+     */
+    public static String getFilenameNoExtension(String fullname) {
+        int i = fullname.lastIndexOf(".");
+        if(i<0) {
+            return fullname;
+        } else {
+            return fullname.substring(0, i);
+        }
+    }
+    
+    /**
      * Utility method that returns the file extension of the given file.
      * 
      * @param f the <tt>File</tt> instance from which the extension 
