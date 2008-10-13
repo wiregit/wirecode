@@ -27,7 +27,6 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
-import org.limewire.ui.swing.downloads.table.FancyDownloadTable;
 import org.limewire.ui.swing.table.MouseableTable.MenuHighlightPredicate;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.I18n;
@@ -128,7 +127,7 @@ public class CategoryDownloadPanel extends JPanel {
 		collapsePane.setLayout(new BorderLayout());
 		EventList<DownloadItem> filterList = GlazedListsFactory.filterList(list, new DownloadStateMatcher(states));
 		
-		final DownloadTable table = new FancyDownloadTable(filterList);
+		final DownloadTable table = new DownloadTable(filterList);
 		tables.add(table);
 		table.addMouseListener(new MultiTableMouseListener());
 	

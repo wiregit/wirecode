@@ -20,6 +20,7 @@ public class DownloadTable extends MouseableTable {
     private DownloadTableModel model;
 
 	public DownloadTable(EventList<DownloadItem> downloadItems) {		
+	 
 		model = new DownloadTableModel(downloadItems);
 		setModel(model);
 
@@ -46,6 +47,18 @@ public class DownloadTable extends MouseableTable {
         };
 
         setDoubleClickHandler(clickHandler);
+        
+        
+        setShowGrid(false, false);
+        
+        DownloadTableEditor editor = new DownloadTableEditor();
+        editor.initialiseEditor(downloadItems);
+        getColumnModel().getColumn(0).setCellEditor(editor);
+        
+        DownloadTableRenderer renderer = new DownloadTableRenderer(editor.getEditorListener());     
+        getColumnModel().getColumn(0).setCellRenderer(renderer);
+            
+        setRowHeight(56);
     }
 	
 	public DownloadItem getDownloadItem(int row){

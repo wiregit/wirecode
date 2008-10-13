@@ -1,20 +1,15 @@
 package org.limewire.ui.swing.downloads.table;
 
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -23,12 +18,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.border.Border;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
@@ -37,29 +27,10 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.CommonUtils;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
+public class DownloadTableCell extends JPanel {
 
-/**
- * Renderer and editor for DownloadTables. Editors must be initialised with 
- * <code>editor.initializeEditor(downloadItems)</code>
- */
-public class DownloadRendererEditor extends JPanel implements
-		TableCellRenderer, TableCellEditor {
-
-	
-	//The item being edited by the editor
-	private DownloadItem editItem = null;
-    
-    private DownloadActionHandler actionHandler;
-		
-    
-    private JPanel mainFrame;
-    
     private CardLayout statusViewLayout;
     private final static String FULL_LAYOUT = "Full download display";
     private JPanel fullPanel;
@@ -73,16 +44,13 @@ public class DownloadRendererEditor extends JPanel implements
     private JLabel minStatusLabel;
     private JXHyperlink minLinkButton;
     
-	private DownloadButtonPanel fullButtonPanel;
-	private CategoryIconLabel fullIconLabel;
-	private JLabel fullTitleLabel;
-	private JLabel fullStatusLabel;
-	private LimeProgressBar fullProgressBar;
+    private DownloadButtonPanel fullButtonPanel;
+    private CategoryIconLabel fullIconLabel;
+    private JLabel fullTitleLabel;
+    private JLabel fullStatusLabel;
+    private LimeProgressBar fullProgressBar;
     private JLabel fullTimeLabel;
-	
-	private DownloadEditorListener editorListener;
-    private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
-
+   
     @Resource
     private Icon warningIcon;
     
@@ -99,18 +67,47 @@ public class DownloadRendererEditor extends JPanel implements
     private Color linkColour          = new Color(0x2b,0x5b,0xaa);
     private Color progressBarBorderColour = new Color(0x8a,0x8a,0x8a);
     
-    
+    private ActionListener editorListener;
     
     private static final Font STATUS_FONT_PLAIN = new Font("Arial", Font.PLAIN, 10);
     private static final Font STATUS_FONT_BOLD = new Font("Arial", Font.BOLD, 10);
     
     private List<JComponent> textComponents = new ArrayList<JComponent>();
-
     
+    
+    public DownloadTableCell(ActionListener editorListener) {
+        GuiUtils.assignResources(this);
+
+        this.editorListener = editorListener;
+        
+        initComponents();
+              
+    }   
+    
+    public void update(DownloadItem item) {
+        updateComponent(this, item);
+    }
     
     private void initComponents() {
+        
+        statusViewLayout = new CardLayout();
+        this.setLayout(statusViewLayout);
+        
+        fullPanel = new JPanel(new GridBagLayout());
+        minPanel  = new JPanel(new GridBagLayout());
+        
+        fullPanel.setOpaque(false);
+        minPanel.setOpaque(false);
 
-        editorListener = new DownloadEditorListener();
+        Border blankBorder = BorderFactory.createEmptyBorder();
+        fullPanel.setBorder(blankBorder);
+        minPanel.setBorder(blankBorder);
+        this.setBorder(blankBorder);
+        
+        this.add(fullPanel, FULL_LAYOUT);
+        this.add( minPanel, MIN_LAYOUT);
+        this.statusViewLayout.show(this, FULL_LAYOUT);
+        
         
         minIconLabel = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
         
@@ -162,6 +159,9 @@ public class DownloadRendererEditor extends JPanel implements
         
         fullButtonPanel = new DownloadButtonPanel(editorListener);
         fullButtonPanel.setOpaque(false);
+        
+        createFullView();
+        createMinView();
     }
     
     private void createMinView() {
@@ -291,122 +291,7 @@ public class DownloadRendererEditor extends JPanel implements
         fullPanel.add(fullTimeLabel, gbc);    
     }
     
-	/**
-	 * Create the panel
-	 */
-	public DownloadRendererEditor() {
-		GuiUtils.assignResources(this);
-
-		statusViewLayout = new CardLayout();
-		mainFrame = new JPanel(statusViewLayout);
-		
-		fullPanel = new JPanel(new GridBagLayout());
-		minPanel  = new JPanel(new GridBagLayout());
-		
-		fullPanel.setOpaque(false);
-	    minPanel.setOpaque(false);
-	    mainFrame.setOpaque(false);
-
-	    Border blankBorder = BorderFactory.createEmptyBorder();
-	    fullPanel.setBorder(blankBorder);
-        minPanel.setBorder(blankBorder);
-        mainFrame.setBorder(blankBorder);
-        this.setBorder(blankBorder);
-
-	    initComponents();
-	    createFullView();
-	    createMinView();
-        
-		this.setLayout(new BorderLayout());
-		
-		mainFrame.add(fullPanel, FULL_LAYOUT);
-	    mainFrame.add( minPanel, MIN_LAYOUT);
-	    this.statusViewLayout.show(mainFrame, FULL_LAYOUT);
-	        
-		
-	    this.add(this.mainFrame, BorderLayout.WEST);
-		
-	}	
-
-	 
-	@Override
-	public void setForeground(Color color){
-	    super.setForeground(color);
-	    for(Component component : getComponents()){
-            component.setForeground(color);
-        }
-	}
-	
-	@Override
-	public void addMouseListener(MouseListener listener){
-	    super.addMouseListener(listener);
-	    for(Component component : getComponents()){
-	        component.addMouseListener(listener);
-	    }	     
-	}
-	
-	@Override
-    public void removeMouseListener(MouseListener listener){
-        super.removeMouseListener(listener);
-        for(Component component : getComponents()){
-            component.removeMouseListener(listener);
-        } 
-    }
-
-	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value,
-			boolean isSelected, boolean hasFocus, int row, int column) {
-        return getCellComponent(table, value, isSelected, hasFocus, row, column);
-    }
-
-
-
-	@Override
-	public Component getTableCellEditorComponent(JTable table, Object value,
-			boolean isSel, int row, int col) {
-	    editItem = (DownloadItem) value;
-		return getCellComponent(table, value, isSel, true, row, col);
-	}
-
-	private DownloadRendererEditor getCellComponent(JTable table, Object value,
-			boolean isSelected, boolean hasFocus, int row, int column) {
-		DownloadItem item = (DownloadItem) value;
-		updateComponent(this, item);
-		return this;
-	}
-	
-
-    /**
-     * Binds editor to downloadItems so that the editor automatically updates
-     * when downloadItems changes and popup menus work.  This is required for Editors
-     */
-	public void initializeEditor(EventList<DownloadItem> downloadItems) {
-	    actionHandler = new DownloadActionHandler(downloadItems);
-        downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-                // TODO: only update if relevant downloadItem was updated
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isVisible()) {
-                            updateEditor();
-                        }
-                    }
-                });
-            }
-        });
-        
-      
-    }
-	
-	private void updateEditor(){
-	    if (editItem != null) {
-            updateComponent(this, editItem);
-        }
-	}
-	
-	private void updateMin(DownloadRendererEditor editor, DownloadItem item) {
+private void updateMin(DownloadTableCell editor, DownloadItem item) {
         
         editor.minTitleLabel.setText(item.getTitle());
         
@@ -443,11 +328,11 @@ public class DownloadRendererEditor extends JPanel implements
         updateButtonsMin(item);      
     }
     
-	
-	
-	private void updateFull(DownloadRendererEditor editor, DownloadItem item) {
-	    
-	    editor.fullIconLabel.setIcon(item.getCategory());
+    
+    
+    private void updateFull(DownloadTableCell editor, DownloadItem item) {
+        
+        editor.fullIconLabel.setIcon(item.getCategory());
         editor.fullTitleLabel.setText(item.getTitle());
         
         long totalSize = item.getTotalSize();
@@ -465,71 +350,9 @@ public class DownloadRendererEditor extends JPanel implements
          
         
         updateButtonsFull(item);      
-	}
-	
-	private void updateComponent(DownloadRendererEditor editor, DownloadItem item){
-	    if (item.getState() == DownloadState.DOWNLOADING) {
-	        editor.statusViewLayout.show(mainFrame, FULL_LAYOUT);
-	        updateFull(editor, item);
-	    } 
-	    else {
-	        editor.statusViewLayout.show(mainFrame, MIN_LAYOUT);
-	        updateMin(editor, item);
-	    }
-	}
+    }
+    
 
-
-    @Override
-	public final void addCellEditorListener(CellEditorListener lis) {
-		synchronized (listeners) {
-			if (!listeners.contains(lis))
-				listeners.add(lis);
-		}
-	}
-
-	@Override
-	public final void cancelCellEditing() {
-		synchronized (listeners) {
-			for (int i = 0, N = listeners.size(); i < N; i++) {
-				listeners.get(i).editingCanceled(new ChangeEvent(this));
-			}
-		}
-	}
-
-	@Override
-	public final Object getCellEditorValue() {
-		return null;
-	}
-
-	@Override
-	public boolean isCellEditable(EventObject e) {
-		return true;
-	}
-
-	@Override
-	public final void removeCellEditorListener(CellEditorListener lis) {
-		synchronized (listeners) {
-			if (listeners.contains(lis))
-				listeners.remove(lis);
-		}
-	}
-
-	@Override
-	public final boolean shouldSelectCell(EventObject e) {
-		return true;
-	}
-
-	@Override
-	public final boolean stopCellEditing() {
-		synchronized (listeners) {
-			for (int i = 0, N = listeners.size(); i < N; i++) {
-				listeners.get(i).editingStopped(new ChangeEvent(this));
-			}
-		}
-		return true;
-	}
-
-	   
     private void updateButtonsMin(DownloadItem item) {
         DownloadState state = item.getState();
         minButtonPanel.updateButtons(state);
@@ -553,65 +376,68 @@ public class DownloadRendererEditor extends JPanel implements
                 minLinkButton.setVisible(false);
         }
     }
-	
-	private void updateButtonsFull(DownloadItem item) {
-	    DownloadState state = item.getState();
-		fullButtonPanel.updateButtons(state);
+    
+    private void updateButtonsFull(DownloadItem item) {
+        DownloadState state = item.getState();
+        fullButtonPanel.updateButtons(state);
 
-		if (state == DownloadState.DOWNLOADING) {
-			fullProgressBar.setEnabled(true);
-			fullProgressBar.setHidden(false);
-		} else if (state == DownloadState.PAUSED) {
-			fullProgressBar.setEnabled(false);
-			fullProgressBar.setHidden(false);
-		} else {
-			fullProgressBar.setHidden(true);
-		}
-	}
+        if (state == DownloadState.DOWNLOADING) {
+            fullProgressBar.setEnabled(true);
+            fullProgressBar.setHidden(false);
+        } else if (state == DownloadState.PAUSED) {
+            fullProgressBar.setEnabled(false);
+            fullProgressBar.setHidden(false);
+        } else {
+            fullProgressBar.setHidden(true);
+        }
+    }
 
-	private class DownloadEditorListener implements ActionListener {
+    
+    private void updateComponent(DownloadTableCell editor, DownloadItem item){
+        if (item.getState() == DownloadState.DOWNLOADING) {
+            editor.statusViewLayout.show(this, FULL_LAYOUT);
+            updateFull(editor, item);
+        } 
+        else {
+            editor.statusViewLayout.show(this, MIN_LAYOUT);
+            updateMin(editor, item);
+        }
+    }
+    
+    
 
-		public void actionPerformed(ActionEvent e) {
-		    actionHandler.performAction(e.getActionCommand(), editItem);
-			cancelCellEditing();
-		}
-
-	}
-	
-	
-
-	private String getMessage(DownloadItem item) {
-		switch (item.getState()) {
-		case CANCELLED:
-			return I18n.tr("Cancelled");
+    private String getMessage(DownloadItem item) {
+        switch (item.getState()) {
+        case CANCELLED:
+            return I18n.tr("Cancelled");
         case FINISHING:
             return I18n.tr("Finishing download...");
             //TODO: correct time for finishing
             //return I18n.tr("Finishing download, {0} remaining", item.getRemainingStateTime());
-		case DONE:
-			return I18n.tr("Done");
-		case CONNECTING:
-			return I18n.tr("Connecting...");
-		case DOWNLOADING:
-			//TODO : uploaders in DownloadItem & plural, not sure if this TODO is addressed
-		    // with adding proper plural handling?
-		    // {0}: current file size, {2} final file size, {3}, number of people
-			return I18n.trn("Downloading {0} of {1} ({2}) from {3} person",
-			        "Downloading {0} of {1} ({2}) from {3} people",
-			        item.getDownloadSourceCount(),
-			        GuiUtils.toUnitbytes(item.getCurrentSize()), 
-			        GuiUtils.toUnitbytes(item.getTotalSize()),
-			        GuiUtils.rate2speed(item.getDownloadSpeed()), 
-			        item.getDownloadSourceCount());
-		case STALLED:
-			return I18n
-					.tr("Stalled - ");
-		case ERROR:			
+        case DONE:
+            return I18n.tr("Done");
+        case CONNECTING:
+            return I18n.tr("Connecting...");
+        case DOWNLOADING:
+            //TODO : uploaders in DownloadItem & plural, not sure if this TODO is addressed
+            // with adding proper plural handling?
+            // {0}: current file size, {2} final file size, {3}, number of people
+            return I18n.trn("Downloading {0} of {1} ({2}) from {3} person",
+                    "Downloading {0} of {1} ({2}) from {3} people",
+                    item.getDownloadSourceCount(),
+                    GuiUtils.toUnitbytes(item.getCurrentSize()), 
+                    GuiUtils.toUnitbytes(item.getTotalSize()),
+                    GuiUtils.rate2speed(item.getDownloadSpeed()), 
+                    item.getDownloadSourceCount());
+        case STALLED:
+            return I18n
+                    .tr("Stalled - ");
+        case ERROR:         
             return I18n.tr("Unable to download: ");
-		case PAUSED:
-			return I18n.tr("Paused - {0} of {1} ({2}%)", 
-			        GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
-			        item.getPercentComplete());
+        case PAUSED:
+            return I18n.tr("Paused - {0} of {1} ({2}%)", 
+                    GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
+                    item.getPercentComplete());
         case LOCAL_QUEUED:
             long queueTime = item.getRemainingQueueTime();
             if(queueTime == DownloadItem.UNKNOWN_TIME){
@@ -623,9 +449,10 @@ public class DownloadRendererEditor extends JPanel implements
             return I18n.trn("Queued - {0} person ahead of you for this file",
                     "Queued - {0} people ahead of you for this file",
                     item.getQueuePosition(), item.getQueuePosition());
-		default:
-		    throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
-		}
-		
-	}
+        default:
+            throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
+        }
+        
+    }
+
 }
