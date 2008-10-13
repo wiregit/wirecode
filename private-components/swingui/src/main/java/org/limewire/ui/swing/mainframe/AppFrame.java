@@ -26,6 +26,7 @@ import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -108,11 +109,18 @@ public class AppFrame extends SingleFrameApplication {
     }
     
     public Injector createInjector() {
+        Module thiz = new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(AppFrame.class).toInstance(AppFrame.this);
+            }
+        };
         if (injector == null) {
-            injector = Guice.createInjector(Stage.PRODUCTION, new MockModule(), new LimeWireSwingUiModule());
+            injector = Guice.createInjector(Stage.PRODUCTION, new MockModule(), new LimeWireSwingUiModule(), thiz);
             return injector;
         } else {
             List<Module> modules = new ArrayList<Module>();
+            modules.add(thiz);
             modules.add(new LimeWireSwingUiModule());
             modules.add(Modules.providersFrom(injector)); // Add all the parent bindings
             return Guice.createInjector(Stage.PRODUCTION, modules);
