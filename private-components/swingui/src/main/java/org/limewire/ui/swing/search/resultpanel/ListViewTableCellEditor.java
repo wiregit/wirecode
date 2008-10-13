@@ -311,7 +311,7 @@ implements TableCellEditor, TableCellRenderer {
         downloadPanel.setOpaque(false);
         downloadPanel.add(itemIconLabel);
 
-        JXPanel headingPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]0", "5[]0[]0[]0"));
+        JXPanel headingPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "5[]0[]0[]0"));
         headingPanel.setOpaque(false);
         headingPanel.add(headingLabel, "wrap, wmin 390");
         headingPanel.add(subheadingLabel, "wrap, wmin 390");
@@ -336,11 +336,11 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private JPanel makeIndentablePanel(Component component) {
-        indentablePanel = new JPanel(new MigLayout("debug, insets 0 0 0 0", "[][]", "[]"));
+        indentablePanel = new JPanel(new MigLayout("insets 0 5 0 0", "[][]", "[]"));
         indentablePanel.setOpaque(false);
         similarResultIndentation = new JLabel(similarResultsIcon);
         similarResultIndentation.setPreferredSize(new Dimension(SIMILARITY_INDENTATION, similarResultsIcon.getIconWidth()));
-        indentablePanel.add(component, "cell 1 0, wmin 390");
+        indentablePanel.add(component, "cell 1 0");
         return indentablePanel;
     }
 
