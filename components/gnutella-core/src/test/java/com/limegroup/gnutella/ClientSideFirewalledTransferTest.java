@@ -173,7 +173,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         drainUDP();
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getSharedFileList().size());
+        assertEquals(2, fileManager.getGnutellaSharedFileList().size());
 
         // send a query that should be answered
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,

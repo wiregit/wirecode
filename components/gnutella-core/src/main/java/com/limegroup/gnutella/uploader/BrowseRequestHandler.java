@@ -145,7 +145,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             sender.setWriteChannel(new NoInterestWritableByteChannel(new ContentEncoderChannel(
                     contentEncoder)));
             
-            sharedFiles = fileManager.getSharedFileList().getAllFileDescs();
+            sharedFiles = fileManager.getGnutellaSharedFileList().getAllFileDescs();
             iterator = sharedFiles.iterator();
         }
         

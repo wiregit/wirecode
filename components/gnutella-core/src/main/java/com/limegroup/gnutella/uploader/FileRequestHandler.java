@@ -452,7 +452,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
         // first verify the file index
         fd = fileManager.get(index);
-        if(fd == null || (!fileManager.getSharedFileList().contains(fd) 
+        if(fd == null || (!fileManager.getGnutellaSharedFileList().contains(fd) 
         			&& !fileManager.getIncompleteFileList().contains(fd)) ){
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid index in request does not map to file descriptor: " + request);

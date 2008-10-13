@@ -140,7 +140,7 @@ public class QRPUpdater implements FileEventListener, SettingListener, Service, 
                 queryRouteTable.addIndivisible(entry);
             }
         }
-        List<FileDesc> fds = fileManager.getSharedFileList().getAllFileDescs();
+        List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getAllFileDescs();
         for (FileDesc fd : fds) {
             queryRouteTable.add(fd.getPath());
         }

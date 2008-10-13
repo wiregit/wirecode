@@ -84,7 +84,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         fileManager = (FileManagerStub) injector.getInstance(FileManager.class);
         fileManager.setUrns(urns);
         fileManager.setFileDesc(descs);
-        FileListStub sharedList = (FileListStub)fileManager.getSharedFileList();
+        FileListStub sharedList = (FileListStub)fileManager.getGnutellaSharedFileList();
         sharedList.setDescs(descs);
         fileRequestHandler = injector.getInstance(FileRequestHandler.class);
     }

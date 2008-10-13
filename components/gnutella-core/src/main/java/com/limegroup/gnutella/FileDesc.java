@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.util.I18NConvert;
@@ -101,6 +103,15 @@ public class FileDesc implements StringLookup {
 	 * The number of times this file has had completed uploads
 	 */
 	private int _completedUploads;
+	
+	/** The number of sharelists this is shared in. */
+	private final AtomicInteger shareListCount = new AtomicInteger(0);
+	
+	/** True if this is shared in the gnutella list. */
+	private final AtomicBoolean sharedInGnutella = new AtomicBoolean(false);
+	
+	   /** True if this is a store file. */
+    private final AtomicBoolean storeFile = new AtomicBoolean(false);
 	
 	    
     /**
@@ -482,7 +493,35 @@ public class FileDesc implements StringLookup {
         }
         return null;
     }
+
+    public void incrementShareListCount() {
+        shareListCount.incrementAndGet();
+    }
+
+    public void decrementShareListCount() {
+        shareListCount.decrementAndGet();
+    }
     
+    public int getShareListCount() {
+        return shareListCount.get();
+    }
+
+    public void setSharedWithGnutella(boolean b) {
+        sharedInGnutella.set(b);
+    }
+    
+    public boolean isSharedWithGnutella() {
+        return sharedInGnutella.get();
+    }
+
+    public void setStoreFile(boolean b) {
+        storeFile.set(b);
+    }
+    
+    public boolean isStoreFile() {
+        return storeFile.get();
+    }
+
 }
 
 

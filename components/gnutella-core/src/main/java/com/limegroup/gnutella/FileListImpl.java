@@ -9,8 +9,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 
@@ -25,7 +27,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
     /** 
      * A list of listeners for this list
      */
-    private final CopyOnWriteArrayList<FileListListener> listeners;
+    private final EventMulticaster<FileListChangedEvent> listenerSupport;
     
     /**
      * List of all the FileDescs in this FileList. This is a continous non-null
@@ -60,7 +62,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
     
         fileManager.addFileEventListener(this);
         
-        listeners = new CopyOnWriteArrayList<FileListListener>();
+        listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
         
         clear();
     }
@@ -220,16 +222,12 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
         return this;
     }
 
-    public void addFileListListener(FileListListener listener) {
-        if(listener == null)
-            throw new IllegalArgumentException("FileListListener cannot be null");
-        listeners.addIfAbsent(listener);
+    public void addFileListListener(EventListener<FileListChangedEvent> listener) {
+        listenerSupport.addListener(listener);
     }
 
-    public void removeFileListListener(FileListListener listener) {
-        if(listener == null)
-            throw new IllegalArgumentException("FileListListener cannot be null");
-        listeners.remove(listener);
+    public void removeFileListListener(EventListener<FileListChangedEvent> listener) {
+        listenerSupport.removeListener(listener);
     }
     
     /**
@@ -237,9 +235,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
      * @param fileDesc that was added
      */
     protected void fireAddEvent(FileDesc fileDesc) {
-        for(FileListListener listener : listeners) {
-            listener.addEvent(fileDesc);
-            }
+        listenerSupport.handleEvent(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fileDesc));
     }
     
     /**
@@ -247,9 +243,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
      * @param fileDesc that was removed
      */
     protected void fireRemoveEvent(FileDesc fileDesc) {
-        for(FileListListener listener : listeners) {
-            listener.removeEvent(fileDesc);
-        }
+        listenerSupport.handleEvent(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, fileDesc));
     }
 
     /**
@@ -258,9 +252,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
     protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        for(FileListListener listener : listeners) {
-            listener.changeEvent(oldFileDesc, newFileDesc);
-        }
+        listenerSupport.handleEvent(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGED, oldFileDesc, newFileDesc));
     }
     
     /**

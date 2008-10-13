@@ -217,11 +217,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public Friend getFriend() {
             return friend;
         }
-
-        @Override
-        public void clear() {
-            throw new UnsupportedOperationException();
-        }
         
         private PresenceLibraryImpl findPresenceLibrary(FriendPresence presence) {
             for(PresenceLibrary library : allPresenceLibraries) {

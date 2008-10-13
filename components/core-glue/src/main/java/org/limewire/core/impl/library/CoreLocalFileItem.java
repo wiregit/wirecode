@@ -34,8 +34,16 @@ public class CoreLocalFileItem implements LocalFileItem {
         this.detailsFactory = detailsFactory;
         this.category = getCategory(fileDesc.getFile());
         this.map = Collections.synchronizedMap(new HashMap<Keys,Object>());
-        
-//        setLimeXMLDocuments(fileDesc.getLimeXMLDocuments());
+    }
+    
+    @Override
+    public int getFriendShareCount() {
+        return fileDesc.getShareListCount();
+    }
+    
+    @Override
+    public boolean isSharedWithGnutella() {
+        return fileDesc.isSharedWithGnutella();
     }
     
     @Override
@@ -242,6 +250,11 @@ public class CoreLocalFileItem implements LocalFileItem {
     @Override
     public String getFileName() {
         return getFileDetails().getFileName();
+    }
+    
+    @Override
+    public boolean isShareable() {
+        return !fileDesc.isStoreFile();
     }
     
 }

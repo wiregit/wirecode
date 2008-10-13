@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
+import org.limewire.listener.EventListener;
+
 public class SynchronizedFileList implements FileListPackage {
 
     final FileListPackage fileList;
@@ -108,13 +110,13 @@ public class SynchronizedFileList implements FileListPackage {
         }
     }
 
-    public void addFileListListener(FileListListener listener) {
+    public void addFileListListener(EventListener<FileListChangedEvent> listener) {
         synchronized (mutex) {
             fileList.addFileListListener(listener);            
         }
     }
 
-    public void removeFileListListener(FileListListener listener) {
+    public void removeFileListListener(EventListener<FileListChangedEvent> listener) {
         synchronized (mutex) {
             fileList.removeFileListListener(listener);
         }

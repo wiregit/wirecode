@@ -11,7 +11,6 @@ import javax.swing.ListSelectionModel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
-import org.limewire.core.api.library.ImageLocalFileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
@@ -51,8 +50,8 @@ public class ImageList extends JXList {
         //this must be set to negative 1 to get horizontal line wrap
         setVisibleRowCount(-1);
         setCellRenderer(new ImageCellRenderer());
-        setFixedCellHeight(ImageLocalFileItem.HEIGHT + insetCellSize + insetCellSize);
-        setFixedCellWidth(ImageLocalFileItem.WIDTH + insetCellSize + insetCellSize);
+        setFixedCellHeight(ThumbnailManager.HEIGHT + insetCellSize + insetCellSize);
+        setFixedCellWidth(ThumbnailManager.WIDTH + insetCellSize + insetCellSize);
         setRolloverEnabled(true);
         
         final SharingPopupHandler handler = new SharingPopupHandler(this, new SharingActionHandler());

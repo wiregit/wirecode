@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
+import org.limewire.listener.EventListener;
+
 /**
  * A collection of FileDescs.
  */
@@ -83,12 +85,12 @@ public interface FileList {
     /**
      * Adds a listener to this list
      */
-    public void addFileListListener(FileListListener listener);
+    public void addFileListListener(EventListener<FileListChangedEvent> listener);
     
     /**
      * Removes a listener from this list
      */
-    public void removeFileListListener(FileListListener listener);
+    public void removeFileListListener(EventListener<FileListChangedEvent> listener);
     
     /**
      * Returns an object which to lock on when iterating over this FileList. The

@@ -186,4 +186,23 @@ public class FriendFileListImpl extends FileListImpl {
         else if (type == MediaType.getImageMediaType() && addNewImagesAlways)
             setAddNewImageAlways(false);
     }
+    
+    @Override
+    protected void fireAddEvent(FileDesc fileDesc) {
+        fileDesc.incrementShareListCount();
+        super.fireAddEvent(fileDesc);
+    }
+
+    @Override
+    protected void fireRemoveEvent(FileDesc fileDesc) {
+        fileDesc.decrementShareListCount();
+        super.fireRemoveEvent(fileDesc);
+    }
+
+    @Override
+    protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
+        oldFileDesc.decrementShareListCount();
+        newFileDesc.incrementShareListCount();
+        super.fireChangeEvent(oldFileDesc, newFileDesc);
+    }
 }

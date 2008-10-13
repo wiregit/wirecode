@@ -381,7 +381,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(fileManager.getSharedFileList().size() == 2);
+        assertTrue(fileManager.getGnutellaSharedFileList().size() == 2);
 
         // send a query that should hit
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -417,7 +417,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertEquals(2, fileManager.getSharedFileList().size());
+        assertEquals(2, fileManager.getGnutellaSharedFileList().size());
 
         // get the URNS for the files
         File berkeley = 

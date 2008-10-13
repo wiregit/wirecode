@@ -201,7 +201,7 @@ public class HeadTest extends LimeTestCase {
         FileManagerStub fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
         fileManager.setUrns(urns);
         fileManager.setFileDesc(descs);
-        FileListStub sharedList = (FileListStub) fileManager.getSharedFileList();
+        FileListStub sharedList = (FileListStub) fileManager.getGnutellaSharedFileList();
         sharedList.setDescs(descs);
         
         assertEquals(_partial,fileManager.getFileDesc(_havePartial));

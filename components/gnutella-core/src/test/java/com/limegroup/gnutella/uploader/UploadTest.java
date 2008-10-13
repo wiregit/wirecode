@@ -191,7 +191,7 @@ public class UploadTest extends LimeTestCase {
         incompleteHashUrl = host + incompleteHashUrl;
 
         assertEquals(1, fileManager.getIncompleteFileList().size());
-        assertEquals(2, fileManager.getSharedFileList().size());
+        assertEquals(2, fileManager.getGnutellaSharedFileList().size());
         assertEquals("Unexpected uploads in progress", 0, uploadManager.uploadsInProgress());
         assertEquals("Unexpected queued uploads", 0, uploadManager.getNumQueuedUploads());
 

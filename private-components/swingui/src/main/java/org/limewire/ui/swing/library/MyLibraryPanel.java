@@ -63,7 +63,7 @@ class MyLibraryPanel extends JPanel implements Disposable {
         table.enableSharing(sharePanel, shareManager);
         table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel()));
                 
-        final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>() {});
+        final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>());
         final JScrollPane scrollPane = new JScrollPane(layer);
         scrollPane.setColumnHeaderView(table.getTableHeader());
         if(table.isColumnControlVisible()){

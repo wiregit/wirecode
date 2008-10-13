@@ -1658,6 +1658,6 @@ public class HeadPongTest extends LimeTestCase {
         List<FileDesc> list = new ArrayList<FileDesc>();
         list.add(fd);
         fileManager.setFileDesc(list);
-        ((FileListStub)fileManager.getSharedFileList()).setDescs(list);
+        ((FileListStub)fileManager.getGnutellaSharedFileList()).setDescs(list);
     }
 }

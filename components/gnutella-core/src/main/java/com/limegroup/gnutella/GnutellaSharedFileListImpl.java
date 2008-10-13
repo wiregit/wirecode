@@ -14,7 +14,7 @@ import org.limewire.collection.MultiCollection;
 
 import com.limegroup.gnutella.library.SharingUtils;
 
-public class SharedFileListImpl extends FileListImpl {
+public class GnutellaSharedFileListImpl extends FileListImpl {
     
     /**
      * The number of files that are forcibly shared over the network.
@@ -36,7 +36,7 @@ public class SharedFileListImpl extends FileListImpl {
      */
     private Collection<File> individualSharedFiles; 
     
-    public SharedFileListImpl(FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
+    public GnutellaSharedFileListImpl(FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
         super(fileManager, individualFiles);
         
         this.filesNotToShare = filesNotToShare;
@@ -213,5 +213,24 @@ public class SharedFileListImpl extends FileListImpl {
         return individualFiles.contains(file) && 
                 SharingUtils.isFilePhysicallyShareable(file)&& 
                 !SharingUtils.isApplicationSpecialShare(file);
+    }
+    
+    @Override
+    protected void fireAddEvent(FileDesc fileDesc) {
+        fileDesc.setSharedWithGnutella(true);
+        super.fireAddEvent(fileDesc);
+    }
+
+    @Override
+    protected void fireRemoveEvent(FileDesc fileDesc) {
+        fileDesc.setSharedWithGnutella(false);
+        super.fireRemoveEvent(fileDesc);
+    }
+
+    @Override
+    protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
+        oldFileDesc.setSharedWithGnutella(false);
+        newFileDesc.setSharedWithGnutella(true);
+        super.fireChangeEvent(oldFileDesc, newFileDesc);
     }
 }

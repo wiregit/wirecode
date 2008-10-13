@@ -76,7 +76,7 @@ public class FileManagerStub extends FileManagerImpl {
     }
     
     @Override
-    public FileList getSharedFileList() {
+    public FileList getGnutellaSharedFileList() {
         return fileListStub;
     }
     

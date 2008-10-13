@@ -23,7 +23,6 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.ImageLocalFileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
@@ -257,10 +256,10 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
             currentPosition = visibleRect.y;
     
         if (direction < 0) {
-            int newPosition = currentPosition - (currentPosition / ImageLocalFileItem.HEIGHT) * ImageLocalFileItem.HEIGHT;
-            return (newPosition == 0) ? ImageLocalFileItem.HEIGHT : newPosition;
+            int newPosition = currentPosition - (currentPosition / ThumbnailManager.HEIGHT) * ThumbnailManager.HEIGHT;
+            return (newPosition == 0) ? ThumbnailManager.HEIGHT : newPosition;
         } else {
-            return ((currentPosition / ImageLocalFileItem.HEIGHT) + 1) * ImageLocalFileItem.HEIGHT - currentPosition;
+            return ((currentPosition / ThumbnailManager.HEIGHT) + 1) * ThumbnailManager.HEIGHT - currentPosition;
         }
     }
 }

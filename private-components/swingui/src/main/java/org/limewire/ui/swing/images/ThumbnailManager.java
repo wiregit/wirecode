@@ -10,6 +10,9 @@ import javax.swing.JList;
  * Manages thumbnails for image files. 
  */
 public interface ThumbnailManager {
+    
+    public static final int WIDTH = 120;
+    public static final int HEIGHT = 90;
 
     /**
      * Returns the thumbnail for this file. If this file is not immediately 

@@ -495,7 +495,7 @@ public final class DaapManager implements FileEventListener {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileList sharedFileList = fileManager.get().getSharedFileList();
+        FileList sharedFileList = fileManager.get().getGnutellaSharedFileList();
   
         List<FileDesc> files = sharedFileList.getAllFileDescs();
     

@@ -139,7 +139,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             assert desc != null : "unexpected null in FileManager for query:\n"+ request;
 
-            if(!(fileManager.getSharedFileList().contains(desc) || fileManager.getIncompleteFileList().contains(desc)))
+            if(!(fileManager.getGnutellaSharedFileList().contains(desc) || fileManager.getIncompleteFileList().contains(desc)))
                 continue;
             
             if ((filter != null) && !filter.allow(desc.getFileName()))
@@ -173,7 +173,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
         IntSet ret = priors;
         for(URN urn : urnsIter) {
-            if( fileManager.getSharedFileList().contains(fileManager.getFileDesc(urn))) {
+            if( fileManager.getGnutellaSharedFileList().contains(fileManager.getFileDesc(urn))) {
                 IntSet hits = fileManager.getIndices(urn);
      
                 if(hits!=null) {
@@ -289,7 +289,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 if (indexIncompleteFiles && ifd.hasUrnsAndPartialData()) {
                     loadKeywords(incompleteKeywordTrie, fileDesc);
                 }
-            } else if(fileManager.getSharedFileList().contains(fileDesc)){
+            } else if(fileManager.getGnutellaSharedFileList().contains(fileDesc)){
                 loadKeywords(keywordTrie, fileDesc);
             }
         }
@@ -543,7 +543,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 res = responseFactory.get().createPureMetadataResponse();
             } else { // meta-data about a specific file
                 FileDesc fd = fileManager.getFileDesc(file);
-                if (fd == null || !fileManager.getSharedFileList().contains(fd)) {
+                if (fd == null || !fileManager.getGnutellaSharedFileList().contains(fd)) {
                     // fd == null is bad -- would mean MetaFileManager is out of sync.
                     // fd incomplete should never happen, but apparently is somehow...
                     // fd is store file, shouldn't be returning query hits for it then..

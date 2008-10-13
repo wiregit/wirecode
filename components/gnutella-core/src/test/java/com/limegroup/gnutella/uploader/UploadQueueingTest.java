@@ -185,7 +185,7 @@ public class UploadQueueingTest extends LimeTestCase {
 
         fm.setUrns(urns);
         fm.setFileDesc(descs);
-        FileListStub sharedList = (FileListStub)fm.getSharedFileList();
+        FileListStub sharedList = (FileListStub)fm.getGnutellaSharedFileList();
         sharedList.setDescs(descs);
     }
 

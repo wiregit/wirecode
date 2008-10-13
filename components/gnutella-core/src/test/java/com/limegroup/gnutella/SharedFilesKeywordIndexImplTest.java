@@ -43,7 +43,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(originalFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getSharedFileList();
+                atLeast(1).of(fileManager).getGnutellaSharedFileList();
                 will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(originalFile);
                 will(returnValue(true));
@@ -56,7 +56,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 will(returnValue(incompleteFileList));
                 atLeast(1).of(incompleteFileList).contains(newFile);
                 will(returnValue(false));
-                atLeast(1).of(fileManager).getSharedFileList();
+                atLeast(1).of(fileManager).getGnutellaSharedFileList();
                 will(returnValue(sharedFileList));
                 atLeast(1).of(sharedFileList).contains(newFile);
                 will(returnValue(true));

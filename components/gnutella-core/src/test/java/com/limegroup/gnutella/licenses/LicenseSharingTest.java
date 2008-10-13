@@ -102,14 +102,14 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    List<FileDesc> fds = fileManager.getSharedFileList().getAllFileDescs();
+	    List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getAllFileDescs();
 	    assertEquals(5, fds.size());
 	    for(FileDesc fd : fds )
 	        assertTrue(fd.toString(), fd.isLicensed());
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, fileManager.getSharedFileList().size());
+        assertEquals(5, fileManager.getGnutellaSharedFileList().size());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

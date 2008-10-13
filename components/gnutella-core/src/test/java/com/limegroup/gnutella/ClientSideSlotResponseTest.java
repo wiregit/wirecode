@@ -78,7 +78,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         waiter.waitForLoad();
         fileManager.removeFileEventListener(waiter);
                 
-    	assertEquals(5, fileManager.getSharedFileList().size());
+    	assertEquals(5, fileManager.getGnutellaSharedFileList().size());
     }
     
     private UploadManagerStub uploadManagerStub;

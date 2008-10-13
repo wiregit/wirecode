@@ -49,9 +49,4 @@ public class FileListAdapter implements LocalFileList {
     public int size() {
         return eventList.size();
     }
-
-    @Override
-    public void clear() {
-        eventList.clear();
-    }
 }

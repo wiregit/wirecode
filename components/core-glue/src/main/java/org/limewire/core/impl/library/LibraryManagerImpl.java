@@ -22,19 +22,19 @@ import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
-import com.limegroup.gnutella.FileListListener;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.LocalFileDetailsFactory;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
+import com.limegroup.gnutella.FileListChangedEvent;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.LocalFileDetailsFactory;
 
 @Singleton
 class LibraryManagerImpl implements ShareListManager, LibraryManager {
@@ -116,7 +116,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
         }
     }
     
-    private class GnutellaFileList extends LocalFileListImpl implements FileListListener {
+    private class GnutellaFileList extends LocalFileListImpl implements EventListener<FileListChangedEvent> {
 
         private final FileManager fileManager;
         
@@ -126,7 +126,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
             super(new BasicEventList<LocalFileItem>());
             
             this.fileManager = fileManager;
-            this.fileManager.getSharedFileList().addFileListListener(this);
+            this.fileManager.getGnutellaSharedFileList().addFileListListener(this);
             
             lookup = new HashMap<File, FileItem>();
         }
@@ -139,40 +139,36 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
 
         @Override
         public void removeFile(File file) {
-            fileManager.getSharedFileList().remove(fileManager.getFileDesc(file));
+            fileManager.getGnutellaSharedFileList().remove(fileManager.getFileDesc(file));
         }
-
+        
         @Override
-        public void addEvent(FileDesc fileDesc) {
-            LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
-            lookup.put(fileDesc.getFile(), newItem);
-            threadSafeList.add(newItem);
-        }
+        public void handleEvent(FileListChangedEvent event) {
+            LocalFileItem newItem;
+            switch(event.getType()) {
+            case ADDED:
+                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);  
+                lookup.put(event.getFileDesc().getFile(), newItem);
+                threadSafeList.add(newItem);
+                break;
+            case CHANGED:
+                FileItem oldItem = lookup.remove(event.getOldValue().getFile());
+                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);
+                lookup.put(event.getFileDesc().getFile(), newItem);
 
-        @Override
-        public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
-            FileItem old = lookup.remove(oldDesc.getFile());
-            LocalFileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
-            lookup.put(newDesc.getFile(), newItem);
-            
-            threadSafeList.remove(old);
-            threadSafeList.add(newItem);
-        }
-
-        @Override
-        public void removeEvent(FileDesc fileDesc) {
-            FileItem old = lookup.remove(fileDesc.getFile());
-            threadSafeList.remove(old);
-        }
-
-        @Override
-        public void clear() {
-            fileManager.getSharedFileList().clear();
+                threadSafeList.remove(oldItem);
+                threadSafeList.add(newItem);
+                break;
+            case REMOVED:
+                FileItem old = lookup.remove(event.getFileDesc().getFile());
+                threadSafeList.remove(old);
+                break;
+            }
         }
     }
 
     
-    private class FriendFileListImpl extends LocalFileListImpl implements FriendFileList, FileListListener {
+    private class FriendFileListImpl extends LocalFileListImpl implements FriendFileList, EventListener<FileListChangedEvent> {
 
         private final FileManager fileManager;
         private final String name;        
@@ -198,31 +194,27 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
         }
         
         @Override
-        public void clear() {
-            fileManager.getFriendFileList(name).clear();
-        }
+        public void handleEvent(FileListChangedEvent event) {
+            LocalFileItem newItem;
+            switch(event.getType()) {
+            case ADDED:
+                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);  
+                lookup.put(event.getFileDesc().getFile(), newItem);
+                threadSafeList.add(newItem);
+                break;
+            case CHANGED:
+                FileItem oldItem = lookup.remove(event.getOldValue().getFile());
+                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);
+                lookup.put(event.getFileDesc().getFile(), newItem);
 
-        @Override
-        public void addEvent(FileDesc fileDesc) {
-            LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
-            lookup.put(fileDesc.getFile(), newItem);
-            threadSafeList.add(newItem);
-        }
-
-        @Override
-        public void changeEvent(FileDesc oldDesc, FileDesc newDesc) {
-            FileItem oldItem = lookup.remove(oldDesc.getFile());
-            LocalFileItem newItem = new CoreLocalFileItem(newDesc, detailsFactory);
-            lookup.put(newDesc.getFile(), newItem);
-
-            threadSafeList.remove(oldItem);
-            threadSafeList.add(newItem);
-        }
-
-        @Override
-        public void removeEvent(FileDesc fileDesc) {
-            FileItem old = lookup.remove(fileDesc.getFile());
-            threadSafeList.remove(old);
+                threadSafeList.remove(oldItem);
+                threadSafeList.add(newItem);
+                break;
+            case REMOVED:
+                FileItem old = lookup.remove(event.getFileDesc().getFile());
+                threadSafeList.remove(old);
+                break;
+            }
         }
         
         @Override
@@ -314,11 +306,6 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
                 break;
             }
         }
-
-        @Override
-        public void clear() {
-            
-        }
     }
     
     private abstract class LocalFileListImpl implements LocalFileList {
@@ -377,11 +364,6 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
                     return o1.getFile().getPath().compareTo(o2.getFile().getPath());
                 }
             });
-        }
-        
-        @Override
-        public void clear() {
-            throw new UnsupportedOperationException();
         }
         
         public void removeMemberList(EventList<LocalFileItem> eventList) {

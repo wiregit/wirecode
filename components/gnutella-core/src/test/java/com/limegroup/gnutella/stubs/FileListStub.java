@@ -6,9 +6,9 @@ import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.SharedFileListImpl;
+import com.limegroup.gnutella.GnutellaSharedFileListImpl;
 
-public class FileListStub extends SharedFileListImpl {
+public class FileListStub extends GnutellaSharedFileListImpl {
 
     private FileDescStub fdStub = new FileDescStub();
     private FileDescStub defaultStub = new FileDescStub("other.txt");

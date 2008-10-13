@@ -166,12 +166,12 @@ public class ServerSideWhatIsNewTest
     public void testCreationTimeCacheInitialState() throws Exception {
         // wait for fm to finish
         int i = 0;
-        for (; (i < 15) && (fileManager.getSharedFileList().size() < 2); i++)
+        for (; (i < 15) && (fileManager.getGnutellaSharedFileList().size() < 2); i++)
             Thread.sleep(1000);
         if (i == 15) assertTrue(false);
 
         // we should be sharing two files - two text files.
-        assertEquals(2, fileManager.getSharedFileList().size());
+        assertEquals(2, fileManager.getGnutellaSharedFileList().size());
 
         FileManager fm = fileManager;
         URN berkeleyURN = fm.getFileDesc(berkeley).getSHA1Urn();
@@ -348,7 +348,7 @@ public class ServerSideWhatIsNewTest
         assertTrue(tempFile2.exists());
 
         FileManagerTestUtils.waitForLoad(fileManager, 1000);
-        assertEquals("Files were not loaded by filemanager", 4, fileManager.getSharedFileList().size());
+        assertEquals("Files were not loaded by filemanager", 4, fileManager.getGnutellaSharedFileList().size());
 
         URN tempFile1URN = fm.getFileDesc(tempFile1).getSHA1Urn();
         URN tempFile2URN = fm.getFileDesc(tempFile2).getSHA1Urn();
@@ -573,11 +573,11 @@ public class ServerSideWhatIsNewTest
     public void testRemoveSharedFile() throws Exception {
         testAddSharedFiles();
         FileManager fm = fileManager;
-        assertEquals(4,fm.getSharedFileList().size());
+        assertEquals(4,fm.getGnutellaSharedFileList().size());
         
         
         // 4 shared files
-        assertEquals(4,fm.getSharedFileList().size());
+        assertEquals(4,fm.getGnutellaSharedFileList().size());
         
         // 4 different urns 
         {
@@ -625,7 +625,7 @@ public class ServerSideWhatIsNewTest
 
         fm.loadSettings();
         Thread.sleep(2000);
-        assertEquals("num shared files", 1, fileManager.getSharedFileList().size());
+        assertEquals("num shared files", 1, fileManager.getGnutellaSharedFileList().size());
 
         URN susheelURN = fm.getFileDesc(susheel).getSHA1Urn();
         {
@@ -645,7 +645,7 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         Map longToUrns = ctCache.getTimeToUrn();
-        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs()) {
+        for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs()) {
             fileManager.removeFile(fd.getFile());
             fd.getFile().delete();
         }
@@ -662,7 +662,7 @@ public class ServerSideWhatIsNewTest
                 .createRemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, "whatever.txt", TestFile.length(), guid, 1, false, 3,
                         false, null, urns, false, false, "LIME", new HashSet(), -1, false);
         
-        int sharedBefore = fileManager.getSharedFileList().size();
+        int sharedBefore = fileManager.getGnutellaSharedFileList().size();
         final CountDownLatch downloadedLatch = new CountDownLatch(2); //1 incomplete, 2 complete
         fileManager.addFileEventListener(new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
@@ -673,7 +673,7 @@ public class ServerSideWhatIsNewTest
         downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         assertTrue("download never completed",downloadedLatch.await(320,TimeUnit.SECONDS));
         
-        assertEquals( sharedBefore + 1, fileManager.getSharedFileList().size());
+        assertEquals( sharedBefore + 1, fileManager.getGnutellaSharedFileList().size());
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.getAbsolutePath()+" didn't exist", newFile.exists());
@@ -695,7 +695,7 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         
-        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs()) {
+        for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs()) {
             fileManager.removeFile(fd.getFile());
             fd.getFile().delete();
         }
@@ -736,7 +736,7 @@ public class ServerSideWhatIsNewTest
         // second notification is for sharing the entire file
         assertTrue("download never finished",downloadState.tryAcquire(120,TimeUnit.SECONDS));
         
-        assertEquals(1, fileManager.getSharedFileList().size());
+        assertEquals(1, fileManager.getGnutellaSharedFileList().size());
 
         {
             Map urnToLong = ctCache.getUrnToTime(); 
@@ -790,11 +790,11 @@ public class ServerSideWhatIsNewTest
         try {
             fileManager.loadSettings();
             int i = 0;
-            for (; (i < 15) && (fileManager.getSharedFileList().size()+ fileManager.getSharedFileList().getNumForcedFiles() < 5); i++)
+            for (; (i < 15) && (fileManager.getGnutellaSharedFileList().size()+ fileManager.getGnutellaSharedFileList().getNumForcedFiles() < 5); i++)
                 Thread.sleep(1000);
             
             if (i == 15)
-                fail("num shared files? " + fileManager.getSharedFileList().size());
+                fail("num shared files? " + fileManager.getGnutellaSharedFileList().size());
     
             // we should be sharing two files - two text files and three installers
             // but the creation time cache should only have the two text files
@@ -802,8 +802,8 @@ public class ServerSideWhatIsNewTest
             //
             //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
             //      files don't count), and 3 forced shared files
-            assertEquals(2, fileManager.getSharedFileList().size());
-            assertEquals(3, fileManager.getSharedFileList().getNumForcedFiles());
+            assertEquals(2, fileManager.getGnutellaSharedFileList().size());
+            assertEquals(3, fileManager.getGnutellaSharedFileList().getNumForcedFiles());
     
             {
                 Map urnToLong = creationTimeCache.getUrnToTime();

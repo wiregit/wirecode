@@ -419,7 +419,6 @@ public class ConversationPane extends JPanel implements Displayable {
             return eventList.size();
         }
 
-        @Override
         public void clear() {
             eventList.clear();
         }    

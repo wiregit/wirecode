@@ -74,7 +74,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             allowing(depthSwitch).getValue();
             will(returnValue(false));
             never(notifier);
-            exactly(4).of(fileManager).getSharedFileList();
+            exactly(4).of(fileManager).getGnutellaSharedFileList();
             will(returnValue(fileList));
             exactly(4).of(fileList).size();
             will(returnValue(5));
@@ -115,7 +115,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getSharedFileList();
+            one(fileManager).getGnutellaSharedFileList();
             will(returnValue(fileList));
             one(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
@@ -137,11 +137,11 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getSharedFileList();
+            one(fileManager).getGnutellaSharedFileList();
             will(returnValue(fileList));
             one(fileList).size();
             will(returnValue(5));
-            one(fileManager).getSharedFileList();
+            one(fileManager).getGnutellaSharedFileList();
             will(returnValue(fileList));
             one(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
@@ -165,7 +165,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            exactly(2).of(fileManager).getSharedFileList();
+            exactly(2).of(fileManager).getGnutellaSharedFileList();
             will(returnValue(fileList));
             exactly(2).of(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
@@ -186,7 +186,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(true));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            exactly(2).of(fileManager).getSharedFileList();
+            exactly(2).of(fileManager).getGnutellaSharedFileList();
             will(returnValue(fileList));
             exactly(2).of(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
@@ -308,7 +308,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getSharedFileList();
+            one(fileManager).getGnutellaSharedFileList();
             will(returnValue(fileList));
             one(fileList).size();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));

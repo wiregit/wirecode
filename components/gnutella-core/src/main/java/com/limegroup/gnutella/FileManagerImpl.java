@@ -207,7 +207,7 @@ public class FileManagerImpl implements FileManager, Service {
      */
     private final FileFilter SHAREABLE_FILE_FILTER = new FileFilter() {
         public boolean accept(File f) {
-            return getSharedFileList().isFileAddable(f);
+            return getGnutellaSharedFileList().isFileAddable(f);
         }
     };    
     
@@ -252,7 +252,7 @@ public class FileManagerImpl implements FileManager, Service {
         this.backgroundExecutor = backgroundExecutor;
         this.eventListeners = eventListeners;
         
-        sharedFileList = new SynchronizedFileList(new SharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
+        sharedFileList = new SynchronizedFileList(new GnutellaSharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl(this, _data.SPECIAL_STORE_FILES));
         allFriendsFileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList("All"), "All"));
         incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl(this, new HashSet<File>()));
@@ -282,7 +282,7 @@ public class FileManagerImpl implements FileManager, Service {
         urnMap = new HashMap<URN, IntSet>();
         fileToFileDescMap = new HashMap<File, FileDesc>();
         
-        getSharedFileList().clear();
+        getGnutellaSharedFileList().clear();
         getStoreFileList().clear();
         getIncompleteFileList().clear();
         for(FileList list : friendFileLists.values()) {
@@ -335,7 +335,7 @@ public class FileManagerImpl implements FileManager, Service {
     //  FileList Accessors
     ////////////////////////////////////////////////////////////////////////
     
-    public FileList getSharedFileList() {
+    public FileList getGnutellaSharedFileList() {
         return sharedFileList;
     }
     
@@ -865,26 +865,26 @@ public class FileManagerImpl implements FileManager, Service {
     public void addSharedFileAlways(File file, List<? extends LimeXMLDocument> list) {
         FileDesc fileDesc = getFileDesc(file);
         sharedFileList.addPendingFileAlways(file);
-        
-        if(fileDesc != null) {
+        System.out.println("ASFA, fd: " + fileDesc);
+        if (fileDesc != null) {
             sharedFileList.add(fileDesc);
             dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
         } else {
             addFile(file, list);
-    }
+        }
     }
     
     public void addSharedFileForFession(File file) {
         FileDesc fileDesc = getFileDesc(file);
         sharedFileList.addPendingFileForSession(file);
-            
-        if(fileDesc != null) {
+
+        if (fileDesc != null) {
             sharedFileList.add(fileDesc);
             dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
         } else {
             addFile(file);
+        }
     }
-     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File)
@@ -1285,7 +1285,7 @@ public class FileManagerImpl implements FileManager, Service {
     	// if at least one of the files in the application special
     	// share are currently shared, return true.
     	for (File f: files) {
-            if (getSharedFileList().contains(getFileDesc(f)))
+            if (getGnutellaSharedFileList().contains(getFileDesc(f)))
     			return true;
     	}
     	
@@ -1399,7 +1399,7 @@ public class FileManagerImpl implements FileManager, Service {
     	} catch (IOException bad) {
     		return false;
     	}
-        return getSharedFileList().contains(getFileDesc(file));
+        return getGnutellaSharedFileList().contains(getFileDesc(file));
     }
     
     public int size() {
@@ -1477,7 +1477,7 @@ public class FileManagerImpl implements FileManager, Service {
                 int matched = 0;
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.getValue());
-                    for (FileDesc fd : getSharedFileList().getAllFileDescs()){
+                    for (FileDesc fd : getGnutellaSharedFileList().getAllFileDescs()){
                         total++;
                         if (parser.evaluate(fd))
                             matched++;
@@ -1525,7 +1525,7 @@ public class FileManagerImpl implements FileManager, Service {
             Map<Integer, FileDesc> topAltsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
 
-            List<FileDesc> fds = getSharedFileList().getAllFileDescs();
+            List<FileDesc> fds = getGnutellaSharedFileList().getAllFileDescs();
             hits.ensureCapacity(fds.size());
             uploads.ensureCapacity(fds.size());
             int rare = 0;
@@ -1751,7 +1751,7 @@ public class FileManagerImpl implements FileManager, Service {
                 for(File f : subs) {
                     if(f.isDirectory())
                         removeSharedFolder(f, folder);
-                    else if(f.isFile() && !getSharedFileList().isIndividualFile(f)){
+                    else if(f.isFile() && !getGnutellaSharedFileList().isIndividualFile(f)){
                         if(removeFile(f) == null)
                             urnCache.get().clearPendingHashesFor(f, this);
                     }

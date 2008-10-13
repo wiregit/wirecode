@@ -63,7 +63,7 @@ public class QRPUpdaterTest extends LimeTestCase {
         
         // add a shared file 
         FileDesc fd = new FileDescStub("FoundFile.txt");
-        FileListStub fileList = (FileListStub)fileManagerStub.getSharedFileList();
+        FileListStub fileList = (FileListStub)fileManagerStub.getGnutellaSharedFileList();
         List<FileDesc> list = new ArrayList<FileDesc>();
         list.add(fd);
         fileList.setDescs(list);

@@ -90,4 +90,22 @@ public class MockLocalFileItem implements LocalFileItem {
     public String getFileName() {
         return "FileName.doc";
     }
+    
+    @Override
+    public int getFriendShareCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+    
+    @Override
+    public boolean isSharedWithGnutella() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public boolean isShareable() {
+        // TODO Auto-generated method stub
+        return true;
+    }
 }

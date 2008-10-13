@@ -15,7 +15,4 @@ public interface FileList <T extends FileItem> {
     
     /** The size of the list. */
     public int size();
-    
-    /** Clears the list. */
-    public void clear();
 }

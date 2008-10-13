@@ -50,4 +50,23 @@ public class StoreFileListImpl extends FileListImpl {
             return true;
         }
     }
+    
+    @Override
+    protected void fireAddEvent(FileDesc fileDesc) {
+        fileDesc.setStoreFile(true);
+        super.fireAddEvent(fileDesc);
+    }
+
+    @Override
+    protected void fireRemoveEvent(FileDesc fileDesc) {
+        fileDesc.setStoreFile(false);
+        super.fireRemoveEvent(fileDesc);
+    }
+
+    @Override
+    protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
+        oldFileDesc.setStoreFile(false);
+        newFileDesc.setStoreFile(true);
+        super.fireChangeEvent(oldFileDesc, newFileDesc);
+    }
 }

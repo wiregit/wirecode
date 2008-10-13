@@ -117,7 +117,7 @@ public class KeywordIndexPerformanceSearcher {
             throw new KeywordIndexPerformanceException("Error adding " + numberOfFilesIndexed + " files to FileManager: ");
         }
 
-        FileList list = fman.getSharedFileList();
+        FileList list = fman.getGnutellaSharedFileList();
         LOG.info(list.size() + " files have been successfully added to the File Manager.");
     }
 

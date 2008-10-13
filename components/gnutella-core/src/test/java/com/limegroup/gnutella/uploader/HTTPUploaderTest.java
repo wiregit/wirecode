@@ -99,7 +99,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         fm = (FileManagerStub) injector.getInstance(FileManager.class);
         fm.setUrns(urns);
         fm.setFileDesc(descs);
-        FileListStub sharedList = (FileListStub)fm.getSharedFileList();
+        FileListStub sharedList = (FileListStub)fm.getGnutellaSharedFileList();
         sharedList.setDescs(descs);
 
         cb = (MyActivityCallback) injector.getInstance(ActivityCallback.class);

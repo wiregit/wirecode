@@ -194,7 +194,7 @@ public class FileManagerTestCase extends LimeTestCase {
         //                 fman.get(i).getFile().getName());
 
         assertEquals("unexpected number of shared files",
-            testFiles.length, fman.getSharedFileList().size() );
+            testFiles.length, fman.getGnutellaSharedFileList().size() );
     }
 
 

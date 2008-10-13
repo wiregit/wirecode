@@ -101,7 +101,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         FileManagerTestUtils.waitForLoad(fileManager,100000);
 
-        assertGreaterThan(0, fileManager.getSharedFileList().size());
+        assertGreaterThan(0, fileManager.getGnutellaSharedFileList().size());
 
         browseHostHandler = injector.getInstance(BrowseHostHandlerManager.class).createBrowseHostHandler(new GUID(), new GUID());
         socketsManager = injector.getInstance(SocketsManager.class);
@@ -166,10 +166,10 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             }
         }
 
-        assertEquals(fileManager.getSharedFileList().size(), files.size());
+        assertEquals(fileManager.getGnutellaSharedFileList().size(), files.size());
 
-        synchronized (fileManager.getSharedFileList().getLock()) {
-            for (Iterator<FileDesc> it = fileManager.getSharedFileList().iterator(); it.hasNext();) {
+        synchronized (fileManager.getGnutellaSharedFileList().getLock()) {
+            for (Iterator<FileDesc> it = fileManager.getGnutellaSharedFileList().iterator(); it.hasNext();) {
                 FileDesc result = it.next();
                 boolean contained = files.remove(result.getFileName());
                 assertTrue("File is missing in browse response: "

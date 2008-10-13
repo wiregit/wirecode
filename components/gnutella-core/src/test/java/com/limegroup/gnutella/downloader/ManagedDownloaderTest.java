@@ -172,7 +172,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	fileManager.setUrns(urnMap);
     	fileManager.setFiles(fileMap);
     	
-    	FileListStub sharedList = (FileListStub) fileManager.getSharedFileList();
+    	FileListStub sharedList = (FileListStub) fileManager.getGnutellaSharedFileList();
     	sharedList.setDescs(descList);
     	
     	// then create an rfd from a firewalled host
