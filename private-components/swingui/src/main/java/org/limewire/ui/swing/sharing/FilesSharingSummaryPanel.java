@@ -111,8 +111,6 @@ public class FilesSharingSummaryPanel extends JPanel {
     }
     
     /**
-     * Builds a transfer handler for the given share button.
-     * 
      * When an item is dragged onto the button, the button flashes while waiting for 750ms. 
      * If the mouse is still over the component at the end of the time then the navigator switches the
      * view to the given Sharing Panel named by the panelName parameter.
