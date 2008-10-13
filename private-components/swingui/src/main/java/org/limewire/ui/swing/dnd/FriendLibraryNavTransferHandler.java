@@ -2,8 +2,9 @@ package org.limewire.ui.swing.dnd;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,7 +12,6 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 
@@ -41,7 +41,7 @@ public class FriendLibraryNavTransferHandler extends TransferHandler {
             if (info.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             Transferable t = info.getTransferable();
             try {
-                handleFiles((List<File>) t.getTransferData(DataFlavor.javaFileListFlavor));
+                handleFiles(getTransferData(t));
             } catch (Exception e) {
                 e.printStackTrace();return false;
             }
@@ -57,6 +57,11 @@ public class FriendLibraryNavTransferHandler extends TransferHandler {
         }
     
             return true;
+        }
+        
+        @SuppressWarnings("unchecked")
+        private List<File> getTransferData(Transferable t) throws UnsupportedFlavorException, IOException{
+            return (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
         }
 
         private void handleFiles(final List<File> fileList){

@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.dnd;
 
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.TransferHandler;
@@ -32,11 +34,14 @@ public class DownloadableTransferHandler extends TransferHandler{
         }
         Transferable t = info.getTransferable();
         final List<RemoteFileItem> remoteFileList;
-        try {
-            remoteFileList = (List<RemoteFileItem>) t.getTransferData(RemoteFileTransferable.REMOTE_FILE_DATA_FLAVOR);
-        } catch (Exception e) {
-            return false;
-        }
+            try {
+                remoteFileList = getTransferData(t);
+            } catch (UnsupportedFlavorException e1) {
+                return false;
+            } catch (IOException e1) {
+                return false;
+            }
+        
         BackgroundExecutorService.schedule(new Runnable() {
             public void run() {
                 for (RemoteFileItem file : remoteFileList) {
@@ -50,6 +55,11 @@ public class DownloadableTransferHandler extends TransferHandler{
         });
 
         return true;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private List<RemoteFileItem> getTransferData(Transferable t) throws UnsupportedFlavorException, IOException{
+        return (List<RemoteFileItem>) t.getTransferData(RemoteFileTransferable.REMOTE_FILE_DATA_FLAVOR);
     }
 
 }

@@ -2,7 +2,9 @@ package org.limewire.ui.swing.dnd;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.TransferHandler;
@@ -34,12 +36,14 @@ public class MyLibraryNavTransferHandler extends TransferHandler{
         }
         if (info.isDataFlavorSupported(RemoteFileTransferable.REMOTE_FILE_DATA_FLAVOR)) {
             Transferable t = info.getTransferable();
-            final List<RemoteFileItem> remoteFileList;
-            try {
-                remoteFileList = (List<RemoteFileItem>) t.getTransferData(RemoteFileTransferable.REMOTE_FILE_DATA_FLAVOR);
-            } catch (Exception e) {
-                return false;
-            }
+            final List<RemoteFileItem> remoteFileList;           
+                try {
+                    remoteFileList = getRemoteTransferData(t);
+                } catch (UnsupportedFlavorException e1) {
+                    return false;
+                } catch (IOException e1) {
+                    return false;
+                }            
             BackgroundExecutorService.schedule(new Runnable() {
                 public void run() {
                     for (RemoteFileItem file : remoteFileList) {
@@ -55,7 +59,7 @@ public class MyLibraryNavTransferHandler extends TransferHandler{
             Transferable t = info.getTransferable();
             final List<File> fileList;
             try {
-                fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+                fileList = getLocalTransferData(t);
             } catch (Exception e) {
                 return false;
             }
@@ -70,4 +74,14 @@ public class MyLibraryNavTransferHandler extends TransferHandler{
         return true;
     }
 
+    @SuppressWarnings("unchecked")
+    private List<RemoteFileItem> getRemoteTransferData(Transferable t) throws UnsupportedFlavorException, IOException{
+        return (List<RemoteFileItem>) t.getTransferData(RemoteFileTransferable.REMOTE_FILE_DATA_FLAVOR);
+    }
+    
+
+    @SuppressWarnings("unchecked")
+    private List<File> getLocalTransferData(Transferable t) throws UnsupportedFlavorException, IOException{
+        return (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+    }
 }

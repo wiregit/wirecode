@@ -61,7 +61,7 @@ class MyLibraryPanel extends JPanel implements Disposable {
                 new TextComponentMatcherEditor<LocalFileItem>(header.getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         table = tableFactory.createTable(category, filterList, null);
         table.enableSharing(sharePanel, shareManager);
-        table.setDoubleClickHandler(new MyLibraryDoubleClickHandler((LibraryTableModel<LocalFileItem>)table.getModel()));
+        table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel()));
                 
         final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>() {});
         final JScrollPane scrollPane = new JScrollPane(layer);
@@ -146,6 +146,11 @@ class MyLibraryPanel extends JPanel implements Disposable {
             
         }
         
+    }
+    
+    @SuppressWarnings("unchecked")
+    private LibraryTableModel<LocalFileItem> getTableModel(){
+        return (LibraryTableModel<LocalFileItem>)table.getModel();
     }
    
 }
