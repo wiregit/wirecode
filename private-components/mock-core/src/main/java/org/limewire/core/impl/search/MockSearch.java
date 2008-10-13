@@ -157,7 +157,7 @@ public class MockSearch implements Search {
 
         // Create a search result that will be categorized as "Other".
         msr = new MockSearchResult();
-        name = "When Everyone has a Sweet Party and you're invited!";
+        name = "When Everyone has a Sweet Party and you're invited! I was at this totally swinging hepcat party last weekend. Oh man, that joint was jumpin!";
         msr.setExtension("tmp");
         msr.setResultType(Category.OTHER);
         msr.setSize(1L);

@@ -66,7 +66,7 @@ public class FromWidget extends JPanel {
         headerPanel.setLayout(new MigLayout("insets 0 0 0 0", "0[]", "[]"));
         
         // The label has to be in a panel so we can add a border.
-        headerPanel.add(headerLabel, "wmin 80");
+        headerPanel.add(headerLabel, "wmin 125");
         headerPanel.setBorder(noBorder);
         headerPanel.setOpaque(false);
 
@@ -123,7 +123,7 @@ public class FromWidget extends JPanel {
     }
 
     private void layoutComponents() {
-        setLayout(new MigLayout("insets 8 0 0 0", "0[]0[]", "[]"));
+        setLayout(new MigLayout("insets 8 0 0 0", "0[]0[]", "0[]"));
         JLabel fromLabel = new JLabel(tr("From"));
         add(shrinkFontSize(fromLabel));
 

@@ -4,7 +4,6 @@ import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperli
 import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.util.I18n.trn;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -69,7 +68,6 @@ implements TableCellEditor, TableCellRenderer {
         new PropertyKeyComparator(PropertyKey.PLATFORM, PropertyKey.COMPANY);
 
     public static final int HEIGHT = 56;
-    public static final int LEFT_WIDTH = 440;
     public static final int WIDTH = 740;
 
     private String searchText;
@@ -309,15 +307,15 @@ implements TableCellEditor, TableCellRenderer {
         metadataLabel.setForeground(metadataLabelColor);
         metadataLabel.setFont(metadataFont);
         
-        JXPanel downloadPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]", "0[top]0"));
+        JXPanel downloadPanel = new JXPanel(new MigLayout("insets 7 0 0 5", "0[]", "0[top]0"));
         downloadPanel.setOpaque(false);
         downloadPanel.add(itemIconLabel);
 
         JXPanel headingPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]0", "5[]0[]0[]0"));
         headingPanel.setOpaque(false);
-        headingPanel.add(headingLabel, "wrap");
-        headingPanel.add(subheadingLabel, "wrap");
-        headingPanel.add(metadataLabel);
+        headingPanel.add(headingLabel, "wrap, wmin 390");
+        headingPanel.add(subheadingLabel, "wrap, wmin 390");
+        headingPanel.add(metadataLabel, "wmin 390");
 
         JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "5[][]0", "0[]0"));
 
@@ -338,23 +336,11 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private JPanel makeIndentablePanel(Component component) {
-        indentablePanel = new JPanel(new BorderLayout()) {
-            @Override
-            public Dimension getMinimumSize() {
-                return getPreferredSize();
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension size = super.getPreferredSize();
-                size.width = LEFT_WIDTH;
-                return size;
-            }
-        };
+        indentablePanel = new JPanel(new MigLayout("debug, insets 0 0 0 0", "[][]", "[]"));
         indentablePanel.setOpaque(false);
         similarResultIndentation = new JLabel(similarResultsIcon);
         similarResultIndentation.setPreferredSize(new Dimension(SIMILARITY_INDENTATION, similarResultsIcon.getIconWidth()));
-        indentablePanel.add(component, BorderLayout.CENTER);
+        indentablePanel.add(component, "cell 1 0, wmin 390");
         return indentablePanel;
     }
 
@@ -422,7 +408,7 @@ implements TableCellEditor, TableCellRenderer {
         
         if (column == 0) {
             if (vsr.getSimilarityParent() != null) {
-                indentablePanel.add(similarResultIndentation, BorderLayout.WEST);
+                indentablePanel.add(similarResultIndentation, "cell 0 0");
             } else {
                 indentablePanel.remove(similarResultIndentation);
             }
