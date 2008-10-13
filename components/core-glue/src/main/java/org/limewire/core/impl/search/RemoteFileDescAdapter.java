@@ -41,14 +41,13 @@ public class RemoteFileDescAdapter implements SearchResult {
     public RemoteFileDescAdapter(RemoteFileDesc rfd, QueryReply queryReply,
             Set<? extends IpPort> locs) {
         this.rfd = rfd;
-        this.locs = new ArrayList<IpPort>(locs);
-        
-        properties = new HashMap<PropertyKey, Object>();
-        LimeXMLDocument doc = rfd.getXMLDocument();
+        this.locs = new ArrayList<IpPort>(locs);        
+        this.properties = new HashMap<PropertyKey, Object>();
 
         set(properties, PropertyKey.NAME, FileUtils.getFilenameNoExtension(rfd.getFileName()));
         set(properties, PropertyKey.DATE_CREATED, rfd.getCreationTime());
 
+        LimeXMLDocument doc = rfd.getXMLDocument();
         if (doc != null) {
             if (LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI())) {
                 set(properties, PropertyKey.ALBUM_TITLE, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
