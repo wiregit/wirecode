@@ -212,15 +212,19 @@ public class FilesSharingSummaryPanel extends JPanel {
             addActionListener(new ActionListener() {
                         int count = 0;
                         public void actionPerformed(ActionEvent e) {
-                            
-                            if( count % 2  == 1) {
-                                shareButton.setFlash(Boolean.TRUE);
+                            Point point =  MouseInfo.getPointerInfo().getLocation();
+                            SwingUtilities.convertPointFromScreen(point, shareButton);
+                            if(shareButton.contains(point)) {
+                                if( count % 2  == 1) {
+                                    shareButton.setFlash(Boolean.TRUE);
+                                } else {
+                                    shareButton.setFlash(Boolean.FALSE);
+                                }
                             } else {
                                 shareButton.setFlash(Boolean.FALSE);
                             }
-                            
                             if(count == 2) {
-                              flashTimer.stop();
+                                flashTimer.stop();
                             }
                             count++;
                         }
