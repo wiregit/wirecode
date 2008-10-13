@@ -4,17 +4,15 @@ import java.util.Iterator;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.api.search.SearchCategory;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-@Singleton
 public class FriendLibraryAutoCompleter implements AutoCompleteDictionary {
-    private final FriendLibraries friendLibrarySearcher;
+    private final FriendLibraries friendLibraries;
+    private final SearchCategory category;
 
-    @Inject
-    FriendLibraryAutoCompleter(FriendLibraries friendLibrarySearcher) {
-        this.friendLibrarySearcher = friendLibrarySearcher;
+    public FriendLibraryAutoCompleter(FriendLibraries friendLibraries, SearchCategory category) {
+        this.friendLibraries = friendLibraries;
+        this.category = category;
     }
     
     public void addEntry(String s) {
@@ -33,7 +31,7 @@ public class FriendLibraryAutoCompleter implements AutoCompleteDictionary {
     }
 
     public Iterator<String> iterator() {
-        final Iterator<RemoteFileItem> files = friendLibrarySearcher.iterator();
+        final Iterator<RemoteFileItem> files = friendLibraries.iterator(category);
         return new Iterator<String>() {
             public boolean hasNext() {
                 return files.hasNext();
@@ -50,7 +48,7 @@ public class FriendLibraryAutoCompleter implements AutoCompleteDictionary {
     }
 
     public Iterator<String> iterator(String s) {
-        final Iterator<RemoteFileItem> files = friendLibrarySearcher.iterator(s);
+        final Iterator<RemoteFileItem> files = friendLibraries.iterator(s, category);
         return new Iterator<String>() {
             public boolean hasNext() {
                 return files.hasNext();

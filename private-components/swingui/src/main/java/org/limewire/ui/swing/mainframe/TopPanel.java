@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
@@ -20,14 +22,12 @@ import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
@@ -52,7 +52,8 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
@@ -68,7 +69,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     
     @Inject
     public TopPanel(final SearchHandler searchHandler, Navigator navigator,
-                    @Named("friendLibraries") AutoCompleteDictionary friendLibraries,
+                    final FriendAutoCompleters friendLibraries,
                     HomePanel homePanel,
                     StorePanel storePanel) {
         GuiUtils.assignResources(this);
@@ -78,7 +79,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         setBackgroundPainter(new TopPanelPainter());
         
-        textField = new TextFieldWithEnterButton(I18n.tr("Search..."), friendLibraries);
+        textField = new TextFieldWithEnterButton(I18n.tr("Search..."),
+                friendLibraries.getDictionary(SearchCategory.ALL));
         textField.setMaximumSize(120);
         textField.setName("TopPanel.searchInput");
         
@@ -88,6 +90,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
             combo.removeItem(SearchCategory.PROGRAM);
 
         combo.setName("TopPanel.combo");
+        combo.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                if(e.getStateChange() == ItemEvent.SELECTED) {
+                    SearchCategory category = (SearchCategory)e.getItem();
+                    textField.setAutoCompleteDictionary(friendLibraries.getDictionary(category));
+                }
+            }
+        });
         JLabel search = new JLabel(I18n.tr("Search"));
         search.setName("TopPanel.SearchLabel");
 

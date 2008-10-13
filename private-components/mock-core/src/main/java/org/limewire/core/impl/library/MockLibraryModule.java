@@ -22,7 +22,6 @@ public class MockLibraryModule extends AbstractModule {
         bind(LibraryManager.class).to(MockLibraryManager.class);
         bind(RemoteLibraryManager.class).to(MockRemoteLibraryManager.class);
         bind(ShareListManager.class).to(MockLibraryManager.class);
-        bind(AutoCompleteDictionary.class).annotatedWith(Names.named("friendLibraries")).to(MockFriendLibraryAutoCompleter.class);
         
         EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
         bind(new TypeLiteral<EventListener<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);

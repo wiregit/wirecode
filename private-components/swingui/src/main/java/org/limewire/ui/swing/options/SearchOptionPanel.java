@@ -204,7 +204,6 @@ public class SearchOptionPanel extends OptionPanel {
         @Override
         void initOptions() {
             groupSimilarResults.setSelected(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
-            //TODO: this isn't linked to anything
             searchFriendLibrary.setSelected(SearchSettings.SEARCH_FRIENDS_LIBRARIES.getValue());
             //TODO: this isn't linked to anything
             moveDownloadedFiles.setSelected(SearchSettings.MOVE_DOWNLOADED_FILES_TO_BOTTOM.getValue());

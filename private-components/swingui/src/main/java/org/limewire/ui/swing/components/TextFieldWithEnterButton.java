@@ -30,7 +30,8 @@ public class TextFieldWithEnterButton extends JPanel {
     private JButton button;
     private JTextField textField;
     private List<ActionListener> listeners = new ArrayList<ActionListener>();
-    
+    private DropDownListAutoCompleteControl dropDownListAutoCompleteControl;
+
     /**
      * Creates a FilteredTextField that displays a given number of columns.
      * @param promptText the prompt text to be displayed in the text field
@@ -48,7 +49,7 @@ public class TextFieldWithEnterButton extends JPanel {
             }
         };
         textField.setBorder(null);
-        DropDownListAutoCompleteControl.install(textField, friendLibraries);
+        dropDownListAutoCompleteControl = DropDownListAutoCompleteControl.install(textField, friendLibraries);
         textField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -133,5 +134,9 @@ public class TextFieldWithEnterButton extends JPanel {
      */
     public void setText(String text) {
         textField.setText(text);
+    }
+
+    public void setAutoCompleteDictionary(AutoCompleteDictionary dictionary) {
+        dropDownListAutoCompleteControl.setDictionary(dictionary);
     }
 }

@@ -17,6 +17,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JComponent;
 import javax.swing.JList;
@@ -33,6 +34,7 @@ import javax.swing.UIManager;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UISettings;
 import org.limewire.util.OSUtils;
 
@@ -46,7 +48,7 @@ public class DropDownListAutoCompleteControl {
     private static final String PROPERTY = "limewire.text.autocompleteControl"; 
 
     /** The dictionary this uses. */
-    protected AutoCompleteDictionary dict;
+    protected AtomicReference<AutoCompleteDictionary> dict = new AtomicReference<AutoCompleteDictionary>();
 
     /** The text field this is working on. */
     private final JTextField textField;
@@ -102,7 +104,7 @@ public class DropDownListAutoCompleteControl {
     * @param dict The dictionary that will be used for the autocomplete lookups.
     */
     public void setDictionary(AutoCompleteDictionary dict) {
-        this.dict = dict;
+        this.dict.set(dict);
     }
 
     /**
@@ -111,7 +113,7 @@ public class DropDownListAutoCompleteControl {
     * @return dict The dictionary that will be used for the autocomplete lookups.
     */
     public AutoCompleteDictionary getDictionary() {
-        return dict;
+        return dict.get();
     }
     
     /**
@@ -140,10 +142,10 @@ public class DropDownListAutoCompleteControl {
     public void addToDictionary() {
         if( !getAutoComplete() ) return;
 
-        if ( dict == null ) {
-            this.dict =  new StringTrieSet(true);
+        if ( dict.get() == null ) {
+            this.dict.set(new StringTrieSet(true));
         }
-        dict.addEntry(textField.getText().trim());
+        dict.get().addEntry(textField.getText().trim());
     }
     
     /**
@@ -152,10 +154,10 @@ public class DropDownListAutoCompleteControl {
     public void addToDictionary(String s) {
         if( !getAutoComplete() ) return;
 
-        if ( dict == null ) {
-            this.dict = new StringTrieSet(true);
+        if ( dict.get() == null ) {
+            this.dict.set(new StringTrieSet(true));
         }
-        dict.addEntry(s.trim());
+        dict.get().addEntry(s.trim());
     }
     
     /**
@@ -169,7 +171,7 @@ public class DropDownListAutoCompleteControl {
             public void run() {
                 String input = textField.getText();
                 if (input != null && input.length() > 0) {
-                    Iterator<String> it = dict.iterator(input);
+                    Iterator<String> it = dict.get().iterator(input);
                     if (it.hasNext())
                         showPopup(it);
                     else
@@ -182,8 +184,8 @@ public class DropDownListAutoCompleteControl {
     }
     
     protected String lookup(String s) {
-        if(dict != null && getAutoComplete() && !s.equals(""))
-            return dict.lookup(s);
+        if(dict.get() != null && getAutoComplete() && !s.equals(""))
+            return dict.get().lookup(s);
         return null;
     }
     
@@ -221,7 +223,9 @@ public class DropDownListAutoCompleteControl {
         boolean different = false;
         Vector<String> v = new Vector<String>();
         ListModel model = entryList.getModel();
-        for(int i = 0; iter.hasNext(); i++) {
+        for(int i = 0;
+            iter.hasNext() && i < SearchSettings.POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES.getValue();
+            i++) {
             String next = iter.next();
             v.add(next);
             
@@ -314,19 +318,19 @@ public class DropDownListAutoCompleteControl {
                 evt.consume();    
             }
             
-            if(dict != null) {
+            if(dict.get() != null) {
                 switch(evt.getKeyCode()) {
                 case KeyEvent.VK_UP:
                     if(popup != null)
                         entryList.decrementSelection();
                     else
-                        showPopup(dict.iterator());
+                        showPopup(dict.get().iterator());
                     break;
                 case KeyEvent.VK_DOWN:
                     if(popup != null)
                         entryList.incrementSelection();
                     else
-                        showPopup(dict.iterator());                        
+                        showPopup(dict.get().iterator());                        
                     break;
                 }
             }
@@ -345,7 +349,7 @@ public class DropDownListAutoCompleteControl {
             if(evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
                 evt.consume();
             
-            if(dict != null) {
+            if(dict.get() != null) {
                 switch(evt.getKeyChar()) {
                 case KeyEvent.VK_ESCAPE:
                     if (popup != null) {

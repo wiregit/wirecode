@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.impl.search.FriendSearchListener;
+import org.limewire.core.settings.SearchSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,15 +23,16 @@ public class FriendSearcher {
     }
     
     public void doSearch(SearchDetails searchDetails, FriendSearchListener listener) {
-        // TODO searchCategory
-        Set<RemoteFileItem> results = new HashSet<RemoteFileItem>();
-        StringTokenizer st = new StringTokenizer(searchDetails.getSearchQuery());
-        while(st.hasMoreElements()) {
-            Iterator<RemoteFileItem> resultsForWord = libraries.iterator(st.nextToken());
-            while (resultsForWord.hasNext()) {
-                results.add(resultsForWord.next());
+        if(SearchSettings.SEARCH_FRIENDS_LIBRARIES.getValue()) {
+            Set<RemoteFileItem> results = new HashSet<RemoteFileItem>();
+            StringTokenizer st = new StringTokenizer(searchDetails.getSearchQuery());
+            while(st.hasMoreElements()) {
+                Iterator<RemoteFileItem> resultsForWord = libraries.iterator(st.nextToken(), searchDetails.getSearchCategory());
+                while (resultsForWord.hasNext()) {
+                    results.add(resultsForWord.next());
+                }
             }
+            listener.handleFriendResults(results.iterator());
         }
-        listener.handleFriendResults(results.iterator());
     }
 }
