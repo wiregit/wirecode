@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
@@ -48,6 +49,7 @@ public class FilesSharingSummaryPanel extends JPanel {
     
     @Resource private Color topButtonSelectionGradient;
     @Resource private Color bottomButtonSelectionGradient;
+    
     private final ShareButton gnutellaButton;
     private final ShareButton friendButton;
           
@@ -65,37 +67,14 @@ public class FilesSharingSummaryPanel extends JPanel {
         gnutellaButton.setName("FilesSharingSummaryPanel.gnutella");
         gnutellaButton.setText("0");
         gnutellaButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        gnutellaButton.setTransferHandler(new SharingTransferHandler(shareListManager.getGnutellaShareList(), false));
+        gnutellaButton.setTransferHandler(buildGnutellaTransferHandler(shareListManager, navigator));
         
         NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME, friendSharePanel);
         friendButton = new ShareButton(NavigatorUtils.getNavAction(friendNav));
         friendButton.setName("FilesSharingSummaryPanel.friends");   
         friendButton.setText("0");
         friendButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        friendButton.setTransferHandler(new TransferHandler() {
-            private Timer timer = null;
-            @Override
-            public boolean canImport(TransferSupport support) {
- 
-                if(timer == null || !timer.isRunning()) {
-                    timer = new Timer(1000,new ActionListener(){
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        Point point =  MouseInfo.getPointerInfo().getLocation();
-                        SwingUtilities.convertPointFromScreen(point, friendButton);
-                        if(friendButton.contains(point)) {
-                            NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
-                            navItem.select();
-                        }
-                    }
-                });
-                timer.setRepeats(false);
-                timer.start();             
-                }
-                return super.canImport(support);
-            }
-            
-        });
+        friendButton.setTransferHandler(buildFriendTransferHandler(navigator));
 		
 		setLayout(new MigLayout("insets 0, gap 0", "", ""));
 
@@ -117,16 +96,114 @@ public class FilesSharingSummaryPanel extends JPanel {
             }
         });
     }
+
+   /**
+    * Builds a transfer handler for the friend button.
+    * 
+    * When an item is dragged onto the friend button, the button flashes while waiting for 750ms. 
+    * If the mouse is still over the component at the end of the time then the navigator switches the
+    * view to the friend share window.
+    * 
+    * Items cannot be dropped view this transfer handler.
+    */
+    private TransferHandler buildFriendTransferHandler(final Navigator navigator) {
+        TransferHandler transferHandler = new TransferHandler() {
+            private Timer timer = null;
+            private Timer flashTimer = null;
+            @Override
+            public boolean canImport(TransferSupport support) {
+ 
+                if(timer == null || !timer.isRunning()) {
+                    timer = new ComponentHoverTimer(750, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
+                        navItem.select();
+                    }
+                }, friendButton);
+                    
+                timer.setRepeats(false);
+                timer.start();
+                }
+                
+                if(flashTimer == null || !flashTimer.isRunning()) {
+                    flashTimer = new FlashTimer(250, navigator, friendButton);
+                    flashTimer.setInitialDelay(250);
+                    flashTimer.start();
+                }
+                return super.canImport(support);
+            }  
+        };
+        return transferHandler;
+    }
+
+    /**
+     * Builds a transfer handler for the gnutella button.
+     * 
+     * When an item is dragged onto the gnutella button, the button flashes while waiting for 750ms. 
+     * If the mouse is still over the component at the end of the time then the navigator switches the
+     * view to the gnutella share window.
+     * 
+     * If the dragged items are dropped onto the gnutella button, they are added to the gnutella library. 
+     * This is done via delegation to a SharingTransferHandler;
+     */
+    private TransferHandler buildGnutellaTransferHandler(final ShareListManager shareListManager,
+            final Navigator navigator) {
+            TransferHandler transferHandler = new TransferHandler() {
+            private final SharingTransferHandler sharingTransferHandler = new SharingTransferHandler(shareListManager.getGnutellaShareList());
+            private Timer timer = null;
+            private Timer flashTimer = null;
+            @Override
+            public boolean canImport(TransferSupport support) {
+ 
+                if(timer == null || !timer.isRunning()) {
+                    timer = new ComponentHoverTimer(750, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, GnutellaSharePanel.NAME);
+                        navItem.select();
+                    }
+                }, gnutellaButton);
+                    
+                timer.setRepeats(false);
+                timer.start();
+                }
+                
+                if(flashTimer == null || !flashTimer.isRunning()) {
+                    flashTimer = new FlashTimer(250, navigator, gnutellaButton);
+                    flashTimer.setInitialDelay(250);
+                    flashTimer.start();
+                }
+                return sharingTransferHandler.canImport(support);
+            }
+            
+            @Override
+            public boolean importData(TransferSupport support) {
+                return sharingTransferHandler.importData(support);
+            }
+            
+        };
+        
+        return transferHandler;
+    }
     
     /**
      * A button that uses a painter to draw the background if
      * its Action.SELECTED_KEY property is true.
      */
-    private static class ShareButton extends IconButton {        
+    private static class ShareButton extends IconButton {
+        
+        private Boolean flash = Boolean.FALSE;
+        
         public ShareButton(Action navAction) {
             super(navAction);
         }
         
+        public void setFlash(Boolean flash) {
+            this.flash = flash;        
+            repaint();
+        }
+
         public void setGradients(Color topGradient, Color bottomGradient) {
             getAction().addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
@@ -145,14 +222,60 @@ public class FilesSharingSummaryPanel extends JPanel {
                 @Override
                 public void doPaint(Graphics2D g, JXButton component, int width,
                         int height) {
-                    if(Boolean.TRUE.equals(getAction().getValue(Action.SELECTED_KEY))) {
+                    //while flashing we simulate the button being selected.
+                    if(Boolean.TRUE.equals(flash) || Boolean.TRUE.equals(getAction().getValue(Action.SELECTED_KEY))) {
                         super.doPaint(g, component, width, height);
                     } else {
                         oldPainter.paint(g, component, width, height);
                     }
                 }
             });
+        }   
+    }
+    
+    private final class FlashTimer extends Timer {
+       
+        private FlashTimer(int delay, final Navigator navigator, final ShareButton shareButton) {
+            super(delay, null);
+            final FlashTimer flashTimer = this;
+            shareButton.setFlash(Boolean.TRUE);
+            addActionListener(new ActionListener() {
+                        int count = 0;
+                        public void actionPerformed(ActionEvent e) {
+                            
+                            if( count % 2  == 1) {
+                                shareButton.setFlash(Boolean.TRUE);
+                            } else {
+                                shareButton.setFlash(Boolean.FALSE);
+                            }
+                            
+                            if(count == 2) {
+                              flashTimer.stop();
+                            }
+                            count++;
+                        }
+                    });
         }
-        
+    }
+    
+    /**
+     * Helper class that given a component will execute the given listener if 
+     * the mouse is hovering over the component at the time the timer fires.
+     */
+    private class ComponentHoverTimer extends Timer {
+        public ComponentHoverTimer(int delay, final ActionListener listener, final Component component) {
+            super(delay, new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Point point =  MouseInfo.getPointerInfo().getLocation();
+                    SwingUtilities.convertPointFromScreen(point, component);
+                    if(component.contains(point)) {
+                        listener.actionPerformed(e);
+                    }
+                }
+                
+            });
+        }
     }
 }
