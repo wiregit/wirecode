@@ -24,17 +24,25 @@ public class PromptTextField extends JTextField implements FocusListener {
     
     public PromptTextField(String promptText) {
         super();
-        init();
+        init(true);
         setPromptText(promptText);
     }
     
-    private void init(){
+    public PromptTextField(String promptText, int columns) {
+        super(columns);
+        init(false);
+        setPromptText(promptText);
+    }
+    
+    private void init(boolean setSize){
         addFocusListener(this);
         this.setOpaque(false);
         this.setBorder(new TextBorder());
-        this.setPreferredSize(new Dimension(150, 19));
-        this.setMinimumSize(this.getPreferredSize());
-        this.setSize(this.getPreferredSize());
+        if(setSize) {
+            this.setPreferredSize(new Dimension(150, 19));
+            this.setMinimumSize(this.getPreferredSize());
+            this.setSize(this.getPreferredSize());
+        }
     }
     
     public void setPromptText(String text){
@@ -54,10 +62,8 @@ public class PromptTextField extends JTextField implements FocusListener {
         }
 
         @Override
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-       
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {       
         }
-      
     }
     
     
@@ -85,23 +91,27 @@ public class PromptTextField extends JTextField implements FocusListener {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-        
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        g2.setColor(Color.WHITE);
-        g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());
-  
-        g2.setColor(new Color(0,0,0,92));
-        
-        g2.drawRoundRect(0, 0, this.getWidth()-1, this.getHeight()-1, 10, this.getHeight());     
-        
+        Graphics2D g2 = (Graphics2D) g;        
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);        
+        paintTextArea(g2);        
         super.paintComponent(g);
-
-        if (!hasFocus() && getText().length() == 0) {
-            g.setColor(Color.LIGHT_GRAY);
-            FontMetrics fm = g.getFontMetrics();
-            g.drawString(promptText, 10, fm.getAscent() + 2);
+        paintPrompt(g2);
+    }
+    
+    protected void paintTextArea(Graphics2D g2) {
+        g2.setColor(Color.WHITE);
+        g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());  
+        g2.setColor(new Color(0,0,0,92));        
+        g2.drawRoundRect(0, 0, this.getWidth()-1, this.getHeight()-1, 10, this.getHeight());     
+    }
+    
+    protected void paintPrompt(Graphics2D g2) {
+        if (!hasFocus() && getText().isEmpty()) {
+            g2.setColor(Color.LIGHT_GRAY);
+            FontMetrics fm = g2.getFontMetrics();
+            Border border = getBorder();
+            int x = border != null ? border.getBorderInsets(this).left : 0;
+            g2.drawString(promptText, x, fm.getAscent() + 3);
         }
     }
 }

@@ -1,11 +1,9 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +11,6 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 
 import net.miginfocom.swing.MigLayout;
@@ -29,13 +25,11 @@ import org.limewire.collection.AutoCompleteDictionary;
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class TextFieldWithEnterButton extends JPanel implements FocusListener {
+public class TextFieldWithEnterButton extends JPanel {
     
     private JButton button;
     private JTextField textField;
     private List<ActionListener> listeners = new ArrayList<ActionListener>();
-    private String promptText;
-    private boolean empty;
     
     /**
      * Creates a FilteredTextField that displays a given number of columns.
@@ -44,35 +38,22 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      */
     public TextFieldWithEnterButton(
             String promptText, AutoCompleteDictionary friendLibraries) {
-        
-        this.promptText = promptText;
-        
         setLayout(new MigLayout("insets 0 2 0 2"));
         
         // Configure the JTextField.
-        textField = new JTextField(999);
+        textField = new PromptTextField(promptText, 999) {
+            @Override
+            protected void paintTextArea(Graphics2D g2) {
+                // Do nothing special.
+            }
+        };
+        textField.setBorder(null);
         TextFieldClipboardControl.install(textField);
         DropDownListAutoCompleteControl.install(textField, friendLibraries);
-        prompt();
-        textField.addFocusListener(this);
         textField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
                 notifyListeners();
-            }
-        });
-        textField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void changedUpdate(DocumentEvent event) {
-                updateEmpty();
-            }
-            @Override
-            public void insertUpdate(DocumentEvent event) {
-                updateEmpty();
-            }
-            @Override
-            public void removeUpdate(DocumentEvent event) {
-                updateEmpty();
             }
         });
         add(textField, "grow, aligny top");
@@ -90,9 +71,6 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
             }
         });
         add(button, "grow");
-        
-        // Fix borders.
-        textField.setBorder(null);
     }
     
     public void setIcon(Icon icon) {
@@ -110,55 +88,27 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
     public synchronized void addActionListener(ActionListener listener) {
         listeners.add(listener);
     }
-    
-    /**
-     * Repaints this component when focus is gained
-     * so default text can be removed.
-     */
-    @Override
-    public void focusGained(FocusEvent e) {
-        if (empty) {
-            textField.setText("");
-            textField.setForeground(Color.BLACK);
-        }
-    }
-    
-    /**
-     * Repaints this component when focus is lost
-     * so default text can be displayed if no text has been entered.
-     */
-    @Override
-    public void focusLost(FocusEvent e) {
-        if (empty) prompt();
-    }
 
     /**
      * Gets the text displayed in the JTextField.
      * @return the text
      */
     public String getText() {
-        return empty ? "" : textField.getText();
+        return textField.getText();
     }
     
     /**
      * Notifies ActionListeners only if the text field isn't empty.
      */
     private synchronized void notifyListeners() {
-        if (empty) return;
+        if (textField.getText().isEmpty()) {
+            return;
+        }
         
         for (ActionListener listener : listeners) {
             ActionEvent event = new ActionEvent(this, 0, null);
             listener.actionPerformed(event);
         }
-    }
-    
-    /**
-     * Prompts the user by added grayed text to the text field.
-     */
-    private void prompt() {
-        textField.setForeground(Color.GRAY);
-        textField.setText(promptText);
-        empty = true;
     }
     
     /**
@@ -184,13 +134,5 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
      */
     public void setText(String text) {
         textField.setText(text);
-        updateEmpty();
-    }
-    
-    /**
-     * Updates the value of the empty flag.
-     */
-    private void updateEmpty() {
-        empty = textField.getText().length() == 0;
     }
 }
