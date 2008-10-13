@@ -24,6 +24,7 @@ import java.util.Vector;
 import javax.swing.text.Document;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -49,7 +50,7 @@ import org.limewire.util.OSUtils;
  *      and listeners to be lazily created, and update the dictionary at will.
  * 
  */
-public class DropDownListAutoCompleteTextField extends KeyProcessingTextField {
+public class DropDownListAutoCompleteTextField extends JTextField {
     
     protected AutoCompleteDictionary dict;
 
@@ -162,6 +163,7 @@ public class DropDownListAutoCompleteTextField extends KeyProcessingTextField {
         enableEvents(AWTEvent.KEY_EVENT_MASK);
         enableEvents(AWTEvent.HIERARCHY_EVENT_MASK);
         enableEvents(AWTEvent.FOCUS_EVENT_MASK);
+        TextFieldClipboardControl.install(this);
     }
     
     /**
