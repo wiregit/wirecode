@@ -34,6 +34,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final Map<PropertyKey, Object> properties;    
     private final Category category;    
     private final String extension;
+    private final String fileName;
     
     private volatile FriendPresence friendPresence;    
 
@@ -78,6 +79,7 @@ public class RemoteFileDescAdapter implements SearchResult {
             }
         }
         
+        fileName = rfd.getFileName();
         extension = FileUtils.getFileExtension(rfd.getFileName());
         category = MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(extension));
     }
@@ -332,5 +334,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         public String getRenderName() {
             return getFriendPresence().getFriend().getRenderName();
         }
+    }
+
+
+    @Override
+    public String getFileName() {
+       return fileName;
     }
 }

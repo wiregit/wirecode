@@ -50,4 +50,6 @@ public interface SearchResult {
     String getUrn();
     
     public boolean isSpam();
+    
+    String getFileName();
 }

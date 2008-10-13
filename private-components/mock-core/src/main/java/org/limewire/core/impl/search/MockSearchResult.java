@@ -116,4 +116,17 @@ public class MockSearchResult implements Cloneable, SearchResult {
     public void setSpam(boolean spam) {
         this.spam = spam;
     }
+
+    @Override
+    public String getFileName() {
+        String fileName="";
+        if(getProperty(PropertyKey.NAME) != null) {
+            fileName = getProperty(PropertyKey.NAME).toString();
+        }
+        
+        if(getFileExtension() != null) {
+            fileName += "." + getFileExtension();
+        }
+        return fileName;
+    }
 }

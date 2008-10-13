@@ -659,13 +659,16 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public class TestSearchResult implements SearchResult {
 
         private String urn;
-
+        
+        private String fileName;
+        
         private Map<PropertyKey, Object> properties;
 
         public TestSearchResult(String urn, String fileName) {
             this.urn = urn;
             this.properties = new HashMap<PropertyKey, Object>();
             this.properties.put(PropertyKey.NAME, fileName);
+            this.fileName = fileName;
         }
 
         @Override
@@ -739,6 +742,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         @Override
         public boolean isSpam() {
             return false;
+        }
+
+        @Override
+        public String getFileName() {
+            return fileName;
         }
     }
 }
