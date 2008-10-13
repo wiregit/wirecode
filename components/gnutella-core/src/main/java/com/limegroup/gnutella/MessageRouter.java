@@ -252,8 +252,7 @@ public interface MessageRouter extends Service {
     public boolean sendInitialQuery(QueryRequest query, RoutedConnection mc);
 
     /**
-     * The default handler for QueryReplies received in
-     * RoutedConnection.loopForMessages().  This implementation
+     * The default handler for QueryReplies.  This implementation
      * uses the query route table to route a query reply.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
      * the QueryReply count is incremented.<p>

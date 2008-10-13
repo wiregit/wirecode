@@ -969,8 +969,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
     private QueryRequest tryToProxy(QueryRequest query) {
         // we must have the following qualifications:
-        // 1) Leaf must be sending SuperNode a query (checked in
-        // loopForMessages)
+        // 1) Leaf must be sending SuperNode a query
         // 2) Leaf must support Leaf Guidance
         // 3) Query must not be OOB.
         // 3.5) The query originator should not disallow proxying.

@@ -328,15 +328,14 @@ public class RatingTable implements Service {
 	        synchronized(RatingTable.this) {
 	            Map<String, Object> ret = new HashMap<String, Object>();
 	            ret.put("ver",1);
-	            final float spamTreshold = Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
-	                    SearchSettings.QUERY_SPAM_CUTOFF.getValue());
+                final float spamThreshold = SearchSettings.FILTER_SPAM_RESULTS.getValue();
 	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	            DataOutputStream daos = new DataOutputStream(baos);
 	            try {
 	                for (Token t : _tokenMap.values()) {
 	                    // 8 bytes per entry
 	                    float rating = t.getRating();
-	                    if (rating < spamTreshold)
+	                    if (rating < spamThreshold)
 	                        break;
 	                    daos.writeFloat(rating);
 	                    daos.writeInt(t.hashCode());

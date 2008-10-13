@@ -23,6 +23,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -325,23 +326,21 @@ public final class QueryUnicaster implements Service {
      */
     public boolean addQuery(QueryRequest query, ReplyHandler reference) {
         LOG.debug("QueryUnicaster.addQuery(): entered.");
-        boolean retBool = false;
+        boolean added = false;
         GUID guid = new GUID(query.getGUID());
         // first map the QueryBundle using the guid....
         synchronized (_queries) {
             if (!_queries.containsKey(guid)) {
                 QueryBundle qb = new QueryBundle(query);
                 _queries.put(guid, qb);
-                retBool = true;
-            }
-            if (retBool) {
                 _queries.notifyAll();
-			}
+                added = true;
+            }
         }
 
 		// return if this node originated the query
         if (reference == null)
-            return retBool;
+            return added;
 
         // then record the guid in the set of leaf's queries...
         synchronized (_querySets) {
@@ -353,8 +352,8 @@ public final class QueryUnicaster implements Service {
             guids.add(guid);
         }
         if(LOG.isDebugEnabled())
-            LOG.debug("QueryUnicaster.addQuery(): returning " + retBool);
-        return retBool;
+            LOG.debug("QueryUnicaster.addQuery(): returning " + added);
+        return added;
     }
 
     /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
@@ -385,9 +384,9 @@ public final class QueryUnicaster implements Service {
                !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
                  NetworkUtils.isCloseIP(networkManager.getAddress(),
                                         endpoint.getInetAddress().getAddress())) ) {
+                byte[] guid = udpService.get().getSolicitedGUID().bytes();
 				PingRequest pr = 
-                pingRequestFactory.createPingRequest(udpService.get().getSolicitedGUID().bytes(),
-                        (byte)1, (byte)0);
+				    pingRequestFactory.createPingRequest(guid, (byte)1, (byte)0);
                 udpService.get().send(pr, endpoint.getInetAddress(), endpoint.getPort());
 				_testUDPPingsSent++;
 			}
@@ -452,9 +451,7 @@ public final class QueryUnicaster implements Service {
      *  pre: pr.getQueryKey() != null
      */
     public void handleQueryKeyPong(PingReply pr) {
-        if(pr == null) {
-            throw new NullPointerException("null pong");
-        }
+        Objects.nonNull(pr, "pong");
         AddressSecurityToken qk = pr.getQueryKey();
         if(qk == null)
             throw new IllegalArgumentException("no key in pong");
@@ -503,8 +500,8 @@ public final class QueryUnicaster implements Service {
                 if ((System.currentTimeMillis() - _lastPingTime) >
                     20000) { // don't sent too many pings..
                     // first send a Ping, hopefully we'll get some pongs....
-                    PingRequest pr = 
-                    pingRequestFactory.createPingRequest(ConnectionSettings.TTL.getValue());
+                    byte ttl = ConnectionSettings.TTL.getValue();
+                    PingRequest pr = pingRequestFactory.createPingRequest(ttl);
                     messageRouter.get().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }

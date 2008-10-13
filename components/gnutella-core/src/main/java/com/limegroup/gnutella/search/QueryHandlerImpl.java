@@ -422,18 +422,18 @@ final class QueryHandlerImpl implements Inspectable, QueryHandler {
             probeConnection = true;
         }
 
-        int results = (_numResultsReportedByLeaf > 0 ? _numResultsReportedByLeaf : RESULT_COUNTER
-                .getNumResults());
-        double resultsPerHost = (double) results / (double) _theoreticalHostsQueried;
+        int reported = _numResultsReportedByLeaf;
+        if(reported <= 0)
+            reported = RESULT_COUNTER.getNumResults();
+        double resultsPerHost = (double) reported / _theoreticalHostsQueried;
 
-        int resultsNeeded = RESULTS - results;
+        int resultsNeeded = RESULTS - reported;
         int hostsToQuery = 40000;
         if (resultsPerHost != 0) {
             hostsToQuery = (int) (resultsNeeded / resultsPerHost);
         }
 
         int hostsToQueryPerConnection = hostsToQuery / remainingConnections;
-        ;
 
         ttl = calculateNewTTL(hostsToQueryPerConnection, mc.getConnectionCapabilities()
                 .getNumIntraUltrapeerConnections(), mc.getConnectionCapabilities().getHeadersRead()

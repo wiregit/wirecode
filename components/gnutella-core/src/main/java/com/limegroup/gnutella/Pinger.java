@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /**
@@ -75,8 +76,10 @@ public final class Pinger implements Runnable, Service {
      * Broadcasts a ping to all connections.
      */
     public void run() {
-        if (connectionServices.isSupernode() && PingPongSettings.PINGS_ACTIVE.getValue()) {
-            messageRouter.get().broadcastPingRequest(pingRequestFactory.createPingRequest((byte) 3));
+        if(connectionServices.isSupernode()
+           && PingPongSettings.PINGS_ACTIVE.getValue()) {
+            PingRequest ping = pingRequestFactory.createPingRequest((byte)3);
+            messageRouter.get().broadcastPingRequest(ping);
         }
     }
 }

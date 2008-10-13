@@ -144,37 +144,45 @@ public class StandardMessageRouter extends MessageRouterImpl {
     @Override
     protected void respondToPingRequest(PingRequest ping,
                                         ReplyHandler handler) {
-        //If this wasn't a handshake or crawler ping, check if we can accept
-        //incoming connection for old-style unrouted connections, ultrapeers, or
-        //leaves.  TODO: does this mean leaves always respond to pings?
-        int hops = ping.getHops();
-        int ttl = ping.getTTL();
-        if (   (hops+ttl > 2) 
-            && !connectionManager.allowAnyConnection())
+        // The ping has already been hopped
+        byte hops = ping.getHops();
+        byte ttl = ping.getTTL();
+        // If hops + ttl > 2 this is not a heartbeat or a crawler ping. Check 
+        // if we can accept an incoming connection for old-style unrouted
+        // connections, ultrapeers, or leaves.
+        if(hops + ttl > 2 && !connectionManager.allowAnyConnection()) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Not responding to ordinary ping (1) " + ping);
             return;
+        }
             
         // Only send pongs for ourself if we have a valid address & port.
-        if(NetworkUtils.isValidAddress(networkManager.getAddress()) &&
-           NetworkUtils.isValidPort(networkManager.getPort())) {    
-            //SPECIAL CASE: for crawler ping
-            // TODO:: this means that we can never send TTL=2 pings without
-            // them being interpreted as from the crawler!!
-            if(hops ==1 && ttl==1) {
+        if(networkManager.isIpPortValid()) {    
+            // If hops == 1 and ttl == 1 this is a crawler ping. We don't send
+            // our own pong since the crawler already knows our address, but
+            // we send the addresses of our leaves.
+            if(hops == 1 && ttl == 1) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Responding to crawler ping " + ping);
                 handleCrawlerPing(ping, handler);
                 return;
-                //Note that the while handling crawler ping, we dont send our
-                //own pong, as that is unnecessary, since crawler already has
-                //our address.
             }
     
-            // handle heartbeat pings specially -- bypass pong caching code
+            // If hops == 1 and ttl == 0 this is a heartbeat ping. Bypass
+            // the pong caching code and reply. TODO: why does this require a
+            // valid address and port? Don't we want to respond to heartbeat
+            // pings on LAN connections?
             if(ping.isHeartbeat()) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Responding to heartbeat ping " + ping);
                 sendPingReply(pingReplyFactory.create(ping.getGUID(), (byte)1), 
-                    handler);
+                        handler);
                 return;
             }
-    
-            //send its own ping in all the cases
+            
+            // TODO: why would hops + ttl be less than 3 at this point? We've
+            // already dealt with crawler and heartbeat pings. And why is the
+            // ttl of the pong greater than the hop count of the ping?
             int newTTL = hops+1;
             if ( (hops+ttl) <=2)
                 newTTL = 1;        
@@ -183,10 +191,15 @@ public class StandardMessageRouter extends MessageRouterImpl {
             // daily uptime is more than 1/2 hour
             if(connectionManager.hasFreeSlots()  ||
                statistics.calculateDailyUptime() > 60*30) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Responding to ordinary ping " + ping);
                 PingReply pr = 
                     pingReplyFactory.create(ping.getGUID(), (byte)newTTL);
                 
                 sendPingReply(pr, handler);
+            } else {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Not responding to ordinary ping (2) " + ping);
             }
         }
         
@@ -218,11 +231,6 @@ public class StandardMessageRouter extends MessageRouterImpl {
         if(!networkManager.isIpPortValid())
             return;
         
-        IpPort ipport = null;
-        if (request.requestsIP()) {
-            ipport = new IpPortImpl(addr);
-        }
-        
         List<IpPort> dhthosts = Collections.emptyList();
         int maxHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
         
@@ -252,8 +260,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
         } 
         
         PingReply reply;
-    	if (ipport != null)
-    	    reply = pingReplyFactory.create(request.getGUID(), (byte)1, ipport, gnuthosts, dhthosts);
+    	if (request.requestsIP())
+    	    reply = pingReplyFactory.create(request.getGUID(), (byte)1, new IpPortImpl(addr), gnuthosts, dhthosts);
     	else
     	    reply = pingReplyFactory.create(request.getGUID(), (byte)1, gnuthosts, dhthosts);
         
@@ -268,36 +276,30 @@ public class StandardMessageRouter extends MessageRouterImpl {
 	}
 
     /**
-     * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
-     * corresponding to all its leaves
-     * @param m The ping request received
+     * Responds to a crawler ping with hops 0 and ttl 2 (before hopping) by
+     * sending a pong for each leaf. Ultrapeer neighbours will send their own
+     * pongs when the ping is forwarded to them. TODO: where is the ping
+     * forwarded to them?
+     * @param ping the ping request received
      * @param handler the <tt>ReplyHandler</tt> that should handle any
      *  replies
      */
-    private void handleCrawlerPing(PingRequest m, ReplyHandler handler) {
-        //TODO: why is this any different than the standard pong?  In other
-        //words, why no ultrapong marking, proper address calculation, etc?
-        
+    private void handleCrawlerPing(PingRequest ping, ReplyHandler handler) {
         //send the pongs for leaves
-        List<RoutedConnection> leafConnections = connectionManager.getInitializedClientConnections();
-        
+        List<RoutedConnection> leafConnections =
+            connectionManager.getInitializedClientConnections();
         for(RoutedConnection connection : leafConnections) {
             //create the pong for this connection
             PingReply pr = 
-                pingReplyFactory.createExternal(m.getGUID(), (byte)2, 
-                                         connection.getPort(),
-                                         connection.getInetAddress().getAddress(),
-                                         false);
-                                                    
-            
+                pingReplyFactory.createExternal(ping.getGUID(), (byte)2, 
+                                    connection.getPort(),
+                                    connection.getInetAddress().getAddress(),
+                                    false);
             //hop the message, as it is ideally coming from the connected host
             pr.hop();
             
             sendPingReply(pr, handler);
         }
-        
-        //pongs for the neighbors will be sent by neighbors themselves
-        //as ping will be broadcasted to them (since TTL=2)        
     }
     
     @Override
@@ -321,8 +323,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
                                                 
         // Ensure that we have a valid IP & Port before we send the response.
         // Otherwise the QueryReply will fail on creation.
-        if( !NetworkUtils.isValidPort(networkManager.getPort()) ||
-            !NetworkUtils.isValidAddress(networkManager.getAddress()))
+        if(!networkManager.isIpPortValid())
             return false;
                                                      
         // Run the local query

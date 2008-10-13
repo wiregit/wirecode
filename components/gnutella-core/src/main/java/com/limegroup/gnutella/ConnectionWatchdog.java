@@ -18,6 +18,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
 /*
@@ -154,7 +155,8 @@ public final class ConnectionWatchdog implements Service {
             if (!c.isKillable())
 				continue;
             snapshot.put(c, new ConnectionState(c));
-            messageRouter.get().sendPingRequest(pingRequestFactory.createPingRequest((byte)1), c);
+            PingRequest ping = pingRequestFactory.createPingRequest((byte)1);
+            messageRouter.get().sendPingRequest(ping, c);
         }
         
         backgroundExecutor.schedule(new DudChecker(snapshot, true), REEVALUATE_TIME, TimeUnit.MILLISECONDS);

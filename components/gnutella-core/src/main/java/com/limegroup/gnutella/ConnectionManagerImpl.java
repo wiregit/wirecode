@@ -86,8 +86,8 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * of good is constantly changing.  For a current view of 'good', review
  * HandshakeResponse.isGoodUltrapeer().  LimeWire leaves will NOT deny
  * a connection to an ultrapeer even if they've reached their maximum
- * desired number of connections (currently 4).  This means that if 5
- * connections resolve simultaneously, the leaf will remain connected to all 5.
+ * desired number of connections (currently 3).  This means that if 4
+ * connections resolve simultaneously, the leaf will remain connected to all 4.
  * <br>
  * As an Ultrapeer, LimeWire will seek outgoing connections for 5 less than
  * the number of it's desired peer slots.  This is done so that newcomers
@@ -97,8 +97,8 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * reserves 3 slots for non-LimeWire peers.  LimeWire ultrapeers will allow
  * ANY leaf to connect, so long as there are atleast 15 slots open.  Beyond
  * that number, LimeWire will only allow 'good' leaves.  To see what consitutes
- * a good leave, view HandshakeResponse.isGoodLeaf().  To ensure that the
- * network does not remain too LimeWire-centric, it reserves 3 slots for
+ * a good leaf, view HandshakeResponse.isGoodLeaf().  To ensure that the
+ * network does not remain too LimeWire-centric, it reserves 2 slots for
  * non-LimeWire leaves.<p>
  *
  * ConnectionManager has methods to get up and downstream bandwidth, but it
@@ -844,7 +844,6 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      */
     public boolean allowAnyConnection() {
         //Stricter than necessary.
-        //See allowAnyConnection(boolean,String,String).
         if (isShieldedLeaf())
             return false;
 

@@ -119,7 +119,9 @@ public final class RouteTable implements Inspectable {
         public byte getTTL() { return ttl; }
 
 		/** Accessor for the number of results for this entry. */
-        public int getNumResults() { return Math.max(0,repliesRouted - partialRepliesRouted); }
+        public int getNumResults() {
+            return Math.max(0, repliesRouted - partialRepliesRouted);
+        }
         
         void updateClassCNetworks(int classCNetwork, int numReplies) {
             classCnetworks.add(classCNetwork, numReplies);

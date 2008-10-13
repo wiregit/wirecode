@@ -840,8 +840,9 @@ public class UDPService implements ReadWriteObserver {
             if (!canReceiveSolicited() && !canReceiveUnsolicited()) return;
 
             // good to use the solicited guid
-            PingRequest pr = pingRequestFactory.createPingRequest(getSolicitedGUID().bytes(), (byte)1,
-                    (byte)0);
+            byte[] guid = getSolicitedGUID().bytes();
+            PingRequest pr =
+                pingRequestFactory.createPingRequest(guid, (byte)1,(byte)0);
             
             pr.addIPRequest();
             send(pr, ep.getInetAddress(), ep.getPort());
