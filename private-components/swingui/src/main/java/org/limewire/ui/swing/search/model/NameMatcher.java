@@ -5,30 +5,24 @@ import java.util.regex.Pattern;
 
 import org.limewire.core.api.search.SearchResult;
 
-public class NameMatcher implements SearchResultMatcher {
+
+public class NameMatcher extends AbstractSearchResultMatcher {
     private static final String REPLACE = "\\(\\d\\)|[-_. ()]";
 
     private Pattern pattern = Pattern.compile(REPLACE);
 
     @Override
-    public boolean matches(VisualSearchResult o1, VisualSearchResult o2) {
-        for (SearchResult result1 : o1.getCoreSearchResults()) {
-            String name1 = result1.getFileName();
-            if (name1 != null) {
-                for (SearchResult result2 : o2.getCoreSearchResults()) {
-                    String name2 = result2.getFileName();
-                    if (name2 != null) {
-                        if (matches(name1, name2)) {
-                            return true;
-                        }
-                    }
-                }
+    public boolean matches(SearchResult result1, SearchResult result2) {
+        String name1 = result1.getFileName();
+        String name2 = result2.getFileName();
+        if (name1 != null && name2 != null) {
+            if (matches(name1, name2)) {
+                return true;
             }
         }
-
         return false;
     }
-
+    
     /**
      * Tests to see if two strings match. First the strings are cleaned up
      * removing all spaces and symbols and converted to lower case. Next they

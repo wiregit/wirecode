@@ -1,16 +1,9 @@
 package org.limewire.ui.swing.search.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import junit.framework.Assert;
 
-import org.limewire.core.api.Category;
-import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.util.BaseTestCase;
 
@@ -618,135 +611,5 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         assertEquals(0, child.getSimilarResults().size());
         assertEquals(1, parent.getSimilarResults().size());
         assertSame(child, parent.getSimilarResults().get(0));
-    }
-
-//    public void testGroupingByName2UrnsNameComesLateWithEditDistance() {
-//        SearchResultsModel model = new BasicSearchResultsModel();
-//        model.getGroupedSearchResults()
-//                .addListEventListener(
-//                        new GroupingListEventListener(new SimilarResultsMatchingDetector(
-//                                new NameMatcher())));
-//
-//        TestSearchResult testResult1 = new TestSearchResult("1", "file name");
-//        TestSearchResult testResult2 = new TestSearchResult("2", "other2 file");
-//        TestSearchResult testResult3 = new TestSearchResult("1", "file name");
-//        // other file for urn1 is coming in late
-//        TestSearchResult testResult4 = new TestSearchResult("1", "other1 file");
-//
-//        model.addSearchResult(testResult1);
-//        model.addSearchResult(testResult2);
-//        model.addSearchResult(testResult3);
-//        model.addSearchResult(testResult4);
-//
-//        List<VisualSearchResult> results = model.getGroupedSearchResults();
-//        Assert.assertEquals(2, results.size());
-//        VisualSearchResult group0 = results.get(0);
-//        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-//        Assert.assertEquals(1, similarResults0.size());
-//        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
-//        Assert.assertEquals(3, coreResults0.size());
-//
-//        VisualSearchResult group1 = results.get(1);
-//        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-//        Assert.assertEquals(0, similarResults1.size());
-//        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
-//        Assert.assertEquals(1, coreResults1.size());
-//
-//        Assert.assertNull(group0.getSimilarityParent());
-//        Assert.assertEquals(group0, group1.getSimilarityParent());
-//    }
-    
-    public class TestSearchResult implements SearchResult {
-
-        private String urn;
-        
-        private String fileName;
-        
-        private Map<PropertyKey, Object> properties;
-
-        public TestSearchResult(String urn, String fileName) {
-            this.urn = urn;
-            this.properties = new HashMap<PropertyKey, Object>();
-            this.properties.put(PropertyKey.NAME, fileName);
-            this.fileName = fileName;
-        }
-
-        @Override
-        public String getFileExtension() {
-            return null;
-        }
-
-        @Override
-        public Map<PropertyKey, Object> getProperties() {
-            return properties;
-        }
-
-        @Override
-        public Object getProperty(PropertyKey key) {
-            return properties.get(key);
-        }
-
-        @Override
-        public long getSize() {
-            return 0;
-        }
-
-        @Override
-        public List<RemoteHost> getSources() {
-            List<RemoteHost> sources =new ArrayList<RemoteHost>();
-            sources.add(new RemoteHost() {
-                UUID randomUUID = UUID.randomUUID();
-            
-                @Override
-                public String getRenderName() {
-                    return randomUUID.toString();
-                }
-
-                @Override
-                public boolean isBrowseHostEnabled() {
-                    return false;
-                }
-
-                @Override
-                public boolean isChatEnabled() {
-                    return false;
-                }
-
-                @Override
-                public boolean isSharingEnabled() {
-                    return false;
-                }
-
-                @Override
-                public FriendPresence getFriendPresence() {
-                    return null;
-                }
-            });
-            return sources;
-        }
-
-        @Override
-        public String getUrn() {
-            return urn;
-        }
-
-        public String toString() {
-            return getUrn() + " - " + getProperty(PropertyKey.NAME);
-        }
-
-        @Override
-        public Category getCategory() {
-            return null;
-        }
-
-        @Override
-        public boolean isSpam() {
-            return false;
-        }
-
-        @Override
-        public String getFileName() {
-            return fileName;
-        }
     }
 }

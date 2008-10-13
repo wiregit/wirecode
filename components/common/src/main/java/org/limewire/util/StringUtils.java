@@ -563,4 +563,11 @@ public class StringUtils {
             }
         }
     }
+    
+    /**
+     * Returns true if the given string is null or empty;
+     */
+    public static boolean isEmpty(String s) {
+        return s == null || s.trim().length() == 0;
+    }
 }

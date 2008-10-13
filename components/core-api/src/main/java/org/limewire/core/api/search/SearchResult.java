@@ -8,7 +8,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 
 public interface SearchResult {
 
-    enum PropertyKey {
+  public enum PropertyKey {
         ALBUM_TITLE,
         ARTIST_NAME,
         AUTHOR,
@@ -30,6 +30,7 @@ public interface SearchResult {
         SAMPLE_RATE, // ex. 44,100 Hz
         // get size from VisualSearchResult.getSize()
         TRACK_NUMBER,
+        TRACK_NAME,
         // get type from VisualSearchResult.getFileExtension()
         WIDTH,
         YEAR
