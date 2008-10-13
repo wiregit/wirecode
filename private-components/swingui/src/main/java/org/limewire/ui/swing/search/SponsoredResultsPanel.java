@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -37,6 +38,12 @@ public class SponsoredResultsPanel extends JXPanel {
     @Resource
     private Color visibleUrlColor;
     
+    @Resource
+    private Font headingFont;
+    
+    @Resource 
+    private Font bodyFont;
+    
     private JLabel title;
 
     
@@ -60,7 +67,7 @@ public class SponsoredResultsPanel extends JXPanel {
     
     JLabel createTitleLabel() {
         JLabel title = new JLabel(I18n.tr("Sponsored Results"));
-        FontUtils.changeSize(title, 2);
+        title.setFont(headingFont);
         FontUtils.bold(title);
         return title;
     }
@@ -86,16 +93,16 @@ public class SponsoredResultsPanel extends JXPanel {
             JXHyperlink link = new JXHyperlink();
             link.setUnclickedColor(linkColor);
             link.setText("<HTML><U>" + result.getTitle() + "</U></HTML>");
-            FontUtils.changeSize(link, -1);
+            link.setFont(bodyFont);
             link.addActionListener(new SponsoredResultListener(result));
             
             JTextArea textArea = new JTextArea(result.getText());
             textArea.setEditable(false);
-            FontUtils.changeSize(textArea, -3);
+            textArea.setFont(bodyFont);
             
             JLabel urlLabel = new JLabel(result.getVisibleUrl());
             urlLabel.setForeground(visibleUrlColor);
-            FontUtils.changeSize(urlLabel, -2);
+            urlLabel.setFont(bodyFont);
             
             add(link);
             add(textArea);
