@@ -12,11 +12,8 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXLabel;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -32,14 +29,10 @@ public class ShareTableRendererEditor extends TableRendererEditor{
 
     private JLabel gnutellaLabel;
     private JLabel friendsLabel;
-    private JLabel friendCountLabel;
     private JButton shareButton;
-    private ShareListManager shareManager;
     
-    public ShareTableRendererEditor(Action shareAction, ShareListManager shareManager){
+    public ShareTableRendererEditor(Action shareAction){
         GuiUtils.assignResources(this);
-        
-        this.shareManager = shareManager;
         
         gnutellaLabel = new JLabel(shareGnutellaIcon);
         friendsLabel = new JLabel(shareFriendsIcon);

@@ -22,7 +22,6 @@ import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
@@ -49,8 +48,7 @@ class MyLibraryPanel extends JPanel implements Disposable {
                           @Assisted EventList<LocalFileItem> eventList,
                           final LibrarySharePanel sharePanel, 
                           IconManager iconManager, 
-                          LibraryTableFactory tableFactory,
-                          ShareListManager shareManager){
+                          LibraryTableFactory tableFactory){
         this.sharePanel = sharePanel;
         
         setLayout(new BorderLayout());
@@ -60,7 +58,7 @@ class MyLibraryPanel extends JPanel implements Disposable {
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(eventList, 
                 new TextComponentMatcherEditor<LocalFileItem>(header.getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         table = tableFactory.createTable(category, filterList, null);
-        table.enableSharing(sharePanel, shareManager);
+        table.enableSharing(sharePanel);
         table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel()));
                 
         final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>());

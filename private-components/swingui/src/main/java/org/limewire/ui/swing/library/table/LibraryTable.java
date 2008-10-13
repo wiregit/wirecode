@@ -13,7 +13,6 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -46,11 +45,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
 
     }
     
-    public void enableSharing(LibrarySharePanel librarySharePanel, ShareListManager shareManager) {
+    public void enableSharing(LibrarySharePanel librarySharePanel) {
         this.librarySharePanel = librarySharePanel;
-        shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Share")), shareManager);
+        shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new ShareTableRendererEditor(null, shareManager));
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new ShareTableRendererEditor(null));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(shareEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(shareEditor.getPreferredSize().width);
         setRowHeight(shareEditor.getPreferredSize().height);
