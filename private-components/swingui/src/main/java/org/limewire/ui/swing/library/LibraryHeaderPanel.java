@@ -15,6 +15,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.ui.swing.components.HeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.painter.SubpanelPainter;
@@ -57,7 +58,7 @@ public class LibraryHeaderPanel extends JXPanel {
         this.friend = friend;
          
         
-        titleLabel = new JLabel(getTitle());
+        titleLabel = new HeadingLabel(getTitle());
         titleLabel.setForeground(fontColor);
         titleLabel.setFont(headerFont);
 

@@ -27,7 +27,6 @@ import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
-import org.limewire.ui.swing.library.table.LibraryTableFactory.Type;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.IconManager;
@@ -60,7 +59,7 @@ class MyLibraryPanel extends JPanel implements Disposable {
         
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(eventList, 
                 new TextComponentMatcherEditor<LocalFileItem>(header.getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
-        table = tableFactory.createTable(category, filterList, Type.LOCAL);
+        table = tableFactory.createTable(category, filterList, null);
         table.enableSharing(sharePanel, shareManager);
         table.setDoubleClickHandler(new MyLibraryDoubleClickHandler((LibraryTableModel<LocalFileItem>)table.getModel()));
                 

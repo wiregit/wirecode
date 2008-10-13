@@ -347,15 +347,13 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
 
         @Override
         public void stateChange(AudioPlayerEvent event) {
-            System.out.println("stateChange : " +event.getState());
             if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
                 playButton.setVisible(false);
                 pauseButton.setVisible(true);
             } else {
                 playButton.setVisible(true);
                 pauseButton.setVisible(false);
-            }
-            
+            }            
         }
         
     }

@@ -29,6 +29,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
@@ -125,6 +126,7 @@ public class DownloadSummaryPanel extends JPanel {
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, Navigator navigator) {
 	    GuiUtils.assignResources(this);
+	    setTransferHandler(new DownloadableTransferHandler(downloadListManager));
 	    
 	    setOpaque(false);
 	    

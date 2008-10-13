@@ -573,4 +573,13 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
         }
     }
     
+    public boolean isPlaying(File file){
+        return playerState == PLAYING && currentSong != null && file.equals(currentSong.getFile());
+    }
+
+    @Override
+    public boolean isPaused(File file) {
+        return playerState == PAUSED && currentSong != null && file.equals(currentSong.getFile());
+    }
+    
 }

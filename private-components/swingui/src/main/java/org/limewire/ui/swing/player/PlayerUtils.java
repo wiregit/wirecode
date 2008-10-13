@@ -16,8 +16,16 @@ public class PlayerUtils {
         player.playSong();
     }
     
+    public static boolean isPlaying(File audioFile){
+        return player.isPlaying(audioFile);
+    }
+    
     public static boolean isPlayableFile(File file) {
         String name = file.getName().toLowerCase(Locale.US);
         return name.endsWith(".mp3") || name.endsWith(".ogg") || name.endsWith(".wav");
+    }
+
+    public static void pause() {
+        player.pause();
     }
 }

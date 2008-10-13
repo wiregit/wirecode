@@ -12,7 +12,6 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
-import org.limewire.ui.swing.library.table.LibraryTableFactory.Type;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventTableModel;
@@ -38,7 +37,7 @@ class FriendLibraryPanel extends JPanel implements Disposable {
         EventList<RemoteFileItem> filterList = GlazedListsFactory.filterList(eventList, 
                 new TextComponentMatcherEditor<RemoteFileItem>(header.getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
         
-        table = tableFactory.createTable(category, filterList, Type.REMOTE); 
+        table = tableFactory.createTable(category, filterList, friend); 
         table.enableDownloading(downloadListManager);
         JScrollPane scrollPane = new JScrollPane(table);
         

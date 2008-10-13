@@ -275,8 +275,6 @@ public class MiniPlayerPanel extends JPanel {
                 playPauseButton.setIcon(pauseIcon);
                 playPauseButton.setRolloverIcon(pauseIconRollover);
                 playPauseButton.setPressedIcon(pauseIconPressed);
-            } else if (player.getStatus() == PlayerState.EOM) {
-                player.stop();
             } else {
                 playPauseButton.setIcon(playIcon);
                 playPauseButton.setRolloverIcon(playIconRollover);

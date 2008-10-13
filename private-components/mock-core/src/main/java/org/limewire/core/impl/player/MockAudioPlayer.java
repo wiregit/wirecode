@@ -78,4 +78,16 @@ public class MockAudioPlayer implements AudioPlayer{
         // TODO Auto-generated method stub        
     }
 
+    @Override
+    public boolean isPlaying(File file) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isPaused(File file) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

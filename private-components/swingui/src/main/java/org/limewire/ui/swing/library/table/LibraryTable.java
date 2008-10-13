@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
@@ -10,6 +9,7 @@ import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -137,7 +137,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
                 if (editor != null) {          
                    editor.cancelCellEditing();
                 }
-            } catch (IOException e) {
+            } catch (SaveLocationException e) {
                 throw new RuntimeException(e);
             }
         }

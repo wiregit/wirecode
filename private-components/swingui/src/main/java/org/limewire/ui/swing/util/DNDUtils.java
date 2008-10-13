@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.TransferHandler.TransferSupport;
 
+import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.util.URIUtils;
 
 /**
@@ -56,7 +57,8 @@ public class DNDUtils {
      */
     public static boolean containsFileFlavors(TransferSupport transferSupport) {
         return transferSupport.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                || transferSupport.isDataFlavorSupported(URIFlavor);
+                || transferSupport.isDataFlavorSupported(URIFlavor)
+                || transferSupport.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
     }
 
     /**
@@ -69,7 +71,9 @@ public class DNDUtils {
     @SuppressWarnings("unchecked")
     public static File[] getFiles(Transferable transferable) throws UnsupportedFlavorException,
             IOException {
-        if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+        if (transferable.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR)) {
+            return (File[]) transferable.getTransferData(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
+        } else if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             return ((List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor))
                     .toArray(new File[0]);
         } else if (transferable.isDataFlavorSupported(URIFlavor)) {

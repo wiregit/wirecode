@@ -84,4 +84,14 @@ public interface AudioPlayer {
      * Removes a listener from the list of player listeners
      */
     public void removeAudioPlayerListener(AudioPlayerListener listener);
+    
+    /**
+     * @return true if the file is currently playing
+     */
+    public boolean isPlaying(File file);
+    
+    /**
+     * @return true if the file is currently paused
+     */
+    public boolean isPaused(File file);
 }

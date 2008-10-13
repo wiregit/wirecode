@@ -38,6 +38,7 @@ import org.jdesktop.swingx.painter.BusyPainter;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryManager;
@@ -45,9 +46,12 @@ import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.ActionKeys;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.components.ShiftedIcon;
+import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
+import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.mainframe.SectionHeading;
@@ -96,14 +100,23 @@ public class LibraryNavigator extends JXPanel {
     @Resource private Color textColor;
     
     private final RemoteLibraryManager remoteLibraryManager;
+    private DownloadListManager downloadListManager;
+    private LibraryManager libraryManager;
+    private ShareListManager shareListManager;
 
     @Inject
     LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
             RemoteLibraryManager remoteLibraryManager,
             MyLibraryFactory myLibraryFactory, 
-            final FriendLibraryFactory friendLibraryFactory) {
+            final FriendLibraryFactory friendLibraryFactory, 
+            DownloadListManager downloadListManager,
+            ShareListManager shareListManager) {
         GuiUtils.assignResources(this);
         this.remoteLibraryManager = remoteLibraryManager;
+        this.downloadListManager = downloadListManager;
+        this.libraryManager = libraryManager;
+        this.shareListManager = shareListManager;
+        
         
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
@@ -373,6 +386,12 @@ public class LibraryNavigator extends JXPanel {
             add(categories, "span, grow, wrap"); // the gap here is implicit in the width of the icon
                                                  // see decorateAction
             updateLibraryState(libraryState);
+            
+            if(friend == Me.ME){
+                setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager));
+            } else {
+                setTransferHandler(new FriendLibraryNavTransferHandler(friend, libraryManager, shareListManager));
+            }
         }
         
         private void busy() {
