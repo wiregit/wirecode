@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
+import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
@@ -42,7 +43,7 @@ import com.google.inject.Singleton;
  * @see URN
  */
 @Singleton
-public final class UrnCache implements FileEventListener {
+public final class UrnCache implements EventListener<FileManagerEvent> {
     
     private static final Log LOG = LogFactory.getLog(UrnCache.class);
     
@@ -502,7 +503,7 @@ public final class UrnCache implements FileEventListener {
 	/**
 	 * Handles events from the FileManager
 	 */
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_STARTED) {
             clearPendingHashes(evt.getFileManager());
         } else if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_SAVE) {

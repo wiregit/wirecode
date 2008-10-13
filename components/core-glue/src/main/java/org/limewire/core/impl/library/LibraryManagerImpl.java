@@ -30,7 +30,6 @@ import ca.odell.glazedlists.TransformedList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileListChangedEvent;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -271,7 +270,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
         }
     } 
     
-    private class LibraryFileList extends LocalFileListImpl implements FileEventListener {
+    private class LibraryFileList extends LocalFileListImpl implements EventListener<FileManagerEvent> {
 
         private final FileManager fileManager;
         
@@ -293,7 +292,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
         }
 
         @Override
-        public void handleFileEvent(FileManagerEvent evt) {
+        public void handleEvent(FileManagerEvent evt) {
             switch(evt.getType()) {
             case ADD_FILE:
                 threadSafeList.add(new CoreLocalFileItem(evt.getNewFileDesc(), detailsFactory));

@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +35,8 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.FileUtils;
@@ -76,7 +77,10 @@ public class FileManagerImpl implements FileManager, Service {
     private static final ExecutorService LOADER = ExecutorsHelper.newProcessingQueue("FileManagerLoader");
      
     /** List of event listeners for FileManagerEvents. */
-    private final CopyOnWriteArrayList<FileEventListener> eventListeners;
+    private final ListenerSupport<FileManagerEvent> listenerSupport;
+    
+    /** The firer of events. */
+    private final EventListener<FileManagerEvent> eventBroadcaster;
     
     /**********************************************************************
      * LOCKING: obtain this's monitor before modifying this.
@@ -242,7 +246,8 @@ public class FileManagerImpl implements FileManager, Service {
             Provider<AltLocManager> altLocManager,
             Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            CopyOnWriteArrayList<FileEventListener> eventListeners) {
+            EventListener<FileManagerEvent> fileManagerEventListener,
+            ListenerSupport<FileManagerEvent> listenerSupport) {
         this.simppManager = simppManager;
         this.urnCache = urnCache;
         this.creationTimeCache = creationTimeCache;
@@ -250,7 +255,8 @@ public class FileManagerImpl implements FileManager, Service {
         this.altLocManager = altLocManager;
         this.activityCallback = activityCallback;
         this.backgroundExecutor = backgroundExecutor;
-        this.eventListeners = eventListeners;
+        this.listenerSupport = listenerSupport;
+        this.eventBroadcaster = fileManagerEventListener;
         
         sharedFileList = new SynchronizedFileList(new GnutellaSharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl(this, _data.SPECIAL_STORE_FILES));
@@ -865,7 +871,6 @@ public class FileManagerImpl implements FileManager, Service {
     public void addSharedFileAlways(File file, List<? extends LimeXMLDocument> list) {
         FileDesc fileDesc = getFileDesc(file);
         sharedFileList.addPendingFileAlways(file);
-        System.out.println("ASFA, fd: " + fileDesc);
         if (fileDesc != null) {
             sharedFileList.add(fileDesc);
             dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
@@ -1409,21 +1414,15 @@ public class FileManagerImpl implements FileManager, Service {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileEventListener(com.limegroup.gnutella.FileEventListener)
      */
-    public void addFileEventListener(FileEventListener listener) {
-        if (listener == null) {
-            throw new NullPointerException("FileEventListener is null");
-        }
-        eventListeners.addIfAbsent(listener);
+    public void addFileEventListener(EventListener<FileManagerEvent> listener) {
+        listenerSupport.addListener(listener);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#removeFileEventListener(com.limegroup.gnutella.FileEventListener)
      */
-    public void removeFileEventListener(FileEventListener listener) {
-        if (listener == null) {
-            throw new NullPointerException("FileEventListener is null");
-        }
-        eventListeners.remove(listener);
+    public void removeFileEventListener(EventListener<FileManagerEvent> listener) {
+        listenerSupport.removeListener(listener);
     }
 
     /**
@@ -1445,9 +1444,7 @@ public class FileManagerImpl implements FileManager, Service {
      * dispatches a FileManagerEvent to any registered listeners 
      */
     protected void dispatchFileEvent(FileManagerEvent evt) {
-        for(FileEventListener listener : eventListeners) {
-            listener.handleFileEvent(evt);
-        }
+        eventBroadcaster.handleEvent(evt);
     }
     
     /** A bunch of inspectables for FileManager */
@@ -1649,7 +1646,7 @@ public class FileManagerImpl implements FileManager, Service {
             saver.setDirty();
     }
     
-    private class Saver implements Runnable, FileEventListener {
+    private class Saver implements Runnable, EventListener<FileManagerEvent> {
         
         private AtomicBoolean isDirty = new AtomicBoolean(false);
         
@@ -1667,7 +1664,7 @@ public class FileManagerImpl implements FileManager, Service {
         /**
          * If a change occurs, write changes to disk
          */
-        public void handleFileEvent(FileManagerEvent evt) {
+        public void handleEvent(FileManagerEvent evt) {
             switch(evt.getType()) {
                 case ADD_FILE:
                 case ADD_FOLDER:

@@ -240,7 +240,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         incompleteKeywordTrie.clear();
     }
     
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         // building tries should be fast and non-blocking so can be done in
         // dispatch thread
         switch (evt.getType()) {

@@ -62,7 +62,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 will(returnValue(true));
             }
         });
-        keywordIndex.handleFileEvent(new FileManagerEvent(fileManager, Type.ADD_FILE, originalFile));
+        keywordIndex.handleEvent(new FileManagerEvent(fileManager, Type.ADD_FILE, originalFile));
         
         IntSet result = keywordIndex.search("world hello", null, false);
         assertNotNull(result);
@@ -72,7 +72,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         result = keywordIndex.search("goodbye world", null, false);
         assertNull(result);
 
-        keywordIndex.handleFileEvent(new FileManagerEvent(fileManager, Type.RENAME_FILE, originalFile, newFile));
+        keywordIndex.handleEvent(new FileManagerEvent(fileManager, Type.RENAME_FILE, originalFile, newFile));
         
         result = keywordIndex.search("world goodbye", null, false);
         assertNotNull(result);

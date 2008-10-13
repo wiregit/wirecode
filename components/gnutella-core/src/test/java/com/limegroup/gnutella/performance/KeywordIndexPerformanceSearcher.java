@@ -14,10 +14,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.listener.EventListener;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -294,7 +294,7 @@ public class KeywordIndexPerformanceSearcher {
      * to the file manager.  Implemented by listening for ADD_FILE events
      * and decrementing a {@link java.util.concurrent.CountDownLatch}.
      */
-    private static class NumFilesAddedListener implements FileEventListener {
+    private static class NumFilesAddedListener implements EventListener<FileManagerEvent> {
 
         private final CountDownLatch latch;
 
@@ -302,7 +302,7 @@ public class KeywordIndexPerformanceSearcher {
             latch = new CountDownLatch(numFilesIndexed);
         }
 
-        public void handleFileEvent(FileManagerEvent evt) {
+        public void handleEvent(FileManagerEvent evt) {
 
             if (evt.getType().equals(FileManagerEvent.Type.ADD_FILE)) {
                 latch.countDown();

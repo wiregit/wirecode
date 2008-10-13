@@ -29,6 +29,7 @@ import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceStage;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 
@@ -67,7 +68,7 @@ import com.limegroup.mozilla.MozillaDownload;
 import com.limegroup.mozilla.MozillaDownloaderImpl;
 
 @Singleton
-public class DownloadManagerImpl implements DownloadManager, Service, FileEventListener {
+public class DownloadManagerImpl implements DownloadManager, Service, EventListener<FileManagerEvent> {
     
     private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
@@ -177,8 +178,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
     }
     
     @Inject
-    void register(List<FileEventListener> listeners) {
-        listeners.add(this);
+    void register(ListenerSupport<FileManagerEvent> listeners) {
+        listeners.addListener(this);
     }
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -1159,7 +1160,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
     /**
      * Listens for events from FileManager
      */
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         switch(evt.getType()){
             case FILEMANAGER_LOAD_FINISHING:
                 getIncompleteFileManager().registerAllIncompleteFiles();

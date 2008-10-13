@@ -6,11 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.listener.EventListener;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManagerEvent;
 
 
@@ -20,7 +21,7 @@ import com.limegroup.gnutella.FileManagerEvent;
  * @author Sumeet Thadani
  */
 @Singleton
-public class SchemaReplyCollectionMapper implements FileEventListener {
+public class SchemaReplyCollectionMapper implements EventListener<FileManagerEvent> {
     
     private Map<String, LimeXMLReplyCollection> mapper;
     
@@ -71,7 +72,7 @@ public class SchemaReplyCollectionMapper implements FileEventListener {
     /**
      * Listen to events from FileManager
      */
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case FILEMANAGER_LOAD_STARTED:
                 loadSchemas();

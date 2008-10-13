@@ -2,28 +2,29 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.List;
 import java.util.ArrayList;
-
-import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.routing.QRPUpdater;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
+import java.util.List;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.listener.EventListener;
+import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
-import org.limewire.util.FileUtils;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.routing.QRPUpdater;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * Tests for FileManager and handling of queries.
@@ -223,9 +224,9 @@ public class FileManagerTestCase extends LimeTestCase {
     // classes and methods related to adding files to file manager
     ////////////////////////////////////////////////////////////////////////////////////
 
-    public static class Listener implements FileEventListener {
+    public static class Listener implements EventListener<FileManagerEvent> {
         public FileManagerEvent evt;
-        public synchronized void handleFileEvent(FileManagerEvent fme) {
+        public synchronized void handleEvent(FileManagerEvent fme) {
             switch(fme.getType()) {
                 case LOAD_FILE:
                 case REMOVE_URN:

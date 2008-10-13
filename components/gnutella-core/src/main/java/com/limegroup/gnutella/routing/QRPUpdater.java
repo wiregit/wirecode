@@ -14,6 +14,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.EventListener;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 
@@ -22,7 +23,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -36,7 +36,7 @@ import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
  * FileManager. When changes occur, a new QRT will lazily be rebuilt.
  */
 @Singleton
-public class QRPUpdater implements FileEventListener, SettingListener, Service, Inspectable {
+public class QRPUpdater implements EventListener<FileManagerEvent>, SettingListener, Service, Inspectable {
 
     /**
      * delay between qrp updates should the simpp words change.
@@ -228,7 +228,7 @@ public class QRPUpdater implements FileEventListener, SettingListener, Service, 
     /**
      * Listens to events from FileManager
      */
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case ADD_FILE:
             case INCOMPLETE_URN_CHANGE:

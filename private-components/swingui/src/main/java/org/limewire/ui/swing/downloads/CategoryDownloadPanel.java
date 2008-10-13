@@ -1,17 +1,12 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -149,31 +144,31 @@ public class CategoryDownloadPanel extends JPanel {
 		tablePanel.add(collapsePane);		
 	}
 
-	/**
-	 * Converts actionListener to mouse listener with hand cursor on mouseover.
-	 */
-	private MouseListener getClickListener(final ActionListener actionListener) {
-		return new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				JComponent comp = (JComponent) e.getComponent();
-				comp.getTopLevelAncestor().setCursor(
-						Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				JComponent comp = (JComponent) e.getComponent();
-				comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				actionListener.actionPerformed(new ActionEvent(
-						e.getComponent(), 0, null));
-			}
-		};
-	}
+//	/**
+//	 * Converts actionListener to mouse listener with hand cursor on mouseover.
+//	 */
+//	private MouseListener getClickListener(final ActionListener actionListener) {
+//		return new MouseAdapter() {
+//			@Override
+//			public void mouseEntered(MouseEvent e) {
+//				JComponent comp = (JComponent) e.getComponent();
+//				comp.getTopLevelAncestor().setCursor(
+//						Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//			}
+//
+//			@Override
+//			public void mouseExited(MouseEvent e) {
+//				JComponent comp = (JComponent) e.getComponent();
+//				comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
+//			}
+//
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				actionListener.actionPerformed(new ActionEvent(
+//						e.getComponent(), 0, null));
+//			}
+//		};
+//	}
 	
     /**
      * deselects other tables when a table is selected

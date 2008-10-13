@@ -27,6 +27,7 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.EventListener;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 
@@ -36,7 +37,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -68,7 +68,7 @@ import de.kapsi.net.daap.Transaction;
  * interface between LimeWire and DAAP.
  */
 @Singleton
-public final class DaapManager implements FileEventListener {
+public final class DaapManager implements EventListener<FileManagerEvent> {
     
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     
@@ -1110,7 +1110,7 @@ public final class DaapManager implements FileEventListener {
     /**
      * Listens for events from FileManager
      */
-    public void handleFileEvent(final FileManagerEvent evt) {
+    public void handleEvent(final FileManagerEvent evt) {
         
         // if Daap isn't enabled ignore events
         if(!DaapSettings.DAAP_ENABLED.getValue())

@@ -36,6 +36,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
@@ -50,14 +51,12 @@ import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.FileManagerEvent.Type;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
@@ -67,6 +66,7 @@ import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
@@ -195,8 +195,8 @@ public class PushUploadTest extends LimeTestCase {
     
     private void startAndWait(long timeout) throws InterruptedException, TimeoutException {
         final CountDownLatch startedLatch = new CountDownLatch(1);
-        FileEventListener listener = new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
+        EventListener<FileManagerEvent> listener = new EventListener<FileManagerEvent>() {
+            public void handleEvent(FileManagerEvent evt) {
                 if (evt.getType() == Type.FILEMANAGER_LOAD_COMPLETE) {
                     startedLatch.countDown();
                 }

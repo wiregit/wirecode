@@ -80,12 +80,12 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(5));
         }});
             
-        fileManagerWarningManager.handleFileEvent(addEvent);    // getNumFiles()  
-        fileManagerWarningManager.handleFileEvent(randomEvent);
-        fileManagerWarningManager.handleFileEvent(randomEvent);
-        fileManagerWarningManager.handleFileEvent(addEvent);    // getNumFiles()
-        fileManagerWarningManager.handleFileEvent(loadedEvent); // getNumFiles()
-        fileManagerWarningManager.handleFileEvent(addEvent);    // getNumFiles()
+        fileManagerWarningManager.handleEvent(addEvent);    // getNumFiles()  
+        fileManagerWarningManager.handleEvent(randomEvent);
+        fileManagerWarningManager.handleEvent(randomEvent);
+        fileManagerWarningManager.handleEvent(addEvent);    // getNumFiles()
+        fileManagerWarningManager.handleEvent(loadedEvent); // getNumFiles()
+        fileManagerWarningManager.handleEvent(addEvent);    // getNumFiles()
         
         context.assertIsSatisfied();
     }
@@ -122,7 +122,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             one(notifier).showMessage(with(matcher));
         }});
             
-        fileManagerWarningManager.handleFileEvent(addEvent);  
+        fileManagerWarningManager.handleEvent(addEvent);  
         
         assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
@@ -148,10 +148,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             exactly(1).of(notifier).showMessage(with(matcher));
         }});
         
-        fileManagerWarningManager.handleFileEvent(removeEvent);
-        fileManagerWarningManager.handleFileEvent(addEvent);
-        fileManagerWarningManager.handleFileEvent(removeEvent);
-        fileManagerWarningManager.handleFileEvent(addEvent);
+        fileManagerWarningManager.handleEvent(removeEvent);
+        fileManagerWarningManager.handleEvent(addEvent);
+        fileManagerWarningManager.handleEvent(removeEvent);
+        fileManagerWarningManager.handleEvent(addEvent);
         
         assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
@@ -172,8 +172,8 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             exactly(2).of(notifier).showMessage(with(matcher));
         }});
         
-        fileManagerWarningManager.handleFileEvent(addEvent);
-        fileManagerWarningManager.handleFileEvent(addEvent);
+        fileManagerWarningManager.handleEvent(addEvent);
+        fileManagerWarningManager.handleEvent(addEvent);
         
         assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
         
@@ -193,8 +193,8 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             never(notifier);
         }});
         
-        fileManagerWarningManager.handleFileEvent(addEvent);
-        fileManagerWarningManager.handleFileEvent(addEvent);
+        fileManagerWarningManager.handleEvent(addEvent);
+        fileManagerWarningManager.handleEvent(addEvent);
         
         context.assertIsSatisfied();
     }
@@ -220,7 +220,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             one(notifier).showMessage(with(matcher));
         }});
             
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue()));  
         
         assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
@@ -240,11 +240,11 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         }});
         
         
-        fileManagerWarningManager.handleFileEvent(removeEvent);
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(removeEvent);
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(1));
-        fileManagerWarningManager.handleFileEvent(randomEvent);
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(randomEvent);
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         
         assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
@@ -265,9 +265,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         }});
         
         
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         
         assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));
@@ -285,9 +285,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             never(notifier);
         }});
         
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         
         context.assertIsSatisfied();
@@ -315,8 +315,8 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             exactly(2).of(notifier).showMessage(with(matcher));
         }});
         
-        fileManagerWarningManager.handleFileEvent(addEvent);
-        fileManagerWarningManager.handleFileEvent(
+        fileManagerWarningManager.handleEvent(addEvent);
+        fileManagerWarningManager.handleEvent(
                 createAddFolderEvent(SharingSettings.DEPTH_FOR_WARNING.getValue())); 
         
         assertTrue("Notification Time Out!", matcher.latch.await(2, TimeUnit.SECONDS));

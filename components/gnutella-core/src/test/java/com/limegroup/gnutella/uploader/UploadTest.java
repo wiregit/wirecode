@@ -49,6 +49,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -61,7 +62,6 @@ import com.google.inject.name.Names;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.HTTPAcceptor;
@@ -1523,8 +1523,8 @@ public class UploadTest extends LimeTestCase {
 
         // catch notification when file is reshared
         final CountDownLatch latch = new CountDownLatch(1);
-        FileEventListener listener = new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent event) {
+        EventListener<FileManagerEvent> listener = new EventListener<FileManagerEvent>() {
+            public void handleEvent(FileManagerEvent event) {
                 if (event.isAddEvent()) {
                     latch.countDown();
                 }

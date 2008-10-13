@@ -22,7 +22,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A List of FileDescs that are grouped together 
  */
-abstract class FileListImpl implements FileListPackage, FileEventListener {
+abstract class FileListImpl implements FileListPackage, EventListener<FileManagerEvent> {
 
     /** 
      * A list of listeners for this list
@@ -305,7 +305,7 @@ abstract class FileListImpl implements FileListPackage, FileEventListener {
      * Listens for changes from FileManager and updates this list if 
      * a containing file is modified
      */
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case ADD_FILE:
                 synchronized (this) {

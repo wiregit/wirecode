@@ -34,6 +34,8 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.Base32;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
@@ -54,7 +56,6 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
@@ -81,7 +82,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * version is stored in memory & on disk.
  */
 @Singleton
-public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Service {
+public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManagerEvent>, Service {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandlerImpl.class);
     
@@ -212,8 +213,8 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
     }
     
     @Inject
-    void register(List<FileEventListener> listener) {
-        listener.add(this);
+    void register(ListenerSupport<FileManagerEvent> listener) {
+        listener.addListener(this);
     }
         
     String getTimeoutUrl() {
@@ -1010,7 +1011,7 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
     /**
      * Listens for events from FileManager
      */
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
             tryToDownloadUpdates();
         }

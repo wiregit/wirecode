@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -231,14 +232,14 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	assertEquals(TORRENT_FILE, responses.get(0).getName());
     }
     
-    private static class FileEventListenerWaiter implements FileEventListener {
+    private static class FileEventListenerWaiter implements EventListener<FileManagerEvent> {
         private final CountDownLatch latch;
         
         public FileEventListenerWaiter(int waitings) {
             this.latch = new CountDownLatch(waitings);
         }
 
-        public void handleFileEvent(FileManagerEvent evt) {
+        public void handleEvent(FileManagerEvent evt) {
             if(evt.isAddEvent())
                 latch.countDown();            
         }

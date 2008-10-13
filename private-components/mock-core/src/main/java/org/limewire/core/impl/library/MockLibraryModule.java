@@ -1,6 +1,5 @@
 package org.limewire.core.impl.library;
 
-import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteLibraryManager;
@@ -12,7 +11,6 @@ import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 
 
 public class MockLibraryModule extends AbstractModule {

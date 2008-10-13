@@ -9,10 +9,10 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.Assert;
 
+import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.FileManagerEvent.Type;
@@ -26,8 +26,8 @@ public class FileManagerTestUtils {
      */
     public static void waitForLoad(FileManager fileManager, int timeout) throws InterruptedException, TimeoutException {
         final CountDownLatch loadedLatch = new CountDownLatch(1);
-        FileEventListener listener = new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
+        EventListener<FileManagerEvent> listener = new EventListener<FileManagerEvent>() {
+            public void handleEvent(FileManagerEvent evt) {
                 if (evt.getType() == Type.FILEMANAGER_LOAD_COMPLETE) {
                     loadedLatch.countDown();
                 }

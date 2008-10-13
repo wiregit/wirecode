@@ -17,6 +17,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -430,8 +431,8 @@ public class ServerSideWhatIsNewTest
         assertNotNull(beforeChanged);
         
         final CountDownLatch fileChangedLatch = new CountDownLatch(1);
-        fm.addFileEventListener(new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
+        fm.addFileEventListener(new EventListener<FileManagerEvent>() {
+            public void handleEvent(FileManagerEvent evt) {
                 if (evt.getType() != FileManagerEvent.Type.CHANGE_FILE)
                     return;
                 //TODO: fix this, result of incomplete file change event in FM
@@ -518,8 +519,8 @@ public class ServerSideWhatIsNewTest
         assertNotNull(beforeChanged);
         
         final CountDownLatch latch = new CountDownLatch(1);
-        fm.addFileEventListener(new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
+        fm.addFileEventListener(new EventListener<FileManagerEvent>() {
+            public void handleEvent(FileManagerEvent evt) {
                 if(FileManagerEvent.Type.CHANGE_FILE == evt.getType())
                     latch.countDown();
             }
@@ -664,8 +665,8 @@ public class ServerSideWhatIsNewTest
         
         int sharedBefore = fileManager.getGnutellaSharedFileList().size();
         final CountDownLatch downloadedLatch = new CountDownLatch(2); //1 incomplete, 2 complete
-        fileManager.addFileEventListener(new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
+        fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
+            public void handleEvent(FileManagerEvent evt) {
                 if (evt.isAddEvent())
                     downloadedLatch.countDown();
             }
@@ -720,8 +721,8 @@ public class ServerSideWhatIsNewTest
 
         // first we get a notification for sharing the incomplete file desc
         final Semaphore downloadState = new Semaphore(0); 
-        fileManager.addFileEventListener(new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
+        fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
+            public void handleEvent(FileManagerEvent evt) {
                 if (evt.isAddEvent())
                     downloadState.release();
             }

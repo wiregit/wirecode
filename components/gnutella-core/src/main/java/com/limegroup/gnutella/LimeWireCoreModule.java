@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,6 +14,9 @@ import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
@@ -36,7 +37,6 @@ import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -388,19 +388,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectableConnector.class);
         
         bind(FileManager.class).to(FileManagerImpl.class);
-    }
-    
-    @Singleton
-    @Provides
-    CopyOnWriteArrayList<FileEventListener> fileEventListener() {
-        return new CopyOnWriteArrayList<FileEventListener>();
-    }
-
-    @Singleton
-    @Provides
-    List<FileEventListener> fileEventListener(
-            CopyOnWriteArrayList<FileEventListener> listener) {
-        return listener;
+        EventMulticaster<FileManagerEvent> fileManagerMulticaster = new EventMulticasterImpl<FileManagerEvent>();
+        bind(new TypeLiteral<EventListener<FileManagerEvent>>(){}).toInstance(fileManagerMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FileManagerEvent>>(){}).toInstance(fileManagerMulticaster);
     }
     
     

@@ -15,6 +15,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +28,7 @@ import com.google.inject.name.Named;
  * as read from the disk.
  */
 @Singleton
-public final class SavedFileManager implements Runnable, FileEventListener, Service {
+public final class SavedFileManager implements Runnable, EventListener<FileManagerEvent>, Service {
     
     private static final Log LOG = LogFactory.getLog(SavedFileManager.class);
     
@@ -169,7 +170,7 @@ public final class SavedFileManager implements Runnable, FileEventListener, Serv
         }
     }
 
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
             scheduleLoad();
         }

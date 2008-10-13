@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
@@ -22,6 +21,8 @@ import org.limewire.collection.Range;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -904,7 +905,9 @@ public class FileManagerTest extends FileManagerTestCase {
                 injector.getInstance(
                         Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor"))),
                 injector.getInstance(
-                        Key.get(new TypeLiteral<CopyOnWriteArrayList<FileEventListener>>(){})));
+                        Key.get(new TypeLiteral<EventListener<FileManagerEvent>>(){})),
+                injector.getInstance(
+                        Key.get(new TypeLiteral<ListenerSupport<FileManagerEvent>>(){})));
         waitForLoad();
         
         //  assert that "shared" is shared
@@ -2156,9 +2159,9 @@ public class FileManagerTest extends FileManagerTestCase {
         }
     }
 
-    private static class MultiListener implements FileEventListener {
+    private static class MultiListener implements EventListener<FileManagerEvent> {
         private List<FileManagerEvent> evtList = new ArrayList<FileManagerEvent>();
-        public synchronized void handleFileEvent(FileManagerEvent fme) {
+        public synchronized void handleEvent(FileManagerEvent fme) {
             evtList.add(fme);
         }
 

@@ -10,12 +10,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -407,8 +408,11 @@ public class CreationTimeCacheTest extends LimeTestCase {
                 Provider<AltLocManager> altLocManager,
                 Provider<ActivityCallback> activityCallback,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                CopyOnWriteArrayList<FileEventListener> eventListeners) {
-            super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, eventListeners);
+                EventListener<FileManagerEvent> fileManagerEventListener,
+                ListenerSupport<FileManagerEvent> eventBroadcaster) {
+            super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager,
+                    activityCallback, backgroundExecutor, fileManagerEventListener,
+                    eventBroadcaster);
         }
         
         public void setDefaultUrn(URN urn) {

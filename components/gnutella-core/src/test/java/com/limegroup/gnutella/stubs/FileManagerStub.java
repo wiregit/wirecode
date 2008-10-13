@@ -6,9 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -18,7 +19,6 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.FileManagerImpl;
@@ -62,8 +62,10 @@ public class FileManagerStub extends FileManagerImpl {
             Provider<AltLocManager> altLocManager,
             Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            CopyOnWriteArrayList<FileEventListener> listeners) {
-        super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, listeners);
+            EventListener<FileManagerEvent> fileManagerEventListener,
+            ListenerSupport<FileManagerEvent> eventBroadcaster) {
+        super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager,
+                activityCallback, backgroundExecutor, fileManagerEventListener, eventBroadcaster);
         
         fileListStub = new FileListStub(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE);
         

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.IntSet;
+import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -334,10 +335,10 @@ public interface FileManager {
     /**
      * registers a listener for FileManagerEvents
      */
-    void addFileEventListener(FileEventListener listener);
+    void addFileEventListener(EventListener<FileManagerEvent> listener);
 
     /**
      * unregisters a listener for FileManagerEvents
      */
-    void removeFileEventListener(FileEventListener listener);
+    void removeFileEventListener(EventListener<FileManagerEvent> listener);
 }

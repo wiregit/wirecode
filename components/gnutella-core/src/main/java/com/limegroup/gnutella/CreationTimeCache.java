@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
+import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
@@ -59,7 +60,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * lock before grabbing my lock.  Please keep doing that as you add code.
  */
 @Singleton
-public final class CreationTimeCache implements FileEventListener {
+public final class CreationTimeCache implements EventListener<FileManagerEvent> {
     
     private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
     
@@ -493,7 +494,7 @@ public final class CreationTimeCache implements FileEventListener {
     /**
      * Listens for events from the FileManager
      */
-    public void handleFileEvent(FileManagerEvent evt) {
+    public void handleEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case FILEMANAGER_LOAD_FINISHING:
                 pruneTimes();          
