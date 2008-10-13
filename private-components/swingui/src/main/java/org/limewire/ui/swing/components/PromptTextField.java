@@ -34,7 +34,8 @@ public class PromptTextField extends JTextField implements FocusListener {
         setPromptText(promptText);
     }
     
-    private void init(boolean setSize){
+    private void init(boolean setSize) {
+        TextFieldClipboardControl.install(this);
         addFocusListener(this);
         this.setOpaque(false);
         this.setBorder(new TextBorder());

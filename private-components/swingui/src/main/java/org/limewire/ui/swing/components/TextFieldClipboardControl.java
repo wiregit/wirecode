@@ -12,7 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.Document;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -22,7 +22,7 @@ import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Enables clipboard controls on a JTextField.
+ * Enables clipboard controls on a JTextComponent.
  */
 public class TextFieldClipboardControl {
     
@@ -33,7 +33,7 @@ public class TextFieldClipboardControl {
      */
     private static Action UNDO_ACTION = new TextFieldAction(I18nMarker.marktr("Undo")) {
         public void actionPerformed(ActionEvent e) {
-            JTextField textField = getTextField(e);
+            JTextComponent textField = getTextField(e);
             UndoManager undoManager = getUndoManager(textField);
             try {
                 if(undoManager != null)
@@ -94,7 +94,7 @@ public class TextFieldClipboardControl {
      */
     private static final JPopupMenu POPUP = createPopup();
     
-    public static void install(JTextField textField) {
+    public static void install(JTextComponent textField) {
         textField.setComponentPopupMenu(POPUP);
         
         UndoManager undoManager = new UndoManager();
@@ -102,11 +102,11 @@ public class TextFieldClipboardControl {
         installUndoManager(textField, undoManager);
     }
     
-    protected static UndoManager getUndoManager(JTextField textField) {
+    protected static UndoManager getUndoManager(JTextComponent textField) {
         return (UndoManager)textField.getClientProperty(UNDO_MANAGER_FIELD);
     }
 
-    private static void installUndoManager(JTextField textField, final UndoManager undoManager) {
+    private static void installUndoManager(JTextComponent textField, final UndoManager undoManager) {
         textField.getDocument().addUndoableEditListener(undoManager);
         textField.putClientProperty(UNDO_MANAGER_FIELD, undoManager);
         textField.addPropertyChangeListener("document", new PropertyChangeListener() {
@@ -116,7 +116,7 @@ public class TextFieldClipboardControl {
                 if(oldDoc != null) {
                     oldDoc.removeUndoableEditListener(undoManager);
                 }
-                JTextField textField = (JTextField)evt.getSource();
+                JTextComponent textField = (JTextComponent)evt.getSource();
                 textField.removePropertyChangeListener("document", this);
             }
         });
@@ -132,7 +132,7 @@ public class TextFieldClipboardControl {
         popup = new JPopupMenu() {
             @Override
             public void show(Component invoker, int x, int y) {
-                updateActions((JTextField)invoker);
+                updateActions((JTextComponent)invoker);
                 super.show(invoker, x, y);
             }
         };
@@ -151,7 +151,7 @@ public class TextFieldClipboardControl {
     /**
      * Updates the actions in each text just before showing the popup menu.
      */
-    private static void updateActions(JTextField textField) {
+    private static void updateActions(JTextComponent textField) {
         String selectedText = textField.getSelectedText();
         if(selectedText == null)
             selectedText = "";
@@ -170,7 +170,7 @@ public class TextFieldClipboardControl {
     /**
      * Determines if an Undo is available.
      */
-    private static boolean isUndoAvailable(JTextField textField) {
+    private static boolean isUndoAvailable(JTextComponent textField) {
         UndoManager undoManager = getUndoManager(textField);
         return undoManager != null && undoManager.canUndoOrRedo();
     }
@@ -178,7 +178,7 @@ public class TextFieldClipboardControl {
     /**
      * Determines if paste is currently available.
      */
-    private static boolean isPasteAvailable(JTextField textField) {
+    private static boolean isPasteAvailable(JTextComponent textField) {
         try {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             return clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor);
@@ -199,12 +199,12 @@ public class TextFieldClipboardControl {
         }
         
         /**
-         * Gets the JTextField for the given ActionEvent.
+         * Gets the JTextComponent for the given ActionEvent.
          */
-        protected JTextField getTextField(ActionEvent e) {
+        protected JTextComponent getTextField(ActionEvent e) {
             JMenuItem source = (JMenuItem)e.getSource();
             JPopupMenu menu = (JPopupMenu)source.getParent();
-            return (JTextField)menu.getInvoker();
+            return (JTextComponent)menu.getInvoker();
         }
 
     }

@@ -48,7 +48,6 @@ public class TextFieldWithEnterButton extends JPanel {
             }
         };
         textField.setBorder(null);
-        TextFieldClipboardControl.install(textField);
         DropDownListAutoCompleteControl.install(textField, friendLibraries);
         textField.addActionListener(new ActionListener() {
             @Override
