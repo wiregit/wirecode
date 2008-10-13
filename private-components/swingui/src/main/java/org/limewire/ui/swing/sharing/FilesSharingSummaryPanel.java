@@ -67,14 +67,27 @@ public class FilesSharingSummaryPanel extends JPanel {
         gnutellaButton.setName("FilesSharingSummaryPanel.gnutella");
         gnutellaButton.setText("0");
         gnutellaButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        gnutellaButton.setTransferHandler(buildGnutellaTransferHandler(shareListManager, navigator));
+        gnutellaButton.setTransferHandler(new ShareButtonTransferHandler(navigator, gnutellaButton, GnutellaSharePanel.NAME) {
+            private final SharingTransferHandler sharingTransferHandler = new SharingTransferHandler(shareListManager.getGnutellaShareList());
+            
+            @Override
+            public boolean canImport(TransferSupport support) {
+              super.canImport(support);
+              return sharingTransferHandler.canImport(support);
+            }
+            
+            @Override
+            public boolean importData(TransferSupport support) {
+                return sharingTransferHandler.importData(support);
+            }
+        });
         
         NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME, friendSharePanel);
         friendButton = new ShareButton(NavigatorUtils.getNavAction(friendNav));
         friendButton.setName("FilesSharingSummaryPanel.friends");   
         friendButton.setText("0");
         friendButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        friendButton.setTransferHandler(buildFriendTransferHandler(navigator));
+        friendButton.setTransferHandler( new ShareButtonTransferHandler(navigator, friendButton, FriendSharePanel.NAME));
 		
 		setLayout(new MigLayout("insets 0, gap 0", "", ""));
 
@@ -96,97 +109,56 @@ public class FilesSharingSummaryPanel extends JPanel {
             }
         });
     }
-
-   /**
-    * Builds a transfer handler for the friend button.
-    * 
-    * When an item is dragged onto the friend button, the button flashes while waiting for 750ms. 
-    * If the mouse is still over the component at the end of the time then the navigator switches the
-    * view to the friend share window.
-    * 
-    * Items cannot be dropped view this transfer handler.
-    */
-    private TransferHandler buildFriendTransferHandler(final Navigator navigator) {
-        TransferHandler transferHandler = new TransferHandler() {
-            private Timer timer = null;
-            private Timer flashTimer = null;
-            @Override
-            public boolean canImport(TransferSupport support) {
- 
-                if(timer == null || !timer.isRunning()) {
-                    timer = new ComponentHoverTimer(750, new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
-                        navItem.select();
-                    }
-                }, friendButton);
-                    
-                timer.setRepeats(false);
-                timer.start();
-                }
-                
-                if(flashTimer == null || !flashTimer.isRunning()) {
-                    flashTimer = new FlashTimer(250, navigator, friendButton);
-                    flashTimer.setInitialDelay(250);
-                    flashTimer.start();
-                }
-                return super.canImport(support);
-            }  
-        };
-        return transferHandler;
-    }
-
-    /**
-     * Builds a transfer handler for the gnutella button.
-     * 
-     * When an item is dragged onto the gnutella button, the button flashes while waiting for 750ms. 
-     * If the mouse is still over the component at the end of the time then the navigator switches the
-     * view to the gnutella share window.
-     * 
-     * If the dragged items are dropped onto the gnutella button, they are added to the gnutella library. 
-     * This is done via delegation to a SharingTransferHandler;
-     */
-    private TransferHandler buildGnutellaTransferHandler(final ShareListManager shareListManager,
-            final Navigator navigator) {
-            TransferHandler transferHandler = new TransferHandler() {
-            private final SharingTransferHandler sharingTransferHandler = new SharingTransferHandler(shareListManager.getGnutellaShareList());
-            private Timer timer = null;
-            private Timer flashTimer = null;
-            @Override
-            public boolean canImport(TransferSupport support) {
- 
-                if(timer == null || !timer.isRunning()) {
-                    timer = new ComponentHoverTimer(750, new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, GnutellaSharePanel.NAME);
-                        navItem.select();
-                    }
-                }, gnutellaButton);
-                    
-                timer.setRepeats(false);
-                timer.start();
-                }
-                
-                if(flashTimer == null || !flashTimer.isRunning()) {
-                    flashTimer = new FlashTimer(250, navigator, gnutellaButton);
-                    flashTimer.setInitialDelay(250);
-                    flashTimer.start();
-                }
-                return sharingTransferHandler.canImport(support);
-            }
-            
-            @Override
-            public boolean importData(TransferSupport support) {
-                return sharingTransferHandler.importData(support);
-            }
-            
-        };
-        
-        return transferHandler;
-    }
     
+    /**
+     * Builds a transfer handler for the given share button.
+     * 
+     * When an item is dragged onto the button, the button flashes while waiting for 750ms. 
+     * If the mouse is still over the component at the end of the time then the navigator switches the
+     * view to the given Sharing Panel named by the panelName parameter.
+     */ 
+    private class ShareButtonTransferHandler extends TransferHandler {
+        private final Navigator navigator;
+
+        private Timer timer = null;
+
+        private Timer flashTimer = null;
+        
+        private ShareButton shareButton = null;
+        
+        private String panelName = null;
+        
+        private ShareButtonTransferHandler(Navigator navigator, ShareButton shareButton, String panelName) {
+            this.navigator = navigator;
+            this.shareButton = shareButton;
+            this.panelName = panelName;
+        }
+
+        @Override
+        public boolean canImport(TransferSupport support) {
+ 
+            if(timer == null || !timer.isRunning()) {
+                timer = new ComponentHoverTimer(750, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    NavItem navItem = navigator.getNavItem(NavCategory.SHARING, panelName);
+                    navItem.select();
+                }
+            }, shareButton);
+                
+            timer.setRepeats(false);
+            timer.start();
+            }
+            
+            if(flashTimer == null || !flashTimer.isRunning()) {
+                flashTimer = new FlashTimer(250, navigator, shareButton);
+                flashTimer.setInitialDelay(250);
+                flashTimer.start();
+            }
+            return super.canImport(support);
+        }
+    }
+
     /**
      * A button that uses a painter to draw the background if
      * its Action.SELECTED_KEY property is true.
