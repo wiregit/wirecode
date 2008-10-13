@@ -1,38 +1,34 @@
-/**
- * Code taken freely from
- * http://www.java-engineer.com/java/auto-complete.html
- */
- 
-//------------------------------------------------------------------------------
-// Copyright (c) 1999-2001 Matt Welsh.  All Rights Reserved.
-//------------------------------------------------------------------------------
 package org.limewire.ui.swing.components;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.HierarchyEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.MouseEvent;
 import java.awt.AWTEvent;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Point;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.text.Document;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.ListModel;
-import javax.swing.PopupFactory;
-import javax.swing.Popup;
 import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
@@ -41,28 +37,63 @@ import org.limewire.util.OSUtils;
 
 
 /**
- *
- * @author Matt Welsh (matt@matt-welsh.com)
- *
- * @modified Sam Berlin
- *      .. to not implement AutoComplete, not take
- *      the dictionary in the constructor, allow the Dictionary
- *      and listeners to be lazily created, and update the dictionary at will.
+ *A DropDown list of autocompletable items for a JTextField.
  * 
  */
-public class DropDownListAutoCompleteTextField extends JTextField {
+public class DropDownListAutoCompleteControl {
     
+    private static final String PROPERTY = "limewire.text.autocompleteControl"; 
+
+    /** The dictionary this uses. */
     protected AutoCompleteDictionary dict;
 
-    public DropDownListAutoCompleteTextField() { super(); init(); }
-    public DropDownListAutoCompleteTextField(Document a, String b, int c) {super(a, b, c); init();}
-    public DropDownListAutoCompleteTextField(int a) { super(a); init(); }
-    public DropDownListAutoCompleteTextField(String a) { super(a); init(); }
-    public DropDownListAutoCompleteTextField(String a, int b) { super(a, b); init(); }
+    /** The text field this is working on. */
+    private final JTextField textField;
+
+    /** The list auto-completable items are shown in */
+    protected AutoCompleteList entryList;
+
+    /** The panel the popup is shown in. */
+    protected JPanel entryPanel;
+
+    /** The popup the scroll pane is in */
+    protected Popup popup;
+
+    /** Whether or not we tried to show a popup while this wasn't showing */
+    protected boolean showPending;
     
-    //----------------------------------------------------------------------------
-    // Public methods
-    //----------------------------------------------------------------------------
+    /** Installs a dropdown list for autocompletion on the given text field. */
+    public static DropDownListAutoCompleteControl install(JTextField textField) {
+        DropDownListAutoCompleteControl control = new DropDownListAutoCompleteControl(textField);
+        textField.putClientProperty(PROPERTY, control);
+        Listener listener = control.new Listener();
+        textField.addKeyListener(listener);
+        textField.addHierarchyListener(listener);
+        textField.addFocusListener(listener);
+        textField.addActionListener(listener);
+        return control;
+    }
+
+    /**
+     * Installs a dropdown list using the given autocomplete dictionary on the
+     * text field.
+     */
+    public static DropDownListAutoCompleteControl install(JTextField textField,
+            AutoCompleteDictionary autocompleteDictionary) {
+        DropDownListAutoCompleteControl control = install(textField);
+        control.setDictionary(autocompleteDictionary);
+        return control;
+    }
+    
+    
+    /** Returns the control for the text field. */
+    public static DropDownListAutoCompleteControl getDropDownListAutoCompleteControl(JTextField textField) {
+        return (DropDownListAutoCompleteControl)textField.getClientProperty(PROPERTY);
+    }
+    
+    private DropDownListAutoCompleteControl(JTextField textField) {
+        this.textField = textField;
+    }
     
     /**
     * Set the dictionary that autocomplete lookup should be performed by.
@@ -80,13 +111,6 @@ public class DropDownListAutoCompleteTextField extends JTextField {
     */
     public AutoCompleteDictionary getDictionary() {
         return dict;
-    }
-
-    /**
-    * Creates the default dictionary object
-    */
-    public AutoCompleteDictionary createDefaultDictionary() {
-        return new StringTrieSet(true);
     }
     
     /**
@@ -116,9 +140,9 @@ public class DropDownListAutoCompleteTextField extends JTextField {
         if( !getAutoComplete() ) return;
 
         if ( dict == null ) {
-            this.dict = createDefaultDictionary();
+            this.dict =  new StringTrieSet(true);
         }
-        dict.addEntry(getText().trim());
+        dict.addEntry(textField.getText().trim());
     }
     
     /**
@@ -128,7 +152,7 @@ public class DropDownListAutoCompleteTextField extends JTextField {
         if( !getAutoComplete() ) return;
 
         if ( dict == null ) {
-            this.dict = createDefaultDictionary();
+            this.dict = new StringTrieSet(true);
         }
         dict.addEntry(s.trim());
     }
@@ -138,7 +162,7 @@ public class DropDownListAutoCompleteTextField extends JTextField {
      * if any exist.
      */
     public void autoCompleteInput() {
-        String input = getText();
+        String input = textField.getText();
         if (input != null && input.length() > 0) {
             Iterator<String> it = dict.iterator(input);
             if (it.hasNext())
@@ -154,113 +178,6 @@ public class DropDownListAutoCompleteTextField extends JTextField {
         if(dict != null && getAutoComplete() && !s.equals(""))
             return dict.lookup(s);
         return null;
-    }
-    
-    /**
-     * Sets up stuff.
-     */
-    private void init() {
-        enableEvents(AWTEvent.KEY_EVENT_MASK);
-        enableEvents(AWTEvent.HIERARCHY_EVENT_MASK);
-        enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-        TextFieldClipboardControl.install(this);
-    }
-    
-    /**
-     * Fires an action event.
-     *
-     * If the popup is visible, this resets the current
-     * text to be the selection on the popup (if something was selected)
-     * prior to firing the event.
-     */
-    @Override
-    protected void fireActionPerformed() {
-        if(popup != null) {
-            String selection = (String)entryList.getSelectedValue();
-            hidePopup();
-            if(selection != null) {
-                setText(selection);
-                return;
-            }
-        }
-        
-        super.fireActionPerformed();
-    }
-    
-    /**
-     * Forwards necessary events to the AutoCompleteList.
-     */
-    @Override
-    public void processKeyEvent(KeyEvent evt) {
-        if(evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
-            evt.consume();
-        
-        super.processKeyEvent(evt);
-        
-        if(dict != null) {
-            switch(evt.getID()) {
-            case KeyEvent.KEY_PRESSED:
-                switch(evt.getKeyCode()) {
-                case KeyEvent.VK_UP:
-                    if(popup != null)
-                        entryList.decrementSelection();
-                    else
-                        showPopup(dict.iterator());
-                    break;
-                case KeyEvent.VK_DOWN:
-                    if(popup != null)
-                        entryList.incrementSelection();
-                    else
-                        showPopup(dict.iterator());                        
-                    break;
-                }
-                break;
-            case KeyEvent.KEY_TYPED:
-                switch(evt.getKeyChar()) {
-                case KeyEvent.VK_ESCAPE:
-                    if (popup != null) {
-                        hidePopup();
-                        selectAll();
-                    }
-                    break;
-                case KeyEvent.VK_ENTER:
-                    break;
-                default:
-                    autoCompleteInput();
-                }
-            }
-        }
-    }
-    
-    /**
-     * Ensures the popup gets hidden if this text-box is hidden and that
-     * the popup is shown if a previous show is pending (from trying to
-     * autocomplete while it wasn't visible).
-     */
-    @Override
-    protected void processHierarchyEvent(HierarchyEvent evt) {
-        super.processHierarchyEvent(evt);
-        
-        if((evt.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) == HierarchyEvent.SHOWING_CHANGED) {
-            boolean showing = isShowing();
-            if(!showing && popup != null)
-                hidePopup();
-            else if(showing && popup == null && showPending)
-                autoCompleteInput();
-        }
-    }
-    
-    /**
-     * Ensures that if we lose focus, the popup goes away.
-     */
-    @Override
-    protected void processFocusEvent(FocusEvent evt) {
-        super.processFocusEvent(evt);
-        
-        if(evt.getID() == FocusEvent.FOCUS_LOST) {
-            if(popup != null)
-                hidePopup();
-        }
     }
     
     /**
@@ -313,7 +230,7 @@ public class DropDownListAutoCompleteTextField extends JTextField {
             entryList.clearSelection();
         }
         
-        entryList.setCurrentText(getText());
+        entryList.setCurrentText(textField.getText());
         showPopup();
     }
 
@@ -325,10 +242,10 @@ public class DropDownListAutoCompleteTextField extends JTextField {
         // due to delay in focus-forwarding & key-pressing events,
         // we may not be visible by the time this is called.
         if(popup == null && entryList.getModel().getSize() > 0) {
-            if(isShowing()) {
-                Point origin = getLocationOnScreen();
+            if(textField.isShowing()) {
+                Point origin = textField.getLocationOnScreen();
                 PopupFactory pf = PopupFactory.getSharedInstance();
-				Component parent = this;
+				Component parent = textField;
 				// OSX doesn't handle MOUSE_CLICKED events correctly
 				// using medium-weight popups, so we need to force
 				// PopupFactory to return a heavy-weight popup.
@@ -340,9 +257,9 @@ public class DropDownListAutoCompleteTextField extends JTextField {
 				// outside developers can correctly subclass methods.
 				if(OSUtils.isMacOSX()) {
 					parent = new JPanel();
-					new MyPopup(this, parent, 0, 0);
+					new MyPopup(textField, parent, 0, 0);
 				}
-                popup = pf.getPopup(parent, getPopupComponent(), origin.x, origin.y + getHeight() + 1);
+                popup = pf.getPopup(parent, getPopupComponent(), origin.x, origin.y + textField.getHeight() + 1);
                 showPending = false;
                 popup.show();
             } else {
@@ -361,18 +278,107 @@ public class DropDownListAutoCompleteTextField extends JTextField {
             popup = null;
         }
     }
-
-    //----------------------------------------------------------------------------
-    // Fields
-    //----------------------------------------------------------------------------
-    /** The list auto-completable items are shown in */
-    protected AutoCompleteList entryList;
-    /** The panel the popup is shown in. */
-    protected JPanel entryPanel;
-    /** The popup the scroll pane is in */
-    protected Popup popup;
-    /** Whether or not we tried to show a popup while this wasn't showing */
-    protected boolean showPending;
+    
+    private class Listener implements ActionListener, KeyListener, HierarchyListener, FocusListener {
+        /**
+         * Fires an action event.
+         *
+         * If the popup is visible, this resets the current
+         * text to be the selection on the popup (if something was selected)
+         * prior to firing the event.
+         */
+        // TODO: This used to return w/o firing the event sometimes.
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(popup != null) {
+                String selection = (String)entryList.getSelectedValue();
+                hidePopup();
+                if(selection != null) {
+                    textField.setText(selection);
+                    // TODO: prevent event from firing?
+                }
+            }
+        }        
+        
+        /** Forwards necessary events to the AutoCompleteList. */
+        @Override
+        public void keyPressed(KeyEvent evt) {
+            if(evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
+                evt.consume();    
+            
+            if(dict != null) {
+                switch(evt.getKeyCode()) {
+                case KeyEvent.VK_UP:
+                    if(popup != null)
+                        entryList.decrementSelection();
+                    else
+                        showPopup(dict.iterator());
+                    break;
+                case KeyEvent.VK_DOWN:
+                    if(popup != null)
+                        entryList.incrementSelection();
+                    else
+                        showPopup(dict.iterator());                        
+                    break;
+                }
+            }
+        }
+        
+        /** Forwards necessary events to the AutoCompleteList. */
+        @Override
+        public void keyReleased(KeyEvent evt) {
+            if(evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
+                evt.consume();       
+        }
+        
+        /** Forwards necessary events to the AutoCompleteList. */
+        @Override
+        public void keyTyped(KeyEvent evt) {
+            if(evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
+                evt.consume();
+            
+            if(dict != null) {
+                switch(evt.getKeyChar()) {
+                case KeyEvent.VK_ESCAPE:
+                    if (popup != null) {
+                        hidePopup();
+                        textField.selectAll();
+                    }
+                    break;
+                case KeyEvent.VK_ENTER:
+                    break;
+                default:
+                    autoCompleteInput();
+                }
+            }
+        }
+        
+        @Override
+        public void hierarchyChanged(HierarchyEvent evt) {            
+            if((evt.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) == HierarchyEvent.SHOWING_CHANGED) {
+                boolean showing = textField.isShowing();
+                if(!showing && popup != null)
+                    hidePopup();
+                else if(showing && popup == null && showPending)
+                    autoCompleteInput();
+            }
+        }
+        
+        @Override
+        public void focusGained(FocusEvent e) {
+        }
+        
+        @Override
+        public void focusLost(FocusEvent evt) {
+            if(evt.getID() == FocusEvent.FOCUS_LOST) {
+                if(popup != null)
+                    hidePopup();
+            }
+        }
+    }
+    
+ 
+    
     
     /**
      * A list that's used to show auto-complete items.
@@ -398,8 +404,8 @@ public class DropDownListAutoCompleteTextField extends JTextField {
                 int idx = locationToIndex(me.getPoint());
                 if(idx != -1 && isSelectedIndex(idx)) {
                     String selection = (String)getSelectedValue();
-                    DropDownListAutoCompleteTextField.this.setText(selection);
-                    DropDownListAutoCompleteTextField.this.hidePopup();
+                    textField.setText(selection);
+                    hidePopup();
                 }
             }
         }
@@ -416,13 +422,13 @@ public class DropDownListAutoCompleteTextField extends JTextField {
          */
         void incrementSelection() {
             if(getSelectedIndex() == getModel().getSize() - 1) {
-                DropDownListAutoCompleteTextField.this.setText(currentText);
+                textField.setText(currentText);
                 clearSelection();
             } else {
                 int selectedIndex = getSelectedIndex() + 1;
                 setSelectedIndex(selectedIndex);
                 ensureIndexIsVisible(selectedIndex);
-                DropDownListAutoCompleteTextField.this.setText((String)getSelectedValue());
+                textField.setText((String)getSelectedValue());
             }
         }
         
@@ -431,7 +437,7 @@ public class DropDownListAutoCompleteTextField extends JTextField {
          */
         void decrementSelection() {
             if(getSelectedIndex() == 0) {
-                DropDownListAutoCompleteTextField.this.setText(currentText);
+                textField.setText(currentText);
                 clearSelection();
             } else {
                 int selectedIndex = getSelectedIndex();
@@ -441,7 +447,7 @@ public class DropDownListAutoCompleteTextField extends JTextField {
                     selectedIndex--;
                 setSelectedIndex(selectedIndex);
                 ensureIndexIsVisible(selectedIndex);
-                DropDownListAutoCompleteTextField.this.setText((String)getSelectedValue());
+                textField.setText((String)getSelectedValue());
             }
         }
         
@@ -450,7 +456,7 @@ public class DropDownListAutoCompleteTextField extends JTextField {
          */
         @Override
         public Dimension getPreferredScrollableViewportSize() {
-            int width = DropDownListAutoCompleteTextField.this.getSize().width - 2;
+            int width = textField.getSize().width - 2;
             int rows = Math.min(getModel().getSize(), 8);
             int height = rows * getCellBounds(0, 0).height;
             return new Dimension(width, height);

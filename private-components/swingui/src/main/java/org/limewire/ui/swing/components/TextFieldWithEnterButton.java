@@ -12,6 +12,7 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
@@ -31,7 +32,7 @@ import org.limewire.collection.AutoCompleteDictionary;
 public class TextFieldWithEnterButton extends JPanel implements FocusListener {
     
     private JButton button;
-    private DropDownListAutoCompleteTextField textField;
+    private JTextField textField;
     private List<ActionListener> listeners = new ArrayList<ActionListener>();
     private String promptText;
     private boolean empty;
@@ -49,8 +50,9 @@ public class TextFieldWithEnterButton extends JPanel implements FocusListener {
         setLayout(new MigLayout("insets 0 2 0 2"));
         
         // Configure the JTextField.
-        textField = new DropDownListAutoCompleteTextField(999);
-        textField.setDictionary(friendLibraries);
+        textField = new JTextField(999);
+        TextFieldClipboardControl.install(textField);
+        DropDownListAutoCompleteControl.install(textField, friendLibraries);
         prompt();
         textField.addFocusListener(this);
         textField.addActionListener(new ActionListener() {
