@@ -3,10 +3,6 @@ package org.limewire.ui.swing.search.resultpanel;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -21,6 +17,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.ComponentHider;
@@ -46,7 +44,7 @@ public class FromWidget extends JPanel {
 
     private final JLabel headerLabel = shrinkFontSize(new JLabel());
 
-    private final JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    private final JPanel headerPanel = new JPanel();
 
     private final JPopupMenu menu;
 
@@ -65,8 +63,10 @@ public class FromWidget extends JPanel {
     }
 
     private void configureHeader() {
+        headerPanel.setLayout(new MigLayout("insets 0 0 0 0", "0[]", "[]"));
+        
         // The label has to be in a panel so we can add a border.
-        headerPanel.add(headerLabel);
+        headerPanel.add(headerLabel, "wmin 80");
         headerPanel.setBorder(noBorder);
         headerPanel.setOpaque(false);
 
@@ -123,16 +123,11 @@ public class FromWidget extends JPanel {
     }
 
     private void layoutComponents() {
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
+        setLayout(new MigLayout("insets 8 0 0 0", "0[]0[]", "[]"));
+        JLabel fromLabel = new JLabel(tr("From"));
+        add(shrinkFontSize(fromLabel));
 
-        gbc.anchor = GridBagConstraints.NORTH;
-        gbc.insets = new Insets(R, 0, 0, 0);
-        JLabel fromLabel = new JLabel(tr("From "));
-        add(shrinkFontSize(fromLabel), gbc);
-
-        gbc.insets.top = 0;
-        add(headerPanel, gbc);
+        add(headerPanel);
     }
 
     private JLabel shrinkFontSize(JLabel label) {
