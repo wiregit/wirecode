@@ -28,6 +28,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.limewire.collection.AutoCompleteDictionary;
@@ -162,16 +163,22 @@ public class DropDownListAutoCompleteControl {
      * if any exist.
      */
     public void autoCompleteInput() {
-        String input = textField.getText();
-        if (input != null && input.length() > 0) {
-            Iterator<String> it = dict.iterator(input);
-            if (it.hasNext())
-                showPopup(it);
-            else
-                hidePopup();
-        } else {
-            hidePopup();
-        }
+        // Shove this into an invokeLater to force us seeing the proper text.
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                String input = textField.getText();
+                if (input != null && input.length() > 0) {
+                    Iterator<String> it = dict.iterator(input);
+                    if (it.hasNext())
+                        showPopup(it);
+                    else
+                        hidePopup();
+                } else {
+                    hidePopup();
+                }
+            }
+        });
     }
     
     protected String lookup(String s) {
@@ -303,8 +310,9 @@ public class DropDownListAutoCompleteControl {
         /** Forwards necessary events to the AutoCompleteList. */
         @Override
         public void keyPressed(KeyEvent evt) {
-            if(evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN)
+            if(evt.getKeyCode() == KeyEvent.VK_UP || evt.getKeyCode() == KeyEvent.VK_DOWN) {
                 evt.consume();    
+            }
             
             if(dict != null) {
                 switch(evt.getKeyCode()) {
