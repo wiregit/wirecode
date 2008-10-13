@@ -39,8 +39,14 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.library.LibraryNavigator;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.FromActions;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.OSUtils;
 
@@ -101,6 +107,7 @@ implements TableCellEditor, TableCellRenderer {
     private JLabel metadataLabel = new JLabel();
     private JXPanel rightPanel = new JXPanel();
     private JXPanel editorComponent;
+    private final JXHyperlink downloadingLink = new JXHyperlink();
 
     private VisualSearchResult vsr;
     private int column;
@@ -108,9 +115,10 @@ implements TableCellEditor, TableCellRenderer {
     private JPanel indentablePanel;
     private JPanel leftPanel;
     private JPanel centerPanel;
+    private JXPanel searchResultTextPanel;
 
     public ListViewTableCellEditor(
-        ActionColumnTableCellEditor actionEditor, String searchText, FromActions fromActions) {
+        ActionColumnTableCellEditor actionEditor, String searchText, FromActions fromActions, Navigator navigator) {
 
         this.actionEditor = actionEditor;
         this.searchText = searchText;
@@ -121,7 +129,7 @@ implements TableCellEditor, TableCellRenderer {
         
         fromWidget = new FromWidget(fromActions);
         
-        makePanel();
+        makePanel(navigator);
     }
 
     /**
@@ -226,6 +234,7 @@ implements TableCellEditor, TableCellRenderer {
             };
             
             actionButtonPanel.configureForListView(table);
+            
             itemIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
@@ -292,7 +301,7 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private Component makeLeftPanel() {
+    private Component makeLeftPanel(final Navigator navigator) {
         itemIconLabel = new JLabel();
         itemIconLabel.setCursor(
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -311,24 +320,41 @@ implements TableCellEditor, TableCellRenderer {
         downloadPanel.setOpaque(false);
         downloadPanel.add(itemIconLabel);
 
-        JXPanel headingPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "5[]0[]0[]0"));
-        headingPanel.setOpaque(false);
-        headingPanel.add(headingLabel, "wrap, wmin 390");
-        headingPanel.add(subheadingLabel, "wrap, wmin 390");
-        headingPanel.add(metadataLabel, "wmin 390");
+        searchResultTextPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "5[]0[]0[]0"));
+        searchResultTextPanel.setOpaque(false);
+        searchResultTextPanel.add(headingLabel, "wrap, wmin 370");
+        searchResultTextPanel.add(subheadingLabel, "wrap, wmin 370");
+        searchResultTextPanel.add(metadataLabel, "wmin 370");
 
         JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "5[][]0", "0[]0"));
 
         panel.setOpaque(false);
 
         panel.add(downloadPanel);
-        panel.add(headingPanel);
+        panel.add(searchResultTextPanel);
+        
+        FontUtils.changeSize(downloadingLink, -2.0f);
+        downloadingLink.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+                    navigator.getNavItem(
+                        NavCategory.DOWNLOAD,
+                        MainDownloadPanel.NAME).select();
+                } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
+                    navigator.getNavItem(
+                        NavCategory.LIBRARY,
+                        LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select();
+                    
+                }
+            }
+        });
 
         return panel;
     }
 
-    private void makePanel() {
-        leftPanel = makeIndentablePanel(makeLeftPanel());
+    private void makePanel(Navigator navigator) {
+        leftPanel = makeIndentablePanel(makeLeftPanel(navigator));
 
         centerPanel = makeCenterPanel();
 
@@ -416,8 +442,22 @@ implements TableCellEditor, TableCellRenderer {
             itemIconLabel.setIcon(getIconFor(vsr.getCategory()));
 
             boolean headingDecorated = populateHeading(vsr);
-            boolean subheadingDecorated = populateSubheading(vsr);
-            populateOther(vsr, headingDecorated || subheadingDecorated);
+
+            populateSearchResultTextPanel();
+            
+            switch (vsr.getDownloadState()) {
+            case NOT_STARTED:
+                downloadingLink.setText("");
+                boolean subheadingDecorated = populateSubheading(vsr);
+                populateOther(vsr, headingDecorated || subheadingDecorated);
+                break;
+            case DOWNLOADING:
+                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
+                break;
+            case DOWNLOADED:
+                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
+                break;
+            }
             
         } else if (column == 1) {
             similarButton.setVisible(getSimilarResultsCount() > 0);
@@ -433,6 +473,20 @@ implements TableCellEditor, TableCellRenderer {
             rightPanel.add(actionButtonPanel);
         }
         markAsJunk(actionButtonPanel.getSpamButton().isSelected());
+    }
+
+    private void populateSearchResultTextPanel() {
+        if (vsr.getDownloadState() == BasicDownloadState.NOT_STARTED) {
+            searchResultTextPanel.remove(downloadingLink);
+            
+            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 370, wrap");
+            searchResultTextPanel.add(metadataLabel, "cell 0 2, wmin 370");
+        } else {
+            searchResultTextPanel.remove(subheadingLabel);
+            searchResultTextPanel.remove(metadataLabel);
+            
+            searchResultTextPanel.add(downloadingLink, "cell 0 1");
+        }
     }
 
     private Icon getIconFor(Category category) {

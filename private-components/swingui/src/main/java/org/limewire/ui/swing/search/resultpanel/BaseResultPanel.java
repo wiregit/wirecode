@@ -32,7 +32,7 @@ import org.limewire.ui.swing.table.StringTableCellRenderer;
 
 import ca.odell.glazedlists.EventList;
 
-public abstract class BaseResultPanel extends JXPanel {
+public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     private static final int TABLE_ROW_HEIGHT = 26;
     
     private final CardLayout layout = new CardLayout();
@@ -84,7 +84,7 @@ public abstract class BaseResultPanel extends JXPanel {
         // can share the same ActionColumnTableCellEditor though.
 
         ListViewTableCellEditor renderer =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery(), fromActions);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), fromActions, navigator);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -94,7 +94,7 @@ public abstract class BaseResultPanel extends JXPanel {
         }
 
         ListViewTableCellEditor editor =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(navigator), searchInfo.getQuery(), fromActions);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), fromActions, navigator);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         for(int columnIndex = 0; columnIndex < tableFormat.getLastVisibleColumnIndex() + 1; columnIndex++) {        
@@ -158,9 +158,9 @@ public abstract class BaseResultPanel extends JXPanel {
         }
 
         resultsTable.setDefaultRenderer(
-            VisualSearchResult.class, new ActionColumnTableCellEditor(navigator));
+            VisualSearchResult.class, new ActionColumnTableCellEditor(this));
         resultsTable.setDefaultEditor(
-            VisualSearchResult.class, new ActionColumnTableCellEditor(navigator));
+            VisualSearchResult.class, new ActionColumnTableCellEditor(this));
 
         // Don't allow sorting on the "Actions" column
         int columnIndex = tableFormat.getActionColumnIndex();

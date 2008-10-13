@@ -1,11 +1,9 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -28,15 +26,9 @@ import javax.swing.event.ChangeEvent;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.library.LibraryNavigator;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /**
@@ -64,17 +56,19 @@ public class ActionButtonPanel extends JXPanel {
     @Resource private Icon spamUpIcon;
     @Resource private Icon spamActiveIcon;
 
+    private final DownloadHandler downloadHandler;
     private Icon[][] icons;
     private JButton downloadButton;
-    private JXHyperlink downloadingLink = new JXHyperlink();
     private JButton infoButton;
     private JToggleButton spamButton;
     private int height;
     private VisualSearchResult vsr;
     private int currentRow;
 
-    public ActionButtonPanel(final Navigator navigator) {
+    public ActionButtonPanel(DownloadHandler downloadHandler) {
         GuiUtils.assignResources(this);
+        
+        this.downloadHandler = downloadHandler;
 
         downloadButton = new JButton() {
             @Override
@@ -82,22 +76,6 @@ public class ActionButtonPanel extends JXPanel {
                 return getToolTipOffset(this);
             }
         };
-        
-        downloadingLink.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
-                    navigator.getNavItem(
-                        NavCategory.DOWNLOAD,
-                        MainDownloadPanel.NAME).select();
-                } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
-                    navigator.getNavItem(
-                        NavCategory.LIBRARY,
-                        LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select();
-                    
-                }
-            }
-        });
         
         infoButton = new JButton() {
             @Override
@@ -143,14 +121,7 @@ public class ActionButtonPanel extends JXPanel {
     }
     
     public void startDownload() {
-        // Find the BaseResultPanel this is inside.
-        Container parent = getParent();
-        while (!(parent instanceof BaseResultPanel)) {
-            parent = parent.getParent();
-        }
-        BaseResultPanel brp = (BaseResultPanel) parent;
-
-        brp.download(vsr, currentRow);
+        downloadHandler.download(vsr, currentRow);
         setDownloadingDisplay(vsr);
     }
     
@@ -271,23 +242,7 @@ public class ActionButtonPanel extends JXPanel {
     }
     
     public void setDownloadingDisplay(VisualSearchResult vsr) {
-        switch (vsr.getDownloadState()) {
-            case NOT_STARTED:
-                downloadButton.setEnabled(true);
-                downloadingLink.setText("");
-                downloadingLink.setVisible(false);
-                break;
-            case DOWNLOADING:
-                downloadButton.setEnabled(false);
-                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
-                downloadingLink.setVisible(true);
-                break;
-            case DOWNLOADED:
-                downloadButton.setEnabled(false);
-                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
-                downloadingLink.setVisible(true);
-                break;
-        }
+        downloadButton.setEnabled(vsr.getDownloadState() == BasicDownloadState.NOT_STARTED);
     }
 
     public void setRow(int row) {
@@ -304,9 +259,7 @@ public class ActionButtonPanel extends JXPanel {
         });
         
         removeAll();
-        setLayout(new MigLayout("insets 0 0 0 0", "[]15[]15[]", "[][]"));
+        setLayout(new MigLayout("insets 0 0 0 0", "[]15[]15[]", "[]"));
         addButtonsToPanel();
-        FontUtils.changeSize(downloadingLink, -2.0f);
-        add(downloadingLink, "span");
     }
 }

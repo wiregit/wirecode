@@ -12,7 +12,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -25,14 +24,14 @@ public class ActionColumnTableCellEditor
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
         
+    private final DownloadHandler downloadHandler;
     private ActionButtonPanel panel;
-    private final Navigator navigator;
     private VisualSearchResult vsr;
     
-    public ActionColumnTableCellEditor(Navigator navigator) {
-        this.navigator = navigator;
+    public ActionColumnTableCellEditor(DownloadHandler downloadHandler) {
+        this.downloadHandler = downloadHandler;
     }
-    
+
     @Override
     public Object getCellEditorValue() {
         return null;
@@ -41,7 +40,7 @@ implements TableCellEditor, TableCellRenderer {
     private ActionButtonPanel getPanel(final JTable table) {
         if (panel != null) return panel;
         
-        panel = new ActionButtonPanel(navigator);
+        panel = new ActionButtonPanel(downloadHandler);
         panel.setOpaque(false);
         
         JToggleButton junkButton = panel.getSpamButton();
