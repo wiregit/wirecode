@@ -14,7 +14,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.iTunesSettings;
-import org.limewire.ui.swing.options.actions.FileChooserDirectoryListener;
+import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
@@ -94,7 +94,9 @@ public class DownloadOptionPanel extends OptionPanel {
             super(I18n.tr("Sharing downloads"));
             
             shareCompletedDownloadsCheckBox = new JCheckBox();
+            shareCompletedDownloadsCheckBox.setContentAreaFilled(false);
             shareIncompleteDownloadsCheckBox = new JCheckBox();
+            shareIncompleteDownloadsCheckBox.setContentAreaFilled(false);
             
             add(shareCompletedDownloadsCheckBox);
             add(new JLabel("Share files downloaded from the LimeWire Network with the LimeWire Network"), "wrap");
@@ -135,11 +137,13 @@ public class DownloadOptionPanel extends OptionPanel {
             super(I18n.tr("Saving"));
             
             clearDownloadsCheckBox = new JCheckBox();
+            clearDownloadsCheckBox.setContentAreaFilled(false);
             downloadSaveTextField = new JTextField();
             downloadSaveTextField.setEditable(false);
             downloadSaveTextField.setBackground(Color.WHITE);
-            browseSaveLocationButton = new JButton(new FileChooserDirectoryListener(this.getRootPane(), downloadSaveTextField));
+            browseSaveLocationButton = new JButton(new BrowseDirectoryAction(getParent(), downloadSaveTextField));
             autoRenameDuplicateFilesCheckBox = new JCheckBox();
+            autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
             
             add(clearDownloadsCheckBox, "split 2");
             add(new JLabel("Clear downloads from list when finished"), "wrap");
@@ -184,7 +188,7 @@ public class DownloadOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        void initOptions() { //TODO: rename file setting
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
 
             //TODO: handle error dialog when download already exists
@@ -221,6 +225,7 @@ public class DownloadOptionPanel extends OptionPanel {
             super(I18n.tr("iTunes"));
             
             addToITunesCheckBox = new JCheckBox();
+            addToITunesCheckBox.setContentAreaFilled(false);
             
             add(addToITunesCheckBox);
             add(new JLabel("Add audio files I downloaded from LimeWire to my iTunes Library"), "wrap");

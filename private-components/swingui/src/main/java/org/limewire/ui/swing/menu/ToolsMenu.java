@@ -6,6 +6,7 @@ import javax.swing.JMenu;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -21,11 +22,8 @@ public class ToolsMenu extends JMenu {
         add(new AbstractAction(I18n.tr("Options")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                if(optionDialog == null) {
-//                    optionDialog = new OptionsDialog();
-//                }
                 if(!optionDialog.isVisible()) {
-//                    GUIUtils.centerOnScreen(optionDialog);
+                    optionDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
                     optionDialog.setVisible(true);
                 }
             }

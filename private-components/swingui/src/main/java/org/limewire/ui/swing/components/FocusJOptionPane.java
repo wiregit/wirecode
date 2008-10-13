@@ -1,15 +1,24 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * A simple wrapper around {@link JOptionPane} methods that
@@ -109,5 +118,34 @@ public class FocusJOptionPane {
                 ((JFrame)parentComponent).dispose();
         }
     }
+    
+    public static JDialog createDialog(String title, JComponent parent, JComponent contentPane) {
+        JDialog dialog;
+        Window window = FocusJOptionPane.getWindowForComponent(parent);
+        if (window instanceof Frame) {
+            dialog = new JDialog((Frame)window, title, true);   
+        } else {
+            dialog = new JDialog((Dialog)window, title, true);
+        }
+        
+        Container frameContentPane = dialog.getContentPane();
+        frameContentPane.setLayout(new BorderLayout());
+        frameContentPane.add(contentPane, BorderLayout.CENTER);
+        
+        dialog.setResizable(false);
+        dialog.setLocationRelativeTo(parent);
+        dialog.pack();
+        
+        return dialog;
+    }
+    
+    static Window getWindowForComponent(Component parentComponent) 
+    throws HeadlessException {
+        if (parentComponent == null)
+            return GuiUtils.getMainFrame();
+        if (parentComponent instanceof Frame || parentComponent instanceof Dialog)
+            return (Window)parentComponent;
+    return FocusJOptionPane.getWindowForComponent(parentComponent.getParent());
+}
 
 }

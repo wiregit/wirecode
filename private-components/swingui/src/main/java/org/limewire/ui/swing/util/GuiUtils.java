@@ -1,13 +1,13 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Color;
-import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -176,7 +176,7 @@ public class GuiUtils {
     /**
      * Returns the application's default frame.
      */
-    public static Window getMainFrame() {
+    public static JFrame getMainFrame() {
         if(AppFrame.isStarted()) {
             Application app = Application.getInstance();
             if(app instanceof SingleFrameApplication) {

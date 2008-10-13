@@ -152,11 +152,8 @@ public final class FileChooser {
                 fileChooser.setMultiSelectionEnabled(allowMultiSelect);
                 boolean dispose = false;
                 if(parent == null) {
-//                    parent = MessageService.getParentComponent();
-                    if(parent == null) {
-                        dispose = true;
-                        parent = FocusJOptionPane.createFocusComponent();
-                    }
+	                dispose = true;
+                    parent = FocusJOptionPane.createFocusComponent();
                 }
                 try {
                     if(fileChooser.showOpenDialog(parent) != option)
@@ -182,8 +179,9 @@ public final class FileChooser {
                 
             } else {
                 FileDialog dialog;
-                if(mode == JFileChooser.DIRECTORIES_ONLY)
+                if(mode == JFileChooser.DIRECTORIES_ONLY) { Thread.dumpStack();
                     dialog = MacUtils.getFolderDialog(null);
+                }
                 else
                     dialog = new FileDialog(new JFrame(), "");
                 

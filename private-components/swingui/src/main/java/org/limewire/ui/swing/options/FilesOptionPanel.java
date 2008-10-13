@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -11,7 +9,6 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -20,8 +17,8 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.ui.swing.mainframe.AppFrame;
-import org.limewire.ui.swing.options.actions.FileChooserDirectoryListener;
+import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
+import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -32,8 +29,6 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class FilesOptionPanel extends OptionPanel {
-
-    private AppFrame appFrame;
     
     private ManageExtensionsPanel manageExtensionsPanel;
     private SaveFoldersPanel saveFoldersPanel;
@@ -41,9 +36,7 @@ public class FilesOptionPanel extends OptionPanel {
     private ITunesPanel iTunesPanel;
     
     @Inject
-    public FilesOptionPanel(AppFrame appFrame) {    
-        this.appFrame = appFrame;
-        
+    public FilesOptionPanel() {    
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
         setOpaque(false);
@@ -165,7 +158,6 @@ public class FilesOptionPanel extends OptionPanel {
     private class LimeWireStorePanel extends OptionPanel {
 
         private String currentSaveDirectory;
-        private JDialog dialog;
         private LWSFileNamingOptionPanel storeOptionPanel;
         
         private JTextField storePathTextField;
@@ -175,24 +167,14 @@ public class FilesOptionPanel extends OptionPanel {
         public LimeWireStorePanel() {
             super(I18n.tr("LimeWire Store"));
             
+            storeOptionPanel = new LWSFileNamingOptionPanel();
+            storeOptionPanel.setPreferredSize(new Dimension(350, 140));
+            
             storePathTextField = new JTextField(40);
-            browseStorePathButton = new JButton(new FileChooserDirectoryListener(this.getRootPane(), storePathTextField));
-            configureNamingButton = new JButton(I18n.tr("Configure file naming"));
-            configureNamingButton.addActionListener(new ActionListener(){
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if(dialog == null) {
-                        storeOptionPanel = new LWSFileNamingOptionPanel();
-                        storeOptionPanel.setPreferredSize(new Dimension(350, 140));
-                        dialog = new JDialog(appFrame.getMainFrame(), I18n.tr("LimeWire Store File Organization"),true);
-                        dialog.add(storeOptionPanel);
-                        dialog.setResizable(false);
-                        dialog.pack();
-                    } 
-                    if(!dialog.isVisible())
-                        dialog.setVisible(true);
-                }
-            });
+            browseStorePathButton = new JButton(new BrowseDirectoryAction(getParent(), storePathTextField));
+            configureNamingButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
+                    storeOptionPanel,I18n.tr("LimeWire Store File Organization"),
+                    I18n.tr("Configure file naming"),I18n.tr("Configure how files are automatically named")));
             
             add(new JLabel("Save store downloads to:"), "split");
             add(storePathTextField);
@@ -262,7 +244,9 @@ public class FilesOptionPanel extends OptionPanel {
             super(I18n.tr("iTunes"));
             
             shareWithITunesCheckBox = new JCheckBox();
+            shareWithITunesCheckBox.setContentAreaFilled(false);
             requirePassWordCheckBox = new JCheckBox();
+            requirePassWordCheckBox.setContentAreaFilled(false);
             requirePassWordCheckBox.addItemListener(new ItemListener(){
                 @Override
                 public void itemStateChanged(ItemEvent e) {

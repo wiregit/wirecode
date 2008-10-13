@@ -73,9 +73,9 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     @Inject
     public OptionsDialog(AppFrame appFrame, LibraryOptionPanel libraryOptionPanel, SearchOptionPanel searchOptionPanel, 
             DownloadOptionPanel downloadOptionPanel, SecurityOptionPanel securityOptionPanel, MiscOptionPanel miscOptionPanel,
-            AdvancedOptionPanel advancedOptionPanel) {
-        super(appFrame.getMainFrame(), I18n.tr("Options"));
-        
+            AdvancedOptionPanel advancedOptionPanel) { 
+        super(GuiUtils.getMainFrame(), I18n.tr("Options"));
+
         GuiUtils.assignResources(this); 
         
         this.libraryOptionPanel = libraryOptionPanel;
@@ -205,8 +205,8 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
             public void run() {
                 AppFrame appFrame = new AppFrame();
                 
-                OptionsDialog o = new OptionsDialog(appFrame, new LibraryOptionPanel(appFrame), new SearchOptionPanel(), new DownloadOptionPanel(), new SecurityOptionPanel(appFrame), new MiscOptionPanel(), 
-                        new AdvancedOptionPanel(new FilesOptionPanel(appFrame), new ConnectionsOptionPanel(), new SystemOptionPanel(), 
+                OptionsDialog o = new OptionsDialog(appFrame, new LibraryOptionPanel(), new SearchOptionPanel(), new DownloadOptionPanel(), new SecurityOptionPanel(), new MiscOptionPanel(), 
+                        new AdvancedOptionPanel(new FilesOptionPanel(), new ConnectionsOptionPanel(), new SystemOptionPanel(), 
                                 new ReallyAdvancedOptionPanel(new FirewallOptionPanel(), new ProxyOptionPanel(), new NetworkInterfaceOptionPanel(),
                                         new PerformanceOptionPanel(), new BitTorrentOptionPanel(), 
                                         new FilteringOptionPanel(), new SpamOptionPanel(null))));

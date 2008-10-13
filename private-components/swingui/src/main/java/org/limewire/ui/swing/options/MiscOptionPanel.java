@@ -70,7 +70,9 @@ public class MiscOptionPanel extends OptionPanel {
             super(I18n.tr("Notifications"));
             
             showNotificationsCheckBox = new JCheckBox();
+            showNotificationsCheckBox.setContentAreaFilled(false);
             playNotificationsCheckBox = new JCheckBox();
+            playNotificationsCheckBox.setContentAreaFilled(false);
             
             add(showNotificationsCheckBox);
             add(new JLabel("Show popup system notifications"), "wrap");
@@ -109,7 +111,9 @@ public class MiscOptionPanel extends OptionPanel {
             super(I18n.tr("Friends and Chat"));
             
             signIntoOnStartupCheckBox = new JCheckBox();
+            signIntoOnStartupCheckBox.setContentAreaFilled(false);
             rememberPasswordCheckBox = new JCheckBox();
+            rememberPasswordCheckBox.setContentAreaFilled(false);
             usernameTextField = new JTextField(30);
             passwordField = new JPasswordField(30);
             
