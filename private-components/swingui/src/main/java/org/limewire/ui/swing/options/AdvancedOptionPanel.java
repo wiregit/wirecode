@@ -58,7 +58,7 @@ public class AdvancedOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         filesOptionPanel.initOptions();
         connectionsOptionPanel.initOptions();
         systemOptionPanel.initOptions();

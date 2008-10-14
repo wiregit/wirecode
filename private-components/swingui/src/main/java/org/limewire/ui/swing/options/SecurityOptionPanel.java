@@ -9,7 +9,9 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.ContentSettings;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -68,7 +70,7 @@ public class SecurityOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getWarningMessagesPanel().initOptions();
         getUnsafeTypesPanel().initOptions();
         getFilteringPanel().initOptions();
@@ -76,12 +78,18 @@ public class SecurityOptionPanel extends OptionPanel {
     
     private class WarningMessagesPanel extends OptionPanel {
 
+        private WarningMessagesOptionPanel warningMessagesPanel;
         private JButton settingsButton;
         
         public WarningMessagesPanel() {
             super(I18n.tr("Warning Messages"));
             
-            settingsButton = new JButton(I18n.tr("Settings"));
+            warningMessagesPanel = new WarningMessagesOptionPanel(new OKDialogAction(), new CancelDialogAction());
+            warningMessagesPanel.setPreferredSize(new Dimension(400,130));
+            
+            settingsButton = new JButton(new DialogDisplayAction(SecurityOptionPanel.this ,
+                    warningMessagesPanel, I18n.tr("Warning Messages"),
+                    I18n.tr("Settings"), I18n.tr("Choose which warning messags to display")));
             
             add(new JLabel("Choose which warning messages you want to see when using LimeWire"), "push");
             add(settingsButton);
@@ -97,7 +105,8 @@ public class SecurityOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
+            warningMessagesPanel.initOptions();
         }
     }
     
@@ -108,7 +117,7 @@ public class SecurityOptionPanel extends OptionPanel {
         public UnsafeTypesPanel() {
             super(I18n.tr("Unsafe types"));
             
-          unsafeOptionPanel = new UnsafeTypeOptionPanel(null);
+          unsafeOptionPanel = new UnsafeTypeOptionPanel(new OKDialogAction());
           unsafeOptionPanel.setPreferredSize(new Dimension(550, 160));
             
             configureButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
@@ -125,15 +134,17 @@ public class SecurityOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            unsafeOptionPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return unsafeOptionPanel.hasChanged();
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
+            unsafeOptionPanel.initOptions();
         }
     }
     
@@ -177,7 +188,7 @@ public class SecurityOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             unlicensedCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue());
         }
     }

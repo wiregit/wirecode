@@ -120,5 +120,10 @@
 			<artifactId>jxlayer</artifactId>
 			<version>3.0</version>
 		</dependency>   	
+		<dependency>
+      		<groupId>mrjadapter</groupId>
+      		<artifactId>mrjadapter</artifactId>
+      		<version>1.0.9</version>
+   		 </dependency>
 	</dependencies>
 </project>

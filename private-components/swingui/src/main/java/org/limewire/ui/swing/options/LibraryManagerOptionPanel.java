@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.options;
 
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -8,12 +9,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.util.I18n;
-
 import net.miginfocom.swing.MigLayout;
 
-public class LibraryManagerOptionPanel extends JPanel {
+import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
+import org.limewire.ui.swing.util.I18n;
+
+public class LibraryManagerOptionPanel extends OptionPanel {
 
     private JButton addFolderButton;
     private JCheckBox musicCheckBox;
@@ -26,10 +28,11 @@ public class LibraryManagerOptionPanel extends JPanel {
     private JButton okButton;
     private JButton cancelButton;
     
-    public LibraryManagerOptionPanel() {
-        setLayout(new MigLayout("debug", "[300!][grow]", ""));
+    public LibraryManagerOptionPanel(Action okAction, CancelDialogAction cancelAction) {
+        setLayout(new MigLayout("", "[300!][grow]", ""));
         
-        createComponents();
+        createComponents(okAction, cancelAction);
+        cancelAction.setOptionPanel(this);
         
         add(new JLabel(I18n.tr("LimeWire will automatically scan the folders below and place files in your library.")), "span 2, wrap");
     
@@ -44,7 +47,7 @@ public class LibraryManagerOptionPanel extends JPanel {
         add(cancelButton);
     }
     
-    private void createComponents() {
+    private void createComponents(Action okAction, Action cancelAction) {
         
         libraryTable = new JTable();
         addFolderButton = new JButton(I18n.tr("Add New Folder"));
@@ -54,8 +57,8 @@ public class LibraryManagerOptionPanel extends JPanel {
         imageCheckBox = new JCheckBox();
         docCheckBox = new JCheckBox();
         
-        okButton = new JButton(I18n.tr("OK"));
-        cancelButton = new JButton(I18n.tr("Cancel"));
+        okButton = new JButton(okAction);
+        cancelButton = new JButton(cancelAction);
     }
     
     private JPanel getCheckBoxPanel() {
@@ -81,11 +84,29 @@ public class LibraryManagerOptionPanel extends JPanel {
         JFrame f = new JFrame();
         f.setSize(500,500);
         
-        LibraryManagerOptionPanel l = new LibraryManagerOptionPanel();
+        LibraryManagerOptionPanel l = new LibraryManagerOptionPanel(null, null);
         f.add(l);
         
         f.setDefaultCloseOperation(2);
         f.setVisible(true);
+    }
+
+    @Override
+    void applyOptions() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    boolean hasChanged() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void initOptions() {
+        // TODO Auto-generated method stub
+        
     }
     
 }

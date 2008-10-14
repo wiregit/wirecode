@@ -68,7 +68,7 @@ public class SpamOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         
     }
 }

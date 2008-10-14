@@ -143,7 +143,7 @@ public class ProxyOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         int connectionMethod = ConnectionSettings.CONNECTION_METHOD.getValue();
         String proxy = ConnectionSettings.PROXY_HOST.getValue();
         int proxyPort = ConnectionSettings.PROXY_PORT.getValue();

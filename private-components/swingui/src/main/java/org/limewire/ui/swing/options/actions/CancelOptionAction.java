@@ -3,13 +3,13 @@ package org.limewire.ui.swing.options.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.limewire.ui.swing.options.OptionsDialog;
+import javax.swing.JDialog;
 
 public class CancelOptionAction implements ActionListener {
 
-    OptionsDialog optionDialog;
+    private JDialog optionDialog;
     
-    public CancelOptionAction(OptionsDialog optionDialog) {
+    public CancelOptionAction(JDialog optionDialog) {
         this.optionDialog = optionDialog;
     }
     

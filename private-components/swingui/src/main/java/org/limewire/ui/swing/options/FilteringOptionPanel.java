@@ -53,7 +53,7 @@ public class FilteringOptionPanel extends OptionPanel {
     }
     
     @Override
-    void initOptions() {
+    public void initOptions() {
         getBlockHostsPanel().initOptions();
         getAllowHostsPanel().initOptions();
     }
@@ -77,7 +77,7 @@ public class FilteringOptionPanel extends OptionPanel {
         }
     
         @Override
-        void initOptions() {
+        public void initOptions() {
     
         }
     }
@@ -101,7 +101,7 @@ public class FilteringOptionPanel extends OptionPanel {
         }
     
         @Override
-        void initOptions() {
+        public void initOptions() {
     
         }
     }

@@ -179,7 +179,7 @@ public final class FileChooser {
                 
             } else {
                 FileDialog dialog;
-                if(mode == JFileChooser.DIRECTORIES_ONLY) { Thread.dumpStack();
+                if(mode == JFileChooser.DIRECTORIES_ONLY) {
                     dialog = MacUtils.getFolderDialog(null);
                 }
                 else

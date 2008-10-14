@@ -56,7 +56,7 @@ public class MiscOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getNotificationsPanel().initOptions();
         getFriendChatPanel().initOptions();
     }
@@ -94,7 +94,7 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             playNotificationsCheckBox.setSelected(UISettings.PLAY_NOTIFICATION_SOUND.getValue());
             showNotificationsCheckBox.setSelected(UISettings.SHOW_NOTIFICATIONS.getValue());
         }
@@ -141,7 +141,7 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
 
         }
     }

@@ -83,7 +83,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getConnectionSpeedPanel().initOptions();
         getDownloadsPanel().initOptions();
         getUploadPanel().initOptions();
@@ -128,7 +128,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             if(ConnectionSettings.CONNECTION_SPEED.getValue() == SpeedConstants.MODEM_SPEED_INT)
                 dialupButton.setSelected(true);
             else
@@ -194,7 +194,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             bandWidthSlider.setValue(DownloadSettings.DOWNLOAD_SPEED.getValue());
             if(DownloadSettings.DOWNLOAD_SPEED.getValue() == 100)
                 limitBandWidthCheckBox.setSelected(false);
@@ -260,7 +260,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             bandWidthSlider.setValue(UploadSettings.UPLOAD_SPEED.getValue());
             maxUploadSpinner.getModel().setValue(UploadSettings.HARD_MAX_UPLOADS.getValue());
             clearUploadCheckBox.setSelected(SharingSettings.CLEAR_UPLOAD.getValue());

@@ -2,6 +2,7 @@ package org.limewire.ui.swing.options;
 
 import java.io.File;
 
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -9,6 +10,7 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.StoreTemplateProcessor;
 
@@ -48,13 +50,14 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
     private final String trackVar =  "<" + StoreTemplateProcessor.TRACK_LABEL  + ">";
     private final String titleVar =  "<" + StoreTemplateProcessor.TITLE_LABEL  + ">";
     
-    public LWSFileNamingOptionPanel() {
+    public LWSFileNamingOptionPanel(Action okAction, CancelDialogAction cancelAction) {
         setLayout(new MigLayout("insets 10 10 10 10"));
         
+        cancelAction.setOptionPanel(this);
         subFolderComboBox = new JComboBox(getSubDirectoryTemplatesArray());
         fileNameComboBox = new JComboBox(getFileNameTemplatesArray());
-        okButton = new JButton("OK");
-        cancelButton = new JButton("Cancel");
+        okButton = new JButton(okAction);
+        cancelButton = new JButton(cancelAction);
         
         add(new JLabel(I18n.tr("Choose how to organize files you purchased from the LimeWire Store")), "span, gapbottom 11, wrap");
         
@@ -64,7 +67,7 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
         add(subFolderComboBox, "gapBottom 20, push");
         add(fileNameComboBox, "gapBottom 20, growx, wrap");
         
-        add(okButton, "skip 1, alignx right, split");
+        add(okButton, "skip 1, alignx right, growx, split 2");
         add(cancelButton);
         
     }
@@ -90,7 +93,7 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         // save locally the old values for comparing later
         oldFileName = SharingSettings.getFileNameLWSTemplate();
         oldSubDirectory = SharingSettings.getSubDirectoryLWSTemplate();

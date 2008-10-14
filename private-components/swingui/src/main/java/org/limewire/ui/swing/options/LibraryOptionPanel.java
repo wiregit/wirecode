@@ -9,7 +9,9 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -59,7 +61,7 @@ public class LibraryOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getLibraryManagerPanel().initOptions();
         getSmartSharingPane().initOptions();
     }
@@ -75,7 +77,7 @@ public class LibraryOptionPanel extends OptionPanel {
         public LibraryManagementPanel() {
             super(I18n.tr("Library Management"));
             
-            libraryOptionPanel = new LibraryManagerOptionPanel();
+            libraryOptionPanel = new LibraryManagerOptionPanel(new OKDialogAction(), new CancelDialogAction());
             libraryOptionPanel.setPreferredSize(new Dimension(500, 500));
             
             manageLibraryButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
@@ -89,15 +91,17 @@ public class LibraryOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            libraryOptionPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return libraryOptionPanel.hasChanged();
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
+            libraryOptionPanel.initOptions();
         }
     }
     
@@ -126,7 +130,7 @@ public class LibraryOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
         }
     }
 }

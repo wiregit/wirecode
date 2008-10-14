@@ -47,7 +47,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         programCheckBox.setSelected(SharingSettings.PROGRAM_SHARING_ENABLED.getValue());
         documentCheckBox.setSelected(SharingSettings.DOCUMENT_SHARING_ENABLED.getValue());
     }

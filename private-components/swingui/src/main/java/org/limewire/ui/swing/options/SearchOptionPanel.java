@@ -68,7 +68,7 @@ public class SearchOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getSearchBarPanel().initOptions();
         getSearchResultsPanel().initOptions();
     }
@@ -134,7 +134,10 @@ public class SearchOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            SearchSettings.POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES.setValue(((SpinnerNumberModel)suggestSpinner.getModel()).getNumber().intValue());
             SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.setValue(suggestCheckBox.isSelected());
+            SearchSettings.POPULATE_SEARCH_BAR_NUMBER_OLD_SEARCH.setValue(((SpinnerNumberModel)searchTabNumberSpinner.getModel()).getNumber().intValue());
+            SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.setValue(searchTabNumberCheckBox.isSelected());
         }
 
         @Override
@@ -146,7 +149,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             //TODO: implement/init default search value
             
             //TODO: this setting isn't linked to anything
@@ -202,7 +205,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             groupSimilarResults.setSelected(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
             searchFriendLibrary.setSelected(SearchSettings.SEARCH_FRIENDS_LIBRARIES.getValue());
             //TODO: this isn't linked to anything

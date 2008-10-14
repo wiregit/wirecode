@@ -34,7 +34,6 @@ public class GuiUtils {
     /**
      * Localizable constants
      */
-    
     public static String GENERAL_UNIT_BYTES;
     public static String GENERAL_UNIT_KILOBYTES;
     public static String GENERAL_UNIT_MEGABYTES;

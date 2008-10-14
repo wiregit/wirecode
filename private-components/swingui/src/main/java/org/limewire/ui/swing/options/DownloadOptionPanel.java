@@ -75,7 +75,7 @@ public class DownloadOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getSharingDownloadsPanel().initOptions();
         getSavingPanel().initOptions();
         getITunesPanel().initOptions();
@@ -118,7 +118,7 @@ public class DownloadOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             shareCompletedDownloadsCheckBox.setSelected(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
             shareIncompleteDownloadsCheckBox.setSelected(SharingSettings.ALLOW_PARTIAL_SHARING.getValue());
         }
@@ -188,7 +188,7 @@ public class DownloadOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() { //TODO: rename file setting
+        public void initOptions() { //TODO: rename file setting
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
 
             //TODO: handle error dialog when download already exists
@@ -242,7 +242,7 @@ public class DownloadOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             addToITunesCheckBox.setSelected(iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue());
         }        
     }

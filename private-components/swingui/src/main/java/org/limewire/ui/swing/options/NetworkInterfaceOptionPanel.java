@@ -65,9 +65,8 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         // TODO Auto-generated method stub
         
     }
-
 }

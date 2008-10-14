@@ -18,7 +18,9 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
+import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
+import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -92,7 +94,7 @@ public class FilesOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getManageExtensionsPanel().initOptions();
         getSaveOptionPanel().initOptions();
         getLimeWireStorePanel().initOptions();
@@ -122,19 +124,24 @@ public class FilesOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
 
         }
     }
     
     private class SaveFoldersPanel extends OptionPanel {
 
+        private ManageSaveFoldersOptionPanel saveFolderPanel;
         private JButton configureButton;
         
         public SaveFoldersPanel() {
             super(I18n.tr("Save Folders"));
             
-            configureButton = new JButton(I18n.tr("Configure"));
+            saveFolderPanel = new ManageSaveFoldersOptionPanel(new OKDialogAction(), new CancelDialogAction());
+            saveFolderPanel.setSize(new Dimension(400,500));
+            
+            configureButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this, saveFolderPanel, 
+                    I18n.tr("Manage Save Folders"),I18n.tr("Configure"),I18n.tr("Configure how file types are saved")));
             
             add(new JLabel("Choose where specific file types get saved"), "push");
             add(configureButton);
@@ -150,7 +157,7 @@ public class FilesOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
 
         }
     }
@@ -167,7 +174,7 @@ public class FilesOptionPanel extends OptionPanel {
         public LimeWireStorePanel() {
             super(I18n.tr("LimeWire Store"));
             
-            storeOptionPanel = new LWSFileNamingOptionPanel();
+            storeOptionPanel = new LWSFileNamingOptionPanel(new OKDialogAction(), new CancelDialogAction());
             storeOptionPanel.setPreferredSize(new Dimension(350, 140));
             
             storePathTextField = new JTextField(40);
@@ -205,15 +212,19 @@ public class FilesOptionPanel extends OptionPanel {
                     storePathTextField.setText(currentSaveDirectory);
                 }
             }
+            
+            storeOptionPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return !currentSaveDirectory.equals(storePathTextField.getText());
+            return !currentSaveDirectory.equals(storePathTextField.getText()) || 
+                    storeOptionPanel.hasChanged();
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
+            storeOptionPanel.initOptions();
             try {
                 File file = SharingSettings.getSaveLWSDirectory();
                 if (file == null) {
@@ -278,7 +289,7 @@ public class FilesOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             //TODO: share with init
             passwordField.setText(DaapSettings.DAAP_PASSWORD.getValue());
             requirePassWordCheckBox.setSelected(DaapSettings.DAAP_REQUIRES_PASSWORD.getValue());

@@ -63,7 +63,7 @@ public class FirewallOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getListeningPortPanel().initOptions();
         getRouterConfigPanel().initOptions();
     }
@@ -116,7 +116,7 @@ public class FirewallOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             port = NetworkSettings.PORT.getValue();
             portField.setText(Integer.toString(port));
         }
@@ -178,7 +178,7 @@ public class FirewallOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             if(ConnectionSettings.FORCE_IP_ADDRESS.getValue() && !ConnectionSettings.UPNP_IN_USE.getValue())
                 portForwardRadioButton.setSelected(true);
             else if(ConnectionSettings.DISABLE_UPNP.getValue())

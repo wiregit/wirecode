@@ -21,7 +21,7 @@ public abstract class OptionPanel extends JPanel {
         setOpaque(false);
     }
     
-    abstract void initOptions();
+    public abstract void initOptions();
     
     abstract void applyOptions();
     

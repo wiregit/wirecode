@@ -88,7 +88,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         disableUltraPeerCheckBox.setSelected(UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue());
         disableMojitoCheckBox.setSelected(DHTSettings.DISABLE_DHT_USER.getValue());
         //TODO: Network manager API

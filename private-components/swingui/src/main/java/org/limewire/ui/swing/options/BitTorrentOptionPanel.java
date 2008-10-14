@@ -107,7 +107,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
     }
     
     @Override
-    void initOptions() {
+    public void initOptions() {
         boolean auto = BittorrentSettings.AUTOMATIC_SETTINGS.getValue();
         if(auto)
             limewireControl.setSelected(true);

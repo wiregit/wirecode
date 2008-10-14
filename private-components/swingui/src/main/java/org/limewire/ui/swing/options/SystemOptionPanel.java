@@ -71,7 +71,7 @@ public class SystemOptionPanel extends OptionPanel {
     }
 
     @Override
-    void initOptions() {
+    public void initOptions() {
         getFileAssociationPanel().initOptions();
         getStartupShutdownPanel().initOptions();
         getUpdatesBugsPanel().initOptions();
@@ -114,7 +114,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             
         }
     }
@@ -191,7 +191,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
             //TODO: should shutdown after transfer be set to false here??
             shutdownAfterTransfer = ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.getValue();
             if(shutdownAfterTransfer) {
@@ -247,7 +247,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        void initOptions() {
+        public void initOptions() {
 
         }
     }
