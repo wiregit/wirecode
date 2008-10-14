@@ -1,7 +1,7 @@
 package org.limewire.collection;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -24,7 +24,7 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
     /**
      * The backing map. A binary-sorted Trie.
      */
-    private transient StringTrie<String> map;
+    private final transient StringTrie<String> map;
 
     /**
      * This constructor sets up a dictionary where case IS significant
@@ -100,10 +100,12 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
      * Clears all items in the dictionary.
      */
     public void clear() {
-        List<String> l = new LinkedList<String>();
-        for(String string : this)
+        List<String> l = new ArrayList<String>(map.size());
+        for (String string : this) {
             l.add(string);
-        for(String string : l)
+        }
+        for (String string : l) {
             removeEntry(string);
+        }
     }
 }

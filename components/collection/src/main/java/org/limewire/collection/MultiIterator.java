@@ -1,7 +1,9 @@
 
 package org.limewire.collection;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -56,6 +58,15 @@ public class MultiIterator<T> implements Iterator<T> {
 	
 	public MultiIterator(Iterator<? extends T>... iterators) {
 		this.iterators = iterators;
+	}
+	
+	@SuppressWarnings("unchecked")
+    public MultiIterator(Iterable<? extends Iterator<? extends T>> iterators) {
+	    List<Iterator<? extends T>> list = new ArrayList<Iterator<? extends T>>();
+	    for(Iterator<? extends T> iterator : iterators) {
+	        list.add(iterator);
+	    }
+	    this.iterators = list.toArray(new Iterator[list.size()]);
 	}
 	
 	public void remove() {

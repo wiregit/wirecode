@@ -3,8 +3,6 @@ package org.limewire.ui.swing.components;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,6 +14,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -217,12 +217,18 @@ public class DropDownListAutoCompleteControl {
         getPopupComponent(); // construct the component.
         
         boolean different = false;
+        Set<String> set = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         Vector<String> v = new Vector<String>();
         ListModel model = entryList.getModel();
         for(int i = 0;
             iter.hasNext() && i < SearchSettings.POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES.getValue();
-            i++) {
+            ) {
             String next = iter.next();
+            if(set.contains(next)) {
+                continue;
+            }
+            i++;
+            set.add(next);
             v.add(next);
             
             if(!different && i < model.getSize())

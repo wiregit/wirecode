@@ -26,11 +26,8 @@ import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.table.MouseableTable.MenuHighlightPredicate;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -45,9 +42,9 @@ public class CategoryDownloadPanel extends JPanel {
 	private JPanel tablePanel = new JPanel(new VerticalLayout());
 
 	private List<DownloadTable> tables = new ArrayList<DownloadTable>();
-	private List<JPanel> titles = new ArrayList<JPanel>();
+//	private List<JPanel> titles = new ArrayList<JPanel>();
 	
-	private EventList<DownloadItem> list;
+//	private EventList<DownloadItem> list;
 	
 	private TableColors colors;
 
@@ -55,7 +52,7 @@ public class CategoryDownloadPanel extends JPanel {
 	private CategoryDownloadPanel(DownloadTableFactory downloadTableFactory, @Assisted EventList<DownloadItem> list) {
 	    this.downloadTableFactory = downloadTableFactory;
 	    
-	    this.list = list;
+//	    this.list = list;
 	    
 	    colors = new TableColors();
 	    
@@ -85,28 +82,28 @@ public class CategoryDownloadPanel extends JPanel {
 		updateStriping();
 	}
 	
-	private void addListListener(){
-	    list.addListEventListener(new ListEventListener<DownloadItem>() {
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isVisible()) {
-                            for (int i = 0; i < titles.size() && i < tables.size(); i++) {
-                                boolean isVisible = tables.get(i).getRowCount() > 0;
-                                titles.get(i).setVisible(isVisible);
-                            }
-                            // TODO: should update striping when necessary. this
-                            // currently fires when any download item is updated
-                            updateStriping();
-                        }
-                    }
-                });
-
-            }
-        });
-	}
+//	private void addListListener(){
+//	    list.addListEventListener(new ListEventListener<DownloadItem>() {
+//            @Override
+//            public void listChanged(ListEvent<DownloadItem> listChanges) {
+//                SwingUtils.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if (isVisible()) {
+//                            for (int i = 0; i < titles.size() && i < tables.size(); i++) {
+//                                boolean isVisible = tables.get(i).getRowCount() > 0;
+//                                titles.get(i).setVisible(isVisible);
+//                            }
+//                            // TODO: should update striping when necessary. this
+//                            // currently fires when any download item is updated
+//                            updateStriping();
+//                        }
+//                    }
+//                });
+//
+//            }
+//        });
+//	}
 
 	/**
 	 * Creates a DownloadTable and adds it to a collapsible pane with the title 

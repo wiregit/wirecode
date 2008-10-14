@@ -1,11 +1,12 @@
 package org.limewire.core.impl.library;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -20,19 +21,19 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 @Singleton
 public class FriendLibraries {
-    private final ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>> libraries;
+    private final Map<String, LockableStringTrie<List<RemoteFileItem>>> libraries;
     private static final Log LOG = LogFactory.getLog(FriendLibraries.class);
 
     FriendLibraries() {
-        this.libraries = new ConcurrentHashMap<String, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>>();
+        this.libraries = new ConcurrentHashMap<String, LockableStringTrie<List<RemoteFileItem>>>();
     }
     
     @Inject
@@ -45,18 +46,23 @@ public class FriendLibraries {
                     if(type == ListEvent.INSERT) {
                         FriendLibrary friendLibrary = listChanges.getSourceList().get(listChanges.getIndex());
                         new AbstractListEventListener<PresenceLibrary>() {
+                            private final Map<String, LibraryListener> listeners = new HashMap<String, LibraryListener>();
+                            
                             @Override
                             protected void itemAdded(PresenceLibrary item) {
-                                LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> trie = new LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>>(true);
-                                if(libraries.putIfAbsent(item.getPresence().getPresenceId(), trie) == null) {
-                                    LOG.debugf("adding library for presence {0} to index", item.getPresence().getPresenceId());
-                                    item.getModel().addListEventListener(new LibraryListener(item.getPresence().getPresenceId(), trie));
-                                }
+                                LockableStringTrie<List<RemoteFileItem>> trie = new LockableStringTrie<List<RemoteFileItem>>(true);
+                                LOG.debugf("adding library for presence {0} to index", item.getPresence().getPresenceId());
+                                libraries.put(item.getPresence().getPresenceId(), trie);
+                                LibraryListener listener = new LibraryListener(item.getPresence().getPresenceId(), trie);
+                                listeners.put(item.getPresence().getPresenceId(), listener);
+                                item.getModel().addListEventListener(listener);
                             }
                             @Override
                             protected void itemRemoved(PresenceLibrary item) {
                                 LOG.debugf("removing library for presence {0} from index", item.getPresence());
                                 libraries.remove(item.getPresence().getPresenceId());
+                                LibraryListener listener = listeners.remove(item.getPresence().getPresenceId());
+                                item.getModel().removeListEventListener(listener);
                             }
                             @Override
                             protected void itemUpdated(PresenceLibrary item) {
@@ -68,12 +74,12 @@ public class FriendLibraries {
         });
     }
 
-    class LibraryListener implements ListEventListener<RemoteFileItem> {
+    private class LibraryListener implements ListEventListener<RemoteFileItem> {
 
         private final String presenceId;
-        final LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library;
+        private final LockableStringTrie<List<RemoteFileItem>> library;
 
-        LibraryListener(String presenceId, LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library) {
+        LibraryListener(String presenceId, LockableStringTrie<List<RemoteFileItem>> library) {
             this.presenceId = presenceId;
             this.library = library;
         }
@@ -95,92 +101,77 @@ public class FriendLibraries {
             }
         }
 
-//        private void removeFromIndex(RemoteFileItem newFile, String word) {
-//            ConcurrentLinkedQueue<RemoteFileItem> filesForWord;
-//            library.getLock().writeLock().lock();
-//            try {
-//                filesForWord = library.get(word);
-//                if (filesForWord == null) {
-//                    filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
-//                    library.add(word, filesForWord);
-//                }
-//            } finally {
-//                library.getLock().writeLock().unlock();
-//            }
-//            filesForWord.remove(newFile);
-//        }
-
         private void addToIndex(RemoteFileItem newFile, String word) {
             LOG.debugf("\t {0}", word);
-            ConcurrentLinkedQueue<RemoteFileItem> filesForWord;            
+            List<RemoteFileItem> filesForWord;            
+            library.getLock().writeLock().lock();
             try {
-                library.getLock().writeLock().lock();
                 filesForWord = library.get(word);
                 if (filesForWord == null) {
-                    filesForWord = new ConcurrentLinkedQueue<RemoteFileItem>();
+                    filesForWord = new ArrayList<RemoteFileItem>();
                     library.add(word, filesForWord);
                 }
+                filesForWord.add(newFile);
             } finally {
                 library.getLock().writeLock().unlock();
             }
-            filesForWord.add(newFile);
         }
     }
 
     @SuppressWarnings("unchecked")
     public Iterator<RemoteFileItem> iterator(SearchCategory category) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
-        for(LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library : libraries.values()) {
-            Iterator<ConcurrentLinkedQueue<RemoteFileItem>> libraryResultsCopy;
+        for(LockableStringTrie<List<RemoteFileItem>> library : libraries.values()) {
+            Iterator<List<RemoteFileItem>> libraryResultsCopy;
+            library.getLock().readLock().lock();
             try {
-                library.getLock().readLock().lock();
                 libraryResultsCopy = filterAndCopy(library.getIterator(), category);
             } finally {
                 library.getLock().readLock().unlock();
             }
             iterators.add(iterator(libraryResultsCopy));
         }
-        return new MultiIterator<RemoteFileItem>(iterators.toArray(new Iterator[iterators.size()]));
+        return new MultiIterator<RemoteFileItem>(iterators);
     }
 
     @SuppressWarnings("unchecked")
-    private Iterator<RemoteFileItem> iterator(final Iterator<ConcurrentLinkedQueue<RemoteFileItem>> iterator) {
+    private Iterator<RemoteFileItem> iterator(final Iterator<List<RemoteFileItem>> iterator) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();        
         while(iterator.hasNext()) {
             iterators.add(iterator.next().iterator());
         }
-        return new MultiIterator<RemoteFileItem>(iterators.toArray(new Iterator[iterators.size()]));
+        return new MultiIterator<RemoteFileItem>(iterators);
     }
 
     @SuppressWarnings("unchecked")
     public Iterator<RemoteFileItem> iterator(String s, SearchCategory category) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
-        for(LockableStringTrie<ConcurrentLinkedQueue<RemoteFileItem>> library : libraries.values()) {
-            Iterator<ConcurrentLinkedQueue<RemoteFileItem>> libraryResultsCopy;
+        for(LockableStringTrie<List<RemoteFileItem>> library : libraries.values()) {
+            Iterator<List<RemoteFileItem>> libraryResultsCopy;
+            library.getLock().readLock().lock();
             try {
-                library.getLock().readLock().lock();
                 libraryResultsCopy = filterAndCopy(library.getPrefixedBy(s), category);
             } finally {
                 library.getLock().readLock().unlock();
             }
             iterators.add(iterator(libraryResultsCopy));
         }
-        return new MultiIterator<RemoteFileItem>(iterators.toArray(new Iterator[iterators.size()]));
+        return new MultiIterator<RemoteFileItem>(iterators);
     }
 
-    private Iterator<ConcurrentLinkedQueue<RemoteFileItem>> filterAndCopy(Iterator<ConcurrentLinkedQueue<RemoteFileItem>> prefixedBy, SearchCategory category) {
-        List<ConcurrentLinkedQueue<RemoteFileItem>> copy = new ArrayList<ConcurrentLinkedQueue<RemoteFileItem>>();
+    private Iterator<List<RemoteFileItem>> filterAndCopy(Iterator<List<RemoteFileItem>> prefixedBy, SearchCategory category) {
+        List<List<RemoteFileItem>> copy = new ArrayList<List<RemoteFileItem>>();
         while(prefixedBy.hasNext()) {
             copy.add(filter(prefixedBy.next(), category));
         }
         return copy.iterator();
     }
 
-    private ConcurrentLinkedQueue<RemoteFileItem> filter(ConcurrentLinkedQueue<RemoteFileItem> remoteFileItems, SearchCategory category) {
+    private List<RemoteFileItem> filter(List<RemoteFileItem> remoteFileItems, SearchCategory category) {
         if(category == SearchCategory.ALL) {
             return remoteFileItems;    
         } else {
-            ConcurrentLinkedQueue<RemoteFileItem> filtered = new ConcurrentLinkedQueue<RemoteFileItem>();
+            List<RemoteFileItem> filtered = new ArrayList<RemoteFileItem>();
             for(RemoteFileItem file : remoteFileItems) {
                 if(category == SearchCategory.forCategory(file.getCategory())) {
                     filtered.add(file);    
@@ -190,7 +181,7 @@ public class FriendLibraries {
         }
     }
 
-    class LockableStringTrie<V> extends StringTrie<V> {
+    private class LockableStringTrie<V> extends StringTrie<V> {
 
         final ReadWriteLock lock;
         
