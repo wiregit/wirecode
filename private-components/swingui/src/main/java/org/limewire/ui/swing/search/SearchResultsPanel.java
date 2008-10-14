@@ -208,6 +208,8 @@ public class SearchResultsPanel extends JXPanel {
         tabHighlight.setBorderPaint(null);
         
         FancyTabList searchTab = searchTabItems.getSearchTab();
+        
+        searchTab.setUnderlineEnabled(false);
         searchTab.setHighlightPainter(tabHighlight);
         
         searchTab.setSelectionPainter(tabHighlight);
