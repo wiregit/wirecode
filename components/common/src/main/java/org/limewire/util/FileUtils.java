@@ -397,7 +397,9 @@ public class FileUtils {
                 }
             }
         }
-        LOG.debugf("success= {0}, file.exists()? {1}", success, file.exists());
+        if(LOG.isDebugEnabled()) {
+            LOG.debugf("success= {0}, file.exists()? {1}", success, file.exists());
+        }
         return !file.exists();
     }
     
