@@ -35,12 +35,12 @@ import com.google.inject.assistedinject.AssistedInject;
 
 public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
 
-    private CategoryIconManager categoryIconManager;
+    private final CategoryIconManager categoryIconManager;
     
     private CardLayout statusViewLayout;
     private final static String FULL_LAYOUT = "Full download display";
     private JPanel fullPanel;
-    private final static String MIN_LAYOUT = "Condensed download display";
+    private static String MIN_LAYOUT = "Condensed download display";
     private JPanel minPanel;
 
     private DownloadButtonPanel minButtonPanel;
@@ -83,9 +83,9 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     public DownloadTableCellImpl(CategoryIconManager categoryIconManager) {
         GuiUtils.assignResources(this);
 
-        initComponents();
-        
         this.categoryIconManager = categoryIconManager;
+        
+        initComponents();
     }
     
     public void setEditorListener(ActionListener editorListener) {

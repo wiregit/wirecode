@@ -8,13 +8,12 @@ import javax.swing.JScrollPane;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
+
+import ca.odell.glazedlists.EventList;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
-import ca.odell.glazedlists.EventList;
 
 
 public class AllDownloadPanel extends JPanel {
