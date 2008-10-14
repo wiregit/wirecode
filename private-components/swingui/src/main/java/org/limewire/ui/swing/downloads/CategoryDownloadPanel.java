@@ -22,6 +22,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
+import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.table.MouseableTable.MenuHighlightPredicate;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.I18n;
@@ -31,10 +32,14 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 
 public class CategoryDownloadPanel extends JPanel {
 
-
+    private final DownloadTableFactory downloadTableFactory;
+    
 	private Highlighter evenTableHighlighter;
 	private Highlighter oddTableHighlighter;
 	private JPanel tablePanel = new JPanel(new VerticalLayout());
@@ -45,22 +50,16 @@ public class CategoryDownloadPanel extends JPanel {
 	private EventList<DownloadItem> list;
 	
 	private TableColors colors;
-	
-	public static CategoryDownloadPanel createCategoryDownloadPanel(EventList<DownloadItem> list){
-	    CategoryDownloadPanel panel = new CategoryDownloadPanel(list);
-	    panel.addListListener();
-	    return panel;
-	}
 
-	/**
-	 * Create the panel
-	 */
-	private CategoryDownloadPanel(EventList<DownloadItem> list) {
+	@AssistedInject
+	private CategoryDownloadPanel(DownloadTableFactory downloadTableFactory, @Assisted EventList<DownloadItem> list) {
+	    this.downloadTableFactory = downloadTableFactory;
+	    
 	    this.list = list;
 	    
 	    colors = new TableColors();
 	    
-	  //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
+	    //HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
         evenTableHighlighter = new CompoundHighlighter(
                new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor, colors.evenForeground, colors.selectionColor, colors.selectionForeground),
                new ColorHighlighter(HighlightPredicate.ODD, colors.oddColor, colors.oddForeground, colors.selectionColor, colors.selectionForeground) );
@@ -122,7 +121,7 @@ public class CategoryDownloadPanel extends JPanel {
 		collapsePane.setLayout(new BorderLayout());
 		EventList<DownloadItem> filterList = GlazedListsFactory.filterList(list, new DownloadStateMatcher(states));
 		
-		final DownloadTable table = new DownloadTable(filterList);
+		final DownloadTable table = downloadTableFactory.create(filterList);
 		tables.add(table);
 		table.addMouseListener(new MultiTableMouseListener());
 	

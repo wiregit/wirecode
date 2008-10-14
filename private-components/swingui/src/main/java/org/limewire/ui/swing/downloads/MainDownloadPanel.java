@@ -13,12 +13,10 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import org.jdesktop.swingx.JXPanel;
@@ -31,7 +29,6 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.CustomCheckBox;
 import org.limewire.ui.swing.components.HeadingLabel;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
-import org.limewire.ui.swing.downloads.table.SimpleDownloadTable;
 import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
@@ -54,7 +51,6 @@ public class MainDownloadPanel extends JPanel {
 	private final JPanel cardPanel;
 	private static final String NO_CATEGORY = "noCategory";
 	private static final String CATEGORY = "category";
-    protected static final String TABLE = "simpleDownloadTable";
 	
 	private final DownloadMediator downloadMediator;
 	
@@ -101,13 +97,14 @@ public class MainDownloadPanel extends JPanel {
 
     };
     
-//    private ViewSelectionPanel viewSelectionPanel;
     
 	/**
 	 * Create the panel
 	 */
 	@Inject
-	public MainDownloadPanel(DownloadListManager downloadListManager, AudioPlayer player) {
+	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
+	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
+	        DownloadListManager downloadListManager, AudioPlayer player) {
 		this.downloadMediator = new DownloadMediator(downloadListManager);
 		setLayout(new BorderLayout());
 		
@@ -121,21 +118,14 @@ public class MainDownloadPanel extends JPanel {
 		add(cardPanel, BorderLayout.CENTER);
 		
         
-        final AllDownloadPanel noCategoryPanel = new AllDownloadPanel(downloadMediator.getFilteredList());
+        final AllDownloadPanel noCategoryPanel = allDownloadPanelFactory.create(downloadMediator.getFilteredList());
 		noCategoryPanel.setName(NO_CATEGORY);
 		cardPanel.add(noCategoryPanel, noCategoryPanel.getName());
 		
-		final CategoryDownloadPanel categoryPanel = CategoryDownloadPanel.createCategoryDownloadPanel(downloadMediator.getFilteredList());
+		final CategoryDownloadPanel categoryPanel = categoryDownloadPanelFactory.create(downloadMediator.getFilteredList());
 		categoryPanel.setName(CATEGORY);
 		cardPanel.add(categoryPanel, categoryPanel.getName());
 		
-	    final SimpleDownloadTable simpleTable = new SimpleDownloadTable(downloadMediator.getFilteredList());
-        simpleTable.setName(TABLE);
-        JScrollPane pane = new JScrollPane(simpleTable);
-        pane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-        cardPanel.add(pane, simpleTable.getName());
-		
-
 		settingsPanel = new DownloadSettingsPanel();
 		add(settingsPanel, BorderLayout.NORTH);
 		
@@ -226,31 +216,6 @@ public class MainDownloadPanel extends JPanel {
 			
             searchBar.setPreferredSize(new Dimension(150,19));
 			
-
-	        /*ItemListener tableListener = new ItemListener() {
-	            @Override
-	            public void itemStateChanged(ItemEvent e) {
-	                if (e.getStateChange() == ItemEvent.SELECTED) {
-	                    cardLayout.show(cardPanel, TABLE);
-	                    categorizeAction.setEnabled(false);
-	                }
-	            }
-	        };
-
-	        ItemListener listListener = new ItemListener() {
-	            @Override
-	            public void itemStateChanged(ItemEvent e) {
-	                if (e.getStateChange() == ItemEvent.SELECTED) {
-	                    String whichList = isCategorized() ? CATEGORY : NO_CATEGORY;
-	                    cardLayout.show(cardPanel, whichList);
-	                    categorizeAction.setEnabled(true);
-	                }
-	            }
-	        };
-
-	        viewSelectionPanel = new ViewSelectionPanel(listListener, tableListener);
-	        */
-	        
 	        categorizeAction.setEnabled(true);
 			
 			GridBagConstraints gbc = new GridBagConstraints();

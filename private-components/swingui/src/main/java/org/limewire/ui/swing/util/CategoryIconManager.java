@@ -1,14 +1,16 @@
-package org.limewire.ui.swing.downloads.table;
+package org.limewire.ui.swing.util;
 
 import javax.swing.Icon;
-import javax.swing.JLabel;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.OSUtils;
 
-public class CategoryIconLabel extends JLabel {
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+@Singleton
+public class CategoryIconManager {
     
     public static enum Size { LARGE, SMALL };
     
@@ -56,8 +58,13 @@ public class CategoryIconLabel extends JLabel {
     private Icon largeDocumentIcon;
     @Resource
     private Icon largeOtherIcon;
+
+    @Inject
+    public CategoryIconManager() {
+        this(Size.SMALL);
+    }
     
-    public CategoryIconLabel(Size size) {
+    public CategoryIconManager(Size size) {
         GuiUtils.assignResources(this);
         
         if (size == Size.LARGE) {
@@ -76,8 +83,6 @@ public class CategoryIconLabel extends JLabel {
             } else {
                 programIcon = largeProgramIconLinux;
             }
-            
-             
         } else {
             audioIcon = smallAudioIcon;
             imageIcon = smallImageIcon;
@@ -96,26 +101,33 @@ public class CategoryIconLabel extends JLabel {
             }
         }
     }
-    
-    public void setIcon(Category category) {
+
+    public Icon getIcon(Category category) {
         switch (category) {
         case AUDIO:
-            setIcon(audioIcon);
-            break;
+            
+            return audioIcon;
+            
         case DOCUMENT:
-            setIcon(documentIcon);
-            break;
+            
+            return documentIcon;
+            
         case IMAGE:
-            setIcon(imageIcon);
-            break;
+            
+            return imageIcon;
+            
         case VIDEO:
-            setIcon(videoIcon);
-            break;
+            
+            return videoIcon;
+            
         case PROGRAM:
-            setIcon(programIcon);
-            break;
+            
+            return programIcon;
+            
         default:
-            setIcon(otherIcon);
+            
+            return otherIcon;
+            
         }
     }
 }

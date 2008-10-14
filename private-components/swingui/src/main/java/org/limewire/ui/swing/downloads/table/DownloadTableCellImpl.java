@@ -26,27 +26,31 @@ import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.assistedinject.AssistedInject;
+
 public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
 
+    private CategoryIconManager categoryIconManager;
+    
     private CardLayout statusViewLayout;
     private final static String FULL_LAYOUT = "Full download display";
     private JPanel fullPanel;
     private final static String MIN_LAYOUT = "Condensed download display";
     private JPanel minPanel;
-    
 
     private DownloadButtonPanel minButtonPanel;
-    private CategoryIconLabel minIconLabel;
+    private JLabel minIconLabel;
     private JLabel minTitleLabel;
     private JLabel minStatusLabel;
     private JXHyperlink minLinkButton;
     
     private DownloadButtonPanel fullButtonPanel;
-    private CategoryIconLabel fullIconLabel;
+    private JLabel fullIconLabel;
     private JLabel fullTitleLabel;
     private JLabel fullStatusLabel;
     private LimeProgressBar fullProgressBar;
@@ -75,11 +79,13 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     
     private List<JComponent> textComponents = new ArrayList<JComponent>();
     
-    
-    public DownloadTableCellImpl() {
+    @AssistedInject
+    public DownloadTableCellImpl(CategoryIconManager categoryIconManager) {
         GuiUtils.assignResources(this);
 
         initComponents();
+        
+        this.categoryIconManager = categoryIconManager;
     }
     
     public void setEditorListener(ActionListener editorListener) {
@@ -114,7 +120,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         this.statusViewLayout.show(this, FULL_LAYOUT);
         
         
-        minIconLabel = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
+        minIconLabel = new JLabel();
         
         minTitleLabel = new JLabel();
         minTitleLabel.setFont(new Font("Arial", Font.BOLD, 12));
@@ -135,7 +141,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         minLinkButton.setForeground(linkColour);
         minLinkButton.setFont(STATUS_FONT_PLAIN);
                                 
-        fullIconLabel = new CategoryIconLabel(CategoryIconLabel.Size.SMALL);
+        fullIconLabel = new JLabel();
 
         fullTitleLabel = new JLabel();
         fullTitleLabel.setFont(new Font("Arial", Font.BOLD, 12));
@@ -314,14 +320,14 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
             
         case DONE :
             
-            editor.minIconLabel.setIcon(item.getCategory());
+            editor.minIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
             editor.minStatusLabel.setForeground(finishedLabelColour);
             editor.minStatusLabel.setFont(STATUS_FONT_BOLD);
             
             break;
             
         default :
-            editor.minIconLabel.setIcon(item.getCategory());     
+            editor.minIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));     
             editor.minStatusLabel.setForeground(statusLabelColour);
             editor.minStatusLabel.setFont(STATUS_FONT_PLAIN);
             
@@ -337,7 +343,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     
     private void updateFull(DownloadTableCellImpl editor, DownloadItem item) {
         
-        editor.fullIconLabel.setIcon(item.getCategory());
+        editor.fullIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
         editor.fullTitleLabel.setText(item.getTitle());
         
         long totalSize = item.getTotalSize();

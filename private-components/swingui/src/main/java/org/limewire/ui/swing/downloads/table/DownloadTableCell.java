@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import org.limewire.core.api.download.DownloadItem;
 
 
-interface DownloadTableCell {
+public interface DownloadTableCell {
     
     public void update(DownloadItem item);
     public Component getComponent();
