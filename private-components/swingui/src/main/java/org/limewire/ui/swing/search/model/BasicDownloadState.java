@@ -9,5 +9,6 @@ package org.limewire.ui.swing.search.model;
 public enum BasicDownloadState {
     NOT_STARTED,
     DOWNLOADING,
-    DOWNLOADED
+    DOWNLOADED,
+    LIBRARY
 }

@@ -337,11 +337,12 @@ implements TableCellEditor, TableCellRenderer {
         downloadingLink.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+                BasicDownloadState downloadState = vsr.getDownloadState();
+                if (downloadState == BasicDownloadState.DOWNLOADING) {
                     navigator.getNavItem(
                         NavCategory.DOWNLOAD,
                         MainDownloadPanel.NAME).select();
-                } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADED) {
+                } else if (downloadState == BasicDownloadState.DOWNLOADED || downloadState == BasicDownloadState.LIBRARY) {
                     navigator.getNavItem(
                         NavCategory.LIBRARY,
                         LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select();
@@ -456,6 +457,9 @@ implements TableCellEditor, TableCellRenderer {
                 break;
             case DOWNLOADED:
                 downloadingLink.setText(hyperlinkText(tr("Download Complete")));
+                break;
+            case LIBRARY:
+                downloadingLink.setText(hyperlinkText(tr("In Your Library")));
                 break;
             }
             

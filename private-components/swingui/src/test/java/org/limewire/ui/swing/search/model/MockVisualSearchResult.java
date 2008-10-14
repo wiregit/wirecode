@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
@@ -162,5 +163,10 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     public void setSimilarityParent(VisualSearchResult parent) {
+    }
+
+    @Override
+    public URN getURN() {
+        return null;
     }
 }

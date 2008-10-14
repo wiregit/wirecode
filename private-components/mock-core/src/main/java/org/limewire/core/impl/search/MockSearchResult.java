@@ -9,22 +9,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.MockSearch.MockRemoteHost;
 
 public class MockSearchResult implements Cloneable, SearchResult {
 
+    private MockURN urn = null;
+
     private List<RemoteHost> sources = new ArrayList<RemoteHost>();
 
-    private Map<PropertyKey, Object> properties =
-        new HashMap<PropertyKey, Object>();
+    private Map<PropertyKey, Object> properties = new HashMap<PropertyKey, Object>();
 
     private String extension;
-    private String urn;
+
     private Category resultType;
+
     private long size;
-    
+
     private boolean spam = false;
 
     public void addSource(String host) {
@@ -38,7 +41,8 @@ public class MockSearchResult implements Cloneable, SearchResult {
         // Copy contents of all the collection fields so they aren't shared.
 
         copy.sources = new ArrayList<RemoteHost>();
-        for (RemoteHost rh : sources) copy.sources.add(rh);
+        for (RemoteHost rh : sources)
+            copy.sources.add(rh);
 
         copy.properties = new HashMap<PropertyKey, Object>();
         for (PropertyKey key : properties.keySet()) {
@@ -60,7 +64,7 @@ public class MockSearchResult implements Cloneable, SearchResult {
 
     @Override
     public Object getProperty(PropertyKey key) {
-         return getProperties().get(key);
+        return getProperties().get(key);
     }
 
     @Override
@@ -79,7 +83,7 @@ public class MockSearchResult implements Cloneable, SearchResult {
     }
 
     @Override
-    public String getUrn() {
+    public URN getUrn() {
         return urn;
     }
 
@@ -99,10 +103,6 @@ public class MockSearchResult implements Cloneable, SearchResult {
         this.size = size;
     }
 
-    public void setUrn(String urn) {
-        this.urn = urn;
-    }
-
     @Override
     public String toString() {
         return getClass().getName() + ": " + getProperty(PropertyKey.NAME) + "spam: " + spam;
@@ -119,14 +119,55 @@ public class MockSearchResult implements Cloneable, SearchResult {
 
     @Override
     public String getFileName() {
-        String fileName="";
-        if(getProperty(PropertyKey.NAME) != null) {
+        String fileName = "";
+        if (getProperty(PropertyKey.NAME) != null) {
             fileName = getProperty(PropertyKey.NAME).toString();
         }
-        
-        if(getFileExtension() != null) {
+
+        if (getFileExtension() != null) {
             fileName += "." + getFileExtension();
         }
         return fileName;
+    }
+
+    public void setUrn(String string) {
+        this.urn = new MockURN(string);
+    }
+    
+    private final class MockURN implements URN {
+        private String urn;
+
+        public MockURN(String urn) {
+            this.urn = urn;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof MockURN) {
+                MockURN mockURN = (MockURN) obj;
+
+                return urn.equals(mockURN.urn);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return urn.hashCode();
+        }
+
+        @Override
+        public int compareTo(URN o) {
+            if (o instanceof MockURN) {
+                MockURN urnObj = (MockURN) o;
+                return urn.compareTo(urnObj.urn);
+            }
+            return -1;
+        }
+
+        @Override
+        public String toString() {
+            return urn;
+        }
     }
 }

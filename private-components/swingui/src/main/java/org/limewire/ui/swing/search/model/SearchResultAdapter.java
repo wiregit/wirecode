@@ -16,6 +16,7 @@ import java.util.TreeSet;
 
 import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
@@ -172,10 +173,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         LOG.debugf("Updating visible to {0} for urn: {1}", visible, getUrn());
     }
 
-    private String getUrn() {
+    private URN getUrn() {
         List<SearchResult> coreSearchResults = getCoreSearchResults();
-        if (coreSearchResults == null || coreSearchResults.size() == 0)
-            return "";
         SearchResult searchResult = coreSearchResults.get(0);
         return searchResult.getUrn();
     }
@@ -206,5 +205,10 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             similarResult.setVisible(childrenVisible);
             similarResult.setChildrenVisible(false);
         }
+    }
+
+    @Override
+    public URN getURN() {
+       return coreResults.get(0).getUrn();
     }
 }

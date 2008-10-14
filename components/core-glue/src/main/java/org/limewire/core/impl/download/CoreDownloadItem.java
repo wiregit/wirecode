@@ -7,9 +7,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
@@ -328,6 +330,15 @@ public class CoreDownloadItem implements DownloadItem {
     @Override
     public File getFile() {
         return downloader.getFile();
+    }
+    
+    @Override
+    public URN getUrn() {
+        com.limegroup.gnutella.URN urn = downloader.getSha1Urn();
+        if(urn != null) {
+            return new URNImpl(urn);
+        }
+        return null;
     }
     
    

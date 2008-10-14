@@ -8,10 +8,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.impl.URNImpl;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -147,8 +149,8 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
 
     @Override
-    public String getUrn() {
-        return rfd.getSHA1Urn().toString();
+    public URN getUrn() {
+        return new URNImpl(rfd.getSHA1Urn());
     }
 
     @Override

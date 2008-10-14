@@ -4,8 +4,6 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Calendar;
 
 import javax.swing.JComponent;
@@ -16,10 +14,10 @@ import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.search.DownloadItemPropertyListener;
 import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
@@ -190,24 +188,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             // went through.. checking for conflicts, etc.
             DownloadItem di = resultDownloader.addDownload(
                 search, vsr.getCoreSearchResults());
-            di.addPropertyChangeListener(new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if ("state".equals(evt.getPropertyName())) {
-                        DownloadState state = (DownloadState) evt.getNewValue();
-                        switch (state) {
-                            case CANCELLED:
-                            case ERROR:
-                                vsr.setDownloadState(
-                                    BasicDownloadState.NOT_STARTED);
-                                break;
-                            case DONE:
-                                vsr.setDownloadState(
-                                    BasicDownloadState.DOWNLOADED);
-                                break;
-                        }
-                    }
-                }
-            });
+            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
              
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
         } catch (SaveLocationException sle) {

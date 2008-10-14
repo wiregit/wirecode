@@ -32,7 +32,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileListChangedEvent;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LocalFileDetailsFactory;
 
 @Singleton
@@ -42,7 +41,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
     
     private final FileManager fileManager;
     
-    private final LibraryFileList libraryFileList;
+    private final LibraryFileListImpl libraryFileList;
     private final GnutellaFileList gnutellaFileList;
     
     private final CombinedFriendShareList combinedFriendShareLists;
@@ -50,7 +49,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
     private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
 
     private final EventListener<FriendShareListEvent> friendShareListEventListener;
-    private final LocalFileDetailsFactory detailsFactory;
+    final LocalFileDetailsFactory detailsFactory;
 
     @Inject
     LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory,
@@ -59,13 +58,13 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
         this.detailsFactory = detailsFactory;
         this.friendShareListEventListener = friendShareListEventListener;
         this.combinedFriendShareLists = new CombinedFriendShareList();
-        this.libraryFileList = new LibraryFileList(fileManager);
+        this.libraryFileList = new LibraryFileListImpl(this, fileManager);
         this.gnutellaFileList = new GnutellaFileList(fileManager);
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
 
     @Override
-    public LocalFileList getLibraryManagedList() {
+    public LibraryFileListImpl getLibraryManagedList() {
         return libraryFileList;
     }
     
@@ -269,85 +268,6 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
             fileManager.getFriendFileList(name).setAddNewImageAlways(value);
         }
     } 
-    
-    private class LibraryFileList extends LocalFileListImpl implements EventListener<FileManagerEvent> {
-
-        private final FileManager fileManager;
-        
-        LibraryFileList(FileManager fileManager) {
-            super(new BasicEventList<LocalFileItem>());
-            
-            this.fileManager = fileManager;
-            this.fileManager.addFileEventListener(this);
-        }
-        
-        @Override
-        public void addFile(File file) {
-            fileManager.addFile(file);
-        }
-
-        @Override
-        public void removeFile(File file) {
-            fileManager.removeFile(file);
-        }
-
-        @Override
-        public void handleEvent(FileManagerEvent evt) {
-            switch(evt.getType()) {
-            case ADD_FILE:
-                threadSafeList.add(new CoreLocalFileItem(evt.getNewFileDesc(), detailsFactory));
-                break;
-            case REMOVE_FILE:
-                remove(evt.getNewFile());
-                break;
-            case FILEMANAGER_LOAD_STARTED:
-                threadSafeList.clear();
-                break;
-            }
-        }
-    }
-    
-    private abstract class LocalFileListImpl implements LocalFileList {
-        protected final EventList<LocalFileItem> baseList;
-        protected final TransformedList<LocalFileItem, LocalFileItem> threadSafeList;
-        protected volatile TransformedList<LocalFileItem, LocalFileItem> swingEventList;
-        
-        LocalFileListImpl(EventList<LocalFileItem> eventList) {
-            this.baseList = eventList;
-            this.threadSafeList = GlazedListsFactory.threadSafeList(eventList);
-        }
-        
-        @Override
-        public EventList<LocalFileItem> getModel() {
-            return threadSafeList;
-        }
-        
-        @Override
-        public EventList<LocalFileItem> getSwingModel() {
-            assert EventQueue.isDispatchThread();
-            if(swingEventList == null) {
-                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeList);
-            }
-            return swingEventList;
-        }
-        
-        void dispose() {
-            if(swingEventList != null) {
-                swingEventList.dispose();
-            }
-            threadSafeList.dispose();
-        }        
-        
-        void remove(File file) {
-        }
-        
-        @Override
-        public int size() {
-            return threadSafeList.size();
-        }
-    }
-    
-
     
     private class CombinedFriendShareList implements FileList<LocalFileItem> {
         private final CompositeList<LocalFileItem> compositeList;

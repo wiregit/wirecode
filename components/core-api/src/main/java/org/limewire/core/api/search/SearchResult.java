@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 
 public interface SearchResult {
@@ -48,7 +49,7 @@ public interface SearchResult {
     
     List<RemoteHost> getSources();
 
-    String getUrn();
+    URN getUrn();
     
     public boolean isSpam();
     

@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.i18n.I18nMarker;
 
 /**
@@ -98,4 +99,11 @@ public interface DownloadItem {
     public boolean isLaunchable();
 
     public File getFile();
+
+    /**
+     * Returns a urn for the file being downloaded.
+     * 
+     * May be null.
+     */
+    URN getUrn();
 }

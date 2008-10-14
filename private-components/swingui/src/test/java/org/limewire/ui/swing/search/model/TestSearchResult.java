@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchResult;
@@ -18,9 +19,9 @@ import org.limewire.util.FileUtils;
 public class TestSearchResult implements SearchResult {
 
     private String urn;
-    
+
     private String fileName;
-    
+
     private Map<PropertyKey, Object> properties;
 
     public TestSearchResult(String urn, String fileName) {
@@ -30,13 +31,12 @@ public class TestSearchResult implements SearchResult {
         this.properties = properties;
         this.fileName = fileName;
     }
-    
+
     public TestSearchResult(String fileName, Map<PropertyKey, Object> properties) {
         this.urn = UUID.randomUUID().toString();
         this.properties = properties;
         this.fileName = fileName;
     }
-
 
     @Override
     public String getFileExtension() {
@@ -60,10 +60,10 @@ public class TestSearchResult implements SearchResult {
 
     @Override
     public List<RemoteHost> getSources() {
-        List<RemoteHost> sources =new ArrayList<RemoteHost>();
+        List<RemoteHost> sources = new ArrayList<RemoteHost>();
         sources.add(new RemoteHost() {
             UUID randomUUID = UUID.randomUUID();
-        
+
             @Override
             public String getRenderName() {
                 return randomUUID.toString();
@@ -93,8 +93,8 @@ public class TestSearchResult implements SearchResult {
     }
 
     @Override
-    public String getUrn() {
-        return urn;
+    public URN getUrn() {
+        return new TestURN(urn);
     }
 
     public String toString() {
@@ -114,5 +114,41 @@ public class TestSearchResult implements SearchResult {
     @Override
     public String getFileName() {
         return fileName;
+    }
+
+    private class TestURN implements URN {
+        private String urn;
+
+        public TestURN(String urn) {
+            this.urn = urn;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof TestURN) {
+                TestURN oUrn = (TestURN) obj;
+                return urn.equals(oUrn);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return urn.hashCode();
+        }
+
+        @Override
+        public int compareTo(URN o) {
+            if (o instanceof TestURN) {
+                TestURN testURN = (TestURN) o;
+                return urn.compareTo(testURN.urn);
+            }
+            return -1;
+        }
+
+        @Override
+        public String toString() {
+            return urn;
+        }
     }
 }

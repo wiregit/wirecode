@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
@@ -20,11 +22,17 @@ public class SearchResultsModelFactory {
 
     private final SimilarResultsDetectorFactory similarResultsDetectorFactory;
 
+    private final LibraryManager libraryManager;
+    
+    private final DownloadListManager downloadListManager;
+    
     @Inject
     public SearchResultsModelFactory(SimilarResultsDetectorFactory similarResultsDetectorFactory,
-            SpamManager spamManager) {
+            SpamManager spamManager, LibraryManager libraryManager, DownloadListManager downloadListManager) {
         this.similarResultsDetectorFactory = similarResultsDetectorFactory;
         this.spamManager = spamManager;
+        this.libraryManager = libraryManager;
+        this.downloadListManager = downloadListManager;
     }
 
     public SearchResultsModel createSearchResultsModel() {
@@ -44,6 +52,10 @@ public class SearchResultsModelFactory {
         SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager,
                 similarResultsDetector);
         visualSearchResults.addListEventListener(spamListEventListener);
+        
+        AlreadyDownloadedListEventListener alreadyDownloadedListEventListener = new AlreadyDownloadedListEventListener(libraryManager, downloadListManager);
+        visualSearchResults.addListEventListener(alreadyDownloadedListEventListener);
+        
 
         return searchResultsModel;
     }

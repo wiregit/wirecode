@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
@@ -202,6 +203,11 @@ public class MockDownloadItem implements DownloadItem {
     @Override
     public File getFile() {
         return new File("A FILE!");
+    }
+
+    @Override
+    public URN getUrn() {
+        return null;
     }
 
   
