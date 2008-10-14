@@ -61,6 +61,7 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -81,14 +82,7 @@ public class LibraryNavigator extends JXPanel {
 
     private final SectionHeading titleLabel;
     private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
-    
-    @Resource private Icon audioIcon;
-    @Resource private Icon videoIcon;
-    @Resource private Icon imageIcon;
-    @Resource private Icon appIcon;
-    @Resource private Icon documentIcon;
-    @Resource private Icon otherIcon;
-    
+       
     @Resource private Icon removeLibraryIcon;
     @Resource private Icon removeLibraryHoverIcon;
     
@@ -100,9 +94,10 @@ public class LibraryNavigator extends JXPanel {
     @Resource private Color textColor;
     
     private final RemoteLibraryManager remoteLibraryManager;
-    private DownloadListManager downloadListManager;
-    private LibraryManager libraryManager;
-    private ShareListManager shareListManager;
+    private final DownloadListManager downloadListManager;
+    private final LibraryManager libraryManager;
+    private final ShareListManager shareListManager;
+    private final CategoryIconManager categoryIconManager;
 
     @Inject
     LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
@@ -110,13 +105,16 @@ public class LibraryNavigator extends JXPanel {
             MyLibraryFactory myLibraryFactory, 
             final FriendLibraryFactory friendLibraryFactory, 
             DownloadListManager downloadListManager,
-            ShareListManager shareListManager) {
+            ShareListManager shareListManager,
+            CategoryIconManager categoryIconManager) {
+        
         GuiUtils.assignResources(this);
+        
         this.remoteLibraryManager = remoteLibraryManager;
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
-        
+        this.categoryIconManager = categoryIconManager;
         
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
@@ -326,16 +324,9 @@ public class LibraryNavigator extends JXPanel {
                 }
             }
         });
-        Icon icon;
-        switch (category) {
-        case AUDIO:    icon = audioIcon; break;
-        case DOCUMENT: icon = documentIcon; break;
-        case IMAGE:    icon = imageIcon; break;
-        case OTHER:    icon = otherIcon; break;
-        case PROGRAM:  icon = appIcon; break;
-        case VIDEO:    icon = videoIcon; break;
-        default:       icon = new EmptyIcon(16, 16); break;
-        }
+        
+        Icon icon = categoryIconManager.getIcon(category);
+        
         action.putValue(Action.SMALL_ICON, new ShiftedIcon(26, 0, icon));
         return action;
     }
