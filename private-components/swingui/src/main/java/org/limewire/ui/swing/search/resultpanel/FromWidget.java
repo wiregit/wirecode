@@ -13,7 +13,6 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
@@ -21,7 +20,6 @@ import javax.swing.border.Border;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.ui.swing.components.ComponentHider;
 import org.limewire.ui.swing.components.RoundedBorder;
 import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.util.FontUtils;
@@ -48,13 +46,10 @@ public class FromWidget extends JPanel {
 
     private final JPopupMenu menu;
 
-    private final ComponentHider menuHider;
-
     private List<RemoteHost> people;
 
     public FromWidget(FromActions fromActions) {
         menu = new JPopupMenu();
-        menuHider = new ComponentHider(menu);
         menu.setBorder(border);
         this.fromActions = Objects.nonNull(fromActions, "fromActions");
         configureHeader();
@@ -69,8 +64,6 @@ public class FromWidget extends JPanel {
         headerPanel.add(headerLabel, "wmin 125");
         headerPanel.setBorder(noBorder);
         headerPanel.setOpaque(false);
-
-        menu.addMouseListener(menuHider);
 
         headerLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -88,6 +81,7 @@ public class FromWidget extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (people.size() > 0) {
+                    updateMenus();
                     menu.show((Component) e.getSource(), -R, -R);
                 }
             }
@@ -137,20 +131,19 @@ public class FromWidget extends JPanel {
 
     public void setPeople(List<RemoteHost> people) {
         this.people = people;
-        menu.removeAll();
-        updateHeaderLabel();
-        updateMenus();
+        headerLabel.setText(getFromText());
     }
 
-    private void updateHeaderLabel() {
-        String text = people.size() == 0 ? tr("nobody") : people.size() == 1 ? people.get(0)
+    private String getFromText() {
+        return people.size() == 0 ? tr("nobody") : people.size() == 1 ? people.get(0)
                 .getRenderName() : tr("{0} people", people.size());
-        headerLabel.setText(text);
-        menu.setLabel(text);
-        menu.add(text);
     }
 
     private void updateMenus() {
+        menu.removeAll();
+        String text = getFromText();
+        menu.setLabel(text);
+        menu.add(text);
         if (people.size() == 0)
             return; // menu has no items
 
@@ -173,24 +166,17 @@ public class FromWidget extends JPanel {
                         || person.isSharingEnabled()) {
 
                     JMenu submenu = new JMenu(person.getRenderName());
-                    submenu.addMouseListener(menuHider);
 
                     if (person.isChatEnabled()) {
-                        JMenuItem chatItem = new JMenuItem(getChatAction(person));
-                        chatItem.addMouseListener(menuHider);
-                        submenu.add(chatItem);
+                        submenu.add(getChatAction(person));
                     }
 
                     if (person.isBrowseHostEnabled()) {
-                        JMenuItem libraryItem = new JMenuItem(getLibraryAction(person));
-                        libraryItem.addMouseListener(menuHider);
-                        submenu.add(libraryItem);
+                        submenu.add(getLibraryAction(person));
                     }
 
                     if (person.isSharingEnabled()) {
-                        JMenuItem shareItem = new JMenuItem(getSharingAction(person));
-                        shareItem.addMouseListener(menuHider);
-                        submenu.add(shareItem);
+                        submenu.add(getSharingAction(person));
                     }
                     menu.add(submenu);
                 }
