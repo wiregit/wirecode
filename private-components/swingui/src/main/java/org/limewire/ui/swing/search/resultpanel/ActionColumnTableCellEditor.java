@@ -40,7 +40,7 @@ implements TableCellEditor, TableCellRenderer {
     private ActionButtonPanel getPanel(final JTable table) {
         if (panel != null) return panel;
         
-        panel = new ActionButtonPanel(downloadHandler);
+        panel = new ActionButtonPanel(downloadHandler, table);
         panel.setOpaque(false);
         
         JToggleButton junkButton = panel.getSpamButton();
@@ -63,13 +63,9 @@ implements TableCellEditor, TableCellRenderer {
         
         ActionButtonPanel panel = getPanel(table);
         vsr = (VisualSearchResult) value;
-        panel.setVisualSearchResult(vsr);
-        panel.setRow(row);
-        boolean spam = vsr.isSpam();
-        panel.setAlpha(spam ? 0.2f : 1.0f);
-
-        panel.getSpamButton().setSelected(spam);
-
+        
+        panel.prepareForDisplay(vsr, row);
+        
         return panel;
     }
 

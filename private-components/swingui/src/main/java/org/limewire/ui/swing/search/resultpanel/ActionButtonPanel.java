@@ -39,7 +39,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 public class ActionButtonPanel extends JXPanel {
 
     private final String[] TOOLTIPS =
-        { tr("Download"), tr("More Info"), tr("Mark as Junk") };
+        { tr("Download"), tr("More Info"), tr("Mark as Spam") };
     
     private static final int DOWNLOAD = 0;    
     private static final int MORE_INFO = 1;    
@@ -65,7 +65,7 @@ public class ActionButtonPanel extends JXPanel {
     private VisualSearchResult vsr;
     private int currentRow;
 
-    public ActionButtonPanel(DownloadHandler downloadHandler) {
+    public ActionButtonPanel(DownloadHandler downloadHandler, final JTable table) {
         GuiUtils.assignResources(this);
         
         this.downloadHandler = downloadHandler;
@@ -76,6 +76,14 @@ public class ActionButtonPanel extends JXPanel {
                 return getToolTipOffset(this);
             }
         };
+        
+        downloadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startDownload();
+                table.editingStopped(new ChangeEvent(table));
+            }
+        });
         
         infoButton = new JButton() {
             @Override
@@ -125,10 +133,6 @@ public class ActionButtonPanel extends JXPanel {
         setDownloadingDisplay(vsr);
     }
     
-    public void setVisualSearchResult(VisualSearchResult vsr) {
-        this.vsr = vsr;
-    }
-
     private void calculateHeight() {
         for (Icon[] iconSet : icons) {
             Icon upIcon = iconSet[0];
@@ -180,17 +184,6 @@ public class ActionButtonPanel extends JXPanel {
         return spamButton;
     }
 
-    /**
-     * Gets the rollover icon of the button at a given index.
-     * @param buttonIndex the button index
-     * @return the rollover icon
-     */
-    private Icon getRolloverIcon(int buttonIndex) {
-        return buttonIndex == DOWNLOAD ? downloadOverIcon :
-            buttonIndex == MORE_INFO ? infoOverIcon :
-            buttonIndex == MARK_AS_SPAM ? spamOverIcon : null;
-    }
-
     private Point getToolTipOffset(JComponent component) {
         // Determine the size of the tooltip.
         Font font = component.getFont();
@@ -207,17 +200,6 @@ public class ActionButtonPanel extends JXPanel {
         return new Point(x, y);
     }
 
-    /**
-     * Gets the up icon of the button at a given index.
-     * @param buttonIndex the button index
-     * @return the up icon
-     */
-    private Icon getUpIcon(int buttonIndex) {
-        return buttonIndex == DOWNLOAD ? downloadUpIcon :
-            buttonIndex == MORE_INFO ? infoUpIcon :
-            buttonIndex == MARK_AS_SPAM ? spamUpIcon : null;
-    }
-
     @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
@@ -228,38 +210,23 @@ public class ActionButtonPanel extends JXPanel {
         }
     }
 
-    /**
-     * Changes the "normal" icon of the specified button
-     * based on whether it should simulate a mouse rollover.
-     * @param buttonIndex the button index
-     * @param rollover true to simulate a rollover; false otherwise
-     */
-    public void setRollover(int buttonIndex, boolean rollover) {
-        AbstractButton button = getButton(buttonIndex);
-        Icon icon = rollover ?
-            getRolloverIcon(buttonIndex) : getUpIcon(buttonIndex);
-        button.setIcon(icon);
-    }
-    
     public void setDownloadingDisplay(VisualSearchResult vsr) {
         downloadButton.setEnabled(vsr.getDownloadState() == BasicDownloadState.NOT_STARTED);
     }
 
-    public void setRow(int row) {
-        this.currentRow = row;        
-    }
-    
     public void configureForListView(final JTable table) {
-        downloadButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startDownload();
-                table.editingStopped(new ChangeEvent(table));
-            }
-        });
-        
         removeAll();
         setLayout(new MigLayout("insets 0 0 0 0", "[]15[]15[]", "[]"));
         addButtonsToPanel();
+    }
+    
+    public void prepareForDisplay(VisualSearchResult vsr, int row) {
+        this.vsr = vsr;
+        this.currentRow = row;
+        
+        boolean spam = vsr.isSpam();
+        setAlpha(spam ? 0.2f : 1.0f);
+        setDownloadingDisplay(vsr);
+        getSpamButton().setSelected(spam);
     }
 }

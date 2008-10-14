@@ -154,11 +154,11 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 tc.setCellRenderer(calendarRenderer);
             } else if (clazz == Component.class) {
                 tc.setCellRenderer(componentRenderer);
+            } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
+                tc.setCellRenderer(new ActionColumnTableCellEditor(this));
             }
         }
 
-        resultsTable.setDefaultRenderer(
-            VisualSearchResult.class, new ActionColumnTableCellEditor(this));
         resultsTable.setDefaultEditor(
             VisualSearchResult.class, new ActionColumnTableCellEditor(this));
 
