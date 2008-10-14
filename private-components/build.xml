@@ -117,9 +117,10 @@
 			<more-jar-elements>
 			    <fileset dir="${build.limewire.components.swingui.classes}" />
 	    	    <fileset dir="${limewire.components.swingui.src.resources}" />
-			    <fileset dir="${build.limewire.components.mock-core.classes}"/>
+			    <!--<fileset dir="${build.limewire.components.mock-core.classes}"/>-->
     	        <fileset dir="${build.limewire.components.integrated-ui.classes}" />
                 <!-- Add as components & resources are added. -->
+                <fileset dir="${build.limewire.components.core-glue.classes}" />
 			</more-jar-elements>
         </do.jar>
     </target>
