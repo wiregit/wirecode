@@ -69,4 +69,9 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
     protected Comparable<Integer> convertToComparable(String value) {
         return new Integer(value);
     }
+    
+    @Override
+    public IntSetting setAlwaysSave(boolean alwaysSave) {
+        return (IntSetting)super.setAlwaysSave(alwaysSave);
+    }
 }

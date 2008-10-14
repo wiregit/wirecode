@@ -136,14 +136,14 @@ public class ApplicationSettings extends LimeProps {
 	 * is started.
 	 */
     public static final IntSetting WINDOW_X =
-        (IntSetting)FACTORY.createIntSetting("WINDOW_X", 0).setAlwaysSave(true);
+        FACTORY.createIntSetting("WINDOW_X", 0).setAlwaysSave(true);
     
     /**
 	 * The y position of the window for the next time the application
 	 * is started.
 	 */
     public static final IntSetting WINDOW_Y =
-        (IntSetting)FACTORY.createIntSetting("WINDOW_Y", 0).setAlwaysSave(true);
+        FACTORY.createIntSetting("WINDOW_Y", 0).setAlwaysSave(true);
     
     /** Setting for whether or not LW should start maximized. */
     @InspectablePrimitive("is application maximized")
