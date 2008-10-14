@@ -2,10 +2,9 @@ package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.text.MessageFormat;
 
-import javax.swing.Icon;
-import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
@@ -13,9 +12,11 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.components.HeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.sharing.friends.FriendUpdate;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -23,24 +24,20 @@ import ca.odell.glazedlists.EventList;
 /**
  * This displays the header on all the sharing panels. It includes the filter
  * box and name and icon describing what this panel is for.
- * 
- * TODO: This is very similar to SortAndFilterPanel. Once final designs are
- * ironed out these two classes should be merged and subclassed.
  */
 public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
 
     private final String staticText;
     
-    protected JLabel descriptionLabel;
-    protected JTextField filterBox;
-    protected ViewSelectionPanel viewSelectionPanel;
+    private HeadingLabel titleLabel;
+    private JTextField filterBox;
     
     @Resource
     private int height;
     @Resource
     private Color fontColor;
     @Resource 
-    private float fontSize;
+    private int fontSize;
     
     /**
      * Constructs sharing header panel.
@@ -52,15 +49,14 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
      * @param name
      * @param viewPanel
      */
-    public SharingHeaderPanel(Icon icon, String staticText, String name, ViewSelectionPanel viewPanel) {
+    public SharingHeaderPanel(String staticText, String name) {
         GuiUtils.assignResources(this);
         
         setBackgroundPainter(new SubpanelPainter());
     
         this.staticText = staticText;
-        this.viewSelectionPanel = viewPanel;
-        createComponents();
-        createComponents(icon, MessageFormat.format(staticText, name));
+
+        createComponents(MessageFormat.format(staticText, name));
         layoutComponents();
         
         setMinimumSize(new Dimension(0, height + 2));
@@ -68,35 +64,31 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
         setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
     }
     
-    public JTextField getFilterBox() {
-        return filterBox;
-    }
-    
-    protected void createComponents() {
-    }
-    
-    private void createComponents(Icon icon, String text) {
-        descriptionLabel = new JLabel(text, icon, JLabel.LEFT);
-        descriptionLabel.setForeground(fontColor);
-        descriptionLabel.setFont(descriptionLabel.getFont().deriveFont(fontSize));
+    private void createComponents(String text) {
+        titleLabel = new HeadingLabel(text);
+        titleLabel.setForeground(fontColor);
+        FontUtils.setSize(titleLabel, fontSize);
+        FontUtils.changeStyle(titleLabel, Font.PLAIN);
         filterBox = new PromptTextField();
     }
     
     protected void layoutComponents() {
-        setLayout(new MigLayout("insets 0 0 0 0", "", ""));
+        setLayout(new MigLayout("insets 0 0 0 0", "", "align 50%"));
 
-        add(descriptionLabel, "gapx 5, push");
-        add(filterBox);
-        add(viewSelectionPanel, "gapafter 5");
+        add(titleLabel, "gapx 10, push");
+        add(filterBox, "gapafter 10");
+    }
+    
+    public JTextField getFilterBox() {
+        return filterBox;
     }
     
     @Override
     public void setFriendName(String name) {
-        descriptionLabel.setText(MessageFormat.format(staticText, name));
+        titleLabel.setText(MessageFormat.format(staticText, name));
     }
 
     @Override
     public void setEventList(EventList<LocalFileItem> model) {
-
     }
 }

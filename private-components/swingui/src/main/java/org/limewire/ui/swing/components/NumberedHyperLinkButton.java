@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 
 import javax.swing.Action;
@@ -19,11 +20,13 @@ import org.limewire.ui.swing.util.GuiUtils;
 public class NumberedHyperLinkButton extends HyperLinkButton {
     
     @Resource
-    Color numberedForeGroundColor;
+    private Color numberedForeGroundColor;
     @Resource
-    Color mouseOverColor;
+    private Color mouseOverColor;
     @Resource
-    Color disabledColor;
+    private Color disabledColor;
+    @Resource
+    private int fontSize;
     
     private int displayNumber = 0;
     
@@ -41,6 +44,8 @@ public class NumberedHyperLinkButton extends HyperLinkButton {
         setForegroundColor(numberedForeGroundColor);
         setMouseOverColor(mouseOverColor);
         setDisabledColor(disabledColor);
+        FontUtils.setSize(this, fontSize);
+        FontUtils.changeStyle(this, Font.PLAIN);
     }
     
     public void setDisplayNumber(int value) {

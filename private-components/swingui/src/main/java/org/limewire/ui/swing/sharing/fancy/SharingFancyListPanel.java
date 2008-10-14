@@ -17,6 +17,7 @@ import javax.swing.TransferHandler;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
@@ -29,6 +30,7 @@ import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
 import org.limewire.ui.swing.sharing.components.UnshareButton;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -42,6 +44,13 @@ import ca.odell.glazedlists.event.ListEventListener;
 //TODO: merge this with SharingFancyTablePanel during cleanup of Sharing package
 public class SharingFancyListPanel extends JPanel implements ListEventListener<LocalFileItem> {
     
+    @Resource
+    private Color lineColor;
+    @Resource
+    private int lineSize;
+    @Resource
+    private Color backgroundColor;
+    
     private final ImageList imageList;
     
     private final ConfirmationUnshareButton unShareButton;
@@ -54,7 +63,9 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     private static final String unshareAll = I18n.tr("Unshare All");
     
     public SharingFancyListPanel(String name, EventList<LocalFileItem> eventList, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager) {       
-        setBackground(Color.WHITE);
+        GuiUtils.assignResources(this); 
+        
+        setBackground(backgroundColor);
         
         this.currentEventList = eventList;
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
@@ -65,7 +76,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         unShareButton.setEnabled(false);
     
         // black seperator
-        Line line = Line.createHorizontalLine(Color.BLACK, 3);
+        Line line = Line.createHorizontalLine(lineColor, lineSize);
         
         imageList = new ImageList(eventList, fileList, thumbnailManager);
         imageList.setTransferHandler(transferHandler);

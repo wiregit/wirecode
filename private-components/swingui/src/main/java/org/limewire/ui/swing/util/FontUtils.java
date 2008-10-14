@@ -18,6 +18,12 @@ public class FontUtils {
         component.setFont(font.deriveFont(newSize));
     }
     
+    public static void setSize(JComponent component, int size) {
+        Font font = component.getFont();
+        if(font == null) return;
+        component.setFont(font.deriveFont((float)size));
+    }
+    
     public static void changeStyle(JComponent component, int style) {
         component.setFont(component.getFont().deriveFont(style));
     }

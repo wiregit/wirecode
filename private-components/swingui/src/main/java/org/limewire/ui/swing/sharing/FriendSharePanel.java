@@ -1,11 +1,10 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.CardLayout;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.Color;
+import java.awt.Dimension;
 
-import javax.swing.Action;
-import javax.swing.DropMode;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -13,7 +12,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -33,7 +31,6 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanelFactory;
@@ -41,14 +38,8 @@ import org.limewire.ui.swing.sharing.friends.FriendItem;
 import org.limewire.ui.swing.sharing.friends.FriendItemImpl;
 import org.limewire.ui.swing.sharing.friends.FriendNameTable;
 import org.limewire.ui.swing.sharing.friends.FriendTableFormat;
-import org.limewire.ui.swing.sharing.table.SharingTable;
-import org.limewire.ui.swing.sharing.table.SharingTableFormat;
-import org.limewire.ui.swing.sharing.table.SharingTableModel;
-import org.limewire.ui.swing.table.IconLabelRenderer;
-import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.IconManager;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -71,61 +62,50 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     @Resource
     protected Icon cancelIcon;
     @Resource
-    protected Icon sharingIcon;
-    
-    private ViewSelectionPanel viewSelectionPanel;
+    private Color leftBorderColor;
     
     private final CardLayout viewCardLayout;
 
     private final FriendNameTable friendTable;
     private SharingFancyPanel sharingFancyPanel;
 
-    private MultiButtonTableCellRendererEditor editor;
-    private MultiButtonTableCellRendererEditor renderer;
-
     private final EventList<FriendItem> friendsList;
-    
-    private final LibraryManager libraryManager;
+
     private final ShareListManager shareListManager;
-    private final IconManager iconManager;
     private final SharingFancyPanelFactory sharingFancyPanelFactory;
         
     private final FriendSharingHeaderPanel headerPanel;
     
-    private SharingTableFormat sharingTableFormat;
-    private IconLabelRenderer iconLabelRenderer;
-    
     @Inject
     public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager,
             RemoteLibraryManager remoteLibraryManager,
-            SharingFriendEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager,
-            SharingFancyPanelFactory sharingFancyPanelFactory) {        
+            SharingFriendEmptyPanel emptyPanel, Navigator navigator, SharingFancyPanelFactory sharingFancyPanelFactory) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
-        
-        this.libraryManager = libraryManager;
+
         this.shareListManager = shareListManager;
-        this.iconManager = iconManager;
         this.sharingFancyPanelFactory = sharingFancyPanelFactory;
         
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
+        cardPanel.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, leftBorderColor));
         cardPanel.setLayout(viewCardLayout);
-        cardPanel.add(emptyPanel, ViewSelectionPanel.DISABLED);
+        cardPanel.add(emptyPanel, EMPTY);
 
         Connector<FriendItem> connector = GlazedLists.beanConnector(FriendItem.class); 
         friendsList = GlazedListsFactory.observableElementList(new BasicEventList<FriendItem>(), connector);               
         friendTable = new FriendNameTable(friendsList, new FriendTableFormat(),
                 remoteLibraryManager, libraryManager, shareListManager, navigator);
         
-        headerPanel = createHeader(cardPanel);
+        headerPanel = new FriendSharingHeaderPanel(I18n.tr("Sharing with {0}"), "", libraryManager);//createHeader(cardPanel);
 
         createCenterCards(headerPanel, cardPanel);
 
-        viewCardLayout.show(cardPanel, ViewSelectionPanel.DISABLED);
+        viewCardLayout.show(cardPanel, EMPTY);
         
         FriendSelectionListener friendSelectionListener = new FriendSelectionListener(friendTable, headerPanel, emptyPanel, cardPanel);
         friendTable.getSelectionModel().addListSelectionListener(friendSelectionListener);
+        friendTable.setPreferredSize(new Dimension(141, friendTable.getPreferredSize().height));
         //if the list is populated for the first time, select the first friend
         friendsList.addListEventListener(new ListEventListener<FriendItem>(){
             int oldSize = 0;
@@ -144,62 +124,25 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                 }
             }});
         
+        JScrollPane friendTableScrollPane = new JScrollPane();
+        friendTableScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        friendTableScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        friendTableScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        friendTableScrollPane.setViewportView(friendTable);
         
         setLayout(new MigLayout("insets 0 0 0 0", "[150!]0[grow]","[grow]"));
         
         add(headerPanel, "dock north");
-        add(new JScrollPane(friendTable), "grow");
+        add(friendTableScrollPane, "grow");
         add(cardPanel, "grow");
     }
     
-    private FriendSharingHeaderPanel createHeader(JPanel cardPanel) {
-        viewSelectionPanel = new ViewSelectionPanel(new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.LIST_SELECTED), 
-                new ItemAction(cardPanel, viewCardLayout, ViewSelectionPanel.TABLE_SELECTED));
-        
-        FriendSharingHeaderPanel headerPanel = new FriendSharingHeaderPanel(sharingIcon, I18n.tr("Sharing with {0}"), "", viewSelectionPanel, libraryManager);
-        return headerPanel;
-    }
-    
-    private void createCenterCards(SharingHeaderPanel headerPanel, JPanel cardPanel) {
+    private void createCenterCards(FriendSharingHeaderPanel headerPanel, JPanel cardPanel) {
         EventList<LocalFileItem> tempList = new BasicEventList<LocalFileItem>();
-        createTable(tempList);
-        
-        JScrollPane scrollPane = new JScrollPane();
+
         sharingFancyPanel = sharingFancyPanelFactory.create(tempList, scrollPane, null);
         scrollPane.setViewportView(sharingFancyPanel);
-        
-        cardPanel.add(new JScrollPane(table),TABLE);
-        cardPanel.add(scrollPane, LIST);
-        viewCardLayout.show(cardPanel, LIST);
-        
-    }
-    
-    private void createTable(EventList<LocalFileItem> eventList) {
-        sharingTableFormat = new SharingTableFormat();
-        table = new SharingTable(eventList, null, sharingTableFormat);
-//        table.setTransferHandler(new SharingTransferHandler(fileList));
-        table.setDropMode(DropMode.ON);
-        
-        editor = new MultiButtonTableCellRendererEditor();
-        editor.addActions(createActions());
-        renderer = new MultiButtonTableCellRendererEditor();
-        renderer.addActions(createActions());
-        table.setRowHeight(20);
-        //TODO: this needs to be fixed, if rows are columns or rows
-        //  are removed this stops working
-        TableColumn tc = table.getColumn(6);
-        tc.setCellEditor(editor);
-        tc.setCellRenderer(renderer);
-        
-        tc = table.getColumn(0);
-        iconLabelRenderer = new IconLabelRenderer(iconManager);
-        tc.setCellRenderer(iconLabelRenderer);
-    }
-    
-    private List<Action> createActions() {
-        List<Action> list = new ArrayList<Action>();
-        list.add(new SharingRemoveTableAction(table, cancelIcon));
-        return list;
+        cardPanel.add(scrollPane, NONEMPTY);       
     }
     
     // TODO: There's a lot of funkiness with disposing of listeners here --
@@ -223,7 +166,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     //       Another approach would be to add an in-between EventList that just forwards
     //       list-changed events, but does *not* forward them if the list unregistered
     //       for listening by the time it comes to forwarding the event.
-    private class FriendSelectionListener implements ListSelectionListener, ListEventListener<LocalFileItem> {
+    private class FriendSelectionListener implements ListSelectionListener {//, ListEventListener<LocalFileItem> {
 
         private final JTable friend;
         private final FriendSharingHeaderPanel headerPanel;
@@ -268,32 +211,26 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
 
             FriendFileList fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
-            if(currentList != null) {
-                assert filteredList != null;
-                final TransformedList<LocalFileItem, LocalFileItem> toDispose = filteredList;
-                final EventList<LocalFileItem> toDispose2 = currentList;
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        toDispose.dispose();
-                        toDispose2.removeListEventListener(FriendSelectionListener.this);
-                    }
-                });
-            } else {
-                assert filteredList == null;
-            }
+//            if(currentList != null) {
+//                assert filteredList != null;
+//                final TransformedList<LocalFileItem, LocalFileItem> toDispose = filteredList;
+//                final EventList<LocalFileItem> toDispose2 = currentList;
+//                SwingUtilities.invokeLater(new Runnable() {
+//                    public void run() {
+//                        toDispose.dispose();
+//                        toDispose2.removeListEventListener(FriendSelectionListener.this);
+//                    }
+//                });
+//            } else {
+//                assert filteredList == null;
+//            }
             
             currentList = fileList.getSwingModel();
             filteredList = GlazedListsFactory.filterList(currentList, 
                     new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
-            currentList.addListEventListener(this);
+//            currentList.addListEventListener(this);
             
             emptyPanel.setUserFileList(fileList);
-            table.setModel(new SharingTableModel(filteredList, fileList,sharingTableFormat));
-            TableColumn tc = table.getColumn(6);
-            tc.setCellEditor(editor);
-            tc.setCellRenderer(renderer);
-            tc = table.getColumn(0);
-            tc.setCellRenderer(iconLabelRenderer);
             sharingFancyPanel.setModel(filteredList, fileList);
             headerPanel.setModel(fileList);           
             
@@ -304,22 +241,25 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                 dropTarget.setModel(fileList);
                 emptyDropTarget.setModel(fileList);
             }
-            
-            viewSelectionPanel.setEnabled(currentList.size() > 0);
-            headerPanel.setEnabled(currentList.size() > 0);
-            viewCardLayout.show(cardPanel, viewSelectionPanel.getSelectedButton());
-        }
 
-        @Override
-        public void listChanged(ListEvent<LocalFileItem> listChanges) {
-            // We only care about change events on the current list --
-            // due to the way we reuse 'this' as a listener and how
-            // events are queued up & sent from GlazedLists, it's possible
-            // that we get an event for a list that's no longer ours.
-            if(listChanges.getSourceList() == currentList) {
-                viewSelectionPanel.setEnabled(currentList.size() > 0);
+            headerPanel.setEnabled(currentList.size() > 0); 
+            if(currentList.size() > 0) {
+                viewCardLayout.show(cardPanel, NONEMPTY);
+            } else {
+                viewCardLayout.show(cardPanel, EMPTY);
             }
         }
+
+//        @Override
+//        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+//            // We only care about change events on the current list --
+//            // due to the way we reuse 'this' as a listener and how
+//            // events are queued up & sent from GlazedLists, it's possible
+//            // that we get an event for a list that's no longer ours.
+////            if(listChanges.getSourceList() == currentList) {
+////                viewSelectionPanel.setEnabled(currentList.size() > 0);
+////            }
+//        }
     }
     
     @Inject

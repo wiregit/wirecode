@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.sharing;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,9 +10,11 @@ import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Circle;
 import org.limewire.ui.swing.components.NumberedHyperLinkButton;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -19,6 +22,11 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 public class SharingShortcutPanel extends JPanel {
 
+    @Resource
+    private Color circleColor;
+    @Resource
+    private int circleSize;
+    
     private String[] names;
     private List<EventList<LocalFileItem>> models;
     
@@ -28,9 +36,11 @@ public class SharingShortcutPanel extends JPanel {
         this.names = names;
         this.models = models;
 
+        GuiUtils.assignResources(this);
+        
         buttons = new ArrayList<ButtonCircleComponent>();
         
-        setLayout(new MigLayout("hidemode 3, gapx 0, ax 50%","",""));
+        setLayout(new MigLayout("hidemode 3, gapx 0, insets 18 0 10 0, ax 50%","",""));
         
         createComponents(actions, alwaysShown);
     }
@@ -44,7 +54,7 @@ public class SharingShortcutPanel extends JPanel {
                 buttonCircle = new ButtonCircleComponent(names[i], actions[i], models.get(i), CircleLocation.LEFT, alwaysShown[i]);
             
             buttons.add(buttonCircle);
-            add(buttonCircle, "gapx 0");
+            add(buttonCircle);
         }
     }
     
@@ -70,16 +80,20 @@ public class SharingShortcutPanel extends JPanel {
             this.model = model;
             createButton(name, action, alwaysShown);
             
-            setLayout(new MigLayout());
+            setLayout(new MigLayout("insets 0 0 0 0"));
             
             if(loc == CircleLocation.LEFT) {
-                add(new Circle(8), "gapafter 8");
-                add(button);
+                Circle circle = new Circle(circleSize);
+                circle.setForeground(circleColor);
+                add(circle, "gapafter 10");
+                add(button, "gapafter 10");
             } else if(loc == CircleLocation.RIGHT) {
-                add(button);
-                add(new Circle(8), "gapbefore 8");
+                add(button, "gapbefore 10");
+                Circle circle = new Circle(circleSize);
+                circle.setForeground(circleColor);
+                add(circle, "gapbefore 10");
             } else
-                add(button);
+                add(button, "gapbefore 10, gapafter 10");
             setBorder(null);
             setVisible(alwaysShown);
         }
@@ -90,11 +104,6 @@ public class SharingShortcutPanel extends JPanel {
             listener = new SharingListEventListener(alwaysShown);
             model.addListEventListener(listener);
         }
-        
-//        @Override
-//        public void setVisible(boolean value) { 
-//            super.setVisible(value);
-//        }
         
         public void setModel(EventList<LocalFileItem> newModel) {
             if(model != null) {

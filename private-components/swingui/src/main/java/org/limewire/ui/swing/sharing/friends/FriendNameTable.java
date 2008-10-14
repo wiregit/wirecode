@@ -35,7 +35,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 public class FriendNameTable extends JXTable {
 
     @Resource
-    Color tableBackgroundColor;
+    private Color tableBackgroundColor;
     
     private EventTableModel<FriendItem> tableModel;
     
@@ -101,9 +101,7 @@ public class FriendNameTable extends JXTable {
     
     /**
      * Transfer handler to allow dropping files onto names in the friends list.
-     * 
      * Delegates to SharingTransferHandler to know if it canImport, or importData.
-     * 
      * On dragging, the row we are on is selected and checked to see if import is possible.
      */
     private final class FriendTransferHandler extends TransferHandler {

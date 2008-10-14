@@ -23,11 +23,17 @@ import org.limewire.ui.swing.util.GuiUtils;
 public class FriendNameRenderer extends JLabel implements TableCellRenderer {
 
     @Resource
-    Color selectionColor;
+    private Color selectionColor;
     @Resource
-    Color onlineColor;
+    private Color backGroundOnlineColor;
     @Resource
-    Color seperatorColor;
+    private Color onlineNameColor;
+    @Resource
+    private Color numberColor;
+    @Resource
+    private Color offlineNameColor;
+    @Resource
+    private Color seperatorColor;
     
     private Border emptyBorder;
     private Border compoundBorder;
@@ -53,13 +59,19 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
             if(isSelected) 
                 setBackground(selectionColor);
             else
-                setBackground(onlineColor);
+                setBackground(backGroundOnlineColor);
+            if(column == 0)
+                setForeground(onlineNameColor);
+            else
+                setForeground(numberColor);
         } else { // not sharing something
             // set the border
             if(row > 0 && ((FriendItem)table.getModel().getValueAt(row - 1, 0)).getShareListSize() > 0)
                 setBorder(compoundBorder);
             else
                 setBorder(emptyBorder);
+            setBackground(backGroundOnlineColor);
+            setForeground(offlineNameColor);
             
             FontUtils.changeStyle(this, Font.ITALIC);
             if(isSelected) {

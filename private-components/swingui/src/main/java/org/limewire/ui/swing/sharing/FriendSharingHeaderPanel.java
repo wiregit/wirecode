@@ -2,27 +2,51 @@ package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.MessageFormat;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.components.HeadingLabel;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.ButtonPainter;
+import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.sharing.actions.SharingAddAction;
+import org.limewire.ui.swing.sharing.friends.FriendUpdate;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-public class FriendSharingHeaderPanel extends SharingHeaderPanel {
+import ca.odell.glazedlists.EventList;
+
+/**
+ * Header for the Friend Sharing Panel. Displays the friend's name, 
+ * a filter box, a library button and a sharing button.
+ * 
+ * The library button is enabled and directs you to their library
+ * if they are signed on through LW. 
+ * 
+ * The Sharing button displays a list of sharing actions to share
+ * file types with them.
+ */
+public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
+    
+    private final String staticText;
     
     @Resource
     private Icon downIcon;
@@ -35,30 +59,62 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     @Resource
     private Color fontColor;
     @Resource 
-    private float fontSize;
+    private int fontSize;
+    
+    private HeadingLabel titleLabel;
+    private JTextField filterBox;
     
     private LibraryButton libraryButton;
     private JXButton shareButton;
     
-    private final JCheckBoxMenuItem audioMenu;
-    private final JCheckBoxMenuItem videoMenu;
-    private final JCheckBoxMenuItem imageMenu;
+    private JCheckBoxMenuItem audioMenu;
+    private JCheckBoxMenuItem videoMenu;
+    private JCheckBoxMenuItem imageMenu;
     
-    private final SharingAddAction musicAction;
-    private final SharingAddAction videoAction;
-    private final SharingAddAction imageAction;
+    private SharingAddAction musicAction;
+    private SharingAddAction videoAction;
+    private SharingAddAction imageAction;
     
-    private final JPopupMenu popup;
+    private JPopupMenu popup;
     
-    public FriendSharingHeaderPanel(Icon icon, String staticText, String name,
-            ViewSelectionPanel viewPanel, LibraryManager libraryManager) {
-        super(icon, staticText, name, viewPanel);
-                
+    public FriendSharingHeaderPanel(String staticText, String name, LibraryManager libraryManager) {               
         GuiUtils.assignResources(this);
         
-        descriptionLabel.setForeground(fontColor);
-        descriptionLabel.setFont(descriptionLabel.getFont().deriveFont(fontSize));
+        setBackgroundPainter(new SubpanelPainter());
+       
+        this.staticText = staticText;
+
+        createPopupMenu(libraryManager);
+        createComponents(MessageFormat.format(staticText, name));
+        layoutComponents();       
         
+        setMinimumSize(new Dimension(0, height + 2));
+        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
+        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
+    }
+    
+    private void createComponents(String text) {     
+        titleLabel = new HeadingLabel(text);
+        titleLabel.setForeground(fontColor);
+        FontUtils.setSize(titleLabel, fontSize);
+        FontUtils.changeStyle(titleLabel, Font.PLAIN);
+        filterBox = new PromptTextField();
+            
+        libraryButton = new LibraryButton(I18n.tr("Library"));
+        libraryButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+
+        libraryButton.setForeground(fontColor);
+        libraryButton.setBackgroundPainter(new ButtonPainter());
+        
+        shareButton = new JXButton(I18n.tr("Share"), downIcon);       
+        shareButton.setVisible(false);
+        shareButton.setForeground(fontColor);
+        shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
+        shareButton.setBackgroundPainter(new ButtonPainter());
+        shareButton.addActionListener(new PopupActionListener());
+    }
+    
+    private void createPopupMenu(LibraryManager libraryManager) {
         musicAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.AUDIO);
         videoAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.VIDEO);
         imageAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.IMAGE);
@@ -76,39 +132,10 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         popup.add(audioMenu);
         popup.add(videoMenu);
         popup.add(imageMenu);
-        
-        shareButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(!popup.isVisible()) {
-                	//set the checkboxes to their selection value
-                    audioMenu.setSelected(musicAction.getUserFileList().isAddNewAudioAlways());
-                    videoMenu.setSelected(videoAction.getUserFileList().isAddNewVideoAlways());
-                    imageMenu.setSelected(imageAction.getUserFileList().isAddNewImageAlways());
-                    
-                    popup.show(shareButton, 0, shareButton.getHeight());
-                }
-            }
-        });
-        
-        setMinimumSize(new Dimension(0, height + 2));
-        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
-        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
     }
     
-    @Override
-    protected void createComponents() {        
-        libraryButton = new LibraryButton(I18n.tr("Library"));
-        libraryButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-//        libraryButton.setEnabled(false);
-        libraryButton.setForeground(fontColor);
-        libraryButton.setBackgroundPainter(new ButtonPainter());
-        
-        shareButton = new JXButton(I18n.tr("Share"), downIcon);       
-        shareButton.setVisible(false);
-        shareButton.setForeground(fontColor);
-        shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
-        shareButton.setBackgroundPainter(new ButtonPainter());
+    public JTextField getFilterBox() {
+        return filterBox;
     }
     
     @Override
@@ -117,16 +144,14 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
         shareButton.setVisible(value);
     }
     
-    @Override
     protected void layoutComponents() {
-        setLayout(new MigLayout("insets 0 0 0 0"));
+        setLayout(new MigLayout("insets 0 0 0 0", "", "align 50%"));
 
-        add(descriptionLabel, "gapx 5");
+        add(titleLabel, "gapx 10");
         add(libraryButton);
         add(shareButton,"push");
         
-        add(filterBox);
-        add(viewSelectionPanel, "gapafter 5");
+        add(filterBox, "gapafter 10");
     }
     
     public void setModel(FriendFileList fileList) {
@@ -137,8 +162,12 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
     
     @Override
     public void setFriendName(String name) {
-        super.setFriendName(name);
+        titleLabel.setText(MessageFormat.format(staticText, name));
         libraryButton.setFriend(name);
+    }
+
+    @Override
+    public void setEventList(EventList<LocalFileItem> model) {
     }
     
     private class LibraryButton extends JXButton {
@@ -166,6 +195,20 @@ public class FriendSharingHeaderPanel extends SharingHeaderPanel {
                 setToolTipText(I18n.tr("View the files {0} is sharing with you.",friend));
             } else {
                 setToolTipText(I18n.tr("{0} isn't logged in through LimeWire.",friend));
+            }
+        }
+    }
+    
+    private class PopupActionListener implements ActionListener {        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(!popup.isVisible()) {
+                //set the checkboxes to their selection value
+                audioMenu.setSelected(musicAction.getUserFileList().isAddNewAudioAlways());
+                videoMenu.setSelected(videoAction.getUserFileList().isAddNewVideoAlways());
+                imageMenu.setSelected(imageAction.getUserFileList().isAddNewImageAlways());
+                
+                popup.show(shareButton, 0, shareButton.getHeight());
             }
         }
     }

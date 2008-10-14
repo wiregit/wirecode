@@ -110,7 +110,6 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
 
     @Override
     public void setEventList(EventList<LocalFileItem> model) {
-//        addAllAction.setUserLibrary(model);
     }
     
     public void setUserFileList(FriendFileList fileList) {

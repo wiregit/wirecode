@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
@@ -27,6 +28,7 @@ import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
+import org.limewire.ui.swing.sharing.table.CustomTableCellHeaderRenderer;
 import org.limewire.ui.swing.sharing.table.SharingFancyMultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.sharing.table.SharingFancyTable;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
@@ -43,6 +45,12 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     
     @Resource
     private Icon cancelIcon;
+    @Resource
+    private Color lineColor;
+    @Resource
+    private int lineSize;
+    @Resource
+    private Color backgroundColor;
     
     private SharingFancyTable table;
     
@@ -63,13 +71,12 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     
     public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, 
             boolean paintTableHeader, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon) {
+        GuiUtils.assignResources(this); 
         
         this.tableFormat = tableFormat;
         this.currentEventList = eventList;
-        
-        GuiUtils.assignResources(this); 
-        
-        setBackground(Color.WHITE);
+               
+        setBackground(backgroundColor);
         
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         
@@ -79,13 +86,13 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         unShareAllButton.setEnabled(false);
 
         // black seperator
-        Line line = Line.createHorizontalLine(Color.BLACK, 3);
+        Line line = Line.createHorizontalLine(lineColor, lineSize);
         
         // create the table
         table = createTable(eventList, fileList, tableFormat, transferHandler);
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remainign space
-        setLayout(new MigLayout("insets 10 25 0 10",     //layout contraints
+        setLayout(new MigLayout("gap 0, insets 0 25 0 10",     //layout contraints
                 "[] [] ",                       // column constraints
                 "[::30] [] [grow][grow]" ));    // row contraints
         
@@ -134,6 +141,10 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         tc.setResizable(false);
         tc.setCellEditor(editor);
         tc.setCellRenderer(renderer);
+        
+        JTableHeader th = table.getTableHeader();
+        th.setDefaultRenderer(new CustomTableCellHeaderRenderer());
+
     }
     
     public SharingFancyTable getTable() {

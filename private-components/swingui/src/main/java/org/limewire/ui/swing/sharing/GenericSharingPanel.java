@@ -8,13 +8,13 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.FileItem.Keys;
-import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.TextFilterator;
@@ -23,16 +23,17 @@ public abstract class GenericSharingPanel extends JPanel implements ComponentLis
 
     protected static final String EMPTY = "EMPTY";
     protected static final String NONEMPTY = "NONEMPTY";
-    protected static final String TABLE = "TABLE";
+//    protected static final String TABLE = "TABLE";
     protected static final String LIST = "LIST";
     
-    protected SharingTable table;
+//    protected SharingTable table;
     
     protected JScrollPane scrollPane;
 
     public GenericSharingPanel() {
         GuiUtils.assignResources(this); 
         scrollPane = new JScrollPane();
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         addComponentListener(this);
     }
     
