@@ -1406,15 +1406,14 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 ErrorService.error(uhe); // impossible
             }
 
-            // 1)
-            PushProxyAcknowledgement ack = 
-                new PushProxyAcknowledgement(addr,networkManager.getPort(),
-                                             ppReq.getClientGUID());
-            source.send(ack);
-            
-            // 2)
-            _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(), source);
-            source.setPushProxyFor(true);
+            if(_pushRouteTable.routeReply(ppReq.getClientGUID().bytes(), source) != null) {
+                source.setPushProxyFor(true);
+
+                PushProxyAcknowledgement ack =
+                    new PushProxyAcknowledgement(addr,networkManager.getPort(),
+                                                 ppReq.getClientGUID());
+                source.send(ack);
+            }
         }
     }
 
