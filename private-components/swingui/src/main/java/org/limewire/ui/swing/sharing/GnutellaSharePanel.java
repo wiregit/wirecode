@@ -17,10 +17,10 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
+import org.limewire.ui.swing.sharing.fancy.SharingFancyPanelFactory;
 import org.limewire.ui.swing.sharing.table.SharingTable;
 import org.limewire.ui.swing.sharing.table.SharingTableFormat;
 import org.limewire.ui.swing.table.IconLabelRenderer;
@@ -48,8 +48,8 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     @Resource
     protected Icon sharingIcon;
     
-    private ThumbnailManager thumbnailManager;
-    private IconManager iconManager;
+    private final SharingFancyPanelFactory sharingFancyPanelFactory;
+    private final IconManager iconManager;
     
     private ViewSelectionPanel viewSelectionPanel;
        
@@ -64,10 +64,10 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     MultiButtonTableCellRendererEditor renderer;
     
     @Inject
-    public GnutellaSharePanel(ShareListManager libraryManager, IconManager iconManager, SharingEmptyPanel emptyPanel, ThumbnailManager thumbnailManager) {
+    public GnutellaSharePanel(ShareListManager libraryManager, SharingEmptyPanel emptyPanel, SharingFancyPanelFactory sharingFancyPanelFactory, IconManager iconManager) {
         GuiUtils.assignResources(this); 
         
-        this.thumbnailManager = thumbnailManager;
+        this.sharingFancyPanelFactory = sharingFancyPanelFactory;
         this.iconManager = iconManager;
         
         this.fileList = libraryManager.getGnutellaShareList();
@@ -134,7 +134,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         
         createTable(filteredList);
         
-        SharingFancyPanel sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList, iconManager, thumbnailManager);
+        SharingFancyPanel sharingFancyPanel = sharingFancyPanelFactory.create(filteredList, scrollPane, fileList);
         scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),ViewSelectionPanel.TABLE_SELECTED);

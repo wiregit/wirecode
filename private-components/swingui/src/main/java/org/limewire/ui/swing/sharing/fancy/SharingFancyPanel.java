@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -19,7 +18,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
@@ -33,6 +31,7 @@ import org.limewire.ui.swing.sharing.table.SharingFancyAudioTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingFancyDefaultTableFormat;
 import org.limewire.ui.swing.sharing.table.SharingFancyIconTableFormat;
 import org.limewire.ui.swing.table.IconLabelRenderer;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -40,19 +39,11 @@ import org.limewire.ui.swing.util.IconManager;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 public class SharingFancyPanel extends JPanel implements Scrollable {
 
-    @Resource
-    private Icon audioIcon;
-    @Resource
-    private Icon videoIcon;
-    @Resource
-    private Icon documentIcon;
-    @Resource
-    private Icon appIcon;
-    @Resource
-    private Icon imageIcon;
-    
     private final String music = I18n.tr("Music");
     private final String video = I18n.tr("Videos");
     private final String image = I18n.tr("Images");
@@ -97,7 +88,13 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
         filterLists.put(Category.OTHER, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.OTHER)));
     }
     
-    public SharingFancyPanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, LocalFileList originalList, IconManager iconManager, ThumbnailManager thumbnailManager) {
+    @AssistedInject
+    public SharingFancyPanel(CategoryIconManager categoryIconManager,
+            IconManager iconManager, 
+            ThumbnailManager thumbnailManager,
+            @Assisted EventList<LocalFileItem> eventList,
+            @Assisted JScrollPane scrollPane,
+            @Assisted LocalFileList originalList) {
 
         GuiUtils.assignResources(this); 
         
@@ -108,12 +105,31 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
 
         createFilteredLists(eventList);
         
-        musicTable = new SharingFancyTablePanel(music, filterLists.get(Category.AUDIO), new SharingFancyAudioTableFormat(), transferHandler, originalList, audioIcon);
-        videoTable = new SharingFancyTablePanel(video, filterLists.get(Category.VIDEO), new SharingFancyDefaultTableFormat(),false, transferHandler, originalList, videoIcon);
-        imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE), transferHandler, originalList, imageIcon, thumbnailManager);
-        documentTable = new SharingFancyTablePanel(doc, filterLists.get(Category.DOCUMENT), new SharingFancyIconTableFormat(), false, transferHandler, originalList, documentIcon);
-        programTable = new SharingFancyTablePanel(program, filterLists.get(Category.PROGRAM), new SharingFancyDefaultTableFormat(), false, transferHandler, originalList, appIcon);
-        otherTable = new SharingFancyTablePanel(other, filterLists.get(Category.OTHER), new SharingFancyDefaultTableFormat(), transferHandler, originalList, appIcon);
+        musicTable = new SharingFancyTablePanel(music, filterLists.get(Category.AUDIO), 
+                new SharingFancyAudioTableFormat(), 
+                transferHandler, originalList, 
+                categoryIconManager.getIcon(Category.AUDIO));
+        
+        videoTable = new SharingFancyTablePanel(video, filterLists.get(Category.VIDEO), 
+                new SharingFancyDefaultTableFormat(),
+                false, transferHandler, originalList, 
+                categoryIconManager.getIcon(Category.VIDEO));
+        
+        imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE),
+                transferHandler, originalList, 
+                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
+        
+        documentTable = new SharingFancyTablePanel(doc, filterLists.get(Category.DOCUMENT), 
+                new SharingFancyIconTableFormat(), false, transferHandler,
+                originalList, categoryIconManager.getIcon(Category.DOCUMENT));
+        
+        programTable = new SharingFancyTablePanel(program, filterLists.get(Category.PROGRAM),
+                new SharingFancyDefaultTableFormat(), false, transferHandler,
+                originalList, categoryIconManager.getIcon(Category.PROGRAM));
+        
+        otherTable = new SharingFancyTablePanel(other, filterLists.get(Category.OTHER), 
+                new SharingFancyDefaultTableFormat(), transferHandler, 
+                originalList, categoryIconManager.getIcon(Category.OTHER));
         
         TableColumn tc = documentTable.getTable().getColumn(0);
         iconLabelRenderer = new IconLabelRenderer(iconManager);

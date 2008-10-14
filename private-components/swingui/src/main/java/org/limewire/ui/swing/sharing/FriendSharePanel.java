@@ -32,11 +32,11 @@ import org.limewire.listener.RegisteringEventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
-import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
+import org.limewire.ui.swing.sharing.fancy.SharingFancyPanelFactory;
 import org.limewire.ui.swing.sharing.friends.FriendItem;
 import org.limewire.ui.swing.sharing.friends.FriendItemImpl;
 import org.limewire.ui.swing.sharing.friends.FriendNameTable;
@@ -88,8 +88,8 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     private final LibraryManager libraryManager;
     private final ShareListManager shareListManager;
     private final IconManager iconManager;
-    private final ThumbnailManager thumbnailManager;
-    
+    private final SharingFancyPanelFactory sharingFancyPanelFactory;
+        
     private final FriendSharingHeaderPanel headerPanel;
     
     private SharingTableFormat sharingTableFormat;
@@ -99,15 +99,15 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager,
             RemoteLibraryManager remoteLibraryManager,
             SharingFriendEmptyPanel emptyPanel, Navigator navigator, IconManager iconManager,
-            ThumbnailManager thumbnailManager) {        
+            SharingFancyPanelFactory sharingFancyPanelFactory) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
         
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.iconManager = iconManager;
-        this.thumbnailManager = thumbnailManager;
-
+        this.sharingFancyPanelFactory = sharingFancyPanelFactory;
+        
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
         cardPanel.setLayout(viewCardLayout);
@@ -165,7 +165,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         createTable(tempList);
         
         JScrollPane scrollPane = new JScrollPane();
-        sharingFancyPanel = new SharingFancyPanel(tempList, scrollPane, null, iconManager, thumbnailManager);
+        sharingFancyPanel = sharingFancyPanelFactory.create(tempList, scrollPane, null);
         scrollPane.setViewportView(sharingFancyPanel);
         
         cardPanel.add(new JScrollPane(table),TABLE);
