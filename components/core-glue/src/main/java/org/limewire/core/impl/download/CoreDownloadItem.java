@@ -212,7 +212,6 @@ public class CoreDownloadItem implements DownloadItem {
     private DownloadState convertState(DownloadStatus status) {
         // TODO: double check states - some are not right
         switch (status) {
-
         case SAVING:
         case HASHING:
             if (getTotalSize() > finishingThreshold) {
@@ -223,18 +222,13 @@ public class CoreDownloadItem implements DownloadItem {
 
         case DOWNLOADING:
         case FETCHING://"FETCHING" is downloading .torrent file
-        case IDENTIFY_CORRUPTION: // or should this be FINISHING?  doesn't seem to be used
             return DownloadState.DOWNLOADING;
 
         
         case CONNECTING:
         case RESUMING:
         case INITIALIZING:
-        case WAITING_FOR_GNET_RESULTS:
-        case QUERYING_DHT:
-        case BUSY:
         case WAITING_FOR_CONNECTIONS:
-        case ITERATIVE_GUESSING:
             return DownloadState.CONNECTING;
 
         case COMPLETE:
@@ -252,6 +246,11 @@ public class CoreDownloadItem implements DownloadItem {
 
         
         case WAITING_FOR_USER:
+        case GAVE_UP://"GAVE_UP" means no sources - Is this really an error state?
+        case WAITING_FOR_GNET_RESULTS://should WAITING_FOR_GNET_RESULTS be in CONNECTING?
+        case ITERATIVE_GUESSING:
+        case QUERYING_DHT:
+        case BUSY:
             return DownloadState.STALLED;
 
         case ABORTED:
@@ -259,15 +258,14 @@ public class CoreDownloadItem implements DownloadItem {
 
         case DISK_PROBLEM:
         case CORRUPT_FILE:
+        case IDENTIFY_CORRUPTION: // or should this be FINISHING?  doesn't seem to be used
         case RECOVERY_FAILED:
         case INVALID:
-        case GAVE_UP://"GAVE_UP" means no sources - Is this really an error state?
             return DownloadState.ERROR;
             
-
-       
+              //FIXME remove RuntimeException when we are out of alpha 
         default:
-            return DownloadState.DOWNLOADING;
+            throw new RuntimeException("Unknown State: " + status);
         }
     }
 
