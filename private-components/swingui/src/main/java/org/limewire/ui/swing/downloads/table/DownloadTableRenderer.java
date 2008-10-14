@@ -12,14 +12,18 @@ public class DownloadTableRenderer implements TableCellRenderer {
 
     private DownloadTableCell cellComponent;  
         
-    public DownloadTableRenderer(ActionListener editorListener) {
-        this.cellComponent = new DownloadTableCell(editorListener);
+    public DownloadTableRenderer(DownloadTableCell cellComponent) {
+        this.cellComponent = cellComponent;
     }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
         cellComponent.update((DownloadItem) value);
-        return cellComponent;
+        return cellComponent.getComponent();
+    }
+    
+    public void initialiseRenderer(ActionListener editorListener) {
+        this.cellComponent.setEditorListener(editorListener);
     }
 }

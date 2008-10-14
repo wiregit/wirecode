@@ -31,9 +31,8 @@ public class DownloadTableEditor implements TableCellEditor {
 
     private DownloadItem editItem;
 
-	public DownloadTableEditor() {
-	    this.editorListener = new DownloadEditorListener();
-	    this.cellComponent = new DownloadTableCell(this.editorListener);
+	public DownloadTableEditor(DownloadTableCell cellComponent) {
+	    this.cellComponent = cellComponent;
 	}	
 
 	@Override
@@ -42,7 +41,7 @@ public class DownloadTableEditor implements TableCellEditor {
 	    
 	    editItem = (DownloadItem) value;
 	    cellComponent.update(editItem);
-        return cellComponent;
+        return cellComponent.getComponent();
 	}
 	
 	public ActionListener getEditorListener() {
@@ -56,7 +55,11 @@ public class DownloadTableEditor implements TableCellEditor {
      * when downloadItems changes and popup menus work.  This is required for Editors
      */
 	public void initialiseEditor(EventList<DownloadItem> downloadItems) {
-	    actionHandler = new DownloadActionHandler(downloadItems);
+        this.editorListener = new DownloadEditorListener();
+        this.cellComponent.setEditorListener(this.editorListener);
+	    
+	    this.actionHandler = new DownloadActionHandler(downloadItems);
+	    
         downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
@@ -64,7 +67,7 @@ public class DownloadTableEditor implements TableCellEditor {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        if (cellComponent.isVisible()) {
+                        if (cellComponent.getComponent().isVisible()) {
                             updateEditor();
                         }
                     }
