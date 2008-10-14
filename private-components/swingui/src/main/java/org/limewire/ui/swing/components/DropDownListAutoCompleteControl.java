@@ -32,6 +32,8 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
 import org.limewire.core.settings.SearchSettings;
@@ -39,10 +41,7 @@ import org.limewire.core.settings.UISettings;
 import org.limewire.util.OSUtils;
 
 
-/**
- *A DropDown list of autocompletable items for a JTextField.
- * 
- */
+/**A DropDown list of autocompletable items for a JTextField. */
 public class DropDownListAutoCompleteControl {
     
     private static final String PROPERTY = "limewire.text.autocompleteControl"; 
@@ -196,18 +195,15 @@ public class DropDownListAutoCompleteControl {
         if(entryPanel != null)
             return entryPanel;
             
-        entryPanel = new JPanel(new GridBagLayout());
+        entryPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
         entryPanel.setBorder(UIManager.getBorder("List.border"));
         entryPanel.setBackground(UIManager.getColor("List.background"));
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.gridwidth = GridBagConstraints.REMAINDER;
         
         entryList = new AutoCompleteList();
         JScrollPane entryScrollPane = new JScrollPane(entryList);
         entryScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         entryScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        entryPanel.add(entryScrollPane, c);
+        entryPanel.add(entryScrollPane, "grow");
         
         //entryPanel.add(new ClearHistory(), c);
                                           
