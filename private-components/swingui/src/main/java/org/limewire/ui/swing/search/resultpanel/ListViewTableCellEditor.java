@@ -322,9 +322,9 @@ implements TableCellEditor, TableCellRenderer {
 
         searchResultTextPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "5[]0[]0[]0"));
         searchResultTextPanel.setOpaque(false);
-        searchResultTextPanel.add(headingLabel, "wrap, wmin 370");
-        searchResultTextPanel.add(subheadingLabel, "wrap, wmin 370");
-        searchResultTextPanel.add(metadataLabel, "wmin 370");
+        searchResultTextPanel.add(headingLabel, "wrap, wmin 350");
+        searchResultTextPanel.add(subheadingLabel, "wrap, wmin 350");
+        searchResultTextPanel.add(metadataLabel, "wmin 350");
 
         JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "5[][]0", "0[]0"));
 
@@ -362,7 +362,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private JPanel makeIndentablePanel(Component component) {
-        indentablePanel = new JPanel(new MigLayout("insets 0 5 0 0", "[][]", "[]"));
+        indentablePanel = new JPanel(new MigLayout("insets 0 0 0 5", "[][]", "[]"));
         indentablePanel.setOpaque(false);
         similarResultIndentation = new JLabel(similarResultsIcon);
         similarResultIndentation.setPreferredSize(new Dimension(SIMILARITY_INDENTATION, similarResultsIcon.getIconWidth()));
@@ -479,8 +479,8 @@ implements TableCellEditor, TableCellRenderer {
         if (vsr.getDownloadState() == BasicDownloadState.NOT_STARTED) {
             searchResultTextPanel.remove(downloadingLink);
             
-            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 370, wrap");
-            searchResultTextPanel.add(metadataLabel, "cell 0 2, wmin 370");
+            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
+            searchResultTextPanel.add(metadataLabel, "cell 0 2, wmin 350");
         } else {
             searchResultTextPanel.remove(subheadingLabel);
             searchResultTextPanel.remove(metadataLabel);
