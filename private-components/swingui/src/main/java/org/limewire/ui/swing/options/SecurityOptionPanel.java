@@ -97,11 +97,12 @@ public class SecurityOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            warningMessagesPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return warningMessagesPanel.hasChanged();
         }
 
         @Override
@@ -150,6 +151,9 @@ public class SecurityOptionPanel extends OptionPanel {
     
     private class FilteringPanel extends OptionPanel {
 
+        private FilterFileExtensionsOptionPanel filterExtensionsPanel;
+        private FilterKeywordOptionPanel filterKeywordPanel;
+        
         private JCheckBox unlicensedCheckBox;
         private JCheckBox adultContentCheckBox;
         private JButton filterFileExtensionsButton;
@@ -158,12 +162,21 @@ public class SecurityOptionPanel extends OptionPanel {
         public FilteringPanel() {
             super(I18n.tr("Filtering"));
             
+            filterExtensionsPanel = new FilterFileExtensionsOptionPanel(new OKDialogAction());
+            filterExtensionsPanel.setPreferredSize(new Dimension(300,400));
+            filterKeywordPanel = new FilterKeywordOptionPanel(new OKDialogAction());
+            filterKeywordPanel.setPreferredSize(new Dimension(300,400));
+            
             unlicensedCheckBox = new JCheckBox();
             unlicensedCheckBox.setContentAreaFilled(false);
             adultContentCheckBox = new JCheckBox();
             adultContentCheckBox.setContentAreaFilled(false);
-            filterFileExtensionsButton = new JButton(I18n.tr("Filter file extensions"));
-            filterKeywordsButton = new JButton(I18n.tr("Filter keywords"));
+            filterFileExtensionsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
+                    filterExtensionsPanel, I18n.tr("Filter file extensions"),
+                    I18n.tr("Filter file extensions"),I18n.tr("Restrict search results with certain file extension from being displayed")));
+            filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
+                    filterKeywordPanel, I18n.tr("Filter Keywords"),
+                    I18n.tr("Filter Keywords"),I18n.tr("Restrict files with certain words from being displayed in search results")));
             
             add(new JLabel("In search results..."), "wrap");
             
@@ -178,18 +191,24 @@ public class SecurityOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        void applyOptions() { //TODO: link adult content check box here
             ContentSettings.USER_WANTS_MANAGEMENTS.setValue(unlicensedCheckBox.isSelected());
+            filterExtensionsPanel.applyOptions();
+            filterKeywordPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != unlicensedCheckBox.isSelected();
+            return ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != unlicensedCheckBox.isSelected() 
+                    || filterExtensionsPanel.hasChanged() 
+                    || filterKeywordPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
             unlicensedCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue());
+            filterExtensionsPanel.initOptions();
+            filterKeywordPanel.initOptions();
         }
     }
 }

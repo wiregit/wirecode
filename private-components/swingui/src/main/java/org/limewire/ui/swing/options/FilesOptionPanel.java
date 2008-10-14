@@ -103,12 +103,17 @@ public class FilesOptionPanel extends OptionPanel {
     
     private class ManageExtensionsPanel extends OptionPanel {
 
+        private ManageFileExtensionsOptionPanel extensionsPanel;
         private JButton manageButton;
         
         public ManageExtensionsPanel() {
             super(I18n.tr("Manage Extensions"));
             
-            manageButton = new JButton(I18n.tr("Manage"));
+            extensionsPanel = new ManageFileExtensionsOptionPanel(new OKDialogAction(), new CancelDialogAction());
+            
+            manageButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
+                    extensionsPanel, I18n.tr("Manage file extensions"),
+                    I18n.tr("Manage"),I18n.tr("Manage file extensions to load")));
             
             add(new JLabel("Choose the specific file extensions LimeWire scans into your Library"), "push");
             add(manageButton);
@@ -116,16 +121,17 @@ public class FilesOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            extensionsPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return extensionsPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
-
+            extensionsPanel.initOptions();
         }
     }
     
@@ -149,16 +155,17 @@ public class FilesOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            saveFolderPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return saveFolderPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
-
+            saveFolderPanel.initOptions();
         }
     }
     

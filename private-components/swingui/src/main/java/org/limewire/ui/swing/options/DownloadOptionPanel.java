@@ -182,7 +182,7 @@ public class DownloadOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean hasChanged() {
+        boolean hasChanged() { //TODO: rename file checkbox init
             return SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected()
                     || !currentSaveDirectory.equals(downloadSaveTextField.getText());
         }

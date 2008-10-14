@@ -121,7 +121,7 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
     @Override
     public void initOptions() {
- 
+//        NamedMediaType t;
     }
     
 //    private void initDirectory(File file, String location, JTextField textField) {
