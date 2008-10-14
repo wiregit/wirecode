@@ -113,7 +113,7 @@ public class DownloadSummaryPanel extends JPanel {
                 Rectangle2D labelRect = this.getFont().getStringBounds(label, g2.getFontRenderContext());
                 
                 g.setColor(new Color(0x2b,0x5b,0xaa));
-                g.drawLine(LEFT_MARGIN, bottom-7, (int)labelRect.getWidth()-2, bottom-7);
+                g.drawLine(LEFT_MARGIN, bottom-7, (int)labelRect.getWidth()+LEFT_MARGIN, bottom-7);
             }
       };
       
