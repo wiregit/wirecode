@@ -129,7 +129,7 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public boolean isSignedInToLimewire() {
-        return presence instanceof LimePresence;
+        return presence.get() instanceof LimePresence;
     }
 
     @Override
