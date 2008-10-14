@@ -27,8 +27,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.util.SystemUtils.SpecialLocations;
 
 
@@ -397,7 +397,7 @@ public class FileUtils {
                 }
             }
         }
-        System.err.println("success="+success + ", file.exists()?"+file.exists());
+        LOG.debugf("success= {0}, file.exists()? {1}", success, file.exists());
         return !file.exists();
     }
     
