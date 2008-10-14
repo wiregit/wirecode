@@ -280,6 +280,13 @@ public class FancyTabList extends JXPanel {
     public void setUnderlineHoverColor(Color underlineHoverColor) {
         props.setUnderlineHoverColor(underlineHoverColor);
     }
+    
+    public void setUnderlineEnabled(boolean enabled) {
+        for (FancyTab tab : tabs) {
+            tab.setUnderlineEnabled(enabled);
+        }
+        props.setUnderlineEnabled(enabled);
+    }
 
     /**
      * Sets the painter to be used when the tab is rolled over.

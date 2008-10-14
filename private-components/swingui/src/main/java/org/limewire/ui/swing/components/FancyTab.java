@@ -280,6 +280,11 @@ public class FancyTab extends JXPanel {
     /** Sets the foreground color of the tab. */
     void setButtonForeground(Color color) {
         mainButton.setForeground(color);
+        additionalText.setForeground(color);
+    }
+    
+    void setUnderlineEnabled(boolean enabled) {
+        underline.setVisible(enabled);
     }
 
     /** Returns true if the tab is currently highlighted (in a rollover). */
@@ -319,7 +324,7 @@ public class FancyTab extends JXPanel {
                 removeButton.setIcon(removeActiveIcon);
                 break;
             case BACKGROUND:
-                underline.setVisible(true);
+                underline.setVisible(props.isUnderlineEnabled());
                 underline.setColor(props.getUnderlineColor());
                 mainButton.setForeground(props.getNormalColor());
                 additionalText.setForeground(props.getNormalColor());
@@ -327,7 +332,7 @@ public class FancyTab extends JXPanel {
                 removeButton.setIcon(removeEmptyIcon);
                 break;
             case ROLLOVER:
-                underline.setVisible(true);
+                underline.setVisible(props.isUnderlineEnabled());
                 underline.setColor(props.getUnderlineHoverColor());
                 setBackgroundPainter(props.getHighlightPainter());
                 removeButton.setIcon(removeInactiveIcon);
