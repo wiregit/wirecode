@@ -7,6 +7,7 @@ import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
@@ -31,7 +32,8 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
 
     private JMenuItem gnutellaShareItem;
     private JMenuItem gnutellaUnshareItem;
-    private JMenu friendSubMenu;
+    private JMenu friendShareSubMenu;
+    private JMenu friendUnshareSubMenu;
     
 
     private LibraryTable table;
@@ -49,15 +51,16 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
 
     public void setFileItems(List<LocalFileItem> items) {
         this.fileItems = items;
-        friendSubMenu.setVisible(friendList.size() > 0);
+        friendShareSubMenu.setVisible(friendList.size() > 0);
+        friendUnshareSubMenu.setVisible(friendList.size() > 0);
         resetFriends();
     }
     
     private void resetFriends() {
-       friendSubMenu.removeAll();
+       friendShareSubMenu.removeAll();
        for (SharingTarget target : friendList){            
-           friendSubMenu.add(new FriendShareAction(target.getFriend()));
-           friendSubMenu.add(new FriendUnshareAction(target.getFriend()));
+           friendShareSubMenu.add(new FriendShareAction(target.getFriend()));
+           friendUnshareSubMenu.add(new FriendUnshareAction(target.getFriend()));
        }
        
     }
@@ -65,14 +68,18 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
     private void initialize(Category category){     
         gnutellaShareItem = new JMenuItem(gnutellaShareAction);
         gnutellaUnshareItem = new JMenuItem(gnutellaUnshareAction);
-        
-        friendSubMenu = new JMenu(I18n.tr("Share with Friends"));
+
+        friendShareSubMenu = new JMenu(I18n.tr("Share with Friends"));
+        friendUnshareSubMenu = new JMenu(I18n.tr("Unshare with Friends"));
         
         add(removeAction);
         add(deleteAction);
+        add(new JSeparator());
         add(gnutellaShareItem);
+        add(friendShareSubMenu);
+        add(new JSeparator());
         add(gnutellaUnshareItem);
-        add(friendSubMenu);
+        add(friendUnshareSubMenu);
     
     }
 
@@ -142,7 +149,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
     private class FriendUnshareAction extends AbstractAction {
         private Friend friend;
         public FriendUnshareAction(Friend friend){
-            super(I18n.tr("Unshare with {0}", friend.getRenderName()));
+            super(friend.getRenderName());
             this.friend = friend;
         }
         @Override
@@ -167,7 +174,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
     private class FriendShareAction extends AbstractAction {
         private Friend friend;
         public FriendShareAction(Friend friend){
-            super(I18n.tr("Share with {0}", friend.getRenderName()));
+            super(friend.getRenderName());
             this.friend = friend;
         }
         @Override

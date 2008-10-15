@@ -10,6 +10,7 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
@@ -90,11 +91,13 @@ public class MyLibraryPopupMenu extends JPopupMenu {
             isLocateActionShown = true;
             add(locateAction);           
         }
-        
+        add(new JSeparator());
         add(removeAction);
         add(deleteAction);
+        add(new JSeparator());
         add(gnutellaShareItem);
         add(friendSubMenu);
+        add(new JSeparator());
         add(copyLinkAction);
         if(!isLocateActionShown){
             add(locateAction);
