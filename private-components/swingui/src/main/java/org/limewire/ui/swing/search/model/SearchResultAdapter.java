@@ -211,4 +211,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     public URN getURN() {
        return coreResults.get(0).getUrn();
     }
+
+    @Override
+    public URN getNavSelectionId() {
+        return getUrn();
+    }
 }

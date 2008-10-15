@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
@@ -255,6 +256,12 @@ public class CoreLocalFileItem implements LocalFileItem {
     @Override
     public boolean isShareable() {
         return !fileDesc.isStoreFile();
+    }
+
+    @Override
+    public org.limewire.core.api.URN getUrn() {
+        URN urn = fileDesc.getSHA1Urn();
+        return new URNImpl(urn);
     }
     
 }

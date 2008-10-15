@@ -7,6 +7,9 @@ public interface NavItem {
 
     /** Selects the nav item. */
     void select();
+    
+    /** Selects the nav item. The given selectable item is selected in this view as well.*/
+    void select(NavSelectable selectable);
 
     /** Removes this nav item. */
     void remove();

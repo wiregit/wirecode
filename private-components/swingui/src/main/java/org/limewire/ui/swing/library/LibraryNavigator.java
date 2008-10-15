@@ -61,6 +61,7 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
+import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -156,10 +157,11 @@ public class LibraryNavigator extends JXPanel {
             }
         
             @Override
-            public void itemSelected(NavCategory category, NavItem navItem, JComponent panel) {
+            public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable,
+                    JComponent panel) {
                 if(category != NavCategory.LIBRARY) {
                     collapseOthersAndExpandThis(null);
-                }
+                }  
             }
         });
     }

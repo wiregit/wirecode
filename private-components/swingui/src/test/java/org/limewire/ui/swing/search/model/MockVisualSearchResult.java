@@ -169,4 +169,9 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public URN getURN() {
         return null;
     }
+
+    @Override
+    public String getNavSelectionId() {
+        return null;
+    }
 }

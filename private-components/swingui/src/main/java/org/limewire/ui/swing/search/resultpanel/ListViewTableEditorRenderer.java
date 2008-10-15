@@ -346,11 +346,11 @@ implements TableCellEditor, TableCellRenderer {
                 if (downloadState == BasicDownloadState.DOWNLOADING) {
                     navigator.getNavItem(
                         NavCategory.DOWNLOAD,
-                        MainDownloadPanel.NAME).select();
+                        MainDownloadPanel.NAME).select(vsr);
                 } else if (downloadState == BasicDownloadState.DOWNLOADED || downloadState == BasicDownloadState.LIBRARY) {
                     navigator.getNavItem(
                         NavCategory.LIBRARY,
-                        LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select();
+                        LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select(vsr);
                     
                 }
             }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -77,5 +78,10 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+
+    @Override
+    public URN getUrn() {
+        return searchResult.getUrn();
     }
 }

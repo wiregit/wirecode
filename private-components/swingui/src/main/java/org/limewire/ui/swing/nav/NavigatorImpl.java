@@ -76,7 +76,7 @@ class NavigatorImpl implements Navigator {
                 if(selectedItem == item) {
                     item.fireSelected(false);
                     selectedItem = null;
-                    listener.itemSelected(null, null, null);
+                    listener.itemSelected(null, null, null, null);
                 }
             }
             item.fireRemoved();
@@ -85,7 +85,7 @@ class NavigatorImpl implements Navigator {
         }
     }
     
-    private void selectNavItem(NavItemImpl item) {
+    private void selectNavItem(NavItemImpl item, NavSelectable selectable) {
         if(item != selectedItem) {
             if(selectedItem != null) {
                 selectedItem.fireSelected(false);
@@ -93,7 +93,7 @@ class NavigatorImpl implements Navigator {
             selectedItem = item;
             item.fireSelected(true);
             for(NavigationListener listener : listeners) {
-                listener.itemSelected(item.category, item, item.panel);
+                listener.itemSelected(item.category, item, selectable, item.panel);
             }
         }
     }
@@ -126,7 +126,12 @@ class NavigatorImpl implements Navigator {
         @Override
         public void select() {
             assert valid;
-            selectNavItem(this);
+            select(null);
+        }
+        
+        @Override
+        public void select(NavSelectable selectable) {
+            selectNavItem(this, selectable);
         }
         
         @Override

@@ -41,6 +41,7 @@ import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
+import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.painter.SearchTabSelectionPainter;
 import org.limewire.ui.swing.painter.TopPanelPainter;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
@@ -234,6 +235,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
             
             @Override
             public void select() {
+                select(null);
+            }
+            
+            @Override
+            public void select(NavSelectable selectable) {
                 item.select();
             }
             

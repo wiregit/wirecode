@@ -26,6 +26,8 @@ import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
+import org.limewire.ui.swing.nav.NavComponent;
+import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.IconManager;
@@ -38,7 +40,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-class MyLibraryPanel extends JPanel implements Disposable {
+class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
     private final LibraryTable<LocalFileItem> table;
     private final LibraryHeaderPanel header;
     private LibrarySharePanel sharePanel;
@@ -141,7 +143,6 @@ class MyLibraryPanel extends JPanel implements Disposable {
             case DOCUMENT:
                 NativeLaunchUtils.launchFile(file);
             }
-            
         }
         
     }
@@ -149,6 +150,18 @@ class MyLibraryPanel extends JPanel implements Disposable {
     @SuppressWarnings("unchecked")
     private LibraryTableModel<LocalFileItem> getTableModel(){
         return (LibraryTableModel<LocalFileItem>)table.getModel();
+    }
+
+    @Override
+    public void select(NavSelectable selectable) {
+        LibraryTableModel<LocalFileItem> model = getTableModel();
+        for(int y=0; y < model.getRowCount(); y++) {
+            LocalFileItem localFileItem = model.getElementAt(y);
+            if(selectable.getNavSelectionId().equals(localFileItem.getUrn())) {
+                table.getSelectionModel().setSelectionInterval(y, y);
+                break;
+            }
+        }
     }
    
 }

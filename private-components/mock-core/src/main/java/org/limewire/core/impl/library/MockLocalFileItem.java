@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import java.io.File;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.FileMetaData;
@@ -107,5 +108,10 @@ public class MockLocalFileItem implements LocalFileItem {
     public boolean isShareable() {
         // TODO Auto-generated method stub
         return true;
+    }
+
+    @Override
+    public URN getUrn() {
+        return null;
     }
 }

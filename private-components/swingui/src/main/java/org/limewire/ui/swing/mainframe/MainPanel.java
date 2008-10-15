@@ -12,9 +12,11 @@ import javax.swing.JPanel;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavComponent;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.NavSelectable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -61,17 +63,20 @@ class MainPanel extends JPanel {
                 LOG.debugf("Removed item {0}", navItem);
                 remove(keyToComponents.remove(asString(navItem)));
             }
-
             @Override
-            public void itemSelected(NavCategory category, NavItem navItem, JComponent panel) {
+            public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable,
+                    JComponent panel) {
                 LOG.debugf("Selected item {0}", navItem);
                 if(navItem != null) {
                     cardLayout.show(MainPanel.this, asString(navItem));
+                    if(selectable != null && panel instanceof NavComponent) {
+                        NavComponent navComponent = (NavComponent)panel;
+                        navComponent.select(selectable);
+                    }
                     // TODO: This breaks focus in the nav, so cannot scroll
                     //       up/down.  Need to figure out what to do properly here.
                     //keyToComponents.get(asString(navItem)).requestFocusInWindow();
-                }
-            }
+                }            }
         });
     }
     

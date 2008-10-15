@@ -10,8 +10,9 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.ui.swing.nav.NavSelectable;
 
-public interface VisualSearchResult {
+public interface VisualSearchResult extends NavSelectable {
 
     Category getCategory();
     
