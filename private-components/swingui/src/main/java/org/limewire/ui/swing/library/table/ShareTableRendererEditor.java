@@ -64,8 +64,8 @@ public class ShareTableRendererEditor extends TableRendererEditor{
     
     private void configure(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        LocalFileItem item = (LocalFileItem)value;
-        if(item != null) {
+        if(value instanceof LocalFileItem) {
+            LocalFileItem item = (LocalFileItem)value;
             gnutellaLabel.setVisible(item.isSharedWithGnutella());
             int friendCount = item.getFriendShareCount();
             friendsLabel.setVisible(friendCount > 0);

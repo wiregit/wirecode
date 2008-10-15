@@ -65,6 +65,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
      * @param friend null for MyLibrary
      * @return
      */
+    @SuppressWarnings("unchecked")
     public <T extends FileItem>LibraryTable<T> createTable(Category category,
             EventList<T> eventList, Friend friend) {
         
@@ -103,7 +104,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
         } else {//Local            
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
-            libTable.setPopupHandler(new LibraryPopupHandler(libTable, category, libraryManager, shareListManager, friendList));
+            libTable.setPopupHandler(new LibraryPopupHandler((LibraryTable<LocalFileItem>)libTable, category, libraryManager, shareListManager, friendList));
         }
         
             libTable.setDropMode(DropMode.ON);

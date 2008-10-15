@@ -15,12 +15,12 @@ import org.limewire.ui.swing.table.TablePopupHandler;
 public class LibraryPopupHandler implements TablePopupHandler {
     private int popupRow = -1;
 
-    private LibraryTable table;
+    private LibraryTable<LocalFileItem> table;
 
     private MyLibraryPopupMenu popupMenu;
     private MyLibraryMultipleSelectionPopupMenu multiSelectPopupMenu;
 
-    public LibraryPopupHandler(LibraryTable table, Category category, LibraryManager libraryManager,
+    public LibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
             ShareListManager shareListManager, List<SharingTarget> friendList) {
         this.table = table;
         this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, shareListManager, table, friendList);
@@ -36,29 +36,15 @@ public class LibraryPopupHandler implements TablePopupHandler {
     @Override
     public void maybeShowPopup(Component component, int x, int y) {
         popupRow = table.rowAtPoint(new Point(x, y));
-        int[] selectedRows = table.getSelectedRows();
-        if (valueInArray(popupRow, selectedRows) && selectedRows.length > 1) {
-            LocalFileItem[] fileItems = new LocalFileItem[selectedRows.length];
-            for (int i = 0; i < fileItems.length; i++) {
-                fileItems[i] = (LocalFileItem) table.getLibraryTableModel().getFileItem(selectedRows[i]);
-                multiSelectPopupMenu.setFileItems(fileItems);
-            }
+        List<LocalFileItem> items = table.getSelectedItems();        
+        LocalFileItem selectedItem = table.getLibraryTableModel().getFileItem(popupRow);
+        if(items.contains(selectedItem) && items.size() > 1) {
+            multiSelectPopupMenu.setFileItems(items);
             multiSelectPopupMenu.show(component, x, y);
         } else {
             table.setRowSelectionInterval(popupRow, popupRow);
-            popupMenu.setFileItem((LocalFileItem) table.getLibraryTableModel().getFileItem(popupRow));
+            popupMenu.setFileItem(selectedItem);
             popupMenu.show(component, x, y);
         }
-
     }
-    
-    private boolean valueInArray(int value, int[] array){
-        for (int arrayValue : array){
-            if (arrayValue == value){
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

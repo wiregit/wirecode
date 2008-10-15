@@ -2,10 +2,11 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
-import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.download.DownloadListManager;
@@ -19,16 +20,18 @@ import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public class LibraryTable<T extends FileItem> extends MouseableTable {
     
-    private LibrarySharePanel librarySharePanel;
+    private final LibraryTableFormat<T> format;
+    private final TableColors tableColors;
+    private final EventList<T> listSelection;
+    
     private ShareTableRendererEditor shareEditor;
-    private LibraryTableFormat<T> format;
-
-
-
-    private TableColors tableColors;
+    private LibrarySharePanel librarySharePanel;
+    
     public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format) {
         super(new LibraryTableModel<T>(libraryItems, format));
         
@@ -38,11 +41,14 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         setStripesPainted(true);
         setColumnControlVisible(true);
         setShowHorizontalLines(false);
-        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        
+        EventSelectionModel<T> model = new EventSelectionModel<T>(libraryItems);
+        setSelectionModel(model);
+        model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        this.listSelection = model.getSelected();
         setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
         setFillsViewportHeight(true);
         setDragEnabled(true);
-
     }
     
     public void enableSharing(LibrarySharePanel librarySharePanel) {
@@ -72,9 +78,22 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         hideColumns();        
     }
     
-    public LibraryTableModel getLibraryTableModel(){
-        return (LibraryTableModel)getModel();
+    @SuppressWarnings("unchecked")
+    public LibraryTableModel<T> getLibraryTableModel(){
+        return (LibraryTableModel<T>)getModel();
     }
+    
+    /** Returns a copy of all selected items. */
+    public List<T> getSelectedItems() {
+        return new ArrayList<T>(listSelection);
+    }
+    
+    @Override
+    public void setModel(TableModel newModel) {
+        assert getModel() == null : "cannot change model!";
+        super.setModel(newModel);
+    }
+    
     //TODO: this is quite brittle.  only works if column indexes are in descending order - need to do it a different way
     protected void hideColumns(){
         int[] hiddenColumns = format.getDefaultHiddenColums();

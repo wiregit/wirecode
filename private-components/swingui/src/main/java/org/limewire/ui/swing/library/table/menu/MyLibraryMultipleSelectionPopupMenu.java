@@ -23,7 +23,7 @@ import org.limewire.util.FileUtils;
 
 public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
    
-    private LocalFileItem[] fileItems;
+    private List<LocalFileItem> fileItems;
 
     private LibraryManager libraryManager;
 
@@ -47,8 +47,8 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         initialize(category);
     }
 
-    public void setFileItems(LocalFileItem[] fileItems) {
-        this.fileItems = fileItems;
+    public void setFileItems(List<LocalFileItem> items) {
+        this.fileItems = items;
         friendSubMenu.setVisible(friendList.size() > 0);
         resetFriends();
     }
