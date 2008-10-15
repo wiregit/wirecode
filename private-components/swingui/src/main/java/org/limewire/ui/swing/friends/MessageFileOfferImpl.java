@@ -62,7 +62,7 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
 
         String fileOfferFormatted;
         String fileOfferReceived = tr("{0} wants to share a file with you", getFriendID());
-        String defaultFileOfferFormatted = fileOfferReceived + formatButtonText("Download " + fileMetadata.getName(), true)
+        String defaultFileOfferFormatted = fileOfferReceived + formatButtonText(tr("Download {0}", fileMetadata.getName()), true)
                     + DOWNLOAD_FROM_LIBRARY;
 
         if (downloadState == null) {
@@ -77,7 +77,7 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
                 case FINISHING:
                 case DOWNLOADING:
                     fileOfferFormatted = fileOfferReceived +
-                        formatButtonText("Downloading", false) +
+                        formatButtonText(tr("Downloading"), false) +
                                 DOWNLOAD_FROM_LIBRARY;
 
                     break;
@@ -85,7 +85,7 @@ public class MessageFileOfferImpl extends AbstractMessageImpl implements Message
                 case STALLED:
                 case ERROR:
                     fileOfferFormatted = fileOfferReceived +
-                        formatButtonText("Retry Download " + fileMetadata.getName(), true) +
+                        formatButtonText(tr("Retry Download {0}", fileMetadata.getName()), true) +
                                 DOWNLOAD_FROM_LIBRARY;
                     break;
                 case DONE:

@@ -139,7 +139,7 @@ public class ChatPanel extends JPanel implements Displayable {
         LOG.debugf("ConversationStartedEvent with friend: {0}", chatFriend.getName());
         ConversationPane chatPane = chats.get(chatFriend.getID());
         if (chatPane == null) {
-            chatPane = conversationFactory.create(event.getWriter(), chatFriend);
+            chatPane = conversationFactory.create(event.getWriter(), chatFriend, getLoggedInID());
             chats.put(chatFriend.getID(), chatPane);
         }
         
@@ -204,5 +204,9 @@ public class ChatPanel extends JPanel implements Displayable {
     
     public void setLoggedInID(String id) {
         friendsPanel.setLoggedInID(id);    
+    }
+    
+    private String getLoggedInID() {
+        return friendsPanel.getLoggedInID();
     }
 }

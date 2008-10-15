@@ -20,7 +20,8 @@ class FileOfferHandlerImpl implements RegisteringEventListener<FileOfferEvent> {
     }
 
     public void handleEvent(FileOfferEvent event) {
-        new MessageReceivedEvent(new MessageFileOfferImpl(null, null, event.getSource().getFromJID(),
+        String fromFriendID = event.getSource().getFromJID();
+        new MessageReceivedEvent(new MessageFileOfferImpl(fromFriendID, null, fromFriendID,
                 Type.Received, event.getSource().getFile())).publish();
     }
 }

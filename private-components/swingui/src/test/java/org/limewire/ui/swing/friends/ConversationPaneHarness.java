@@ -50,7 +50,7 @@ public class ConversationPaneHarness {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        ConversationPane pane = new ConversationPane(writer, friend, new MockLibraryManager(), iconManager, new MockFriendSharingDisplay(), null);
+                        ConversationPane pane = new ConversationPane(writer, friend, "me", new MockLibraryManager(), iconManager, new MockFriendSharingDisplay(), null);
                         frame.add(pane);
                         
                         for(int i = 0; i < 10; i++) {

@@ -440,6 +440,10 @@ public class FriendsPane extends JPanel implements FriendRemover {
     public void setLoggedInID(String id) {
         this.myID = id;
     }
+
+    String getLoggedInID() {
+        return myID;
+    }
     
     public void fireConversationStarted(Friend friend) {
         ChatFriend chatFriend = idToFriendMap.get(friend.getId());

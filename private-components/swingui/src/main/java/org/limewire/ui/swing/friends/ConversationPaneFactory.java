@@ -8,5 +8,5 @@ import org.limewire.xmpp.api.client.MessageWriter;
  *
  */
 public interface ConversationPaneFactory {
-    ConversationPane create(MessageWriter writer, ChatFriend chatFriend);
+    ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID);
 }

@@ -81,11 +81,6 @@ public class ConversationPane extends JPanel implements Displayable {
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private static final Color BACKGROUND_COLOR = Color.WHITE;
 
-    // TODO: FIXME: Concerns about synchronization!  messages and the map represent the "message state"
-    // or better yet, have the Map do everything (consider linkedHashMap).
-    // Make it so that iterating thru the map gets the messages
-    // in the same order they were added. Ando also what if the user sends the same file in a file offer
-    // multiple times in the same conversation.  The Message will need to be uniquely identified
     private final List<Message> messages = new ArrayList<Message>();
     private final Map<String, MessageFileOffer> idToMessageWithFileOffer =
             new ConcurrentHashMap<String, MessageFileOffer>();
@@ -93,6 +88,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private final JEditorPane editor;
     private final String conversationName;
     private final String friendId;
+    private final String loggedInID;
     private final MessageWriter writer;
     private final ChatFriend chatFriend;
     private final ShareListManager libraryManager;
@@ -103,13 +99,14 @@ public class ConversationPane extends JPanel implements Displayable {
     private final ResultDownloader downloader;
 
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend,
+    public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
             ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
             ResultDownloader downloader) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.conversationName = chatFriend.getName();
         this.friendId = chatFriend.getID();
+        this.loggedInID = loggedInID;
         this.libraryManager = libraryManager;
         this.iconManager = iconManager;
         this.friendSharingDisplay = friendSharingDisplay;
@@ -365,7 +362,7 @@ public class ConversationPane extends JPanel implements Displayable {
     public void offerFile(LocalFileItem file) {
         if(chatFriend.getPresence() instanceof LimePresence) {
             FileMetaData metadata = file.offer((LimePresence)chatFriend.getPresence());
-            new MessageReceivedEvent(new MessageFileOfferImpl(null, null, friendId,
+            new MessageReceivedEvent(new MessageFileOfferImpl(loggedInID, null, friendId,
                         Message.Type.Sent, metadata)).publish();
         }
     }
