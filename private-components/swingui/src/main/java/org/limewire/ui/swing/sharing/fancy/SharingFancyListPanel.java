@@ -30,6 +30,7 @@ import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
 import org.limewire.ui.swing.sharing.components.UnshareButton;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -50,6 +51,10 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     private int lineSize;
     @Resource
     private Color backgroundColor;
+    @Resource
+    private Color mainLabelColor;
+    @Resource
+    private int mainLabelFontSize;
     
     private final ImageList imageList;
     
@@ -69,6 +74,9 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         
         this.currentEventList = eventList;
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
+        headerLabel.setForeground(mainLabelColor);
+        FontUtils.setSize(headerLabel, mainLabelFontSize);
+        FontUtils.bold(headerLabel);
         
         JLabel unShareButtonLabel = new JLabel(unshareAll);
         removeAction = new SharingRemoveAllAction(fileList, eventList);
@@ -101,14 +109,14 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         });
         new MouseReaction(imageList, layerButton);
         
-        // top row should never be tall than 30pixels, the bottom row(table, should fill any remainign space
-        setLayout(new MigLayout("insets 10 25 0 10",     //layout contraints
+        // top row should never be tall than 30pixels, the bottom row(table, should fill any remaining space
+        setLayout(new MigLayout("gap 0, insets 18 6 10 6",     //layout constraints
                 "[] [] ",                       // column constraints
-                "[::30] [] [grow]" ));    // row contraints
+                "[::30] [] [grow][grow]" ));    // row constraints
         
-        add(headerLabel, "push");       // first row
-        add(unShareButtonLabel, "split 2");
-        add(unShareButton, "wrap");
+        add(headerLabel, "gapbottom 4, push");       // first row
+        add(unShareButtonLabel, "gapbottom 2, split 2");
+        add(unShareButton, "gapbottom 2, wrap");
         
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");

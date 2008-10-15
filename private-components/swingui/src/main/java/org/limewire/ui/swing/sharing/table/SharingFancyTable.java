@@ -5,12 +5,12 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.ListSelectionModel;
 
+import org.jdesktop.swingx.JXTable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
-import org.limewire.ui.swing.table.StripedJXTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -18,7 +18,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 
-public class SharingFancyTable extends StripedJXTable {
+public class SharingFancyTable extends JXTable {
 
     private TableColors tableColors;
     
@@ -33,7 +33,7 @@ public class SharingFancyTable extends StripedJXTable {
         setFillsViewportHeight(false);
         getTableHeader().setFocusable(false);
         getTableHeader().setReorderingAllowed(false);
-        setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
+        setHighlighters(tableColors.getEvenHighLighter());
         
         final TableDoubleClickHandler doubleClickHandler = new TableDoubleClickHandler() {
             @Override

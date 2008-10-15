@@ -44,12 +44,12 @@ import com.google.inject.assistedinject.AssistedInject;
 
 public class SharingFancyPanel extends JPanel implements Scrollable {
 
-    private final String music = I18n.tr("Music");
-    private final String video = I18n.tr("Videos");
-    private final String image = I18n.tr("Images");
-    private final String doc = I18n.tr("Documents");
-    private final String program = I18n.tr("Program");
-    private final String other = I18n.tr("Other");
+    private final String music = I18n.tr(Category.AUDIO.toString());
+    private final String video = I18n.tr(Category.VIDEO.toString());
+    private final String image = I18n.tr(Category.IMAGE.toString());
+    private final String doc = I18n.tr(Category.DOCUMENT.toString());
+    private final String program = I18n.tr(Category.PROGRAM.toString());
+    private final String other = I18n.tr(Category.OTHER.toString());
     
     private SharingFancyTablePanel musicTable;
     private SharingFancyTablePanel videoTable;

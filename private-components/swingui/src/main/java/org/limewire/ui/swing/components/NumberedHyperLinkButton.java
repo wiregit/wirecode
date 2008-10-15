@@ -45,7 +45,7 @@ public class NumberedHyperLinkButton extends HyperLinkButton {
         setMouseOverColor(mouseOverColor);
         setDisabledColor(disabledColor);
         FontUtils.setSize(this, fontSize);
-        FontUtils.changeStyle(this, Font.PLAIN);
+        FontUtils.changeStyle(this, Font.BOLD);
     }
     
     public void setDisplayNumber(int value) {

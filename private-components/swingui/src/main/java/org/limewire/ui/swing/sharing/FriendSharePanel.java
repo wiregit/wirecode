@@ -3,6 +3,8 @@ package org.limewire.ui.swing.sharing;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -130,6 +132,8 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         friendTableScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         friendTableScrollPane.setViewportView(friendTable);
         
+        friendTable.addKeyListener(friendSelectionListener);
+        
         setLayout(new MigLayout("insets 0 0 0 0", "[150!]0[grow]","[grow]"));
         
         add(headerPanel, "dock north");
@@ -166,7 +170,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     //       Another approach would be to add an in-between EventList that just forwards
     //       list-changed events, but does *not* forward them if the list unregistered
     //       for listening by the time it comes to forwarding the event.
-    private class FriendSelectionListener implements ListSelectionListener {//, ListEventListener<LocalFileItem> {
+    private class FriendSelectionListener implements ListSelectionListener , ListEventListener<LocalFileItem>, KeyListener {
 
         private final JTable friend;
         private final FriendSharingHeaderPanel headerPanel;
@@ -176,8 +180,11 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         private ShareDropTarget emptyDropTarget;
         private ShareDropTarget dropTarget;
         
+        private boolean isPressed = false;
+        
         private EventList<LocalFileItem> currentList;
         private TransformedList<LocalFileItem, LocalFileItem> filteredList;
+        private FriendFileList fileList;
         
         private String lastRenderedId = "";
         
@@ -210,28 +217,29 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             headerPanel.setFriendName(friendItem.getFriend().getRenderName());
             emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
 
-            FriendFileList fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
-//            if(currentList != null) {
-//                assert filteredList != null;
-//                final TransformedList<LocalFileItem, LocalFileItem> toDispose = filteredList;
-//                final EventList<LocalFileItem> toDispose2 = currentList;
-//                SwingUtilities.invokeLater(new Runnable() {
-//                    public void run() {
-//                        toDispose.dispose();
-//                        toDispose2.removeListEventListener(FriendSelectionListener.this);
-//                    }
-//                });
-//            } else {
-//                assert filteredList == null;
-//            }
+            fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
+            if(currentList != null) {
+                assert filteredList != null;
+                final TransformedList<LocalFileItem, LocalFileItem> toDispose = filteredList;
+                final EventList<LocalFileItem> toDispose2 = currentList;
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        toDispose.dispose();
+                        toDispose2.removeListEventListener(FriendSelectionListener.this);
+                    }
+                });
+            } else {
+                assert filteredList == null;
+            }
             
             currentList = fileList.getSwingModel();
             filteredList = GlazedListsFactory.filterList(currentList, 
                     new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
-//            currentList.addListEventListener(this);
+            currentList.addListEventListener(this);
             
             emptyPanel.setUserFileList(fileList);
-            sharingFancyPanel.setModel(filteredList, fileList);
+            if(!isPressed)
+                sharingFancyPanel.setModel(filteredList, fileList);
             headerPanel.setModel(fileList);           
             
             if(dropTarget == null) {
@@ -250,16 +258,35 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             }
         }
 
-//        @Override
-//        public void listChanged(ListEvent<LocalFileItem> listChanges) {
-//            // We only care about change events on the current list --
-//            // due to the way we reuse 'this' as a listener and how
-//            // events are queued up & sent from GlazedLists, it's possible
-//            // that we get an event for a list that's no longer ours.
-////            if(listChanges.getSourceList() == currentList) {
-////                viewSelectionPanel.setEnabled(currentList.size() > 0);
-////            }
-//        }
+        @Override
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            // We only care about change events on the current list --
+            // due to the way we reuse 'this' as a listener and how
+            // events are queued up & sent from GlazedLists, it's possible
+            // that we get an event for a list that's no longer ours.
+            if(listChanges.getSourceList() == currentList) {
+                if(currentList.size() > 0) {
+                    viewCardLayout.show(cardPanel, NONEMPTY);
+                } else {
+                    viewCardLayout.show(cardPanel, EMPTY);
+                }
+            }
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            isPressed = true;
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            isPressed = false;
+            sharingFancyPanel.setModel(filteredList, fileList);
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
     }
     
     @Inject
