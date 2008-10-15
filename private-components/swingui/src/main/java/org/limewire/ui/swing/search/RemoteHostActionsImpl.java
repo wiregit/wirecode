@@ -18,8 +18,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FromActionsImpl implements FromActions {
-    private static final Log LOG = LogFactory.getLog(FromActionsImpl.class);
+public class RemoteHostActionsImpl implements RemoteHostActions {
+    private static final Log LOG = LogFactory.getLog(RemoteHostActionsImpl.class);
 
     private final RemoteLibraryManager remoteLibraryManager;
 
@@ -33,7 +33,7 @@ public class FromActionsImpl implements FromActions {
     
     private final Navigator navigator;
     @Inject
-    public FromActionsImpl(RemoteLibraryManager remoteLibraryManager,
+    public RemoteHostActionsImpl(RemoteLibraryManager remoteLibraryManager,
             ShareListManager shareListManager, FriendsPane friendsPane, LibraryNavigator libraryNavigator, FriendSharePanel friendSharePanel, Navigator navigator) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.shareListManager = shareListManager;

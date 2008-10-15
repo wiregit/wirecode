@@ -3,7 +3,7 @@ package org.limewire.ui.swing.search.resultpanel;
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.search.FromActions;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -23,11 +23,11 @@ public class AudioResultsPanel extends BaseResultPanel {
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
-        FromActions fromActions,
+        RemoteHostActions remoteHostActions,
         ListViewTableEditorRendererFactory listViewEditorRendererFactory) {
         
         super(listViewEditorRendererFactory, eventList, new MusicTableFormat(), resultDownloader,
-            search, searchInfo, preserver, navigator, fromActions);
+            search, searchInfo, preserver, navigator, remoteHostActions);
         
     }
 }

@@ -19,8 +19,8 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
-import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.search.ModeListener;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.ModeListener.Mode;
@@ -29,9 +29,9 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
 
-import com.google.inject.assistedinject.AssistedInject;
-
 import ca.odell.glazedlists.EventList;
+
+import com.google.inject.assistedinject.AssistedInject;
 
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     
@@ -56,7 +56,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
-            Navigator navigator, FromActions fromActions) {
+            Navigator navigator, RemoteHostActions remoteHostActions) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         
@@ -66,7 +66,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         setLayout(layout);
                 
-        configureList(eventList, preserver, navigator, searchInfo, fromActions);
+        configureList(eventList, preserver, navigator, searchInfo, remoteHostActions);
         configureTable(eventList, tableFormat, navigator);
  
         add(resultsList, ModeListener.Mode.LIST.name());
@@ -75,7 +75,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
-            SearchInfo searchInfo, FromActions fromActions) {
+            SearchInfo searchInfo, final RemoteHostActions remoteHostActions) {
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
         resultsList.setShowGrid(false, false);
         preserver.addRowPreservationListener(resultsList);
@@ -94,7 +94,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
            new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    fromActions, navigator, resultsList);
+                    remoteHostActions, navigator, resultsList);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -105,7 +105,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    fromActions, navigator, resultsList);
+                    remoteHostActions, navigator, resultsList);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
@@ -132,7 +132,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
                     SearchResultMenu menu = new SearchResultMenu(
-                        BaseResultPanel.this, navigator, vsr, row);
+                        BaseResultPanel.this, navigator, vsr, row, remoteHostActions);
                     menu.show(component, e.getX(), e.getY());
                 }
             }

@@ -70,7 +70,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
                 FactoryProvider.newFactory(
                         ListViewTableEditorRendererFactory.class, ListViewTableEditorRenderer.class));
         
-        bind(FromActions.class).to(FromActionsImpl.class);
+        bind(RemoteHostActions.class).to(RemoteHostActionsImpl.class);
 
     }
 }

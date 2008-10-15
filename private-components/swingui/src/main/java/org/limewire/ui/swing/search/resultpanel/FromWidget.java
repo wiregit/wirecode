@@ -21,7 +21,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.RoundedBorder;
-import org.limewire.ui.swing.search.FromActions;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.util.Objects;
 
@@ -38,7 +38,7 @@ public class FromWidget extends JPanel {
 
     private final Border noBorder = BorderFactory.createEmptyBorder(R, R, R, R);
 
-    private final FromActions fromActions;
+    private final RemoteHostActions fromActions;
 
     private final JLabel headerLabel = shrinkFontSize(new JLabel());
 
@@ -48,7 +48,7 @@ public class FromWidget extends JPanel {
 
     private List<RemoteHost> people;
 
-    public FromWidget(FromActions fromActions) {
+    public FromWidget(RemoteHostActions fromActions) {
         menu = new JPopupMenu();
         menu.setBorder(border);
         this.fromActions = Objects.nonNull(fromActions, "fromActions");

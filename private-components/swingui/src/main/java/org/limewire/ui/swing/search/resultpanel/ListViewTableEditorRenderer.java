@@ -43,7 +43,7 @@ import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.library.LibraryNavigator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.search.FromActions;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.RowColorResolver;
@@ -118,7 +118,7 @@ implements TableCellEditor, TableCellRenderer {
     ListViewTableEditorRenderer(CategoryIconManager categoryIconManager,
         @Assisted ActionColumnTableCellEditor actionEditor, 
         @Assisted String searchText, 
-        @Assisted FromActions fromActions, 
+        @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
         @Assisted RowColorResolver<VisualSearchResult> colorResolver) {
 
@@ -132,7 +132,7 @@ implements TableCellEditor, TableCellRenderer {
 
         similarButton.setFont(similarResultsButtonFont);
         
-        fromWidget = new FromWidget(fromActions);
+        fromWidget = new FromWidget(remoteHostActions);
         
         makePanel(navigator);
     }

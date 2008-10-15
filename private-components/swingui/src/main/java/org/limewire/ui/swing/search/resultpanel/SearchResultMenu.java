@@ -11,6 +11,7 @@ import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -21,14 +22,11 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class SearchResultMenu extends JPopupMenu {
 
-//    private Navigator navigator;
-
     public SearchResultMenu(final BaseResultPanel brp,
         final Navigator navigator,
         final VisualSearchResult vsr,
-        final int row) {
-
-//        this.navigator = navigator;
+        final int row,
+        final RemoteHostActions fromActions) {
 
         add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
@@ -57,11 +55,11 @@ public class SearchResultMenu extends JPopupMenu {
 
         if (multipleSources) {
             for (RemoteHost host : hosts) {
-                addSubmenu(host);
+                addSubmenu(host, fromActions);
             }
         } else {
             RemoteHost host = hosts[0];
-            addSubmenu(host);
+            addSubmenu(host, fromActions);
         }
 
         addSeparator();
@@ -74,20 +72,18 @@ public class SearchResultMenu extends JPopupMenu {
         });
     }
 
-    private void addSubmenu(RemoteHost host) {
-        JMenu menu = new JMenu("todo implement");
+    private void addSubmenu(final RemoteHost host, final RemoteHostActions fromActions) {
+        JMenu menu = new JMenu(host.getRenderName());
 
         menu.add(new AbstractAction(tr("View library")) {
             public void actionPerformed(ActionEvent e) {
-                //TODO
-                throw new UnsupportedOperationException("Implement Me Properly!");
+                fromActions.viewLibraryOf(host);
             }
         });
 
         menu.add(new AbstractAction(tr("Chat")) {
             public void actionPerformed(ActionEvent e) {
-                //TODO
-                throw new UnsupportedOperationException("Implement Me Properly!");
+                fromActions.chatWith(host);
             }
         });
 
