@@ -10,11 +10,13 @@ public class URNImpl implements URN {
         this.urn = Objects.nonNull(urn, "urn");
     }
 
+    public com.limegroup.gnutella.URN getUrn() {
+        return urn;
+    }
+    
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof com.limegroup.gnutella.URN) {
-            return urn.equals(obj);
-        } else if (obj instanceof URNImpl) {
+        if (obj instanceof URNImpl) {
             return urn.equals(((URNImpl) obj).getUrn());
         }
         return false;
@@ -30,13 +32,9 @@ public class URNImpl implements URN {
         return urn.toString();
     }
 
-    public com.limegroup.gnutella.URN getUrn() {
-        return urn;
-    }
-
     @Override
     public int compareTo(URN o) {
-        return urn.toString().compareTo(o.toString());
+        return toString().compareTo(o.toString());
     }
 
 }
