@@ -199,13 +199,13 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         
         gbc.insets = new Insets(0,30,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridx = 4;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = 1;
-        gbc.gridheight = 2;
+        gbc.gridheight = 5;
         minPanel.add(minButtonPanel, gbc);  
         
         gbc.insets = insets;
@@ -272,13 +272,13 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         
         gbc.insets = new Insets(0,30,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.SOUTHWEST;
+        gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridx += gbc.gridwidth;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = 1;
-        gbc.gridheight = 2;
+        gbc.gridheight = 3;
         fullPanel.add(fullButtonPanel, gbc);  
         
         gbc.insets = insets;

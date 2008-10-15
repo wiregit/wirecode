@@ -20,6 +20,9 @@ import ca.odell.glazedlists.EventList;
  */
 public class DownloadTable extends MouseableTable {   
     
+    //TODO: Make resource
+    private int rowHeight = 60;    
+    
     private DownloadTableModel model;
 
     @AssistedInject
@@ -40,7 +43,7 @@ public class DownloadTable extends MouseableTable {
         renderer.initialiseRenderer(editor.getEditorListener());
         getColumnModel().getColumn(0).setCellRenderer(renderer);
         
-        setRowHeight(56);
+        setRowHeight(this.rowHeight);
     }
 	
 	public DownloadItem getDownloadItem(int row){
