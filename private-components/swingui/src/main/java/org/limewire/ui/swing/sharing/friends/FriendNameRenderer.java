@@ -33,17 +33,17 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
     @Resource
     private Color offlineNameColor;
     @Resource
-    private Color seperatorColor;
+    private int fontSize;
     
-    private Border emptyBorder;
-    private Border compoundBorder;
+    private Border emptyRightBorder;
+    private Border emptyLeftBorder;
 
     public FriendNameRenderer() {
         GuiUtils.assignResources(this);
-        emptyBorder = BorderFactory.createEmptyBorder(0,10,0,10);
-        compoundBorder = BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, seperatorColor),
-                emptyBorder);
-        setBorder(emptyBorder);
+        emptyRightBorder = BorderFactory.createEmptyBorder(10,0,10,6);
+        emptyLeftBorder = BorderFactory.createEmptyBorder(10, 6, 10, 0);
+        
+        FontUtils.setSize(this, fontSize);
     }
     
     @Override
@@ -53,38 +53,25 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
         FriendItem item = (FriendItem) value;
         // sharing something
         if(item.getShareListSize() > 0) {
-            setBorder(emptyBorder);
             FontUtils.changeStyle(this, Font.BOLD);
             setOpaque(true);
-            if(isSelected) 
-                setBackground(selectionColor);
-            else
-                setBackground(backGroundOnlineColor);
-            if(column == 0)
-                setForeground(onlineNameColor);
-            else
-                setForeground(numberColor);
+
+            setSharingBackgroundColor(isSelected);
+            setSharingForeground(column);
         } else { // not sharing something
-            // set the border
-            if(row > 0 && ((FriendItem)table.getModel().getValueAt(row - 1, 0)).getShareListSize() > 0)
-                setBorder(compoundBorder);
-            else
-                setBorder(emptyBorder);
             setBackground(backGroundOnlineColor);
             setForeground(offlineNameColor);
             
             FontUtils.changeStyle(this, Font.ITALIC);
-            if(isSelected) {
-                setOpaque(true);
-                setBackground(selectionColor);
-            } else
-                setOpaque(false);
+            setNotSharingBackgroundColor(isSelected);
         }
         
         //set the text
         if(column == 0) {
             setText(item.getFriend().getRenderName());
+            setBorder(emptyLeftBorder);
         } else {
+            setBorder(emptyRightBorder);
             setHorizontalAlignment(RIGHT);
             if( item.getShareListSize() > 0) 
                 setText(Integer.toString(item.getShareListSize()));
@@ -94,5 +81,35 @@ public class FriendNameRenderer extends JLabel implements TableCellRenderer {
 
         return this;
     }
-
+    
+    /**
+     * Sets the background color for a friend sharing with.
+     */
+    private void setSharingBackgroundColor(boolean isSelected) {
+        if(isSelected) 
+            setBackground(selectionColor);
+        else
+            setBackground(backGroundOnlineColor);
+    }
+    
+    /**
+     * Sets the foreground color for a sharing friend
+     */
+    private void setSharingForeground(int column) {
+        if(column == 0)
+            setForeground(onlineNameColor);
+        else
+            setForeground(numberColor);
+    }
+    
+    /**
+     * Sets the background color a friend not being shared with
+     */
+    private void setNotSharingBackgroundColor(boolean isSelected) {
+        if(isSelected) {
+            setOpaque(true);
+            setBackground(selectionColor);
+        } else
+            setOpaque(false);
+    }
 }

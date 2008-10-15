@@ -73,6 +73,8 @@ public class ConfirmationUnshareButton extends JPanel {
         noButton.setForegroundColor(foregroundColor);
         noButton.setMouseOverColor(mouseOverColor);
         xButton = new UnshareButton();
+        xButton.setContentAreaFilled(false);
+        xButton.setFocusPainted(false);
         xButton.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {

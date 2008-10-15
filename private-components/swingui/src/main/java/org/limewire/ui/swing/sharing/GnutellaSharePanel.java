@@ -14,7 +14,6 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanelFactory;
-import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -27,6 +26,10 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * The LimeWire Network sharing panel. This panel displays all the files
+ * being shared with Gnutella.
+ */
 @Singleton
 public class GnutellaSharePanel extends GenericSharingPanel {
 
@@ -42,15 +45,14 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     private CardLayout overviewCardLayout;
     
     private JPanel nonEmptyPanel;
-
-    MultiButtonTableCellRendererEditor editor;
-    MultiButtonTableCellRendererEditor renderer;
+    private final SharingEmptyPanel emptyPanel;
     
     @Inject
-    public GnutellaSharePanel(ShareListManager libraryManager, SharingEmptyPanel emptyPanel, SharingFancyPanelFactory sharingFancyPanelFactory) {
+    public GnutellaSharePanel(ShareListManager libraryManager, SharingEmptyPanel sharingEmptyPanel, SharingFancyPanelFactory sharingFancyPanelFactory) {
         GuiUtils.assignResources(this); 
         
         this.sharingFancyPanelFactory = sharingFancyPanelFactory;
+        this.emptyPanel = sharingEmptyPanel;
         
         this.fileList = libraryManager.getGnutellaShareList();
         this.fileList.getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>(){
@@ -72,30 +74,27 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         overviewCardLayout = new CardLayout();
         this.setLayout(overviewCardLayout);
 
-        setupEmptyPanel(emptyPanel);
-        createTablesPanels();
-    
-        add(emptyPanel, EMPTY);
+        createNonEmptyPanel();
+        addTransferHandlers();
+        
+        add(sharingEmptyPanel, EMPTY);
         add(nonEmptyPanel, NONEMPTY);
         overviewCardLayout.show(this,EMPTY);
     }
     
-    private void setupEmptyPanel(JPanel emptyPanel) {
+    private void addTransferHandlers() {
         emptyPanel.setTransferHandler(new SharingTransferHandler(fileList,false));
+        nonEmptyPanel.setTransferHandler(new SharingTransferHandler(fileList,false));
     }
-
     
-    private void createTablesPanels() {
+    private void createNonEmptyPanel() {
         nonEmptyPanel = new JPanel();
         nonEmptyPanel.setLayout(new BorderLayout());
-        nonEmptyPanel.setTransferHandler(new SharingTransferHandler(fileList,false));
         
-        SharingHeaderPanel headerPanel = new SharingHeaderPanel(I18n.tr("Sharing with the {0}"), NAME);//createHeader(cardPanel);
+        SharingHeaderPanel headerPanel = new SharingHeaderPanel(I18n.tr("Sharing with the {0}"), NAME);
 
         FilterList<LocalFileItem> filteredList = GlazedListsFactory.filterList(fileList.getSwingModel(), 
                 new TextComponentMatcherEditor<LocalFileItem>(headerPanel.getFilterBox(), new SharingTextFilterer()));
-        
-//        SharingFancyPanel sharingFancyPanel = new SharingFancyPanel(filteredList, scrollPane, fileList, iconManager, thumbnailManager);
         
         SharingFancyPanel sharingFancyPanel = sharingFancyPanelFactory.create(filteredList, scrollPane, fileList);
         scrollPane.setViewportView(sharingFancyPanel);

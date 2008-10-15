@@ -23,10 +23,7 @@ public abstract class GenericSharingPanel extends JPanel implements ComponentLis
 
     protected static final String EMPTY = "EMPTY";
     protected static final String NONEMPTY = "NONEMPTY";
-//    protected static final String TABLE = "TABLE";
     protected static final String LIST = "LIST";
-    
-//    protected SharingTable table;
     
     protected JScrollPane scrollPane;
 
@@ -61,9 +58,11 @@ public abstract class GenericSharingPanel extends JPanel implements ComponentLis
         @Override
         public void getFilterStrings(List<String> baseList, LocalFileItem element) {
            baseList.add(element.getName());
-           baseList.add((String)element.getProperty(Keys.ALBUM));
-           baseList.add((String)element.getProperty(Keys.TITLE));
-           //TODO: finish linking properties here
+
+           for(Keys key : Keys.values()) {
+               baseList.add((String)element.getProperty(key));
+           }
+           baseList.remove(element.getProperty(Keys.IMAGE));
         }
     }
     

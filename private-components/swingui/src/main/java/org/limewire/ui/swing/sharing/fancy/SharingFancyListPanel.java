@@ -11,6 +11,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
@@ -134,6 +135,10 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         eventList.addListEventListener(this);
         
         setVisible(false);
+    }
+    
+    public JList getList() {
+        return imageList;
     }
     
     public void setModel(EventList<LocalFileItem> eventList, LocalFileList fileList) {

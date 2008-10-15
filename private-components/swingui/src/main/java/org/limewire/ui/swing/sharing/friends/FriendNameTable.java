@@ -24,14 +24,21 @@ import org.limewire.ui.swing.sharing.menu.FriendSharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
- * Table for displaying a list of friends in the shared view
+ * Table for displaying a list of friends in the shared view.
+ * The table consists of a list of names and number of files being shared.
+ * The table is sorted based on the first if files are being share or not
+ * and then by alphabetical order. 
  */
+@Singleton
 public class FriendNameTable extends JXTable {
 
     @Resource
@@ -39,28 +46,17 @@ public class FriendNameTable extends JXTable {
     
     private EventTableModel<FriendItem> tableModel;
     
-    public FriendNameTable(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat,
-            RemoteLibraryManager remoteLibraryManager, LibraryManager libraryManager, final ShareListManager shareListManager, Navigator navigator) {
+    @Inject
+    public FriendNameTable( RemoteLibraryManager remoteLibraryManager, LibraryManager libraryManager, final ShareListManager shareListManager, Navigator navigator) {
         GuiUtils.assignResources(this);
-        
-        SortedList<FriendItem> friendList = GlazedListsFactory.sortedList(eventList, new FriendComparator());       
-        tableModel = new EventTableModel<FriendItem>(friendList, tableFormat);
-        
-        setModel(tableModel);
-        
+                
         setBackground(tableBackgroundColor);
         setColumnControlVisible(false);
         setTableHeader(null);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setShowGrid(false, false);
         setColumnSelectionAllowed(false);
-        
-        getColumn(0).setCellRenderer(new FriendNameRenderer());
-        getColumn(1).setCellRenderer(new FriendNameRenderer());
-        
-        getColumn(1).setWidth(30);
-        getColumn(1).setPreferredWidth(30);
-        
+                       
         final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), remoteLibraryManager, shareListManager);
 
         setTransferHandler(new FriendTransferHandler(shareListManager));
@@ -93,6 +89,20 @@ public class FriendNameTable extends JXTable {
                 }
             }
         });
+    }
+    
+    public void setTableModel(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat) {
+        SortedList<FriendItem> friendList = GlazedListsFactory.sortedList(eventList, new FriendComparator());       
+        tableModel = new EventTableModel<FriendItem>(friendList, tableFormat);
+        
+        setModel(tableModel);
+        
+        getColumn(0).setCellRenderer(new FriendNameRenderer());
+        getColumn(1).setCellRenderer(new FriendNameRenderer());
+        
+        getColumn(0).setPreferredWidth(110);
+        getColumn(1).setWidth(30);
+        getColumn(1).setPreferredWidth(30);
     }
     
     public EventTableModel<FriendItem> getEventTableModel() {
@@ -146,6 +156,13 @@ public class FriendNameTable extends JXTable {
         }
     }
 
+    /**
+     * Sorts the FriendNameTable. All items are first sorted on whether
+     * they are sharing any files. Those that are sharing are displayed first,
+     * those that aren't are displayed second. Then they are sorted based on
+     * alphabetical order. This results in two alphabetical sorted lists where
+     * the first list is sharing files and the second list isn't sharing files.
+     */
     private static class FriendComparator implements Comparator<FriendItem> {
         @Override
         public int compare(FriendItem o1, FriendItem o2) {

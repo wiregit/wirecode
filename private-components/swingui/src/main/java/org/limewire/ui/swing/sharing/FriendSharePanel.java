@@ -25,14 +25,12 @@ import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanelFactory;
@@ -79,9 +77,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     private final FriendSharingHeaderPanel headerPanel;
     
     @Inject
-    public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager,
-            RemoteLibraryManager remoteLibraryManager,
-            SharingFriendEmptyPanel emptyPanel, Navigator navigator, SharingFancyPanelFactory sharingFancyPanelFactory) {        
+    public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager, FriendNameTable friendNameTable, SharingFriendEmptyPanel emptyPanel, SharingFancyPanelFactory sharingFancyPanelFactory) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
 
@@ -96,10 +92,11 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
 
         Connector<FriendItem> connector = GlazedLists.beanConnector(FriendItem.class); 
         friendsList = GlazedListsFactory.observableElementList(new BasicEventList<FriendItem>(), connector);               
-        friendTable = new FriendNameTable(friendsList, new FriendTableFormat(),
-                remoteLibraryManager, libraryManager, shareListManager, navigator);
+
+        this.friendTable = friendNameTable;
+        friendTable.setTableModel(friendsList, new FriendTableFormat());
         
-        headerPanel = new FriendSharingHeaderPanel(I18n.tr("Sharing with {0}"), "", libraryManager);//createHeader(cardPanel);
+        headerPanel = new FriendSharingHeaderPanel(I18n.tr("Sharing with {0}"), "", libraryManager);
 
         createCenterCards(headerPanel, cardPanel);
 

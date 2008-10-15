@@ -3,7 +3,6 @@ package org.limewire.ui.swing.sharing.actions;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.Icon;
 
 import org.jdesktop.swingx.JXTable;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
@@ -16,8 +15,8 @@ public class SharingRemoveTableAction extends AbstractAction {
 
     private JXTable table;
     
-    public SharingRemoveTableAction(JXTable table, Icon icon) {
-        super("", icon);
+    public SharingRemoveTableAction(JXTable table) {
+        super("");
         
         this.table = table;
     }

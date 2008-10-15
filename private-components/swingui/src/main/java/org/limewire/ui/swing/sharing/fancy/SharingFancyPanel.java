@@ -4,15 +4,21 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -38,6 +44,7 @@ import org.limewire.ui.swing.util.IconManager;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.gui.TableFormat;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -51,12 +58,11 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
     private final String program = I18n.tr(Category.PROGRAM.toString());
     private final String other = I18n.tr(Category.OTHER.toString());
     
-    private SharingFancyTablePanel musicTable;
-    private SharingFancyTablePanel videoTable;
+    private final CategoryIconManager categoryIconManager;
+    
+    private final Map<String, SharingFancyTablePanel> tables = new HashMap<String, SharingFancyTablePanel>();
+
     private SharingFancyListPanel imageList;
-    private SharingFancyTablePanel documentTable;
-    private SharingFancyTablePanel programTable;
-    private SharingFancyTablePanel otherTable;
     
     private SharingShortcutPanel shortcuts;
     
@@ -67,6 +73,110 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
     private final SharingTransferHandler transferHandler;
     
     private final EnumMap<Category, FilterList<LocalFileItem>> filterLists = new EnumMap<Category, FilterList<LocalFileItem>>(Category.class);
+       
+    @AssistedInject
+    public SharingFancyPanel(CategoryIconManager categoryIconManager, IconManager iconManager, ThumbnailManager thumbnailManager,
+            @Assisted EventList<LocalFileItem> eventList, @Assisted JScrollPane scrollPane,  @Assisted LocalFileList originalList) {
+
+        this.categoryIconManager = categoryIconManager;
+        
+        GuiUtils.assignResources(this); 
+        
+        this.scrollPane = scrollPane;
+        this.scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        
+        this.transferHandler = new SharingTransferHandler(originalList, false);
+
+        createFilteredLists(eventList);
+        
+        addTable(music, Category.AUDIO, originalList, new SharingFancyAudioTableFormat(), true);       
+        addTable(video, Category.VIDEO, originalList, new SharingFancyDefaultTableFormat(), false);
+        addTable(doc, Category.DOCUMENT, originalList, new SharingFancyIconTableFormat(), false);       
+        addTable(program, Category.PROGRAM, originalList, new SharingFancyDefaultTableFormat(), false);       
+        addTable(other, Category.OTHER, originalList, new SharingFancyDefaultTableFormat(), true);
+        
+        imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE),
+                transferHandler, originalList, 
+                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
+        
+        
+        TableColumn tc = tables.get(doc).getTable().getColumn(0);
+        iconLabelRenderer = new IconLabelRenderer(iconManager);
+        tc.setCellRenderer(iconLabelRenderer);
+        
+        shortcuts = new SharingShortcutPanel(
+                new String[]{music, video, image, doc, program, other},
+                new Action[]{new BookmarkJumpAction(this, tables.get(music)),
+                             new BookmarkJumpAction(this, tables.get(video)),
+                             new BookmarkJumpAction(this, imageList),
+                             new BookmarkJumpAction(this, tables.get(doc)),
+                             new BookmarkJumpAction(this, tables.get(program)),
+                             new BookmarkJumpAction(this, tables.get(other))},
+                getFilteredListsInOrderOf(
+                                Category.AUDIO, Category.VIDEO,
+                                Category.IMAGE, Category.DOCUMENT,
+                                Category.PROGRAM, Category.OTHER),
+                new boolean[]{true,true,true,true,false,false});
+
+       setLayout(new VerticalLayout());
+        
+       add(shortcuts);
+        
+       add(tables.get(music));
+       add(tables.get(video));
+       add(imageList);
+       add(tables.get(doc));
+       add(tables.get(program));
+       add(tables.get(other));
+
+       this.setTransferHandler(transferHandler);
+    }
+    
+    /**
+     * Constructs a SharingFancyTablePanel for a given Category
+     */
+    private void addTable(String title, Category category, LocalFileList originalList, TableFormat<LocalFileItem> tableFormat, boolean displayHeader) {
+       
+        SharingFancyTablePanel tablePanel = new SharingFancyTablePanel(title, filterLists.get(category), 
+                tableFormat, displayHeader, transferHandler, originalList, categoryIconManager.getIcon(category));
+        
+        tablePanel.getTable().addMouseListener(new MultiTableMouseListener());
+        tables.put(title, tablePanel); 
+    }
+        
+    public void setModel(EventList<LocalFileItem> eventList, LocalFileList fileList) {
+        //TODO: these need to be lazily created and stored somewhere, FileList?? so we don't keep recreating them
+        //		GlazedLists.multiMap would be perfect if they supported EventLists instead of Lists
+        createFilteredLists(eventList);
+        
+        tables.get(music).setModel(filterLists.get(Category.AUDIO), fileList);
+        tables.get(video).setModel(filterLists.get(Category.VIDEO), fileList);
+        imageList.setModel(filterLists.get(Category.IMAGE), fileList);
+        tables.get(doc).setModel(filterLists.get(Category.DOCUMENT), fileList);
+        tables.get(program).setModel(filterLists.get(Category.PROGRAM), fileList);
+        tables.get(other).setModel(filterLists.get(Category.OTHER), fileList);
+        
+        imageList.addMouseListener(new MultiTableMouseListener());
+        
+        TableColumn tc = tables.get(doc).getTable().getColumn(0);
+        tc.setCellRenderer(iconLabelRenderer);
+        
+        transferHandler.setModel(fileList);
+        
+        scrollPane.getViewport().setViewPosition(new Point(0, 0));
+        shortcuts.setModel(getFilteredListsInOrderOf(
+                Category.AUDIO, Category.VIDEO,
+                Category.IMAGE, Category.DOCUMENT,
+                Category.PROGRAM, Category.OTHER));
+    }
+    
+    private List<EventList<LocalFileItem>> getFilteredListsInOrderOf(Category... categories) {
+        List<EventList<LocalFileItem>> list = new ArrayList<EventList<LocalFileItem>>(categories.length);
+        for(Category category : categories) {
+            list.add(filterLists.get(category));
+        }
+        return list;
+    }
     
     private void createFilteredLists(EventList<LocalFileItem> eventList) {
         // First dispose of the old ones!
@@ -88,111 +198,28 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
         filterLists.put(Category.OTHER, GlazedListsFactory.filterList(eventList, new CategoryFilter(Category.OTHER)));
     }
     
-    @AssistedInject
-    public SharingFancyPanel(CategoryIconManager categoryIconManager,
-            IconManager iconManager, 
-            ThumbnailManager thumbnailManager,
-            @Assisted EventList<LocalFileItem> eventList,
-            @Assisted JScrollPane scrollPane,
-            @Assisted LocalFileList originalList) {
-
-        GuiUtils.assignResources(this); 
-        
-        this.scrollPane = scrollPane;
-        this.scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        
-        this.transferHandler = new SharingTransferHandler(originalList, false);
-
-        createFilteredLists(eventList);
-        
-        musicTable = new SharingFancyTablePanel(music, filterLists.get(Category.AUDIO), 
-                new SharingFancyAudioTableFormat(), 
-                transferHandler, originalList, 
-                categoryIconManager.getIcon(Category.AUDIO));
-        
-        videoTable = new SharingFancyTablePanel(video, filterLists.get(Category.VIDEO), 
-                new SharingFancyDefaultTableFormat(),
-                false, transferHandler, originalList, 
-                categoryIconManager.getIcon(Category.VIDEO));
-        
-        imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE),
-                transferHandler, originalList, 
-                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
-        
-        documentTable = new SharingFancyTablePanel(doc, filterLists.get(Category.DOCUMENT), 
-                new SharingFancyIconTableFormat(), false, transferHandler,
-                originalList, categoryIconManager.getIcon(Category.DOCUMENT));
-        
-        programTable = new SharingFancyTablePanel(program, filterLists.get(Category.PROGRAM),
-                new SharingFancyDefaultTableFormat(), false, transferHandler,
-                originalList, categoryIconManager.getIcon(Category.PROGRAM));
-        
-        otherTable = new SharingFancyTablePanel(other, filterLists.get(Category.OTHER), 
-                new SharingFancyDefaultTableFormat(), transferHandler, 
-                originalList, categoryIconManager.getIcon(Category.OTHER));
-        
-        TableColumn tc = documentTable.getTable().getColumn(0);
-        iconLabelRenderer = new IconLabelRenderer(iconManager);
-        tc.setCellRenderer(iconLabelRenderer);
-        
-        shortcuts = new SharingShortcutPanel(
-                new String[]{music, video, image, doc, program, other},
-                new Action[]{new BookmarkJumpAction(this, musicTable),
-                             new BookmarkJumpAction(this, videoTable),
-                             new BookmarkJumpAction(this, imageList),
-                             new BookmarkJumpAction(this, documentTable),
-                             new BookmarkJumpAction(this, programTable),
-                             new BookmarkJumpAction(this, otherTable)},
-                getFilteredListsInOrderOf(
-                                Category.AUDIO, Category.VIDEO,
-                                Category.IMAGE, Category.DOCUMENT,
-                                Category.PROGRAM, Category.OTHER),
-                new boolean[]{true,true,true,true,false,false});
-
-       setLayout(new VerticalLayout());
-        
-       add(shortcuts);
-        
-       add(musicTable);
-       add(videoTable);
-       add(imageList);
-       add(documentTable);
-       add(programTable);
-       add(otherTable);
-
-       this.setTransferHandler(transferHandler);
-    }
-    
-    private List<EventList<LocalFileItem>> getFilteredListsInOrderOf(Category... categories) {
-        List<EventList<LocalFileItem>> list = new ArrayList<EventList<LocalFileItem>>(categories.length);
-        for(Category category : categories) {
-            list.add(filterLists.get(category));
+    /**
+     * UnSelects other tables and lists when a table or list is selected
+     */
+    private class MultiTableMouseListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (!e.isPopupTrigger()) {
+                if(e.getComponent() instanceof JList)
+                    for (SharingFancyTablePanel table : tables.values()) {
+                        table.getTable().clearSelection();
+                    }
+                else {
+                    JTable selectedTable = (JTable) e.getComponent();
+                    for (SharingFancyTablePanel table : tables.values()) {
+                        if (table.getTable() != selectedTable) {
+                            table.getTable().clearSelection();
+                        }
+                    }
+                    imageList.getList().clearSelection();
+                }
+            }
         }
-        return list;
-    }
-    
-    public void setModel(EventList<LocalFileItem> eventList, LocalFileList fileList) {
-        //TODO: these need to be lazily created and stored somewhere, FileList?? so we don't keep recreating them
-        //		GlazedLists.multiMap would be perfect if they supported EventLists instead of Lists
-        createFilteredLists(eventList);
-        
-        musicTable.setModel(filterLists.get(Category.AUDIO), fileList);
-        videoTable.setModel(filterLists.get(Category.VIDEO), fileList);
-        imageList.setModel(filterLists.get(Category.IMAGE), fileList);
-        documentTable.setModel(filterLists.get(Category.DOCUMENT), fileList);
-        programTable.setModel(filterLists.get(Category.PROGRAM), fileList);
-        otherTable.setModel(filterLists.get(Category.OTHER), fileList);
-        
-        TableColumn tc = documentTable.getTable().getColumn(0);
-        tc.setCellRenderer(iconLabelRenderer);
-        
-        transferHandler.setModel(fileList);
-        
-        scrollPane.getViewport().setViewPosition(new Point(0, 0));
-        shortcuts.setModel(getFilteredListsInOrderOf(
-                Category.AUDIO, Category.VIDEO,
-                Category.IMAGE, Category.DOCUMENT,
-                Category.PROGRAM, Category.OTHER));
     }
     
     /**

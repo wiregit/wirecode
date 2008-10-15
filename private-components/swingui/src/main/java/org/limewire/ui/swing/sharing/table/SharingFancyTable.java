@@ -1,29 +1,30 @@
 package org.limewire.ui.swing.sharing.table;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
 import javax.swing.ListSelectionModel;
 
-import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
+import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
-import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 
-public class SharingFancyTable extends JXTable {
+public class SharingFancyTable extends MouseableTable {
 
+    private SharingTableModel sharingTableModel;
+    
     private TableColors tableColors;
     
     public SharingFancyTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
-        super(new SharingTableModel(sharedItems, fileList, tableFormat));
+
+        initialize(sharedItems, fileList, tableFormat);
         
         tableColors = new TableColors();
         
@@ -33,13 +34,22 @@ public class SharingFancyTable extends JXTable {
         setFillsViewportHeight(false);
         getTableHeader().setFocusable(false);
         getTableHeader().setReorderingAllowed(false);
-        setHighlighters(tableColors.getEvenHighLighter());
+        setHighlighters( new ColorHighlighter(HighlightPredicate.ALWAYS, tableColors.evenColor, tableColors.evenForeground, tableColors.selectionColor, tableColors.selectionForeground));        
+    }
+    
+    public LocalFileItem getFileItem(int row) {
+        return sharingTableModel.getFileItem(row);
+    }
+    
+    private void initialize(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
+        sharingTableModel = new SharingTableModel(sharedItems, fileList, tableFormat);
+        setModel(sharingTableModel);
         
         final TableDoubleClickHandler doubleClickHandler = new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
                 if( row >= 0 && row < getModel().getRowCount()) {
-                    LocalFileItem item = ((SharingTableModel) getModel()).getFileItem(row);
+                    LocalFileItem item = getFileItem(row);
                     if(PlayerUtils.isPlayableFile(item.getFile())) {
                         PlayerUtils.play(item.getFile());
                     } else {
@@ -48,52 +58,11 @@ public class SharingFancyTable extends JXTable {
                 }
             }
         };
-        
-        final SharingPopupHandler handler = new SharingPopupHandler(this, new SharingActionHandler());
-        
-        addMouseListener(new MouseAdapter() {
-            
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                maybeShowPopup(e);
-            }
 
-            @Override
-            public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-            
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if(e.getClickCount() == 1) {
-                    maybeShowPopup(e);
-                } else if(e.getClickCount() > 1) {
-                    int row = rowAtPoint(e.getPoint());
-                    doubleClickHandler.handleDoubleClick(row);
-                }
-            }
-
-            private void maybeShowPopup(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    int col = columnAtPoint(e.getPoint());
-                    int row = rowAtPoint(e.getPoint());
-                    if(row != getSelectedRow()) {
-                        setRowSelectionInterval(row, row);
-                    }
-                    if (row >= 0 && col >= 0) {
-                        handler.maybeShowPopup(
-                            e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-            }
-        });
-    }
-    
-    @Override
-    public boolean isCellEditable(int row, int column) {
-        // as long as an editor has been installed, assuming we want to use it
-        if(getColumnModel().getColumn(column).getCellEditor() != null)
-            return true;
-        return false;        
+        setDoubleClickHandler(doubleClickHandler);
+        
+        final SharingPopupHandler popupHandler = new SharingPopupHandler(this, new SharingActionHandler());
+        
+        setPopupHandler(popupHandler);
     }
 }

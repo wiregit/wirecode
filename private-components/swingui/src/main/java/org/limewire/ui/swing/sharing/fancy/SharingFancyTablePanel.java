@@ -1,10 +1,6 @@
 package org.limewire.ui.swing.sharing.fancy;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,11 +8,9 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
@@ -29,7 +23,6 @@ import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
 import org.limewire.ui.swing.sharing.table.CustomTableCellHeaderRenderer;
-import org.limewire.ui.swing.sharing.table.SharingFancyMultiButtonTableCellRendererEditor;
 import org.limewire.ui.swing.sharing.table.SharingFancyTable;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.MultiButtonTableCellRendererEditor;
@@ -43,9 +36,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.TableFormat;
 
 public class SharingFancyTablePanel extends JPanel implements ListEventListener<LocalFileItem> {
-    
-    @Resource
-    private Icon cancelIcon;
+
     @Resource
     private Color lineColor;
     @Resource
@@ -62,10 +53,6 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     private final TableFormat<LocalFileItem> tableFormat;
     
     private final ConfirmationUnshareButton unShareAllButton;
-    
-    FancyCellRenderer fancyRenderer;
-    MultiButtonTableCellRendererEditor editor;
-    MultiButtonTableCellRendererEditor renderer;
     
     private SharingRemoveAllAction removeAction;
     private EventList<LocalFileItem> currentEventList;
@@ -126,14 +113,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
             table = new SharingFancyTable(eventList, fileList, tableFormat);
             table.setTransferHandler(transferHandler);
             table.setSortable(false);
-            
-            TableMouseListener tableMouseListener = new TableMouseListener(table);
-            fancyRenderer = new FancyCellRenderer(tableMouseListener);
-            
-            editor = new SharingFancyMultiButtonTableCellRendererEditor(tableMouseListener);
-            editor.addActions(createActions());
-            renderer = new SharingFancyMultiButtonTableCellRendererEditor(tableMouseListener);
-            renderer.addActions(createActions());
+            table.setRowSelectionAllowed(true);
             table.setRowHeight(20);
             setRenderers();
         }
@@ -141,7 +121,9 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     }
     
     private void setRenderers() {
-        table.setDefaultRenderer(Object.class, fancyRenderer);
+        //create renders/editors
+        MultiButtonTableCellRendererEditor editor = new MultiButtonTableCellRendererEditor(createActions());
+        MultiButtonTableCellRendererEditor renderer = new MultiButtonTableCellRendererEditor(createActions());
         
         TableColumn tc = table.getColumn("");
         tc.setPreferredWidth(25);
@@ -152,7 +134,6 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         
         JTableHeader th = table.getTableHeader();
         th.setDefaultRenderer(new CustomTableCellHeaderRenderer());
-
     }
     
     public SharingFancyTable getTable() {
@@ -195,81 +176,9 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         });
     }
     
-    public class TableMouseListener implements MouseListener, MouseMotionListener {
-
-        private final JTable table;
-        private int mouseOverRow = -1;
-        
-        public TableMouseListener(JTable table) {
-            this.table = table;
-            
-            table.addMouseListener(this);
-            table.addMouseMotionListener(this);
-        }
-        
-        public int getMouseOverRow() {
-            return mouseOverRow;
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-            mouseOverRow = table.rowAtPoint(e.getPoint()); 
-            table.repaint();
-        }
-        
-        @Override
-        public void mouseExited(MouseEvent e) {
-            mouseOverRow = -1;
-            table.repaint();
-        }
-        
-        @Override
-        public void mouseClicked(MouseEvent e) {}
-        @Override
-        public void mouseEntered(MouseEvent e) {}
-        @Override
-        public void mousePressed(MouseEvent e) {}
-        @Override
-        public void mouseReleased(MouseEvent e) {}
-        @Override
-        public void mouseDragged(MouseEvent e) { }      
-    }
-    
-    private class FancyCellRenderer extends JLabel implements TableCellRenderer {
-
-        private final TableMouseListener tableListener;
-        
-        public FancyCellRenderer(TableMouseListener tableListener) {
-            this.tableListener = tableListener;
-            setOpaque(true);
-        }
-        
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-
-            if(row == tableListener.getMouseOverRow()) {
-                this.setBackground(Color.BLUE);
-                setForeground(Color.WHITE);
-            } else {
-                this.setBackground(Color.WHITE);
-                setForeground(Color.BLACK);
-            }
-            
-            if(value == null)
-                setText("");
-            else
-                setText(value.toString());
-            
-            return this;
-        }
-        
-    }
-    
     private List<Action> createActions() {
         List<Action> list = new ArrayList<Action>();
-        list.add(new SharingRemoveTableAction(table, cancelIcon));
+        list.add(new SharingRemoveTableAction(table));
         return list;
     }
-
 }

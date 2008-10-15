@@ -1,19 +1,21 @@
 package org.limewire.ui.swing.table;
 
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.Action;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+
+import net.miginfocom.swing.MigLayout;
+
+import org.limewire.ui.swing.sharing.components.UnshareButton;
 
 /**
  * Generic Renderer/Editor that allows for one or more buttons to 
@@ -31,17 +33,6 @@ import javax.swing.table.TableCellRenderer;
  *      }
  */
 public class MultiButtonTableCellRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
-
-    /**
-     *  The horizontal gap in the layout. 
-     */
-    private final static int HGAP = 5;
-    
-    /** 
-     * The vertical gap in the layout. 
-     */
-    private final static int VGAP = 1;
-
      
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 
@@ -50,17 +41,18 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
     }
     
     public MultiButtonTableCellRendererEditor(List<Action> actions) {
-        setLayout(new FlowLayout(FlowLayout.CENTER, HGAP, VGAP));
+        setLayout(new MigLayout("aligny 50%, alignx left, fillx, gapx 0, insets 0 0 0 0"));
      
         addActions(actions);
     }
     
     public void addActions(List<Action> actions) {
         for(Action action : actions) {
-            JButton button = new JButton(action);
-            button.setBorder(null);
+            UnshareButton button = new UnshareButton(action);
             button.setFocusable(false);
             button.setBorderPainted(false);
+            button.setContentAreaFilled(false);
+            button.setBorder(null);
                     
             add(button);
         }

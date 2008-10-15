@@ -14,11 +14,17 @@ public class UnshareButton extends JButton {
 
     @Resource
     Icon removeIcon;
+    @Resource
+    Icon pressedIcon;
+    @Resource
+    Icon rollOverIcon;
     
     public UnshareButton() {
         GuiUtils.assignResources(this); 
         
         setIcon(removeIcon);
+        setPressedIcon(pressedIcon);
+        setRolloverIcon(rollOverIcon);
     }
     
     public UnshareButton(Action action) {
@@ -27,5 +33,7 @@ public class UnshareButton extends JButton {
         GuiUtils.assignResources(this); 
         
         setIcon(removeIcon);
+        setPressedIcon(pressedIcon);
+        setRolloverIcon(rollOverIcon);
     }
 }

@@ -35,8 +35,6 @@ public class CustomTableCellHeaderRenderer extends DefaultTableCellRenderer {
         
         setBackground(backgroundColor);
         setForeground(foregroundColor);
-
-
     }
     
     @Override
@@ -51,5 +49,4 @@ public class CustomTableCellHeaderRenderer extends DefaultTableCellRenderer {
         
         return this;
     }
-
 }
