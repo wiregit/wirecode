@@ -213,7 +213,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 Roster roster = connection.getRoster();
                 for(String id : addedIds) {             
                     RosterEntry rosterEntry = roster.getEntry(id);
-                    UserImpl user = new UserImpl(id, rosterEntry);
+                    UserImpl user = new UserImpl(id, rosterEntry, configuration);
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " added");
                     }
@@ -232,7 +232,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     UserImpl user = users.get(id);
                     if(user == null) {
                         // should never happen ?
-                        user = new UserImpl(id, rosterEntry);
+                        user = new UserImpl(id, rosterEntry, configuration);
                         users.put(id, user);
                     } else {
                         user.setRosterEntry(rosterEntry);

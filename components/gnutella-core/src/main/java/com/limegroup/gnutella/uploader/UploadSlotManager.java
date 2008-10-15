@@ -53,7 +53,7 @@ public interface UploadSlotManager extends BandwidthTracker {
 	public float getAverageBandwidth();
 
 	/**
-	 * Cancels the request issued by this UploadSlotListener
+	 * Cancels the request issued by the upload slot user.
 	 */
 	public void cancelRequest(UploadSlotUser user);
 

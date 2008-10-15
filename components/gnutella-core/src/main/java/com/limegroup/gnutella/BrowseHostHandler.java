@@ -18,12 +18,13 @@ import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
-import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
@@ -137,14 +138,14 @@ public class BrowseHostHandler {
         this.pushEndpointFactory = pushEndpointFactory;
     }
 
-    public void browseHost(Address address, BrowseListener browseListener) {
+    public void browseHost(FriendPresence friendPresence, BrowseListener browseListener) {
         setState(STARTED);
         setState(CONNECTING);
         BlockingConnectObserver connectObserver = new BlockingConnectObserver();
-        socketsManager.connect(address, (int)EXPIRE_TIME, connectObserver);
+        socketsManager.connect(friendPresence.getPresenceAddress(), (int)EXPIRE_TIME, connectObserver);
         try {
             Socket socket = connectObserver.getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
-            browseHost(socket);
+            browseHost(socket, null);
             browseListener.browseFinished(true);
             return;
         } catch (IOException ie) {
@@ -220,7 +221,7 @@ public class BrowseHostHandler {
                 Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 DIRECT_CONNECT_TIME, type);
                 LOG.trace("Direct connect successful");
-                browseHost(socket);
+                browseHost(socket, null);
 
                 // browse was successful
                 return;
@@ -325,10 +326,10 @@ public class BrowseHostHandler {
         activityCallback.browseHostFailed(_guid);
     }
 
-    void browseHost(Socket socket) throws IOException, URISyntaxException, HttpException, InterruptedException {
+    void browseHost(Socket socket, FriendPresence friendPresence) throws IOException, URISyntaxException, HttpException, InterruptedException {
     	try {
             setState(EXCHANGING);
-            HttpResponse response = makeHTTPRequest(socket);
+            HttpResponse response = makeHTTPRequest(socket, friendPresence);
             validateResponse(response);
             readQueryRepliesFromStream(response);
         } finally {
@@ -337,9 +338,12 @@ public class BrowseHostHandler {
     	}
     }
 
-    private HttpResponse makeHTTPRequest(Socket socket) throws IOException, URISyntaxException, HttpException, InterruptedException {
+    private HttpResponse makeHTTPRequest(Socket socket, FriendPresence friendPresence) throws IOException, URISyntaxException, HttpException, InterruptedException {
         SocketWrappingHttpClient client = clientProvider.get();
         client.setSocket(socket);
+        String username = friendPresence.getFriend().getNetwork().getMyID();
+        String password = new String(friendPresence.getAuthToken());
+        client.setCredentials(new UsernamePasswordCredentials(username, password));
         // TODO
         // hardcoding to "http" should work;
         // socket has already been established

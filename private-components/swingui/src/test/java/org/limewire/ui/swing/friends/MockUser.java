@@ -6,6 +6,7 @@ import java.util.Map;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.core.api.friend.Network;
 
 public class MockUser implements User {
     private String id;
@@ -55,5 +56,17 @@ public class MockUser implements User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Network getNetwork() {
+        return new Network() {
+            public String getMyID() {
+                return "";
+            }
+
+            public String getNetworkName() {
+                return "mock-network";
+            }
+        };
     }
 }

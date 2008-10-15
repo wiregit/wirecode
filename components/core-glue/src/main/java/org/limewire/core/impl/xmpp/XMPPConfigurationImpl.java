@@ -69,4 +69,12 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     public XMPPErrorListener getErrorListener() {
         return errorListener;
     }
+
+    public String getMyID() {
+        return getUsername();
+    }
+
+    public String getNetworkName() {
+        return getServiceName();
+    }
 }

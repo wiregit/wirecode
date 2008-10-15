@@ -142,7 +142,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
-                        browseHostHandler.browseHost(socket);
+                        browseHostHandler.browseHost(socket, null);
                     } catch (IOException e) {
                         LOG.debug("error while push transfer", e);
                         browseHostHandler.failed();

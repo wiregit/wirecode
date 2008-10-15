@@ -40,6 +40,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
@@ -766,6 +767,10 @@ public class LibraryNavigator extends JXPanel {
 
         @Override
         public void setName(String name) {
+        }
+
+        public Network getNetwork() {
+            return null;
         }
     }
 }

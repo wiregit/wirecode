@@ -198,8 +198,6 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         List<FileDesc> list = new ArrayList<FileDesc>();
 
         for(FileDesc fd : fileDescs) {
-            if( fd == null)
-                continue;
             if(directory.equals(fd.getFile().getParentFile()))
                 list.add(fd);
         }

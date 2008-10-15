@@ -1,11 +1,12 @@
 package org.limewire.xmpp.api.client;
 
 import org.limewire.listener.EventListener;
+import org.limewire.core.api.friend.Network;
 
 /**
  * Allows the xmpp service user to provide configuration for xmpp login.
  */
-public interface XMPPConnectionConfiguration {
+public interface XMPPConnectionConfiguration extends Network {
     public boolean isDebugEnabled();
     public String getUsername();
     public void setUsername(String username);

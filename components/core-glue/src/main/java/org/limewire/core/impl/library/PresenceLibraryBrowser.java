@@ -10,7 +10,6 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.io.Address;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
@@ -72,10 +71,9 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
     }
 
     private void browse(final PresenceLibrary presenceLibrary, final FriendPresence friendPresence) {
-        Address address = friendPresence.getPresenceAddress();
         presenceLibrary.setState(LibraryState.LOADING);
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
-        browseFactory.createBrowse(address).start(new BrowseListener() {
+        browseFactory.createBrowse(friendPresence).start(new BrowseListener() {
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
