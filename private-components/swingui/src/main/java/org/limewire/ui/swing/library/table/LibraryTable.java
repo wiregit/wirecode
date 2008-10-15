@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.table;
 
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,5 +168,24 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             }
         }
         
+    }
+    
+    /**
+     * Ensures the selected row is visible.
+     */
+    public void ensureSelectionVisible() {
+        ensureRowVisible(getSelectedRow());
+    }
+    
+    /**
+     * Ensures the given row is visible.
+     */
+    public void ensureRowVisible(int row) {
+        if(row != -1) {
+            Rectangle cellRect = getCellRect(row, 0, false);
+            Rectangle visibleRect = getVisibleRect();
+            if( !visibleRect.intersects(cellRect) )
+                scrollRectToVisible(cellRect);
+        }
     }
 }

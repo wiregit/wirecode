@@ -163,6 +163,7 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
                 break;
             }
         }
+        table.ensureSelectionVisible();
     }
    
 }
