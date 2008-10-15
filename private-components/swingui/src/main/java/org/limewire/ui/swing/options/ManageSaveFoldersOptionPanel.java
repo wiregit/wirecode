@@ -3,7 +3,6 @@ package org.limewire.ui.swing.options;
 import java.awt.Color;
 
 import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -11,27 +10,18 @@ import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
+import org.limewire.core.api.Category;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
-    @Resource
-    private Icon audioIcon;
-    @Resource
-    private Icon videoIcon;
-    @Resource
-    private Icon imageIcon;
-    @Resource
-    private Icon documentIcon;
-    @Resource
-    private Icon programIcon;
-    @Resource
-    private Icon otherIcon;
-    
     private DisplayTextField audioTextField;
     private DisplayTextField videoTextField;
     private DisplayTextField imageTextField;
@@ -50,7 +40,10 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
     private JButton okButton;
     private JButton cancelButton;
     
-    public ManageSaveFoldersOptionPanel(Action okAction, CancelDialogAction cancelAction) {
+    @AssistedInject
+    public ManageSaveFoldersOptionPanel(CategoryIconManager categoryIconManager,
+            @Assisted Action okAction, @Assisted CancelDialogAction cancelAction) {
+        
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("gapy 10"));
@@ -77,29 +70,47 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
         
         add(new JLabel(I18n.tr("Choose where specific file types get saved")), "span, wrap");
         
-        add(new JLabel(I18n.tr("Audio"), audioIcon, SwingConstants.RIGHT), "wrap");
+        add(new JLabel(I18n.tr("Audio"), categoryIconManager.getIcon(Category.AUDIO),
+                SwingConstants.RIGHT), "wrap");
+        
         add(audioTextField, "gapleft 25, gap unrelated");
         add(audioBrowseButton, "alignx right, wrap");
         
-        add(new JLabel(I18n.tr("Video"), videoIcon, SwingConstants.RIGHT), "wrap");
+        
+        add(new JLabel(I18n.tr("Video"), categoryIconManager.getIcon(Category.VIDEO),
+                SwingConstants.RIGHT), "wrap");
+        
         add(videoTextField, "gapleft 25, gap unrelated");
         add(videoBrowseButton, "alignx right, wrap");
         
-        add(new JLabel(I18n.tr("Images"), imageIcon, SwingConstants.RIGHT), "wrap");
+        
+        add(new JLabel(I18n.tr("Images"), categoryIconManager.getIcon(Category.IMAGE),
+                SwingConstants.RIGHT), "wrap");
+        
         add(imageTextField, "gapleft 25, gap unrelated");
         add(imageBrowseButton, "alignx right, wrap");
         
-        add(new JLabel(I18n.tr("Documents"), documentIcon, SwingConstants.RIGHT), "wrap");
+        
+        add(new JLabel(I18n.tr("Documents"), categoryIconManager.getIcon(Category.DOCUMENT), 
+                SwingConstants.RIGHT), "wrap");
+        
         add(documentTextField, "gapleft 25, gap unrelated");
         add(documentBrowseButton, "alignx right, wrap");
         
-        add(new JLabel(I18n.tr("Programs"), programIcon, SwingConstants.RIGHT), "wrap");
+        
+        add(new JLabel(I18n.tr("Programs"), categoryIconManager.getIcon(Category.PROGRAM), 
+                SwingConstants.RIGHT), "wrap");
+        
         add(programTextField, "gapleft 25, gap unrelated");
         add(programBrowseButton, "alignx right, wrap");
         
-        add(new JLabel(I18n.tr("Other"), otherIcon, SwingConstants.RIGHT), "wrap");
+        
+        add(new JLabel(I18n.tr("Other"), categoryIconManager.getIcon(Category.OTHER),
+                SwingConstants.RIGHT), "wrap");
+        
         add(otherTextField, "gapleft 25, gap unrelated");
         add(otherBrowseButton, "alignx right, wrap");
+        
         
         add(defaultButton, "gaptop 10, push");
         add(okButton, "split 2, alignx right, gaptop 10");

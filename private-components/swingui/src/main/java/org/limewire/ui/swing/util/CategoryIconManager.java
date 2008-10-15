@@ -59,8 +59,12 @@ public class CategoryIconManager {
     @Resource
     private Icon largeOtherIcon;
 
+    public static CategoryIconManager createTestingCategoryIconManager() {
+        return new CategoryIconManager();
+    }
+    
     @Inject
-    public CategoryIconManager() {
+    CategoryIconManager() {
         this(Size.SMALL);
     }
     

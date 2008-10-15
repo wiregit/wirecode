@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -21,6 +22,7 @@ import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -32,13 +34,40 @@ import com.google.inject.Singleton;
 @Singleton
 public class FilesOptionPanel extends OptionPanel {
     
+    private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
+    
     private ManageExtensionsPanel manageExtensionsPanel;
     private SaveFoldersPanel saveFoldersPanel;
     private LimeWireStorePanel limeWireStorePanel;
     private ITunesPanel iTunesPanel;
     
+    // Somebody needs this for testing the options panel without limewire?
+    public static FilesOptionPanel createTestingFilesOptionPanel() {
+        return new FilesOptionPanel();
+    }
+        
+    
+    private FilesOptionPanel() {
+        this(new ManageSaveFoldersOptionPanelFactory() {
+
+            @Override
+            public ManageSaveFoldersOptionPanel create(Action okAction,
+                    CancelDialogAction cancelAction) {
+                
+                return new ManageSaveFoldersOptionPanel(
+                        CategoryIconManager.createTestingCategoryIconManager(),
+                        okAction, cancelAction);
+                
+            }
+            
+        });
+    }
+    
     @Inject
-    public FilesOptionPanel() {    
+    FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory) { 
+        
+        this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
         setOpaque(false);
@@ -143,7 +172,7 @@ public class FilesOptionPanel extends OptionPanel {
         public SaveFoldersPanel() {
             super(I18n.tr("Save Folders"));
             
-            saveFolderPanel = new ManageSaveFoldersOptionPanel(new OKDialogAction(), new CancelDialogAction());
+            saveFolderPanel = manageFoldersOptionPanelFactory.create(new OKDialogAction(), new CancelDialogAction());
             saveFolderPanel.setSize(new Dimension(400,500));
             
             configureButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this, saveFolderPanel, 

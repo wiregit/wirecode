@@ -206,7 +206,8 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
                 AppFrame appFrame = new AppFrame();
                 
                 OptionsDialog o = new OptionsDialog(appFrame, new LibraryOptionPanel(), new SearchOptionPanel(), new DownloadOptionPanel(), new SecurityOptionPanel(), new MiscOptionPanel(null), 
-                        new AdvancedOptionPanel(new FilesOptionPanel(), new ConnectionsOptionPanel(), new SystemOptionPanel(), 
+                        new AdvancedOptionPanel(FilesOptionPanel.createTestingFilesOptionPanel(),
+                                new ConnectionsOptionPanel(), new SystemOptionPanel(), 
                                 new ReallyAdvancedOptionPanel(new FirewallOptionPanel(), new ProxyOptionPanel(), new NetworkInterfaceOptionPanel(),
                                         new PerformanceOptionPanel(), new BitTorrentOptionPanel(), 
                                         new FilteringOptionPanel(), new SpamOptionPanel(null))));

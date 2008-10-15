@@ -118,7 +118,6 @@ public class FriendLibraries {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public Iterator<RemoteFileItem> iterator(SearchCategory category) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
         for(LockableStringTrie<List<RemoteFileItem>> library : libraries.values()) {
@@ -134,7 +133,6 @@ public class FriendLibraries {
         return new MultiIterator<RemoteFileItem>(iterators);
     }
 
-    @SuppressWarnings("unchecked")
     private Iterator<RemoteFileItem> iterator(final Iterator<List<RemoteFileItem>> iterator) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();        
         while(iterator.hasNext()) {
@@ -143,7 +141,6 @@ public class FriendLibraries {
         return new MultiIterator<RemoteFileItem>(iterators);
     }
 
-    @SuppressWarnings("unchecked")
     public Iterator<RemoteFileItem> iterator(String s, SearchCategory category) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
         for(LockableStringTrie<List<RemoteFileItem>> library : libraries.values()) {
