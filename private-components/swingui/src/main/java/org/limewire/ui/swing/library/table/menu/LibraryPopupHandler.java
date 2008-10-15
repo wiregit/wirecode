@@ -24,7 +24,7 @@ public class LibraryPopupHandler implements TablePopupHandler {
             ShareListManager shareListManager, List<SharingTarget> friendList) {
         this.table = table;
         this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, shareListManager, table, friendList);
-        this.multiSelectPopupMenu = new MyLibraryMultipleSelectionPopupMenu(category, libraryManager, shareListManager, table);
+        this.multiSelectPopupMenu = new MyLibraryMultipleSelectionPopupMenu(category, libraryManager, shareListManager, table, friendList);
 
     }
 

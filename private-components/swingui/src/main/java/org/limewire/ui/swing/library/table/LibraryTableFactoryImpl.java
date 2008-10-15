@@ -20,7 +20,6 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
@@ -31,6 +30,7 @@ import org.limewire.ui.swing.library.table.menu.LibraryPopupHandler;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -228,7 +228,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
     }
 
     @Override
-    @SwingEDTEvent
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {              
             addFriend(event.getSource());
@@ -238,20 +237,31 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
     }
 
     @EventSubscriber
-    @SwingEDTEvent
     public void handleSignoff(SignoffEvent event) {
-        friendList.clear();
+        SwingUtils.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                friendList.clear();
+            }
+        });
     }
     
-    private void removeFriend(Friend friend) {
-        System.err.println("remove "+ friend);
-        friendList.remove(new SharingTarget(friend));
+    private void removeFriend(final Friend friend) {
+        SwingUtils.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                friendList.remove(new SharingTarget(friend));
+            }
+        });
     }
 
-    private void addFriend(Friend friend) {
-        System.err.println("add "+ friend);
-        friendList.add(new SharingTarget(friend));
-        
+    private void addFriend(final Friend friend) {
+        SwingUtils.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                friendList.add(new SharingTarget(friend));
+            }
+        });
     }
 
 }
