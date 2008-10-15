@@ -61,4 +61,6 @@ public interface VisualSearchResult extends NavSelectable {
     public void setSimilarityParent(VisualSearchResult parent);
     
     public URN getURN();
+    
+    public String getMagnetLink();
 }

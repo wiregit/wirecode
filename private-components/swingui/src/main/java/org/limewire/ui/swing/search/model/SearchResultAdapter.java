@@ -216,4 +216,20 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     public URN getNavSelectionId() {
         return getUrn();
     }
+
+    @Override
+    public String getMagnetLink() {
+        
+        String sep = System.getProperty("line.separator");
+        StringBuilder bldr = new StringBuilder();
+        for(SearchResult result : getCoreSearchResults()) {
+            bldr.append(result.getMagnetURL()).append(sep);
+        }
+
+        if (bldr.length() > sep.length()) {
+            return bldr.substring(0, bldr.length() - sep.length());
+        }
+        
+        return null;
+    }
 }

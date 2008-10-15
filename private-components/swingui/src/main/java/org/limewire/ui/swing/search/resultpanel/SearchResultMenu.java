@@ -2,6 +2,8 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 
@@ -34,7 +36,7 @@ public class SearchResultMenu extends JPopupMenu {
             }
         });
 
-        add(new AbstractAction(tr("Mark as junk")) {
+        add(new AbstractAction(tr("Mark as spam")) {
             public void actionPerformed(ActionEvent e) {
                 vsr.setSpam(true);
             }
@@ -42,8 +44,8 @@ public class SearchResultMenu extends JPopupMenu {
 
         add(new AbstractAction(tr("Copy link to clipboard")) {
             public void actionPerformed(ActionEvent e) {
-                //TODO
-                throw new UnsupportedOperationException("Implement Me Properly!");
+                StringSelection sel = new StringSelection(vsr.getMagnetLink());
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(sel, sel);
             }
         });
 

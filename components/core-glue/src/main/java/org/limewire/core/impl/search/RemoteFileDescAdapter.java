@@ -25,6 +25,7 @@ import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
@@ -342,5 +343,11 @@ public class RemoteFileDescAdapter implements SearchResult {
     @Override
     public String getFileName() {
        return fileName;
+    }
+
+    @Override
+    public String getMagnetURL() {
+        MagnetOptions magnet = MagnetOptions.createMagnet(rfd, rfd.getInetSocketAddress(), rfd.getClientGUID());
+        return magnet.toExternalForm();
     }
 }

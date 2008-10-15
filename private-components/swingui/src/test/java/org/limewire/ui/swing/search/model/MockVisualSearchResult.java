@@ -174,4 +174,9 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public String getNavSelectionId() {
         return null;
     }
+
+    @Override
+    public String getMagnetLink() {
+        return null;
+    }
 }

@@ -54,4 +54,6 @@ public interface SearchResult {
     public boolean isSpam();
     
     String getFileName();
+    
+    String getMagnetURL();
 }

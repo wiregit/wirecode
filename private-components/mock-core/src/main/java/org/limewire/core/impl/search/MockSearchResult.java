@@ -29,6 +29,8 @@ public class MockSearchResult implements Cloneable, SearchResult {
     private long size;
 
     private boolean spam = false;
+    
+    private String magnetURL;
 
     public void addSource(String host) {
         sources.add(new MockRemoteHost(host));
@@ -169,5 +171,14 @@ public class MockSearchResult implements Cloneable, SearchResult {
         public String toString() {
             return urn;
         }
+    }
+
+    public void setMagnetURL(String magnet) {
+        this.magnetURL = magnet;
+    }
+    
+    @Override
+    public String getMagnetURL() {
+        return magnetURL;
     }
 }

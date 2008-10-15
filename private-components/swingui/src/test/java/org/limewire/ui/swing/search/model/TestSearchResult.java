@@ -115,6 +115,13 @@ public class TestSearchResult implements SearchResult {
     public String getFileName() {
         return fileName;
     }
+    
+    @Override
+    public String getMagnetURL() {
+        return null;
+    }
+
+
 
     private class TestURN implements URN {
         private String urn;
