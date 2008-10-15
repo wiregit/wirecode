@@ -26,14 +26,14 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
    
     private List<LocalFileItem> fileItems;
 
-    private LibraryManager libraryManager;
+    final private LibraryManager libraryManager;
 
-    private ShareListManager shareListManager;
+    final private ShareListManager shareListManager;
 
-    private JMenuItem gnutellaShareItem;
-    private JMenuItem gnutellaUnshareItem;
-    private JMenu friendShareSubMenu;
-    private JMenu friendUnshareSubMenu;
+    final private JMenuItem gnutellaShareItem;
+    final private JMenuItem gnutellaUnshareItem;
+    final private JMenu friendShareSubMenu;
+    final private JMenu friendUnshareSubMenu;
     
 
     private LibraryTable table;
@@ -46,6 +46,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         this.shareListManager = shareListManager;
         this.table = table;
         this.friendList = friendList;
+        
+        gnutellaShareItem = new JMenuItem(gnutellaShareAction);
+        gnutellaUnshareItem = new JMenuItem(gnutellaUnshareAction);
+        friendShareSubMenu = new JMenu(I18n.tr("Share with Friends"));
+        friendUnshareSubMenu = new JMenu(I18n.tr("Unshare with Friends"));
+        
         initialize(category);
     }
 
@@ -65,13 +71,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
        
     }
     
-    private void initialize(Category category){     
-        gnutellaShareItem = new JMenuItem(gnutellaShareAction);
-        gnutellaUnshareItem = new JMenuItem(gnutellaUnshareAction);
-
-        friendShareSubMenu = new JMenu(I18n.tr("Share with Friends"));
-        friendUnshareSubMenu = new JMenu(I18n.tr("Unshare with Friends"));
-        
+    private void initialize(Category category){             
         add(removeAction);
         add(deleteAction);
         add(new JSeparator());
@@ -83,14 +83,25 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
     
     }
 
-
+    private LocalFileItem[] createFileItemArray(){
+        return fileItems.toArray(new LocalFileItem[fileItems.size()]);
+    }
+    
 
     private Action removeAction = new AbstractAction(I18n.tr("Remove from library")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            for (LocalFileItem fileItem : fileItems) {
-                libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
-            }
+            final LocalFileItem[] fileItemArray = createFileItemArray();
+
+            BackgroundExecutorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    for (LocalFileItem fileItem : fileItemArray) {
+                        libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
+                    }
+
+                }
+            });
         }
     };
 
@@ -98,21 +109,32 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO send to trash, instead of deleting
-            for (LocalFileItem fileItem : fileItems) {
-                FileUtils.forceDelete(fileItem.getFile());
-            }
-        }
+            final LocalFileItem[] fileItemArray = createFileItemArray();
 
+            BackgroundExecutorService.schedule(new Runnable() {
+                
+                @Override
+                public void run() {
+                    for (LocalFileItem fileItem : fileItemArray) {
+                        // TODO send to trash, instead of deleting
+                        FileUtils.forceDelete(fileItem.getFile());
+                    }
+                }
+                
+            });
+        }
     };
     
+
    private Action gnutellaUnshareAction = new AbstractAction(I18n.tr("Unshare with LimeWire Network")) {
         @Override
         public void actionPerformed(ActionEvent e) {
+            final LocalFileItem[] fileItemArray = createFileItemArray();
+            
             BackgroundExecutorService.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    for (LocalFileItem fileItem : fileItems) {
+                    for (LocalFileItem fileItem : fileItemArray) {
                         shareListManager.getGnutellaShareList().removeFile(fileItem.getFile());
                     }
                     SwingUtils.invokeLater(new Runnable() {
@@ -129,10 +151,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
     private Action gnutellaShareAction = new AbstractAction(I18n.tr("Share with LimeWire Network")) {
         @Override
         public void actionPerformed(ActionEvent e) {
+            final LocalFileItem[] fileItemArray = createFileItemArray();
+            
             BackgroundExecutorService.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    for (LocalFileItem fileItem : fileItems) {
+                    for (LocalFileItem fileItem : fileItemArray) {
                         shareListManager.getGnutellaShareList().addFile(fileItem.getFile());
                     }
                     SwingUtils.invokeLater(new Runnable() {
@@ -154,10 +178,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         }
         @Override
         public void actionPerformed(ActionEvent e) {
+            final LocalFileItem[] fileItemArray = createFileItemArray();
+            
             BackgroundExecutorService.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    for (LocalFileItem fileItem : fileItems) {
+                    for (LocalFileItem fileItem : fileItemArray) {
                         shareListManager.getFriendShareList(friend).removeFile(fileItem.getFile());
                     }
                     SwingUtils.invokeLater(new Runnable() {
@@ -179,10 +205,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         }
         @Override
         public void actionPerformed(ActionEvent e) {
+            final LocalFileItem[] fileItemArray = createFileItemArray();
+            
             BackgroundExecutorService.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    for (LocalFileItem fileItem : fileItems) {
+                    for (LocalFileItem fileItem : fileItemArray) {
                         shareListManager.getFriendShareList(friend).addFile(fileItem.getFile());
                     }
                     SwingUtils.invokeLater(new Runnable() {
