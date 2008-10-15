@@ -109,6 +109,7 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
     }
     
     public void dispose() {
+        table.dispose();
         ((EventTableModel)table.getModel()).dispose();
         if(sharePanel != null){
             sharePanel.dispose();
@@ -124,7 +125,7 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
 
         @Override
         public void handleDoubleClick(int row) {
-            File file = ((LocalFileItem)model.getFileItem(row)).getFile();
+            File file = model.getFileItem(row).getFile();
             switch (model.getFileItem(row).getCategory()){
             case AUDIO:
                 if (PlayerUtils.isPlayableFile(file)){

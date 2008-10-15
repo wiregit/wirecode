@@ -78,6 +78,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         hideColumns();        
     }
     
+    public void dispose() {
+        ((EventSelectionModel)getSelectionModel()).dispose();
+    }
+    
     @SuppressWarnings("unchecked")
     public LibraryTableModel<T> getLibraryTableModel(){
         return (LibraryTableModel<T>)getModel();
