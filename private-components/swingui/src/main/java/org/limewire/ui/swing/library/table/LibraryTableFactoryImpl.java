@@ -26,7 +26,7 @@ import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
-import org.limewire.ui.swing.library.table.menu.LibraryPopupHandler;
+import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.IconManager;
@@ -104,7 +104,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
         } else {//Local            
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
-            libTable.setPopupHandler(new LibraryPopupHandler((LibraryTable<LocalFileItem>)libTable, category, libraryManager, shareListManager, friendList));
+            libTable.setPopupHandler(new MyLibraryPopupHandler((LibraryTable<LocalFileItem>)libTable, category, libraryManager, shareListManager, friendList));
         }
         
             libTable.setDropMode(DropMode.ON);

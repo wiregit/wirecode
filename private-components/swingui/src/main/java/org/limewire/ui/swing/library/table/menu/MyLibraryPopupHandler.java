@@ -12,7 +12,7 @@ import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
-public class LibraryPopupHandler implements TablePopupHandler {
+public class MyLibraryPopupHandler implements TablePopupHandler {
     private int popupRow = -1;
 
     private LibraryTable<LocalFileItem> table;
@@ -20,7 +20,7 @@ public class LibraryPopupHandler implements TablePopupHandler {
     private MyLibraryPopupMenu popupMenu;
     private MyLibraryMultipleSelectionPopupMenu multiSelectPopupMenu;
 
-    public LibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
+    public MyLibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
             ShareListManager shareListManager, List<SharingTarget> friendList) {
         this.table = table;
         this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, shareListManager, table, friendList);
