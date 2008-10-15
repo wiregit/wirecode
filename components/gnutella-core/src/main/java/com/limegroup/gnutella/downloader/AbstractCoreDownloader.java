@@ -112,19 +112,25 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	        saveDirectory = SharingSettings.getSaveDirectory(fileName);
 	    }
 	    
+	    // Forcibly create the save directory, if it doesn't exist.
+	    if(!saveDirectory.exists()) {
+	        saveDirectory.mkdirs();
+	    }
+	    
 	    try {
 	        fileName = CommonUtils.convertFileName(saveDirectory, fileName);
 	    }
 	    catch (IOException ie) {
+	        // if not a directory, give precedence to error messages below
 	        if (saveDirectory.isDirectory()) {
 	            throw new SaveLocationException(LocationCode.PATH_NAME_TOO_LONG, saveDirectory);
 	        }
-	        // if not a directory, give precedence to error messages below
 	    }
 	    
 	    if (!saveDirectory.isDirectory()) {
-	        if (saveDirectory.exists())
+	        if (saveDirectory.exists()) {
 	            throw new SaveLocationException(LocationCode.NOT_A_DIRECTORY, saveDirectory);
+	        }
 	        throw new SaveLocationException(LocationCode.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
 	    }
 	    
