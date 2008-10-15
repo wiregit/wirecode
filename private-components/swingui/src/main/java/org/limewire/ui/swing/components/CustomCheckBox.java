@@ -28,6 +28,9 @@ public class CustomCheckBox extends JCheckBox{
         
         Graphics2D g2 = (Graphics2D) g;
         
+        // get original antialiasing value for reset
+        Object origAntiAliasHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         String label = this.getText();
@@ -52,7 +55,9 @@ public class CustomCheckBox extends JCheckBox{
             g2.drawLine(3,top + 3, 9, top + 9);
             g2.drawLine(9,top + 3, 3, top + 9);
         }
-             
+       
+        // reset antialiasing propery
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }
 
 }

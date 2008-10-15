@@ -92,18 +92,25 @@ public class PromptTextField extends JTextField implements FocusListener {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;        
+        Graphics2D g2 = (Graphics2D) g;
+        
+        // get original antialiasing value for reset
+        Object origAntiAliasHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);        
         paintTextArea(g2);        
         super.paintComponent(g);
         paintPrompt(g2);
+        
+        // reset antialiasing propery
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }
     
     protected void paintTextArea(Graphics2D g2) {
         g2.setColor(Color.WHITE);
-        g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());  
+        g2.fillRoundRect(0, 1, getWidth()-1, getHeight()-1, 10, getHeight());  
         g2.setColor(new Color(0,0,0,92));        
-        g2.drawRoundRect(0, 0, this.getWidth()-1, this.getHeight()-1, 10, this.getHeight());     
+        g2.drawRoundRect(0, 1, this.getWidth()-1, this.getHeight()-1, 10, this.getHeight());     
     }
     
     protected void paintPrompt(Graphics2D g2) {

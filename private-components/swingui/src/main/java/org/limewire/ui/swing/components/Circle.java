@@ -32,6 +32,9 @@ public class Circle extends JComponent {
 
         Color oldColor = g2.getColor();
         
+        // get original antialiasing value for reset
+        Object origAntiAliasHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -50,5 +53,8 @@ public class Circle extends JComponent {
         g2.fillOval(x, y, diameter, diameter);
         
         g2.setColor(oldColor);
+
+        // reset antialiasing propery
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }    
 }

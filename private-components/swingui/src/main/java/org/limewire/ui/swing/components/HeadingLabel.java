@@ -22,6 +22,9 @@ public class HeadingLabel extends JLabel {
         
         Graphics2D g2 = (Graphics2D) g;
         
+        // get original antialiasing value for reset
+        Object origAntiAliasHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         String label = this.getText();
@@ -33,6 +36,9 @@ public class HeadingLabel extends JLabel {
         g2.drawString(label, 1, (int) labelRect.getHeight()+1 -3);
         g2.setColor(Color.WHITE);
         g2.drawString(label, 0, (int) labelRect.getHeight() -3);
+        
+        // reset antialiasing propery
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }
 
 }

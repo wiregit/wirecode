@@ -16,6 +16,9 @@ abstract class AbstractButtonPainter extends AbstractPainter<JXButton> {
     protected void doPaint(Graphics2D g, JXButton button, int width, int height) {
         setButtonColors(button, colors);
         
+        // get original antialiasing value for reset
+        Object origAntiAliasHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        
         //turn on antialiasing
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);    
         
@@ -30,6 +33,9 @@ abstract class AbstractButtonPainter extends AbstractPainter<JXButton> {
         // draw the highlight
         g.setPaint(new GradientPaint(0,1, colors.bevelTop, 0,height-3, colors.bevelBottom, false));
         g.drawRoundRect(1, 1, width-3, height-3, colors.arcWidth, colors.arcHeight);
+        
+        // reset antialiasing propery
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 
     }
     
     protected abstract void setButtonColors(JXButton button, ButtonColors colors);
