@@ -38,7 +38,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         setStripesPainted(true);
         setColumnControlVisible(true);
         setShowHorizontalLines(false);
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
         setFillsViewportHeight(true);
         setDragEnabled(true);
@@ -72,6 +72,9 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         hideColumns();        
     }
     
+    public LibraryTableModel getLibraryTableModel(){
+        return (LibraryTableModel)getModel();
+    }
     //TODO: this is quite brittle.  only works if column indexes are in descending order - need to do it a different way
     protected void hideColumns(){
         int[] hiddenColumns = format.getDefaultHiddenColums();

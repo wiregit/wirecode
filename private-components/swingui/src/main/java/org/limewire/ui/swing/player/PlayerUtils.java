@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Locale;
 
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 //TODO:  this is not the best way to handle player access but it gets it working for now.
@@ -27,5 +28,21 @@ public class PlayerUtils {
 
     public static void pause() {
         player.pause();
+    }
+    
+    /**Plays file internally if playable.  Launches native player otherwise.
+     * 
+     * @param file
+     * @return true if file is played internally, false if played in native player
+     */
+    public static boolean playOrLaunch(File file) {
+        if (isPlayableFile(file)) {
+            play(file);
+            return true;
+        }
+
+        NativeLaunchUtils.launchFile(file);
+        return false;
+
     }
 }

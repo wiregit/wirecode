@@ -57,7 +57,7 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (file == null) {
-                    throw new IllegalStateException("Can not play null file");
+                    //do nothing
                 } else if (PlayerUtils.isPlayableFile(file)){
                     if(player.isPlaying(file)){
                         player.pause();
@@ -93,7 +93,11 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
     }
     
     private File update(Object value){
-        if(value instanceof LocalFileItem){
+        if(value == null){
+            playButton.setSelected(false);
+            playButton.setVisible(false);
+            return null;
+        } else if(value instanceof LocalFileItem){
             File file = ((LocalFileItem)value).getFile();
             update(file);
             return file;

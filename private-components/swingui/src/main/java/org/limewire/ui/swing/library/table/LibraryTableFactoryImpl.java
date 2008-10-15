@@ -10,6 +10,7 @@ import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
@@ -17,12 +18,21 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.RegisteringEventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
+import org.limewire.ui.swing.library.table.menu.LibraryPopupHandler;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.xmpp.api.client.User;
 
 import ca.odell.glazedlists.EventList;
 
@@ -30,12 +40,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class LibraryTableFactoryImpl implements LibraryTableFactory{
+public class LibraryTableFactoryImpl implements LibraryTableFactory, RegisteringEventListener<RosterEvent>{
 
     private IconManager iconManager;
     private LibraryManager libraryManager;
     private ShareListManager shareListManager;
     private AudioPlayer player;
+    
+    //only accessed on EDT
+    private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager, LibraryManager libraryManager, 
@@ -44,6 +57,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory{
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.player = player;
+        EventAnnotationProcessor.subscribe(this);
     }
     
     /**
@@ -89,6 +103,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory{
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
         } else {//Local            
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
+            libTable.setPopupHandler(new LibraryPopupHandler(libTable, category, libraryManager, shareListManager, friendList));
         }
         
             libTable.setDropMode(DropMode.ON);
@@ -204,6 +219,39 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory{
             }
             return new RemoteFileTransferable(files);
         }
+    }
+
+    @Inject
+    @Override
+    public void register(ListenerSupport<RosterEvent> listenerSupport) {
+        listenerSupport.addListener(this);
+    }
+
+    @Override
+    @SwingEDTEvent
+    public void handleEvent(RosterEvent event) {
+        if(event.getType().equals(User.EventType.USER_ADDED)) {              
+            addFriend(event.getSource());
+        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+            removeFriend(event.getSource());
+        }
+    }
+
+    @EventSubscriber
+    @SwingEDTEvent
+    public void handleSignoff(SignoffEvent event) {
+        friendList.clear();
+    }
+    
+    private void removeFriend(Friend friend) {
+        System.err.println("remove "+ friend);
+        friendList.remove(new SharingTarget(friend));
+    }
+
+    private void addFriend(Friend friend) {
+        System.err.println("add "+ friend);
+        friendList.add(new SharingTarget(friend));
+        
     }
 
 }
