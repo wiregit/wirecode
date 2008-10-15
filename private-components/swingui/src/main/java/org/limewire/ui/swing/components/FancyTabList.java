@@ -104,6 +104,10 @@ public class FancyTabList extends JXPanel {
      * Returns the tabs that *should* be visible, based on the currently visible
      * tabs, and the currently selected tab.  This keeps state and assumes the
      * tabs it returns will become visible.
+     * 
+     * The goal is to shift the minimum amount of distance possible, while
+     * still keeping the selected tab in view.  If there's no selected tab,
+     * this bumps everything to the left one.
      */
     private List<FancyTab> getPendingVisibleTabs() {
         List<FancyTab> vizTabs;
@@ -111,12 +115,18 @@ public class FancyTabList extends JXPanel {
             vizStartIdx = 0;
             vizTabs = tabs;
         } else {        
-            FancyTab selectedTab = getSelectedTab();
+            // Bump the start down from where it previously was
+            // if there's now more room to display more tabs,
+            // so that we display as many tabs as possible.
             if (tabs.size() - vizStartIdx < maxVisibleTabs) {
                 vizStartIdx = tabs.size() - maxVisibleTabs;
             }
             vizTabs = tabs.subList(vizStartIdx, vizStartIdx + maxVisibleTabs);
-            if (!vizTabs.contains(selectedTab)) {
+            
+            // If we had a selection, make sure that we shift in the
+            // appropriate distance to keep that selection in view.
+            FancyTab selectedTab = getSelectedTab();
+            if (selectedTab != null && !vizTabs.contains(selectedTab)) {
                 int selIdx = tabs.indexOf(selectedTab);
                 if (vizStartIdx > selIdx) { // We have to shift left
                     vizStartIdx = selIdx;
