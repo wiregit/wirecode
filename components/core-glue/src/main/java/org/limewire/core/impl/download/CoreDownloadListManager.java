@@ -1,5 +1,6 @@
 package org.limewire.core.impl.download;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,7 +14,6 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -55,7 +55,10 @@ import com.limegroup.gnutella.net.address.FirewalledAddress;
 @Singleton
 public class CoreDownloadListManager implements DownloadListManager {
     
+    private static final String DOWNLOAD_ITEM = "limewire.download.glueItem";
+    
 	private final EventList<DownloadItem> downloadItems;
+	private EventList<DownloadItem> swingThreadDownloadItems;
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
 	private final QueueTimeCalculator queueTimeCalculator;
@@ -96,7 +99,6 @@ public class CoreDownloadListManager implements DownloadListManager {
                 if (item instanceof CoreDownloadItem)
                     ((CoreDownloadItem) item).fireDataChanged();
             }
-
         } finally {
             downloadItems.getReadWriteLock().writeLock().unlock();
         }
@@ -105,6 +107,15 @@ public class CoreDownloadListManager implements DownloadListManager {
 	@Override
 	public EventList<DownloadItem> getDownloads() {
 		return downloadItems;
+	}
+	
+	@Override
+	public EventList<DownloadItem> getSwingThreadSafeDownloads() {
+	    assert EventQueue.isDispatchThread();
+	    if(swingThreadDownloadItems == null) {
+	        swingThreadDownloadItems = GlazedListsFactory.swingThreadProxyEventList(downloadItems);
+	    }
+	    return swingThreadDownloadItems;
 	}
 
 	@Override
@@ -126,7 +137,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         return createDownloader(files, alts, queryGUID, saveDir, fileName, overwrite, category);
 	}
 	
-	private CoreDownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
+	private DownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
             GUID queryGuid, File saveDir, String fileName, boolean overwrite, Category category)
             throws SaveLocationException {
 
@@ -141,10 +152,10 @@ public class CoreDownloadListManager implements DownloadListManager {
             }
        // }
 
-        Downloader downloader = downloadManager.download(files, alts, queryGuid, overwrite,
-                saveDir, fileName);
-
-        return new CoreDownloadItem(downloader, queueTimeCalculator, true);
+        Downloader downloader = downloadManager.download(files, alts, queryGuid, overwrite, saveDir, fileName);
+        // This should have been funneled through our addDownload callback method, which
+        // should have set the CoreDownloadItem.
+        return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
     }
 
     @Override
@@ -244,8 +255,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     private static class CoreDownloadListener implements DownloadListener {
 	    
-	    private List<DownloadItem> list;
-	    private QueueTimeCalculator queueTimeCalculator;
+	    private final List<DownloadItem> list;
+	    private final QueueTimeCalculator queueTimeCalculator;
 
         public CoreDownloadListener(List<DownloadItem> list, QueueTimeCalculator queueTimeCalculator){
 	        this.list = list;
@@ -253,17 +264,18 @@ public class CoreDownloadListManager implements DownloadListManager {
 	    }
 
         @Override
-        public void downloadAdded(DownloadItem downloadItem) {
-            //TODO better way of doing this
-            ((CoreDownloadItem) downloadItem).setQueueTimeCalculator(queueTimeCalculator);
-            list.add(downloadItem);
+        public void downloadAdded(Downloader downloader) {
+            DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator);
+            downloader.setAttribute(DOWNLOAD_ITEM, item, false);
+            list.add(item);
         }
 
         @Override
-        public void downloadRemoved(DownloadItem downloadItem) {
+        public void downloadRemoved(Downloader downloader) {
+            DownloadItem item = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
             //don't automatically remove finished downloads or downloads in error states
-            if (downloadItem.getState() != DownloadState.DONE && downloadItem.getState() != DownloadState.ERROR) {
-                list.remove(downloadItem);
+            if (item.getState() != DownloadState.DONE && item.getState() != DownloadState.ERROR) {
+                list.remove(item);
             }
         }
 

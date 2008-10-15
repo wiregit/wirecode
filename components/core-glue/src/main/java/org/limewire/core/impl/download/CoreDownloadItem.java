@@ -14,6 +14,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
@@ -22,47 +23,26 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 
-public class CoreDownloadItem implements DownloadItem {
+class CoreDownloadItem implements DownloadItem {
    
-    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
-    private Downloader downloader;
+    private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
+    private final Downloader downloader;
     private volatile int hashCode = 0;
-    private boolean useCachedSize;
     private volatile long cachedSize;
     private volatile boolean cancelled = false;
-    /**
-     * size in bytes.  FINISHING state is only shown for files greater than this size.
-     */
-    //set to 0 to show FINISHING state regardless of size
-    private final long finishingThreshold = 0;
-    private QueueTimeCalculator queueTimeCalculator;
-/**
- * 
- * Constructs CoreDownloadItem with null QueueTimeCalculator and cached size.  Cached size requires calling fireDataChanged().
- */
-    public CoreDownloadItem(Downloader downloader) {
-        this(downloader, null);
-    }
-/**
- * 
- * Constructs CoreDownloadItem with null QueueTimeCalculator and cached size.  Cached size requires calling fireDataChanged().
- */
-    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator) {
-        this(downloader, queueTimeCalculator, true);
-    }
 
     /**
-     * 
-     * @param downloader
-     * @param queueTimeCalculator
-     * @param useCachedSize Whether or not to cache the value returned by
-     *        getCurrentSize(). If true, value is updated when fireDataChanged()
-     *        is called.
+     * size in bytes. FINISHING state is only shown for files greater than this
+     * size.
      */
-    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator, boolean useCachedSize) {
+    // set to 0 to show FINISHING state regardless of size
+    private final long finishingThreshold = 0;
+
+    private final QueueTimeCalculator queueTimeCalculator;
+
+    public CoreDownloadItem(Downloader downloader, QueueTimeCalculator queueTimeCalculator) {
         this.downloader = downloader;
         this.queueTimeCalculator = queueTimeCalculator;
-        this.useCachedSize = useCachedSize;
         
         downloader.addListener(new EventListener<DownloadStatusEvent>() {
             @Override
@@ -70,7 +50,7 @@ public class CoreDownloadItem implements DownloadItem {
                 // broadcast the status has changed
                 fireDataChanged();
                 if (event.getType() == DownloadStatus.ABORTED) {
-                  //attempt to delete ABORTED file
+                    //attempt to delete ABORTED file
                     File file = CoreDownloadItem.this.downloader.getFile();
                     if (file != null) {
                         FileUtils.forceDelete(file);
@@ -91,7 +71,7 @@ public class CoreDownloadItem implements DownloadItem {
     }
     
     @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener){
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }
     
@@ -122,11 +102,9 @@ public class CoreDownloadItem implements DownloadItem {
     public long getCurrentSize() {
         if (getState() == DownloadState.DONE) {
             return getTotalSize();
-        } else if (useCachedSize) {
+        } else {
             return cachedSize;
         }
-        
-        return downloader.getAmountRead();
 
     }
 
@@ -315,11 +293,6 @@ public class CoreDownloadItem implements DownloadItem {
     @Override
     public int getLocalQueuePriority() {
         return downloader.getInactivePriority();
-    }
-
-  
-    public void setQueueTimeCalculator(QueueTimeCalculator queueTimeCalculator) {
-        this.queueTimeCalculator = queueTimeCalculator;
     }
 
     @Override

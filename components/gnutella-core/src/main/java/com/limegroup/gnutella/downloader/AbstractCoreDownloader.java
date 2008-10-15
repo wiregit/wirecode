@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
@@ -36,7 +37,7 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	 * may be used by GUI, to keep some additional information about
 	 * the download.
 	 */
-	private Map<String, Attribute> attributes = new HashMap<String, Attribute>();
+	private Map<String, Attribute> attributes = new ConcurrentHashMap<String, Attribute>();
 	
 	/**
 	 * The save file this download should be saved too.

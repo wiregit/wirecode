@@ -1,7 +1,7 @@
 package org.limewire.core.impl.download;
 
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -14,17 +14,16 @@ import ca.odell.glazedlists.matchers.Matcher;
 /**
  * calculates
  */
-public class QueueTimeCalculator {
+class QueueTimeCalculator {
     
     /**
      * List of all items whose DownloadState is DOWNLOADING
      */
-    private EventList<DownloadItem> downloadingList;
+    private final EventList<DownloadItem> downloadingList;
 
     public QueueTimeCalculator(EventList<DownloadItem> downloadItems) {
-       
-
-        downloadingList = GlazedListsFactory.filterList(downloadItems, new DownloadStateMatcher(
+        EventList<DownloadItem> list =
+            GlazedListsFactory.filterList(downloadItems, new DownloadStateMatcher(
                 DownloadState.DOWNLOADING));
 
         Comparator<DownloadItem> dlComparator = new Comparator<DownloadItem>() {
@@ -34,23 +33,21 @@ public class QueueTimeCalculator {
             }
         };
 
-        downloadingList = GlazedListsFactory.sortedList(downloadingList, dlComparator);
+        downloadingList = GlazedListsFactory.sortedList(list, dlComparator);
 
     }
 
     public long getRemainingQueueTime(DownloadItem queueItem) {
-
         downloadingList.getReadWriteLock().readLock().lock();
-        
-        if(queueItem.getState() != DownloadState.LOCAL_QUEUED){
-            return DownloadItem.UNKNOWN_TIME;
-        }
-        
-        int priority = queueItem.getLocalQueuePriority();
-        //top priority is 1 (but may briefly be 0 when resuming)
-        int index = priority - 1;
-        
-        try {            
+        try {
+            if (queueItem.getState() != DownloadState.LOCAL_QUEUED) {
+                return DownloadItem.UNKNOWN_TIME;
+            }
+
+            int priority = queueItem.getLocalQueuePriority();
+            // top priority is 1 (but may briefly be 0 when resuming)
+            int index = priority - 1;
+
             if (index >= downloadingList.size() || index < 0) {
                 return DownloadItem.UNKNOWN_TIME;
             }
@@ -61,27 +58,20 @@ public class QueueTimeCalculator {
     }
     
     private static class DownloadStateMatcher implements Matcher<DownloadItem> {
+        private final Set<DownloadState> downloadStates;
 
-        
-        private Set<DownloadState> downloadStates = new HashSet<DownloadState>();
-
-        
-        public DownloadStateMatcher(DownloadState... states) {
-            for (DownloadState state : states) {
-                downloadStates.add(state);
-            }
+        public DownloadStateMatcher(DownloadState first, DownloadState... rest) {
+            downloadStates = EnumSet.of(first, rest);
         }
 
-        
         @Override
         public boolean matches(DownloadItem item) {
-            if (item == null)
+            if (item == null) {
                 return false;
-
-            return downloadStates.contains(item.getState());
+            } else {
+                return downloadStates.contains(item.getState());
+            }
         }
-
-        
 
     }
 

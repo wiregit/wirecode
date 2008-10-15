@@ -81,29 +81,6 @@ public class CategoryDownloadPanel extends JPanel {
 		
 		updateStriping();
 	}
-	
-//	private void addListListener(){
-//	    list.addListEventListener(new ListEventListener<DownloadItem>() {
-//            @Override
-//            public void listChanged(ListEvent<DownloadItem> listChanges) {
-//                SwingUtils.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if (isVisible()) {
-//                            for (int i = 0; i < titles.size() && i < tables.size(); i++) {
-//                                boolean isVisible = tables.get(i).getRowCount() > 0;
-//                                titles.get(i).setVisible(isVisible);
-//                            }
-//                            // TODO: should update striping when necessary. this
-//                            // currently fires when any download item is updated
-//                            updateStriping();
-//                        }
-//                    }
-//                });
-//
-//            }
-//        });
-//	}
 
 	/**
 	 * Creates a DownloadTable and adds it to a collapsible pane with the title 
@@ -113,58 +90,19 @@ public class CategoryDownloadPanel extends JPanel {
 	 * @param state
 	 */
 	private void addTable(EventList<DownloadItem> list, String title,
-			DownloadState... states) {
+			DownloadState first, DownloadState... rest) {
 		final JXCollapsiblePane collapsePane = new JXCollapsiblePane();
 		collapsePane.setLayout(new BorderLayout());
-		EventList<DownloadItem> filterList = GlazedListsFactory.filterList(list, new DownloadStateMatcher(states));
+		EventList<DownloadItem> filterList = GlazedListsFactory.filterList(list, new DownloadStateMatcher(first, rest));
 		
 		final DownloadTable table = downloadTableFactory.create(filterList);
 		tables.add(table);
 		table.addMouseListener(new MultiTableMouseListener());
 	
 		collapsePane.add(table, BorderLayout.CENTER);
-
-		
-	    // Heading code, temporarily removed for LWC-1571
-		
-		// final JPanel titlePanel = new JPanel(new VerticalLayout());
-		// JLabel titleLabel = new JLabel(title);
-		// Set title labels to collapse their tables
-		// titleLabel.addMouseListener(getClickListener(collapsePane
-		// 		.getActionMap().get(JXCollapsiblePane.TOGGLE_ACTION)));
-		// titlePanel.add(titleLabel);
-		// titlePanel.add(new JSeparator());
-		// titles.add(titlePanel);
-		// tablePanel.add(titlePanel);
 		
 		tablePanel.add(collapsePane);		
 	}
-
-//	/**
-//	 * Converts actionListener to mouse listener with hand cursor on mouseover.
-//	 */
-//	private MouseListener getClickListener(final ActionListener actionListener) {
-//		return new MouseAdapter() {
-//			@Override
-//			public void mouseEntered(MouseEvent e) {
-//				JComponent comp = (JComponent) e.getComponent();
-//				comp.getTopLevelAncestor().setCursor(
-//						Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//			}
-//
-//			@Override
-//			public void mouseExited(MouseEvent e) {
-//				JComponent comp = (JComponent) e.getComponent();
-//				comp.getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
-//			}
-//
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				actionListener.actionPerformed(new ActionEvent(
-//						e.getComponent(), 0, null));
-//			}
-//		};
-//	}
 	
     /**
      * deselects other tables when a table is selected

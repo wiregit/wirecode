@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 import org.limewire.core.api.download.DownloadItem;
@@ -10,25 +10,18 @@ import ca.odell.glazedlists.matchers.Matcher;
 
 public class DownloadStateMatcher implements Matcher<DownloadItem> {
 
-	
-	private Set<DownloadState> downloadStates = new HashSet<DownloadState>();
+    private final Set<DownloadState> downloadStates;
 
-	
-	public DownloadStateMatcher(DownloadState... states) {
-		for (DownloadState state : states) {
-			downloadStates.add(state);
-		}
-	}
+    public DownloadStateMatcher(DownloadState first, DownloadState... rest) {
+        downloadStates = EnumSet.of(first, rest);
+    }
 
-	
-	@Override
-	public boolean matches(DownloadItem item) {
-		if (item == null)
-			return false;
+    @Override
+    public boolean matches(DownloadItem item) {
+        if (item == null)
+            return false;
 
-		return downloadStates.contains(item.getState());
-	}
-
-	
+        return downloadStates.contains(item.getState());
+    }
 
 }

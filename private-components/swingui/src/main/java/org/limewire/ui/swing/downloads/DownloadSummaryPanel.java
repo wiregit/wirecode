@@ -130,7 +130,7 @@ public class DownloadSummaryPanel extends JPanel {
 	    
 	    setOpaque(false);
 	    
-        this.allList = GlazedListsFactory.swingThreadProxyEventList(downloadListManager.getDownloads());
+        this.allList = downloadListManager.getSwingThreadSafeDownloads();
 
         setLayout(new BorderLayout());
                 
@@ -147,31 +147,24 @@ public class DownloadSummaryPanel extends JPanel {
 		titleLabel.setName("DownloadSummaryPanel.titleLabel");
 		
 		countLabel = new JLabel("0 ");
-        countLabel.setFont(new Font("Arial",Font.PLAIN,15));
+        countLabel.setFont(new Font("Arial", Font.PLAIN, 15));
         countLabel.setForeground(fontColor);
-        
+
         titleLabel.add(countLabel, BorderLayout.EAST);
-		
-		
-		add(titleLabel, BorderLayout.NORTH);
-		
-		
-		createMoreLabel();
-		add(moreLabel, BorderLayout.SOUTH);
-				
-		
 
-		
-		Comparator<DownloadItem> comparator = new Comparator<DownloadItem>(){
+        add(titleLabel, BorderLayout.NORTH);
 
+        createMoreLabel();
+        add(moreLabel, BorderLayout.SOUTH);
+
+        Comparator<DownloadItem> comparator = new Comparator<DownloadItem>() {
             @Override
             public int compare(DownloadItem o1, DownloadItem o2) {
                 return getSortPriority(o2.getState()) - getSortPriority(o1.getState());
             }
-		    
-		};
-		
-		SortedList<DownloadItem> sortedList = GlazedListsFactory.sortedList(allList, comparator);		
+        };
+
+        SortedList<DownloadItem> sortedList = GlazedListsFactory.sortedList(allList, comparator);		
 		
 		chokeList = GlazedListsFactory.rangeList(sortedList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);

@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -37,6 +38,11 @@ public class MockDownloadListManager implements DownloadListManager {
 	@Override
 	public EventList<DownloadItem> getDownloads() {
 		return downloadItems;
+	}
+	
+	@Override
+	public EventList<DownloadItem> getSwingThreadSafeDownloads() {
+	    return GlazedListsFactory.swingThreadProxyEventList(getDownloads());
 	}
 
 	@Override

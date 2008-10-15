@@ -21,81 +21,50 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 class DownloadMediator {
 
 	
-	private JTextField filterField;
+	private final JTextField filterField;
 	
 	/**
 	 * filtered by filterField
 	 */
-	private EventList<DownloadItem> filteredList;
+	private final EventList<DownloadItem> filteredList;
 	
 	/**
 	 * unfiltered - common to all tables
 	 */
-	private EventList<DownloadItem> commonBaseList;
+	private final EventList<DownloadItem> commonBaseList;
 	
 	public DownloadMediator(DownloadListManager downloadManager) {
-	
-		commonBaseList= GlazedListsFactory.filterList(downloadManager.getDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));	
-		commonBaseList = GlazedListsFactory.threadSafeList(commonBaseList);
+		commonBaseList= GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
 		filterField = new PromptTextField(I18n.tr("Filter"));
-		
-		filteredList = GlazedListsFactory.filterList(commonBaseList, 
-				new TextComponentMatcherEditor<DownloadItem>(filterField, new DownloadItemTextFilterator(), true));		
+        filteredList = GlazedListsFactory.filterList(commonBaseList, 
+                new TextComponentMatcherEditor<DownloadItem>(filterField, new DownloadItemTextFilterator(), true));
 	}
 
-	
-
 	public void pauseAll() {
-	 // TODO use TransactionList for performance (requires using GlazedLists from head)
-        // lock list to ensure it is not modified elsewhere
-        commonBaseList.getReadWriteLock().writeLock().lock();
-        try {
-            for (DownloadItem item : commonBaseList) {
-                if (item.getState().isPausable()) {
-                    item.pause();
-                }
+	    for (DownloadItem item : commonBaseList) {
+            if (item.getState().isPausable()) {
+                item.pause();
             }
-        } finally {
-            commonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 
-
 	public void resumeAll() {
-        // lock list to ensure it is not modified elsewhere
-	 // TODO use TransactionList for these for performance (requires using GlazedLists from head)
-        commonBaseList.getReadWriteLock().writeLock().lock();
-        try {
-            for (DownloadItem item : commonBaseList) {
-                if (item.getState().isResumable()) {
-                    item.resume();
-                }
+        for (DownloadItem item : commonBaseList) {
+            if (item.getState().isResumable()) {
+                item.resume();
             }
-        } finally {
-            commonBaseList.getReadWriteLock().writeLock().unlock();
         }
     }
 	
 	public void clearFinished() {
 		List<DownloadItem> finishedItems = new ArrayList<DownloadItem>();
-		//lock list to ensure it is not modified elsewhere
-		commonBaseList.getReadWriteLock().writeLock().lock();
-		
-		try {
-			
-			for (DownloadItem item : commonBaseList) {
-				if (item.getState() == DownloadState.DONE) {
-					finishedItems.add(item);
-				}
+	    for (DownloadItem item : commonBaseList) {
+			if (item.getState() == DownloadState.DONE) {
+				finishedItems.add(item);
 			}
-			
-			for(DownloadItem removeItem : finishedItems){
-				commonBaseList.remove(removeItem);
-			}
-			
-		} finally {
-			commonBaseList.getReadWriteLock().writeLock().unlock();
 		}
+		
+	    commonBaseList.removeAll(finishedItems);
 	}
 
     /**
@@ -112,16 +81,6 @@ class DownloadMediator {
 	public EventList<DownloadItem> getFilteredList(){
 		return filteredList;
 	}
-	
-	/**
-	 * 
-	 * @return a Swing thread safe list of all DownloadItems
-	 */
-	public EventList<DownloadItem> getUnfilteredList(){
-		return commonBaseList;
-	}
-	
-
 	
     private static class DownloadItemTextFilterator implements TextFilterator<DownloadItem> {
         @Override

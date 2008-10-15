@@ -46,7 +46,7 @@ public class AlreadyDownloadedListEventListener implements ListEventListener<Vis
                         visualSearchResult.setDownloadState(BasicDownloadState.LIBRARY);
                     } else {
                         //next checking download list
-                        List<DownloadItem> downloads = downloadListManager.getDownloads();
+                        List<DownloadItem> downloads = downloadListManager.getSwingThreadSafeDownloads();
                         // TODO instead of iterating through loop, it would be
                         // nice to lookup download by urn potentially.
                         for (DownloadItem downloadItem : downloads) {

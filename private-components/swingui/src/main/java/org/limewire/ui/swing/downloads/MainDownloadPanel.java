@@ -30,10 +30,8 @@ import org.limewire.ui.swing.components.CustomCheckBox;
 import org.limewire.ui.swing.components.HeadingLabel;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.painter.SubpanelPainter;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -59,32 +57,20 @@ public class MainDownloadPanel extends JPanel {
     private final Action pauseAction = new AbstractAction(I18n.tr("Pause All")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            BackgroundExecutorService.schedule(new Runnable(){
-                public void run() {
-                    downloadMediator.pauseAll();
-                }
-            });
+            downloadMediator.pauseAll();
         }
     };
 
     private final Action resumeAction = new AbstractAction(I18n.tr("Resume All")) {
         public void actionPerformed(ActionEvent e) {
-            BackgroundExecutorService.schedule(new Runnable(){
-                public void run() {
-                    downloadMediator.resumeAll();
-                }
-            });
+            downloadMediator.resumeAll();
         }
     };
 
     private final Action clearAction = new AbstractAction(I18n.tr("Clear Finished")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            BackgroundExecutorService.schedule(new Runnable(){
-                public void run() {
-                    downloadMediator.clearFinished();
-                }
-            });
+            downloadMediator.clearFinished();
         }
     };
     
@@ -131,46 +117,31 @@ public class MainDownloadPanel extends JPanel {
 		
 		cardLayout.show(cardPanel, NO_CATEGORY);
 		
-		final EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
+		EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
 		        new PausableMatcher());
-		final EventList<DownloadItem> resumableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
+		EventList<DownloadItem> resumableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
                 new ResumableMatcher());
-		final EventList<DownloadItem> doneList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
+		EventList<DownloadItem> doneList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
                         new DownloadStateMatcher(DownloadState.DONE));
 		
 		pausableList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        pauseAction.setEnabled(pausableList.size() > 0);
-                    }
-                });
+                pauseAction.setEnabled(listChanges.getSourceList().size() > 0);
             }
         });
 
         resumableList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        resumeAction.setEnabled(resumableList.size() > 0);
-                    }
-                });
+                resumeAction.setEnabled(listChanges.getSourceList().size() > 0);
             }
         });
         
         doneList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        clearAction.setEnabled(doneList.size() > 0);
-                    }
-                });
+                clearAction.setEnabled(listChanges.getSourceList().size() > 0);
             }
         });
     }
