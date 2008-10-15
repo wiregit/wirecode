@@ -34,6 +34,8 @@ import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
@@ -44,6 +46,10 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
     private final LibraryTable<LocalFileItem> table;
     private final LibraryHeaderPanel header;
     private LibrarySharePanel sharePanel;
+    private JXLayer<JTable> layer;
+    private final JScrollPane scrollPane;
+    private ListEventListener<LocalFileItem> listListener;
+    private EventList<LocalFileItem> eventList;
     
     @AssistedInject
     public MyLibraryPanel(@Assisted Category category,
@@ -52,6 +58,7 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
                           IconManager iconManager, 
                           LibraryTableFactory tableFactory){
         this.sharePanel = sharePanel;
+        this.eventList = eventList;
         
         setLayout(new BorderLayout());
 
@@ -63,8 +70,8 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
         table.enableSharing(sharePanel);
         table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel()));
                 
-        final JXLayer<JTable> layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>());
-        final JScrollPane scrollPane = new JScrollPane(layer);
+        layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>());
+        scrollPane = new JScrollPane(layer);
         scrollPane.setColumnHeaderView(table.getTableHeader());
         if(table.isColumnControlVisible()){
             scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
@@ -75,13 +82,18 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
         scrollPane.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                if (table.getPreferredSize().height < scrollPane.getViewport().getSize().height) {
-                    layer.setPreferredSize(scrollPane.getViewport().getSize());
-                } else {
-                    layer.setPreferredSize(table.getPreferredSize());
-                }
+                adjustSize();
             }
         });
+        
+        listListener = new ListEventListener<LocalFileItem>() {
+            @Override
+            public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                adjustSize();
+            }
+        };
+        
+        eventList.addListEventListener(listListener);
         
         
         //for absolute positioning of LibrarySharePanel
@@ -110,9 +122,18 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
     
     public void dispose() {
         table.dispose();
+        eventList.removeListEventListener(listListener);
         ((EventTableModel)table.getModel()).dispose();
         if(sharePanel != null){
             sharePanel.dispose();
+        }
+    }
+    
+    private void adjustSize(){
+        if (table.getPreferredSize().height < scrollPane.getViewport().getSize().height) {
+            layer.setPreferredSize(scrollPane.getViewport().getSize());
+        } else {
+            layer.setPreferredSize(table.getPreferredSize());
         }
     }
     
