@@ -227,6 +227,12 @@ public class FancyTab extends JXPanel {
             button.setFont(props.getTextFont());
         }
         
+        if(Boolean.TRUE.equals(tabActions.getMainAction().getValue(TabActionMap.NEW_HINT))) {
+            FontUtils.bold(button);
+        } else {
+            FontUtils.plain(button);
+        }
+        
         tabActions.getMainAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
