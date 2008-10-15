@@ -64,7 +64,7 @@ public class StripedJXTable extends JXTable {
         // paint rows and horizontal lines
         if (rowCount * rowHeight < height) {
             for (int i = rowCount; i <= height/rowHeight; ++i) {
-                g.setColor(colorForRow(i));
+                g.setColor(getColorForRow(i));
                 g.fillRect(clip.x, i * rowHeight, clip.width, rowHeight);
                 
                 // paint horizontal rows if they're shown
@@ -95,7 +95,7 @@ public class StripedJXTable extends JXTable {
      * @param row - row to paint
      * @return - Color to paint with
      */
-    protected Color colorForRow(int row) {
+    protected Color getColorForRow(int row) {
       return (row % 2 == 0) ? getHighlighterColor(0) : getHighlighterColor(1);
     }
         

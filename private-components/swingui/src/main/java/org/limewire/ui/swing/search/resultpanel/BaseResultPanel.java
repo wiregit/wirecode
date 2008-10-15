@@ -82,7 +82,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // can share the same ActionColumnTableCellEditor though.
 
         ListViewTableCellEditor renderer =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), fromActions, navigator);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
+                    fromActions, navigator, resultsList);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -92,7 +93,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         }
 
         ListViewTableCellEditor editor =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), fromActions, navigator);
+            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
+                    fromActions, navigator, resultsList);
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         for(int columnIndex = 0; columnIndex < tableFormat.getLastVisibleColumnIndex() + 1; columnIndex++) {        

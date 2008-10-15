@@ -4,10 +4,10 @@ import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperli
 import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.util.I18n.trn;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -46,6 +46,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.table.RowColorResolver;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.OSUtils;
@@ -61,7 +62,6 @@ implements TableCellEditor, TableCellRenderer {
 
     private static final String HTML = "<html>";
     private static final String CLOSING_HTML_TAG = "</html>";
-    private static final int SIMILARITY_INDENTATION = 50;
     private final Log LOG = LogFactory.getLog(getClass());
     private final PropertyKeyComparator AUDIO_COMPARATOR = 
         new PropertyKeyComparator(PropertyKey.GENRE, PropertyKey.BITRATE, PropertyKey.TRACK_NUMBER, PropertyKey.SAMPLE_RATE);
@@ -97,7 +97,8 @@ implements TableCellEditor, TableCellRenderer {
     
     private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
 
-    private ActionColumnTableCellEditor actionEditor;
+    private final ActionColumnTableCellEditor actionEditor;
+    private final RowColorResolver<VisualSearchResult> rowColorResolver;
     private ActionButtonPanel actionButtonPanel;
     private FromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -118,10 +119,12 @@ implements TableCellEditor, TableCellRenderer {
     private JXPanel searchResultTextPanel;
 
     public ListViewTableCellEditor(
-        ActionColumnTableCellEditor actionEditor, String searchText, FromActions fromActions, Navigator navigator) {
+        ActionColumnTableCellEditor actionEditor, String searchText, FromActions fromActions, 
+        Navigator navigator, RowColorResolver<VisualSearchResult> colorResolver) {
 
         this.actionEditor = actionEditor;
         this.searchText = searchText;
+        this.rowColorResolver = colorResolver;
 
         GuiUtils.assignResources(this);
 
@@ -252,7 +255,7 @@ implements TableCellEditor, TableCellRenderer {
 
         JPanel panel = col == 0 ? leftPanel : col == 1 ? centerPanel : rightPanel;
         
-        editorComponent.add(panel);
+        editorComponent.add(panel, "height 100%");
 
         return editorComponent;
     }
@@ -365,9 +368,9 @@ implements TableCellEditor, TableCellRenderer {
     private JPanel makeIndentablePanel(Component component) {
         indentablePanel = new JPanel(new MigLayout("insets 0 0 0 5", "[][]", "[]"));
         indentablePanel.setOpaque(false);
-        similarResultIndentation = new JLabel(similarResultsIcon);
-        similarResultIndentation.setPreferredSize(new Dimension(SIMILARITY_INDENTATION, similarResultsIcon.getIconWidth()));
-        indentablePanel.add(component, "cell 1 0");
+        similarResultIndentation = new JPanel(new BorderLayout());
+        similarResultIndentation.add(new JLabel(similarResultsIcon), BorderLayout.CENTER);
+        indentablePanel.add(component, "cell 1 0, top, left");
         return indentablePanel;
     }
 
@@ -435,7 +438,9 @@ implements TableCellEditor, TableCellRenderer {
         
         if (column == 0) {
             if (vsr.getSimilarityParent() != null) {
-                indentablePanel.add(similarResultIndentation, "cell 0 0");
+                indentablePanel.add(similarResultIndentation, "cell 0 0, height 100%");
+                Color backgroundColor = rowColorResolver.getColorForItemRow(vsr.getSimilarityParent());
+                similarResultIndentation.setBackground(backgroundColor);
             } else {
                 indentablePanel.remove(similarResultIndentation);
             }

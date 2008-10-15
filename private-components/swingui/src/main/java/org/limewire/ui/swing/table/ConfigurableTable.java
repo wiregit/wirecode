@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.table;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -33,7 +35,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * This class is a subclass of JTable that adds features from Glazed Lists.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ConfigurableTable<E> extends MouseableTable implements RowPresevationListener {
+public class ConfigurableTable<E> extends MouseableTable implements RowPresevationListener, RowColorResolver<E> {
     private final Log LOG = LogFactory.getLog(getClass());
     private EventList<E> eventList;
     private EventTableModel<E> tableModel;
@@ -53,20 +55,11 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
             // Set up table headers to have a context menu
             // that configures which columns are visible.
             final JTableHeader header = getTableHeader();
-            header.setToolTipText("Right-click to select columns to display");
+            header.setToolTipText(tr("Right-click to select columns to display"));
             header.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() == 1) {
-//                        int col = columnAtPoint(e.getPoint());
-//                        String headerName = tableFormat.getColumnName(col);
-                        // TODO: RMV Need to update the "Sort by" combobox
-                        // TODO: RMV to match the new sort order.
-                        //sortCombo.setSelectedItem(headerName);
-
-                    // TODO: RMV Why doesn't the following line work?
-                    //} else if (!e.isPopupTrigger()) return;
-                    } else if (e.getButton() == 3) {
+                    if (e.getButton() == 3) {
                         // If a header popup menu was created ...
                         if (headerPopup != null) {
                             // Display the header popup menu where the user clicked.
@@ -85,6 +78,12 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
 
     public EventList<E> getEventList() {
         return eventList;
+    }
+
+    @Override
+    public Color getColorForItemRow(E item) {
+        int index = eventList.indexOf(item);
+        return super.getColorForRow(index);
     }
 
     /**
@@ -121,9 +120,7 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
         }
 
         headerPopup = new JPopupMenu();
-//        int margin = 5;
         headerPopup.setBorder(
-            //BorderFactory.createEmptyBorder(margin, margin, margin, margin));
             BorderFactory.createLineBorder(Color.BLACK, 1));
 
         // Create a checkbox menu item for each column heading.
