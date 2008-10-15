@@ -12,6 +12,7 @@ import javax.swing.TransferHandler;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
@@ -26,6 +27,7 @@ import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
+import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -49,14 +51,16 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
     
     //only accessed on EDT
     private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
+    private DownloadListManager downloadListManager;
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager, LibraryManager libraryManager, 
-            ShareListManager shareListManager, AudioPlayer player){
+            ShareListManager shareListManager, AudioPlayer player, DownloadListManager downloadListManager){
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.player = player;
+        this.downloadListManager = downloadListManager;
         EventAnnotationProcessor.subscribe(this);
     }
     
@@ -102,6 +106,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         
         if(friend != null){
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
+            libTable.setPopupHandler(new FriendLibraryPopupHandler((LibraryTable<RemoteFileItem>)libTable, downloadListManager));
         } else {//Local            
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
             libTable.setPopupHandler(new MyLibraryPopupHandler((LibraryTable<LocalFileItem>)libTable, category, libraryManager, shareListManager, friendList));
