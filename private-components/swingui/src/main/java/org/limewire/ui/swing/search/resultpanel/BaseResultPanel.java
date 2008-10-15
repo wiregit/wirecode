@@ -14,6 +14,7 @@ import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
@@ -28,9 +29,14 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
 
+import com.google.inject.assistedinject.AssistedInject;
+
 import ca.odell.glazedlists.EventList;
 
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
+    
+    private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory; 
+    
     private static final int TABLE_ROW_HEIGHT = 26;
     
     private final CardLayout layout = new CardLayout();
@@ -38,17 +44,22 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private ConfigurableTable<VisualSearchResult> resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
     private final Search search;
-    private final org.limewire.core.api.download.ResultDownloader resultDownloader;
+    private final ResultDownloader resultDownloader;
     
     private Scrollable visibileComponent;
     
-    BaseResultPanel(EventList<VisualSearchResult> eventList,
+    @AssistedInject
+    BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
+            EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
-            org.limewire.core.api.download.ResultDownloader resultDownloader,
+            ResultDownloader resultDownloader,
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
             Navigator navigator, FromActions fromActions) {
+        
+        this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
+        
         this.baseEventList = eventList;
         this.resultDownloader = resultDownloader;
         this.search = search;
@@ -81,8 +92,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
 
-        ListViewTableCellEditor renderer =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
+        ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
+           new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
                     fromActions, navigator, resultsList);
         
         TableColumnModel tcm = resultsList.getColumnModel();
@@ -92,9 +103,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             tc.setCellRenderer(renderer);
         }
 
-        ListViewTableCellEditor editor =
-            new ListViewTableCellEditor(new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
+        ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
+                new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
                     fromActions, navigator, resultsList);
+        
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
         for(int columnIndex = 0; columnIndex < tableFormat.getLastVisibleColumnIndex() + 1; columnIndex++) {        
@@ -104,9 +116,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         resultsList.getColumnModel().getColumn(2).setMaxWidth(ListViewTableFormat.ACTIONS_WIDTH);
 
-        resultsList.setRowHeight(ListViewTableCellEditor.HEIGHT);
+        resultsList.setRowHeight(ListViewTableEditorRenderer.HEIGHT);
         
-        resultsList.addMouseListener(new ResultDownloader());
+        resultsList.addMouseListener(new ResultDownloaderAdaptor());
 
         resultsList.addMouseListener(new MouseAdapter() {
             @Override
@@ -216,7 +228,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         }
     }
 
-    private class ResultDownloader extends MouseAdapter {
+    private class ResultDownloaderAdaptor extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {

@@ -23,8 +23,11 @@ public class VideoResultsPanel extends BaseResultPanel {
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
-        FromActions fromActions) {
-        super(eventList, new VideoTableFormat(), resultDownloader,
+        FromActions fromActions,
+        ListViewTableEditorRendererFactory listViewEditorRendererFactory) {
+        
+        super(listViewEditorRendererFactory, eventList, new VideoTableFormat(), resultDownloader,
             search, searchInfo, preserver, navigator, fromActions);
+        
     }
 }

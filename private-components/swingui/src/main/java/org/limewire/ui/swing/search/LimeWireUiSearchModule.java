@@ -10,6 +10,8 @@ import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.ListViewTableEditorRenderer;
+import org.limewire.ui.swing.search.resultpanel.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.OtherResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanel;
@@ -63,6 +65,10 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(VideoResultsPanelFactory.class).toProvider(
             FactoryProvider.newFactory(
                 VideoResultsPanelFactory.class, VideoResultsPanel.class));
+        
+        bind(ListViewTableEditorRendererFactory.class).toProvider(
+                FactoryProvider.newFactory(
+                        ListViewTableEditorRendererFactory.class, ListViewTableEditorRenderer.class));
         
         bind(FromActions.class).to(FromActionsImpl.class);
 

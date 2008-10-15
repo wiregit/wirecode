@@ -47,19 +47,24 @@ import org.limewire.ui.swing.search.FromActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.RowColorResolver;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.util.OSUtils;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * This class is responsible for rendering an individual SearchResult
  * in "List View".
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ListViewTableCellEditor
+public class ListViewTableEditorRenderer
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
+    private final CategoryIconManager categoryIconManager;
+    
     private static final String HTML = "<html>";
     private static final String CLOSING_HTML_TAG = "</html>";
     private final Log LOG = LogFactory.getLog(getClass());
@@ -77,15 +82,6 @@ implements TableCellEditor, TableCellRenderer {
     public static final int WIDTH = 740;
 
     private String searchText;
-
-    @Resource private Icon audioIcon;
-    @Resource private Icon videoIcon;
-    @Resource private Icon documentIcon;
-    @Resource private Icon imageIcon;
-    @Resource private Icon applicationXPIcon;
-    @Resource private Icon applicationVistaIcon;
-    @Resource private Icon applicationOSXIcon;
-    @Resource private Icon otherIcon;
     @Resource private Icon similarResultsIcon;
     @Resource private Color headingLabelColor;
     @Resource private Color subHeadingLabelColor;
@@ -118,10 +114,16 @@ implements TableCellEditor, TableCellRenderer {
     private JPanel centerPanel;
     private JXPanel searchResultTextPanel;
 
-    public ListViewTableCellEditor(
-        ActionColumnTableCellEditor actionEditor, String searchText, FromActions fromActions, 
-        Navigator navigator, RowColorResolver<VisualSearchResult> colorResolver) {
+    @AssistedInject
+    ListViewTableEditorRenderer(CategoryIconManager categoryIconManager,
+        @Assisted ActionColumnTableCellEditor actionEditor, 
+        @Assisted String searchText, 
+        @Assisted FromActions fromActions, 
+        @Assisted Navigator navigator, 
+        @Assisted RowColorResolver<VisualSearchResult> colorResolver) {
 
+        this.categoryIconManager = categoryIconManager;
+        
         this.actionEditor = actionEditor;
         this.searchText = searchText;
         this.rowColorResolver = colorResolver;
@@ -445,7 +447,7 @@ implements TableCellEditor, TableCellRenderer {
                 indentablePanel.remove(similarResultIndentation);
             }
             
-            itemIconLabel.setIcon(getIconFor(vsr.getCategory()));
+            itemIconLabel.setIcon(categoryIconManager.getIcon(vsr.getCategory()));
 
             boolean headingDecorated = populateHeading(vsr);
 
@@ -496,30 +498,6 @@ implements TableCellEditor, TableCellRenderer {
             
             searchResultTextPanel.add(downloadingLink, "cell 0 1");
         }
-    }
-
-    private Icon getIconFor(Category category) {
-        switch(category) {
-            case AUDIO:
-                return audioIcon;
-            case VIDEO:
-                return videoIcon;
-            case IMAGE:
-                return imageIcon;
-            case DOCUMENT:
-                return documentIcon;
-            case PROGRAM:
-                if (OSUtils.isAnyMac()) {
-                    return applicationOSXIcon;
-                } else if (OSUtils.isWindowsVista()) {
-                    return applicationVistaIcon;
-                } else {
-                    return applicationXPIcon;
-                }
-            case OTHER:
-                return otherIcon;
-        }
-        return null;
     }
 
     /**

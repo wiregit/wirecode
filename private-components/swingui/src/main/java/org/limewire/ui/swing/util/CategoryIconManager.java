@@ -64,7 +64,7 @@ public class CategoryIconManager {
         this(Size.SMALL);
     }
     
-    public CategoryIconManager(Size size) {
+    CategoryIconManager(Size size) {
         GuiUtils.assignResources(this);
         
         if (size == Size.LARGE) {

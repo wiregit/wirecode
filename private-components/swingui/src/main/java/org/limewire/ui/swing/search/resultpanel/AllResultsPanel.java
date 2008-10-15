@@ -24,8 +24,11 @@ public class AllResultsPanel extends BaseResultPanel {
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
-        FromActions fromActions) {
-        super(eventList, tableFormat,
+        FromActions fromActions,
+        ListViewTableEditorRendererFactory listViewEditorRendererFactory) {
+        
+        super(listViewEditorRendererFactory, eventList, tableFormat,
             resultDownloader, search, searchInfo, preserver, navigator, fromActions);
+        
     }
 }

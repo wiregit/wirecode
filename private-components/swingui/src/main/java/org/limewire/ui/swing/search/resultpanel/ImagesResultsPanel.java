@@ -23,8 +23,12 @@ public class ImagesResultsPanel extends BaseResultPanel {
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
-        FromActions fromActions) {
-        super(eventList, new ImageTableFormat(), resultDownloader,
+        FromActions fromActions,
+        ListViewTableEditorRendererFactory listViewEditorRendererFactory) {
+        
+        super(listViewEditorRendererFactory,
+            eventList, new ImageTableFormat(), resultDownloader,
             search, searchInfo, preserver, navigator, fromActions);
+        
     }
 }

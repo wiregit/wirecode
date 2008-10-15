@@ -23,8 +23,11 @@ public class AudioResultsPanel extends BaseResultPanel {
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
-        FromActions fromActions) {
-        super(eventList, new MusicTableFormat(), resultDownloader,
+        FromActions fromActions,
+        ListViewTableEditorRendererFactory listViewEditorRendererFactory) {
+        
+        super(listViewEditorRendererFactory, eventList, new MusicTableFormat(), resultDownloader,
             search, searchInfo, preserver, navigator, fromActions);
+        
     }
 }
