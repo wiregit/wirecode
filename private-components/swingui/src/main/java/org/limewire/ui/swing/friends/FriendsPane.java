@@ -411,7 +411,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
-        LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
+        LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         ChatFriend chatFriend = idToFriendMap.get(message.getFriendID());
         if (!chatFriend.isActiveConversation() && message.getType() != Type.Sent) {
             chatFriend.startChat();

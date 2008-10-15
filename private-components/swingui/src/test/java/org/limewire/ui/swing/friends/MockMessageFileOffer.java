@@ -1,21 +1,24 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.xmpp.api.client.FileMetaData;
+import org.limewire.core.api.download.DownloadState;
 
-public class MockMessage implements MessageText {
+public class MockMessageFileOffer implements MessageFileOffer {
     private final String friendName;
     private final String friendID;
     private final String senderName;
-    private final String message;
     private final Type type;
     private final long messageTimeMillis;
+    private final FileMetaData fileOffer;
 
-    public MockMessage(ChatFriend chatFriend, String message, long messageTimeMillis, String senderName, Type type) {
+    public MockMessageFileOffer(ChatFriend chatFriend, long messageTimeMillis, String senderName,
+            Type type, FileMetaData fileOffer) {
         this.friendName = chatFriend.getName();
         this.friendID = chatFriend.getID();
-        this.message = message;
         this.messageTimeMillis = messageTimeMillis;
         this.senderName = senderName;
         this.type = type;
+        this.fileOffer = fileOffer;
     }
 
     @Override
@@ -29,18 +32,13 @@ public class MockMessage implements MessageText {
     }
 
     @Override
-    public String getMessageText() {
-        return message;
-    }
-
-    @Override
     public long getMessageTimeMillis() {
         return messageTimeMillis;
     }
 
     @Override
     public String format() {
-        return "Message with text only: " + message;
+        return "Message with file offer: " + fileOffer.getName();
     }
 
     @Override
@@ -52,4 +50,15 @@ public class MockMessage implements MessageText {
     public Type getType() {
         return type;
     }
+
+    @Override
+    public FileMetaData getFileOffer() {
+        return fileOffer;
+    }
+
+    @Override
+    public void setDownloadState(DownloadState downloadState) {
+        // TBD when we wish to test with download states
+    }
 }
+

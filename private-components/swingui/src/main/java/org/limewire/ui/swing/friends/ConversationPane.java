@@ -16,8 +16,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -34,6 +36,8 @@ import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -76,8 +80,16 @@ public class ConversationPane extends JPanel implements Displayable {
     private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private static final Color BACKGROUND_COLOR = Color.WHITE;
-    private final ArrayList<Message> messages = new ArrayList<Message>();
-    private final Map<String, FileMetaData> idToFileMetaDataMap = new ConcurrentHashMap<String, FileMetaData>();
+
+    // TODO: FIXME: Concerns about synchronization!  messages and the map represent the "message state"
+    // or better yet, have the Map do everything (consider linkedHashMap).
+    // Make it so that iterating thru the map gets the messages
+    // in the same order they were added. Ando also what if the user sends the same file in a file offer
+    // multiple times in the same conversation.  The Message will need to be uniquely identified
+    private final List<Message> messages = new ArrayList<Message>();
+    private final Map<String, MessageFileOffer> idToMessageWithFileOffer =
+            new ConcurrentHashMap<String, MessageFileOffer>();
+
     private final JEditorPane editor;
     private final String conversationName;
     private final String friendId;
@@ -133,7 +145,7 @@ public class ConversationPane extends JPanel implements Displayable {
         FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, new ShareLocalFileList());
         editor.setDropTarget(friendShare.getDropTarget());
         scroll.getViewport().add(editor);
-        
+
         add(footerPanel(writer, chatFriend), BorderLayout.SOUTH);
 
         setBackground(DEFAULT_BACKGROUND);
@@ -144,7 +156,7 @@ public class ConversationPane extends JPanel implements Displayable {
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
     public void handleConversationMessage(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();
-        LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.getMessageText(), topic);
+        LOG.debugf("Message: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         messages.add(message);
         Type type = message.getType();
 
@@ -152,9 +164,10 @@ public class ConversationPane extends JPanel implements Displayable {
             currentChatState = ChatState.active;
         }
 
-        if (message.hasFileOffer()) {
-            FileMetaData fileOffer = message.getFileOffer();
-            idToFileMetaDataMap.put(fileOffer.getId(), fileOffer);
+        if (message instanceof MessageFileOffer) {
+            MessageFileOffer msgWithFileOffer = (MessageFileOffer)message;
+            String fileOfferID = msgWithFileOffer.getFileOffer().getId();
+            idToMessageWithFileOffer.put(fileOfferID, msgWithFileOffer);
         }
 
         displayMessages();
@@ -233,14 +246,14 @@ public class ConversationPane extends JPanel implements Displayable {
                 if (!extension.isEmpty()) {
                     Icon icon = iconManager.getIconForExtension(extension);
                     button.setIcon(icon);
+                }
 
-                    // Using end of button text to determine whether button shouild be disabled
-                    // then disable it.  This is because JEditorPane does not disable buttons
-                    // disabled in the form html
-                    if (buttonText.endsWith(":disabled")) {
-                        button.setText(buttonText.substring(0, buttonText.lastIndexOf(":disabled")));
-                        button.setEnabled(false);
-                    }
+                // Using end of button text to determine whether button shouild be disabled
+                // then disable it.  This is because JEditorPane does not disable buttons
+                // disabled in the form html
+                if (buttonText.endsWith(":disabled")) {
+                    button.setText(buttonText.substring(0, buttonText.lastIndexOf(":disabled")));
+                    button.setEnabled(false);
                 }
             }
         }
@@ -297,16 +310,18 @@ public class ConversationPane extends JPanel implements Displayable {
                     return;
                 }
 
+                DownloadItem dl;
+                final MessageFileOffer msgWithfileOffer;
                 try {
                     String dataStr = event.getData();
-                    String fileIdEncoded = dataStr.substring(dataStr.indexOf("=") + 1).trim();
+                    String fileIdEncoded = dataStr.substring(dataStr.indexOf("=")+1).trim();
                     String fileId = URLDecoder.decode(fileIdEncoded, "UTF-8");
-
-                    FileMetaData offeredFile = idToFileMetaDataMap.get(fileId);
+                    msgWithfileOffer = idToMessageWithFileOffer.get(fileId);
 
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
-                   downloader.addDownload((LimePresence)chatFriend.getPresence(), offeredFile);
+                   dl = downloader.addDownload((LimePresence)chatFriend.getPresence(),
+                           msgWithfileOffer.getFileOffer());
                 } catch(SaveLocationException sle) {
                     throw new RuntimeException("FIX ME", sle); // BROKEN
                 } catch (InvalidDataException ide) {
@@ -317,7 +332,16 @@ public class ConversationPane extends JPanel implements Displayable {
                     throw new RuntimeException(uee); // impossible
                 }
 
-                // TODO: Track download states by adding listeners to dl item
+                // Track download states by adding listeners to dl item
+                dl.addPropertyChangeListener(new PropertyChangeListener() {
+                    public void propertyChange(PropertyChangeEvent evt) {
+                        if ("state".equals(evt.getPropertyName())) {
+                            DownloadState state = (DownloadState) evt.getNewValue();
+                            msgWithfileOffer.setDownloadState(state);
+                            displayMessages();
+                        }
+                    }
+                });
 
             } else if (EventType.ACTIVATED == e.getEventType()) {
                 if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
@@ -341,8 +365,8 @@ public class ConversationPane extends JPanel implements Displayable {
     public void offerFile(LocalFileItem file) {
         if(chatFriend.getPresence() instanceof LimePresence) {
             FileMetaData metadata = file.offer((LimePresence)chatFriend.getPresence());
-            new MessageReceivedEvent(new MessageImpl(null, null, friendId,
-                        null, Message.Type.Sent, metadata)).publish();
+            new MessageReceivedEvent(new MessageFileOfferImpl(null, null, friendId,
+                        Message.Type.Sent, metadata)).publish();
         }
     }
     

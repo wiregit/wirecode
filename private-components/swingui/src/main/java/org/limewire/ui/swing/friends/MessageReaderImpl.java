@@ -18,7 +18,7 @@ class MessageReaderImpl implements MessageReader {
     }
 
     private Message newMessage(String message, Message.Type type) {
-        return new MessageImpl(chatFriend.getName(), chatFriend, message, type);
+        return new MessageTextImpl(chatFriend.getName(), chatFriend, type, message);
     }
 
     public void newChatState(ChatState chatState) {

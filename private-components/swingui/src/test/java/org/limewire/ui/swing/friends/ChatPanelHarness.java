@@ -94,7 +94,7 @@ public class ChatPanelHarness {
         
         for(int i = 0; i < 50; i++) {
             String id = "foo" + i;
-            new MessageReceivedEvent(new MockMessage(new MockChatFriend(id, "hey", Mode.available), "yo", System.currentTimeMillis(), "me", Type.Received, null)).publish();
+            new MessageReceivedEvent(new MockMessage(new MockChatFriend(id, "hey", Mode.available), "yo", System.currentTimeMillis(), "me", Type.Received)).publish();
         }
     }
 }

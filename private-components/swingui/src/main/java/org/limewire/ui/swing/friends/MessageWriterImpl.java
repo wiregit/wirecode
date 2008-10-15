@@ -31,7 +31,7 @@ class MessageWriterImpl implements MessageWriter {
     }
 
     private Message newMessage(String message, Message.Type type) {
-        return new MessageImpl(localID, chatFriend, message, type);
+        return new MessageTextImpl(localID, chatFriend, type, message);
     }
 
     public void setChatState(ChatState chatState) throws XMPPException {

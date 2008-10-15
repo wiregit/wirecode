@@ -95,8 +95,8 @@ public class ChatDocumentBuilderTest extends TestCase {
         
         MockChatFriend friend = new MockChatFriend(null, null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
-        messages.add(new MockMessage(friend, "heynow", 0, "me", Type.Sent, null));      
-        messages.add(new MockMessage(friend, "yo", 600001, "me", Type.Sent, null));      
+        messages.add(new MockMessage(friend, "heynow", 0, "me", Type.Sent));      
+        messages.add(new MockMessage(friend, "yo", 600001, "me", Type.Sent));
         compareOutput(conversation.toString(), null, false, messages);
     }
     
@@ -112,7 +112,7 @@ public class ChatDocumentBuilderTest extends TestCase {
 
         MockChatFriend friend = new MockChatFriend("myName", null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
-        messages.add(new MockMessage(friend, null, 0, "you", Type.Received, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
+        messages.add(new MockMessageFileOffer(friend, 0, "you", Type.Received, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
 
         compareOutput(conversation.toString(), ChatState.active, false, messages);
     }
@@ -129,7 +129,7 @@ public class ChatDocumentBuilderTest extends TestCase {
 
         MockChatFriend friend = new MockChatFriend("myName", null, Mode.available);
         ArrayList<Message> messages = new ArrayList<Message>();
-        messages.add(new MockMessage(friend, null, 0, "you", Type.Sent, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
+        messages.add(new MockMessageFileOffer(friend, 0, "you", Type.Sent, new MockFileMetadata("heynow-fileid", "Foo doc.doc")));
     }
 
     private void compareOutput(String input, String expected) {
@@ -160,7 +160,7 @@ public class ChatDocumentBuilderTest extends TestCase {
         ArrayList<Message> list = new ArrayList<Message>();
         for(int i = 0; i < messages.length; i++) {
             Type type = types[i];
-            list.add(new MessageImpl(type == Type.Sent ? "me" : "you", null, null, messages[i], type, null));
+            list.add(new MessageTextImpl(type == Type.Sent ? "me" : "you", null, null, type, messages[i]));
         }
         return list;
     }

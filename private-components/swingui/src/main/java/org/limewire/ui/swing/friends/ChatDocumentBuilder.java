@@ -2,11 +2,10 @@ package org.limewire.ui.swing.friends;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.xmpp.api.client.ChatState;
-import org.limewire.xmpp.api.client.FileMetaData;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -44,7 +43,7 @@ class ChatDocumentBuilder {
         "</body>" +
         "</html>";
     
-    public static String buildChatText(ArrayList<Message> messages, ChatState currentChatState, 
+    public static String buildChatText(List<Message> messages, ChatState currentChatState, 
             String conversationName, boolean friendSignedOff) {
         StringBuilder builder = new StringBuilder();
         builder.append(TOP);
@@ -65,7 +64,7 @@ class ChatDocumentBuilder {
             
             lastMessageType = type;
             
-            builder.append(processContent(message));
+            builder.append(message.format());
             
             builder.append(LINE_BREAK);
             
@@ -116,35 +115,5 @@ class ChatDocumentBuilder {
                .append(stateMessage)
                .append("</div>")
                .append("<br/>");
-    }
-
-    private static String processContent(Message message) {
-        String messageText = message.getMessageText();
-        if (message.hasFileOffer()) {
-            StringBuilder bldr = new StringBuilder();
-            FileMetaData offeredFile = message.getFileOffer();
-            boolean isIncoming = (message.getType() == Message.Type.Received);
-            String fileOfferReceived = tr("{0} wants to share a file with you", message.getFriendID());
-            String fileOfferSent = tr("Sharing file with {0}", message.getFriendID());
-
-            bldr.append(isIncoming ? fileOfferReceived : fileOfferSent)
-                .append("<br/>")
-                .append("<form action=\"\"><input type=\"hidden\" name=\"fileid\" value=\"")
-                .append(offeredFile.getId())
-                .append("\"/><input type=\"submit\" value=\"")
-                .append(offeredFile.getName())
-                .append(isIncoming ? "\"/>" : ":disabled\"/>")
-                .append("</form><br/>");
-
-            if (isIncoming) {
-                // {0} and {1} are HTML tags that make Library a link
-                bldr.append(tr("Download it now, or get it from their " +
-                               "{0}Library{1} later.","<a href=\"" + LIBRARY_LINK + "\">", "</a>"));
-            }
-            return bldr.toString();
-        }
-        messageText = messageText.replace("<", "&lt;").replace(">", "&gt;");
-        
-        return URLWrapper.wrap(messageText);
     }
 }

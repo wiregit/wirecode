@@ -31,7 +31,7 @@ public class ConversationPaneHarness {
                 final MessageWriter writer = new MessageWriter() {
                     @Override
                     public void writeMessage(String message) throws XMPPException {
-                        new MessageReceivedEvent(new MessageImpl("me", friend, message, Type.Sent)).publish();
+                        new MessageReceivedEvent(new MessageTextImpl("me", friend, Type.Sent, message)).publish();
                     }
 
                     public void setChatState(ChatState chatState) {
@@ -55,9 +55,9 @@ public class ConversationPaneHarness {
                         
                         for(int i = 0; i < 10; i++) {
                             new MessageReceivedEvent(
-                                    new MessageImpl(friend.getName(), friend, 
-                                            "This is a message This is a message This is a message This is a message This is a message This is a message ",
-                                            Type.Received)).publish();
+                                    new MessageTextImpl(friend.getName(), friend, Type.Received,
+                                            "This is a message This is a message This is a message This is a message This is a message This is a message "
+                                            )).publish();
                         }
                         
                         frame.setPreferredSize(new Dimension(470, 400));
