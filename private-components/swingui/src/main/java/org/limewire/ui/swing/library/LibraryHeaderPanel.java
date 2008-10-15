@@ -73,6 +73,8 @@ public class LibraryHeaderPanel extends JXPanel {
             shareAllButton.setFont(buttonFont);
             shareAllButton.setOpaque(false);
             shareAllButton.setFocusPainted(false);
+            shareAllButton.setContentAreaFilled(false);
+            shareAllButton.setBorderPainted(false);
         }
         
         add(titleLabel);
