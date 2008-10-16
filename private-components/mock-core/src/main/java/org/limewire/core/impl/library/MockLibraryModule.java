@@ -21,7 +21,7 @@ public class MockLibraryModule extends AbstractModule {
         bind(LibraryManager.class).to(MockLibraryManager.class);
         bind(RemoteLibraryManager.class).to(MockRemoteLibraryManager.class);
         bind(ShareListManager.class).to(MockLibraryManager.class);
-        bind(MagnetLinkFactory.class).to(MagnetLinkFactoryImpl.class);
+        bind(MagnetLinkFactory.class).to(MockMagnetLinkFactoryImpl.class);
         
         EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
         bind(new TypeLiteral<EventListener<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
