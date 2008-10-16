@@ -24,7 +24,7 @@ public class GroupingListEventListener implements ListEventListener<VisualSearch
         EventList<VisualSearchResult> eventList = listChanges.getSourceList();
         while (listChanges.next()) {
                 VisualSearchResult searchResult = eventList.get(listChanges.getIndex());
-                similarResultsDetector.detectSimilarResult(eventList, searchResult);
+                similarResultsDetector.detectSimilarResult(searchResult);
         }
         LOG.debugf("finished detecting similar results");
     }

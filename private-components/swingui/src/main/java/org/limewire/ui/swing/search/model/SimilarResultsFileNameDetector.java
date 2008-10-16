@@ -1,47 +1,82 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 /**
- * Responsible for detecting a VisualSearchResult that is similar to another
- * result and associating the two. Uses a matcher, on successful match, the
- * parent for that group is found and the items are updated to reflect this.
+ * For every file name found in the search the parent that matches that
+ * filename is put into the matchCache. A single parent might have more than
+ * 1 key. As a new search result comes in, its fileNAmes are found, the
+ * parent matching him is taken from the cache, and then a new parent is
+ * chosen between the two. The new parent is then put in the cache for all
+ * the relevant filenames. Because of ordering issues when processing items,
+ * a child might end up in the cache. But when selecting a new parent, the
+ * findParent method checks items parents as well. This prevents the data
+ * from being wrong when setting parents on other visual search results.
  */
-public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
-    private final SearchResultMatcher searchResultComparator;
-
+public class SimilarResultsFileNameDetector implements SimilarResultsDetector {
     private final Log LOG = LogFactory.getLog(getClass());
 
-    /**
-     * Builds the SimilarResultDetector using the given supplied matching
-     * algorithm.
-     */
-    public SimilarResultsMatchingDetector(SearchResultMatcher searchResultMatcher) {
-        this.searchResultComparator = searchResultMatcher;
+    private final CleanStringCache nameCache;
+
+    private final Map<String, VisualSearchResult> matchCache;
+
+    public SimilarResultsFileNameDetector() {
+        this.nameCache = new CleanStringCache();
+        this.matchCache = new HashMap<String, VisualSearchResult>();
+    }
+
+    public String[] getCleanStrings(String[] names) {
+        Set<String> strings = new HashSet<String>();
+        for (String name : names) {
+            strings.add(nameCache.cleanString(name));
+        }
+        return strings.toArray(new String[0]);
     }
 
     @Override
-    public void detectSimilarResult(List<VisualSearchResult> results, VisualSearchResult eventItem) {
-        for (VisualSearchResult result : results) {
-            if (result != eventItem) {
-                if (!result.isSpam() && !eventItem.isSpam()) {
-                    if (searchResultComparator.matches(result, eventItem)) {
-                        update(eventItem, result);
-                    }
+    public void detectSimilarResult(VisualSearchResult visualSearchResult) {
+        if (!visualSearchResult.isSpam()) {
+            String[] names = getCleanStrings(getFileNames(visualSearchResult));
+            VisualSearchResult parent = null;
+            for (int i = 0; i < names.length; i++) {
+                String name = names[i];
+                parent = matchCache.get(name);
+                if (parent == null) {
+                    matchCache.put(name, visualSearchResult);
+                } else {
+                    parent = update(parent, visualSearchResult);
+                    matchCache.put(name, parent);
                 }
             }
         }
+    }
+
+    public String[] getFileNames(VisualSearchResult visualSearchResult) {
+        List<SearchResult> coreResults = visualSearchResult.getCoreSearchResults();
+        String[] fileNames = new String[coreResults.size()];
+        int index = 0;
+        for (SearchResult searchResult : coreResults) {
+            fileNames[index++] = searchResult.getFileName();
+        }
+        return fileNames;
     }
 
     /**
      * Finds the parent correlating the two searchResults and then moves these
      * search results under that parent. Then updates the visibility of these
      * items based on their parents visibilities.
+     * 
+     * Returns the parent chosen for these search results.
      */
-    private void update(VisualSearchResult o1, VisualSearchResult o2) {
+    private VisualSearchResult update(VisualSearchResult o1, VisualSearchResult o2) {
 
         VisualSearchResult parent = findParent(o1, o2);
 
@@ -58,6 +93,8 @@ public class SimilarResultsMatchingDetector implements SimilarResultsDetector {
         updateParent(o2, parent);
 
         updateVisibility(parent, childrenVisible);
+
+        return parent;
     }
 
     /**

@@ -58,7 +58,7 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                                             .getCoreSearchResults()) {
                                         spamManager.handleUserMarkedGood(searchResult);
                                     }
-                                    similarResultsDetector.detectSimilarResult(eventList, visualSearchResult);
+                                    similarResultsDetector.detectSimilarResult(visualSearchResult);
                                 }
                             }
                         }
