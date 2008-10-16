@@ -3,29 +3,44 @@ package com.limegroup.gnutella.spam;
 import java.io.Serializable;
 
 /**
- * From every RFD we can extract a set of tokens,
+ * An abstract Token class that uses an exponential moving average to update
+ * its spam rating. Each subclass can have a different weight that determines
+ * how sensitive its spam rating is to updates. 
  */
-public interface Token extends Serializable {
-    
-    public static enum Rating {
-        USER_MARKED_SPAM, USER_MARKED_GOOD, CLEARED;
-    };
-
-	/**
-     * Returns a rating between 0 and 1 representing the probability that
-     * the file associated with this token is spam
-     * 
-     * @return the spam rating of this token
+public abstract class Token implements Serializable {
+    /**
+     * The spam rating of this token, between 0 (not spam) and 1 (spam).
+     * Initialised to 0.
      */
-	public float getRating();
-
-	/**
-	 * Adjusts the spam rating of this token
-	 * 
-	 * @param rating a rating as defined in the <tt>Token</tt> interface,
-     *        which will influence the rating stored in this <tt>Token</tt>
-	 * @throws IllegalArgumentException if the argument is not one of the
-     *         ratings defined in the <tt>Token</tt> interface
-	 */
-	public void rate(Rating rating);
+    protected float rating = 0;
+    
+    /**
+     * Returns a weight between 0 and 1 that determines how sensitive this
+     * token's spam rating is to updates - 0 means an update has no effect on
+     * the rating, while 1 means an update completely changes the rating.
+     * 
+     * @return a weight between 0 (not sensitive) and 1 (sensitive)
+     */
+    abstract protected float getWeight();
+    
+    /**
+     * Gets this token's spam rating
+     * 
+     * @return a rating between 0 (not spam) and 1 (spam)
+     */
+    protected float getRating() {
+        return rating;
+    }
+    
+    /**
+     * Updates this token's spam rating by using an exponential moving average
+     * to combine the new rating is combined with the current rating. The
+     * subclass must supply the weight of the exponential moving average.
+     *  
+     * @param update the new rating
+     */
+    protected void updateRating(float update) {
+        float weight = getWeight();
+        rating = rating * (1 - weight) + update * weight;
+    }
 }

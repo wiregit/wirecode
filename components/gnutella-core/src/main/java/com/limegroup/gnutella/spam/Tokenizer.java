@@ -23,11 +23,10 @@ import com.limegroup.gnutella.xml.XMLStringUtils;
  * This class splits a RemoteFileDesc or a QueryRequest into tokens that will
  * be put into the RatingTable.
  * 
- * Currently, it extracts the following data from the RemoteFileDesc to build a
- * token:
+ * Currently, it extracts the following data to build a token:
  * 
  * <ul>
- * <li>keywords from the file name</li>
+ * <li>keywords from the file name or query string</li>
  * <li>name/value pairs from the XML metadata (if any)</li>
  * <li>file urn (if any)</li>
  * <li>file size</li>
@@ -99,7 +98,7 @@ public class Tokenizer {
 		    set.addAll(getKeywordTokens(xml));
         URN urn = desc.getSHA1Urn();
 		if(urn != null)
-			set.add(new UrnToken(urn));
+			set.add(new UrnToken(urn.toString()));
 		set.add(new SizeToken(desc.getSize()));
 		set.add(new AddressToken(desc.getAddress()));
 	}
@@ -120,7 +119,7 @@ public class Tokenizer {
             set.addAll(getKeywordTokens(xml));
         Set<URN> urns = qr.getQueryUrns();
         for(URN urn : urns)
-            set.add(new UrnToken(urn));
+            set.add(new UrnToken(urn.toString()));
 		Token[] tokens = new Token[set.size()];
 		tokens = set.toArray(tokens);
 		return tokens;

@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.spam.Token.Rating;
 
 @Singleton
 public class SpamManager {
@@ -74,7 +73,7 @@ public class SpamManager {
 		for(RemoteFileDesc rfd : rfds)
 			rfd.setSpamRating(1);
         // Update the ratings of the tokens associated with the RFDs
-		ratingTable.rate(rfds, Rating.USER_MARKED_SPAM);
+		ratingTable.rate(rfds, 1);
 	}
 
 	/**
@@ -86,7 +85,7 @@ public class SpamManager {
 		for(RemoteFileDesc rfd : rfds)
 			rfd.setSpamRating(0);
         // Update the ratings of the tokens associated with the RFDs
-		ratingTable.rate(rfds, Rating.USER_MARKED_GOOD);
+		ratingTable.rate(rfds, 0);
 	}
 
 	/**

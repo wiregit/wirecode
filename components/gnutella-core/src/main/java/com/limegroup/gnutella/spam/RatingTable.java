@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,11 +32,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.spam.Token.Rating;
+import com.limegroup.gnutella.spam.Token;
 
 @Singleton
 public class RatingTable implements Service {
-	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
+	private static final Log LOG = LogFactory.getLog(RatingTable.class);
 
 	/**
 	 * Don't hold more than this many entries in memory or save more than
@@ -139,9 +140,9 @@ public class RatingTable implements Service {
 	 * Assigns the given rating to an array of RemoteFileDescs
 	 * 
 	 * @param descs an array of RemoteFileDescs to be rated
-	 * @param rating a rating as defined by the Token interface
+	 * @param rating a rating between 0 (not spam) and 1 (spam)
 	 */
-	protected synchronized void rate(RemoteFileDesc[] descs, Rating rating) {
+	protected synchronized void rate(RemoteFileDesc[] descs, float rating) {
 		rateInternal(lookup(tokenizer.getTokens(descs)), rating);
 	}
 
@@ -151,7 +152,7 @@ public class RatingTable implements Service {
 	 * @param qr the QueryRequest to clear
 	 */
 	protected synchronized void clear(QueryRequest qr) {
-		rateInternal(lookup(tokenizer.getTokens(qr)), Rating.CLEARED);
+		rateInternal(lookup(tokenizer.getTokens(qr)), 0);
 	}
 
 	/**
@@ -160,11 +161,11 @@ public class RatingTable implements Service {
 	 * @param tokens the Tokens to rate
 	 * @param rating a rating as defined by the Token interface
 	 */
-	private void rateInternal(Token[] tokens, Rating rating) {
+	private void rateInternal(Token[] tokens, float rating) {
 		for(Token t : tokens) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Rating " + t + " as " + rating);
-			t.rate(rating);
+			t.updateRating(rating);
         }
 	}
 
@@ -245,6 +246,18 @@ public class RatingTable implements Service {
                 LOG.debug("Error saving spam ratings: ", iox);
         } finally {
             IOUtils.close(oos);
+        }
+        // DEBUG: dump the ratings to a human-readable file
+        PrintWriter dump = null;
+        try {
+            dump = new PrintWriter(
+                    new File(CommonUtils.getUserSettingsDir(), "spam.dump"));
+            for(Token t : tokenMap.keySet()) dump.println(t);
+        } catch (Exception x) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Error dumping spam ratings: ", x);
+        } finally {
+            IOUtils.close(dump);
         }
 	}
     
