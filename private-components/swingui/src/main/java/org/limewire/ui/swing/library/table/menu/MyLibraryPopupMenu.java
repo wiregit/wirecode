@@ -18,6 +18,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.LibraryTable;
@@ -99,7 +100,9 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         add(removeAction);
         add(deleteAction);
         add(new JSeparator());
-        add(gnutellaShareItem);
+        if (isGnutellaSharable(category)) {
+            add(gnutellaShareItem);
+        }
         add(friendSubMenu);
         add(new JSeparator());
         add(copyLinkAction);
@@ -108,6 +111,11 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         }
         add(propertiesAction);
         
+    }
+    
+    //TODO: refactor to common parent with MyLibraryMultipleSelectionPopupMenu
+    private boolean isGnutellaSharable(Category category){
+        return category != Category.DOCUMENT || SharingSettings.DOCUMENT_SHARING_ENABLED.getValue();
     }
 
     
