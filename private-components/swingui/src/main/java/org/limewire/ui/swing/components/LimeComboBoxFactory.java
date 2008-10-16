@@ -53,7 +53,7 @@ public class LimeComboBoxFactory {
         
         box.setBackgroundPainter(new ButtonPainter());
         box.setBorder(BorderFactory.createEmptyBorder(3,10,3,12));
-        box.setIcons(this.fullIcon, this.fullIcon, this.fullIcon);
+        box.setIcon(this.fullIcon);
         box.setFont(this.fullTextFont);
         box.setForeground(this.fullTextColour);
         
@@ -69,9 +69,8 @@ public class LimeComboBoxFactory {
         box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
         box.setText(promptText);
         box.setFont(this.miniTextFont);
-        box.setForeground(this.miniRegTextColour);
-        box.setRolloverForeground(this.miniHoverTextColour);
-        box.setPressedForeground(this.miniDownTextColour);
+        box.setForegrounds(this.miniRegTextColour, 
+                this.miniHoverTextColour, this.miniDownTextColour);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
         
         return box;

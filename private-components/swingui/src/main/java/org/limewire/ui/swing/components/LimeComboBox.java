@@ -47,11 +47,35 @@ public class LimeComboBox extends JXButton {
         
         super.setText(promptText);
     }
+
+    public void setForegrounds(Color regular, Color hover, Color down) {
+        this.setForeground(regular);
+        this.setRolloverForeground(hover);
+        this.setPressedForeground(down);
+    }
     
     public void setIcons(Icon regular, Icon hover, Icon down) {
         this.setIcon(regular);
         this.setRolloverIcon(hover);
         this.setPressedIcon(down);
+    }
+
+    @Override
+    public Icon getRolloverIcon() {
+        Icon icon = super.getRolloverIcon();
+        if (icon== null) 
+            return this.getIcon();
+        else
+            return icon;
+    }
+    
+    @Override
+    public Icon getPressedIcon() {
+        Icon icon = super.getPressedIcon();
+        if (icon== null) 
+            return this.getIcon();
+        else
+            return icon;
     }
     
     public void setRolloverForeground(Color colour) {
