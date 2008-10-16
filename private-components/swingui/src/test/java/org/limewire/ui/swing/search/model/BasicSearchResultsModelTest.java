@@ -1,10 +1,13 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.util.BaseTestCase;
 
 public class BasicSearchResultsModelTest extends BaseTestCase {
@@ -241,13 +244,13 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(3, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        Assert.assertEquals(2, similarResults0.size());
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(2, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, similarResults1.size());
+        Assert.assertEquals(2, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
@@ -257,9 +260,9 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(2, coreResults2.size());
 
-        Assert.assertNull(group0.getSimilarityParent());
-        Assert.assertEquals(group0, group1.getSimilarityParent());
-        Assert.assertEquals(group0, group2.getSimilarityParent());
+        Assert.assertNull(group1.getSimilarityParent());
+        Assert.assertEquals(group1, group0.getSimilarityParent());
+        Assert.assertEquals(group1, group2.getSimilarityParent());
     }
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
@@ -400,4 +403,156 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(group0, group2.getSimilarityParent());
         Assert.assertEquals(group0, group1.getSimilarityParent());
     }
+    
+    public void testSameNameHyphenNameHyphenName() {
+       
+        
+        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
+        properties1.put(PropertyKey.NAME, "test-foo-bar");
+        SearchResult searchResult1 = new TestSearchResult("1", "test-foo-bar.mp3", properties1); 
+        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
+        properties2.put(PropertyKey.NAME, "test-foo-bar");
+        SearchResult searchResult2 = new TestSearchResult("2", "test-foo-bar.mp3", properties2);
+        
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getGroupedSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        
+        model.addSearchResult(searchResult1);
+        model.addSearchResult(searchResult2);
+        
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        Assert.assertEquals(2, results.size());
+        
+        VisualSearchResult group0 = results.get(0);
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(1, similarResults0.size());
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults0.size());
+
+        VisualSearchResult group1 = results.get(1);
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults1.size());
+
+        Assert.assertNull(group0.getSimilarityParent());
+        Assert.assertEquals(group0, group1.getSimilarityParent());
+    }
+    
+    public void testNotSameNameOrButSameTrackMetaData() {
+        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
+        properties1.put(PropertyKey.NAME, "test");
+        SearchResult searchResult1 = new TestSearchResult("1", "test.mp3", properties1);
+        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
+        properties2.put(PropertyKey.NAME, "blah123");
+        properties2.put(PropertyKey.TRACK_NAME, "test");
+        SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
+        
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getGroupedSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        
+        model.addSearchResult(searchResult1);
+        model.addSearchResult(searchResult2);
+        
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        Assert.assertEquals(2, results.size());
+        
+        VisualSearchResult group0 = results.get(0);
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(0, similarResults0.size());
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults0.size());
+
+        VisualSearchResult group1 = results.get(1);
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults1.size());
+
+        //should be no similar results
+        Assert.assertNull(group1.getSimilarityParent());
+        Assert.assertNull(group0.getSimilarityParent());
+
+    
+    }
+    
+    public void testSameNameOrAlbumAndTrackMetaData() {
+        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
+        properties1.put(PropertyKey.NAME, "test-blah");
+        SearchResult searchResult1 = new TestSearchResult("1", "test-blah.mp3", properties1);
+        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
+        properties2.put(PropertyKey.NAME, "blah123");
+        properties2.put(PropertyKey.ALBUM_TITLE, "test");
+        properties2.put(PropertyKey.TRACK_NAME, "blah");
+        SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
+        
+        
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getGroupedSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        
+        model.addSearchResult(searchResult1);
+        model.addSearchResult(searchResult2);
+        
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        Assert.assertEquals(2, results.size());
+        
+        VisualSearchResult group0 = results.get(0);
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(1, similarResults0.size());
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults0.size());
+
+        VisualSearchResult group1 = results.get(1);
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults1.size());
+
+        Assert.assertNull(group0.getSimilarityParent());
+        Assert.assertEquals(group0, group1.getSimilarityParent());
+    }
+    
+    public void testSameNameOrArtistAndTrackMetaData() {
+        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
+        properties1.put(PropertyKey.NAME, "test-blah");
+        SearchResult searchResult1 = new TestSearchResult("1", "test-blah.mp3", properties1);
+        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
+        properties2.put(PropertyKey.NAME, "blah123");
+        properties2.put(PropertyKey.ARTIST_NAME, "test");
+        properties2.put(PropertyKey.TRACK_NAME, "blah");
+        SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
+        
+        SearchResultsModel model = new BasicSearchResultsModel();
+        model.getGroupedSearchResults()
+                .addListEventListener(
+                        new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
+        
+        model.addSearchResult(searchResult1);
+        model.addSearchResult(searchResult2);
+        
+        List<VisualSearchResult> results = model.getGroupedSearchResults();
+        Assert.assertEquals(2, results.size());
+        
+        VisualSearchResult group0 = results.get(0);
+        List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
+        Assert.assertEquals(1, similarResults0.size());
+        List<SearchResult> coreResults0 = group0.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults0.size());
+
+        VisualSearchResult group1 = results.get(1);
+        List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
+        Assert.assertEquals(0, similarResults1.size());
+        List<SearchResult> coreResults1 = group1.getCoreSearchResults();
+        Assert.assertEquals(1, coreResults1.size());
+
+        Assert.assertNull(group0.getSimilarityParent());
+        Assert.assertEquals(group0, group1.getSimilarityParent());
+    }
+
 }

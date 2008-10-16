@@ -32,8 +32,8 @@ public class TestSearchResult implements SearchResult {
         this.fileName = fileName;
     }
 
-    public TestSearchResult(String fileName, Map<PropertyKey, Object> properties) {
-        this.urn = UUID.randomUUID().toString();
+    public TestSearchResult(String urn, String fileName, Map<PropertyKey, Object> properties) {
+        this.urn = urn;
         this.properties = properties;
         this.fileName = fileName;
     }
@@ -103,7 +103,7 @@ public class TestSearchResult implements SearchResult {
 
     @Override
     public Category getCategory() {
-        return null;
+        return Category.AUDIO;
     }
 
     @Override

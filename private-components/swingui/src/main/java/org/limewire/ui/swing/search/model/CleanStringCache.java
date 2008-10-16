@@ -7,14 +7,14 @@ import java.util.regex.Pattern;
 
 
 public class CleanStringCache {
-    private static final String DEFAULT_REPLACE = "\\(\\d\\)|[-_.' ()]";
-
     private final Pattern pattern;
+    private final String replacement;
     
     private final Map<String, String> cache;
     
-    public CleanStringCache() {
-        this.pattern = Pattern.compile(DEFAULT_REPLACE);
+    public CleanStringCache(Pattern pattern, String replacement) {
+        this.pattern = pattern;
+        this.replacement = replacement;
         this.cache = new WeakHashMap<String, String>();
     }
 
@@ -34,7 +34,7 @@ public class CleanStringCache {
      */
     public String cleanString(String string) {
         Matcher matcher = pattern.matcher(string);
-        string = matcher.replaceAll("");
+        string = matcher.replaceAll(replacement);
         return string;
     }
 
