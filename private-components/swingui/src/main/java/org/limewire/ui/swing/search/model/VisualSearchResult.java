@@ -63,4 +63,6 @@ public interface VisualSearchResult extends NavSelectable {
     public URN getURN();
     
     public String getMagnetLink();
+
+    String getHeading();
 }

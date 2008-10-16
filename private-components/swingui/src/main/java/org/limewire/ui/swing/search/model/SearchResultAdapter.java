@@ -22,6 +22,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.StringUtils;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private final Log LOG = LogFactory.getLog(getClass());
@@ -39,7 +40,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private VisualSearchResult similarityParent;
 
     private boolean visible;
-    
+
     private boolean childrenVisible;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
@@ -181,7 +182,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public boolean isChildrenVisible() {
-       return childrenVisible;
+        return childrenVisible;
     }
 
     public void removeSimilarSearchResult(VisualSearchResult result) {
@@ -209,7 +210,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public URN getURN() {
-       return coreResults.get(0).getUrn();
+        return coreResults.get(0).getUrn();
     }
 
     @Override
@@ -219,17 +220,44 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public String getMagnetLink() {
-        
+
         String sep = System.getProperty("line.separator");
         StringBuilder bldr = new StringBuilder();
-        for(SearchResult result : getCoreSearchResults()) {
+        for (SearchResult result : getCoreSearchResults()) {
             bldr.append(result.getMagnetURL()).append(sep);
         }
 
         if (bldr.length() > sep.length()) {
             return bldr.substring(0, bldr.length() - sep.length());
         }
-        
+
         return null;
+    }
+
+    @Override
+    public String getHeading() {
+        String name = getProperty(PropertyKey.NAME).toString();
+        String renderName = "";
+        switch (getCategory()) {
+        case AUDIO:
+            String artist = getPropertyString(PropertyKey.ARTIST_NAME);
+            String title = getPropertyString(PropertyKey.TRACK_NAME);
+            if (!StringUtils.isEmpty(artist) && !StringUtils.isEmpty(title)) {
+                renderName = artist + " - " + title;
+            } else {
+                renderName = name;
+            }
+            break;
+        case VIDEO:
+        case IMAGE:
+            renderName = name;
+            break;
+        case DOCUMENT:
+        case PROGRAM:
+        case OTHER:
+        default:
+            renderName = name + "." + getFileExtension();
+        }
+        return renderName.trim();
     }
 }

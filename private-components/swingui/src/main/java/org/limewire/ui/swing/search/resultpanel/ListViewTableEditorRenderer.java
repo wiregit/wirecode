@@ -50,6 +50,7 @@ import org.limewire.ui.swing.table.RowColorResolver;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -391,30 +392,11 @@ implements TableCellEditor, TableCellRenderer {
      * parts of the content that match search terms
      */
     private boolean populateHeading(VisualSearchResult vsr) {
-        String name = getProperty(vsr, PropertyKey.NAME);
-        String heading;
-        
-        switch(getCategory()) {
-        case AUDIO:
-            heading = getProperty(vsr, PropertyKey.ARTIST_NAME) + " - " + name;
-            break;
-        case VIDEO:
-        case IMAGE:
-            heading = name;
-            break;
-        default:
-            heading = name + "." + vsr.getFileExtension();
-        }
-
+        String heading = vsr.getHeading();
         String highlightMatches = highlightMatches(heading);
         LOG.debugf("Heading: {0} highlightedMatches: {1}", heading, highlightMatches);
         headingLabel.setText(highlightMatches);
         return isDifferentLength(heading, highlightMatches);
-    }
-
-    private String getProperty(VisualSearchResult vsr, PropertyKey key) {
-        Object property = vsr.getProperty(key);
-        return property == null ? "?" : property.toString();
     }
 
     private void populateOther(VisualSearchResult vsr, boolean shouldHidePropertyMatches) {
@@ -505,30 +487,80 @@ implements TableCellEditor, TableCellRenderer {
      * parts of the content that match search terms
      */
     private boolean populateSubheading(VisualSearchResult vsr) {
-        String subheading;
+        String subheading = "";
 
         switch(getCategory()) {
-        case AUDIO:
-            Object albumTitle = vsr.getProperty(PropertyKey.ALBUM_TITLE);
-            String prefix = albumTitle == null ? "" : albumTitle + " - ";
-            subheading = prefix + vsr.getProperty(PropertyKey.QUALITY)
-                + " - " + vsr.getProperty(PropertyKey.LENGTH);
+        case AUDIO: {
+            String albumTitle = vsr.getPropertyString(PropertyKey.ALBUM_TITLE);
+            String quality = vsr.getPropertyString(PropertyKey.QUALITY);
+            String length = vsr.getPropertyString(PropertyKey.LENGTH);
+            
+            
+            int change = 0;
+            if(!StringUtils.isEmpty(albumTitle)) {
+                subheading += albumTitle;
+                change = albumTitle.length();
+            }
+            
+            if(!StringUtils.isEmpty(quality)) {
+                if(change > 0) {
+                    subheading += " - ";
+                }
+                subheading += quality; 
+                change = quality.length();
+            }
+            
+            if(!StringUtils.isEmpty(length)) {
+                if(change > 0) {
+                    subheading += " - ";
+                }
+                subheading += length;
+            }
+        }
             break;
-        case VIDEO:
-            subheading = vsr.getProperty(PropertyKey.QUALITY)
-                + " - " + vsr.getProperty(PropertyKey.LENGTH);
+        case VIDEO: {
+            String quality = vsr.getPropertyString(PropertyKey.QUALITY);
+            String length = vsr.getPropertyString(PropertyKey.LENGTH);
+            int change = 0;
+            if(!StringUtils.isEmpty(quality)) {
+                if(change > 0) {
+                    subheading += " - ";
+                }
+                subheading += quality; 
+                change = quality.length();
+            }
+            
+            if(!StringUtils.isEmpty(length)) {
+                if(change > 0) {
+                    subheading += " - ";
+                }
+                subheading += length;
+            }
+        }
             break;
-        case IMAGE:
+        case IMAGE: {
             Object time = vsr.getProperty(PropertyKey.DATE_CREATED);
-            if(time == null) {
-                subheading = "";
-            } else {
+            if(time != null) {
                 subheading = DATE_FORMAT.format(new java.util.Date((Long)time));
             }
+        }
             break;
-        default:
-            subheading = "{application name}"
-                + " - " + vsr.getProperty(PropertyKey.FILE_SIZE) + tr("MB");
+        case PROGRAM: {
+            String fileSize = vsr.getPropertyString(PropertyKey.FILE_SIZE);
+            if(!StringUtils.isEmpty(fileSize)) {
+                subheading = fileSize + tr("MB");
+            }
+        }
+            break;
+        case DOCUMENT:
+        case OTHER:
+        default: {
+            subheading = "{application name}";
+            String fileSize = vsr.getPropertyString(PropertyKey.FILE_SIZE);
+            if(!StringUtils.isEmpty(fileSize)) {
+                subheading = " - " + fileSize + tr("MB");
+            }
+        }
         }
 
         String highlightMatches = highlightMatches(subheading);

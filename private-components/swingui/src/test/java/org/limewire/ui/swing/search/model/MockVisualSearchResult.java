@@ -179,4 +179,9 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public String getMagnetLink() {
         return null;
     }
+
+    @Override
+    public String getHeading() {
+        return name;
+    }
 }

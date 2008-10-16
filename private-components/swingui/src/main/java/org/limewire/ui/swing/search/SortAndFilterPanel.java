@@ -246,6 +246,19 @@ public class SortAndFilterPanel extends JXPanel {
         };
     }
     
+    private static Comparator<VisualSearchResult> getNameComparator(
+            final PropertyKey key, final boolean ascending) {
+            return new SimilarResultsGroupingComparator() {
+                @Override
+                public int doCompare(
+                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    String v1 = vsr1.getHeading();
+                    String v2 = vsr2.getHeading();
+                    return compareNullCheck(v1, v2, ascending);
+                }
+            };
+        }
+    
     private Comparator<VisualSearchResult> getComparator(String item) {
 
         if (ALBUM.equals(item)) {
@@ -289,7 +302,7 @@ public class SortAndFilterPanel extends JXPanel {
                 // is this a bug?
             || "Filename".equals(item)
             || TITLE.equals(item)) {
-            return getStringComparator(PropertyKey.NAME, true);
+            return getNameComparator(PropertyKey.NAME, true);
         }
 
         if (PLATFORM.equals(item)) {
