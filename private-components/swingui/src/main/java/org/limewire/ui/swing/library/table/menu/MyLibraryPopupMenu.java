@@ -162,7 +162,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-                libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
+            libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
         }
 
     };
@@ -171,8 +171,9 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO send to trash, instead of deleting
-                FileUtils.forceDelete(getFile());
+            FileUtils.unlockFile(getFile());
+            libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
+            FileUtils.delete(getFile(), true);
         }
 
     };

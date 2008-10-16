@@ -105,6 +105,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         }
     };
 
+    //TODO combine with MyLibraryManager deleteAction
     private Action deleteAction = new AbstractAction(I18n.tr("Delete file")) {
 
         @Override
@@ -116,8 +117,9 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
-                        // TODO send to trash, instead of deleting
-                        FileUtils.forceDelete(fileItem.getFile());
+                        FileUtils.unlockFile(fileItem.getFile());
+                        libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
+                        FileUtils.delete(fileItem.getFile(), true);
                     }
                 }
                 

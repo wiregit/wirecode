@@ -993,4 +993,11 @@ public class FileUtils {
         process.waitFor();
         return process.exitValue();
     }
+    
+    public static void unlockFile(File file) {
+        for (FileLocker locker : fileLockers) {
+            locker.releaseLock(file);
+        }
+    }
+    
 }
