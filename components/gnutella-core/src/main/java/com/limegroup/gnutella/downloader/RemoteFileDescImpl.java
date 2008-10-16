@@ -763,6 +763,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
                 }
             }
 
+            // TODO 
             address = new FirewalledAddress(publicPrivateAddress, publicPrivateAddress, new GUID(getClientGUID()), proxies, _pushAddr
                     .getFWTVersion());
         }

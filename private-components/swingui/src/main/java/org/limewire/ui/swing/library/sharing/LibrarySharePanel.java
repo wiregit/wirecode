@@ -47,6 +47,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -704,6 +705,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
         public void setName(String name) {
             
+        }
+
+        public Network getNetwork() {
+            return null;
         }
     }
  

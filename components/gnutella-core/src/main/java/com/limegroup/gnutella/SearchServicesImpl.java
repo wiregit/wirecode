@@ -67,22 +67,6 @@ public class SearchServicesImpl implements SearchServices {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.SearchServices#doAsynchronousBrowseHost(org.limewire.io.Connectable, com.limegroup.gnutella.GUID, com.limegroup.gnutella.GUID, java.util.Set, boolean)
-     */
-    public BrowseHostHandler doAsynchronousBrowseHost(
-      final Connectable host, GUID guid, GUID serventID, 
-      final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
-        final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid, serventID);
-        ThreadExecutor.startThread(new DebugRunnable(new Runnable() {
-            public void run() {
-                handler.browseHost(host, proxies, canDoFWTransfer);
-            }
-        }), "BrowseHoster" );
-        
-        return handler;
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#isMandragoreWorm(byte[], com.limegroup.gnutella.Response)
      */
     public boolean isMandragoreWorm(byte[] guid, Response response) {

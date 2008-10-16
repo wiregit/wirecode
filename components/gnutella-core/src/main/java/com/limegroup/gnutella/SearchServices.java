@@ -11,21 +11,6 @@ import org.limewire.util.MediaType;
 
 public interface SearchServices {
 
-    /**
-     * Browses the passed host
-     * @param host The host to browse
-     * @param port The port at which to browse
-     * @param guid The guid to be used for the query replies received 
-     * while browsing host
-     * @param serventID The guid of the client to browse from.  I need this in
-     * case I need to push....
-     * @param proxies the list of PushProxies we can use - may be null.
-     * @param canDoFWTransfer true if the remote host supports fw transfer
-     */
-    public BrowseHostHandler doAsynchronousBrowseHost(final Connectable host,
-            GUID guid, GUID serventID, final Set<? extends IpPort> proxies,
-            final boolean canDoFWTransfer);
-
     /** 
      * Returns true if the given response for the query with the given guid is a
      * result of the Madragore worm (8KB files of form "x.exe").  Returns false

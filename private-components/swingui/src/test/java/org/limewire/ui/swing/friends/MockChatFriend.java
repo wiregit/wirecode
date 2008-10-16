@@ -3,6 +3,7 @@ package org.limewire.ui.swing.friends;
 import java.beans.PropertyChangeListener;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.Network;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
@@ -43,6 +44,10 @@ class MockChatFriend implements ChatFriend {
             @Override
             public boolean isAnonymous() {
                 return false;
+            }
+
+            public Network getNetwork() {
+                return null;
             }
         };
     }
