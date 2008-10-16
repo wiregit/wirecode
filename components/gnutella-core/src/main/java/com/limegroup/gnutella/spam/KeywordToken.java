@@ -26,9 +26,7 @@ public class KeywordToken extends AbstractToken {
 
 	private final String keyword;
 
-	private byte _good;
-
-	private byte _bad;
+	private byte _good, _bad;
     
 	KeywordToken(String keyword) {
         this.keyword = keyword;
@@ -62,7 +60,6 @@ public class KeywordToken extends AbstractToken {
 	 * implements interface <tt>Token</tt>
 	 */
 	public void rate(Rating rating) {
-		_age = 0;
 		switch (rating) {
 		case USER_MARKED_GOOD:
 			_bad = 0;

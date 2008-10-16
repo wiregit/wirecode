@@ -84,7 +84,6 @@ public class VendorToken extends AbstractToken {
     }
 
     public void rate(Rating rating) {
-        _age = 0;
         switch (rating) {
         case USER_MARKED_GOOD:
             _bad = (byte) (_bad / 2); // bad rating should decrease slowly

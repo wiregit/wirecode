@@ -10,10 +10,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,18 +38,41 @@ public class RatingTable implements Service {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
 
 	/**
-	 * Don't hold more than twice this many entries in memory and don't save
-     * more than this many entries to disk
+	 * Don't hold more than this many entries in memory or save more than
+     * this many entries to disk. The size is a tradeoff - tokens should be
+     * discarded when they become irrelevant, but not before.
 	 */
-	private static final int MAX_SIZE = 50000;
+	private static final int MAX_SIZE = 10000;
+    
+    /**
+     * Initial size of the rating table - should not be too large as many
+     * users probably don't use the spam filter.
+     */
+    private static final int INITIAL_SIZE = 1000;
     
 	/**
-	 * A Map containing a limited number of Tokens. We use a Map rather than
-     * a Set so that we can retrieve a stored Token by using an equivalent
-     * Token as a key. This allows us to use a blank Token without rating
-     * data to retrieve an equivalent Token that has rating data.
+	 * A map containing a limited number of tokens. We use a map rather than
+     * a set so that we can retrieve a stored token by using an equivalent
+     * token as a key. This allows us to use a token without rating data to
+     * retrieve an equivalent token that has rating data.
+     * 
+     * The size of the map is limited. Entries are discarded in
+     * least-recently-used order when the map if full, on the assumption that
+     * the least-recently-used token is the least important to keep.
+     * TODO: check that the order is preserved during serialization.
 	 */
-	private final Map<Token, Token> _tokenMap = new HashMap<Token, Token>();
+	private final Map<Token, Token> tokenMap
+        = new LinkedHashMap<Token, Token>(INITIAL_SIZE, 0.75f, true) {
+            // This method will be called on every get(), put(), and putAll()
+            protected boolean removeEldestEntry(Map.Entry<Token, Token> e) {
+                if(size() > MAX_SIZE) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Discarding token " + e.getValue());
+                    return true;
+                }
+                return false;
+            }
+        };
 	
 	private final Tokenizer tokenizer;
 	
@@ -69,17 +94,19 @@ public class RatingTable implements Service {
 	}
 	
 	public synchronized void start() {
-        _tokenMap.putAll(load());
-        if(LOG.isDebugEnabled())
-            LOG.debug(_tokenMap.size() + " tokens loaded");
+        load();
     }
 	
+    public synchronized void stop() {
+        save();
+    }
+    
 	/**
 	 * Clears the filter data
 	 */
 	protected synchronized void clear() {
         LOG.debug("Clearing ratings");
-		_tokenMap.clear();
+		tokenMap.clear();
 	}
 
 	/**
@@ -165,54 +192,54 @@ public class RatingTable implements Service {
 	 * @return the same token or a previously stored equivalent
 	 */
 	private Token lookup(Token token) {
-        Token stored = _tokenMap.get(token);
+        Token stored = tokenMap.get(token);
         if(stored == null) {
-            _tokenMap.put(token, token);
-            pruneEntries (MAX_SIZE * 2);
+            tokenMap.put(token, token);
             stored = token;
         }
         return stored;
 	}
 
 	/**
-	 * Load ratings from disk
-	 * 
-	 * @return Map of <tt>Token</tt> to <tt>Token</tt> as read from disk
+	 * Loads ratings from disk
 	 */
-	private Map<Token, Token> load() {
+	private void load() {
 		ObjectInputStream is = null;
 		try {
 			is = new ObjectInputStream(
                     new BufferedInputStream(
                             new FileInputStream(getSpamDat())));
-            return GenericsUtils.scanForMap(is.readObject(),
-                    Token.class, Token.class, GenericsUtils.ScanMode.REMOVE);
+            List<Token> list
+                = GenericsUtils.scanForList(is.readObject(),
+                    Token.class, GenericsUtils.ScanMode.REMOVE);
+            // Most-recently-used token will be at the head, but we want to
+            // add it to the map last so it's still most-recently-used
+            Collections.reverse(list);
+            for(Token t : list)
+                tokenMap.put(t, t);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Loaded " + tokenMap.size() + " entries");
 		} catch(Throwable t) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Error loading spam ratings: " + t);
-			return new HashMap<Token, Token>();
 		} finally {
             IOUtils.close(is);
 		}
 	}
     
     /**
-     * Save ratings to disk
+     * Saves ratings to disk (called whenever the user marks a search result)
      */
     public synchronized void save() {
-        pruneEntries (MAX_SIZE);
-        Map<Token, Token> copy = new HashMap<Token, Token>(_tokenMap);
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("Saving " + copy.size() + " entries");
-
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(
                             new FileOutputStream(getSpamDat())));
-            oos.writeObject(copy);
+            oos.writeObject(new ArrayList<Token>(tokenMap.keySet()));
             oos.flush();
+            if(LOG.isDebugEnabled())
+                LOG.debug("Saved " + tokenMap.size() + " entries");
         } catch (IOException iox) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Error saving spam ratings: ", iox);
@@ -221,44 +248,8 @@ public class RatingTable implements Service {
         }
 	}
     
-    /**
-     * Increments the age of each token and saves the ratings to disk
-     * (called when LimeWire shuts down)
-     */
-    public synchronized void stop() {
-        for(Token token : _tokenMap.values()) 
-            token.incrementAge();
-        save();
-    }
-    
-	/**
-	 * Removes the least important entries from the rating table
-     *
-     * @param size the size to which the table should be pruned
-	 */
-	private void pruneEntries(int size) {
-        
-        int tokensToRemove = _tokenMap.size() - size;
-        if(tokensToRemove <= 0)
-            return;
-        
-		if(LOG.isDebugEnabled())
-			LOG.debug("Pruning rating table to " + size + " entries");
-
-        // Make a set of sorted tokens, low importance first
-        Set<Token> sortedTokens = new TreeSet<Token>(_tokenMap.values());
-        for(Token token : sortedTokens) {
-            // Keys and values of the map are identical, so we can iterate
-            // over the values and use them as keys
-            _tokenMap.remove(token);
-            --tokensToRemove;
-            if(tokensToRemove == 0)
-                break;
-        }
-	}
-    
 	private static File getSpamDat() {
-	    return new File(CommonUtils.getUserSettingsDir(), "spam.dat");
+	    return new File(CommonUtils.getUserSettingsDir(), "spam1.dat");
 	}
     
 	/** Inspectable that returns a hash and rating of the tokens */
@@ -273,7 +264,7 @@ public class RatingTable implements Service {
 	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	            DataOutputStream daos = new DataOutputStream(baos);
 	            try {
-	                for (Token t : _tokenMap.values()) {
+	                for (Token t : tokenMap.values()) {
 	                    // 8 bytes per entry
 	                    float rating = t.getRating();
 	                    if (rating < spamThreshold)

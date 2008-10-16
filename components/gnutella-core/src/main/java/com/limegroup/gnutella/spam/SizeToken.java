@@ -38,7 +38,6 @@ public class SizeToken extends AbstractToken {
 	 * implements interface <tt>Token</tt>
 	 */
 	public void rate(Rating rating) {
-		_age = 0;
 		switch (rating) {
 		case CLEARED:
 		case USER_MARKED_GOOD:

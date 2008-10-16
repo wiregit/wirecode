@@ -82,17 +82,6 @@ public class AddressToken extends AbstractToken {
 		return ((float) _bad )/(_good + _bad + 1);
 	}
 
-    /**
-     * implements interface <tt>Token</tt>
-     */
-    @Override
-    public double getImportance() {
-        // Throw out AddressTokens first, since they
-        // can mostly be regenerated from the list of
-        // blocked IP addresses.
-        return Double.NEGATIVE_INFINITY;
-    }
-    
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
@@ -100,7 +89,6 @@ public class AddressToken extends AbstractToken {
         if (!ratingInitialized) {
             initializeRating();
         }
-		_age = 0;
 		switch (rating) {
 		case USER_MARKED_GOOD:
 			_bad = 0;

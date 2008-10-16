@@ -40,7 +40,6 @@ public class XMLKeywordToken extends AbstractToken {
 	 * implements interface <tt>Token</tt>
 	 */
 	public void rate(Rating rating) {
-		_age = 0;
 		switch (rating) {
 		case USER_MARKED_GOOD:
 			_bad = 0;

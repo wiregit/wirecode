@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * From every RFD we can extract a set of tokens,
  */
-public interface Token extends Serializable, Comparable<Token> {
+public interface Token extends Serializable {
     
     public static enum Rating {
         USER_MARKED_SPAM, USER_MARKED_GOOD, CLEARED;
@@ -28,18 +28,4 @@ public interface Token extends Serializable, Comparable<Token> {
      *         ratings defined in the <tt>Token</tt> interface
 	 */
 	public void rate(Rating rating);
-
-	/**
-     * Returns a value representing the importance of remembering this token,
-     * which is used to determine which tokens to keep when there are too
-     * many tokens in the RatingTable
-	 * 
-	 * @return the importance of this token  
-	 */
-	public double getImportance();
-	
-	/**
-	 * Increases the age of this token (measured in LimeWire sessions)
-	 */
-	public void incrementAge();
 }
