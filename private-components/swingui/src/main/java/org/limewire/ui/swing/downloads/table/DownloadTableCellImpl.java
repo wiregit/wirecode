@@ -185,7 +185,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.weightx = 0;
         gbc.weighty = 0;
-        gbc.gridheight = 3;
+        gbc.gridheight = 5;
         minPanel.add(minIconLabel, gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
