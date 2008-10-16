@@ -17,6 +17,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
@@ -52,15 +53,17 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
     //only accessed on EDT
     private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
     private DownloadListManager downloadListManager;
+    private MagnetLinkFactory magnetLinkFactory;
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager, LibraryManager libraryManager, 
-            ShareListManager shareListManager, AudioPlayer player, DownloadListManager downloadListManager){
+            ShareListManager shareListManager, AudioPlayer player, DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory){
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.player = player;
         this.downloadListManager = downloadListManager;
+        this.magnetLinkFactory = magnetLinkFactory;
         EventAnnotationProcessor.subscribe(this);
     }
     
@@ -106,10 +109,10 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         
         if(friend != null){
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
-            libTable.setPopupHandler(new FriendLibraryPopupHandler((LibraryTable<RemoteFileItem>)libTable, downloadListManager));
+            libTable.setPopupHandler(new FriendLibraryPopupHandler((LibraryTable<RemoteFileItem>)libTable, downloadListManager, magnetLinkFactory));
         } else {//Local            
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
-            libTable.setPopupHandler(new MyLibraryPopupHandler((LibraryTable<LocalFileItem>)libTable, category, libraryManager, shareListManager, friendList));
+            libTable.setPopupHandler(new MyLibraryPopupHandler((LibraryTable<LocalFileItem>)libTable, category, libraryManager, shareListManager, magnetLinkFactory, friendList));
         }
         
             libTable.setDropMode(DropMode.ON);

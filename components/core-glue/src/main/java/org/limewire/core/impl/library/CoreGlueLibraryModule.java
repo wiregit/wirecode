@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.inject.AbstractModule;
@@ -19,6 +20,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(LibraryManager.class).to(LibraryManagerImpl.class);
         bind(RemoteLibraryManager.class).to(RemoteLibraryManagerImpl.class);
         bind(ShareListManager.class).to(LibraryManagerImpl.class);
+        bind(MagnetLinkFactory.class).to(MagnetLinkFactoryImpl.class);
         bind(PresenceLibraryBrowser.class);
         bind(FriendSearcher.class);
         

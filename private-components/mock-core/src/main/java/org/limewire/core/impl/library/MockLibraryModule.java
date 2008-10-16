@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
@@ -20,6 +21,7 @@ public class MockLibraryModule extends AbstractModule {
         bind(LibraryManager.class).to(MockLibraryManager.class);
         bind(RemoteLibraryManager.class).to(MockRemoteLibraryManager.class);
         bind(ShareListManager.class).to(MockLibraryManager.class);
+        bind(MagnetLinkFactory.class).to(MagnetLinkFactoryImpl.class);
         
         EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
         bind(new TypeLiteral<EventListener<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);

@@ -10,6 +10,7 @@ import javax.swing.JSeparator;
 
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -25,8 +26,11 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
 
     final private DownloadListManager downloadListManager;
 
-    public FriendLibraryPopupMenu(DownloadListManager downloadListManager) {
+    private MagnetLinkFactory magnetFactory;
+
+    public FriendLibraryPopupMenu(DownloadListManager downloadListManager, MagnetLinkFactory magnetFactory) {
         this.downloadListManager = downloadListManager;
+        this.magnetFactory = magnetFactory;
         
         linkItem = new JMenuItem(linkAction);
         propertiesItem = new JMenuItem(propertiesAction);
@@ -41,10 +45,10 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
     public void setFileItems(List<RemoteFileItem> items) {
         this.fileItems = items;   
           
-        boolean isMultipleSelection = fileItems.size() > 1;
-        linkItem.setVisible(isMultipleSelection);
-        separator.setVisible(isMultipleSelection);
-        propertiesItem.setVisible(isMultipleSelection);        
+        boolean isSingleSelection = fileItems.size() == 1;
+        linkItem.setVisible(isSingleSelection);
+        separator.setVisible(isSingleSelection);
+        propertiesItem.setVisible(isSingleSelection);        
     }
 
 
@@ -76,8 +80,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
     private Action linkAction = new AbstractAction(I18n.tr("Copy Link to Clipboard")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO Copy Link to Clipboard
-            throw new RuntimeException("Implement me");
+            new MagnetLinkCopier(fileItems.get(0), magnetFactory).copyLinkToClipBoard();
         }
     };
     

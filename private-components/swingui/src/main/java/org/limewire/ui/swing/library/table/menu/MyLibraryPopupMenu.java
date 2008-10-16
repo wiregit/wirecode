@@ -16,6 +16,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
@@ -43,10 +44,13 @@ public class MyLibraryPopupMenu extends JPopupMenu {
   //only accessed on EDT
     private List<SharingTarget> friendList;
 
+    private MagnetLinkFactory magnetFactory;
+
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
-            ShareListManager shareListManager, LibraryTable table, List<SharingTarget> friendList) {
+            ShareListManager shareListManager, MagnetLinkFactory magnetFactory, LibraryTable table, List<SharingTarget> friendList) {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
+        this.magnetFactory = magnetFactory;
         this.table = table;
         this.friendList = friendList;
         initializeCategory(category);
@@ -140,7 +144,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            throw new RuntimeException("implement me");
+            new MagnetLinkCopier(fileItem, magnetFactory).copyLinkToClipBoard();
         }
 
     };
