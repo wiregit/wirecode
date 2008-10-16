@@ -315,6 +315,10 @@ public class StringUtilsTest extends BaseTestCase {
         assertEquals("ArrayFields {objs=[null, hello], ints=[4, 4]}", fields.toString());
     }
     
+    public void testReplace() {
+        assertEquals("mimimi", StringUtils.replace("mamama", "ma", "mi"));
+    }
+    
     private static class AllFields {
         String a = "a";
         int i = Integer.MAX_VALUE;
