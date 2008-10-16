@@ -65,7 +65,7 @@ public class DownloadTable extends MouseableTable {
                 BackgroundExecutorService.schedule(new Runnable(){
                     public void run() {
                         if (item.isLaunchable()) {
-                            if(item.getCategory() == Category.AUDIO){
+                            if(item.getCategory() == Category.AUDIO && PlayerUtils.isPlayableFile(item.getFile())){
                                 PlayerUtils.play(item.getFile());
                             } else {
                                 NativeLaunchUtils.launchFile(item.getFile());
