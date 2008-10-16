@@ -4,8 +4,7 @@
 package org.limewire.core.impl.library;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
@@ -25,7 +24,7 @@ public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFil
     private final LibraryManagerImpl libraryManagerImpl;
     private final FileManager fileManager;
     
-    private final Map<File, LocalFileItem> lookup;
+    private final ConcurrentHashMap<File, LocalFileItem> lookup;
     
     LibraryFileListImpl(LibraryManagerImpl libraryManagerImpl, FileManager fileManager) {
         super(new BasicEventList<LocalFileItem>());
@@ -34,7 +33,7 @@ public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFil
         this.fileManager = fileManager;
         this.fileManager.addFileEventListener(this);
         
-        lookup = new HashMap<File, LocalFileItem>();
+        lookup = new ConcurrentHashMap<File, LocalFileItem>();
     }
     
     @Override

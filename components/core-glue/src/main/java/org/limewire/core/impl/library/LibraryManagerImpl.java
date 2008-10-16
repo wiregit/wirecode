@@ -3,7 +3,6 @@ package org.limewire.core.impl.library;
 import java.awt.EventQueue;
 import java.io.File;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -118,7 +117,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
 
         private final FileManager fileManager;
         
-        private final Map<File, FileItem> lookup;
+        private final ConcurrentHashMap<File, FileItem> lookup;
         
         public GnutellaFileList(FileManager fileManager) {
             super(new BasicEventList<LocalFileItem>());
@@ -126,7 +125,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
             this.fileManager = fileManager;
             this.fileManager.getGnutellaSharedFileList().addFileListListener(this);
             
-            lookup = new HashMap<File, FileItem>();
+            lookup = new ConcurrentHashMap<File, FileItem>();
         }
         
         @Override
