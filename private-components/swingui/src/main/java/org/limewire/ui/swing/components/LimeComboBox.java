@@ -16,8 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXButton;
-
-import com.limegroup.gnutella.gui.actions.AbstractAction;
+import org.limewire.ui.swing.action.AbstractAction;
 
 public class LimeComboBox extends JXButton {
 
