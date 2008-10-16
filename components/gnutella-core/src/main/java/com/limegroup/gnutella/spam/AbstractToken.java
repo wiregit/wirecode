@@ -47,20 +47,13 @@ public abstract class AbstractToken implements Token {
      * implements interface <tt>Comparable</tt>
      */
     public int compareTo(Token t) {
-        // First, sort by importance
+        // Sort by importance, in descending order
         double importanceDelta = this.getImportance() - t.getImportance();
-        // Sort low importance first
         if (importanceDelta < 0.0)
             return -1;
         if (importanceDelta > 0.0)
             return 1;
-        
-        // Then, sort by type
-        int typeDelta = this.getType().ordinal() - t.getType().ordinal();
-        if (typeDelta != 0)
-            return typeDelta;
-        
-        // Finally, sort by hashCode to reduce ambiguity
+        // Use the hashCode to break ties
         return this.hashCode() - t.hashCode();
     }
 }

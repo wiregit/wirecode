@@ -37,14 +37,6 @@ public class UrnToken extends AbstractToken {
 	public void rate(Rating rating) {
 		_age = 0;
 		switch (rating) {
-		case PROGRAM_MARKED_GOOD:
-			if (_bad > 0)
-				_bad--;
-			break;
-		case PROGRAM_MARKED_SPAM:
-			if (_bad < MAX)
-				_bad++;
-			break;
 		case CLEARED:
 		case USER_MARKED_GOOD:
 			_bad = 0;
@@ -57,13 +49,6 @@ public class UrnToken extends AbstractToken {
 		}
 	}
 
-	/**
-	 * implements interface <tt>Token</tt>
-	 */
-	public TokenType getType() {
-		return TokenType.URN;
-	}
-    
     @Override
     public final int hashCode() {
         return _urn.hashCode();
@@ -82,10 +67,7 @@ public class UrnToken extends AbstractToken {
         
         return _urn.equals(((UrnToken)o)._urn);
     }
-
-	/**
-	 * overrides method from <tt>Object</tt>
-	 */
+    
 	@Override
     public String toString() {
 		return _urn.toString() + " " + _bad;

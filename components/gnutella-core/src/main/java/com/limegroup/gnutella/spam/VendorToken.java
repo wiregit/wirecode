@@ -74,8 +74,9 @@ public class VendorToken extends AbstractToken {
         return vendor.equals(((VendorToken)o).vendor);
     }
     
-    public TokenType getType() {
-        return TokenType.VENDOR;
+    @Override
+    public String toString() {
+        return vendor + " " + _good + " " + _bad;
     }
     
     public float getRating() {
@@ -85,12 +86,6 @@ public class VendorToken extends AbstractToken {
     public void rate(Rating rating) {
         _age = 0;
         switch (rating) {
-        case PROGRAM_MARKED_GOOD:
-            _good++;
-            break;
-        case PROGRAM_MARKED_SPAM:
-            _bad++;
-            break;
         case USER_MARKED_GOOD:
             _bad = (byte) (_bad / 2); // bad rating should decrease slowly
             break;

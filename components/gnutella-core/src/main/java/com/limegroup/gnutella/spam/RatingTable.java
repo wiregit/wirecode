@@ -36,30 +36,21 @@ public class RatingTable implements Service {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
 
 	/**
-	 * don't hold more than this many entries * 2 and don't save more than this
-	 * many entries...
+	 * Don't hold more than twice this many entries in memory and don't save
+     * more than this many entries to disk
 	 */
 	private static final int MAX_SIZE = 50000;
     
 	/**
-	 * a Map containing all tokens.
-     * 
-     * Although we stored the data as Token -> Token,
-     * this is by design (and purposely not a Set), so that
-     * we can retrieve the stored value from the Set, using
-     * a Token as an identifier.  This way a third-party can
-     * create a blank Token object without rating data and ask 
-     * the RatingTable to return the actual Token that should
-     * be used inplace of that Token (one that has rating data).
+	 * A Map containing a limited number of Tokens. We use a Map rather than
+     * a Set so that we can retrieve a stored Token by using an equivalent
+     * Token as a key. This allows us to use a blank Token without rating
+     * data to retrieve an equivalent Token that has rating data.
 	 */
 	private final Map<Token, Token> _tokenMap = new HashMap<Token, Token>();
 	
 	private final Tokenizer tokenizer;
 	
-	/**
-	 * constructor, tries to deserialize filter data from disc, which will fail
-	 * silently, if it fails
-	 */
 	@Inject
 	RatingTable(Tokenizer tokenizer) {
 	    this.tokenizer = tokenizer;
@@ -78,117 +69,85 @@ public class RatingTable implements Service {
 	}
 	
 	public synchronized void start() {
-        _tokenMap.putAll(readData());
-        
-        for(Token token : _tokenMap.values())
-            tokenizer.initialize(token);
-
-        if (LOG.isDebugEnabled())
-            LOG.debug("size of tokenSet " + _tokenMap.size());
+        _tokenMap.putAll(load());
+        if(LOG.isDebugEnabled())
+            LOG.debug(_tokenMap.size() + " tokens loaded");
     }
 	
 	/**
-	 * clears the filter data
+	 * Clears the filter data
 	 */
-	synchronized void clear() {
+	protected synchronized void clear() {
+        LOG.debug("Clearing ratings");
 		_tokenMap.clear();
 	}
 
 	/**
 	 * Returns the rating for a RemoteFileDesc
 	 * 
-	 * @param desc
-	 *            the RemoteFileDesc to rate
+	 * @param desc the RemoteFileDesc to rate
 	 * @return the rating for the RemoteFileDesc
 	 */
-	float getRating(RemoteFileDesc desc) {
-		float ret = getRating(lookup(tokenizer.getTokens(desc)));
-		if (LOG.isDebugEnabled())
-			LOG.debug(desc.toString() + " rated " + ret);
-		return ret;
+	protected synchronized float getRating(RemoteFileDesc desc) {
+		float rating = getRating(lookup(tokenizer.getTokens(desc)));
+		if(LOG.isDebugEnabled())
+			LOG.debug(desc + " rated " + rating);
+		return rating;
 	}
 
 	/**
-	 * Returns the cumulative rating for a RemoteFileDesc
+	 * Returns the rating for a tokenized RemoteFileDesc
 	 * 
-	 * @param tokens
-	 *            an array of Token
-	 * @return the cumulative rating
+	 * @param tokens an array of Tokens taken from a RemoteFileDesc
+	 * @return the rating for the RemoteFileDesc
 	 */
-    float getRating(Token[] tokens) {
+    private float getRating(Token[] tokens) {
         float rating = 1;
-        for (int i = 0; i < tokens.length && rating > 0; i++) {
-            rating *= (1 - tokens[i].getRating());
-        }
-
-        rating = 1 - rating;
-
-        float bad = SearchSettings.FILTER_SPAM_RESULTS.getValue();
-        if (rating >= bad && rating <= SpamManager.MAX_THRESHOLD)
-            markInternal(tokens, Rating.PROGRAM_MARKED_SPAM);
-        else if (rating <= 1f - bad)
-            markInternal(tokens, Rating.PROGRAM_MARKED_GOOD);
-
-        return rating;
+        for(Token t : tokens)
+            rating *= 1 - t.getRating();
+        return 1 - rating;
     }
 
 	/**
-	 * mark an array of RemoteFileDesc
+	 * Assigns the given rating to an array of RemoteFileDescs
 	 * 
-	 * @param descs
-	 *            an array of RemoteFileDesc
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
+	 * @param descs an array of RemoteFileDescs to be rated
+	 * @param rating a rating as defined by the Token interface
 	 */
-	void mark(RemoteFileDesc[] descs, Rating rating) {
-		markInternal(lookup(tokenizer.getTokens(descs)), rating);
+	protected synchronized void rate(RemoteFileDesc[] descs, Rating rating) {
+		rateInternal(lookup(tokenizer.getTokens(descs)), rating);
 	}
 
 	/**
-	 * mark a the Tokens of a RemoteFileDesc
-	 * 
-	 * @param desc
-	 *            the RemoteFileDesc to mark
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
+     * Clears the ratings of the tokens associated with a QueryRequest
+     * 
+	 * @param qr the QueryRequest to clear
 	 */
-	void mark(RemoteFileDesc desc, Rating rating) {
-		markInternal(lookup(tokenizer.getTokens(desc)), rating);
+	protected synchronized void clear(QueryRequest qr) {
+		rateInternal(lookup(tokenizer.getTokens(qr)), Rating.CLEARED);
 	}
 
 	/**
-	 * mark a single QueryRequest, or rather the Tokens associated with it
+	 * Assigns the given rating to an array of tokens
 	 * 
-	 * @param qr
-	 *            the QueryRequest to mark
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
+	 * @param tokens the Tokens to rate
+	 * @param rating a rating as defined by the Token interface
 	 */
-	void mark(QueryRequest qr, Rating rating) {
-		markInternal(lookup(tokenizer.getTokens(qr)), rating);
+	private void rateInternal(Token[] tokens, Rating rating) {
+		for(Token t : tokens) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Rating " + t + " as " + rating);
+			t.rate(rating);
+        }
 	}
 
 	/**
-	 * mark an array of Token
+	 * Replaces each token with an equivalent previously stored token, or
+     * stores the token if no equivalent exists
 	 * 
-	 * @param tokens
-	 *            the Tokens to mark
-	 * @param rating
-	 *            must be a rating as defined by the Token interface
-	 */
-	private void markInternal(Token[] tokens, Rating rating) {
-		for (int i = 0; i < tokens.length; i++)
-			tokens[i].rate(rating);
-	}
-
-	/**
-	 * Replaces all tokens with equal tokens from the _tokenMap
-	 * 
-	 * @param tokens
-	 *            an array of Token
-	 * @return an array of Token of equal length where all Tokens that are equal
-	 *         to Tokens we have already seen before are replaced with the
-	 *         matching Tokens we remember
+	 * @param tokens an array of tokens to be replaced
+	 * @return the same array, with each element replaced by an equivalent
+     *         previously stored token if any such token exists
 	 */
 	private Token[] lookup(Token[] tokens) {
 		for (int i = 0; i < tokens.length; i++) {
@@ -199,38 +158,38 @@ public class RatingTable implements Service {
 	}
 
 	/**
-	 * Replaces a Token with the copy stored in our internal _tokenMap if
-	 * possible, stores the Token in the _tokenMap otherwise
+	 * Replaces a token with an equivalent previously stored token if
+     * any such token exists, otherwise stores the token
 	 * 
-	 * @param token
-	 *            the Token to look up in _tokenMap
-	 * @return token or the matching copy of it from _tokenMap
+	 * @param token the token to look up
+	 * @return the same token or a previously stored equivalent
 	 */
-	private synchronized Token lookup(Token token) {
+	private Token lookup(Token token) {
         Token stored = _tokenMap.get(token);
-        
         if(stored == null) {
             _tokenMap.put(token, token);
-            checkSize();
+            pruneEntries (MAX_SIZE * 2);
             stored = token;
         }
-        
         return stored;
 	}
 
 	/**
-	 * read data from disk
+	 * Load ratings from disk
 	 * 
 	 * @return Map of <tt>Token</tt> to <tt>Token</tt> as read from disk
 	 */
-	private Map<Token, Token> readData() {
+	private Map<Token, Token> load() {
 		ObjectInputStream is = null;
 		try {
 			is = new ObjectInputStream(
                     new BufferedInputStream(
                             new FileInputStream(getSpamDat())));
-            return GenericsUtils.scanForMap(is.readObject(), Token.class, Token.class, GenericsUtils.ScanMode.REMOVE);
-		} catch(Throwable someKindOfError) {
+            return GenericsUtils.scanForMap(is.readObject(),
+                    Token.class, Token.class, GenericsUtils.ScanMode.REMOVE);
+		} catch(Throwable t) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Error loading spam ratings: " + t);
 			return new HashMap<Token, Token>();
 		} finally {
             IOUtils.close(is);
@@ -238,36 +197,33 @@ public class RatingTable implements Service {
 	}
     
     /**
-     * Save data from this table to disk.
+     * Save ratings to disk
      */
-    public void save() {
-        Map<Token, Token> copy;
+    public synchronized void save() {
+        pruneEntries (MAX_SIZE);
+        Map<Token, Token> copy = new HashMap<Token, Token>(_tokenMap);
         
-        synchronized(this) {
-            if (_tokenMap.size() > MAX_SIZE)
-                pruneEntries();
-            copy = new HashMap<Token, Token>(_tokenMap);
-        }
-        
-        if (LOG.isDebugEnabled())
-            LOG.debug("size of tokenMap " + copy.size());
+        if(LOG.isDebugEnabled())
+            LOG.debug("Saving " + copy.size() + " entries");
 
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(getSpamDat())));
+            oos = new ObjectOutputStream(
+                    new BufferedOutputStream(
+                            new FileOutputStream(getSpamDat())));
             oos.writeObject(copy);
             oos.flush();
         } catch (IOException iox) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("saving rating table failed", iox);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Error saving spam ratings: ", iox);
         } finally {
             IOUtils.close(oos);
         }
 	}
     
     /**
-     * Marks that the table will be serialized to disc and not accessed for a long time (i.e. LimeWire is about to get
-     * shut down)
+     * Increments the age of each token and saves the ratings to disk
+     * (called when LimeWire shuts down)
      */
     public synchronized void stop() {
         for(Token token : _tokenMap.values()) 
@@ -276,37 +232,24 @@ public class RatingTable implements Service {
     }
     
 	/**
-	 * check size of _tokenMap and clears old entries if necessary
+	 * Removes the least important entries from the rating table
+     *
+     * @param size the size to which the table should be pruned
 	 */
-	private synchronized void checkSize() {
-		if (_tokenMap.size() < MAX_SIZE * 2)
-			return;
-		pruneEntries();
-	}
-
-	/**
-	 * removes lowest importance elements from _tokenSet until there
-     * are at most MAX_SIZE entries.
-     * 
-     * LOCKING: MUST hold monitor (synchronize) of "this" when calling 
-     * this method.
-	 */
-	private void pruneEntries() {
-
-		if (LOG.isDebugEnabled())
-			LOG.debug("pruning unimportant entries from RatingTable");
-
-        int tokensToRemove = _tokenMap.size() - MAX_SIZE;
-        if (tokensToRemove <= 0) {
-            return;
-        }
+	private void pruneEntries(int size) {
         
+        int tokensToRemove = _tokenMap.size() - size;
+        if(tokensToRemove <= 0)
+            return;
+        
+		if(LOG.isDebugEnabled())
+			LOG.debug("Pruning rating table to " + size + " entries");
+
         // Make a set of sorted tokens, low importance first
         Set<Token> sortedTokens = new TreeSet<Token>(_tokenMap.values());
         for(Token token : sortedTokens) {
-            // Note: Although we are iterating over the sorted values or the map,
-            // and then removing from it using those items (as opposed to the keys),
-            // this works fine because the Map stores the same element in key/value.
+            // Keys and values of the map are identical, so we can iterate
+            // over the values and use them as keys
             _tokenMap.remove(token);
             --tokensToRemove;
             if(tokensToRemove == 0)
@@ -315,11 +258,9 @@ public class RatingTable implements Service {
 	}
     
 	private static File getSpamDat() {
-	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
+	    return new File(CommonUtils.getUserSettingsDir(), "spam.dat");
 	}
     
-   
-        
 	/** Inspectable that returns a hash and rating of the tokens */
 	@InspectionPoint("spam rating table token hashes")
 	@SuppressWarnings("unused")

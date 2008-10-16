@@ -1,14 +1,11 @@
 package com.limegroup.gnutella.spam;
 
-import java.util.Arrays;
-
-import org.limewire.io.IP;
-
 import com.google.inject.Provider;
 import com.limegroup.gnutella.filters.IPFilter;
+import org.limewire.io.IP;
 
 /**
- * This is a simple token holding a 4-byte-ip / port pair
+ * A simple token holding an IP address
  */
 public class AddressToken extends AbstractToken {
 	private static final long serialVersionUID = 3257568416670824244L;
@@ -31,33 +28,25 @@ public class AddressToken extends AbstractToken {
 	 */
 	private static final int MAX = 50;
 
-	private final byte[] _address;
+	private final String address;
 
-	private final short _port;
-    
     private boolean ratingInitialized;
 
 	private byte _good;
 
 	private byte _bad;
     
-    private final int _hashCode;
+    private static volatile transient Provider<IPFilter> ipFilter;
 
-    private volatile transient Provider<IPFilter> ipFilter;
-
-	public AddressToken(byte[] address, int port, Provider<IPFilter> ipFilter) {
-		this.ipFilter = ipFilter;
-        assert address.length == 4;
-		_address = address;
-		_port = (short) port;
-        _hashCode = getHashCode();
+    static void setIpFilter(Provider<IPFilter> filter) {
+        ipFilter = filter;
+    }
+    
+	public AddressToken(String address) {
+		this.address = address;
         ratingInitialized = false;
 	}
 	
-	void setIpFilter(Provider<IPFilter> ipFilter) {
-	    this.ipFilter = ipFilter;
-	}
-    
     /* Rating initialization is costly, and many Tokens are created 
      * simply to be replaced by existing tokens in the RatingTable,
      * so initialize rating lazily. */
@@ -69,10 +58,8 @@ public class AddressToken extends AbstractToken {
         if(ipFilter == null)
             throw new IllegalStateException("must initialize IPFilter after deserializing.");
                 
-        // this initial value is an
         _good = INITIAL_GOOD;
-        int logDistance = ipFilter.get().logMinDistanceTo(new IP(_address));
-        
+        int logDistance = ipFilter.get().logMinDistanceTo(new IP(address));
         // Constants 1600 and 3.3 chosen such that:
         // Same /24 subnet as a banned IP results in a rating of 0.07
         // Same /16 subnet as a banned IP results in a rating of 0.01
@@ -82,14 +69,9 @@ public class AddressToken extends AbstractToken {
             _good /= 2;
         }
         _bad = (byte) bad;
-        
         ratingInitialized = true;
     }
     
-    private int getHashCode() {
-        return _address[0] + _address[1] + _address[2] + _address[3] + _port;
-    }
-
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
@@ -120,12 +102,6 @@ public class AddressToken extends AbstractToken {
         }
 		_age = 0;
 		switch (rating) {
-		case PROGRAM_MARKED_GOOD:
-			_good++;
-			break;
-		case PROGRAM_MARKED_SPAM:
-			_bad++;
-			break;
 		case USER_MARKED_GOOD:
 			_bad = 0;
 			break;
@@ -146,40 +122,22 @@ public class AddressToken extends AbstractToken {
 		}
 	}
 
-	/**
-	 * implements interface <tt>Token</tt>
-	 */
-	public TokenType getType() {
-		return TokenType.ADDRESS;
-	}
-
     @Override
     public final int hashCode() {
-        return _hashCode;
+        return address.hashCode();
     }
     
     @Override
     public final boolean equals(Object o) {
-        if (o == null)
+        if(o == null)
             return false;
-        if ( ! (o instanceof AddressToken))
+        if(!(o instanceof AddressToken))
             return false;
-        
-        if (_hashCode != o.hashCode()) {
-            return false;
-        }
-        
-        return _port == ((AddressToken)o)._port 
-                && Arrays.equals(_address, ((AddressToken)o)._address);
+        return address.equals(((AddressToken)o).address);
     }
 
-	/**
-	 * overrides method from <tt>Object</tt>
-	 */
 	@Override
     public String toString() {
-		return "" + (0xFF & _address[0]) + "." + (0xFF & _address[1]) + "."
-				+ (0xFF & _address[2]) + "." + (0xFF & _address[3]) + ":"
-				+ (0xFFFF & _port) + " " + _bad;
-	}	
+		return address + " " + _good + " " + _bad;
+	}
 }

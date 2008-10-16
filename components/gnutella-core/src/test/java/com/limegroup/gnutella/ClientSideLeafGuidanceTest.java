@@ -218,7 +218,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // no UPs should get a QueryStatusResponse
-        drainQSRespones();
+        drainQSResponses();
     }
 
 
@@ -324,90 +324,118 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         testUP[0].flush();
 
         // no UPs should get a QueryStatusResponse
-        drainQSRespones();
+        drainQSResponses();
     }
     
     /**
      * tests that spammy results are shown to the gui but are not counted 
      * in leaf guidance
      */
-    public void testSpamFiltering() throws Exception {
+    public void testSpamFiltering1() throws Exception {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
-        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.4f);
-        
+        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f); // Strict
+        spamManager.clearFilterData();        
         callback.responses.clear();
         
-        Message m = null;
-
-        for (int i = 0; i < testUP.length; i++)
-            BlockingConnectionUtils.drain(testUP[i]);
-        
         // spawn a query and make sure all UPs get it
-        GUID queryGuid = new GUID(searchServices.newQueryGUID());
-        searchServices.query(queryGuid.bytes(), "anita kesavan");
-
-        for (int i = 0; i < testUP.length; i++) {
-            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(testUP[i]);
-            assertNotNull(qr);
-            assertEquals(new GUID(qr.getGUID()), queryGuid);
-        }
+        GUID queryGuid = spawnQuery("anita kesavan");
         
         // mark anita as spammy
         RemoteFileDesc anita =injector.getInstance(RemoteFileDescFactory.class)
-                .createRemoteFileDesc("127.0.0.1", 6355, 1, "anita kasevan", 1000, DataUtils.EMPTY_GUID, 3, false, 3, false,
+                .createRemoteFileDesc("127.0.0.1", 6355, 1, "anita kesavan", 10, DataUtils.EMPTY_GUID, 3, false, 3, false,
                         null, Collections.EMPTY_SET, false, false, "ALT", Collections.EMPTY_SET, 0l, false);
         
         spamManager.handleUserMarkedSpam(new RemoteFileDesc[]{anita});
-        assertTrue(spamManager.isSpam(anita));
+        assertTrue(anita.isSpam());
         
-        // now send back results and make sure that we do not get a QueryStatus
-        // from the leaf
+        // now send back results
         Response[] res = new Response[REPORT_INTERVAL*4];
-        for (int j = 0; j < res.length; j++)
-            res[j] = responseFactory.createResponse(10, 10, "anita kasevan "+j);
+        for (int i = 0; i < res.length; i++)
+            res[i] = responseFactory.createResponse(10, 10, "anita kesavan "+i);
 
-        m = queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1, 6355,
-                myIP(), 0, res, GUID.makeGuid(), new byte[0], false, false,
-                true, true, false, false, null);
+        QueryReply reply =
+            queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1,
+                    6355, myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
         
-        testUP[0].send(m);
+        testUP[0].send(reply);
         testUP[0].flush();
         Thread.sleep(1000);
         
         // the gui should be informed about the results 
-        assertEquals(REPORT_INTERVAL * 4, callback.responses.size());
+        assertEquals(res.length, callback.responses.size());
         
-        // We should get a QueryStatusResponse from the UP even if all
-        // Responses are spam. See SearchResultHandler.handleQueryReply(QueryReply)
-        // for more info!
-        int numGoodSentToFrontEnd = 0;
-        int numBadSentToFrontEnd = (int)Math.ceil(res.length * SearchSettings.SPAM_RESULT_RATIO.getValue());
-        int numToReport = numGoodSentToFrontEnd + numBadSentToFrontEnd;
+        // the UP should not get a QueryStatusResponse for spam results
+        QueryStatusResponse qsr = getFirstQueryStatus(testUP[0]);
+        assertNull(qsr);
+    }
+    
+    /**
+     * tests that non-spammy results are shown to the gui and counted in
+     * leaf guidance
+     */
+    public void testSpamFiltering2() throws Exception {
+        SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
+        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f); // Strict
+        spamManager.clearFilterData();
+        callback.responses.clear();
         
-        // Make sure the spam ratio is not 1 as we'd no longer 
-        // be able to distinguish between spam and not spam!
-        assertNotEquals(SearchSettings.SPAM_RESULT_RATIO.getValue(), 1.0f);
+        // spawn a query and make sure all UPs get it
+        GUID queryGuid = spawnQuery("anita kesavan");
         
-        assertGreaterThan(REPORT_INTERVAL, numToReport);
+        // now send back results
+        Response[] res = new Response[REPORT_INTERVAL*4];
+        for (int i = 0; i < res.length; i++)
+            res[i] = responseFactory.createResponse(10, 10, "anita kesavan "+i);
+
+        QueryReply reply =
+            queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1,
+                    6355, myIP(), 0, res, GUID.makeGuid(), new byte[0],
+                    false, false, true, true, false, false, null);
         
-        QueryStatusResponse qsr 
-            = (QueryStatusResponse)BlockingConnectionUtils.getFirstInstanceOfMessageType(testUP[0], QueryStatusResponse.class, TIMEOUT);
+        testUP[0].send(reply);
+        testUP[0].flush();
+        Thread.sleep(1000);
         
-        assertEquals(numToReport/4, qsr.getNumResults());
+        // the gui should be informed about the results 
+        assertEquals(res.length, callback.responses.size());
+        
+        // the UP should get a QueryStatusResponse for non-spam results
+        QueryStatusResponse qsr = getFirstQueryStatus(testUP[0]);
+        assertNotNull(qsr);
+        assertEquals(res.length/4, qsr.getNumResults());
+    }
+    
+    /**
+     * Spawns a query and makes sure all the UPs have received it
+     * 
+     * @param query the query string
+     * @returns the GUID of the query
+     */
+    private GUID spawnQuery(String query) throws Exception {
+        GUID queryGuid = new GUID(searchServices.newQueryGUID());
+        searchServices.query(queryGuid.bytes(), query);
+        Thread.sleep(250);
+        for(BlockingConnection up : testUP) {
+            QueryRequest qr = BlockingConnectionUtils.getFirstQueryRequest(up);
+            assertNotNull(qr);
+            assertEquals(new GUID(qr.getGUID()), queryGuid);
+        }
+        return queryGuid;
     }
     
     /**
      * drains the ultrapeers for any QueryStatusResponses and fails if one is received.
      * @throws Exception
      */
-    private void drainQSRespones() throws Exception {
+    private void drainQSResponses() throws Exception {
         BlockingConnectionUtils.failIfAnyArrive(testUP, QueryStatusResponse.class);
     }
 
     private static byte[] myIP() {
-        return new byte[] { (byte)127, (byte)0, 0, 1 };
+        return new byte[] { (byte)127, (byte)0, (byte)0, (byte)1 };
     }
-
+    
     public int getNumberOfPeers() {
         return 3;
     }

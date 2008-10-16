@@ -197,9 +197,6 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             return -1;
     }
     
-    /**
-     * Determines whether or not the specified 
-    
     /*---------------------------------------------------    
       END OF PUBLIC INTERFACE METHODS
      ----------------------------------------------------*/
@@ -219,7 +216,8 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         try {
             qr.validate();
         } catch(BadPacketException bpe) {
-            LOG.debug("bad packet reading qr", bpe);
+            if(LOG.isDebugEnabled())
+                LOG.debug("bad packet reading qr", bpe);
             return;
         }
 
@@ -256,7 +254,8 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         try {
             results = qr.getResultsAsList();
         } catch (BadPacketException e) {
-            LOG.debug("Error gettig results", e);
+            if(LOG.isDebugEnabled())
+                LOG.debug("error getting results", e);
             return;
         }
 
@@ -268,46 +267,45 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         
         boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
-        double numBadSentToFrontEnd = 0;
             
         for(Response response : results) {
-            if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                if (!searchServices.matchesType(qr.getGUID(), response)) {
+            if(!qr.isBrowseHostReply() &&
+               secureStatus != SecureMessage.SECURE) {
+                if (!searchServices.matchesType(qr.getGUID(), response))
                     continue;
-                }
-
-                if (!searchServices.matchesQuery(qr.getGUID(), response)) {
+                if (!searchServices.matchesQuery(qr.getGUID(), response))
                     continue;
-                }
             }
 
             // Throw away results from Mandragore Worm
-            if (searchServices.isMandragoreWorm(qr.getGUID(), response)) {
+            if(searchServices.isMandragoreWorm(qr.getGUID(), response))
                 continue;
-            }
             
             // If there was an action, only allow it if it's a secure message.
             LimeXMLDocument doc = response.getDocument();
             if(ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
-               doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
+               doc != null && !doc.getAction().equals("") &&
+               secureStatus != SecureMessage.SECURE) {
                 continue;
             }
             
             // we'll be showing the result to the user, count it
             countClassC(qr,response);
-            RemoteFileDesc rfd = response.toRemoteFileDesc(qr, remoteFileDescFactory);
+            RemoteFileDesc rfd =
+                response.toRemoteFileDesc(qr, remoteFileDescFactory);
             rfd.setSecureStatus(secureStatus);
             Set<? extends IpPort> alts = response.getLocations();
             activityCallback.get().handleQueryResult(rfd, qr, alts);
             
-            if (skipSpam || !spamManager.get().isSpam(rfd))
+            // Set the spam rating for the RemoteFileDesc
+            spamManager.get().calculateSpamRating(rfd);
+            
+            // Count non-spam results for dynamic querying
+            if (skipSpam || !rfd.isSpam())
                 numGoodSentToFrontEnd++;
-            else 
-                numBadSentToFrontEnd++;
-        } //end of response loop
+        }
         
-        numBadSentToFrontEnd = Math.ceil(numBadSentToFrontEnd * SearchSettings.SPAM_RESULT_RATIO.getValue());
-        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
+        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd);
     }
 
     private void countClassC(QueryReply qr, Response r) {
@@ -335,8 +333,6 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
 
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
-        // technically Ultrapeers don't use this info, but we are keeping it
-        // around for further use
         if (numGoodSentToFrontEnd > 0) {
             // get the correct GuidCount
             GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));

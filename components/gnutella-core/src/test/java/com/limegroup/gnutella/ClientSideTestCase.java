@@ -290,14 +290,13 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         RemoteFileDesc rfds[] = new RemoteFileDesc[resp.length];
         for(int i = 0; i < resp.length; i++) {
             rfds[i] = resp[i].toRemoteFileDesc(qr, injector.getInstance(RemoteFileDescFactory.class));
-            //assertTrue(SpamManager.instance().isSpam(rfds[i]));
         }
         
         spamManager.handleUserMarkedGood(rfds);
         
         // Make sure they're not spam
         for(int i = 0; i < rfds.length; i++) {
-            assertFalse(spamManager.isSpam(rfds[i]));
+            assertFalse(rfds[i].isSpam());
         }
     }
     
