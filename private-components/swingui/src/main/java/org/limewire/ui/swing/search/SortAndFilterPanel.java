@@ -236,9 +236,21 @@ public class SortAndFilterPanel extends JXPanel {
             @Override
             public int doCompare(
                 VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                Long v1 = (Long) vsr1.getProperty(key);
-                Long v2 = (Long) vsr2.getProperty(key);
-                return compareNullCheck(v1, v2, ascending);
+                String v1 = vsr1.getPropertyString(key);
+                String v2 = vsr2.getPropertyString(key);
+                Long l1 = parseLong(v1);
+                Long l2 = parseLong(v2);
+                return compareNullCheck(l1, l2, ascending);
+            }
+
+            private Long parseLong(String v) {
+                Long l = null;
+                try {
+                    l = Long.valueOf(v);
+                } catch (NumberFormatException e) {
+                    //continue value will be null
+                }
+                return l;
             }
         };
     }
@@ -294,7 +306,7 @@ public class SortAndFilterPanel extends JXPanel {
                 @Override
                 public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    return compareToNull(vsr1.getCategory(), vsr2.getCategory());
+                    return compareToNull(vsr1.getFileExtension(), vsr2.getFileExtension());
                 }
             };
         }

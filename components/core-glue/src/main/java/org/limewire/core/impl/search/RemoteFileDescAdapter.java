@@ -62,6 +62,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                 set(properties, PropertyKey.TRACK_NUMBER, doc.getValue(LimeXMLNames.AUDIO_TRACK));
                 set(properties, PropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
                 set(properties, PropertyKey.TRACK_NAME, doc.getValue(LimeXMLNames.AUDIO_TITLE));
+                set(properties, PropertyKey.QUALITY, doc.getValue(LimeXMLNames.AUDIO_BITRATE));
             } else if (LimeXMLNames.VIDEO_SCHEMA.equals(doc.getSchemaURI())) {
                 set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.VIDEO_PRODUCER));
                 set(properties, PropertyKey.BITRATE, doc.getValue(LimeXMLNames.VIDEO_BITRATE));
@@ -70,6 +71,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                 set(properties, PropertyKey.HEIGHT, doc.getValue(LimeXMLNames.VIDEO_HEIGHT));
                 set(properties, PropertyKey.WIDTH, doc.getValue(LimeXMLNames.VIDEO_WIDTH));
                 set(properties, PropertyKey.YEAR, doc.getValue(LimeXMLNames.VIDEO_YEAR));
+                set(properties, PropertyKey.QUALITY, doc.getValue(LimeXMLNames.VIDEO_BITRATE));
             } else if (LimeXMLNames.APPLICATION_SCHEMA.equals(doc.getSchemaURI())) {
                 set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.APPLICATION_NAME));
                 set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.APPLICATION_PUBLISHER));
