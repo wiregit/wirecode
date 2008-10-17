@@ -268,8 +268,7 @@ public class SortAndFilterPanel extends JXPanel {
         };
     }
     
-    private static Comparator<VisualSearchResult> getNameComparator(
-            final PropertyKey key, final boolean ascending) {
+    private static Comparator<VisualSearchResult> getNameComparator(final boolean ascending) {
             return new SimilarResultsGroupingComparator() {
                 @Override
                 public int doCompare(
@@ -300,16 +299,34 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         if (FILE_EXTENSION.equals(item)
-            || FILE_TYPE.equals(item)
             || TYPE.equals(item)) {
             return new SimilarResultsGroupingComparator() {
                 @Override
                 public int doCompare(
                     VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    return compareToNull(vsr1.getFileExtension(), vsr2.getFileExtension());
+                    int compare = compareToNull(vsr1.getFileExtension(), vsr2.getFileExtension());
+                    if(compare == 0) {
+                        compare = getNameComparator(true).compare(vsr1, vsr2);
+                    }
+                    return compare;
                 }
             };
         }
+        
+        if(FILE_TYPE.equals(item)) {
+            return new SimilarResultsGroupingComparator() {
+                @Override
+                public int doCompare(
+                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    int compare = compareToNull(vsr1.getCategory(), vsr2.getCategory());
+                    if(compare == 0) {
+                        compare = getNameComparator(true).compare(vsr1, vsr2);
+                    }
+                    return compare;
+                }
+            };
+        }
+            
 
         if (FRIEND_ITEM.equals(item)) {
             return null; // TODO: RMV What to do here?
@@ -323,8 +340,9 @@ public class SortAndFilterPanel extends JXPanel {
                 // TODO ?? explain where untranslated filename comes from, or
                 // is this a bug?
             || "Filename".equals(item)
-            || TITLE.equals(item)) {
-            return getNameComparator(PropertyKey.NAME, true);
+            || TITLE.equals(item))//TODO move TITLE to its own?
+            {
+            return getNameComparator(true);
         }
 
         if (PLATFORM.equals(item)) {
