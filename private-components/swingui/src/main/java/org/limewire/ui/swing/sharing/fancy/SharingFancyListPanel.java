@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.sharing.fancy;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -8,7 +9,6 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -24,13 +24,16 @@ import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.images.ImageButtonPanel;
+import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveListAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
-import org.limewire.ui.swing.sharing.components.UnshareButton;
+import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
+import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -61,8 +64,6 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     
     private final ConfirmationUnshareButton unShareButton;
     
-    private final UnshareButton layerButton;
-    
     private SharingRemoveAllAction removeAction;
     private EventList<LocalFileItem> currentEventList;
     
@@ -87,31 +88,23 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         // black seperator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
         
-        imageList = new ImageList(eventList, fileList, thumbnailManager);
+        imageList = new ImageList(eventList, fileList);
         imageList.setTransferHandler(transferHandler);
+        imageList.setPopupHandler(new SharingPopupHandler(imageList, new SharingActionHandler()));
         
-        layerButton = new UnshareButton(new SharingRemoveListAction(imageList));
-        layerButton.setSize(60, 30);
-        layerButton.setVisible(false);
-        layerButton.addMouseListener(new MouseListener(){
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                e.getComponent().setVisible(false);
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {}
-            @Override
-            public void mouseExited(MouseEvent e) {}
-            @Override
-            public void mousePressed(MouseEvent e) {}
-            @Override
-            public void mouseReleased(MouseEvent e) {}
-        });
-        new MouseReaction(imageList, layerButton);
+        ImageCellRenderer renderer = new ImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight(), thumbnailManager);
+        renderer.setButtonComponent(new ImageButtonPanel());
+        imageList.setImageCellRenderer(renderer);
+        
+        ImageButtonPanel panel = new ImageButtonPanel(new SharingRemoveListAction(imageList));
+        panel.setPreferredSize(new Dimension(ThumbnailManager.WIDTH,30));
+        panel.setSize(new Dimension(ThumbnailManager.WIDTH,30));
+        panel.setVisible(false);
+        
+        new MouseReaction(imageList, panel);
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remaining space
-        setLayout(new MigLayout("gap 0, insets 18 6 10 6",     //layout constraints
+        setLayout(new MigLayout("gap 0, insets 18 4 10 4",     //layout constraints
                 "[] [] ",                       // column constraints
                 "[::30] [] [grow][grow]" ));    // row constraints
         
@@ -128,7 +121,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         JXLayer<JComponent> l = new JXLayer<JComponent>(scrollPane, new  AbstractLayerUI<JComponent>());
         l.getGlassPane().setLayout(null);
-        l.getGlassPane().add(layerButton);
+        l.getGlassPane().add(panel);
         //third row
         add(l, "span 2, grow");
 
@@ -178,14 +171,12 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
     public class MouseReaction implements MouseListener, MouseMotionListener {
 
         private ImageList imageList;
-        private JButton ushareButton;
+        private JComponent hoverComponent;
         
-        public MouseReaction(ImageList imageList, JButton unShareButton) {
-            this.imageList = imageList;
-            this.ushareButton = unShareButton;
-            this.ushareButton.setBorder(null);
-            this.ushareButton.setContentAreaFilled(false);
-            
+        public MouseReaction(ImageList imageList, JComponent hoverComponent) {
+            this.imageList = imageList;          
+            this.hoverComponent = hoverComponent;
+
             imageList.addMouseListener(this);
             imageList.addMouseMotionListener(this);
         }
@@ -193,19 +184,22 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         @Override
         public void mouseEntered(MouseEvent e) {
             if(imageList.getModel().getSize() > 0)
-                ushareButton.setVisible(true);
+                hoverComponent.setVisible(true);
         }
 
         @Override
         public void mouseExited(MouseEvent e) { 
-            if(!ushareButton.getBounds().contains(e.getPoint())) {
-                imageList.clearSelection();
-                ushareButton.setVisible(false);
+            if(!hoverComponent.getBounds().contains(e.getPoint())) {
+                hoverComponent.setVisible(false);
             }
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {}
+        public void mouseClicked(MouseEvent e) {
+            int index = imageList.locationToIndex(e.getPoint());
+            if( index > -1)
+                imageList.setSelectedIndex(index);
+        }
         @Override
         public void mousePressed(MouseEvent e) {}
         @Override
@@ -217,11 +211,10 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         public void mouseMoved(MouseEvent e) {
             int index = imageList.locationToIndex(e.getPoint());
             if( index > -1) {
-                imageList.setSelectedIndex(index);
-                
                 Rectangle bounds = imageList.getCellBounds(index, index);
-                ushareButton.setLocation(bounds.x + bounds.width - ushareButton.getWidth()-25, 
-                       bounds.y + 25);
+                ImageCellRenderer renderer = imageList.getImageCellRenderer();
+                hoverComponent.setLocation(bounds.x + renderer.getSubComponentLocation().x,
+                        bounds.y + renderer.getSubComponentLocation().y);
             }
         }
     }

@@ -25,6 +25,11 @@ public class UnshareButton extends JButton {
         setIcon(removeIcon);
         setPressedIcon(pressedIcon);
         setRolloverIcon(rollOverIcon);
+        
+        setFocusPainted(false);
+        setBorderPainted(false);
+        setContentAreaFilled(false);
+        setBorder(null);
     }
     
     public UnshareButton(Action action) {
@@ -35,5 +40,10 @@ public class UnshareButton extends JButton {
         setIcon(removeIcon);
         setPressedIcon(pressedIcon);
         setRolloverIcon(rollOverIcon);
+        
+        setFocusPainted(false);
+        setBorderPainted(false);
+        setContentAreaFilled(false);
+        setBorder(null);
     }
 }

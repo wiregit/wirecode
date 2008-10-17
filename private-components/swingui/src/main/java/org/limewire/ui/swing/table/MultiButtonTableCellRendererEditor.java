@@ -50,9 +50,6 @@ public class MultiButtonTableCellRendererEditor extends JPanel implements TableC
         for(Action action : actions) {
             UnshareButton button = new UnshareButton(action);
             button.setFocusable(false);
-            button.setBorderPainted(false);
-            button.setContentAreaFilled(false);
-            button.setBorder(null);
                     
             add(button);
         }

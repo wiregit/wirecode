@@ -1,56 +1,106 @@
 package org.limewire.ui.swing.images;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.border.Border;
+
+import org.limewire.ui.swing.util.GuiUtils;
 
 /**
- * Draws an image, centered in the component. When selected a border of a 
- * specified width is drawn around the edges of the image.
+ * Draws an image, centered in the component. 
  */
- //TODO: this should extend JComponent and paint the image directly rather than having to wrap it
- //		in an ImageIcon
-public class ImageLabel extends JLabel {
+public class ImageLabel extends JComponent {
+
+    protected int topPadding = 5;
     
-    private int selectionBorderWidth;
+    private Icon icon;
     
-    public ImageLabel() {
-        this(3);
-    }
+    private Border border;
     
-    public ImageLabel(int selectedBorderWidth) {
-        this(3,20);
-    }
+    private JComponent buttonComponent;
     
-    public ImageLabel(int selectedBorderWidth, int insetWidth) {
+    private int x = 0;
+    private int y = 0;
+    
+    public ImageLabel(int width, int height) {
+        GuiUtils.assignResources(this);
+        
         setOpaque(true);
-        setBorder(BorderFactory.createEmptyBorder(insetWidth,insetWidth,insetWidth,insetWidth));
-        this.selectionBorderWidth = selectedBorderWidth;
+        
+        setPreferredSize(new Dimension(width, height));
+        setSize(getPreferredSize());
+        setLayout(null);
+    }
+    
+    public void setIcon(Icon icon) {
+        this.icon = icon;
+    }
+    
+    public void setInsets(Border border) {
+        super.setBorder(border);
+        if(buttonComponent != null)
+            calculateSubPanelDimensions();
+    }
+    
+    @Override
+    public void setBorder(Border border) {
+        this.border = border;
+    }
+    
+    /**
+     * Sets the subComponent on this. This gets painted below the image.
+     */
+    public void setButtonComponent(JComponent buttonPanel) {
+        this.removeAll();
+        
+        this.buttonComponent = buttonPanel;        
+        calculateSubPanelDimensions();
+        add(buttonPanel);
+    }
+    
+    /**
+     * Returns the Point where the subComponent is located.
+     */
+    public Point getSubComponentLocation() {
+        return new Point(x,y);
+    }
+    
+    private void calculateSubPanelDimensions() {
+        x = (getWidth() - getInsets().left - getInsets().right - ThumbnailManager.WIDTH)/2 + getInsets().left;
+        y = getInsets().top + ThumbnailManager.HEIGHT +  topPadding;
+        int width = ThumbnailManager.WIDTH;
+        int height =  getHeight() - ThumbnailManager.HEIGHT - topPadding - getInsets().top - getInsets().bottom;
+
+        buttonComponent.setBounds(x, y, width, height);
     }
     
     @Override
     public void paintComponent(Graphics g) {
-        if(isVisible()) {
+        if(isVisible()) {          
+            int x = getInsets().left;
+            int y = getInsets().top;
+            int width = getWidth() - getInsets().left - getInsets().right;
+            int height = getHeight() - getInsets().top - getInsets().bottom;
             
-           int rectWidth = getWidth() - getInsets().left - getInsets().right + selectionBorderWidth + selectionBorderWidth;
-           int rectHeight = getHeight() - getInsets().top - getInsets().bottom + selectionBorderWidth + selectionBorderWidth;
-                     
-           g.setColor(getBackground());
-           g.fillRect(getInsets().left - selectionBorderWidth, 
-                   getInsets().top - selectionBorderWidth, rectWidth, rectHeight);
-           g.setColor(getForeground());
-           g.fillRect(getInsets().left, 
-                   getInsets().top, 
-                   getWidth() - getInsets().left - getInsets().right, 
-                   getHeight() - getInsets().top - getInsets().bottom);           
-           
-           if(getIcon() != null) {
-               int width = getWidth() - getIcon().getIconWidth();
-               int height = getHeight() - getIcon().getIconHeight();
-               
-               getIcon().paintIcon(this, g, width/2, height/2);
-           }
+            g.setColor(getBackground());
+            g.fillRect(getInsets().left, getInsets().top, getWidth() - getInsets().left - getInsets().right,
+                    getHeight() - getInsets().top - getInsets().bottom);
+            
+            // if a border has been added, ask it to paint itself
+            if(border != null) {
+                border.paintBorder(this, g, x, y, width, height);
+            }
+            // if an icon is loaded
+            if(icon != null) {
+                int iconX = (width - icon.getIconWidth())/2;
+                int iconY = (ThumbnailManager.HEIGHT - icon.getIconHeight())/2;
+             
+                icon.paintIcon(this, g, x + iconX, topPadding + y + iconY);
+            }
         }
     }
 }

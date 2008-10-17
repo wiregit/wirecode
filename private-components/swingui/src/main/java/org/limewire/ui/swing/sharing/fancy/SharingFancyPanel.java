@@ -33,9 +33,9 @@ import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.sharing.SharingShortcutPanel;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
-import org.limewire.ui.swing.sharing.table.SharingFancyAudioTableFormat;
-import org.limewire.ui.swing.sharing.table.SharingFancyDefaultTableFormat;
-import org.limewire.ui.swing.sharing.table.SharingFancyIconTableFormat;
+import org.limewire.ui.swing.sharing.table.SharingAudioTableFormat;
+import org.limewire.ui.swing.sharing.table.SharingDefaultTableFormat;
+import org.limewire.ui.swing.sharing.table.SharingIconTableFormat;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -89,15 +89,18 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
 
         createFilteredLists(eventList);
         
-        addTable(music, Category.AUDIO, originalList, new SharingFancyAudioTableFormat(), true);       
-        addTable(video, Category.VIDEO, originalList, new SharingFancyDefaultTableFormat(), false);
-        addTable(doc, Category.DOCUMENT, originalList, new SharingFancyIconTableFormat(), false);       
-        addTable(program, Category.PROGRAM, originalList, new SharingFancyDefaultTableFormat(), false);       
-        addTable(other, Category.OTHER, originalList, new SharingFancyDefaultTableFormat(), true);
+        addTable(music, Category.AUDIO, originalList, new SharingAudioTableFormat(), true);       
+        addTable(video, Category.VIDEO, originalList, new SharingDefaultTableFormat(), false);
+        addTable(doc, Category.DOCUMENT, originalList, new SharingIconTableFormat(), false);       
+        addTable(program, Category.PROGRAM, originalList, new SharingDefaultTableFormat(), false);       
+        addTable(other, Category.OTHER, originalList, new SharingDefaultTableFormat(), true);
         
         imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE),
                 transferHandler, originalList, 
                 categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
+        
+        
+        imageList.getList().addMouseListener(new MultiTableMouseListener());
         
         
         TableColumn tc = tables.get(doc).getTable().getColumn(0);
@@ -156,8 +159,6 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
         tables.get(program).setModel(filterLists.get(Category.PROGRAM), fileList);
         tables.get(other).setModel(filterLists.get(Category.OTHER), fileList);
         
-        imageList.addMouseListener(new MultiTableMouseListener());
-        
         TableColumn tc = tables.get(doc).getTable().getColumn(0);
         tc.setCellRenderer(iconLabelRenderer);
         
@@ -202,13 +203,15 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
      * UnSelects other tables and lists when a table or list is selected
      */
     private class MultiTableMouseListener extends MouseAdapter {
+        
         @Override
         public void mouseClicked(MouseEvent e) {
             if (!e.isPopupTrigger()) {
-                if(e.getComponent() instanceof JList)
+                if(e.getComponent() instanceof JList) {
                     for (SharingFancyTablePanel table : tables.values()) {
                         table.getTable().clearSelection();
                     }
+                }
                 else {
                     JTable selectedTable = (JTable) e.getComponent();
                     for (SharingFancyTablePanel table : tables.values()) {

@@ -9,12 +9,12 @@ import org.limewire.ui.swing.util.I18n;
  * Only the file name is displayed by default. The second column
  * can display a list of actions that can operate on this fileItem.
  */
-public class SharingFancyDefaultTableFormat extends AbstractTableFormat<LocalFileItem> {
+public class SharingDefaultTableFormat extends AbstractTableFormat<LocalFileItem> {
   
     private static final int FILENAME_INDEX = 0;
     private static final int ACTIONS_INDEX = 1;
     
-    public SharingFancyDefaultTableFormat() {
+    public SharingDefaultTableFormat() {
         super(I18n.tr("Name"), "");
     }
     

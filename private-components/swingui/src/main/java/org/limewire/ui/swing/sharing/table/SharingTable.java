@@ -16,13 +16,16 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 
-public class SharingFancyTable extends MouseableTable {
+/**
+ * A table for displaying shared files.
+ */
+public class SharingTable extends MouseableTable {
 
     private SharingTableModel sharingTableModel;
     
     private TableColors tableColors;
     
-    public SharingFancyTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
+    public SharingTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
 
         initialize(sharedItems, fileList, tableFormat);
         

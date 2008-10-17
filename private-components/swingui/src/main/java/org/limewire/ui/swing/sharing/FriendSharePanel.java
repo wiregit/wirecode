@@ -131,7 +131,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         
         friendTable.addKeyListener(friendSelectionListener);
         
-        setLayout(new MigLayout("insets 0 0 0 0", "[150!]0[grow]","[grow]"));
+        setLayout(new MigLayout("insets 0 0 0 0", "[141!]0[grow]","[grow]"));
         
         add(headerPanel, "dock north");
         add(friendTableScrollPane, "grow");

@@ -9,12 +9,12 @@ import org.limewire.ui.swing.util.I18n;
  * its icon. The second column is a list of actions that can operate on
  * this fileItem.
  */
-public class SharingFancyIconTableFormat extends AbstractTableFormat<LocalFileItem> {
+public class SharingIconTableFormat extends AbstractTableFormat<LocalFileItem> {
   
     private static final int FILENAME_INDEX = 0;
     private static final int ACTIONS_INDEX = 1;
     
-    public SharingFancyIconTableFormat() {
+    public SharingIconTableFormat() {
         super(I18n.tr("Name"), "");
     }
     

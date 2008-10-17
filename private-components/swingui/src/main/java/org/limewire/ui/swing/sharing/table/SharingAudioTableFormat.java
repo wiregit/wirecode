@@ -11,14 +11,14 @@ import org.limewire.ui.swing.util.I18n;
  * filename is displayed instead. The last column is a list of actions that 
  * can operate on this fileItem.
  */
-public class SharingFancyAudioTableFormat extends AbstractTableFormat<LocalFileItem> {
+public class SharingAudioTableFormat extends AbstractTableFormat<LocalFileItem> {
 
     private static final int ARTIST_INDEX = 0;
     private static final int SONG_INDEX = 1;
     private static final int ALBUM_INDEX = 2;
     private static final int ACTIONS_INDEX = 3;
     
-    public SharingFancyAudioTableFormat() {
+    public SharingAudioTableFormat() {
         super(I18n.tr("Artist"), I18n.tr("Song"), I18n.tr("Album"), "");
     }
     

@@ -3,7 +3,6 @@ package org.limewire.ui.swing.sharing;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.text.MessageFormat;
 
 import javax.swing.JTextField;
 
@@ -11,23 +10,21 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.HeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.SubpanelPainter;
-import org.limewire.ui.swing.sharing.friends.FriendUpdate;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
+import com.google.inject.Singleton;
 
 /**
  * This displays the header on all the sharing panels. It includes the filter
  * box and name and icon describing what this panel is for.
  */
-public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
-
-    private final String staticText;
+@Singleton
+public class SharingHeaderPanel extends JXPanel{
     
     private HeadingLabel titleLabel;
     private JTextField filterBox;
@@ -49,14 +46,12 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
      * @param name
      * @param viewPanel
      */
-    public SharingHeaderPanel(String staticText, String name) {
+    public SharingHeaderPanel() {
         GuiUtils.assignResources(this);
         
         setBackgroundPainter(new SubpanelPainter());
-    
-        this.staticText = staticText;
 
-        createComponents(MessageFormat.format(staticText, name));
+        createComponents();
         layoutComponents();
         
         setMinimumSize(new Dimension(0, height + 2));
@@ -64,8 +59,8 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
         setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
     }
     
-    private void createComponents(String text) {
-        titleLabel = new HeadingLabel(text);
+    private void createComponents() {
+        titleLabel = new HeadingLabel(I18n.tr("Sharing with the LimeWire Network"));
         titleLabel.setForeground(fontColor);
         FontUtils.setSize(titleLabel, fontSize);
         FontUtils.changeStyle(titleLabel, Font.PLAIN);
@@ -81,14 +76,5 @@ public class SharingHeaderPanel extends JXPanel implements FriendUpdate {
     
     public JTextField getFilterBox() {
         return filterBox;
-    }
-    
-    @Override
-    public void setFriendName(String name) {
-        titleLabel.setText(MessageFormat.format(staticText, name));
-    }
-
-    @Override
-    public void setEventList(EventList<LocalFileItem> model) {
     }
 }
