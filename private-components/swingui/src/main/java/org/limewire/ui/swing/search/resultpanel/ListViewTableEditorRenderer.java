@@ -496,22 +496,22 @@ implements TableCellEditor, TableCellRenderer {
             String length = vsr.getPropertyString(PropertyKey.LENGTH);
             
             
-            int change = 0;
+            boolean changed = false;
             if(!StringUtils.isEmpty(albumTitle)) {
                 subheading += albumTitle;
-                change = albumTitle.length();
+                changed = true;
             }
             
             if(!StringUtils.isEmpty(quality)) {
-                if(change > 0) {
+                if(changed) {
                     subheading += " - ";
                 }
                 subheading += quality; 
-                change = quality.length();
+                changed = true;
             }
             
             if(!StringUtils.isEmpty(length)) {
-                if(change > 0) {
+                if(changed) {
                     subheading += " - ";
                 }
                 subheading += length;
@@ -521,17 +521,14 @@ implements TableCellEditor, TableCellRenderer {
         case VIDEO: {
             String quality = vsr.getPropertyString(PropertyKey.QUALITY);
             String length = vsr.getPropertyString(PropertyKey.LENGTH);
-            int change = 0;
+            boolean changed = false;
             if(!StringUtils.isEmpty(quality)) {
-                if(change > 0) {
-                    subheading += " - ";
-                }
                 subheading += quality; 
-                change = quality.length();
+                changed = true;
             }
             
             if(!StringUtils.isEmpty(length)) {
-                if(change > 0) {
+                if(changed) {
                     subheading += " - ";
                 }
                 subheading += length;
