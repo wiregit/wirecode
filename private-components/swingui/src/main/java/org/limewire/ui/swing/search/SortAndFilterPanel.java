@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.util.Objects.compareToNull;
+import static org.limewire.util.Objects.compareToNullIgnoreCase;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -75,9 +76,6 @@ public class SortAndFilterPanel extends JXPanel {
     private ChatLoginState chatLoginState;
     
     private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
-    
-//    private final List<SearchFilterListener> filterListeners =
-//        new CopyOnWriteArrayList<SearchFilterListener>();
 
     @Resource private Icon listViewIcon;
     @Resource private Icon tableViewIcon;
@@ -175,7 +173,7 @@ public class SortAndFilterPanel extends JXPanel {
 
         // Created a SortedList that doesn't have a Comparator yet.
         final SortedList<VisualSearchResult> sortedList =
-            GlazedListsFactory.sortedList(simpleList, getFloatComparator(PropertyKey.RELEVANCE, false));
+            GlazedListsFactory.sortedList(simpleList, getFloatComparator(PropertyKey.RELEVANCE, false, false));
 
         EventList<VisualSearchResult> filteredList =
             GlazedListsFactory.filterList(sortedList, editor);
@@ -204,43 +202,40 @@ public class SortAndFilterPanel extends JXPanel {
         return filteredList;
     }
 
-    private static Comparator<VisualSearchResult> getDateComparator(
-        final PropertyKey key, final boolean ascending) {
+    private static Comparator<VisualSearchResult> getDateComparator(final PropertyKey key,
+            final boolean ascending) {
         return new SimilarResultsGroupingComparator() {
             @Override
-            public int doCompare(
-                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+            public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Long v1 = (Long) vsr1.getProperty(key);
                 Long v2 = (Long) vsr2.getProperty(key);
-                return compareNullCheck(v1, v2, ascending);
+                return compareNullCheck(v1, v2, ascending, true);
             }
         };
     }
 
-    private static Comparator<VisualSearchResult> getFloatComparator(
-            final PropertyKey key, final boolean ascending) {
+    private static Comparator<VisualSearchResult> getFloatComparator(final PropertyKey key,
+            final boolean ascending, final boolean nullsFirst) {
         return new SimilarResultsGroupingComparator() {
             @Override
-            protected int doCompare(
-                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+            protected int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 Float v1 = (Float) vsr1.getProperty(key);
                 Float v2 = (Float) vsr2.getProperty(key);
-                return compareNullCheck(v1, v2, ascending);
+                return compareNullCheck(v1, v2, ascending, nullsFirst);
             }
         };
     }
 
-    private static Comparator<VisualSearchResult> getLongComparator(
-        final PropertyKey key, final boolean ascending) {
+    private static Comparator<VisualSearchResult> getLongComparator(final PropertyKey key,
+            final boolean ascending) {
         return new SimilarResultsGroupingComparator() {
             @Override
-            public int doCompare(
-                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+            public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 String v1 = vsr1.getPropertyString(key);
                 String v2 = vsr2.getPropertyString(key);
                 Long l1 = parseLong(v1);
                 Long l2 = parseLong(v2);
-                return compareNullCheck(l1, l2, ascending);
+                return compareNullCheck(l1, l2, ascending, true);
             }
 
             private Long parseLong(String v) {
@@ -248,144 +243,242 @@ public class SortAndFilterPanel extends JXPanel {
                 try {
                     l = Long.valueOf(v);
                 } catch (NumberFormatException e) {
-                    //continue value will be null
+                    // continue value will be null
                 }
                 return l;
             }
         };
     }
 
-    private static Comparator<VisualSearchResult> getStringComparator(
-        final PropertyKey key, final boolean ascending) {
+    private static Comparator<VisualSearchResult> getStringComparator(final PropertyKey key,
+            final boolean ascending) {
         return new SimilarResultsGroupingComparator() {
             @Override
-            public int doCompare(
-                VisualSearchResult vsr1, VisualSearchResult vsr2) {
+            public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 String v1 = (String) vsr1.getProperty(key);
                 String v2 = (String) vsr2.getProperty(key);
-                return compareNullCheck(v1, v2, ascending);
+                return compareNullCheck(v1, v2, ascending, false);
             }
         };
     }
-    
+
     private static Comparator<VisualSearchResult> getNameComparator(final boolean ascending) {
-            return new SimilarResultsGroupingComparator() {
-                @Override
-                public int doCompare(
-                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    String v1 = vsr1.getHeading();
-                    String v2 = vsr2.getHeading();
-                    return compareNullCheck(v1, v2, ascending);
+        return new SimilarResultsGroupingComparator() {
+            @Override
+            public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                String v1 = vsr1.getHeading();
+                String v2 = vsr2.getHeading();
+                return ascending ? compareToNullIgnoreCase(v1, v2, false)
+                        : compareToNullIgnoreCase(v2, v1, false);
+            }
+        };
+    }
+
+    private static Comparator<VisualSearchResult> getStringPropertyPlusNameComparator(
+            final PropertyKey propertyKey, final boolean ascending) {
+        return new Comparator<VisualSearchResult>() {
+            private Comparator<VisualSearchResult> propertyComparator = getStringComparator(
+                    propertyKey, ascending);
+
+            private Comparator<VisualSearchResult> nameComparator = getNameComparator(ascending);
+
+            @Override
+            public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+                int compare = propertyComparator.compare(o1, o2);
+                if (compare == 0) {
+                    compare = nameComparator.compare(o1, o2);
                 }
-            };
-        }
-    
+                return compare;
+            }
+        };
+    }
+
     private Comparator<VisualSearchResult> getComparator(String item) {
 
         if (ALBUM.equals(item)) {
-            return getStringComparator(PropertyKey.ALBUM_TITLE, true);
+            return getStringPropertyPlusNameComparator(PropertyKey.ALBUM_TITLE, true);
         }
 
         if (ARTIST.equals(item)) {
-            return getStringComparator(PropertyKey.ARTIST_NAME, true);
+            return getStringPropertyPlusNameComparator(PropertyKey.ARTIST_NAME, true);
         }
 
         if (COMPANY.equals(item)) {
-            return getStringComparator(PropertyKey.COMPANY, true);
+            return getStringPropertyPlusNameComparator(PropertyKey.COMPANY, true);
         }
 
         if (DATE_CREATED.equals(item)) {
-            return getDateComparator(PropertyKey.DATE_CREATED, false);
+            return new Comparator<VisualSearchResult>() {
+                private Comparator<VisualSearchResult> propertyComparator = getDateComparator(
+                        PropertyKey.DATE_CREATED, false);
+
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
+                @Override
+                public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+                    int compare = propertyComparator.compare(o1, o2);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(o1, o2);
+                    }
+                    return compare;
+                }
+            };
         }
 
-        if (FILE_EXTENSION.equals(item)
-            || TYPE.equals(item)) {
+        if (FILE_EXTENSION.equals(item) || TYPE.equals(item)) {
             return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
                 @Override
-                public int doCompare(
-                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                     int compare = compareToNull(vsr1.getFileExtension(), vsr2.getFileExtension());
-                    if(compare == 0) {
-                        compare = getNameComparator(true).compare(vsr1, vsr2);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
                     }
                     return compare;
                 }
             };
         }
-        
-        if(FILE_TYPE.equals(item)) {
+
+        if (FILE_TYPE.equals(item)) {
             return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
                 @Override
-                public int doCompare(
-                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                     int compare = compareToNull(vsr1.getCategory(), vsr2.getCategory());
-                    if(compare == 0) {
-                        compare = getNameComparator(true).compare(vsr1, vsr2);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
                     }
                     return compare;
                 }
             };
         }
-            
 
         if (FRIEND_ITEM.equals(item)) {
             return null; // TODO: RMV What to do here?
         }
 
         if (LENGTH.equals(item)) {
-            return getLongComparator(PropertyKey.LENGTH, true);
+            return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
+                private Comparator<VisualSearchResult> propertyComparator = getLongComparator(
+                        PropertyKey.LENGTH, true);
+
+                @Override
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    int compare = propertyComparator.compare(vsr1, vsr2);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
+                    }
+                    return compare;
+                }
+            };
         }
 
-        if (NAME.equals(item)
-                // TODO ?? explain where untranslated filename comes from, or
-                // is this a bug?
-            || "Filename".equals(item)
-            || TITLE.equals(item))//TODO move TITLE to its own?
-            {
+        if (NAME.equals(item)) {
             return getNameComparator(true);
         }
 
+        if (TITLE.equals(item)) {
+            return getStringPropertyPlusNameComparator(PropertyKey.ALBUM_TITLE, true);
+        }
+
         if (PLATFORM.equals(item)) {
-            return getStringComparator(PropertyKey.PLATFORM, true);
+            return getStringPropertyPlusNameComparator(PropertyKey.COMPANY, true);
         }
 
         if (QUALITY.equals(item)) {
-            return getLongComparator(PropertyKey.QUALITY, false);
+            return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
+                private Comparator<VisualSearchResult> propertyComparator = getLongComparator(
+                        PropertyKey.QUALITY, false);
+
+                @Override
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    int compare = propertyComparator.compare(vsr1, vsr2);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
+                    }
+                    return compare;
+                }
+            };
         }
 
         if (RELEVANCE_ITEM.equals(item)) {
-            return getFloatComparator(PropertyKey.RELEVANCE, false);
+            return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
+                private Comparator<VisualSearchResult> propertyComparator = getFloatComparator(
+                        PropertyKey.RELEVANCE, false, false);
+
+                @Override
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    int compare = propertyComparator.compare(vsr1, vsr2);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
+                    }
+                    return compare;
+                }
+            };
         }
 
         if (SIZE_HIGH_TO_LOW.equals(item)) {
             return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
                 @Override
-                public int doCompare(
-                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    return compareToNull(vsr2.getSize(), vsr1.getSize());
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    int compare = compareToNull(vsr2.getSize(), vsr1.getSize(), false);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
+                    }
+                    return compare;
                 }
             };
         }
 
         if (SIZE_LOW_TO_HIGH.equals(item)) {
             return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
                 @Override
-                public int doCompare(
-                    VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                    return compareToNull(vsr1.getSize(), vsr2.getSize());
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    int compare = compareToNull(vsr1.getSize(), vsr2.getSize(), false);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
+                    }
+                    return compare;
                 }
             };
         }
 
         if (YEAR.equals(item)) {
-            return getLongComparator(PropertyKey.YEAR, true);
+            return new SimilarResultsGroupingComparator() {
+                private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
+
+                private Comparator<VisualSearchResult> propertyComparator = getLongComparator(
+                        PropertyKey.YEAR, true);
+
+                @Override
+                public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
+                    int compare = propertyComparator.compare(vsr1, vsr2);
+                    if (compare == 0) {
+                        compare = nameComparator.compare(vsr1, vsr2);
+                    }
+                    return compare;
+                }
+            };
         }
 
         throw new IllegalArgumentException("unknown item " +  item);
     }
-    
-    private static int compareNullCheck(Comparable c1, Comparable c2, boolean ascending) {
-        return ascending ? compareToNull(c1, c2) : compareToNull(c2, c1);
+
+    private static int compareNullCheck(Comparable c1, Comparable c2, boolean ascending,
+            boolean nullsFirst) {
+        return ascending ? compareToNull(c1, c2, nullsFirst) : compareToNull(c2, c1, nullsFirst);
     }
     
     @EventSubscriber
