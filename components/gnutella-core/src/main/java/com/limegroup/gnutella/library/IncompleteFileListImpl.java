@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -9,8 +10,8 @@ import java.util.Set;
  */
 class IncompleteFileListImpl extends FileListImpl {
 
-    public IncompleteFileListImpl(FileManager fileManager, Set<File> individualFiles) {
-        super(fileManager, individualFiles);
+    public IncompleteFileListImpl(Executor executor, FileManager fileManager, Set<File> individualFiles) {
+        super(executor, fileManager, individualFiles);
     }
     
     @Override

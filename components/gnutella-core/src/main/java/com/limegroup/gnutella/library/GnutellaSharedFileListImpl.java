@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import org.limewire.collection.MultiCollection;
 
@@ -35,8 +36,8 @@ class GnutellaSharedFileListImpl extends FileListImpl {
      */
     private Collection<File> individualSharedFiles; 
     
-    public GnutellaSharedFileListImpl(FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
-        super(fileManager, individualFiles);
+    public GnutellaSharedFileListImpl(Executor executor, FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
+        super(executor, fileManager, individualFiles);
         
         this.filesNotToShare = filesNotToShare;
         transientSharedFiles = new HashSet<File>();

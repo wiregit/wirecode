@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -235,6 +236,8 @@ class FileManagerImpl implements FileManager, Service {
     private final Provider<ActivityCallback> activityCallback;
     private final ScheduledExecutorService backgroundExecutor;
     
+    private final Executor fileListExecutor;
+    
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
@@ -258,14 +261,16 @@ class FileManagerImpl implements FileManager, Service {
         this.listenerSupport = listenerSupport;
         this.eventBroadcaster = fileManagerEventListener;
         
-        sharedFileList = new SynchronizedFileList(new GnutellaSharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
-        storeFileList = new SynchronizedFileList(new StoreFileListImpl(this, _data.SPECIAL_STORE_FILES));
-        allFriendsFileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList("All"), "All"));
-        incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl(this, new HashSet<File>()));
+        fileListExecutor = ExecutorsHelper.newProcessingQueue("FileListDispatchThread");
+        
+        sharedFileList = new SynchronizedFileList(new GnutellaSharedFileListImpl(fileListExecutor, this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
+        storeFileList = new SynchronizedFileList(new StoreFileListImpl(fileListExecutor, this, _data.SPECIAL_STORE_FILES));
+        allFriendsFileList = new SynchronizedFileList(new FriendFileListImpl(fileListExecutor, this, _data.getFriendList("All"), "All"));
+        incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl(fileListExecutor, this, new HashSet<File>()));
         
         synchronized(this) {
             for(String name : SharingSettings.SHARED_FRIEND_LIST_NAMES.getValue()) {
-                friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name), name)));
+                friendFileLists.put(name, new SynchronizedFileList(new FriendFileListImpl(fileListExecutor, this, _data.getFriendList(name), name)));
             }
         }
         
@@ -362,7 +367,7 @@ class FileManagerImpl implements FileManager, Service {
         if(fileList == null) {
             SharingSettings.addFriendListName(name);
             _data.addFriendList(name);
-            fileList = new SynchronizedFileList(new FriendFileListImpl(this, _data.getFriendList(name), name));
+            fileList = new SynchronizedFileList(new FriendFileListImpl(fileListExecutor, this, _data.getFriendList(name), name));
             friendFileLists.put(name, fileList);
         }
         return fileList;
@@ -930,11 +935,15 @@ class FileManagerImpl implements FileManager, Service {
         }
         
         // if the file is already added
+        boolean contained = false;
         synchronized (this) {
-            if(fileToFileDescMap.containsKey(file)) {
-                dispatchFileEvent( new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, getFileDesc(file)));
-            return;
+            contained = fileToFileDescMap.containsKey(file);
         }
+        
+        if(contained) {
+            dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED,
+                    getFileDesc(file)));
+            return;
         }
         
         //make sure a FileDesc can be created from this file

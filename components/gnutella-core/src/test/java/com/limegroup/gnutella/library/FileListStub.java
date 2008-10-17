@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 
 public class FileListStub extends GnutellaSharedFileListImpl {
@@ -13,7 +14,11 @@ public class FileListStub extends GnutellaSharedFileListImpl {
     private FileDescStub defaultStub = new FileDescStub("other.txt");
     
     public FileListStub(FileManager fileManager, Set<File> individual, Set<File> files) {
-        super(fileManager, individual, files);
+        super(new Executor() {
+            public void execute(Runnable command) {
+                command.run();
+            }
+        }, fileManager, individual, files);
     }
     
     public void setWhitelist(File... files) {        

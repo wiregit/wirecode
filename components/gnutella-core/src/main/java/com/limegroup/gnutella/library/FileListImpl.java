@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
@@ -23,6 +24,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A List of FileDescs that are grouped together 
  */
 abstract class FileListImpl implements FileListPackage, EventListener<FileManagerEvent> {
+    
+    private final Executor eventThread;
 
     /** 
      * A list of listeners for this list
@@ -54,7 +57,8 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
     
     protected final FileManager fileManager;
     
-    public FileListImpl(FileManager fileManager, Set<File> filesToShare) {
+    public FileListImpl(Executor eventThread, FileManager fileManager, Set<File> filesToShare) {
+        this.eventThread = eventThread;
         this.fileManager = fileManager;
         this.individualFiles = filesToShare;
         this.fileDescs = new ArrayList<FileDesc>();
@@ -234,16 +238,26 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
      * Fires an addFileDesc event to all the listeners
      * @param fileDesc that was added
      */
-    protected void fireAddEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fileDesc));
+    protected void fireAddEvent(final FileDesc fileDesc) {
+        eventThread.execute(new Runnable() {
+            @Override
+            public void run() {
+                listenerSupport.handleEvent(new FileListChangedEvent(FileListImpl.this, FileListChangedEvent.Type.ADDED, fileDesc));
+            }
+        });
     }
     
     /**
      * Fires a removeFileDesc event to all the listeners
      * @param fileDesc that was removed
      */
-    protected void fireRemoveEvent(FileDesc fileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, fileDesc));
+    protected void fireRemoveEvent(final FileDesc fileDesc) {
+        eventThread.execute(new Runnable() {
+            @Override
+            public void run() {
+                listenerSupport.handleEvent(new FileListChangedEvent(FileListImpl.this, FileListChangedEvent.Type.REMOVED, fileDesc));
+            }
+        });
     }
 
     /**
@@ -251,8 +265,13 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
      * @param oldFileDesc FileDesc that was there previously
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
-    protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        listenerSupport.handleEvent(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGED, oldFileDesc, newFileDesc));
+    protected void fireChangeEvent(final FileDesc oldFileDesc, final FileDesc newFileDesc) {
+        eventThread.execute(new Runnable() {
+            @Override
+            public void run() {
+                listenerSupport.handleEvent(new FileListChangedEvent(FileListImpl.this, FileListChangedEvent.Type.CHANGED, oldFileDesc, newFileDesc));
+            }
+        });
     }
     
     /**

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
@@ -13,8 +14,8 @@ import org.limewire.util.FileUtils;
  */
 public class StoreFileListImpl extends FileListImpl {
 
-    public StoreFileListImpl(FileManager fileManager, Set<File> individualFiles) {
-        super(fileManager, individualFiles);
+    public StoreFileListImpl(Executor executor, FileManager fileManager, Set<File> individualFiles) {
+        super(executor, fileManager, individualFiles);
     }
     
     /**

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
@@ -20,8 +21,8 @@ class FriendFileListImpl extends FileListImpl {
     private boolean addNewVideoAlways = false;
     
 
-    public FriendFileListImpl(FileManager fileManager, Set<File> filesToShare, String id) {
-        super(fileManager, filesToShare);
+    public FriendFileListImpl(Executor executor, FileManager fileManager, Set<File> filesToShare, String id) {
+        super(executor, fileManager, filesToShare);
         if(id == null)
             throw new NullPointerException("ID cannot be null");
         idName = id;
