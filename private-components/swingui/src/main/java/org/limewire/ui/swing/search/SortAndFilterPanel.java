@@ -128,7 +128,9 @@ public class SortAndFilterPanel extends JXPanel {
         listViewToggleButton.setOpaque(false);
         listViewToggleButton.setToolTipText(tr("List view"));
         listViewToggleButton.setBackgroundPainter(new ButtonPainter());
+        listViewToggleButton.setBorderPainted(false);
         listViewToggleButton.setPaintBorderInsets(true);
+        listViewToggleButton.setContentAreaFilled(false);
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -146,6 +148,9 @@ public class SortAndFilterPanel extends JXPanel {
         tableViewToggleButton.setOpaque(false);
         tableViewToggleButton.setToolTipText(tr("Table view"));
         tableViewToggleButton.setBackgroundPainter(new ButtonPainter());
+        tableViewToggleButton.setBorderPainted(false);
+        tableViewToggleButton.setPaintBorderInsets(true);
+        tableViewToggleButton.setContentAreaFilled(false);
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
