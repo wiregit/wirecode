@@ -1,18 +1,14 @@
 package org.limewire.http.auth;
 
-import java.security.Principal;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.http.auth.Credentials;
 
-import com.google.inject.Singleton;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 public class UserStoreRegistryImpl implements UserStore, UserStoreRegistry {
@@ -24,20 +20,19 @@ public class UserStoreRegistryImpl implements UserStore, UserStoreRegistry {
         lock = new ReentrantReadWriteLock();
         userStores = new HashSet<UserStore>();
     }
-    
-    public Principal authenticate(Credentials credentials) {
+
+    public void register(UserStoreRegistry registry) {
+    }
+
+    public void authenticate(Credentials credentials) {
         lock.readLock().lock();
         try {
             for(UserStore store : userStores) {
-                Principal principal = store.authenticate(credentials);
-                if(principal != null) {
-                    return principal;
-                }
+                store.authenticate(credentials);
             }
         } finally {
             lock.readLock().unlock();
         }
-        return null;
     }
 
     public void addStore(UserStore userStore) {

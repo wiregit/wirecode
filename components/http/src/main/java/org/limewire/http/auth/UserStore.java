@@ -1,9 +1,10 @@
 package org.limewire.http.auth;
 
-import java.security.Principal;
-
 import org.apache.http.auth.Credentials;
 
 public interface UserStore {
-    Principal authenticate(Credentials credentials);
+    void register(UserStoreRegistry registry);
+    //Credentials getCredentials(Principal principal);
+    //void addUser(Credentials credentials);
+    void authenticate(Credentials credentials);
 }

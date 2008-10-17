@@ -2,12 +2,10 @@ package org.limewire.http.auth;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.auth.AUTH;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.UriPatternMatcher;
@@ -31,8 +29,20 @@ public class RequestAuthenticator implements HttpRequestInterceptor, ProtectedUR
         }
         
         if(protectedURIs.lookup(request.getRequestLine().getUri()) != null) {
-            if (request.containsHeader(AUTH.WWW_AUTH_RESP)) {
-                // TODO send back 401
+            if (!request.containsHeader(AUTH.WWW_AUTH_RESP)) {
+                // TODO 401
+            } else {
+                ServerAuthState authState = (ServerAuthState) context.getAttribute(ServerAuthState.AUTH_STATE);
+                if(authState != null) {
+                    ServerAuthScheme authScheme = authState.getScheme();
+                    if(authScheme != null) {
+                        authState.setCredentials(authScheme.authenticate(request));    
+                    } else {
+                        // TODO 500
+                    }
+                } else {
+                    // TODO 500
+                }
             }
         }
     }
