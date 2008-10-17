@@ -53,7 +53,17 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         this.remoteHosts = new TreeSet<RemoteHost>(new Comparator<RemoteHost>() {
             @Override
             public int compare(RemoteHost o1, RemoteHost o2) {
-                return o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
+                int compare = 0;
+                boolean anonymous1 = o1.getFriendPresence().getFriend().isAnonymous();
+                boolean anonymous2 = o2.getFriendPresence().getFriend().isAnonymous();
+                if (anonymous1 == anonymous2) {
+                    compare = o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
+                } else if (anonymous1) {
+                    compare = 1;
+                } else if(anonymous2) {
+                    compare = -1;
+                }
+                return compare;
             }
         });
         this.visible = true;
@@ -337,7 +347,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         case OTHER:
         default: {
             // subheading = "{application name}";
-            //TODO add name of program used to open this file, not included in 5.0
+            // TODO add name of program used to open this file, not included in
+            // 5.0
             String fileSize = getPropertyString(PropertyKey.FILE_SIZE);
             if (!StringUtils.isEmpty(fileSize)) {
                 long bytes = parseLongNoException(fileSize);
