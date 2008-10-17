@@ -32,6 +32,9 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.EventList;
 
 /**
@@ -44,9 +47,10 @@ import ca.odell.glazedlists.EventList;
  * The Sharing button displays a list of sharing actions to share
  * file types with them.
  */
+@Singleton
 public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
     
-    private final String staticText;
+    private final String staticText = I18n.tr("Sharing with {0}", "");
     
     @Resource
     private Icon downIcon;
@@ -77,15 +81,14 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
     
     private JPopupMenu popup;
     
-    public FriendSharingHeaderPanel(String staticText, String name, LibraryManager libraryManager) {               
+    @Inject
+    public FriendSharingHeaderPanel(LibraryManager libraryManager) {               
         GuiUtils.assignResources(this);
         
         setBackgroundPainter(new SubpanelPainter());
-       
-        this.staticText = staticText;
 
         createPopupMenu(libraryManager);
-        createComponents(MessageFormat.format(staticText, name));
+        createComponents();
         layoutComponents();       
         
         setMinimumSize(new Dimension(0, height + 2));
@@ -93,8 +96,8 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
         setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
     }
     
-    private void createComponents(String text) {     
-        titleLabel = new HeadingLabel(text);
+    private void createComponents() {     
+        titleLabel = new HeadingLabel(staticText);
         titleLabel.setForeground(fontColor);
         FontUtils.setSize(titleLabel, fontSize);
         FontUtils.changeStyle(titleLabel, Font.PLAIN);

@@ -1,21 +1,18 @@
 package org.limewire.ui.swing.sharing;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
@@ -39,7 +36,6 @@ import org.limewire.ui.swing.sharing.friends.FriendItemImpl;
 import org.limewire.ui.swing.sharing.friends.FriendNameTable;
 import org.limewire.ui.swing.sharing.friends.FriendTableFormat;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -58,31 +54,33 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendSharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
     public static final String NAME = "All Friends";
-    
-    @Resource
-    protected Icon cancelIcon;
+
     @Resource
     private Color leftBorderColor;
     
     private final CardLayout viewCardLayout;
 
-    private final FriendNameTable friendTable;
     private SharingFancyPanel sharingFancyPanel;
+    
+    private JScrollPane friendTableScrollPane;
 
     private final EventList<FriendItem> friendsList;
 
+    private final FriendNameTable friendTable;
     private final ShareListManager shareListManager;
     private final SharingFancyPanelFactory sharingFancyPanelFactory;
-        
     private final FriendSharingHeaderPanel headerPanel;
     
     @Inject
-    public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager, FriendNameTable friendNameTable, SharingFriendEmptyPanel emptyPanel, SharingFancyPanelFactory sharingFancyPanelFactory) {        
+    public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager, FriendNameTable friendNameTable, SharingFriendEmptyPanel emptyPanel, 
+                SharingFancyPanelFactory sharingFancyPanelFactory, FriendSharingHeaderPanel friendHeaderPanel) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
 
+        this.friendTable = friendNameTable;
         this.shareListManager = shareListManager;
         this.sharingFancyPanelFactory = sharingFancyPanelFactory;
+        this.headerPanel = friendHeaderPanel;
         
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
@@ -93,18 +91,24 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         Connector<FriendItem> connector = GlazedLists.beanConnector(FriendItem.class); 
         friendsList = GlazedListsFactory.observableElementList(new BasicEventList<FriendItem>(), connector);               
 
-        this.friendTable = friendNameTable;
-        friendTable.setTableModel(friendsList, new FriendTableFormat());
+        FriendSelectionListener friendSelectionListener = new FriendSelectionListener(friendTable, headerPanel, emptyPanel, cardPanel);
         
-        headerPanel = new FriendSharingHeaderPanel(I18n.tr("Sharing with {0}"), "", libraryManager);
-
+        createFriendTable(friendSelectionListener);
         createCenterCards(headerPanel, cardPanel);
+        
+        setLayout(new BorderLayout());
+        
+        add(headerPanel, BorderLayout.NORTH);
+        add(friendTableScrollPane, BorderLayout.WEST);
+        add(cardPanel, BorderLayout.CENTER);
 
         viewCardLayout.show(cardPanel, EMPTY);
+    }
+    
+    private void createFriendTable(FriendSelectionListener friendSelectionListener) {
         
-        FriendSelectionListener friendSelectionListener = new FriendSelectionListener(friendTable, headerPanel, emptyPanel, cardPanel);
+        friendTable.setTableModel(friendsList, new FriendTableFormat());
         friendTable.getSelectionModel().addListSelectionListener(friendSelectionListener);
-        friendTable.setPreferredSize(new Dimension(141, friendTable.getPreferredSize().height));
         //if the list is populated for the first time, select the first friend
         friendsList.addListEventListener(new ListEventListener<FriendItem>(){
             int oldSize = 0;
@@ -123,19 +127,11 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                 }
             }});
         
-        JScrollPane friendTableScrollPane = new JScrollPane();
-        friendTableScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        friendTableScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        friendTableScrollPane = new JScrollPane();
         friendTableScrollPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         friendTableScrollPane.setViewportView(friendTable);
         
         friendTable.addKeyListener(friendSelectionListener);
-        
-        setLayout(new MigLayout("insets 0 0 0 0", "[141!]0[grow]","[grow]"));
-        
-        add(headerPanel, "dock north");
-        add(friendTableScrollPane, "grow");
-        add(cardPanel, "grow");
     }
     
     private void createCenterCards(FriendSharingHeaderPanel headerPanel, JPanel cardPanel) {

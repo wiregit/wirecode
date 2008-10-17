@@ -301,11 +301,13 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
         else
             currentPosition = visibleRect.y;
     
+        int height = imageList.getList().getFixedCellHeight();
+        
         if (direction < 0) {
-            int newPosition = currentPosition - (currentPosition / ThumbnailManager.HEIGHT) * ThumbnailManager.HEIGHT;
-            return (newPosition == 0) ? ThumbnailManager.HEIGHT : newPosition;
+            int newPosition = currentPosition - (currentPosition / height) * height;
+            return (newPosition == 0) ? height : newPosition;
         } else {
-            return ((currentPosition / ThumbnailManager.HEIGHT) + 1) * ThumbnailManager.HEIGHT - currentPosition;
+            return ((currentPosition / height) + 1) * height - currentPosition;
         }
     }
 }
