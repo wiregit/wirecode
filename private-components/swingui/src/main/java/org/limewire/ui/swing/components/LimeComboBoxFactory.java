@@ -52,7 +52,7 @@ public class LimeComboBoxFactory {
         
         
         box.setBackgroundPainter(new ButtonPainter());
-        box.setBorder(BorderFactory.createEmptyBorder(3,10,3,12));
+        box.setBorder(BorderFactory.createEmptyBorder(3,10,3,20));
         box.setIcon(this.fullIcon);
         box.setFont(this.fullTextFont);
         box.setForeground(this.fullTextColour);
