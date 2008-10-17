@@ -47,12 +47,15 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                                     }
                                     VisualSearchResult parent = visualSearchResult
                                             .getSimilarityParent();
+                                    VisualSearchResult newParent = null;
                                     if (parent == null) {
                                         //null parent means you are the parent
-                                        pickNewParent(visualSearchResult);
+                                        newParent = pickNewParent(visualSearchResult);
                                     } else {
-                                        removeItemFromPArent(visualSearchResult, parent);
+                                        removeItemFromParent(visualSearchResult, parent);
                                     }
+                                    
+                                    similarResultsDetector.removeSpamItem(visualSearchResult, newParent);
                                 } else {
                                     for (SearchResult searchResult : visualSearchResult
                                             .getCoreSearchResults()) {
@@ -64,7 +67,7 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                         }
                     }
 
-                    private void removeItemFromPArent(final VisualSearchResult visualSearchResult,
+                    private void removeItemFromParent(final VisualSearchResult visualSearchResult,
                             VisualSearchResult parent) {
                         parent.removeSimilarSearchResult(visualSearchResult);
                         visualSearchResult.setSimilarityParent(null);
@@ -72,7 +75,7 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                         visualSearchResult.setVisible(true);
                     }
 
-                    private void pickNewParent(final VisualSearchResult visualSearchResult) {
+                    private VisualSearchResult pickNewParent(final VisualSearchResult visualSearchResult) {
                         VisualSearchResult newParent = null;
                         if (visualSearchResult.getSimilarResults().size() > 0) {
                             newParent = visualSearchResult.getSimilarResults().get(
@@ -100,6 +103,8 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                         //toggle visibility to ensure a repaint
                         visualSearchResult.setVisible(false);
                         visualSearchResult.setVisible(true);
+                        
+                        return newParent;
                     }
 
                 });

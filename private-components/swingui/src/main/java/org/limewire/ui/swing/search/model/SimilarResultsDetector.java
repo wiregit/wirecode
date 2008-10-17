@@ -13,4 +13,6 @@ public interface SimilarResultsDetector {
 
     void detectSimilarResult(VisualSearchResult result);
 
+    void removeSpamItem(VisualSearchResult visualSearchResult, VisualSearchResult newParent);
+
 }

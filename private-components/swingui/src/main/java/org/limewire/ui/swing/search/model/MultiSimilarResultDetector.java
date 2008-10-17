@@ -19,4 +19,11 @@ public class MultiSimilarResultDetector implements SimilarResultsDetector {
             similarResultsDetector.detectSimilarResult(result);
         }
     }
+
+    @Override
+    public void removeSpamItem(VisualSearchResult result, VisualSearchResult newParent) {
+        for (SimilarResultsDetector similarResultsDetector : similarResultsDetectors) {
+            similarResultsDetector.removeSpamItem(result, newParent);
+        }
+    }
 }
