@@ -63,7 +63,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                 set(properties, PropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
                 set(properties, PropertyKey.TRACK_NAME, doc.getValue(LimeXMLNames.AUDIO_TITLE));
             } else if (LimeXMLNames.VIDEO_SCHEMA.equals(doc.getSchemaURI())) {
-                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
+                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.VIDEO_PRODUCER));
                 set(properties, PropertyKey.BITRATE, doc.getValue(LimeXMLNames.VIDEO_BITRATE));
                 set(properties, PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.VIDEO_COMMENTS));
                 set(properties, PropertyKey.LENGTH, doc.getValue(LimeXMLNames.VIDEO_LENGTH));

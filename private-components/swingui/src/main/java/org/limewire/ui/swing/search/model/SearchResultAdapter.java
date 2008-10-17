@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.model;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,12 +22,13 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.StringUtils;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
-    
+
     private final Log LOG = LogFactory.getLog(getClass());
 
     private final List<SearchResult> coreResults;
@@ -276,31 +275,27 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             String quality = getPropertyString(PropertyKey.QUALITY);
             String length = getPropertyString(PropertyKey.LENGTH);
 
-            boolean changed = false;
+            boolean insertHypen = false;
             if (!StringUtils.isEmpty(albumTitle)) {
                 subheading += albumTitle;
-                changed = true;
+                insertHypen = true;
             }
 
             if (!StringUtils.isEmpty(quality)) {
-                if (changed) {
+                if (insertHypen) {
                     subheading += " - ";
                 }
                 subheading += quality;
-                changed = true;
+                insertHypen = true;
             }
 
             if (!StringUtils.isEmpty(length)) {
-                try {
-                    int len = Integer.parseInt(length);
-                    length = CommonUtils.seconds2time(len);
-                    if (changed) {
-                        subheading += " - ";
-                    }
-                    subheading += length;
-                } catch (NumberFormatException e) {
-                    // continue
+                long len = parseLongNoException(length);
+                length = CommonUtils.seconds2time(len);
+                if (insertHypen) {
+                    subheading += " - ";
                 }
+                subheading += length;
             }
         }
             break;
@@ -317,6 +312,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
                 if (changed) {
                     subheading += " - ";
                 }
+                long len = parseLongNoException(length);
+                length = CommonUtils.seconds2time(len);
                 subheading += length;
             }
         }
@@ -331,20 +328,34 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         case PROGRAM: {
             String fileSize = getPropertyString(PropertyKey.FILE_SIZE);
             if (!StringUtils.isEmpty(fileSize)) {
-                subheading = fileSize + tr("MB");
+                long bytes = parseLongNoException(fileSize);
+                subheading = GuiUtils.toUnitbytes(bytes);
             }
         }
             break;
         case DOCUMENT:
         case OTHER:
         default: {
-            subheading = "{application name}";
+            // subheading = "{application name}";
+            //TODO add name of program used to open this file, not included in 5.0
             String fileSize = getPropertyString(PropertyKey.FILE_SIZE);
             if (!StringUtils.isEmpty(fileSize)) {
-                subheading = " - " + fileSize + tr("MB");
+                long bytes = parseLongNoException(fileSize);
+                subheading = GuiUtils.toUnitbytes(bytes);
             }
         }
         }
         return subheading;
+    }
+
+    private long parseLongNoException(String fileSize) {
+        long bytes = 0;
+        try {
+
+            bytes = Long.parseLong(fileSize);
+        } catch (NumberFormatException e) {
+            // continue zero is returned
+        }
+        return bytes;
     }
 }
