@@ -13,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,7 +49,6 @@ import org.limewire.ui.swing.table.RowColorResolver;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -92,8 +90,6 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Font metadataFont;
     @Resource private Font similarResultsButtonFont;
     
-    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
-
     private final ActionColumnTableCellEditor actionEditor;
     private final RowColorResolver<VisualSearchResult> rowColorResolver;
     private ActionButtonPanel actionButtonPanel;
@@ -487,110 +483,12 @@ implements TableCellEditor, TableCellRenderer {
      * parts of the content that match search terms
      */
     private boolean populateSubheading(VisualSearchResult vsr) {
-        //TODO move logic to visual search result
-        String subheading = "";
-        
-        switch(getCategory()) {
-        case AUDIO: {
-            String albumTitle = vsr.getPropertyString(PropertyKey.ALBUM_TITLE);
-            String quality = vsr.getPropertyString(PropertyKey.QUALITY);
-            String length = convertToTime(vsr.getPropertyString(PropertyKey.LENGTH));
-            
-            
-            boolean changed = false;
-            if(!StringUtils.isEmpty(albumTitle)) {
-                subheading += albumTitle;
-                changed = true;
-            }
-            
-            if(!StringUtils.isEmpty(quality)) {
-                if(changed) {
-                    subheading += " - ";
-                }
-                subheading += quality; 
-                changed = true;
-            }
-            
-            if(!StringUtils.isEmpty(length)) {
-                if(changed) {
-                    subheading += " - ";
-                }
-                subheading += length;
-            }
-        }
-            break;
-        case VIDEO: {
-            String quality = vsr.getPropertyString(PropertyKey.QUALITY);
-            String length = vsr.getPropertyString(PropertyKey.LENGTH);
-            boolean changed = false;
-            if(!StringUtils.isEmpty(quality)) {
-                subheading += quality; 
-                changed = true;
-            }
-            
-            if(!StringUtils.isEmpty(length)) {
-                if(changed) {
-                    subheading += " - ";
-                }
-                subheading += length;
-            }
-        }
-            break;
-        case IMAGE: {
-            Object time = vsr.getProperty(PropertyKey.DATE_CREATED);
-            if(time != null) {
-                subheading = DATE_FORMAT.format(new java.util.Date((Long)time));
-            }
-        }
-            break;
-        case PROGRAM: {
-            String fileSize = vsr.getPropertyString(PropertyKey.FILE_SIZE);
-            if(!StringUtils.isEmpty(fileSize)) {
-                subheading = fileSize + tr("MB");
-            }
-        }
-            break;
-        case DOCUMENT:
-        case OTHER:
-        default: {
-            subheading = "{application name}";
-            String fileSize = vsr.getPropertyString(PropertyKey.FILE_SIZE);
-            if(!StringUtils.isEmpty(fileSize)) {
-                subheading = " - " + fileSize + tr("MB");
-            }
-        }
-        }
+        String subheading = vsr.getSubHeading();
 
         String highlightMatches = highlightMatches(subheading);
         LOG.debugf("Subheading: {0} highlightedMatches: {1}", subheading, highlightMatches);
         subheadingLabel.setText(highlightMatches);
         return isDifferentLength(subheading, highlightMatches);
-    }
-
-    private String convertToTime(String intString) {
-        try {
-            int length = Integer.parseInt(intString);
-            int hours = length / 3600;
-            int minutes = (length - (hours * 3600)) / 60;
-            int seconds = (length - (hours * 3600) - (minutes * 60));
-            String time = "";
-            if(hours > 0) {
-                time += zeroPad(hours) + ":"; 
-            }
-            time += zeroPad(minutes) + ":" + zeroPad(seconds);
-            return time;
-        } catch (NumberFormatException e) {
-           //do nothing null will be returned
-        }
-        
-        return null;
-    }
-    
-    private String zeroPad(int num) {
-        if(num < 10) {
-            return "0"+num;
-        }
-        return ""+num;
     }
 
     private boolean isDifferentLength(String str1, String str2) {

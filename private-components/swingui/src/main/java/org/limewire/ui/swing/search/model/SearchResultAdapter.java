@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.model;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,9 +24,12 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.StringUtils;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
+    
     private final Log LOG = LogFactory.getLog(getClass());
 
     private final List<SearchResult> coreResults;
@@ -259,5 +264,87 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             renderName = name + "." + getFileExtension();
         }
         return renderName.trim();
+    }
+
+    @Override
+    public String getSubHeading() {
+        String subheading = "";
+
+        switch (getCategory()) {
+        case AUDIO: {
+            String albumTitle = getPropertyString(PropertyKey.ALBUM_TITLE);
+            String quality = getPropertyString(PropertyKey.QUALITY);
+            String length = getPropertyString(PropertyKey.LENGTH);
+
+            boolean changed = false;
+            if (!StringUtils.isEmpty(albumTitle)) {
+                subheading += albumTitle;
+                changed = true;
+            }
+
+            if (!StringUtils.isEmpty(quality)) {
+                if (changed) {
+                    subheading += " - ";
+                }
+                subheading += quality;
+                changed = true;
+            }
+
+            if (!StringUtils.isEmpty(length)) {
+                try {
+                    int len = Integer.parseInt(length);
+                    length = CommonUtils.seconds2time(len);
+                    if (changed) {
+                        subheading += " - ";
+                    }
+                    subheading += length;
+                } catch (NumberFormatException e) {
+                    // continue
+                }
+            }
+        }
+            break;
+        case VIDEO: {
+            String quality = getPropertyString(PropertyKey.QUALITY);
+            String length = getPropertyString(PropertyKey.LENGTH);
+            boolean changed = false;
+            if (!StringUtils.isEmpty(quality)) {
+                subheading += quality;
+                changed = true;
+            }
+
+            if (!StringUtils.isEmpty(length)) {
+                if (changed) {
+                    subheading += " - ";
+                }
+                subheading += length;
+            }
+        }
+            break;
+        case IMAGE: {
+            Object time = getProperty(PropertyKey.DATE_CREATED);
+            if (time != null) {
+                subheading = DATE_FORMAT.format(new java.util.Date((Long) time));
+            }
+        }
+            break;
+        case PROGRAM: {
+            String fileSize = getPropertyString(PropertyKey.FILE_SIZE);
+            if (!StringUtils.isEmpty(fileSize)) {
+                subheading = fileSize + tr("MB");
+            }
+        }
+            break;
+        case DOCUMENT:
+        case OTHER:
+        default: {
+            subheading = "{application name}";
+            String fileSize = getPropertyString(PropertyKey.FILE_SIZE);
+            if (!StringUtils.isEmpty(fileSize)) {
+                subheading = " - " + fileSize + tr("MB");
+            }
+        }
+        }
+        return subheading;
     }
 }
