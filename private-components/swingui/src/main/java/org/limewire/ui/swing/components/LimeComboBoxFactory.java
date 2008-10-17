@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -46,7 +47,11 @@ public class LimeComboBoxFactory {
         GuiUtils.assignResources(this);        
     }
     
-    public LimeComboBox createFullComboBox(Action... items) {
+    public LimeComboBox createFullComboBox() {
+        return this.createFullComboBox(null);
+    }
+    
+    public LimeComboBox createFullComboBox(List<Action> items) {
     
         LimeComboBox box = new LimeComboBox(items);
         
@@ -61,7 +66,7 @@ public class LimeComboBoxFactory {
         
     }
     
-    public LimeComboBox createMiniComboBox(String promptText, Action... items) {
+    public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
     
         LimeComboBox box = new LimeComboBox(items);
         

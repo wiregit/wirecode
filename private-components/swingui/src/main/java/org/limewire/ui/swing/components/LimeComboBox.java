@@ -3,7 +3,6 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -14,15 +13,15 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeListener;
 
@@ -31,23 +30,25 @@ import org.limewire.ui.swing.action.AbstractAction;
 
 public class LimeComboBox extends JXButton {
     
-    private Action[] actions;
+    private final List<Action> actions;
     private Action   selectedAction;
             
     private Color pressedTextColour = null;
     private Color rolloverTextColour = null;
     
     private boolean hasSize = false;
+    private boolean isMenuUpdated = false;
     
     private final JPopupMenu menu;
     
-    LimeComboBox(Action...actions) {
+    LimeComboBox(List<Action> actions) {
         this.setText(null);
         
-        this.actions = actions;
+        this.actions = new LinkedList<Action>();
+        this.addActions(actions);
         
-        if (this.actions.length > 0)
-            this.selectedAction = actions[0];
+        if (!this.actions.isEmpty())
+            this.selectedAction = actions.get(0);
         else
             this.selectedAction = null;
         
@@ -77,6 +78,33 @@ public class LimeComboBox extends JXButton {
         });
     }
 
+    
+    public void  addActions(List<Action> actions) {
+        this.isMenuUpdated = false;
+        
+        this.actions.addAll(actions);
+    }
+    
+    public void  addAction(Action action) {
+        this.isMenuUpdated = false;
+        
+        this.actions.add(action);                
+    }
+    
+    public void  removeAction(Action action) {
+        this.isMenuUpdated = false;
+        
+        this.actions.remove(action);
+    }
+    
+    public void setSelectedAction(Action action) {
+        this.selectedAction = action;
+    }
+    
+    public Action getSelectedAction() {
+        return this.selectedAction;
+    }
+    
     
     @Override
     public void setText(String promptText) {
@@ -215,7 +243,7 @@ public class LimeComboBox extends JXButton {
             labelRect = this.getLongestTextArea(this.getText());
         } 
         else {
-            labelRect = this.getLongestTextArea((Object[])this.actions);
+            labelRect = this.getLongestTextArea(this.actions.toArray());
         }    
         
         int ix1 = 0;
@@ -331,6 +359,9 @@ public class LimeComboBox extends JXButton {
     
     
     private void updateMenu() {
+        if (this.isMenuUpdated) return;
+        this.isMenuUpdated = true;
+        
         this.menu.removeAll();
         
         int ix1 = 0;
@@ -339,8 +370,6 @@ public class LimeComboBox extends JXButton {
             Insets insets = this.getBorder().getBorderInsets(this);
             ix1 = insets.left - 4;
         }
-        
-        System.out.println(ix1);
         
         for ( Action action : this.actions ) {
         
@@ -366,80 +395,6 @@ public class LimeComboBox extends JXButton {
         this.menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
         this.menu.setBackground(Color.WHITE);
         this.menu.setForeground(Color.BLACK);
-        
-        
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    public static void main(String[] args) {
-        
-        JFrame window = new JFrame();
-        
-        JPanel panel = new JPanel(new FlowLayout());
-        panel.setBackground(Color.CYAN);
-        
-        Action one = new AbstractAction("hola") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
-            }
-        };
-        Action two = new AbstractAction("ayer") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
-            }
-        };
-        AbstractAction three = new AbstractAction("palabrasssssssss") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
-                
-                
-            }
-            
-             
-            
-        };
-        
-        Action[] actions = new Action[] {one,two,three};
-        
-        panel.add(new LimeComboBoxFactory().createFullComboBox(actions));
-        
-        panel.add(new LimeComboBoxFactory().createMiniComboBox("hello",actions));
-        
-        window.add(panel);
-        window.pack();
-        window.validate();
-        window.setVisible(true);
-        window.setSize(new Dimension(500,500));
     }
     
 }
