@@ -460,6 +460,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
 
 
     private void resetRowSelection(JTable table, int oldSelRow) {
+        if(table.getRowCount() == 0){
+            return;
+        }
+        
         if(oldSelRow == -1){
             table.setRowSelectionInterval(0, 0);
         } else if(table.getRowCount() > oldSelRow){
