@@ -15,18 +15,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
-import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
-import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.SavedFileManager;
-import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.licenses.LicenseFactory;
-import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -48,11 +44,7 @@ class CoreRandomGlue {
     private final SimppManager simppManager;
     private final HashTreeCache hashTreeCache;
     private final LicenseFactory licenseFactory;
-    private final SharedFilesKeywordIndex sharedFilesKeywordIndex;
-    private final QRPUpdater qrpUpdater;
-    private final CreationTimeCache creationTimeCache;
     private final SavedFileManager savedFileManager;
-    private final DaapManager daapManager;
     private final UrnCache urnCache;
     private final SchemaReplyCollectionMapper schemaMapper;
     private final AltLocManager altLocManager;
@@ -68,11 +60,7 @@ class CoreRandomGlue {
             SimppManager simppManager,
             LicenseFactory licenseFactory,
             HashTreeCache hashTreeCache,
-            SharedFilesKeywordIndex sharedFilesKeywordIndex,
-            QRPUpdater qrpUpdater,
-            CreationTimeCache creationTimeCache,
             SavedFileManager savedFileManager,
-            DaapManager daapManager,
             UrnCache urnCache,
             SchemaReplyCollectionMapper schemaMapper,
             AltLocManager altLocManager) {
@@ -88,11 +76,7 @@ class CoreRandomGlue {
         this.simppManager = simppManager;
         this.hashTreeCache = hashTreeCache;
         this.licenseFactory = licenseFactory;
-        this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;
-        this.qrpUpdater = qrpUpdater;
-        this.creationTimeCache = creationTimeCache;
         this.savedFileManager = savedFileManager;
-        this.daapManager = daapManager;
         this.urnCache = urnCache;
         this.schemaMapper = schemaMapper;
         this.altLocManager = altLocManager;
@@ -103,11 +87,7 @@ class CoreRandomGlue {
         registry.register(new Service() {            
             public void initialize() {
                 //TODO: find a better way to do this
-                fileManager.addFileEventListener(sharedFilesKeywordIndex);
-                fileManager.addFileEventListener(qrpUpdater);
-                fileManager.addFileEventListener(creationTimeCache);
                 fileManager.addFileEventListener(savedFileManager);
-                fileManager.addFileEventListener(daapManager);
                 fileManager.addFileEventListener(urnCache);
                 fileManager.addFileEventListener(schemaMapper);
                 fileManager.addFileEventListener(altLocManager);

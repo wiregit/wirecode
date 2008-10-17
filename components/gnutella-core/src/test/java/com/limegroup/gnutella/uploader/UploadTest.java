@@ -49,6 +49,7 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
@@ -58,6 +59,7 @@ import org.limewire.util.TestUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.HTTPAcceptor;
@@ -160,7 +162,7 @@ public class UploadTest extends LimeTestCase {
         assertGreaterThan("Expected file to contain data", 0, target.length());
 
         // initialize services
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
@@ -243,8 +245,7 @@ public class UploadTest extends LimeTestCase {
         
         // make sure the FileDesc objects in file manager are up-to-date
         fileManager = injector.getInstance(FileManager.class);
-        CreationTimeCache cache = injector.getInstance(CreationTimeCache.class);
-        fileManager.addFileEventListener(cache);
+        injector.getInstance(ServiceRegistry.class).initialize();
         FileManagerTestUtils.waitForLoad(fileManager, 4000);
         
         ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));

@@ -14,11 +14,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerEvent;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * Class to measure latency searching on shared files
@@ -57,7 +57,7 @@ public class KeywordIndexPerformanceSearcher {
         this.sharedFilesDirectory = config.getSharedFilesDirectory();
         this.searchTerms = config.getSearchTerms();
 
-        this.injector = LimeTestUtils.createInjector();
+        this.injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         this.keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         this.limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
         this.queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
@@ -84,14 +84,9 @@ public class KeywordIndexPerformanceSearcher {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
         FileManager fman = injector.getInstance(FileManager.class);
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
-        CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
-        SchemaReplyCollectionMapper schemaMapper = injector.getInstance(SchemaReplyCollectionMapper.class);
         NumFilesAddedListener numFilesListener = new NumFilesAddedListener(numberOfFilesIndexed);
 
-        fman.addFileEventListener(keywordIndex);
-        fman.addFileEventListener(numFilesListener);
-        fman.addFileEventListener(schemaMapper);
-        fman.addFileEventListener(creationTimeCache);
+        injector.getInstance(ServiceRegistry.class).initialize();
 
         CommonWords commonWords;
         try {

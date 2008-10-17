@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
@@ -61,7 +63,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * lock before grabbing my lock.  Please keep doing that as you add code.
  */
 @Singleton
-public final class CreationTimeCache implements EventListener<FileManagerEvent> {
+public final class CreationTimeCache {
     
     private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
     
@@ -93,6 +95,36 @@ public final class CreationTimeCache implements EventListener<FileManagerEvent> 
             }
         });
 	}
+    
+    @Inject void register(ServiceRegistry registry) {
+        registry.register(new Service() {
+            @Override
+            public String getServiceName() {
+                return "What's New Manager";
+            }
+            @Override
+            public void initialize() {
+                fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
+                    @Override
+                    public void handleEvent(FileManagerEvent event) {
+                        handleFileManagerEvent(event);
+                    }
+                });
+                fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+                    @Override
+                    public void handleEvent(FileListChangedEvent event) {
+                        handleFileListEvent(event);
+                    }
+                });
+            }
+            @Override
+            public void start() {
+            }
+            @Override
+            public void stop() {
+            }
+        });
+    }
     
     /**
      * Package private for testing.
@@ -495,7 +527,7 @@ public final class CreationTimeCache implements EventListener<FileManagerEvent> 
     /**
      * Listens for events from the FileManager
      */
-    public void handleEvent(FileManagerEvent evt) {
+    private void handleFileManagerEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case FILEMANAGER_LOAD_FINISHING:
                 pruneTimes();          
@@ -503,24 +535,27 @@ public final class CreationTimeCache implements EventListener<FileManagerEvent> 
             case FILEMANAGER_SAVE:
                 persistCache();
                 break;
-            case ADD_FILE:
-                // Commit the time in the CreactionTimeCache, but don't share
-                // the installer.  We populate free LimeWire's with free installers
-                // so we have to make sure we don't influence the what is new
-                // result set.
-                if (!SharingUtils.isForcedShare(evt.getNewFile()) && 
-                        !(evt.getNewFileDesc() instanceof IncompleteFileDesc)) {     
-                    fileAdded(evt.getNewFile(), evt.getNewFileDesc().getSHA1Urn());
-                }
-                 break;
-            case CHANGE_FILE: 
-                if(!(evt.getOldFileDesc() instanceof IncompleteFileDesc))
-                    fileChanged(evt.getOldFileDesc().getCreationTime(), evt.getOldFileDesc().getSHA1Urn(),
-                            evt.getNewFileDesc().getSHA1Urn());
-                break;
-            case REMOVE_URN:
-                removeTime(evt.getURN());
-                break;
+        }
+    }
+    
+    private void handleFileListEvent(FileListChangedEvent evt) {
+        switch(evt.getType()) {
+        case ADDED:
+            // Commit the time in the CreactionTimeCache, but don't share
+            // the installer.  We populate free LimeWire's with free installers
+            // so we have to make sure we don't influence the what is new
+            // result set.
+            if (!SharingUtils.isForcedShare(evt.getFileDesc())) {     
+                fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
+            }
+            break;
+        case REMOVED:
+            removeTime(evt.getFileDesc().getSHA1Urn());
+            break;
+        case CHANGED:
+            fileChanged(evt.getOldValue().getCreationTime(), evt.getOldValue().getSHA1Urn(),
+                        evt.getFileDesc().getSHA1Urn());
+            break;
         }
     }
 }

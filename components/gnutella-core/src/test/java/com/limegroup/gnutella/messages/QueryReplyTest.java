@@ -42,6 +42,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.net.TLSManager;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -1194,7 +1195,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
         SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
-        fileManager.addFileEventListener(keywordIndex);
+        injector.getInstance(ServiceRegistry.class).initialize();
         addFilesToLibrary();
         addAlternateLocationsToFiles();
         
@@ -1259,7 +1260,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
         SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
-        fileManager.addFileEventListener(keywordIndex);
+        injector.getInstance(ServiceRegistry.class).initialize();
         addFilesToLibrary();
         addCreationTimeToFiles();
         boolean checked = false;

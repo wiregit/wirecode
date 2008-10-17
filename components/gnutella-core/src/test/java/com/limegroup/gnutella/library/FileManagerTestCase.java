@@ -8,6 +8,7 @@ import java.util.List;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
@@ -16,14 +17,10 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
-import com.limegroup.gnutella.library.FileManagerImpl;
-import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
@@ -32,7 +29,6 @@ import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * Tests for FileManager and handling of queries.
@@ -80,7 +76,7 @@ public class FileManagerTestCase extends LimeTestCase {
         cleanFiles(_storeDir, false);
 
 
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
@@ -91,16 +87,12 @@ public class FileManagerTestCase extends LimeTestCase {
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         creationTimeCache = injector.getInstance(CreationTimeCache.class);
         qrpUpdater = injector.getInstance(QRPUpdater.class);
-        SchemaReplyCollectionMapper schemaMapper = injector.getInstance(SchemaReplyCollectionMapper.class);
-
-        fman.addFileEventListener(keywordIndex);
-        fman.addFileEventListener(qrpUpdater);
-        fman.addFileEventListener(schemaMapper);
-        fman.addFileEventListener(creationTimeCache);
 
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        injector.getInstance(ServiceRegistry.class).initialize();
     }
 
     @Override

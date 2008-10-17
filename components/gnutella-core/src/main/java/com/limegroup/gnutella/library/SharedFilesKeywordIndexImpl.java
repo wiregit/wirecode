@@ -17,6 +17,9 @@ import org.limewire.collection.StringTrie;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inspection.InspectableForSize;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.listener.EventListener;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
@@ -59,7 +62,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      */
     @InspectableForSize("size of keyword trie")
     private final StringTrie<IntSet> keywordTrie = new StringTrie<IntSet>(true);
-    
+
     /**
      * A trie mapping keywords in complete filenames to the indices in _files.
      * Contains ONLY incomplete keywords.
@@ -68,7 +71,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      */
     @InspectableForSize("size of incomplete keyword trie")
     private final StringTrie<IntSet> incompleteKeywordTrie = new StringTrie<IntSet>(true);
-    
+
     private final Provider<CreationTimeCache> creationTimeCache;
 
     private final Provider<ResponseFactory> responseFactory;
@@ -82,8 +85,10 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private final LimeXMLSchemaRepository schemaRepository;
 
     @Inject
-    public SharedFilesKeywordIndexImpl(FileManager fileManager, Provider<CreationTimeCache> creationTimeCache,
-            Provider<ResponseFactory> responseFactory, Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
+    public SharedFilesKeywordIndexImpl(FileManager fileManager,
+            Provider<CreationTimeCache> creationTimeCache,
+            Provider<ResponseFactory> responseFactory,
+            Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
             ActivityCallback activityCallback, LimeXMLSchemaRepository schemaRepository) {
         this.fileManager = fileManager;
         this.creationTimeCache = creationTimeCache;
@@ -93,11 +98,51 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         this.schemaRepository = schemaRepository;
     }
     
+    @Inject void register(ServiceRegistry registry) {
+        registry.register(new Service() {
+            @Override
+            public String getServiceName() {
+                return "LimeWire Network Keyword Library";
+            }
+            @Override
+            public void initialize() {
+                fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
+                    @Override
+                    public void handleEvent(FileManagerEvent event) {
+                        handleFileManagerEvent(event);
+                    }
+                });
+                fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+                    @Override
+                    public void handleEvent(FileListChangedEvent event) {
+                        handleFileListEvent(event);
+                    }
+                });
+                fileManager.getIncompleteFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+                    @Override
+                    public void handleEvent(FileListChangedEvent event) {
+                        handleFileListEvent(event);
+                    }
+                });
+            }
+            @Override
+            public void start() {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void stop() {
+                // TODO Auto-generated method stub
+                
+            }
+        });
+    }
+
     public Response[] query(QueryRequest request) {
         Set<Response> responses = QueryProcessor.processQuery(request, this);
         return responses.toArray(new Response[responses.size()]);
     }
-
 
     private Set<Response> queryMetaData(QueryRequest request) {
         Set<LimeXMLDocument> documents = Collections.emptySet();
@@ -112,25 +157,27 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         return createResponses(documents);
     }
 
-    /* (non-Javadoc)
-    * @see com.limegroup.gnutella.FileManager#query(com.limegroup.gnutella.messages.QueryRequest)
-    */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.limegroup.gnutella.FileManager#query(com.limegroup.gnutella.messages.QueryRequest)
+     */
     private Set<Response> queryFileNames(QueryRequest request) {
         String str = request.getQuery();
         boolean includeXML = request.shouldIncludeXMLInResponse();
 
-        //Normal case: query the index to find all matches.  TODO: this
-        //sometimes returns more results (>255) than we actually send out.
-        //That's wasted work.
-        //Trie requires that getPrefixedBy(String, int, int) passes
-        //an already case-changed string.  Both search & urnSearch
-        //do this kind of match, so we canonicalize the case for them.
+        // Normal case: query the index to find all matches. TODO: this
+        // sometimes returns more results (>255) than we actually send out.
+        // That's wasted work.
+        // Trie requires that getPrefixedBy(String, int, int) passes
+        // an already case-changed string. Both search & urnSearch
+        // do this kind of match, so we canonicalize the case for them.
         str = keywordTrie.canonicalCase(str);
         IntSet matches = search(str, null, request.desiresPartialResults());
-        if(request.getQueryUrns().size() > 0)
-            matches = urnSearch(request.getQueryUrns(),matches);
-        
-        if (matches==null)
+        if (request.getQueryUrns().size() > 0)
+            matches = urnSearch(request.getQueryUrns(), matches);
+
+        if (matches == null)
             return Collections.emptySet();
 
         Set<Response> responses = new HashSet<Response>();
@@ -138,15 +185,16 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         LimeXMLDocument doc = request.getRichQuery();
 
         // Iterate through our hit indices to create a list of results.
-        for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
+        for (IntSet.IntSetIterator iter = matches.iterator(); iter.hasNext();) {
             int i = iter.next();
             FileDesc desc = fileManager.get(i);
 
-            assert desc != null : "unexpected null in FileManager for query:\n"+ request;
+            assert desc != null : "unexpected null in FileManager for query:\n" + request;
 
-            if(!(fileManager.getGnutellaSharedFileList().contains(desc) || fileManager.getIncompleteFileList().contains(desc)))
+            if (!(fileManager.getGnutellaSharedFileList().contains(desc) || fileManager
+                    .getIncompleteFileList().contains(desc)))
                 continue;
-            
+
             if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;
 
@@ -154,10 +202,9 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             activityCallback.handleSharedFileUpdate(desc.getFile());
 
             Response resp = responseFactory.get().createResponse(desc);
-            if(includeXML) {
+            if (includeXML) {
                 addXMLToResponse(resp, desc);
-                if(doc != null && resp.getDocument() != null &&
-                   !isValidXMLMatch(resp, doc))
+                if (doc != null && resp.getDocument() != null && !isValidXMLMatch(resp, doc))
                     continue;
             }
             responses.add(resp);
@@ -177,32 +224,33 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      */
     private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
         IntSet ret = priors;
-        for(URN urn : urnsIter) {
-            if( fileManager.getGnutellaSharedFileList().contains(fileManager.getFileDesc(urn))) {
+        for (URN urn : urnsIter) {
+            if (fileManager.getGnutellaSharedFileList().contains(fileManager.getFileDesc(urn))) {
                 IntSet hits = fileManager.getIndices(urn);
-     
-                if(hits!=null) {
+
+                if (hits != null) {
                     // double-check hits to be defensive (not strictly needed)
                     IntSet.IntSetIterator iter = hits.iterator();
-                    while(iter.hasNext()) {
-                            FileDesc fd = fileManager.get(iter.next());
-        
+                    while (iter.hasNext()) {
+                        FileDesc fd = fileManager.get(iter.next());
+
                         // If the file is unshared or an incomplete file
                         // DO NOT SEND IT.
-                        if(fd == null || (fd instanceof IncompleteFileDesc))
+                        if (fd == null || (fd instanceof IncompleteFileDesc))
                             continue;
-                        if(fd.containsUrn(urn)) {
+                        if (fd.containsUrn(urn)) {
                             // still valid
-                            if(ret==null) ret = new IntSet();
+                            if (ret == null)
+                                ret = new IntSet();
                             ret.add(fd.getIndex());
-                        } 
+                        }
                     }
                 }
             }
         }
         return ret;
     }
-     
+
     /**
      * Responds to a what is new request.
      */
@@ -210,30 +258,30 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         boolean includeXML = request.shouldIncludeXMLInResponse();
 
         // see if there are any files to send....
-        // NOTE: we only request up to 3 urns.  we don't need to worry
+        // NOTE: we only request up to 3 urns. we don't need to worry
         // about partial files because we don't add them to the cache.
-        // NOTE: this doesn't return Store files. getNewestUrns only 
-        //       returns the top 3 shared files
+        // NOTE: this doesn't return Store files. getNewestUrns only
+        // returns the top 3 shared files
         List<URN> urnList = creationTimeCache.get().getFiles(request, 3);
         if (urnList.size() == 0)
             return Collections.emptySet();
-        
+
         // get the appropriate responses
         Set<Response> resps = new HashSet<Response>(urnList.size());
         for (int i = 0; i < urnList.size(); i++) {
             URN currURN = urnList.get(i);
             FileDesc desc = fileManager.getFileDesc(currURN);
-            
+
             // should never happen since we don't add times for IFDs and
             // we clear removed files...
-            if ((desc==null) || (desc instanceof IncompleteFileDesc))
+            if ((desc == null) || (desc instanceof IncompleteFileDesc))
                 throw new RuntimeException("Bad Rep - No IFDs allowed!");
-            
+
             // Formulate the response
             Response r = responseFactory.get().createResponse(desc);
-            if(includeXML)
+            if (includeXML)
                 addXMLToResponse(r, desc);
-            
+
             // Cache it
             resps.add(r);
         }
@@ -245,24 +293,25 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         incompleteKeywordTrie.clear();
     }
     
-    public void handleEvent(FileManagerEvent evt) {
+    private void handleFileListEvent(FileListChangedEvent evt) {
+        switch(evt.getType()) {
+        case ADDED:
+            addFileDescs(evt.getFileDesc());
+            break;
+        case CHANGED:
+            removeFileDescs(evt.getOldValue());
+            addFileDescs(evt.getFileDesc());
+            break;
+        case REMOVED:
+            removeFileDescs(evt.getFileDesc());
+            break;
+        }
+    }
+
+    private void handleFileManagerEvent(FileManagerEvent evt) {
         // building tries should be fast and non-blocking so can be done in
         // dispatch thread
         switch (evt.getType()) {
-        case ADD_FILE:
-            addFileDescs(evt.getNewFileDesc());
-            break;
-        case REMOVE_FILE:
-            removeFileDescs(evt.getNewFileDesc());
-            break;
-        case RENAME_FILE:
-            removeFileDescs(evt.getOldFileDesc());
-            addFileDescs(evt.getNewFileDesc());
-            break;
-        case CHANGE_FILE:
-            removeFileDescs(evt.getOldFileDesc());
-            addFileDescs(evt.getNewFileDesc());
-            break;
         case INCOMPLETE_URN_CHANGE:
             addFileDescs(evt.getNewFileDesc());
             break;
@@ -274,57 +323,57 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             break;
         }
     }
-    
-    private void removeFileDescs(FileDesc...fileDescs) {
+
+    private void removeFileDescs(FileDesc... fileDescs) {
         for (FileDesc fileDesc : fileDescs) {
-            if(fileDesc instanceof IncompleteFileDesc) {
+            if (fileDesc instanceof IncompleteFileDesc) {
                 removeKeywords(incompleteKeywordTrie, fileDesc);
             } else {
                 removeKeywords(keywordTrie, fileDesc);
             }
         }
     }
-    
-    private void addFileDescs(FileDesc...fileDescs) {
+
+    private void addFileDescs(FileDesc... fileDescs) {
         boolean indexIncompleteFiles = SharingSettings.ALLOW_PARTIAL_SHARING.getValue()
-        && SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue();
+                && SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue();
         for (FileDesc fileDesc : fileDescs) {
-            if(fileManager.getIncompleteFileList().contains(fileDesc)) { 
-                IncompleteFileDesc ifd = (IncompleteFileDesc)fileDesc;
+            if (fileManager.getIncompleteFileList().contains(fileDesc)) {
+                IncompleteFileDesc ifd = (IncompleteFileDesc) fileDesc;
                 if (indexIncompleteFiles && ifd.hasUrnsAndPartialData()) {
                     loadKeywords(incompleteKeywordTrie, fileDesc);
                 }
-            } else if(fileManager.getGnutellaSharedFileList().contains(fileDesc)){
+            } else if (fileManager.getGnutellaSharedFileList().contains(fileDesc)) {
                 loadKeywords(keywordTrie, fileDesc);
             }
         }
     }
-    
+
     /**
      * @param trie to update
      * @param fd to load keywords from
      */
     private void loadKeywords(StringTrie<IntSet> trie, FileDesc fd) {
-        // Index the filename.  For each keyword...
+        // Index the filename. For each keyword...
         String[] keywords = extractKeywords(fd);
 
         for (String keyword : keywords) {
             synchronized (trie) {
-                //Ensure the _keywordTrie has a set of indices associated with keyword.
+                // Ensure the _keywordTrie has a set of indices associated with
+                // keyword.
                 IntSet indices = trie.get(keyword);
                 if (indices == null) {
                     indices = new IntSet();
                     trie.add(keyword, indices);
                 }
-                //Add fileIndex to the set.
+                // Add fileIndex to the set.
                 indices.add(fd.getIndex());
             }
         }
     }
-    
 
     private void removeKeywords(StringTrie<IntSet> trie, FileDesc fd) {
-        //Remove references to this from index.
+        // Remove references to this from index.
         String[] keywords = extractKeywords(fd);
         for (String keyword : keywords) {
             synchronized (trie) {
@@ -335,42 +384,41 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                         trie.remove(keyword);
                 }
             }
-        }        
+        }
     }
-    
+
     /**
      * Returns a set of indices of files matching <code>query</code>, or null
-     * if there are no matches.  Subclasses may override to provide different
-     * notions of matching.  The caller of this method must not mutate the returned
-     * value.
+     * if there are no matches. Subclasses may override to provide different
+     * notions of matching. The caller of this method must not mutate the
+     * returned value.
      */
     protected IntSet search(String query, IntSet priors, boolean partial) {
-        //As an optimization, we lazily allocate all sets in case there are no
-        //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
-        //returns an iterator of one element and there is only one keyword.
-        IntSet ret=priors;
+        // As an optimization, we lazily allocate all sets in case there are no
+        // matches. TODO2: we can avoid allocating sets when getPrefixedBy
+        // returns an iterator of one element and there is only one keyword.
+        IntSet ret = priors;
 
-        //For each keyword in the query....  (Note that we avoid calling
-        //StringUtils.split and take advantage of Trie's offset/limit feature.)
-        for (int i=0; i<query.length(); ) { 
+        // For each keyword in the query.... (Note that we avoid calling
+        // StringUtils.split and take advantage of Trie's offset/limit feature.)
+        for (int i = 0; i < query.length();) {
             if (QueryUtils.isDelimiter(query.charAt(i))) {
                 i++;
                 continue;
             }
             int j;
-            for (j=i+1; j<query.length(); j++) {
+            for (j = i + 1; j < query.length(); j++) {
                 if (QueryUtils.isDelimiter(query.charAt(j)))
                     break;
             }
 
-            //Search for keyword, i.e., keywords[i...j-1].
+            // Search for keyword, i.e., keywords[i...j-1].
             Iterator<IntSet> iter;
             synchronized (keywordTrie) {
                 iter = keywordTrie.getPrefixedBy(query, i, j);
             }
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-                    SharingSettings.ALLOW_PARTIAL_RESPONSES.getValue() &&
-                    partial) {
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue()
+                    && SharingSettings.ALLOW_PARTIAL_RESPONSES.getValue() && partial) {
                 Iterator<IntSet> incompleteIndices;
                 synchronized (incompleteKeywordTrie) {
                     incompleteIndices = incompleteKeywordTrie.getPrefixedBy(query, i, j);
@@ -380,45 +428,49 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             synchronized (keywordTrie) {
                 synchronized (incompleteKeywordTrie) {
-                    if(iter.hasNext()) {
-                        //Got match.  Union contents of the iterator and store in
-                        //matches.  As an optimization, if this is the only keyword and
-                        //there is only one set returned, return that set without 
-                        //copying.
-                        IntSet matches=null;
-                        while (iter.hasNext()) {                
-                            IntSet s= iter.next();
+                    if (iter.hasNext()) {
+                        // Got match. Union contents of the iterator and store
+                        // in
+                        // matches. As an optimization, if this is the only
+                        // keyword and
+                        // there is only one set returned, return that set
+                        // without
+                        // copying.
+                        IntSet matches = null;
+                        while (iter.hasNext()) {
+                            IntSet s = iter.next();
                             if (matches == null) {
-                                if (i==0 && j==query.length() && !(iter.hasNext()))
+                                if (i == 0 && j == query.length() && !(iter.hasNext()))
                                     return s;
-                                matches=new IntSet();
+                                matches = new IntSet();
                             }
                             matches.addAll(s);
                         }
-                        
-                        //Intersect matches with ret.  If ret isn't allocated,
-                        //initialize to matches.
-                        if (ret == null)   
+
+                        // Intersect matches with ret. If ret isn't allocated,
+                        // initialize to matches.
+                        if (ret == null)
                             ret = matches;
                         else
                             ret.retainAll(matches);
                     } else {
-                        //No match.  Optimization: no matches for keyword => failure
+                        // No match. Optimization: no matches for keyword =>
+                        // failure
                         return null;
                     }
-                    
-                    //Optimization: no matches after intersect => failure
+
+                    // Optimization: no matches after intersect => failure
                     if (ret.size() == 0)
-                        return null;        
-                    i=j;
+                        return null;
+                    i = j;
                 }
             }
-        } 
-        if (ret==null || ret.size()==0)
+        }
+        if (ret == null || ret.size() == 0)
             return null;
         return ret;
     }
-    
+
     /**
      * Adds XML to the response. This assumes that shouldIncludeXMLInResponse
      * was already consulted and returned true.
@@ -441,23 +493,24 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             response.setDocument(docs.get(0));
     }
 
-
     /**
      * Utility method to perform standardized keyword extraction for the given
-     * <tt>FileDesc</tt>.  This handles extracting keywords according to 
+     * <tt>FileDesc</tt>. This handles extracting keywords according to
      * locale-specific rules.
      * 
-     * @param fd the <tt>FileDesc</tt> containing a file system path with 
-     *  keywords to extact
+     * @param fd the <tt>FileDesc</tt> containing a file system path with
+     *        keywords to extact
      * @return an array of keyword strings for the given file
      */
     private static String[] extractKeywords(FileDesc fd) {
-        return StringUtils.split(I18NConvert.instance().getNorm(fd.getPath()), 
-            QueryUtils.DELIMITERS);
+        return StringUtils.split(I18NConvert.instance().getNorm(fd.getPath()),
+                QueryUtils.DELIMITERS);
     }
 
-    /** Ensures that this's index takes the minimum amount of space.  Only
-     *  affects performance, not correctness; hence no modifies clause. */
+    /**
+     * Ensures that this's index takes the minimum amount of space. Only affects
+     * performance, not correctness; hence no modifies clause.
+     */
     private void trim() {
         for (StringTrie<IntSet> trie : new StringTrie[] { keywordTrie, incompleteKeywordTrie }) {
             synchronized (trie) {
@@ -471,14 +524,14 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         }
     }
 
-
     /**
      * Returns an array of Responses that correspond to documents that have a
      * match given query document.
      */
     private Set<LimeXMLDocument> queryMetaDataWithRequestXml(LimeXMLDocument queryDoc) {
         String schema = queryDoc.getSchemaURI();
-        LimeXMLReplyCollection replyCol = schemaReplyCollectionMapper.get().getReplyCollection(schema);
+        LimeXMLReplyCollection replyCol = schemaReplyCollectionMapper.get().getReplyCollection(
+                schema);
         if (replyCol == null)// no matching reply collection for schema
             return Collections.emptySet();
 
@@ -486,46 +539,45 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     }
 
     /**
-     * Queries metadata of shared files.  This will query certain
-     * media types, depending on what is specified in the request.
-     *
+     * Queries metadata of shared files. This will query certain media types,
+     * depending on what is specified in the request.
+     * 
      * If not specified in request, query all metadata.
-     *
-     * @param request determines what to search, and
-     * which metadata is searched.
+     * 
+     * @param request determines what to search, and which metadata is searched.
      * @return
      */
     private Set<LimeXMLDocument> queryMetaDataWithPlaintext(QueryRequest request) {
-        
+
         Collection<LimeXMLReplyCollection> schemas = getReplyCollections(request);
-        
+
         Set<LimeXMLDocument> documents = new IdentityHashSet<LimeXMLDocument>();
-    	for (LimeXMLReplyCollection schemaCol : schemas) {
-    		documents.addAll(schemaCol.getMatchingDocuments(request.getQuery()));
-    	}
-    	return documents;
+        for (LimeXMLReplyCollection schemaCol : schemas) {
+            documents.addAll(schemaCol.getMatchingDocuments(request.getQuery()));
+        }
+        return documents;
     }
 
-
     private Collection<LimeXMLReplyCollection> getReplyCollections(QueryRequest request) {
-    	MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(request);
-    	SchemaReplyCollectionMapper mapper = schemaReplyCollectionMapper.get();
+        MediaTypeAggregator.Aggregator filter = MediaTypeAggregator.getAggregator(request);
+        SchemaReplyCollectionMapper mapper = schemaReplyCollectionMapper.get();
         if (filter == null) {
-    		return mapper.getCollections();
+            return mapper.getCollections();
         }
-    	Collection<MediaType> mediaTypes = filter.getMediaTypes();
-    	List<LimeXMLReplyCollection> collections = new ArrayList<LimeXMLReplyCollection>(mediaTypes.size());
-    	for (MediaType mt : mediaTypes) {
+        Collection<MediaType> mediaTypes = filter.getMediaTypes();
+        List<LimeXMLReplyCollection> collections = new ArrayList<LimeXMLReplyCollection>(mediaTypes
+                .size());
+        for (MediaType mt : mediaTypes) {
 
             // get schema uri from media type
-            LimeXMLReplyCollection col = mapper.getReplyCollection(
-                    getSchemaUriFromMimeType(mt.getSchema()));
+            LimeXMLReplyCollection col = mapper.getReplyCollection(getSchemaUriFromMimeType(mt
+                    .getSchema()));
 
             if (col != null) {
-    		    collections.add(col);
+                collections.add(col);
             }
         }
-    	return collections;
+        return collections;
     }
 
     private String getSchemaUriFromMimeType(String mimeType) {
@@ -539,9 +591,9 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     }
 
     private Set<Response> createResponses(Set<LimeXMLDocument> documents) {
-    	Set<Response> responses = new HashSet<Response>(documents.size());
+        Set<Response> responses = new HashSet<Response>(documents.size());
 
-    	for (LimeXMLDocument currDoc : documents) {
+        for (LimeXMLDocument currDoc : documents) {
             File file = currDoc.getIdentifier();// returns null if none
             Response res = null;
             if (file == null) { // pure metadata (no file)
@@ -549,9 +601,12 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             } else { // meta-data about a specific file
                 FileDesc fd = fileManager.getFileDesc(file);
                 if (fd == null || !fileManager.getGnutellaSharedFileList().contains(fd)) {
-                    // fd == null is bad -- would mean MetaFileManager is out of sync.
-                    // fd incomplete should never happen, but apparently is somehow...
-                    // fd is store file, shouldn't be returning query hits for it then..
+                    // fd == null is bad -- would mean MetaFileManager is out of
+                    // sync.
+                    // fd incomplete should never happen, but apparently is
+                    // somehow...
+                    // fd is store file, shouldn't be returning query hits for
+                    // it then..
                     continue;
                 } else { // we found a file with the right name
                     res = responseFactory.get().createResponse(fd);
@@ -562,16 +617,15 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             res.setDocument(currDoc);
             responses.add(res);
-    	}
+        }
         return responses;
     }
 
     /**
-     * Enum type and context object to better organize the
-     * various steps that go into processing a query
+     * Enum type and context object to better organize the various steps that go
+     * into processing a query
      * <p>
-     * Each QueryProcessor enum represents 1 step in
-     * processing a query.
+     * Each QueryProcessor enum represents 1 step in processing a query.
      * <p>
      * Purposes of the context object are:
      * <p>
@@ -582,11 +636,11 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * <p>
      * For each QueryProcessor Enum type,
      * <p>
-     * 1. Check context object to see if query processing is done.  If so, stop processing
-     * 2. Should this particular query type be done?
-     * 3. If it should, perform the query, and add the Response objects in context object
-     * 4. If query processing done, set status in context object
-     *
+     * 1. Check context object to see if query processing is done. If so, stop
+     * processing 2. Should this particular query type be done? 3. If it should,
+     * perform the query, and add the Response objects in context object 4. If
+     * query processing done, set status in context object
+     * 
      */
     private enum QueryProcessor {
 
@@ -594,9 +648,8 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
          * "What is new" search. Get up to 3 of your "youngest" files.
          */
         WHATS_NEW {
-            void processQueryStage(QueryRequest request,
-                                          QueryProcessingContext context,
-                                          SharedFilesKeywordIndexImpl keywordIndex) {
+            void processQueryStage(QueryRequest request, QueryProcessingContext context,
+                    SharedFilesKeywordIndexImpl keywordIndex) {
                 Set<Response> responses = keywordIndex.queryWhatsNew(request);
                 context.addQueryResponses(responses);
                 context.setFinishedProcessing();
@@ -607,24 +660,23 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             }
         },
 
-
         /**
-         * Special case: return everything for Clip2 indexing query ("    ") and
-         * browse queries ("*.*").  If these messages had initial TTLs too high,
+         * Special case: return everything for Clip2 indexing query (" ") and
+         * browse queries ("*.*"). If these messages had initial TTLs too high,
          * StandardMessageRouter will clip the number of results sent on the
-         * network.  Note that some initial TTLs are filterd by GreedyQuery
+         * network. Note that some initial TTLs are filterd by GreedyQuery
          * before they ever reach this point.
          */
         SPECIAL_CASE_EMPTY_RESPONSE {
-            void processQueryStage(QueryRequest request,
-                                   QueryProcessingContext context,
-                                   SharedFilesKeywordIndexImpl keywordIndex) {
+            void processQueryStage(QueryRequest request, QueryProcessingContext context,
+                    SharedFilesKeywordIndexImpl keywordIndex) {
                 context.setFinishedProcessing();
             }
-            
+
             boolean shouldProcess(QueryRequest request) {
                 String str = request.getQuery();
-                return str.equals(QueryRequest.INDEXING_QUERY) || str.equals(QueryRequest.BROWSE_QUERY);
+                return str.equals(QueryRequest.INDEXING_QUERY)
+                        || str.equals(QueryRequest.BROWSE_QUERY);
             }
         },
 
@@ -632,9 +684,8 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
          * Search file name
          */
         FILE_SEARCH {
-            void processQueryStage(QueryRequest request,
-                                   QueryProcessingContext context,
-                                   SharedFilesKeywordIndexImpl keywordIndex) {
+            void processQueryStage(QueryRequest request, QueryProcessingContext context,
+                    SharedFilesKeywordIndexImpl keywordIndex) {
                 Set<Response> responses = keywordIndex.queryFileNames(request);
                 context.addQueryResponses(responses);
             }
@@ -649,9 +700,8 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
          * Search meta data
          */
         METADATA_SEARCH {
-            void processQueryStage(QueryRequest request,
-                                   QueryProcessingContext context,
-                                   SharedFilesKeywordIndexImpl keywordIndex) {
+            void processQueryStage(QueryRequest request, QueryProcessingContext context,
+                    SharedFilesKeywordIndexImpl keywordIndex) {
                 Set<Response> responses = keywordIndex.queryMetaData(request);
                 context.addQueryResponses(responses);
                 context.setFinishedProcessing();
@@ -662,15 +712,13 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             }
         };
 
-        abstract void processQueryStage(QueryRequest request,
-                                        QueryProcessingContext context,
-                                        SharedFilesKeywordIndexImpl keywordIndex);
+        abstract void processQueryStage(QueryRequest request, QueryProcessingContext context,
+                SharedFilesKeywordIndexImpl keywordIndex);
 
         abstract boolean shouldProcess(QueryRequest request);
 
-
         public static Set<Response> processQuery(QueryRequest request,
-                                                        SharedFilesKeywordIndexImpl keywordIndex) {
+                SharedFilesKeywordIndexImpl keywordIndex) {
 
             QueryProcessingContext contextObj = new QueryProcessingContext();
             for (QueryProcessor queryProcessor : QueryProcessor.values()) {
@@ -689,6 +737,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private static class QueryProcessingContext {
 
         private boolean isTerminal;
+
         private final Set<Response> responses;
 
         QueryProcessingContext() {

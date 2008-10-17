@@ -1,11 +1,12 @@
 package com.limegroup.gnutella.routing;
 
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.Test;
+
+import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -49,7 +50,7 @@ public class QRPUpdaterTest extends LimeTestCase {
         qrpUpdater = injector.getInstance(QRPUpdater.class);
         fileManagerStub = (FileManagerStub)injector.getInstance(FileManager.class);
         
-        fileManagerStub.addFileEventListener(qrpUpdater);
+        injector.getInstance(ServiceRegistry.class).initialize();
         fileManagerStub.start();
     }
     
@@ -64,9 +65,8 @@ public class QRPUpdaterTest extends LimeTestCase {
         // add a shared file 
         FileDesc fd = new FileDescStub("FoundFile.txt");
         FileListStub fileList = (FileListStub)fileManagerStub.getGnutellaSharedFileList();
-        List<FileDesc> list = new ArrayList<FileDesc>();
-        list.add(fd);
-        fileList.setDescs(list);
+        fileList.setWhitelist(fd.getFile());
+        fileList.addPendingFile(fd.getFile());
         fileManagerStub.dispatchEvent(FileManagerEvent.Type.ADD_FILE, fd);
         
         //update QRT table, shared file should be found in a query
@@ -76,8 +76,6 @@ public class QRPUpdaterTest extends LimeTestCase {
         assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
         
         // simulate removing shared file
-        fileList.clear();
-        fileList.setDescs( new ArrayList<FileDesc>());
         fileManagerStub.dispatchEvent(FileManagerEvent.Type.REMOVE_FILE, fd);
         
         //update QRT table, removed file should not be found in query

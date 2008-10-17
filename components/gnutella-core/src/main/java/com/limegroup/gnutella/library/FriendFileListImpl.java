@@ -20,8 +20,8 @@ class FriendFileListImpl extends FileListImpl {
     private boolean addNewVideoAlways = false;
     
 
-    public FriendFileListImpl(FileManager fileManager, Set<File> individualFiles, String id) {
-        super(fileManager, individualFiles);
+    public FriendFileListImpl(FileManager fileManager, Set<File> filesToShare, String id) {
+        super(fileManager, filesToShare);
         if(id == null)
             throw new NullPointerException("ID cannot be null");
         idName = id;

@@ -74,11 +74,12 @@ class GnutellaSharedFileListImpl extends FileListImpl {
         
         //Register this file with its parent directory.
         File parent = fileDesc.getFile().getParentFile();
-        assert parent != null : "Null parent to \""+fileDesc.getFile()+"\"";        
-        // files that are forcibly shared over the network
-        // aren't counted or shown.
-        if(SharingUtils.isForcedShareDirectory(parent))
-            numForcedFiles++;
+        if(parent != null) {        
+            // files that are forcibly shared over the network
+            // aren't counted or shown.
+            if(SharingUtils.isForcedShareDirectory(parent))
+                numForcedFiles++;
+        }
     
         return value;
     }
@@ -89,14 +90,17 @@ class GnutellaSharedFileListImpl extends FileListImpl {
             filesNotToShare.add(fd.getFile());
        
         boolean value = super.removeFileDesc(fd);
-        
-        if(value) {
-        File parent = fd.getFile().getParentFile();
-        // files that are forcibly shared over the network aren't counted
-        if(SharingUtils.isForcedShareDirectory(parent)) {
-            numForcedFiles--;
+
+        if (value) {
+            File parent = fd.getFile().getParentFile();
+            if (parent != null) {
+                // files that are forcibly shared over the network aren't
+                // counted
+                if (SharingUtils.isForcedShareDirectory(parent)) {
+                    numForcedFiles--;
+                }
+            }
         }
-    }
         return value;
     }
     

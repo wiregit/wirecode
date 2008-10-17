@@ -14,9 +14,8 @@ public class LimeWireLibraryModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);
-
         bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
-        
+        bind(CreationTimeCache.class);        
         
         bind(FileManager.class).to(FileManagerImpl.class);
         EventMulticaster<FileManagerEvent> fileManagerMulticaster = new EventMulticasterImpl<FileManagerEvent>();

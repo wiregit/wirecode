@@ -1,21 +1,24 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.GnutellaSharedFileListImpl;
 import com.limegroup.gnutella.stubs.FileDescStub;
 
 public class FileListStub extends GnutellaSharedFileListImpl {
 
+    private List<File> whitelist;
     private FileDescStub fdStub = new FileDescStub();
     private FileDescStub defaultStub = new FileDescStub("other.txt");
     
     public FileListStub(FileManager fileManager, Set<File> individual, Set<File> files) {
         super(fileManager, individual, files);
+    }
+    
+    public void setWhitelist(File... files) {        
+        this.whitelist = Arrays.asList(files);
     }
 
     public void setDescs(List<FileDesc> descs) {
@@ -30,6 +33,15 @@ public class FileListStub extends GnutellaSharedFileListImpl {
             fileDescs.add(fd);
             numBytes += fd.getFile().length();
             individualFiles.add(fd.getFile());
+        }
+    }
+    
+    @Override
+    public boolean isFileAddable(File file) {
+        if(whitelist != null) {
+            return whitelist.contains(file);
+        } else {
+            return super.isFileAddable(file);
         }
     }
     

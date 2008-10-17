@@ -23,8 +23,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
@@ -36,7 +36,7 @@ import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
  * FileManager. When changes occur, a new QRT will lazily be rebuilt.
  */
 @Singleton
-public class QRPUpdater implements EventListener<FileManagerEvent>, SettingListener, Service, Inspectable {
+public class QRPUpdater implements SettingListener, Service, Inspectable {
 
     /**
      * delay between qrp updates should the simpp words change.
@@ -216,6 +216,17 @@ public class QRPUpdater implements EventListener<FileManagerEvent>, SettingListe
     public void initialize() {
         SearchSettings.PUBLISH_LIME_KEYWORDS.addSettingListener(this);
         SearchSettings.LIME_QRP_ENTRIES.addSettingListener(this);
+        fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+            @Override
+            public void handleEvent(FileListChangedEvent event) {
+                switch(event.getType()) {
+                case ADDED:
+                case CHANGED:
+                case REMOVED:
+                    needRebuild = true;
+                }
+            }
+        });
     }
     
     public void start() {}
@@ -223,22 +234,6 @@ public class QRPUpdater implements EventListener<FileManagerEvent>, SettingListe
     public void stop() {
         SearchSettings.PUBLISH_LIME_KEYWORDS.removeSettingListener(this);
         SearchSettings.LIME_QRP_ENTRIES.removeSettingListener(this);
-    }
-
-    /**
-     * Listens to events from FileManager
-     */
-    public void handleEvent(FileManagerEvent evt) {
-        switch(evt.getType()) {
-            case ADD_FILE:
-            case INCOMPLETE_URN_CHANGE:
-            case CHANGE_FILE:
-            case REMOVE_FILE:
-            case RENAME_FILE:
-            case LOAD_FILE:
-            case REMOVE_FD:
-                needRebuild = true;
-        }
     }
 
     public Object inspect() {

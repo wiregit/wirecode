@@ -54,9 +54,9 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
     
     protected final FileManager fileManager;
     
-    public FileListImpl(FileManager fileManager, Set<File> individualFiles) {
+    public FileListImpl(FileManager fileManager, Set<File> filesToShare) {
         this.fileManager = fileManager;
-        this.individualFiles = individualFiles;
+        this.individualFiles = filesToShare;
         this.fileDescs = new ArrayList<FileDesc>();
         pendingFiles = new ArrayList<File>();
     

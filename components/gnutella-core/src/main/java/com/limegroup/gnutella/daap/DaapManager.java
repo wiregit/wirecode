@@ -40,6 +40,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
@@ -68,7 +69,7 @@ import de.kapsi.net.daap.Transaction;
  * interface between LimeWire and DAAP.
  */
 @Singleton
-public final class DaapManager implements EventListener<FileManagerEvent> {
+public final class DaapManager {
     
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     
@@ -143,7 +144,18 @@ public final class DaapManager implements EventListener<FileManagerEvent> {
             }
 
             public void initialize() {
-                
+                fileManager.get().addFileEventListener(new EventListener<FileManagerEvent>() {
+                    @Override
+                    public void handleEvent(FileManagerEvent event) {
+                        handleFileManagerEvent(event);
+                    }
+                });
+                fileManager.get().getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+                    @Override
+                    public void handleEvent(FileListChangedEvent event) {
+                        handleFileListEvent(event);
+                    }
+                });
             }
 
             public String getServiceName() {
@@ -387,30 +399,35 @@ public final class DaapManager implements EventListener<FileManagerEvent> {
     /**
      * Handles a change event.
      */
-    private synchronized void handleChangeEvent(FileManagerEvent evt) {
-        Song song = urnToSong.remove(evt.getOldFileDesc().getSHA1Urn());
-
+    private synchronized void handleChangeEvent(FileListChangedEvent evt) {
+        Song song = urnToSong.remove(evt.getOldValue().getSHA1Urn());
         if (song != null) {
-            urnToSong.put(evt.getNewFileDesc().getSHA1Urn(), song);
+            urnToSong.put(evt.getFileDesc().getSHA1Urn(), song);
             
-            String name = evt.getNewFileDesc().getFileName().toLowerCase(Locale.US);
-            
-            if (isSupportedAudioFormat(name)) {
-                updateSongAudioMeta(autoCommitTxn, song, evt.getNewFileDesc());
-            } else if (isSupportedVideoFormat(name)) {
-                updateSongVideoMeta(autoCommitTxn, song, evt.getNewFileDesc());
-            } else {
-                database.removeSong(autoCommitTxn, song);
+            // See if the URNs changed -- if so, we can just rename.
+            boolean rename = evt.getOldValue().getSHA1Urn().equals(evt.getFileDesc().getSHA1Urn());
+            if(rename) {
+                song.setAttachment(evt.getFileDesc());
+            } else {                
+                String name = evt.getFileDesc().getFileName().toLowerCase(Locale.US);
+                
+                if (isSupportedAudioFormat(name)) {
+                    updateSongAudioMeta(autoCommitTxn, song, evt.getFileDesc());
+                } else if (isSupportedVideoFormat(name)) {
+                    updateSongVideoMeta(autoCommitTxn, song, evt.getFileDesc());
+                } else {
+                    database.removeSong(autoCommitTxn, song);
+                }
+                // auto commit
             }
             
-            // auto commit
         }
     }
 
     /**
      * Handles an add event.
      */
-    private synchronized void handleAddEvent(FileManagerEvent evt) {
+    private synchronized void handleAddEvent(FileListChangedEvent evt) {
         // Transactions synchronize on the Library. So if there's
         // an ongoing commit we may get a ConcurrentModificationException
         // because Database has to iterate through all Playlists and
@@ -421,7 +438,7 @@ public final class DaapManager implements EventListener<FileManagerEvent> {
             }
         }
         
-        FileDesc fileDesc = evt.getNewFileDesc();
+        FileDesc fileDesc = evt.getFileDesc();
         if (!(fileDesc instanceof IncompleteFileDesc)) {
 
             String name = fileDesc.getFileName().toLowerCase(Locale.US);
@@ -452,24 +469,12 @@ public final class DaapManager implements EventListener<FileManagerEvent> {
             }
         }
     }
-
-    /**
-     * Handles a rename event.
-     */
-    private synchronized void handleRenameEvent(FileManagerEvent evt) {
-        Song song = urnToSong.remove(evt.getOldFileDesc().getSHA1Urn());
-
-        if (song != null) {
-            urnToSong.put(evt.getNewFileDesc().getSHA1Urn(), song);
-            song.setAttachment(evt.getNewFileDesc());
-        }
-    }
-
+    
     /**
      * Handles a remove event.
      */
-    private synchronized void handleRemoveEvent(FileManagerEvent evt) {
-        Song song = urnToSong.remove(evt.getNewFileDesc().getSHA1Urn());
+    private synchronized void handleRemoveEvent(FileListChangedEvent evt) {
+        Song song = urnToSong.remove(evt.getFileDesc().getSHA1Urn());
 
         if (song != null) {
             database.removeSong(autoCommitTxn, song);
@@ -1110,7 +1115,7 @@ public final class DaapManager implements EventListener<FileManagerEvent> {
     /**
      * Listens for events from FileManager
      */
-    public void handleEvent(final FileManagerEvent evt) {
+    private void handleFileManagerEvent(final FileManagerEvent evt) {
         
         // if Daap isn't enabled ignore events
         if(!DaapSettings.DAAP_ENABLED.getValue())
@@ -1126,23 +1131,31 @@ public final class DaapManager implements EventListener<FileManagerEvent> {
                         setEnabled(true);
                         return;
                 }
-                
-                if (!isEnabled()|| !isServerRunning())
+            }
+        });
+    }
+    
+    private void handleFileListEvent(final FileListChangedEvent evt) {
+        // if Daap isn't enabled ignore events
+        if (!DaapSettings.DAAP_ENABLED.getValue())
+            return;
+
+        DAAP_EVENT_QUEUE.execute(new Runnable() {
+            public void run() {
+
+                if (!isEnabled() || !isServerRunning())
                     return;
-              
-                switch(evt.getType()) {
-                    case CHANGE_FILE:
-                        handleChangeEvent(evt);
-                        break;
-                    case ADD_FILE:
-                        handleAddEvent(evt);
-                        break;
-                    case RENAME_FILE:
-                        handleRenameEvent(evt);
-                        break;
-                    case REMOVE_FILE:
-                        handleRemoveEvent(evt);
-                        break;                    
+
+                switch (evt.getType()) {
+                case CHANGED:
+                    handleChangeEvent(evt);
+                    break;
+                case ADDED:
+                    handleAddEvent(evt);
+                    break;
+                case REMOVED:
+                    handleRemoveEvent(evt);
+                    break;
                 }
             }
         });
