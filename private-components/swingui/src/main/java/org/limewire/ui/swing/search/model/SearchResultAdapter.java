@@ -54,8 +54,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             @Override
             public int compare(RemoteHost o1, RemoteHost o2) {
                 int compare = 0;
-                boolean anonymous1 = o1.getFriendPresence().getFriend().isAnonymous();
-                boolean anonymous2 = o2.getFriendPresence().getFriend().isAnonymous();
+                boolean anonymous1 = o1.getFriendPresence() == null || o1.getFriendPresence().getFriend() == null || o1.getFriendPresence().getFriend().isAnonymous();
+                boolean anonymous2 = o2.getFriendPresence() == null || o2.getFriendPresence().getFriend() == null || o2.getFriendPresence().getFriend().isAnonymous();
+                
                 if (anonymous1 == anonymous2) {
                     compare = o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
                 } else if (anonymous1) {
