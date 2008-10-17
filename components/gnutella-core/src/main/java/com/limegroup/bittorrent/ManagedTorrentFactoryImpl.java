@@ -12,10 +12,10 @@ import com.google.inject.name.Named;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 @Singleton

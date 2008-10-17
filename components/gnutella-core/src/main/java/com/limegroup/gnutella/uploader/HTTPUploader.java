@@ -6,12 +6,12 @@ import java.net.InetAddress;
 import org.apache.http.HttpResponse;
 import org.limewire.collection.Range;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocTracker;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 
 /**

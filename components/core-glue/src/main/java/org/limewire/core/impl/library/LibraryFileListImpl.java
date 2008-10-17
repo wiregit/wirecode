@@ -14,10 +14,10 @@ import org.limewire.listener.EventListener;
 
 import ca.odell.glazedlists.BasicEventList;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.IncompleteFileDesc;
 
 public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList, EventListener<FileManagerEvent> {
 

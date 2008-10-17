@@ -10,8 +10,8 @@ import java.util.Set;
 
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.FileDesc;
 
 @SuppressWarnings("unchecked")
 public class FileDescStub extends FileDesc {

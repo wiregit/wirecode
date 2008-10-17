@@ -17,11 +17,11 @@ import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.LimeTestCase;
 

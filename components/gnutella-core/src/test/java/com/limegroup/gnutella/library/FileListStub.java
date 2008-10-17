@@ -1,0 +1,49 @@
+package com.limegroup.gnutella.library;
+
+import java.io.File;
+import java.util.List;
+import java.util.Set;
+
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.GnutellaSharedFileListImpl;
+import com.limegroup.gnutella.stubs.FileDescStub;
+
+public class FileListStub extends GnutellaSharedFileListImpl {
+
+    private FileDescStub fdStub = new FileDescStub();
+    private FileDescStub defaultStub = new FileDescStub("other.txt");
+    
+    public FileListStub(FileManager fileManager, Set<File> individual, Set<File> files) {
+        super(fileManager, individual, files);
+    }
+
+    public void setDescs(List<FileDesc> descs) {
+        for(FileDesc fd : descs ) {
+            fileDescs.add(fd);
+            numBytes += fd.getFile().length();
+        }
+    }
+    
+    public void setDescsAddIndividual(List<FileDesc> files) {
+        for(FileDesc fd: files) {
+            fileDescs.add(fd);
+            numBytes += fd.getFile().length();
+            individualFiles.add(fd.getFile());
+        }
+    }
+    
+    @Override
+    public boolean contains(FileDesc fileDesc) {
+        if(fileDesc == null)
+            return false;
+        
+        if(fileDescs.contains(fileDesc))
+            return true;
+        else if(fileDesc.getFile().equals(fdStub.getFile()) ||
+                fileDesc.getFile().equals(defaultStub.getFile()))
+            return true;
+        else 
+            return false;
+    }
+}

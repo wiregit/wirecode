@@ -4,9 +4,9 @@ package com.limegroup.gnutella.stubs;
 import java.net.InetAddress;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.library.FileDesc;
 
 /**
  * stub for easier testing.  Feel free to override more methods/getters

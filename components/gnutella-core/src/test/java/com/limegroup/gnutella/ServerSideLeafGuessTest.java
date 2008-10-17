@@ -20,6 +20,7 @@ import org.limewire.util.TestUtils;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;

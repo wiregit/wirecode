@@ -3,7 +3,7 @@ package com.limegroup.gnutella.xml;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 

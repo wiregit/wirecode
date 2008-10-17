@@ -14,9 +14,6 @@ import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.EventMulticaster;
-import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
@@ -124,6 +121,8 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.library.LimeWireLibraryModule;
+import com.limegroup.gnutella.library.SavedFileManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.lws.server.LWSManager;
@@ -236,6 +235,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
         binder().install(new LimeWireBittorrentModule());
+        binder().install(new LimeWireLibraryModule());
         
         bind(LimeWireCore.class);
         
@@ -265,7 +265,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(RoutedConnectionFactory.class).to(RoutedConnectionFactoryImpl.class);
         bind(AltLocValueFactory.class).to(AltLocValueFactoryImpl.class);
         bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
-        bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);
         bind(HttpExecutor.class).to(DefaultHttpExecutor.class);
         bind(HttpRequestHandlerFactory.class).to(HttpRequestHandlerFactoryImpl.class);
         bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
@@ -358,7 +357,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FECUtils.class).to(FECUtilsImpl.class);
         bind(NodeAssigner.class).to(NodeAssignerImpl.class);
         bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
-        bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
         
@@ -386,11 +384,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FirewalledAddressSerializer.class);
         bind(SameNATAddressResolver.class);
         bind(ConnectableConnector.class);
-        
-        bind(FileManager.class).to(FileManagerImpl.class);
-        EventMulticaster<FileManagerEvent> fileManagerMulticaster = new EventMulticasterImpl<FileManagerEvent>();
-        bind(new TypeLiteral<EventListener<FileManagerEvent>>(){}).toInstance(fileManagerMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FileManagerEvent>>(){}).toInstance(fileManagerMulticaster);
     }
     
     

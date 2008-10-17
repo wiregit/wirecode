@@ -14,8 +14,8 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 @Singleton

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.library.FileManager;
 
 @Singleton
 public class LocalPongInfoImpl implements LocalPongInfo {

@@ -28,10 +28,10 @@ import ca.odell.glazedlists.TransformedList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileListChangedEvent;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.LocalFileDetailsFactory;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 
 @Singleton
 class LibraryManagerImpl implements ShareListManager, LibraryManager {
@@ -229,7 +229,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
             fileManager.getOrCreateFriendFileList(name).addFileListListener(this);
             combinedFriendShareLists.addMemberList(baseList);
             
-            com.limegroup.gnutella.FileList fileList =
+            com.limegroup.gnutella.library.FileList fileList =
                 fileManager.getFriendFileList(name);  
 
               synchronized (fileList.getLock()) {

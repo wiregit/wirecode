@@ -12,8 +12,8 @@ import org.limewire.io.IOUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.tigertree.dime.TigerDimeReadUtils;
 

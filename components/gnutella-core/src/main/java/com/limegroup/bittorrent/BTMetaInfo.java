@@ -4,10 +4,10 @@ import java.net.URI;
 import java.security.MessageDigest;
 
 import com.limegroup.bittorrent.disk.BlockRangeMap;
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
+import com.limegroup.gnutella.library.FileDesc;
 
 /**
  * Defines an interface for a class parsing information in a .torrent file.

@@ -4,6 +4,8 @@ import java.net.InetAddress;
 
 import org.apache.http.protocol.HttpRequestHandler;
 
+import com.limegroup.gnutella.library.FileDesc;
+
 /**
  * Defines the requirements for classes that manage Gnutella uploads. 
  */

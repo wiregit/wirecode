@@ -13,9 +13,9 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.FileManagerEvent.Type;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.FileManagerEvent.Type;
 
 public class FileManagerTestUtils {
 

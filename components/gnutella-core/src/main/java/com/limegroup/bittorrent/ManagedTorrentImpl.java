@@ -40,13 +40,13 @@ import com.limegroup.bittorrent.swarm.BTSwarmCoordinator;
 import com.limegroup.bittorrent.swarm.BTSwarmHttpSource;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.LimeWireUtils;
 

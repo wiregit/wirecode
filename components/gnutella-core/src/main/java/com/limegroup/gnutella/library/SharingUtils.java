@@ -10,7 +10,6 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.FileDesc;
 
 public class SharingUtils {
     

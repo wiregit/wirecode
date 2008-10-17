@@ -26,6 +26,8 @@ import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.security.MerkleTree;
 import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.security.Tiger;

@@ -10,13 +10,13 @@ import junit.framework.Test;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileListStub;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
-import com.limegroup.gnutella.stubs.FileListStub;
-import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.QueryRequestStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 

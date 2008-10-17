@@ -19,14 +19,14 @@ import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.helpers.AlternateLocationHelper;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class DownloadAltLocTest extends DownloadTestCase {

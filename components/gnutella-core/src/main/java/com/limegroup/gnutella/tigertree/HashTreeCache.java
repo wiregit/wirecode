@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.tigertree;
 
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileManager;
 
 /**
  * A cache of HashTrees that can be serialized between session.

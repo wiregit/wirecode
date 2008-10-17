@@ -10,8 +10,8 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.IncompleteFileDesc;
 
 /**
  * A stub that is identical to FileDescStub.  The code uses instanceof,

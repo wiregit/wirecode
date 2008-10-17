@@ -3,10 +3,10 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.util.Locale;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**

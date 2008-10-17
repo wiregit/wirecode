@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import org.limewire.io.Connectable;
 
+import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**

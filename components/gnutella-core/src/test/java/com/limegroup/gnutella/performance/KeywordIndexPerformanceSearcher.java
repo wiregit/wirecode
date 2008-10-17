@@ -17,12 +17,12 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.FileList;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.SharedFilesKeywordIndex;
+import com.limegroup.gnutella.library.CreationTimeCache;
+import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

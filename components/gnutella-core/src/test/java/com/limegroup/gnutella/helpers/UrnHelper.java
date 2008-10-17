@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnCache;
-import com.limegroup.gnutella.UrnCallback;
+import com.limegroup.gnutella.library.UrnCache;
+import com.limegroup.gnutella.library.UrnCallback;
 
 public class UrnHelper {
 

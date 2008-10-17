@@ -18,10 +18,10 @@ import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.LocalFileDetailsFactory;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 
 public class CoreLocalFileItem implements LocalFileItem {
 

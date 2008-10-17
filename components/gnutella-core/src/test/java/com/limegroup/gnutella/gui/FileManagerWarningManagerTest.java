@@ -14,11 +14,11 @@ import org.jmock.Mockery;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.BooleanSetting;
 
-import com.limegroup.gnutella.FileList;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.gui.notify.Notification;
 import com.limegroup.gnutella.gui.notify.NotifyUser;
+import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerEvent;
 
 public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     
