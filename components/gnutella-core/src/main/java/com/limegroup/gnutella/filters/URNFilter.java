@@ -17,28 +17,34 @@ import com.limegroup.gnutella.messages.QueryRequest;
 public class URNFilter implements SpamFilter {
     
     private static final Log LOG = LogFactory.getLog(URNFilter.class);
-    private static HashSet<URN> blacklist = new HashSet<URN>();
+    private static final HashSet<URN> blacklist = new HashSet<URN>();
     // TODO: make this into a SIMPP setting
-    private static String[] badURNs = new String[]{
+    private static final String[] badURNs = new String[]{
         "urn:sha1:2GLEYBJPC6ZLVSI7IDJT5CJPGO7CKNOM",
         "urn:sha1:6AV6I5L77MQ3TTUAG5WWXE3VE7R6KMP4",
         "urn:sha1:6FPIGULR3OMOMOESYFELHS2YVV2M7ZGF",
         "urn:sha1:BAYURWNMQAF5DGVPMRQRLRIZ77R3AGDJ",
         "urn:sha1:BSR2F3A2K7PLDVKL4FM47BU2GYJEORFR",
+        "urn:sha1:E3DXKZGWI6TMRTG2RSTRLSOCQW5Q65VF",
         "urn:sha1:EOU33ELGG6Y3KN7YK3TKANKLIAX36SOY",
         "urn:sha1:F75XVBSE35WBGJT6TDRVEJGDK5LGZIQK",
         "urn:sha1:FL5SVC5KPWLUE45SOOGSOTAKQILZISFS",
         "urn:sha1:FZMBTBIMI7BMTNSDHYAQTVL4NR2AZXRS",
+        "urn:sha1:G7IMYVITWYXAVJXYK7HCGAUDQA3B6IWJ",
         "urn:sha1:GOZG2MFW5XWQHWRIFS62FWVSPDD7YUFK",
         "urn:sha1:JYMLNADQONAK3MUH7EQM57ADRE6CPRZA",
+        "urn:sha1:MF2PHNLWS5Q4CGJ35HT4DNLIHEN5GN7O",
         "urn:sha1:NQBTBUTQSRE6HXSJLGIUQLPCR25WDNLD",
         "urn:sha1:OIFR7TOZMF7ZTJGUWIZCIIAHQE4AUG2K",
         "urn:sha1:OIN574PBP34ITVQYTAGUMPFUOPZOQAIQ",
+        "urn:sha1:P53HONQTHF4LIWKWQZTD5RESX7DWPJUU",
         "urn:sha1:PZB2T2DCTUUP6WGLW5RHBVVFZDLGJHAE",
         "urn:sha1:Q5ABFLH6FCY37JKFOP5E3AXBTYLIOKDN",
         "urn:sha1:TAQZVN4CEHJREAKKMNO6NN5SLAP5VSW5",
+        "urn:sha1:TMAJHDRNYRS54Q5M7BQXEUME6OX2XFBW",
         "urn:sha1:UO3FR5RVVAWDCOV7B5WEUAANTDLM65CT",
         "urn:sha1:UQFQCREXD6QAC754YXKEBQG7FS76NIN5",
+        "urn:sha1:UY6M3FEURMIPSYSAELBFKNKBOZZNTBN5",
         "urn:sha1:VC5RP6DJ4OX6TQWHI7UJTFXBAXUDPQ67",
         "urn:sha1:VHKHYERJO5QE7QER74MUKQM5NM4X7L2K",
         "urn:sha1:WOE2VY7W7U52CRS3756E7FTNS7S4ZR7M",
