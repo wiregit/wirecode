@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library.table;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -11,7 +10,6 @@ import javax.swing.AbstractAction;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -37,9 +35,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
     private final TableColors tableColors;
     private final EventList<T> listSelection;
     
-    @Resource
-    private Color disabledForegroundColor;
-    
     private ShareTableRendererEditor shareEditor;
     private LibrarySharePanel librarySharePanel;
     
@@ -60,7 +55,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         this.listSelection = model.getSelected();
         setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter(), 
-                new ColorHighlighter(new DisabledHighlightPredicate(this), null, disabledForegroundColor, null, disabledForegroundColor));
+                new ColorHighlighter(new DisabledHighlightPredicate(this), null, tableColors.getDisabledForegroundColor(), null, tableColors.getDisabledForegroundColor()));
        
         setFillsViewportHeight(true);
         setDragEnabled(true);
@@ -221,7 +216,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             this.table = table;
         }
         @Override
-        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {            
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {  
+            if(table.isRowDisabled(adapter.row)){
+                System.out.println("col : "+ adapter.column + ", "+renderer);
+            }
             return table.isRowDisabled(adapter.row);
         }
     }

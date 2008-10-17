@@ -235,6 +235,8 @@ public class MouseableTable extends StripedJXTable {
 	    public Color selectionColor;
 	    @Resource
 	    public Color selectionForeground;
+	    @Resource
+	    private Color disabledForegroundColor;
 	    
 	    private ColorHighlighter evenHighLighter;
 	    
@@ -253,6 +255,10 @@ public class MouseableTable extends StripedJXTable {
 	    
 	    public ColorHighlighter getOddHighLighter() {
 	        return oddHighlighter;
+	    }
+	    
+	    public Color getDisabledForegroundColor() {
+	        return disabledForegroundColor;
 	    }
 	}
 	
