@@ -20,7 +20,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class IncompleteFileManagerTest extends LimeTestCase {
@@ -192,7 +191,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         FileDesc fd = fm.getFileDesc(urn);
         assertNotNull(urn);
-        assertInstanceof(IncompleteFileDesc.class, fd);
+        assertInstanceof(com.limegroup.gnutella.library.IncompleteFileDesc.class, fd);
         
         incompleteFileManager.removeEntry(tmp1);
         

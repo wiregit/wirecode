@@ -1030,7 +1030,7 @@ class FileManagerImpl implements FileManager, Service {
      * @return
      */
     private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
-        FileDesc fileDesc = new FileDesc(file, urns, index);
+        FileDesc fileDesc = new FileDescImpl(file, urns, index);
         ContentResponseData r = contentManager.get().getResponse(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
@@ -1127,7 +1127,7 @@ class FileManagerImpl implements FileManager, Service {
         
         // no indices were found for any URN associated with this
         // IncompleteFileDesc... add it.
-        IncompleteFileDesc incompleteFileDesc = new IncompleteFileDesc(incompleteFile, urns, files.size(), name, size, vf);
+        IncompleteFileDesc incompleteFileDesc = new IncompleteFileDescImpl(incompleteFile, urns, files.size(), name, size, vf);
         
         numFiles += 1;
         files.add(incompleteFileDesc);

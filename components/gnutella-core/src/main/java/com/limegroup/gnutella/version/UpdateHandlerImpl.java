@@ -71,6 +71,7 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -630,7 +631,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
                 if(LOG.isDebugEnabled())
                     LOG.debug("Looking for: " + next + ", got: " + shared);
                 
-                if(shared != null && shared.getClass() == FileDesc.class) {
+                if(shared != null && !(shared instanceof IncompleteFileDesc)) {
                     // if it's already shared, stop any existing download.
                     if(md != null)
                         md.stop();
@@ -849,7 +850,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
         
         if (desc == null)
             return false;
-        return desc.getClass() == FileDesc.class;
+        return !(desc instanceof IncompleteFileDesc);
     }
     
     /**

@@ -23,6 +23,7 @@ import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileDescImpl;
 import com.limegroup.gnutella.security.SHA1;
 
 /**
@@ -407,7 +408,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
         return ret;
     }
 
-    public static class FakeFileDesc extends FileDesc {
+    public static class FakeFileDesc extends FileDescImpl {
         public FakeFileDesc(File file, Set<? extends URN> s) {
             super(file, s, Integer.MAX_VALUE);
         }

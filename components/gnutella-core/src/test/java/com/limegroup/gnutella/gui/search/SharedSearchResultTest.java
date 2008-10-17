@@ -17,6 +17,7 @@ import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GuiCoreMediator;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileDescImpl;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -50,7 +51,7 @@ public class SharedSearchResultTest extends GUIBaseTestCase {
         File file = new File("pom.xml");
         URN sha1Urn = URN.createSHA1Urn(file);
         urns.add(sha1Urn);
-        FileDesc fileDesc = new FileDesc(file, urns, 0);
+        FileDesc fileDesc = new FileDescImpl(file, urns, 0);
         
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         creationTimeCache.addTime(sha1Urn, fileDesc.getFile().lastModified());
@@ -82,7 +83,7 @@ public class SharedSearchResultTest extends GUIBaseTestCase {
         File file = new File("pom.xml");
         URN sha1Urn = URN.createSHA1Urn(file);
         urns.add(sha1Urn);
-        FileDesc fileDesc = new FileDesc(file, urns, 0);
+        FileDesc fileDesc = new FileDescImpl(file, urns, 0);
         
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         creationTimeCache.addTime(sha1Urn, fileDesc.getFile().lastModified());
@@ -107,7 +108,7 @@ public class SharedSearchResultTest extends GUIBaseTestCase {
         File file = new File("pom.xml");
         URN sha1Urn = URN.createSHA1Urn(file);
         urns.add(sha1Urn);
-        FileDesc fileDesc = new FileDesc(file, urns, 0);
+        FileDesc fileDesc = new FileDescImpl(file, urns, 0);
         
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         creationTimeCache.addTime(sha1Urn, fileDesc.getFile().lastModified());

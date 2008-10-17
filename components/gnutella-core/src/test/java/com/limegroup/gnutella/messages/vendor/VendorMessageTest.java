@@ -19,11 +19,11 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.stubs.FileDescStub;
 
 
 @SuppressWarnings( { "cast" } )

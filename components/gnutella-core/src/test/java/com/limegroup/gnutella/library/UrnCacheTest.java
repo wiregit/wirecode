@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileDescImpl;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -88,7 +88,7 @@ public final class UrnCacheTest extends LimeTestCase {
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
 			Set urns = UrnHelper.calculateAndCacheURN(files[i], urnCache);
-			fileDescs[i] = new FileDesc(files[i], urns, i);
+			fileDescs[i] = new FileDescImpl(files[i], urns, i);
 		}				
 		return fileDescs;
 	}

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.stubs;
+package com.limegroup.gnutella.library;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -11,10 +11,10 @@ import java.util.Set;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileDescImpl;
 
 @SuppressWarnings("unchecked")
-public class FileDescStub extends FileDesc {
+public class FileDescStub extends FileDescImpl {
     public static final String DEFAULT_URN =
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
     public static final URN DEFAULT_SHA1;

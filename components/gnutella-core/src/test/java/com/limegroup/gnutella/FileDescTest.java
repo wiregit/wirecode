@@ -15,7 +15,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileDescImpl;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.simpp.SimppListener;
@@ -58,22 +58,22 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
 		try {
-			new FileDesc(null, urns, 0);
+			new FileDescImpl(null, urns, 0);
 			fail("null file should not be permitted for FileDesc constructor");
 		} catch(NullPointerException ignored) {}
         
         try {
-            new FileDesc(file, null, 0);
+            new FileDescImpl(file, null, 0);
             fail("null urns should not be permitted for FileDesc constructor");
         } catch(NullPointerException ignored) {}
         
         try {
-            new FileDesc(file, urns, -1);
+            new FileDescImpl(file, urns, -1);
             fail("negative index should not be permitted for FileDesc constructor");
         } catch(IndexOutOfBoundsException ignored) {}
         
         try {
-            new FileDesc(file, Collections.EMPTY_SET, 0);
+            new FileDescImpl(file, Collections.EMPTY_SET, 0);
             fail("no sha1 urn should not be permitted for FileDesc constructor");
         } catch(IllegalArgumentException ignored) {}
 	}
@@ -98,7 +98,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         for(int i = 0; it.hasNext(); i++) {
             File file = (File)it.next();
             Set urns = UrnHelper.calculateAndCacheURN(file, urnCache); 
-            new FileDesc(file, urns, i);
+            new FileDescImpl(file, urns, i);
         }
     }
     
@@ -106,7 +106,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         File file = TestUtils.getResourceFile("build.xml");
         Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
-        FileDesc fd = new FileDesc(file, urns, 0);
+        FileDescImpl fd = new FileDescImpl(file, urns, 0);
         
         // Initial State: Not Rare!
         assertLessThan(DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue(), fd.getAttemptedUploads());

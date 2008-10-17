@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import com.limegroup.gnutella.stubs.FileDescStub;
 
 public class FileListStub extends GnutellaSharedFileListImpl {
 

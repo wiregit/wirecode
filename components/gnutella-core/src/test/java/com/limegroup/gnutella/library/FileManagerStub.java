@@ -21,14 +21,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileList;
-import com.limegroup.gnutella.library.FileManagerEvent;
-import com.limegroup.gnutella.library.FileManagerImpl;
-import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.FileManagerEvent.Type;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.stubs.FileDescStub;
 
 /**
  * A simple FileManager that shares one file of (near) infinite length.
@@ -123,7 +117,7 @@ public class FileManagerStub extends FileManagerImpl {
         // IncompleteFileDesc... add it.
         int fileIndex = size();
         
-        IncompleteFileDesc ifd = new IncompleteFileDesc(
+        IncompleteFileDesc ifd = new IncompleteFileDescImpl(
         incompleteFile, urns, fileIndex, name, size, vf);
         getIncompleteFileList().add(ifd);
         fileURNSUpdated(ifd);

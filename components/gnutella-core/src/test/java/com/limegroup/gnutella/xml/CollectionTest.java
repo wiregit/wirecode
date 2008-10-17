@@ -21,6 +21,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileDescImpl;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -84,11 +85,11 @@ public class CollectionTest extends LimeTestCase {
         
         Set<URN> urns;
         urns = UrnHelper.calculateAndCacheURN(mason, urnCache);
-        files[0] = new FileDesc(mason, urns, 0);
+        files[0] = new FileDescImpl(mason, urns, 0);
         urns = UrnHelper.calculateAndCacheURN(test1, urnCache);
-        files[1] = new FileDesc(test1, urns, 1);
+        files[1] = new FileDescImpl(test1, urns, 1);
         urns = UrnHelper.calculateAndCacheURN(test2, urnCache);
-        files[2] = new FileDesc(test2, urns, 2);
+        files[2] = new FileDescImpl(test2, urns, 2);
 
         
     }

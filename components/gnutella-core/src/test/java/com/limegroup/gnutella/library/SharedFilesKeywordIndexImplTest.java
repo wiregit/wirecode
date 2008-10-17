@@ -43,8 +43,8 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     @SuppressWarnings("unchecked")
     public void testRenamedFilesEvent() throws Exception {
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        final FileDesc originalFile = new FileDesc(new File("hello world"), new UrnSet(urn), 1);
-        final FileDesc newFile = new FileDesc(new File("goodbye world"), new UrnSet(urn), 2);
+        final FileDesc originalFile = new FileDescImpl(new File("hello world"), new UrnSet(urn), 1);
+        final FileDesc newFile = new FileDescImpl(new File("goodbye world"), new UrnSet(urn), 2);
         
         final GetterMatcher<Service> serviceGetter = GetterMatcher.create();
         final GetterMatcher<EventListener<FileListChangedEvent>> listenerGetter = GetterMatcher.create();

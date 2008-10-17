@@ -1,5 +1,5 @@
 
-package com.limegroup.gnutella.stubs;
+package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import org.limewire.collection.Range;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.library.IncompleteFileDesc;
+import com.limegroup.gnutella.library.IncompleteFileDescImpl;
 
 /**
  * A stub that is identical to FileDescStub.  The code uses instanceof,
@@ -21,7 +21,7 @@ import com.limegroup.gnutella.library.IncompleteFileDesc;
  * need arises.
  */
 @SuppressWarnings("unchecked")
-public class IncompleteFileDescStub extends IncompleteFileDesc {
+public class IncompleteFileDescStub extends IncompleteFileDescImpl {
 	public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
     public static final Set set;
     private static Set localSet2,globalSet;

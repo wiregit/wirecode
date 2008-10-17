@@ -374,7 +374,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
 			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], injector.getInstance(UrnCache.class));            
-			fileDescs[i] = new FileDesc(files[i], urns, i);
+			fileDescs[i] = new FileDescImpl(files[i], urns, i);
 			cache.addTime(fileDescs[i].getSHA1Urn(),
                                                  files[i].lastModified());
 		}				
@@ -398,7 +398,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
 	@Singleton
     private static class MyFileManager extends FileManagerImpl {
-        private FileDesc fd = null;
+        private FileDescImpl fd = null;
         private URN toExclude = null;
         private URN defaultURN;
         private Set<URN> validUrns;
@@ -438,7 +438,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
             if (fd == null) {
                 Set<URN> urnSet = new HashSet<URN>();
                 urnSet.add(defaultURN);
-                fd = new FileDesc(new File(_settingsDir, CREATION_CACHE_FILE), urnSet, 0);
+                fd = new FileDescImpl(new File(_settingsDir, CREATION_CACHE_FILE), urnSet, 0);
             }
             if ((toExclude != null) && toExclude.equals(urn)) {
                 return null;
