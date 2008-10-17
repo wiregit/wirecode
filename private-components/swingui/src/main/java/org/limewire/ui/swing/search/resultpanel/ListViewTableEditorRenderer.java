@@ -487,13 +487,14 @@ implements TableCellEditor, TableCellRenderer {
      * parts of the content that match search terms
      */
     private boolean populateSubheading(VisualSearchResult vsr) {
+        //TODO move logic to visual search result
         String subheading = "";
-
+        
         switch(getCategory()) {
         case AUDIO: {
             String albumTitle = vsr.getPropertyString(PropertyKey.ALBUM_TITLE);
             String quality = vsr.getPropertyString(PropertyKey.QUALITY);
-            String length = vsr.getPropertyString(PropertyKey.LENGTH);
+            String length = convertToTime(vsr.getPropertyString(PropertyKey.LENGTH));
             
             
             boolean changed = false;
@@ -564,6 +565,32 @@ implements TableCellEditor, TableCellRenderer {
         LOG.debugf("Subheading: {0} highlightedMatches: {1}", subheading, highlightMatches);
         subheadingLabel.setText(highlightMatches);
         return isDifferentLength(subheading, highlightMatches);
+    }
+
+    private String convertToTime(String intString) {
+        try {
+            int length = Integer.parseInt(intString);
+            int hours = length / 3600;
+            int minutes = (length - (hours * 3600)) / 60;
+            int seconds = (length - (hours * 3600) - (minutes * 60));
+            String time = "";
+            if(hours > 0) {
+                time += zeroPad(hours) + ":"; 
+            }
+            time += zeroPad(minutes) + ":" + zeroPad(seconds);
+            return time;
+        } catch (NumberFormatException e) {
+           //do nothing null will be returned
+        }
+        
+        return null;
+    }
+    
+    private String zeroPad(int num) {
+        if(num < 10) {
+            return "0"+num;
+        }
+        return ""+num;
     }
 
     private boolean isDifferentLength(String str1, String str2) {
