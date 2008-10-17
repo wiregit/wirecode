@@ -216,10 +216,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             this.table = table;
         }
         @Override
-        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {  
-            if(table.isRowDisabled(adapter.row)){
-                System.out.println("col : "+ adapter.column + ", "+renderer);
-            }
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {           
             return table.isRowDisabled(adapter.row);
         }
     }
