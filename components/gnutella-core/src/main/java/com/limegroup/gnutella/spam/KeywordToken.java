@@ -7,10 +7,12 @@ public class KeywordToken extends Token {
 	private static final long serialVersionUID = 3257850995487748662L;
     
     /**
-     * We should be very careful about treating keywords as indicators of
-     * spam, since spammers often echo the query string in the file name.
+     * Spammers often echo the search tokens in the result, but we ignore
+     * those tokens, so any remaining keywords should be a reasonable
+     * indicator of spam. However, the same keyword may occur in a large
+     * number of files, so we don't want to be too hasty.
      */
-    private static final float KEYWORD_WEIGHT = 0.01f;
+    private static final float KEYWORD_WEIGHT = 0.1f;
     
 	protected final String keyword;
     
@@ -39,6 +41,6 @@ public class KeywordToken extends Token {
     
 	@Override
     public String toString() {
-		return keyword + " " + rating;
+		return "keyword " + keyword;
 	}
 }

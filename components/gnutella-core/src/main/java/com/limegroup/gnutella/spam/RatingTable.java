@@ -14,9 +14,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,6 +76,14 @@ public class RatingTable implements Service {
                 return false;
             }
         };
+    
+    /**
+     * Tokens that the user has searched for during this session (could be
+     * keywords, XML metadata, and maybe URNs in the future). They will not
+     * contribute to the spam ratings of search results, because spammers
+     * often echo the search terms.
+     */
+    private final HashSet<Token> searchTokens = new HashSet<Token>();
 	
 	private final Tokenizer tokenizer;
 	
@@ -126,10 +136,10 @@ public class RatingTable implements Service {
 	/**
 	 * Returns the rating for a tokenized RemoteFileDesc
 	 * 
-	 * @param tokens an array of Tokens taken from a RemoteFileDesc
+	 * @param tokens a set of tokens taken from a RemoteFileDesc
 	 * @return the rating for the RemoteFileDesc
 	 */
-    private float getRating(Token[] tokens) {
+    private float getRating(Set<Token> tokens) {
         float rating = 1;
         for(Token t : tokens)
             rating *= 1 - t.getRating();
@@ -147,21 +157,28 @@ public class RatingTable implements Service {
 	}
 
 	/**
-     * Clears the ratings of the tokens associated with a QueryRequest
+     * Clears the ratings of the tokens associated with a QueryRequest and
+     * ignores them for the rest of the session
      * 
 	 * @param qr the QueryRequest to clear
 	 */
 	protected synchronized void clear(QueryRequest qr) {
-		rateInternal(lookup(tokenizer.getTokens(qr)), 0);
+        Set<Token> tokens = lookup(tokenizer.getTokens(qr));
+        for(Token t : tokens) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Clearing search token " + t);
+            searchTokens.add(t); // Ignore the token for this session
+            tokenMap.remove(t); // Clear the rating for future sessions
+        }
 	}
 
 	/**
-	 * Assigns the given rating to an array of tokens
+	 * Assigns the given rating to a set of tokens
 	 * 
-	 * @param tokens the Tokens to rate
-	 * @param rating a rating as defined by the Token interface
+	 * @param tokens a set of tokens to be rated
+	 * @param rating a rating between 0 (not spam) and 1 (spam)
 	 */
-	private void rateInternal(Token[] tokens, float rating) {
+	private void rateInternal(Set<Token> tokens, float rating) {
 		for(Token t : tokens) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Rating " + t + " as " + rating);
@@ -171,23 +188,26 @@ public class RatingTable implements Service {
 
 	/**
 	 * Replaces each token with an equivalent previously stored token, or
-     * stores the token if no equivalent exists
+     * stores the token and returns it if no equivalent exists. Tokens that
+     * have been searched for during this session are removed.
 	 * 
-	 * @param tokens an array of tokens to be replaced
-	 * @return the same array, with each element replaced by an equivalent
-     *         previously stored token if any such token exists
+	 * @param tokens a set of tokens to be replaced
+	 * @return a set of equivalent tokens, with search tokens removed
 	 */
-	private Token[] lookup(Token[] tokens) {
-		for (int i = 0; i < tokens.length; i++) {
-			// lookup stored token
-			tokens[i] = lookup(tokens[i]);
-		}
-		return tokens;
+	private Set<Token> lookup(Set<Token> tokens) {
+        Set<Token> newTokens = new HashSet<Token>();
+		for(Token t : tokens) {
+            if(!searchTokens.contains(t))
+                newTokens.add(lookup(t));
+            else if(LOG.isDebugEnabled())
+                LOG.debug("Ignoring search token " + t);
+        }
+		return newTokens;
 	}
 
 	/**
-	 * Replaces a token with an equivalent previously stored token if
-     * any such token exists, otherwise stores the token
+	 * Returns an equivalent previously stored token if any such token exists,
+     * otherwise stores the token and returns it
 	 * 
 	 * @param token the token to look up
 	 * @return the same token or a previously stored equivalent
@@ -257,7 +277,7 @@ public class RatingTable implements Service {
         try {
             dump = new PrintWriter(
                     new File(CommonUtils.getUserSettingsDir(), "spam.dump"));
-            for(Token t : list) dump.println(t);
+            for(Token t : list) dump.println(t + " " + t.getRating());
         } catch (Exception x) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Error dumping spam ratings: ", x);
@@ -267,7 +287,7 @@ public class RatingTable implements Service {
 	}
     
 	private static File getSpamDat() {
-	    return new File(CommonUtils.getUserSettingsDir(), "spam1.dat");
+	    return new File(CommonUtils.getUserSettingsDir(), "spam.dat");
 	}
     
 	/** Inspectable that returns a hash and rating of the tokens */

@@ -7,10 +7,10 @@ public class XMLKeywordToken extends KeywordToken {
 	private static final long serialVersionUID = 3617573808026760503L;
     
     /**
-     * XML name/value pairs are more specific than keywords, so we require
-     * fewer updates before considering them spam.
+     * Like keywords, XML name/value pairs may occur in a large number of
+     * files, so we don't want to be too hasty about considering them spam.
      */
-    private static final float XML_WEIGHT = 0.1f;
+    private static final float XML_WEIGHT = 0.15f;
 
 	XMLKeywordToken(String name, String value) {
 		super(name + ":" + value);
@@ -28,5 +28,10 @@ public class XMLKeywordToken extends KeywordToken {
         if(!(o instanceof XMLKeywordToken))
             return false;
         return keyword.equals(((XMLKeywordToken)o).keyword);
+    }
+    
+    @Override
+    public String toString() {
+        return "xml " + keyword;
     }
 }

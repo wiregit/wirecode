@@ -29,4 +29,9 @@ public class UrnToken extends KeywordToken {
             return false;
         return keyword.equals(((UrnToken)o).keyword);
     }
+    
+    @Override
+    public String toString() {
+        return "urn " + keyword;
+    }
 }

@@ -7,10 +7,10 @@ public class SizeToken extends Token {
 	private static final long serialVersionUID = 3906652994404955696L;
 
     /** 
-     * We consider file sizes to be very accurate identifiers of a file, so we
-     * will consider a certain file size spam after only a few bad ratings.
+     * File size is a fairly accurate identifier of a file, so we will
+     * consider a certain file size spam after only a couple of bad ratings.
      */
-    private static final float SIZE_WEIGHT = 0.5f;
+    private static final float SIZE_WEIGHT = 0.6f;
     
 	private final long size;
     
@@ -39,6 +39,6 @@ public class SizeToken extends Token {
     
 	@Override
     public String toString() {
-		return size + " " + rating;
+		return "size " + size;
 	}
 }

@@ -83,6 +83,6 @@ public class AddressToken extends Token {
     
 	@Override
     public String toString() {
-		return address + " " + rating;
+		return "address " + address;
 	}
 }

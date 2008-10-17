@@ -53,49 +53,45 @@ public class Tokenizer {
 	}
 	
 	/**
-	 * Extracts an array of unique Tokens from a RemoteFileDesc
+	 * Extracts a set of tokens from a RemoteFileDesc
 	 * 
 	 * @param desc the RemoteFileDesc that should be tokenized
-	 * @return an array of Tokens, will never be empty
+	 * @return a non-empty set of Tokens
 	 */
-	public Token[] getTokens(RemoteFileDesc desc) {
+	public Set<Token> getTokens(RemoteFileDesc desc) {
         Set<Token> set = new HashSet<Token>();
         tokenize(desc, set);
-        Token[] tokens = new Token[set.size()];
-        tokens = set.toArray(tokens);
-        return tokens;
+        return set;
     }
     
     /**
-     * Extracts an array of unique tokens from an array of RemoteFileDescs -
-     * useful if the user wants to mark multiple RFDs from a TableLine as
-     * spam, which should rate each token only once
+     * Extracts a set of tokens from an array of RemoteFileDescs - useful if
+     * the user wants to mark multiple RFDs from a TableLine as spam (or not),
+     * which should rate each token only once
      * 
      * @param descs the array of RemoteFileDescs that should be tokenized
-     * @return an array of Tokens, will never be empty
+     * @return a non-empty set of Tokens
      */
-    public Token[] getTokens(RemoteFileDesc[] descs) {
+    public Set<Token> getTokens(RemoteFileDesc[] descs) {
         Set<Token> set = new HashSet<Token>();
         for(RemoteFileDesc desc : descs)
             tokenize(desc, set);
-        Token[] tokens = new Token[set.size()];
-        tokens = set.toArray(tokens);
-        return tokens;
+        return set;
     }
 
     /**
      * Extracts a set of tokens from a RemoteFileDesc
      * 
      * @param desc the RemoteFileDesc that should be tokenized
-     * @param set the extracted tokens, may be empty
+     * @param set the set to which the tokens should be added
      */
     private void tokenize(RemoteFileDesc desc, Set<Token> set) {
 		if(LOG.isDebugEnabled())
 			LOG.debug("Tokenizing " + desc);
-        set.addAll(getKeywordTokens(desc.getFileName()));
+        getKeywordTokens(desc.getFileName(), set);
         LimeXMLDocument xml = desc.getXMLDocument();
         if(xml != null)
-		    set.addAll(getKeywordTokens(xml));
+		    getKeywordTokens(xml, set);
         URN urn = desc.getSHA1Urn();
 		if(urn != null)
 			set.add(new UrnToken(urn.toString()));
@@ -105,40 +101,38 @@ public class Tokenizer {
 
 	/**
 	 * Tokenizes a QueryRequest, including the search terms, XML metadata and
-     * URN - used to reduce the ratings of keywords the user searches for
+     * URN (if any) - we clear the spam ratings of search tokens and ignore
+     * them for spam rating purposes for the rest of the session
 	 * 
 	 * @param qr the QueryRequest that should be tokenized
-	 * @return an array of Tokens, may be empty
+	 * @return a set of Tokens, may be empty
 	 */
-	public Token[] getTokens(QueryRequest qr) {
+	public Set<Token> getTokens(QueryRequest qr) {
 		if(LOG.isDebugEnabled())
 			LOG.debug("Tokenizing " + qr);
-		Set<Token> set = getKeywordTokens(qr.getQuery());
+		Set<Token> set = new HashSet<Token>();
+        getKeywordTokens(qr.getQuery(), set);
         LimeXMLDocument xml = qr.getRichQuery();
         if(xml != null)
-            set.addAll(getKeywordTokens(xml));
+            getKeywordTokens(xml, set);
         Set<URN> urns = qr.getQueryUrns();
         for(URN urn : urns)
             set.add(new UrnToken(urn.toString()));
-		Token[] tokens = new Token[set.size()];
-		tokens = set.toArray(tokens);
-		return tokens;
+        return set;
 	}
 
 	/**
 	 * Extracts KeywordTokens from an XML metadata document
 	 * 
 	 * @param doc the LimeXMLDocument that should be tokenized
-	 * @return a Set of XMLKeywordTokens, may be empty
+	 * @param set the set to which the tokens should be added
 	 */
-	private Set<Token> getKeywordTokens(LimeXMLDocument doc) {
-        Set<Token> tokens = new HashSet<Token>();
+	private void getKeywordTokens(LimeXMLDocument doc, Set<Token> set) {
         for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
             String name = entry.getKey().toString();
             String value = entry.getValue().toString(); 
-            tokens.addAll(getXMLKeywords(name, value));
+            getXMLKeywords(name, value, set);
 		}
-		return tokens;
 	}
 
 	/**
@@ -147,19 +141,17 @@ public class Tokenizer {
 	 * 
 	 * @param name the field name as a String (eg audios_audio_bitrate)
 	 * @param value the value as a String
-	 * @return a Set of XMLKeywordTokens
+	 * @param set the set to which the tokens should be added
 	 */
-	private Set<Token> getXMLKeywords(String name, String value) {
+	private void getXMLKeywords(String name, String value, Set<Token> set) {
         name = extractSimpleFieldName(name);
         name.toLowerCase(Locale.US);
         value.toLowerCase(Locale.US);
-		Set<Token> tokens = new HashSet<Token>();
 		for(String keyword : QueryUtils.extractKeywords(value, false)) {
             if(keyword.length() > MAX_KEYWORD_LENGTH)
                 keyword = keyword.substring(0, MAX_KEYWORD_LENGTH);
-            tokens.add(new XMLKeywordToken(name, keyword));
+            set.add(new XMLKeywordToken(name, keyword));
         }
-        return tokens;
 	}
 
 	/**
@@ -179,16 +171,14 @@ public class Tokenizer {
 	 * Splits a String into keyword tokens using QueryUtils.extractKeywords()
 	 * 
 	 * @param str the String to tokenize
-	 * @return a Set of KeywordTokens, may be empty
+	 * @param set the set to which the tokens should be added
 	 */
-	private Set<Token> getKeywordTokens(String str) {
+	private void getKeywordTokens(String str, Set<Token> set) {
         str.toLowerCase(Locale.US);
-		Set<Token> tokens = new HashSet<Token>();
         for(String keyword : QueryUtils.extractKeywords(str, false)) {
             if(keyword.length() > MAX_KEYWORD_LENGTH)
                 keyword = keyword.substring(0, MAX_KEYWORD_LENGTH);
-            tokens.add(new KeywordToken(keyword));
+            set.add(new KeywordToken(keyword));
         }
-        return tokens;
 	}
 }
