@@ -114,4 +114,9 @@ public class MockLocalFileItem implements LocalFileItem {
     public URN getUrn() {
         return null;
     }
+
+    @Override
+    public boolean isIncomplete() {
+        return false;
+    }
 }

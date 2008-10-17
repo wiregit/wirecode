@@ -67,7 +67,7 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
         case PLAY_COL:
             return baseObject;
         case NAME_COL:
-            return (baseObject.getProperty(Keys.TITLE) == null) ? baseObject.getName() : baseObject.getProperty(Keys.TITLE);
+            return (baseObject.getProperty(Keys.TITLE) == null) ? baseObject.getName() : (String)baseObject.getProperty(Keys.TITLE);
         case ARTIST_COL:
             return baseObject.getProperty(Keys.AUTHOR);
         case ALBUM_COL:

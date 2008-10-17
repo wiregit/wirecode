@@ -68,9 +68,9 @@ public class ShareTableRendererEditor extends TableRendererEditor{
             LocalFileItem item = (LocalFileItem)value;
             gnutellaLabel.setVisible(item.isSharedWithGnutella());
             int friendCount = item.getFriendShareCount();
-            friendsLabel.setVisible(friendCount > 0);
+            friendsLabel.setVisible(friendCount > 0 && !item.isIncomplete());
             friendsLabel.setText(GuiUtils.toLocalizedInteger(item.getFriendShareCount()));
-            shareButton.setEnabled(item.isShareable());
+            shareButton.setVisible(item.isShareable() && !item.isIncomplete());
         }
     }
 

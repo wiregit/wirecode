@@ -106,7 +106,9 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
-                        libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
+                        if (!fileItem.isIncomplete()) {
+                            libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
+                        }
                     }
 
                 }
@@ -126,9 +128,11 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
-                        FileUtils.unlockFile(fileItem.getFile());
-                        libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
-                        FileUtils.delete(fileItem.getFile(), true);
+                        if (!fileItem.isIncomplete()) {
+                            FileUtils.unlockFile(fileItem.getFile());
+                            libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
+                            FileUtils.delete(fileItem.getFile(), true);
+                        }
                     }
                 }
                 
@@ -146,7 +150,9 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
-                        shareListManager.getGnutellaShareList().removeFile(fileItem.getFile());
+                        if (!fileItem.isIncomplete()) {
+                            shareListManager.getGnutellaShareList().removeFile(fileItem.getFile());
+                        }
                     }
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
@@ -168,7 +174,9 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
-                        shareListManager.getGnutellaShareList().addFile(fileItem.getFile());
+                        if (!fileItem.isIncomplete()) {
+                            shareListManager.getGnutellaShareList().addFile(fileItem.getFile());
+                        }
                     }
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
@@ -195,7 +203,9 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
-                        shareListManager.getFriendShareList(friend).removeFile(fileItem.getFile());
+                        if (!fileItem.isIncomplete()) {
+                            shareListManager.getFriendShareList(friend).removeFile(fileItem.getFile());
+                        }
                     }
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
@@ -222,7 +232,9 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
-                        shareListManager.getFriendShareList(friend).addFile(fileItem.getFile());
+                        if (!fileItem.isIncomplete()) {
+                            shareListManager.getFriendShareList(friend).addFile(fileItem.getFile());
+                        }
                     }
                     SwingUtils.invokeLater(new Runnable() {
                         @Override

@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.table;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -9,6 +11,10 @@ import javax.swing.AbstractAction;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
+import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -18,6 +24,7 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -30,11 +37,16 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
     private final TableColors tableColors;
     private final EventList<T> listSelection;
     
+    @Resource
+    private Color disabledForegroundColor;
+    
     private ShareTableRendererEditor shareEditor;
     private LibrarySharePanel librarySharePanel;
     
     public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format) {
         super(new LibraryTableModel<T>(libraryItems, format));
+        
+        GuiUtils.assignResources(this);
         
         this.format = format;
 
@@ -47,7 +59,9 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         setSelectionModel(model);
         model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         this.listSelection = model.getSelected();
-        setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter());
+        setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter(), 
+                new ColorHighlighter(new DisabledHighlightPredicate(this), null, disabledForegroundColor, null, disabledForegroundColor));
+       
         setFillsViewportHeight(true);
         setDragEnabled(true);
     }
@@ -177,6 +191,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         ensureRowVisible(getSelectedRow());
     }
     
+    public boolean isCellEditable(int row, int column) {
+        return super.isCellEditable(row, column) && !isRowDisabled(row);
+    }
+    
     /**
      * Ensures the given row is visible.
      */
@@ -186,6 +204,25 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
             Rectangle visibleRect = getVisibleRect();
             if( !visibleRect.intersects(cellRect) )
                 scrollRectToVisible(cellRect);
+        }
+    }
+    
+    public boolean isRowDisabled(int row) {
+        FileItem item = getLibraryTableModel().getFileItem(convertRowIndexToModel(row));
+        if (item instanceof LocalFileItem) {
+            return ((LocalFileItem) item).isIncomplete();
+        }
+        return item == null;
+    }
+    
+    private static class DisabledHighlightPredicate implements HighlightPredicate {
+        private LibraryTable table;
+        public DisabledHighlightPredicate (LibraryTable table) {
+            this.table = table;
+        }
+        @Override
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {            
+            return table.isRowDisabled(adapter.row);
         }
     }
 }

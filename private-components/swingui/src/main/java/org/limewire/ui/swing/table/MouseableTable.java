@@ -147,10 +147,7 @@ public class MouseableTable extends StripedJXTable {
                             e.getComponent(), e.getX(), e.getY());
                         TableCellEditor editor = getCellEditor();
                         if (editor != null) {
-							// force update editor colors
-							prepareEditor(editor, row, col);
-							// editor.repaint() takes about a second to show sometimes
-							repaint();
+                            editor.cancelCellEditing();
                         }
                     }
                 }

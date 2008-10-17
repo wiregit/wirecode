@@ -34,9 +34,9 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
 
     private File file;
     
-    private JTable table;
+    private LibraryTable table;
 
-    public PlayRendererEditor(JTable table, final AudioPlayer player) {
+    public PlayRendererEditor(LibraryTable table, final AudioPlayer player) {
         GuiUtils.assignResources(this);
         
         this.table = table;
@@ -93,14 +93,16 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
     }
     
     private File update(Object value){
-        if(value == null){
-            playButton.setSelected(false);
-            playButton.setVisible(false);
-            return null;
-        } else if(value instanceof LocalFileItem){
-            File file = ((LocalFileItem)value).getFile();
-            update(file);
-            return file;
+        if(value instanceof LocalFileItem){
+            if(((LocalFileItem)value).isIncomplete()){
+                playButton.setVisible(false);
+                return null;
+            } else {
+                playButton.setVisible(true);
+                File file = ((LocalFileItem) value).getFile();
+                update(file);
+                return file;
+            }
         } else {
             throw new IllegalStateException(value + " must be LocalFileItem");
         }

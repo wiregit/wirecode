@@ -46,7 +46,7 @@ public class ImageTableFormat<T extends FileItem> implements LibraryTableFormat<
         else if (column == SIZE_COL)
             return baseObject.getSize();
         else if (column == CREATED_COL)
-            return new Date();
+            return new Date(baseObject.getCreationTime());
         else if (column == MODIFIED_COL)
             return new Date(baseObject.getLastModifiedTime());
         else if (column == ACTION_COL)

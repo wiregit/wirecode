@@ -37,15 +37,17 @@ public class MyLibraryPopupHandler implements TablePopupHandler {
     @Override
     public void maybeShowPopup(Component component, int x, int y) {
         popupRow = table.rowAtPoint(new Point(x, y));
-        List<LocalFileItem> items = table.getSelectedItems();        
-        LocalFileItem selectedItem = table.getLibraryTableModel().getFileItem(popupRow);
-        if(items.contains(selectedItem) && items.size() > 1) {
-            multiSelectPopupMenu.setFileItems(items);
-            multiSelectPopupMenu.show(component, x, y);
-        } else {
-            table.setRowSelectionInterval(popupRow, popupRow);
-            popupMenu.setFileItem(selectedItem);
-            popupMenu.show(component, x, y);
+        if (!table.isRowDisabled(popupRow)) {
+            List<LocalFileItem> items = table.getSelectedItems();
+            LocalFileItem selectedItem = table.getLibraryTableModel().getFileItem(popupRow);
+            if (items.contains(selectedItem) && items.size() > 1) {
+                multiSelectPopupMenu.setFileItems(items);
+                multiSelectPopupMenu.show(component, x, y);
+            } else {
+                table.setRowSelectionInterval(popupRow, popupRow);
+                popupMenu.setFileItem(selectedItem);
+                popupMenu.show(component, x, y);
+            }
         }
     }
 }

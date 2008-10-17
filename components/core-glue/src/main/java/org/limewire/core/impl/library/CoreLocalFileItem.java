@@ -21,6 +21,7 @@ import org.limewire.xmpp.api.client.LimePresence;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 
 public class CoreLocalFileItem implements LocalFileItem {
@@ -262,6 +263,11 @@ public class CoreLocalFileItem implements LocalFileItem {
     public org.limewire.core.api.URN getUrn() {
         URN urn = fileDesc.getSHA1Urn();
         return new URNImpl(urn);
+    }
+
+    @Override
+    public boolean isIncomplete() {
+        return fileDesc instanceof IncompleteFileDesc;
     }
     
 }
