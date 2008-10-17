@@ -24,6 +24,7 @@ import javax.swing.JToggleButton;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
@@ -33,6 +34,7 @@ import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.friends.ChatLoginState;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -85,8 +87,8 @@ public class SortAndFilterPanel extends JXPanel {
     
     private final JLabel sortLabel = new JLabel(tr("Sort by:"));
     private final JTextField filterBox = new PromptTextField();
-    private final JToggleButton listViewToggleButton = new JToggleButton();
-    private final JToggleButton tableViewToggleButton = new JToggleButton();
+    private final JXButton listViewToggleButton = new JXButton();
+    private final JXButton tableViewToggleButton = new JXButton();
     
     private String sortBy;
 
@@ -105,6 +107,8 @@ public class SortAndFilterPanel extends JXPanel {
         GuiUtils.assignResources(this);
         sortLabel.setForeground(Color.WHITE);
         sortLabel.setFont(sortLabelFont);
+        listViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
+        tableViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         setSearchCategory(SearchCategory.ALL);
         configureViewButtons();
         layoutComponents();
@@ -115,16 +119,16 @@ public class SortAndFilterPanel extends JXPanel {
     }
     
     private void configureViewButtons() {
-        Insets insets = new Insets(0, 0, 0, 0);
-        
         final SortAndFilterPanel outerThis = this;
         
         listViewToggleButton.setIcon(listViewIcon);
         listViewToggleButton.setPressedIcon(listViewIcon);
         listViewToggleButton.setSelected(true);
-        listViewToggleButton.setMargin(insets);
+        listViewToggleButton.setMargin(new Insets(0, 10, 0, 6));
         listViewToggleButton.setOpaque(false);
         listViewToggleButton.setToolTipText(tr("List view"));
+        listViewToggleButton.setBackgroundPainter(new ButtonPainter());
+        listViewToggleButton.setPaintBorderInsets(true);
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -138,9 +142,10 @@ public class SortAndFilterPanel extends JXPanel {
         
         tableViewToggleButton.setIcon(tableViewIcon);
         tableViewToggleButton.setPressedIcon(tableViewIcon);
-        tableViewToggleButton.setMargin(insets);
+        tableViewToggleButton.setMargin(new Insets(0, 6, 0, 10));
         tableViewToggleButton.setOpaque(false);
         tableViewToggleButton.setToolTipText(tr("Table view"));
+        tableViewToggleButton.setBackgroundPainter(new ButtonPainter());
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {

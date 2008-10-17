@@ -2,6 +2,8 @@ package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
 
+import javax.swing.ButtonModel;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -51,7 +53,9 @@ public class ButtonPainter extends AbstractButtonPainter {
         colors.arcHeight = arcHeight;
         colors.arcWidth = arcWidth;
         
-        if(button.getModel().isPressed()) {
+        ButtonModel model = button.getModel();
+        //isSelected() for toggle buttons
+        if(model.isPressed() || model.isSelected()) {
             colors.backgroundTop = backgroundGradientTopPressed;
             colors.backgroundBottom = backgroundGradientBottomPressed;
             colors.bevelTop = highlightBevelPressed;
