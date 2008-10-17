@@ -176,6 +176,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 		_index = index;
 		_filename = filename;
         _size = size;
+        assert (firewalled && pe != null) || (!firewalled && pe == null); 
         _firewalled = firewalled;
 		_pushAddr = pe;
 		_clientGUID = clientGUID;
@@ -751,22 +752,24 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     
     @Override
     public Address toAddress() {
-        Connectable publicPrivateAddress = new ConnectableImpl(this);
-        Address address = publicPrivateAddress;
         if (isFirewalled()) {
             Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
             for (IpPort ipPort : _pushAddr.getProxies()) {
-                if(ipPort instanceof Connectable) {
+                if (ipPort instanceof Connectable) {
                    proxies.add((Connectable)ipPort);   
                 } else {
                    proxies.add(new ConnectableImpl(ipPort, false));
                 }
             }
-
-            address = new FirewalledAddress(publicPrivateAddress, publicPrivateAddress, new GUID(getClientGUID()), proxies, _pushAddr
+            // using the valid external address instead of this RemoteFileDescs values
+            // provided through the IpPort interface since they can be to BOGUS_IP and the default port 6346
+            // which might not be handled as wrong values in the new address code
+            IpPort validPublicIpPort = _pushAddr.getValidExternalAddress();
+            Connectable publicAddress = validPublicIpPort != null ? new ConnectableImpl(validPublicIpPort, false) : ConnectableImpl.INVALID_CONNECTABLE;
+            return new FirewalledAddress(publicAddress, ConnectableImpl.INVALID_CONNECTABLE, new GUID(getClientGUID()), proxies, _pushAddr
                     .getFWTVersion());
+        } else {
+            return this;
         }
-
-        return address;
     }
 }

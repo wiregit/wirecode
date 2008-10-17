@@ -1,15 +1,17 @@
 package com.limegroup.gnutella.net.address;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressResolutionObserver;
@@ -21,7 +23,7 @@ import com.limegroup.gnutella.NetworkManager;
 
 /**
  * Detects if a firewalled address is behind the same NAT and on the same
- * local network and resolves to the local address. Otherwise marks the 
+ * local network as this client and resolves to the local address. Otherwise marks the 
  * firewalled address as resolved.
  */
 @Singleton
@@ -30,12 +32,23 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
     private final static Log LOG = LogFactory.getLog(SameNATAddressResolver.class);
     
     private final NetworkManager networkManager;
+
+    private final EventMulticaster<ConnectivityChangeEvent> connectivityEventMulticaster;
     
-    private final AtomicReference<Address> localAddress = new AtomicReference<Address>();
+    /**
+     * Ensures that {@link ConnectivityChangeEvent} is only thrown once.
+     */
+    private final AtomicBoolean localAddressEventGuard = new AtomicBoolean(false);
 
     @Inject
-    public SameNATAddressResolver(NetworkManager networkManager) {
+    public SameNATAddressResolver(NetworkManager networkManager, EventMulticaster<ConnectivityChangeEvent> connectivityEventMulticaster) {
         this.networkManager = networkManager;
+        this.connectivityEventMulticaster = connectivityEventMulticaster;
+    }
+    
+    @Inject
+    public void register(ListenerSupport<AddressEvent> addressEventListenerSupport) {
+        addressEventListenerSupport.addListener(this);
     }
     
     @Inject
@@ -43,21 +56,53 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
         socketsManager.registerResolver(this);
     }
 
-    @Inject
-    public void register(ListenerSupport<AddressEvent> addressEventListenerSupport) {
-        addressEventListenerSupport.addListener(this);
-    }
-
     public void handleEvent(AddressEvent event) {
-        synchronized (localAddress) {
-            localAddress.set(event.getSource());
-            localAddress.notifyAll();
+        if (areLocalAddressesKnown()) {
+            if (localAddressEventGuard.compareAndSet(false, true)) {
+                connectivityEventMulticaster.handleEvent(new ConnectivityChangeEvent());
+            }
         }
     }
 
+    /**
+     * Returns true if the local private and public addresses are known,
+     * and the address is a {@link FirewalledAddress} and it is behind the
+     * same NAT. 
+     */
     @Override
     public boolean canResolve(Address address) {
-        return address instanceof FirewalledAddress && !(address instanceof ResolvedFirewalledAddress); 
+        if (address instanceof FirewalledAddress) {
+            if (areLocalAddressesKnown()) {
+                return isBehindThisNAT((FirewalledAddress)address);
+            }
+        }
+        return false;
+    }
+
+    private boolean areLocalAddressesKnown() {
+        return NetworkUtils.isValidAddress(networkManager.getExternalAddress())
+        && NetworkUtils.isValidAddress(networkManager.getNonForcedAddress());
+    }
+    
+    private boolean isBehindThisNAT(FirewalledAddress address) {
+        byte[] thisPublicAddress = networkManager.getExternalAddress();
+        if (!Arrays.equals(address.getPublicAddress().getInetAddress().getAddress(), thisPublicAddress)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debugf("different public address: local = {0}, remote = {1}",
+                        NetworkUtils.ip2string(thisPublicAddress), address.getPublicAddress());
+            }
+            return false;
+        }
+        byte[] thisPrivateAddress = networkManager.getNonForcedAddress();
+        if (!NetworkUtils.areInSameSiteLocalNetwork(address.getPrivateAddress().getInetAddress().getAddress(), thisPrivateAddress)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debugf("different site local networks: local = {0}, remote = {1}", NetworkUtils.ip2string(thisPrivateAddress),
+                        address.getPrivateAddress());
+            }
+            return false;
+        }
+        LOG.debug("addresses behind same NAT!");
+        return true;
     }
 
     /**
@@ -71,41 +116,8 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
     @Override
     public void resolve(Address addr, int timeout, AddressResolutionObserver observer) {
         FirewalledAddress address = (FirewalledAddress)addr;
-        waitForLocalAddress();
-        byte[] publicAddress = networkManager.getExternalAddress();
-        if (!Arrays.equals(publicAddress, address.getPublicAddress().getInetAddress().getAddress())) {
-            LOG.debugf("different public address: local = {0}, remote = {1}", toString(publicAddress), address.getPublicAddress());
-            observer.resolved(new ResolvedFirewalledAddress(address.getPublicAddress(), address.getPrivateAddress(), address.getClientGuid(), address.getPushProxies(), address.getFwtVersion()));
-            return;
-        }
-        byte[] privateAddress = networkManager.getNonForcedAddress();
-        if (NetworkUtils.areInSameSiteLocalNetwork(privateAddress, address.getPrivateAddress().getInetAddress().getAddress())) {
-            LOG.debug("addresses behind same NAT!");
-            observer.resolved(address.getPrivateAddress());
-        } else {
-            LOG.debugf("different site local networks: local = {0}, remote = {1}", toString(privateAddress), address.getPrivateAddress());
-            observer.resolved(new ResolvedFirewalledAddress(address.getPublicAddress(), address.getPrivateAddress(), address.getClientGuid(), address.getPushProxies(), address.getFwtVersion()));
-        }
-    }
-
-    private String toString(byte[] publicAddress) {
-        StringBuilder sb = new StringBuilder();
-        for(byte b : publicAddress) {
-            sb.append(b).append(".");
-        }
-        return sb.substring(0, sb.length() - 1);
-    }
-
-    private void waitForLocalAddress() {
-        synchronized (localAddress) {
-            while(localAddress.get() == null) {
-                try {
-                    localAddress.wait();
-                } catch (InterruptedException e) {
-                    LOG.error(e);
-                }
-            }
-        }
+        assert isBehindThisNAT(address) : "not behind same NAT: " + address;
+        observer.resolved(address.getPrivateAddress());
     }
 
 }

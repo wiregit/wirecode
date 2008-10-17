@@ -8,7 +8,9 @@ import org.limewire.io.Address;
 public interface AddressResolver {
 
     /**
-     * Returns true if it can resolve the given type of address.
+     * Returns true if it can resolve the given address. This means it should
+     * take its own state and the information provided by the address into
+     * account. This call must be non-blocking.
      */
     boolean canResolve(Address address);
     

@@ -45,11 +45,11 @@ public interface Acceptor extends SocketProcessor {
      * Returns this' address to use for ping replies, query replies,
      * and pushes.
      * 
-     * @param checkForcedAddress whether or not to check if the IP address is forced.
-     *   If false, the forced IP address will never be return
+     * @param preferForcedAddress whether or not to prefer the forced address if the IP address is forced.
+     *   If false, the forced IP address will never be returned
      *   If true, the forced IP address will only be returned if one is set.
      */
-    public byte[] getAddress(boolean checkForcedAddress);
+    public byte[] getAddress(boolean preferForcedAddress);
 
     /**
      * Returns the port at which the Connection Manager listens for incoming

@@ -3,17 +3,17 @@ package org.limewire.listener;
 /**
  * A default, simple implementation of Event.
  */
-public class DefaultEvent<T, E> implements Event<T, E> {
+public class DefaultEvent<S, E> implements Event<S, E> {
     
-    private final T source;
+    private final S source;
     private final E event;
     
-    public DefaultEvent(T source, E event) {
+    public DefaultEvent(S source, E event) {
         this.source = source;
         this.event = event;
     }
 
-    public T getSource() {
+    public S getSource() {
         return source;
     }
 

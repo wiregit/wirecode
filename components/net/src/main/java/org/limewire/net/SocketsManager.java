@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.limewire.io.Address;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressConnector;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
@@ -16,7 +17,7 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.ssl.TLSSocketFactory;
 
 /** Factory for creating Sockets. */
-public interface SocketsManager {
+public interface SocketsManager extends ListenerSupport<ConnectivityChangeEvent> {
     
     /** The different ways a connection can be attempted. */
     public static enum ConnectType {    
@@ -199,6 +200,9 @@ public interface SocketsManager {
      * Asynchronously resolves <code>address</code> to other addresses if 
      * possible and notifying <code>observer</code> of the success or
      * failure.
+     * <p>
+     * If there is no resolver for address, the observer is notified of a address
+     * resolution with the exact same address.
      * 
      * @param timeout timeout in milliseconds
      */
@@ -242,4 +246,15 @@ public interface SocketsManager {
      * See {@link AddressResolver}.
      */
     public void registerResolver(AddressResolver resolver);
+    
+    /**
+     * Returns true if there is a connector that can connect to the address.
+     */
+    public boolean canConnect(Address address);
+
+    /**
+     * Returns true if there is a resolver that can resolve the address. 
+     */
+    public boolean canResolve(Address address);
+    
 }

@@ -26,8 +26,8 @@ public class FirewalledAddress implements Address {
     private int hashCode;
     
     public FirewalledAddress(Connectable publicAddress, Connectable privateAddress, GUID clientGuid, Set<Connectable> pushProxies, int fwtVersion) {
-        this.publicAddress = publicAddress;
-        this.privateAddress = privateAddress;
+        this.publicAddress = Objects.nonNull(publicAddress, "publicAddress");
+        this.privateAddress = Objects.nonNull(privateAddress, "privateAddress");
         this.clientGuid = clientGuid;
         this.pushProxies = pushProxies;
         this.fwtVersion = fwtVersion;

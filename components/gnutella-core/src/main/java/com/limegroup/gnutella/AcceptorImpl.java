@@ -432,8 +432,8 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.Acceptor#getAddress(boolean)
      */
-    public byte[] getAddress(boolean checkForce) {        
-		if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+    public byte[] getAddress(boolean preferForcedAddress) {        
+		if(preferForcedAddress && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
             String address = 
                 ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
             try {

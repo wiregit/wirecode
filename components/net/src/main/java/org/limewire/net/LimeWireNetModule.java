@@ -1,11 +1,14 @@
 package org.limewire.net;
 
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressFactoryImpl;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 
 /**
  * A Guice-module for binding all net related activity.
@@ -42,7 +45,8 @@ public class LimeWireNetModule extends AbstractModule {
         bind(FirewallService.class).to(FirewallServiceImpl.class);
         bind(AddressFactory.class).to(AddressFactoryImpl.class);
         bind(ConnectableSerializer.class);
-
+        bind(new TypeLiteral<ListenerSupport<ConnectivityChangeEvent>>(){}).to(SocketsManager.class);
+        bind(new TypeLiteral<EventMulticaster<ConnectivityChangeEvent>>(){}).to(SocketsManagerImpl.class);
         
         if(OSUtils.isSocketChallengedWindows())
             bind(SocketController.class).to(LimitedSocketController.class);
