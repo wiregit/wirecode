@@ -7,15 +7,11 @@ import java.net.URLDecoder;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.RequestLine;
-import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.auth.Credentials;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.http.BasicAuthenticationRequestInterceptor;
-import org.limewire.security.MACCalculator;
-import org.limewire.security.SecurityToken.TokenData;
-import org.limewire.util.StringUtils;
+import org.limewire.http.auth.ServerAuthState;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.uploader.HttpException;
@@ -24,28 +20,26 @@ import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvide
 public class AuthenticatingBrowseFriendListProvider implements HttpRequestFileListProvider {
 
     private final FileManager fileManager;
-    private final MACCalculator calculator;
 
     @Inject
-    public AuthenticatingBrowseFriendListProvider(FileManager fileManager, @Named("xmppMACCalculator") MACCalculator calculator) {
+    public AuthenticatingBrowseFriendListProvider(FileManager fileManager) {
         this.fileManager = fileManager;
-        this.calculator = calculator;
     }
     
     @Override
     public FileList getFileList(HttpRequest request, HttpContext httpContext) throws HttpException, IOException, org.apache.http.HttpException {
-        String friendId = getFriend(request);
-        String password = StringUtils.getUTF8String(calculator.getMACBytes(new FriendTokenData(friendId)));
-        
-        BasicHttpProcessor processor = new BasicHttpProcessor();
-        processor.addRequestInterceptor(new BasicAuthenticationRequestInterceptor(friendId, password));
-        processor.process(request, httpContext);
-
-        FileList buddyFileList = fileManager.getFriendFileList(friendId);
-        if (buddyFileList == null) {
-            throw new HttpException("no such list for: " + friendId, HttpStatus.SC_NOT_FOUND);
+        ServerAuthState authState = (ServerAuthState)httpContext.getAttribute(ServerAuthState.AUTH_STATE);
+        if(authState != null) {
+            Credentials credentials = authState.getCredentials();
+            if(credentials != null) {
+                FileList buddyFileList = fileManager.getFriendFileList(credentials.getUserPrincipal().getName());
+                if (buddyFileList == null) {
+                    throw new HttpException("no such list for: " + credentials.getUserPrincipal().getName(), HttpStatus.SC_NOT_FOUND);
+                }
+                return buddyFileList;
+            }
         }
-        return buddyFileList;
+        throw new HttpException("forbidden", HttpStatus.SC_FORBIDDEN);
     }
     
     String parseFriend(HttpRequest request) throws HttpException {
@@ -76,21 +70,6 @@ public class AuthenticatingBrowseFriendListProvider implements HttpRequestFileLi
             throw new HttpException("invalid friend id:" + String.valueOf(friendId), HttpStatus.SC_BAD_REQUEST);
         }
         return friendId;
-    }
-    
-    private static class FriendTokenData implements TokenData {
-        
-        private final String friendId;
-
-        public FriendTokenData(String friendId) {
-            this.friendId = friendId;
-        }
-
-        @Override
-        public byte[] getData() {
-            return StringUtils.toUTF8Bytes(friendId);
-        }
-        
     }
      
 }

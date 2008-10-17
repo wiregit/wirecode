@@ -4,9 +4,9 @@ import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvide
 
 public interface HttpRequestHandlerFactory {
 
-    public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider fileRequestFileListProvider);
+    public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider fileRequestFileListProvider, boolean requiresAuthentication);
     
-    public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider);
+    public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider, boolean requiresAuthentication);
 
     public FreeLoaderRequestHandler createFreeLoaderRequestHandler();
 

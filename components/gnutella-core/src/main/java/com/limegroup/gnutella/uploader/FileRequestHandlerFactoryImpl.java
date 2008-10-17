@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
+import org.limewire.http.auth.Protected;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -63,11 +65,25 @@ public class FileRequestHandlerFactoryImpl {
         this.tigerWriteHandlerFactory = tigerWriteHandlerFactory;
     }
     
-    public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider fileListProvider) {
-        return new FileRequestHandler(sessionManager, fileManager, httpHeaderUtils,
-                httpRequestHandlerFactory, creationTimeCache, fileResponseEntityFactory,
-                altLocManager, alternateLocationFactory, downloadManager, tigerTreeCache,
-                pushEndpointFactory, tigerWriteHandlerFactory, fileListProvider);
+    public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider fileListProvider, boolean requiresAuthentication) {
+        if(!requiresAuthentication) {
+            return new FileRequestHandler(sessionManager, fileManager, httpHeaderUtils,
+                    httpRequestHandlerFactory, creationTimeCache, fileResponseEntityFactory,
+                    altLocManager, alternateLocationFactory, downloadManager, tigerTreeCache,
+                    pushEndpointFactory, tigerWriteHandlerFactory, fileListProvider);
+        } else {
+            return new ProtectedFileRequestHandler(sessionManager, fileManager, httpHeaderUtils,
+                    httpRequestHandlerFactory, creationTimeCache, fileResponseEntityFactory,
+                    altLocManager, alternateLocationFactory, downloadManager, tigerTreeCache,
+                    pushEndpointFactory, tigerWriteHandlerFactory, fileListProvider);
+        }
+    }
+    
+    @Protected
+    class ProtectedFileRequestHandler extends FileRequestHandler {
+        ProtectedFileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager, HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, AltLocManager altLocManager, AlternateLocationFactory alternateLocationFactory, Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache, PushEndpointFactory pushEndpointFactory, HashTreeWriteHandlerFactory tigerWriteHandlerFactory, HttpRequestFileListProvider fileListProvider) {
+            super(sessionManager, fileManager, httpHeaderUtils, httpRequestHandlerFactory, creationTimeCache, fileResponseEntityFactory, altLocManager, alternateLocationFactory, downloadManager, tigerTreeCache, pushEndpointFactory, tigerWriteHandlerFactory, fileListProvider);
+        }
     }
 
 }

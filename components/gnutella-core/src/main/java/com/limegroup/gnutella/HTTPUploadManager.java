@@ -246,7 +246,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         httpAcceptor.get().addAcceptorListener(responseListener);
 
         // browse
-        httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler(gnutellaBrowseRequestFileListProvider.get()));
+        httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler(gnutellaBrowseRequestFileListProvider.get(), false));
 
         // push-proxy requests
         NHttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
@@ -254,7 +254,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         httpAcceptor.get().registerHandler("/gnet/push-proxy", pushProxyHandler);
 
         // uploads
-        FileRequestHandler fileRequestHandler = httpRequestHandlerFactory.createFileRequestHandler(gnutellaBrowseRequestFileListProvider.get());
+        FileRequestHandler fileRequestHandler = httpRequestHandlerFactory.createFileRequestHandler(gnutellaBrowseRequestFileListProvider.get(), false);
         httpAcceptor.get().registerHandler("/get*", fileRequestHandler);
         httpAcceptor.get().registerHandler("/uri-res/*", fileRequestHandler);
         

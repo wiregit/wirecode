@@ -38,16 +38,16 @@ public class HttpRequestHandlerFactoryImpl implements HttpRequestHandlerFactory 
      * 
      * @see com.limegroup.gnutella.uploader.HttpRequestHandlerFactory#createFileRequestHandler()
      */
-    public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider provider) {
-        return fileRequestHandlerProvider.get().createFileRequestHandler(provider);
+    public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider provider, boolean requiresAuthentication) {
+        return fileRequestHandlerProvider.get().createFileRequestHandler(provider, requiresAuthentication);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.uploader.HttpRequestHandlerFactory#createBrowseRequestHandler()
      */
     @Override
-    public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider) {
-        return browseRequestHandlerFactory.get().createBrowseRequestHandler(browseRequestFileListProvider);
+    public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider, boolean requiresAuthentication) {
+        return browseRequestHandlerFactory.get().createBrowseRequestHandler(browseRequestFileListProvider, requiresAuthentication);
     }
 
     /* (non-Javadoc)

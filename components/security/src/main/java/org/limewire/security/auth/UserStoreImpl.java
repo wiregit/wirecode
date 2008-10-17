@@ -31,14 +31,16 @@ public class UserStoreImpl implements UserStore, org.limewire.http.auth.UserStor
         users.put(user, password);
     }
 
-    public void authenticate(String username, String password) {
+    public boolean authenticate(String username, String password) {
         String pw = users.get(username);
         if(pw == null || !pw.equals(password)) {
-            throw new RuntimeException(); // TODO checked exception OR return false
+            return false;
+        } else {
+            return true;
         }
     }
 
-    public void authenticate(Credentials credentials) {
-        authenticate(credentials.getUserPrincipal().getName(), credentials.getPassword());
+    public boolean authenticate(Credentials credentials) {
+        return authenticate(credentials.getUserPrincipal().getName(), credentials.getPassword());
     }
 }

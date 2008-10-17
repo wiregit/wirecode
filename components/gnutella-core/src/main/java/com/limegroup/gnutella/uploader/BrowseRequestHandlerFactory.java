@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
+import org.limewire.http.auth.Protected;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -23,9 +25,22 @@ public class BrowseRequestHandlerFactory {
         this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
     }
     
-    public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider) {
-        return new BrowseRequestHandler(sessionManager, responseFactory, outgoingQueryReplyFactory,
-                browseRequestFileListProvider);
+    public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider,
+                                                           boolean requiresAuthentication) {
+        if(!requiresAuthentication) {
+            return new BrowseRequestHandler(sessionManager, responseFactory, outgoingQueryReplyFactory,
+                    browseRequestFileListProvider);
+        } else {
+            return new ProtectedBrowseRequestHandler(sessionManager, responseFactory, outgoingQueryReplyFactory,
+                    browseRequestFileListProvider);
+        }
+    }
+    
+    @Protected 
+    class ProtectedBrowseRequestHandler extends BrowseRequestHandler {
+        ProtectedBrowseRequestHandler(HTTPUploadSessionManager sessionManager, Provider<ResponseFactory> responseFactory, OutgoingQueryReplyFactory outgoingQueryReplyFactory, HttpRequestFileListProvider browseRequestFileListProvider) {
+            super(sessionManager, responseFactory, outgoingQueryReplyFactory, browseRequestFileListProvider);
+        }
     }
 
 }

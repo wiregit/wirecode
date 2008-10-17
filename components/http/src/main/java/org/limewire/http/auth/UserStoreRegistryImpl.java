@@ -16,7 +16,7 @@ public class UserStoreRegistryImpl implements UserStore, UserStoreRegistry {
     final Set<UserStore> userStores;
     
     @Inject
-    UserStoreRegistryImpl() {
+    public UserStoreRegistryImpl() {
         lock = new ReentrantReadWriteLock();
         userStores = new HashSet<UserStore>();
     }

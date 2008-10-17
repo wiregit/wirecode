@@ -22,7 +22,7 @@ public class CoreGlueXMPPService implements Service {
     private final static String FRIEND_BROWSE_PATTERN = "/friend/browse/*";
 
     public CoreGlueXMPPService(Provider<HTTPAcceptor> httpAcceptor, BrowseRequestHandlerFactory browseRequestHandlerFactory,
-            Provider<AuthenticatingBrowseFriendListProvider> authenticatingBrowseFriendListProvider) {
+           Provider<AuthenticatingBrowseFriendListProvider> authenticatingBrowseFriendListProvider) {
         this.httpAcceptor = httpAcceptor;
         this.browseRequestHandlerFactory = browseRequestHandlerFactory;
         this.authenticatingBrowseFriendListProvider = authenticatingBrowseFriendListProvider;
@@ -44,7 +44,8 @@ public class CoreGlueXMPPService implements Service {
 
     @Override
     public void start() {
-        httpAcceptor.get().registerHandler(FRIEND_BROWSE_PATTERN, browseRequestHandlerFactory.createBrowseRequestHandler(authenticatingBrowseFriendListProvider.get())); 
+        httpAcceptor.get().registerHandler(FRIEND_BROWSE_PATTERN, browseRequestHandlerFactory.createBrowseRequestHandler(authenticatingBrowseFriendListProvider.get(), true)); 
+        httpAcceptor.get().registerHandler(FRIEND_BROWSE_PATTERN, browseRequestHandlerFactory.createBrowseRequestHandler(authenticatingBrowseFriendListProvider.get(), true));
     }
 
     @Override

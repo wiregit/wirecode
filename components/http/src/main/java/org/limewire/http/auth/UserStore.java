@@ -6,5 +6,5 @@ public interface UserStore {
     void register(UserStoreRegistry registry);
     //Credentials getCredentials(Principal principal);
     //void addUser(Credentials credentials);
-    void authenticate(Credentials credentials);
+    boolean authenticate(Credentials credentials);
 }

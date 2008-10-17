@@ -22,7 +22,6 @@ import org.limewire.http.HttpCoreUtils;
 import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.nio.channel.NoInterestWritableByteChannel;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileDesc;
