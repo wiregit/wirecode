@@ -232,12 +232,17 @@ public class RatingTable implements Service {
      * Saves ratings to disk (called whenever the user marks a search result)
      */
     public synchronized void save() {
+        // Don't save ratings that have default scores
+        ArrayList<Token> list = new ArrayList<Token>(tokenMap.size());
+        for(Token t : tokenMap.keySet())
+            if(t.getRating() > 0f)
+                list.add(t);
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(
                             new FileOutputStream(getSpamDat())));
-            oos.writeObject(new ArrayList<Token>(tokenMap.keySet()));
+            oos.writeObject(list);
             oos.flush();
             if(LOG.isDebugEnabled())
                 LOG.debug("Saved " + tokenMap.size() + " entries");
@@ -252,7 +257,7 @@ public class RatingTable implements Service {
         try {
             dump = new PrintWriter(
                     new File(CommonUtils.getUserSettingsDir(), "spam.dump"));
-            for(Token t : tokenMap.keySet()) dump.println(t);
+            for(Token t : list) dump.println(t);
         } catch (Exception x) {
             if(LOG.isDebugEnabled())
                 LOG.debug("Error dumping spam ratings: ", x);
