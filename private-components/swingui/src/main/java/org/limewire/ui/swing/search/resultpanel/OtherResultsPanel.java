@@ -25,10 +25,11 @@ public class OtherResultsPanel extends BaseResultPanel {
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
         RemoteHostActions fromActions,
-        ListViewTableEditorRendererFactory listViewEditorRendererFactory) {
+        ListViewTableEditorRendererFactory listViewEditorRendererFactory,
+        SearchResultProperties properties) {
         
         super(listViewEditorRendererFactory, eventList, tableFormat, resultDownloader,
-            search, searchInfo, preserver, navigator, fromActions);
+            search, searchInfo, preserver, navigator, fromActions, properties);
         
     }
 }

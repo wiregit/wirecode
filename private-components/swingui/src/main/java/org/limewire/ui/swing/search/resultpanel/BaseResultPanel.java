@@ -56,7 +56,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
-            Navigator navigator, RemoteHostActions remoteHostActions) {
+            Navigator navigator, RemoteHostActions remoteHostActions, SearchResultProperties properties) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         
@@ -66,7 +66,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         setLayout(layout);
                 
-        configureList(eventList, preserver, navigator, searchInfo, remoteHostActions);
+        configureList(eventList, preserver, navigator, searchInfo, remoteHostActions, properties);
         configureTable(eventList, tableFormat, navigator);
  
         add(resultsList, ModeListener.Mode.LIST.name());
@@ -75,7 +75,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
-            SearchInfo searchInfo, final RemoteHostActions remoteHostActions) {
+            SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final SearchResultProperties properties) {
         resultsList = new ConfigurableTable<VisualSearchResult>(false);
         resultsList.setShowGrid(false, false);
         preserver.addRowPreservationListener(resultsList);
@@ -132,7 +132,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
                     SearchResultMenu menu = new SearchResultMenu(
-                        BaseResultPanel.this, navigator, vsr, row, remoteHostActions);
+                        BaseResultPanel.this, navigator, vsr, row, remoteHostActions, properties);
                     menu.show(component, e.getX(), e.getY());
                 }
             }

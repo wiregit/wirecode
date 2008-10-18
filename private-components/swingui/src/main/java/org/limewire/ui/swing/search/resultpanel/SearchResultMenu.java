@@ -28,7 +28,8 @@ public class SearchResultMenu extends JPopupMenu {
         final Navigator navigator,
         final VisualSearchResult vsr,
         final int row,
-        final RemoteHostActions fromActions) {
+        final RemoteHostActions fromActions,
+        final SearchResultProperties properties) {
 
         add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
@@ -68,8 +69,7 @@ public class SearchResultMenu extends JPopupMenu {
 
         add(new AbstractAction(tr("Properties")) {
             public void actionPerformed(ActionEvent e) {
-                //TODO
-                throw new UnsupportedOperationException("Implement Me Properly!");
+                properties.showProperties(vsr);
             }
         });
     }

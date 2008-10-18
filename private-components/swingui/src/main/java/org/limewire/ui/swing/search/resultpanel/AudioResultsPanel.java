@@ -24,10 +24,11 @@ public class AudioResultsPanel extends BaseResultPanel {
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
         RemoteHostActions remoteHostActions,
-        ListViewTableEditorRendererFactory listViewEditorRendererFactory) {
+        ListViewTableEditorRendererFactory listViewEditorRendererFactory,
+        SearchResultProperties properties) {
         
         super(listViewEditorRendererFactory, eventList, new MusicTableFormat(), resultDownloader,
-            search, searchInfo, preserver, navigator, remoteHostActions);
+            search, searchInfo, preserver, navigator, remoteHostActions, properties);
         
     }
 }
