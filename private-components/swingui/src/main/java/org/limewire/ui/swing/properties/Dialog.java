@@ -19,9 +19,8 @@ import javax.swing.table.DefaultTableModel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXHyperlink;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Line;
-
-import com.limegroup.gnutella.gui.actions.AbstractAction;
 
 public abstract class Dialog extends JDialog {
 
