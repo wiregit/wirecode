@@ -88,7 +88,7 @@ public final class UrnCacheTest extends LimeTestCase {
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
 			Set urns = UrnHelper.calculateAndCacheURN(files[i], urnCache);
-			fileDescs[i] = new FileDescImpl(files[i], urns, i);
+			fileDescs[i] = new FileDescImpl(null, files[i], urns, i);
 		}				
 		return fileDescs;
 	}

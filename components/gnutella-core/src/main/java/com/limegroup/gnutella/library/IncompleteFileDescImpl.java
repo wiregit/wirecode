@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.listener.SourcedEventMulticaster;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -38,10 +39,10 @@ public class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFi
     /**
      * Constructor for the IncompleteFileDesc object.
      */
-    public IncompleteFileDescImpl(File file, Set<? extends URN> urns, int index, 
-                              String completedName, long completedSize,
-                              VerifyingFile vf) {
-        super(file, urns, index);
+    public IncompleteFileDescImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster, File file,
+            Set<? extends URN> urns, int index, String completedName, long completedSize,
+            VerifyingFile vf) {
+        super(fileDescMulticaster, file, urns, index);
         _name = completedName;
         _size = completedSize;
         _verifyingFile = vf;

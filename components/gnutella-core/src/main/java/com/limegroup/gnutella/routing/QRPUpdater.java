@@ -15,6 +15,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 
@@ -23,6 +24,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileDescChangeEvent;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
@@ -48,6 +50,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
     private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
+    private final ListenerSupport<FileDescChangeEvent> fileDescListenerSupport;
    
     /**
      * Schedules a delayed rebuild task when simpp changes occur
@@ -75,11 +78,13 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     public QRPUpdater(FileManager fileManager, 
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
-            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
+            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository,
+            ListenerSupport<FileDescChangeEvent> fileDescListenerSupport) {
         this.fileManager = fileManager;
         this.backgroundExecutor = backgroundExecutor;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
+        this.fileDescListenerSupport = fileDescListenerSupport;
 
         for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
             qrpWords.add(entry);
@@ -151,10 +156,9 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             List<FileDesc> incompleteFds = fileManager.getIncompleteFileList().getAllFileDescs();
             for(FileDesc fd: incompleteFds) {
                 IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-                if (!ifd.hasUrnsAndPartialData())
-                    continue;
-
-                queryRouteTable.add(ifd.getFileName());
+                if (ifd.hasUrnsAndPartialData()) {
+                    queryRouteTable.add(ifd.getFileName());
+                }
             }
         }
 
@@ -223,6 +227,26 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 case ADDED:
                 case CHANGED:
                 case REMOVED:
+                    needRebuild = true;
+                }
+            }
+        });
+        fileManager.getIncompleteFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+            @Override
+            public void handleEvent(FileListChangedEvent event) {
+                switch(event.getType()) {
+                case ADDED:
+                case CHANGED:
+                case REMOVED:
+                    needRebuild = true;
+                }   
+            }
+        });
+        fileDescListenerSupport.addListener(new EventListener<FileDescChangeEvent>() {
+            @Override
+            public void handleEvent(FileDescChangeEvent event) {
+                switch(event.getType()) {
+                case URNS_CHANGED:
                     needRebuild = true;
                 }
             }

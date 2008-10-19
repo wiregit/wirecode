@@ -1,12 +1,11 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.EventObject;
 import java.util.List;
 
+import org.limewire.listener.AbstractSourcedEvent;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -15,8 +14,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * the front end about add, remove, rename and change
  * events in the Library.
  */
-@SuppressWarnings("serial")
-public class FileManagerEvent extends EventObject {
+public class FileManagerEvent extends AbstractSourcedEvent<FileManager> {
     
     public static enum Type {
         /**
@@ -71,24 +69,6 @@ public class FileManagerEvent extends EventObject {
         LOAD_FILE,
         
         /**
-         * Called whenever a URN is removed from FileManager. 
-         */
-        REMOVE_URN,
-        
-        /**
-         * Called when a FileDesc has been removed from FileManager. Unlike REMOVE_FILE, 
-         * this gets fired any time a file managed by FileManager is 
-         * modified. This event will be called any time one of the following events are
-         * generated: REMOVE_FILE, RENAME_FILE, CHANGE_FILE
-         */
-        REMOVE_FD,
-                
-        /**
-         * Called when an IncompleteFileDesc has had its URNs modified.
-         */
-        INCOMPLETE_URN_CHANGE,
-        
-        /**
          * Called when a folder and all of its contents has been added to FileManager
          */
         ADD_FOLDER,
@@ -138,7 +118,6 @@ public class FileManagerEvent extends EventObject {
     private final FileDesc newFileDesc;
     private final File oldFile;
     private final File newFile;
-    private final URN urn;
     
     private final int relativeDepth;
     private final File rootShare;
@@ -154,7 +133,6 @@ public class FileManagerEvent extends EventObject {
         newFileDesc = null;
         oldFile = null;
         newFile = null;
-        this.urn = null;
         this.relativeDepth = -1;
         this.rootShare = null;
         this.metaData = null;
@@ -168,7 +146,6 @@ public class FileManagerEvent extends EventObject {
         this.relativeDepth = -1;
         this.rootShare = null;
         this.metaData = null;
-        this.urn = null;
 
         oldFile = null;
         
@@ -189,7 +166,6 @@ public class FileManagerEvent extends EventObject {
         this.relativeDepth = -1;
         this.rootShare = null;
         this.metaData = null;
-        this.urn = null;
         
         if(oldFileDesc != null)
             oldFile = oldFileDesc.getFile();
@@ -212,7 +188,6 @@ public class FileManagerEvent extends EventObject {
     public FileManagerEvent(FileManager manager, Type type, File oldFile, File newFile) {
         super(manager);
         this.type = type;
-        this.urn = null;
         
         this.newFileDesc = null;
         this.oldFileDesc = null;
@@ -227,7 +202,6 @@ public class FileManagerEvent extends EventObject {
     public FileManagerEvent(FileManager manager, Type type, int relativeDepth) {
         super(manager);
         this.type = type;
-        this.urn = null;
         
         this.newFileDesc = null;
         this.oldFileDesc = null;
@@ -242,7 +216,6 @@ public class FileManagerEvent extends EventObject {
     public FileManagerEvent(FileManager manager, Type type, File rootShare, int relativeDepth, File oldFile, File newFile) {
         super(manager);
         this.type = type;
-        this.urn = null;
 
         this.newFileDesc = null;
         this.oldFileDesc = null;
@@ -257,7 +230,6 @@ public class FileManagerEvent extends EventObject {
     public FileManagerEvent(FileManager manager, Type type, List<? extends LimeXMLDocument> md, FileDesc newFileDesc) {
         super(manager);
         this.type = type;
-        this.urn = null;
         
         this.newFileDesc = newFileDesc;
         this.oldFileDesc = null;
@@ -270,32 +242,11 @@ public class FileManagerEvent extends EventObject {
         this.rootShare = null;
     }
     
-    public FileManagerEvent(FileManager manager, Type type, URN urn) {
-        super(manager);
-        this.type = type;
-        this.urn = urn;
-        
-        oldFileDesc = null;
-        newFileDesc = null;
-        oldFile = null;
-        newFile = null;
-        this.relativeDepth = -1;
-        this.rootShare = null;
-        this.metaData = null;
-    }
-    
     /**
      * Returns the type of the Event
      */
     public Type getType() {
         return type;
-    }
-    
-    /**
-     * Returns the FileManager which fired the Event
-     */
-    public FileManager getFileManager() {
-        return (FileManager)getSource();
     }
     
     /**
@@ -332,14 +283,7 @@ public class FileManagerEvent extends EventObject {
      */
     public FileDesc getNewFileDesc() {
         return newFileDesc;
-    }
-    
-    /**
-     * Gets the URN
-     */
-    public URN getURN() {
-        return urn;
-    }
+    }    
 
     /** 
      * Gets the the relative depth of the folder from where the sharing was initiated from

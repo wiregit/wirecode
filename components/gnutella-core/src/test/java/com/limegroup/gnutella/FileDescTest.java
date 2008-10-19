@@ -58,22 +58,22 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
 		try {
-			new FileDescImpl(null, urns, 0);
+			new FileDescImpl(null, null, urns, 0);
 			fail("null file should not be permitted for FileDesc constructor");
 		} catch(NullPointerException ignored) {}
         
         try {
-            new FileDescImpl(file, null, 0);
+            new FileDescImpl(null, file, null, 0);
             fail("null urns should not be permitted for FileDesc constructor");
         } catch(NullPointerException ignored) {}
         
         try {
-            new FileDescImpl(file, urns, -1);
+            new FileDescImpl(null, file, urns, -1);
             fail("negative index should not be permitted for FileDesc constructor");
         } catch(IndexOutOfBoundsException ignored) {}
         
         try {
-            new FileDescImpl(file, Collections.EMPTY_SET, 0);
+            new FileDescImpl(null, file, Collections.EMPTY_SET, 0);
             fail("no sha1 urn should not be permitted for FileDesc constructor");
         } catch(IllegalArgumentException ignored) {}
 	}
@@ -98,7 +98,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         for(int i = 0; it.hasNext(); i++) {
             File file = (File)it.next();
             Set urns = UrnHelper.calculateAndCacheURN(file, urnCache); 
-            new FileDescImpl(file, urns, i);
+            new FileDescImpl(null, file, urns, i);
         }
     }
     
@@ -106,7 +106,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         File file = TestUtils.getResourceFile("build.xml");
         Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
-        FileDescImpl fd = new FileDescImpl(file, urns, 0);
+        FileDescImpl fd = new FileDescImpl(null, file, urns, 0);
         
         // Initial State: Not Rare!
         assertLessThan(DHTSettings.RARE_FILE_ATTEMPTED_UPLOADS.getValue(), fd.getAttemptedUploads());

@@ -85,11 +85,11 @@ public class CollectionTest extends LimeTestCase {
         
         Set<URN> urns;
         urns = UrnHelper.calculateAndCacheURN(mason, urnCache);
-        files[0] = new FileDescImpl(mason, urns, 0);
+        files[0] = new FileDescImpl(null, mason, urns, 0);
         urns = UrnHelper.calculateAndCacheURN(test1, urnCache);
-        files[1] = new FileDescImpl(test1, urns, 1);
+        files[1] = new FileDescImpl(null, test1, urns, 1);
         urns = UrnHelper.calculateAndCacheURN(test2, urnCache);
-        files[2] = new FileDescImpl(test2, urns, 2);
+        files[2] = new FileDescImpl(null, test2, urns, 2);
 
         
     }

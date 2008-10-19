@@ -31,7 +31,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 
 @Singleton
 class LibraryManagerImpl implements ShareListManager, LibraryManager {
@@ -48,16 +47,17 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
     private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
 
     private final EventListener<FriendShareListEvent> friendShareListEventListener;
-    final LocalFileDetailsFactory detailsFactory;
+    
+    private final CoreLocalFileItemFactory coreLocalFileItemFactory;
 
     @Inject
-    LibraryManagerImpl(FileManager fileManager, LocalFileDetailsFactory detailsFactory,
+    LibraryManagerImpl(FileManager fileManager, CoreLocalFileItemFactory coreLocalFileItemFactory,
             EventListener<FriendShareListEvent> friendShareListEventListener) {
         this.fileManager = fileManager;
-        this.detailsFactory = detailsFactory;
+        this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.friendShareListEventListener = friendShareListEventListener;
         this.combinedFriendShareLists = new CombinedFriendShareList();
-        this.libraryFileList = new LibraryFileListImpl(this, fileManager);
+        this.libraryFileList = new LibraryFileListImpl(fileManager, coreLocalFileItemFactory);
         this.gnutellaFileList = new GnutellaFileList(fileManager);
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
@@ -144,13 +144,13 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
             LocalFileItem newItem;
             switch(event.getType()) {
             case ADDED:
-                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);  
+                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());  
                 lookup.put(event.getFileDesc().getFile(), newItem);
                 threadSafeList.add(newItem);
                 break;
             case CHANGED:
                 FileItem oldItem = lookup.remove(event.getOldValue().getFile());
-                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);
+                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());
                 lookup.put(event.getFileDesc().getFile(), newItem);
 
                 threadSafeList.remove(oldItem);
@@ -195,13 +195,13 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
             LocalFileItem newItem;
             switch(event.getType()) {
             case ADDED:
-                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);  
+                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());
                 lookup.put(event.getFileDesc().getFile(), newItem);
                 threadSafeList.add(newItem);
                 break;
             case CHANGED:
                 FileItem oldItem = lookup.remove(event.getOldValue().getFile());
-                newItem = new CoreLocalFileItem(event.getFileDesc(), detailsFactory);
+                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());
                 lookup.put(event.getFileDesc().getFile(), newItem);
 
                 threadSafeList.remove(oldItem);
@@ -236,7 +236,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
                   Iterator<FileDesc> iter = fileList.iterator();
                   while(iter.hasNext()) {
                       FileDesc fileDesc = iter.next();
-                      LocalFileItem newItem = new CoreLocalFileItem(fileDesc, detailsFactory);  
+                      LocalFileItem newItem = coreLocalFileItemFactory.createCoreLocalFileItem(fileDesc);
                       lookup.put(fileDesc.getFile(), newItem);
                       threadSafeList.add(newItem);
                   }

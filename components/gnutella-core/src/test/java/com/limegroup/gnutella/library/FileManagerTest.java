@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -21,8 +24,10 @@ import org.limewire.collection.Range;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -236,6 +241,18 @@ public class FileManagerTest extends FileManagerTestCase {
     public void testAddAnotherSharedFileDifferentIndex() throws Exception {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
+        final CountDownLatch latch = new CountDownLatch(3);
+        fman.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+            @Override
+            public void handleEvent(FileListChangedEvent event) {
+                switch(event.getType()) {
+                case ADDED:
+                    latch.countDown();
+                    break;
+                }
+            }
+        });
+        
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
         waitForLoad();
@@ -248,6 +265,7 @@ public class FileManagerTest extends FileManagerTestCase {
         assertNotNull(result.getNewFileDesc());
         assertEquals("unexpected file size", 12, fman.getGnutellaSharedFileList().getNumBytes());
         assertEquals("unexpedted number of files", 2, fman.getGnutellaSharedFileList().size());
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
         responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
         assertNotEquals("unexpected response[0] index", 1, responses[0].getIndex());
@@ -454,7 +472,7 @@ public class FileManagerTest extends FileManagerTestCase {
         urns.add(UrnHelper.URNS[0]);
         f = new File("asdf");
         
-        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        addIncompleteFile(fman, f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDesc(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
@@ -469,7 +487,7 @@ public class FileManagerTest extends FileManagerTestCase {
         urns.add(UrnHelper.URNS[0]);
         f = new File("asdf");
         
-        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        addIncompleteFile(fman, f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDesc(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
@@ -485,7 +503,7 @@ public class FileManagerTest extends FileManagerTestCase {
         urns.add(UrnHelper.TTROOT);
         f = new File("asdf");
         
-        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        addIncompleteFile(fman, f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDesc(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
@@ -502,7 +520,7 @@ public class FileManagerTest extends FileManagerTestCase {
         assertGreaterThan(1, urns.size());
         f = new File("asdf");
         
-        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        addIncompleteFile(fman, f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDesc(UrnHelper.URNS[0]);
         assertTrue(ifd.hasUrnsAndPartialData());
         assertGreaterThan(0,keywordIndex.query(qrDesiring).length);
@@ -530,7 +548,7 @@ public class FileManagerTest extends FileManagerTestCase {
         assertGreaterThan(1, urns.size());
         f = new File("asdf");
         
-        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        addIncompleteFile(fman, f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDesc(UrnHelper.URNS[0]);
         assertTrue(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
@@ -547,7 +565,7 @@ public class FileManagerTest extends FileManagerTestCase {
         urns.add(UrnHelper.URNS[0]);
         f = new File("asdf");
         
-        fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        addIncompleteFile(fman, f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDesc(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
@@ -555,7 +573,6 @@ public class FileManagerTest extends FileManagerTestCase {
         
         ifd.setTTRoot(UrnHelper.TTROOT);
         assertTrue(ifd.hasUrnsAndPartialData());
-        fman.fileURNSUpdated(ifd);
         assertGreaterThan(0,keywordIndex.query(qrDesiring).length);
         assertEquals(0,keywordIndex.query(notDesiring).length);
         assertTrue(qrpUpdater.getQRT().contains(qrDesiring));
@@ -567,6 +584,30 @@ public class FileManagerTest extends FileManagerTestCase {
         // we request is 128kb, we're bound to have more data downloaded
         // by the time we get the tree root.
         // This will change once we start using roots from replies.
+    }
+    
+    private void addIncompleteFile(FileManager fileManager, final File f, Set<URN> urns, String name,
+            long size, VerifyingFile vf) throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        fileManager.getIncompleteFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+            @Override
+            public void handleEvent(FileListChangedEvent event) {
+                switch(event.getType()) {
+                case ADDED:
+                    try {
+                        if(event.getFileDesc().getFile().getCanonicalFile().equals(f.getCanonicalFile())) {
+                            latch.countDown();
+                            event.getList().removeFileListListener(this);
+                        }
+                    } catch(IOException iox) {
+                        throw new RuntimeException(iox);
+                    }
+                    break;
+                }
+            }
+        });
+        fileManager.addIncompleteFile(f, urns, name, size, vf);
+        assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
     }
     
     /**
@@ -902,16 +943,17 @@ public class FileManagerTest extends FileManagerTestCase {
         fman = new FileManagerImpl(
                 injector.getProvider(SimppManager.class),
                 injector.getProvider(UrnCache.class),
-                injector.getProvider(CreationTimeCache.class),
                 injector.getProvider(ContentManager.class),
                 injector.getProvider(AltLocManager.class),
                 injector.getProvider(ActivityCallback.class), 
                 injector.getInstance(
                         Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor"))),
                 injector.getInstance(
-                        Key.get(new TypeLiteral<EventListener<FileManagerEvent>>(){})),
+                        Key.get(new TypeLiteral<EventBroadcaster<FileManagerEvent>>(){})),
                 injector.getInstance(
-                        Key.get(new TypeLiteral<ListenerSupport<FileManagerEvent>>(){})));
+                        Key.get(new TypeLiteral<ListenerSupport<FileManagerEvent>>(){})),
+                injector.getInstance(
+                        Key.get(new TypeLiteral<SourcedEventMulticaster<FileDescChangeEvent, FileDesc>>(){})));
         waitForLoad();
         
         //  assert that "shared" is shared

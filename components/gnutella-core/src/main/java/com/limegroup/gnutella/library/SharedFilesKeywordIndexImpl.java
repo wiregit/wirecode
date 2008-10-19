@@ -20,6 +20,7 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
@@ -98,7 +99,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         this.schemaRepository = schemaRepository;
     }
     
-    @Inject void register(ServiceRegistry registry) {
+    @Inject void register(ServiceRegistry registry, final ListenerSupport<FileDescChangeEvent> fileDescSupport) {
         registry.register(new Service() {
             @Override
             public String getServiceName() {
@@ -106,6 +107,12 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             }
             @Override
             public void initialize() {
+                fileDescSupport.addListener(new EventListener<FileDescChangeEvent>() {
+                    @Override
+                    public void handleEvent(FileDescChangeEvent event) {
+                        handleFileDescEvent(event);
+                    }
+                });                
                 fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
                     @Override
                     public void handleEvent(FileManagerEvent event) {
@@ -115,13 +122,13 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
                     @Override
                     public void handleEvent(FileListChangedEvent event) {
-                        handleFileListEvent(event);
+                        handleFileListEvent(event, true);
                     }
                 });
                 fileManager.getIncompleteFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
                     @Override
                     public void handleEvent(FileListChangedEvent event) {
-                        handleFileListEvent(event);
+                        handleFileListEvent(event, false);
                     }
                 });
             }
@@ -293,17 +300,17 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         incompleteKeywordTrie.clear();
     }
     
-    private void handleFileListEvent(FileListChangedEvent evt) {
+    private void handleFileListEvent(FileListChangedEvent evt, boolean complete) {
         switch(evt.getType()) {
         case ADDED:
-            addFileDescs(evt.getFileDesc());
+            addFileDesc(evt.getFileDesc(), complete);
             break;
         case CHANGED:
-            removeFileDescs(evt.getOldValue());
-            addFileDescs(evt.getFileDesc());
+            removeFileDesc(evt.getOldValue(), complete);
+            addFileDesc(evt.getFileDesc(), complete);
             break;
         case REMOVED:
-            removeFileDescs(evt.getFileDesc());
+            removeFileDesc(evt.getFileDesc(), complete);
             break;
         }
     }
@@ -312,9 +319,6 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // building tries should be fast and non-blocking so can be done in
         // dispatch thread
         switch (evt.getType()) {
-        case INCOMPLETE_URN_CHANGE:
-            addFileDescs(evt.getNewFileDesc());
-            break;
         case FILEMANAGER_LOAD_DIRECTORIES:
             clear();
             break;
@@ -323,29 +327,41 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             break;
         }
     }
-
-    private void removeFileDescs(FileDesc... fileDescs) {
-        for (FileDesc fileDesc : fileDescs) {
-            if (fileDesc instanceof IncompleteFileDesc) {
-                removeKeywords(incompleteKeywordTrie, fileDesc);
-            } else {
-                removeKeywords(keywordTrie, fileDesc);
-            }
+    
+    private void handleFileDescEvent(FileDescChangeEvent evt) {
+        FileDesc fd = evt.getSource();
+        switch(evt.getType()) {
+        case URNS_CHANGED:
+              if(fd instanceof IncompleteFileDesc) {
+                  IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
+                  if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+                          SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
+                          ifd.hasUrnsAndPartialData()) {
+                      addFileDesc(fd, false);
+                  }
+              }
+          break;
         }
     }
 
-    private void addFileDescs(FileDesc... fileDescs) {
-        boolean indexIncompleteFiles = SharingSettings.ALLOW_PARTIAL_SHARING.getValue()
-                && SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue();
-        for (FileDesc fileDesc : fileDescs) {
-            if (fileManager.getIncompleteFileList().contains(fileDesc)) {
-                IncompleteFileDesc ifd = (IncompleteFileDesc) fileDesc;
-                if (indexIncompleteFiles && ifd.hasUrnsAndPartialData()) {
-                    loadKeywords(incompleteKeywordTrie, fileDesc);
-                }
-            } else if (fileManager.getGnutellaSharedFileList().contains(fileDesc)) {
-                loadKeywords(keywordTrie, fileDesc);
+    private void removeFileDesc(FileDesc fileDesc, boolean complete) {
+        if(complete) {
+            removeKeywords(keywordTrie, fileDesc);
+        } else {
+            removeKeywords(incompleteKeywordTrie, fileDesc);
+        }
+    }
+
+    private void addFileDesc(FileDesc fileDesc, boolean complete) {
+        if(!complete) {
+            boolean indexIncompleteFiles = SharingSettings.ALLOW_PARTIAL_SHARING.getValue()
+                                                && SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue();
+            IncompleteFileDesc ifd = (IncompleteFileDesc) fileDesc;
+            if (indexIncompleteFiles && ifd.hasUrnsAndPartialData()) {
+                loadKeywords(incompleteKeywordTrie, fileDesc);
             }
+        } else {
+            loadKeywords(keywordTrie, fileDesc);
         }
     }
 

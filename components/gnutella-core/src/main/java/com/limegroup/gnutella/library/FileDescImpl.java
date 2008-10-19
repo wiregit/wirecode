@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.I18NConvert;
 
 import com.limegroup.gnutella.URN;
@@ -52,12 +54,6 @@ public class FileDescImpl implements FileDesc {
 	 * The modification time of the file.
 	 */
     private final long _modTime;
-    
-    /**
-     * Time file was first shared on gnutella or -1 if not time
-     * exists for this
-     */
-    private long creationTime = -1;
 
 	/**
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
@@ -113,25 +109,28 @@ public class FileDescImpl implements FileDesc {
 	
 	   /** True if this is a store file. */
     private final AtomicBoolean storeFile = new AtomicBoolean(false);
+    
+    private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
 	
 	    
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
 	 * <tt>File</tt> class and the associated urns.
-	 *
-	 * @param file the <tt>File</tt> instance to use for constructing the
+     * @param file the <tt>File</tt> instance to use for constructing the
 	 *  <tt>FileDesc</tt>
      * @param urns the URNs to associate with this FileDesc
      * @param index the index in the FileManager
      */
-    public FileDescImpl(File file, Set<? extends URN> urns, int index) {	
-		if((file == null))
+    public FileDescImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster,
+            File file, Set<? extends URN> urns, int index) {
+        if ((file == null))
 			throw new NullPointerException("cannot create a FileDesc with a null File");
 		if(index < 0)
 			throw new IndexOutOfBoundsException("negative index (" + index + ") not permitted in FileDesc");
 		if(urns == null)
 			throw new NullPointerException("cannot create a FileDesc with a null URN Set");
 
+		this.multicaster = multicaster;
 		FILE = file;
         _index = index;
         _name = I18NConvert.instance().compose(FILE.getName());
@@ -180,20 +179,6 @@ public class FileDescImpl implements FileDesc {
      */
 	public long lastModified() {
 		return _modTime;
-	}
-	
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#getCreationTime()
-     */
-	public long getCreationTime() {
-	    return creationTime;
-	}
-	
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.library.FileDesc#setCreationTime(long)
-     */
-	public void setCreationTime(long time) {
-	    this.creationTime = time;
 	}
 
 	/**
@@ -245,6 +230,9 @@ public class FileDescImpl implements FileDesc {
         s.add(SHA1_URN);
         s.add(ttroot);
         URNS = Collections.unmodifiableSet(s);
+        if(multicaster != null) {
+            multicaster.handleEvent(new FileDescChangeEvent(this, FileDescChangeEvent.Type.URNS_CHANGED));
+        }
         return ret;
     }
     
@@ -509,6 +497,16 @@ public class FileDescImpl implements FileDesc {
      */
     public boolean isStoreFile() {
         return storeFile.get();
+    }
+    
+    @Override
+    public void addListener(EventListener<FileDescChangeEvent> listener) {
+        multicaster.addListener(this, listener);
+    }
+    
+    @Override
+    public boolean removeListener(EventListener<FileDescChangeEvent> listener) {
+        return multicaster.removeListener(this, listener);
     }
 
 }

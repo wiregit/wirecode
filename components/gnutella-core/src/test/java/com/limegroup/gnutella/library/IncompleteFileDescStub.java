@@ -46,12 +46,12 @@ public class IncompleteFileDescStub extends IncompleteFileDescImpl {
     }
     
     public IncompleteFileDescStub(String name) {
-        super(FileDescStub.createStubFile(new File(name)), set, 0,name,size,null);
+        super(null, FileDescStub.createStubFile(new File(name)), set,0,name,size, null);
         localSet=new HashSet();
     }
     
     public IncompleteFileDescStub(String name, URN urn, int index) {
-    	super(FileDescStub.createStubFile(new File(name)), createUrnSet(urn),index,name,size,null);
+    	super(null, FileDescStub.createStubFile(new File(name)),createUrnSet(urn),index,name,size, null);
     	localSet=localSet2;
     }
     

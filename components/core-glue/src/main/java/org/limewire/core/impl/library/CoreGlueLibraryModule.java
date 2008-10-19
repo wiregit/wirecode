@@ -12,6 +12,7 @@ import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryProvider;
 
 public class CoreGlueLibraryModule extends AbstractModule {
     
@@ -27,6 +28,11 @@ public class CoreGlueLibraryModule extends AbstractModule {
         EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
         bind(new TypeLiteral<EventListener<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
         bind(new TypeLiteral<ListenerSupport<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
+        
+        bind(CoreLocalFileItemFactory.class)
+                .toProvider(
+                        FactoryProvider.newFactory(CoreLocalFileItemFactory.class,
+                                CoreLocalFileItem.class));
     }
 
 }

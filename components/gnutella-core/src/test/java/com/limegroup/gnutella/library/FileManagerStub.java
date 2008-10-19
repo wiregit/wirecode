@@ -8,8 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.listener.EventListener;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -50,16 +51,17 @@ public class FileManagerStub extends FileManagerImpl {
     @Inject
     public FileManagerStub(Provider<SimppManager> simppManager,
             Provider<UrnCache> urnCache,
-            Provider<CreationTimeCache> creationTimeCache,
             Provider<ContentManager> contentManager,
             Provider<AltLocManager> altLocManager,
             Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            EventListener<FileManagerEvent> fileManagerEventListener,
-            ListenerSupport<FileManagerEvent> eventBroadcaster) {
-        super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager,
-                activityCallback, backgroundExecutor, fileManagerEventListener, eventBroadcaster);
-        
+            EventBroadcaster<FileManagerEvent> fileManagerEventListener,
+            ListenerSupport<FileManagerEvent> eventBroadcaster,
+            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster) {
+        super(simppManager, urnCache, contentManager, altLocManager,
+                activityCallback, backgroundExecutor, fileManagerEventListener, eventBroadcaster,
+                fileDescMulticaster);
+
         fileListStub = new FileListStub(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE);
         
         super.resetVariables();
@@ -118,9 +120,8 @@ public class FileManagerStub extends FileManagerImpl {
         int fileIndex = size();
         
         IncompleteFileDesc ifd = new IncompleteFileDescImpl(
-        incompleteFile, urns, fileIndex, name, size, vf);
+        null, incompleteFile, urns, fileIndex, name, size, vf);
         getIncompleteFileList().add(ifd);
-        fileURNSUpdated(ifd);
         
         files.add(ifd);
         fileToFileDescMap.put(incompleteFile, ifd);

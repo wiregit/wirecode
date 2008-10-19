@@ -15,8 +15,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
-import org.limewire.listener.EventListener;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -374,7 +375,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
 			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], injector.getInstance(UrnCache.class));            
-			fileDescs[i] = new FileDescImpl(files[i], urns, i);
+			fileDescs[i] = new FileDescImpl(null, files[i], urns, i);
 			cache.addTime(fileDescs[i].getSHA1Urn(),
                                                  files[i].lastModified());
 		}				
@@ -406,16 +407,16 @@ public class CreationTimeCacheTest extends LimeTestCase {
         @Inject
         public MyFileManager(Provider<SimppManager> simppManager,
                 Provider<UrnCache> urnCache,
-                Provider<CreationTimeCache> creationTimeCache,
                 Provider<ContentManager> contentManager,
                 Provider<AltLocManager> altLocManager,
                 Provider<ActivityCallback> activityCallback,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                EventListener<FileManagerEvent> fileManagerEventListener,
-                ListenerSupport<FileManagerEvent> eventBroadcaster) {
-            super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager,
+                EventBroadcaster<FileManagerEvent> fileManagerEventListener,
+                ListenerSupport<FileManagerEvent> eventBroadcaster,
+                SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster) {
+            super(simppManager, urnCache, contentManager, altLocManager,
                     activityCallback, backgroundExecutor, fileManagerEventListener,
-                    eventBroadcaster);
+                    eventBroadcaster, fileDescMulticaster);
         }
         
         public void setDefaultUrn(URN urn) {
@@ -438,7 +439,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
             if (fd == null) {
                 Set<URN> urnSet = new HashSet<URN>();
                 urnSet.add(defaultURN);
-                fd = new FileDescImpl(new File(_settingsDir, CREATION_CACHE_FILE), urnSet, 0);
+                fd = new FileDescImpl(null, new File(_settingsDir, CREATION_CACHE_FILE), urnSet, 0);
             }
             if ((toExclude != null) && toExclude.equals(urn)) {
                 return null;

@@ -30,6 +30,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -68,6 +69,7 @@ import com.limegroup.gnutella.handshaking.BadHandshakeException;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.library.FileDescChangeEvent;
 import com.limegroup.gnutella.library.FileDescStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.messages.Message;
@@ -1133,8 +1135,9 @@ public final class MessageRouterImplTest extends LimeTestCase {
         public TestQRPUpdater(FileManager fileManager, 
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
-                Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
-            super(fileManager, backgroundExecutor, schemaReplyCollectionMapper, limeXMLSchemaRepository);
+                Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository,
+                ListenerSupport<FileDescChangeEvent> fileDescListenerSupport) {
+            super(fileManager, backgroundExecutor, schemaReplyCollectionMapper, limeXMLSchemaRepository, fileDescListenerSupport);
         }
         
         @Override

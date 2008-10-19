@@ -21,15 +21,13 @@ import com.limegroup.gnutella.library.IncompleteFileDesc;
 
 public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList, EventListener<FileManagerEvent> {
 
-    private final LibraryManagerImpl libraryManagerImpl;
-    private final FileManager fileManager;
-    
+    private final CoreLocalFileItemFactory coreLocalFileItemFactory;
+    private final FileManager fileManager;    
     private final ConcurrentHashMap<File, LocalFileItem> lookup;
     
-    LibraryFileListImpl(LibraryManagerImpl libraryManagerImpl, FileManager fileManager) {
+    LibraryFileListImpl(FileManager fileManager, CoreLocalFileItemFactory coreLocalFileItemFactory) {
         super(new BasicEventList<LocalFileItem>());
-        this.libraryManagerImpl = libraryManagerImpl;
-        
+        this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.fileManager = fileManager;
         this.fileManager.addFileEventListener(this);
         
@@ -50,7 +48,7 @@ public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFil
     public void handleEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
         case ADD_FILE:
-            LocalFileItem fileItem = new CoreLocalFileItem(evt.getNewFileDesc(), this.libraryManagerImpl.detailsFactory);
+            LocalFileItem fileItem = coreLocalFileItemFactory.createCoreLocalFileItem(evt.getNewFileDesc());
             threadSafeList.add(fileItem);
             lookup.put(fileItem.getFile(), fileItem);
             break;

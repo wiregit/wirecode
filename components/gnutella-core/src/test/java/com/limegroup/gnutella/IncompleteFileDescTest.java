@@ -49,12 +49,12 @@ public class IncompleteFileDescTest extends LimeTestCase {
         vf = verifyingFileFactory.createVerifyingFile();
         
         ifd = new IncompleteFileDescImpl(
+            null,
             new File(fileName),
             urns,
             0,
             fileName,
-            1981,
-            vf);
+            1981, vf);
 		
     }
     
@@ -92,12 +92,12 @@ public class IncompleteFileDescTest extends LimeTestCase {
         
         urns.add(UrnHelper.TTROOT);
         ifd = new IncompleteFileDescImpl(
+                null,
                 new File(fileName),
                 urns,
                 0,
                 fileName,
-                1981,
-                vf);
+                1981, vf);
         
         IntervalSet i = new IntervalSet();
         assertFalse(ifd.loadResponseRanges(i));

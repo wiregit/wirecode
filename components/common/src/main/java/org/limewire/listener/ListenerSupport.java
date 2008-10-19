@@ -6,8 +6,10 @@ package org.limewire.listener;
  */
 public interface ListenerSupport<E> {
 
+    /** Adds the listener. */
     public void addListener(EventListener<E> listener);
 
+    /** Returns true if the listener was removed. */
     public boolean removeListener(EventListener<E> listener);
 
 }

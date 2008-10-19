@@ -86,8 +86,12 @@ public class SchemaReplyCollectionMapper implements EventListener<FileManagerEve
             case LOAD_FILE:
                 load(evt);
                 break;
-            case REMOVE_FD:
+            case REMOVE_FILE:
                 removeFileDesc(evt.getNewFileDesc());
+                break;
+            case RENAME_FILE:
+            case CHANGE_FILE:
+                removeFileDesc(evt.getOldFileDesc());
                 break;
         }
     }
@@ -122,7 +126,7 @@ public class SchemaReplyCollectionMapper implements EventListener<FileManagerEve
      * Serializes the current LimeXMLReplyCollection to disk.
      */
     private void save(FileManagerEvent evt) {
-        if (evt.getFileManager().isLoadFinished()) {
+        if (evt.getSource().isLoadFinished()) {
             synchronized (this) {
                 Collection<LimeXMLReplyCollection> replies = getCollections();
                 for (LimeXMLReplyCollection col : replies)

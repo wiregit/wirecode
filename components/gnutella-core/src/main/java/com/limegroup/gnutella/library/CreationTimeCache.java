@@ -513,14 +513,15 @@ public final class CreationTimeCache {
         }
     }
     
-    //TODO: check this, this seems either completely wrong or
-    //		completely pointless
-    private void fileChanged(long creationTime, URN oldUrn, URN newUrn ) {
+    private void fileChanged(URN oldUrn, URN newUrn ) {
         // re-populate the ctCache
-        synchronized (this) { 
+        synchronized (this) {
+            long creationTime = getCreationTimeAsLong(oldUrn);
             removeTime(oldUrn);
-            addTime(newUrn, creationTime);
-            commitTime(newUrn);
+            if(creationTime != -1) {
+                addTime(newUrn, creationTime);
+                commitTime(newUrn);
+            }
         }   
     }
 
@@ -553,7 +554,7 @@ public final class CreationTimeCache {
             removeTime(evt.getFileDesc().getSHA1Urn());
             break;
         case CHANGED:
-            fileChanged(evt.getOldValue().getCreationTime(), evt.getOldValue().getSHA1Urn(),
+            fileChanged(evt.getOldValue().getSHA1Urn(),
                         evt.getFileDesc().getSHA1Urn());
             break;
         }

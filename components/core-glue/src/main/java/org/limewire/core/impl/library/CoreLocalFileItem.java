@@ -18,22 +18,29 @@ import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 
-public class CoreLocalFileItem implements LocalFileItem {
+class CoreLocalFileItem implements LocalFileItem {
 
     private final Category category;
     private final Map<Keys,Object> map;
     private final FileDesc fileDesc;
     private final LocalFileDetailsFactory detailsFactory;
+    private final CreationTimeCache creationTimeCache;
 
-    public CoreLocalFileItem(FileDesc fileDesc, LocalFileDetailsFactory detailsFactory) {
+    @AssistedInject
+    public CoreLocalFileItem(@Assisted FileDesc fileDesc, LocalFileDetailsFactory detailsFactory,
+            CreationTimeCache creationTimeCache) {
         this.fileDesc = fileDesc;
         this.detailsFactory = detailsFactory;
+        this.creationTimeCache = creationTimeCache;
         this.category = getCategory(fileDesc.getFile());
         this.map = Collections.synchronizedMap(new HashMap<Keys,Object>());
     }
@@ -50,7 +57,7 @@ public class CoreLocalFileItem implements LocalFileItem {
     
     @Override
     public long getCreationTime() {
-        return fileDesc.getCreationTime();
+        return creationTimeCache.getCreationTimeAsLong(fileDesc.getSHA1Urn());
     }
 
     @Override

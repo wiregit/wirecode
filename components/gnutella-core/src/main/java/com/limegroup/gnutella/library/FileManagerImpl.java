@@ -36,8 +36,10 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.FileUtils;
@@ -81,7 +83,7 @@ class FileManagerImpl implements FileManager, Service {
     private final ListenerSupport<FileManagerEvent> listenerSupport;
     
     /** The firer of events. */
-    private final EventListener<FileManagerEvent> eventBroadcaster;
+    private final EventBroadcaster<FileManagerEvent> eventBroadcaster;
     
     /**********************************************************************
      * LOCKING: obtain this's monitor before modifying this.
@@ -230,11 +232,11 @@ class FileManagerImpl implements FileManager, Service {
     
     private final Provider<SimppManager> simppManager;
     private final Provider<UrnCache> urnCache;
-    private final Provider<CreationTimeCache> creationTimeCache;
     private final Provider<ContentManager> contentManager;
     private final Provider<AltLocManager> altLocManager;
     private final Provider<ActivityCallback> activityCallback;
     private final ScheduledExecutorService backgroundExecutor;
+    private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster;
     
     private final Executor fileListExecutor;
     
@@ -244,22 +246,22 @@ class FileManagerImpl implements FileManager, Service {
     @Inject
     public FileManagerImpl(Provider<SimppManager> simppManager,
             Provider<UrnCache> urnCache,
-            Provider<CreationTimeCache> creationTimeCache,
             Provider<ContentManager> contentManager,
             Provider<AltLocManager> altLocManager,
             Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            EventListener<FileManagerEvent> fileManagerEventListener,
-            ListenerSupport<FileManagerEvent> listenerSupport) {
+            EventBroadcaster<FileManagerEvent> fileManagerEventBroadcaster,
+            ListenerSupport<FileManagerEvent> listenerSupport,
+            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster) {
         this.simppManager = simppManager;
         this.urnCache = urnCache;
-        this.creationTimeCache = creationTimeCache;
         this.contentManager = contentManager;
         this.altLocManager = altLocManager;
         this.activityCallback = activityCallback;
         this.backgroundExecutor = backgroundExecutor;
         this.listenerSupport = listenerSupport;
-        this.eventBroadcaster = fileManagerEventListener;
+        this.eventBroadcaster = fileManagerEventBroadcaster;
+        this.fileDescMulticaster = fileDescMulticaster;
         
         fileListExecutor = ExecutorsHelper.newProcessingQueue("FileListDispatchThread");
         
@@ -313,6 +315,19 @@ class FileManagerImpl implements FileManager, Service {
     }
     
     public void initialize() {
+        fileDescMulticaster.addListener(new EventListener<FileDescChangeEvent>() {
+            @Override
+            public void handleEvent(FileDescChangeEvent event) {
+                switch(event.getType()) {
+                case URNS_CHANGED:
+                    synchronized(FileManagerImpl.this) {
+                        updateUrnIndex(event.getSource());
+                    }
+                    break;
+                }
+            }
+            
+        });
     }
     
     @Inject
@@ -1001,7 +1016,6 @@ class FileManagerImpl implements FileManager, Service {
                 numFiles += 1;
                 files.add(fd);
                 fileToFileDescMap.put(file, fd);
-
                 updateUrnIndex(fd);
 
                 //If the event is a addStoreFile event, just pass along the newly added FileDesc
@@ -1039,7 +1053,7 @@ class FileManagerImpl implements FileManager, Service {
      * @return
      */
     private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
-        FileDesc fileDesc = new FileDescImpl(file, urns, index);
+        FileDesc fileDesc = new FileDescImpl(fileDescMulticaster, file, urns, index);
         ContentResponseData r = contentManager.get().getResponse(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
@@ -1077,16 +1091,11 @@ class FileManagerImpl implements FileManager, Service {
      * @param fileDesc
      */
     private void removeFileDesc(FileDesc fileDesc) {
-        if(fileDesc instanceof IncompleteFileDesc)
-            removeUrnIndex(fileDesc, false);
-        else 
-            removeUrnIndex(fileDesc, true);
-
+        removeUrnIndex(fileDesc);
         numFiles -= 1;
         files.set(fileDesc.getIndex(), null);
         fileToFileDescMap.remove(fileDesc.getFile());
-
-        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FD, fileDesc));
+        fileDescMulticaster.removeListeners(fileDesc);
     }
     
     /* (non-Javadoc)
@@ -1136,13 +1145,13 @@ class FileManagerImpl implements FileManager, Service {
         
         // no indices were found for any URN associated with this
         // IncompleteFileDesc... add it.
-        IncompleteFileDesc incompleteFileDesc = new IncompleteFileDescImpl(incompleteFile, urns, files.size(), name, size, vf);
+        IncompleteFileDesc incompleteFileDesc = new IncompleteFileDescImpl(fileDescMulticaster,
+                incompleteFile, urns, files.size(), name, size, vf);
         
         numFiles += 1;
         files.add(incompleteFileDesc);
         fileToFileDescMap.put(incompleteFile, incompleteFileDesc);
-        fileURNSUpdated(incompleteFileDesc);
-        //TODO: check incomplete file
+        updateUrnIndex(incompleteFileDesc);
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, incompleteFileDesc));
     }
     
@@ -1164,25 +1173,6 @@ class FileManagerImpl implements FileManager, Service {
     ///////////////////////////////////////////////////////////////////////////
     //  Search, utility, etc...
     ///////////////////////////////////////////////////////////////////////////
-	
-    public synchronized void fileURNSUpdated(FileDesc fd) {
-        FileManagerEvent event = null; 
-        synchronized (this) {
-            updateUrnIndex(fd);
-            if(fd instanceof IncompleteFileDesc) {
-                IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-                if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-                        SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
-                        ifd.hasUrnsAndPartialData()) {
-                    event = new FileManagerEvent(this, Type.INCOMPLETE_URN_CHANGE, fd);
-                }
-            }
-        }
-        if (event != null) {
-            dispatchFileEvent(event);
-        }
-
-    }
 
     /** 
      * Generic method for adding a fileDesc's URNS to a map
@@ -1203,7 +1193,7 @@ class FileManagerImpl implements FileManager, Service {
     /** 
      * Removes stored indices for a URN associated with a given FileDesc
      */
-    private void removeUrnIndex(FileDesc fileDesc, boolean purgeState) {
+    private void removeUrnIndex(FileDesc fileDesc) {
         for(URN urn : fileDesc.getUrns()) {
             if (!urn.isSHA1())
                 continue;
@@ -1217,9 +1207,6 @@ class FileManagerImpl implements FileManager, Service {
 
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
-            if (indices.size()==0 && purgeState) {
-                dispatchFileEvent(new FileManagerEvent(this,Type.REMOVE_URN, urn));
-            }
         }
     }
     
@@ -1238,11 +1225,11 @@ class FileManagerImpl implements FileManager, Service {
         }      
         
         FileDesc fileDesc = getFileDesc(oldName);
-        if( fileDesc == null) {
+        if (fileDesc == null) {
             // couldn't find a FileDesc for this file
             dispatchFileEvent(new FileManagerEvent(this, Type.RENAME_FILE_FAILED, oldName, null));
             return;
-    }
+        }
     
         removeFileDesc(fileDesc);
         // Prepopulate the cache with new URNs.
@@ -1266,7 +1253,6 @@ class FileManagerImpl implements FileManager, Service {
             return;            
         }
 
-        fd.setCreationTime(creationTimeCache.get().getCreationTimeAsLong(fd.getSHA1Urn()));
         removeFileDesc(fd);
         addFile(f, xmlDocs, _revision, Type.CHANGE_FILE, Type.REMOVE_FILE, fd);
     }
@@ -1453,7 +1439,7 @@ class FileManagerImpl implements FileManager, Service {
      * dispatches a FileManagerEvent to any registered listeners 
      */
     protected void dispatchFileEvent(FileManagerEvent evt) {
-        eventBroadcaster.handleEvent(evt);
+        eventBroadcaster.broadcast(evt);
     }
     
     /** A bunch of inspectables for FileManager */

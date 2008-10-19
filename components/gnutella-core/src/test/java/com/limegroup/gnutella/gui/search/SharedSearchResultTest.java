@@ -51,7 +51,7 @@ public class SharedSearchResultTest extends GUIBaseTestCase {
         File file = new File("pom.xml");
         URN sha1Urn = URN.createSHA1Urn(file);
         urns.add(sha1Urn);
-        FileDesc fileDesc = new FileDescImpl(file, urns, 0);
+        FileDesc fileDesc = new FileDescImpl(null, file, urns, 0);
         
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         creationTimeCache.addTime(sha1Urn, fileDesc.getFile().lastModified());
@@ -83,7 +83,7 @@ public class SharedSearchResultTest extends GUIBaseTestCase {
         File file = new File("pom.xml");
         URN sha1Urn = URN.createSHA1Urn(file);
         urns.add(sha1Urn);
-        FileDesc fileDesc = new FileDescImpl(file, urns, 0);
+        FileDesc fileDesc = new FileDescImpl(null, file, urns, 0);
         
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         creationTimeCache.addTime(sha1Urn, fileDesc.getFile().lastModified());
@@ -108,7 +108,7 @@ public class SharedSearchResultTest extends GUIBaseTestCase {
         File file = new File("pom.xml");
         URN sha1Urn = URN.createSHA1Urn(file);
         urns.add(sha1Urn);
-        FileDesc fileDesc = new FileDescImpl(file, urns, 0);
+        FileDesc fileDesc = new FileDescImpl(null, file, urns, 0);
         
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         creationTimeCache.addTime(sha1Urn, fileDesc.getFile().lastModified());

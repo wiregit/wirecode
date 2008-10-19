@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -225,78 +227,69 @@ public class FileManagerTestCase extends LimeTestCase {
     ////////////////////////////////////////////////////////////////////////////////////
 
     public static class Listener implements EventListener<FileManagerEvent> {
+        private final CountDownLatch latch = new CountDownLatch(1);
         public FileManagerEvent evt;
-        public synchronized void handleEvent(FileManagerEvent fme) {
+        public void handleEvent(FileManagerEvent fme) {
             switch(fme.getType()) {
                 case LOAD_FILE:
-                case REMOVE_URN:
-                case REMOVE_FD:
                     return;
             }
 
             evt = fme;
-            notify();
-            fme.getFileManager().removeFileEventListener(this);
+            latch.countDown();
+            fme.getSource().removeFileEventListener(this);
+        }
+        
+        void await(long timeout) throws Exception {
+            assertTrue(latch.await(timeout, TimeUnit.MILLISECONDS));
         }
     }
 
     protected FileManagerEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addSharedFile(f, LimeXMLDocument.EMPTY_LIST);
-            fel.wait(5000);
-        }
+        fman.addSharedFile(f, LimeXMLDocument.EMPTY_LIST);
+        fel.await(5000);
         return fel.evt;
     }
 
     protected FileManagerEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addSharedFile(f, l);
-            fel.wait(5000);
-        }
+        fman.addSharedFile(f, l);
+        fel.await(5000);
         return fel.evt;
     }
 
     protected FileManagerEvent addAlways(File f) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addSharedFileAlways(f);
-            fel.wait(5000);
-        }
+        fman.addSharedFileAlways(f);
+        fel.await(5000);
         return fel.evt;
     }
 
     protected FileManagerEvent renameFile(File f1, File f2) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.renameFile(f1, f2);
-            fel.wait(5000);
-        }
+        fman.renameFile(f1, f2);
+        fel.await(5000);
         return fel.evt;
     }
 
     protected FileManagerEvent addFileForSession(File f1) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        synchronized(fel) {
-            fman.addSharedFileForFession(f1);
-            fel.wait(5000);
-        }
+        fman.addSharedFileForFession(f1);
+        fel.await(5000);
         return fel.evt;
     }
 
     protected FileManagerEvent fileChanged(File f1) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        synchronized (fel) {
-            fman.fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
-            fel.wait(5000);
-        }
+        fman.fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
+        fel.await(5000);
         return fel.evt;
     }
 

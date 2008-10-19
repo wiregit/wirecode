@@ -410,7 +410,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 
     public static class FakeFileDesc extends FileDescImpl {
         public FakeFileDesc(File file, Set<? extends URN> s) {
-            super(file, s, Integer.MAX_VALUE);
+            super(null, file, s, Integer.MAX_VALUE);
         }
     }
 

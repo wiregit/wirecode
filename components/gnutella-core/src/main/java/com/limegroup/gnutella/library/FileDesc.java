@@ -4,13 +4,14 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.RPNParser.StringLookup;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public interface FileDesc extends StringLookup {
+public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEvent> {
 
 
     /**
@@ -41,17 +42,6 @@ public interface FileDesc extends StringLookup {
      * @return the modification time for the file
      */
     public long lastModified();
-
-    /**
-     * Returns the time this file was first shared on gnutella or -1
-     * if no value has been set
-     */
-    public long getCreationTime();
-
-    /**
-     * Sets the creation time for this file
-     */
-    public void setCreationTime(long time);
 
     /**
      * @return the TTROOT URN from the set of urns.

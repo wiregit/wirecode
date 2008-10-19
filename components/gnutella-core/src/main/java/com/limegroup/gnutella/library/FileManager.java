@@ -316,11 +316,6 @@ public interface FileManager {
      */
     boolean isFileApplicationShared(String name);
 
-    /**
-     * Notification that an IncompleteFileDesc has been updated.
-     */
-    void fileURNSUpdated(FileDesc ifd);
-
     IntSet getIndices(URN urn);
 
     /**

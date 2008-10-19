@@ -39,7 +39,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
-import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.net.ConnectionAcceptor;
@@ -126,7 +126,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
 
     private final RemoteFileDescFactory remoteFileDescFactory;
 
-    private final EventMulticaster<ConnectivityChangeEvent> connectivityEventMulticaster;
+    private final EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
     
     private final AtomicBoolean acceptedIncomingConnectionEventFired = new AtomicBoolean(false);
     
@@ -145,7 +145,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		Provider<UDPSelectorProvider> udpSelectorProvider,
     		Provider<PushEndpointCache> pushEndpointCache,
     		RemoteFileDescFactory remoteFileDescFactory,
-    		EventMulticaster<ConnectivityChangeEvent> connectivityEventMulticaster) {
+    		EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;
         this.defaultParams = defaultParams;
@@ -157,7 +157,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         this.udpSelectorProvider = udpSelectorProvider;
         this.pushEndpointCache = pushEndpointCache;
         this.remoteFileDescFactory = remoteFileDescFactory;
-        this.connectivityEventMulticaster = connectivityEventMulticaster;
+        this.connectivityEventBroadcaster = connectivityEventBroadcaster;
     }
 
     public void register(PushedSocketHandler handler) {
@@ -184,11 +184,11 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
          */
         if (networkManager.acceptedIncomingConnection()) {
             if (acceptedIncomingConnectionEventFired.compareAndSet(false, true)) {
-                connectivityEventMulticaster.handleEvent(new ConnectivityChangeEvent());
+                connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());
             }
         } else if (networkManager.canDoFWT()) {
             if (canDoFWTEventFired.compareAndSet(false, true)) {
-                connectivityEventMulticaster.handleEvent(new ConnectivityChangeEvent());
+                connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());
             }
         }
     }

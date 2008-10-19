@@ -42,7 +42,7 @@ public class FileDescStub extends FileDescImpl {
     }
     
     public FileDescStub(String name, URN urn, int index) {
-    	super(createStubFile(new File(name)), createUrnSet(urn), index);
+    	super(null, createStubFile(new File(name)), createUrnSet(urn), index);
     }
 
     static File createStubFile(File file) {

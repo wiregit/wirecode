@@ -13,7 +13,7 @@ import org.limewire.util.Objects;
 /**
  * Maintains event listeners and broadcasts events to all listeners.
  */
-public class EventListenerList<E> implements ListenerSupport<E> {
+public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaster<E> {
     
     private final Log log;
     
@@ -60,6 +60,11 @@ public class EventListenerList<E> implements ListenerSupport<E> {
         for(EventListener<E> listener : listenerList) {
             listener.handleEvent(event);
         }
+    }
+    
+    /** Returns the size of the list. */
+    public int size() {
+        return listenerList.size();
     }
     
     private static final class ListenerProxy<E> implements EventListener<E> {

@@ -11,6 +11,7 @@ import org.limewire.collection.IntSet;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.URN;
@@ -20,6 +21,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
 
 
     private ServiceRegistry registry;
+    private SourcedEventMulticaster multicaster;
     private SharedFilesKeywordIndexImpl keywordIndex;
     private Mockery context;
     private FileManager fileManager;
@@ -33,6 +35,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
+        multicaster = context.mock(SourcedEventMulticaster.class);
         registry = context.mock(ServiceRegistry.class);
         fileManager = context.mock(FileManager.class);
         sharedFileList = context.mock(FileList.class);
@@ -43,8 +46,8 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     @SuppressWarnings("unchecked")
     public void testRenamedFilesEvent() throws Exception {
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        final FileDesc originalFile = new FileDescImpl(new File("hello world"), new UrnSet(urn), 1);
-        final FileDesc newFile = new FileDescImpl(new File("goodbye world"), new UrnSet(urn), 2);
+        final FileDesc originalFile = new FileDescImpl(null, new File("hello world"), new UrnSet(urn), 1);
+        final FileDesc newFile = new FileDescImpl(null, new File("goodbye world"), new UrnSet(urn), 2);
         
         final GetterMatcher<Service> serviceGetter = GetterMatcher.create();
         final GetterMatcher<EventListener<FileListChangedEvent>> listenerGetter = GetterMatcher.create();
@@ -55,6 +58,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 exactly(1).of(sharedFileList).addFileListListener(with(listenerGetter));
                 exactly(1).of(fileManager).addFileEventListener(with(any(EventListener.class)));
                 exactly(1).of(incompleteFileList).addFileListListener(with(any(EventListener.class)));
+                exactly(1).of(multicaster).addListener(with(any(EventListener.class)));
                 
                 atLeast(1).of(fileManager).getIncompleteFileList();
                 will(returnValue(incompleteFileList));
@@ -79,7 +83,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
                 will(returnValue(true));
             }
         });
-        keywordIndex.register(registry);
+        keywordIndex.register(registry, multicaster);
         serviceGetter.get().initialize();
         listenerGetter.get().handleEvent(new FileListChangedEvent(sharedFileList, FileListChangedEvent.Type.ADDED, originalFile));
         

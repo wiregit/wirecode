@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.NetworkUtils;
-import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.logging.Log;
@@ -33,7 +33,7 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
     
     private final NetworkManager networkManager;
 
-    private final EventMulticaster<ConnectivityChangeEvent> connectivityEventMulticaster;
+    private final EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
     
     /**
      * Ensures that {@link ConnectivityChangeEvent} is only thrown once.
@@ -41,9 +41,9 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
     private final AtomicBoolean localAddressEventGuard = new AtomicBoolean(false);
 
     @Inject
-    public SameNATAddressResolver(NetworkManager networkManager, EventMulticaster<ConnectivityChangeEvent> connectivityEventMulticaster) {
+    public SameNATAddressResolver(NetworkManager networkManager, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster) {
         this.networkManager = networkManager;
-        this.connectivityEventMulticaster = connectivityEventMulticaster;
+        this.connectivityEventBroadcaster = connectivityEventBroadcaster;
     }
     
     @Inject
@@ -59,7 +59,7 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
     public void handleEvent(AddressEvent event) {
         if (areLocalAddressesKnown()) {
             if (localAddressEventGuard.compareAndSet(false, true)) {
-                connectivityEventMulticaster.handleEvent(new ConnectivityChangeEvent());
+                connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());
             }
         }
     }

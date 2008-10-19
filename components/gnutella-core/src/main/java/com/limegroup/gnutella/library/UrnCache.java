@@ -507,7 +507,7 @@ public final class UrnCache implements EventListener<FileManagerEvent> {
 	 */
     public void handleEvent(FileManagerEvent evt) {
         if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_STARTED) {
-            clearPendingHashes(evt.getFileManager());
+            clearPendingHashes(evt.getSource());
         } else if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_SAVE) {
             persistCache();
         } 

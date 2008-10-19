@@ -13,9 +13,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.io.Address;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressConnector;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
@@ -29,7 +31,7 @@ import com.google.inject.Singleton;
 
 /** Factory for creating Sockets. */
 @Singleton
-public class SocketsManagerImpl implements SocketsManager, EventMulticaster<ConnectivityChangeEvent> {
+public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<ConnectivityChangeEvent>, ListenerSupport<ConnectivityChangeEvent> {
     
     private final SocketController socketController;
     
@@ -266,7 +268,7 @@ public class SocketsManagerImpl implements SocketsManager, EventMulticaster<Conn
     }
 
     @Override
-    public void handleEvent(ConnectivityChangeEvent event) {
-        connectivityEventMulticaster.handleEvent(event);
+    public void broadcast(ConnectivityChangeEvent event) {
+        connectivityEventMulticaster.broadcast(event);
     }
 }

@@ -3,10 +3,6 @@ package org.limewire.listener;
 /**
  * An event for a given source and type.
  */
-public interface Event<T, E> {
-    
-    public T getSource();
-    
-    public E getType();
+public interface Event<S, T> extends SourcedEvent<S>, TypedEvent<T> {
 
 }

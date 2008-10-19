@@ -904,7 +904,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         PrivilegedAccessor.setValue(vf,"verifiedBlocks",verified);
         
         
-        IncompleteFileDesc ifd = new IncompleteFileDescImpl(new File("a"),set,11,"a",1024 * 1024,vf);
+        IncompleteFileDesc ifd = new IncompleteFileDescImpl(null,new File("a"),set,11,"a",1024 * 1024, vf);
         Response resp = responseFactoryImpl.createResponse(ifd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
@@ -940,7 +940,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         PrivilegedAccessor.setValue(vf,"partialBlocks",partial);
         
         
-        IncompleteFileDesc ifd = new IncompleteFileDescImpl(new File("a"),set,11,"a",1024 * 1024,vf);
+        IncompleteFileDesc ifd = new IncompleteFileDescImpl(null,new File("a"),set,11,"a",1024 * 1024, vf);
         Response resp = responseFactoryImpl.createResponse(ifd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
@@ -973,7 +973,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
                 return 1;
             }
         };
-        FileDesc fd = new FileDescImpl(f, set, 1);
+        FileDesc fd = new FileDescImpl(null, f, set, 1);
         Response resp = responseFactoryImpl.createResponse(fd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
@@ -1003,7 +1003,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
                 return 1;
             }
         };
-        FileDesc fd = new FileDescImpl(f, set, 1);
+        FileDesc fd = new FileDescImpl(null, f, set, 1);
         Response resp = responseFactoryImpl.createResponse(fd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));

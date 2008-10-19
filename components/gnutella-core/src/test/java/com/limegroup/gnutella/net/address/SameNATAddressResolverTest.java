@@ -7,6 +7,7 @@ import org.jmock.Mockery;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.address.AddressEvent;
@@ -20,7 +21,7 @@ public class SameNATAddressResolverTest extends BaseTestCase {
     private NetworkManagerStub networkManagerStub;
     private SameNATAddressResolver resolver;
     private Mockery context;
-    private EventMulticaster eventMulticaster;
+    private EventBroadcaster eventBroadcaster;
 
     public SameNATAddressResolverTest(String name) {
         super(name);
@@ -35,8 +36,8 @@ public class SameNATAddressResolverTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         networkManagerStub = new NetworkManagerStub();
-        eventMulticaster = context.mock(EventMulticaster.class);
-        resolver = new SameNATAddressResolver(networkManagerStub, eventMulticaster);
+        eventBroadcaster = context.mock(EventMulticaster.class);
+        resolver = new SameNATAddressResolver(networkManagerStub, eventBroadcaster);
         networkManagerStub.setExternalAddress(new byte[] { (byte)129, 0, 0, 1 });
         networkManagerStub.setAddress(new byte[] { (byte)192, (byte)168, 0, 1});
     }
@@ -50,7 +51,7 @@ public class SameNATAddressResolverTest extends BaseTestCase {
     @SuppressWarnings("unchecked")
     public void testConnectivityEventOnlyFiredOnce() {
         context.checking(new Expectations() {{
-            one(eventMulticaster).handleEvent(with(any(ConnectivityChangeEvent.class)));
+            one(eventBroadcaster).broadcast(with(any(ConnectivityChangeEvent.class)));
         }});
         resolver.handleEvent(new AddressEvent(null, null));
         resolver.handleEvent(new AddressEvent(null, null));
