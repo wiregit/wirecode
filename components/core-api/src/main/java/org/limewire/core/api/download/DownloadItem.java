@@ -97,8 +97,19 @@ public interface DownloadItem {
      * @return if this downloader can be launched or previewed.
      */
     public boolean isLaunchable();
-
-    public File getFile();
+    
+    /**
+     * Returns the File that is being downloaded to.
+     * This call never blocks, but may return a file
+     * that is locked and cannot be used by other programs.
+     */
+    File getDownloadingFile();
+    
+    /**
+     * Returns a file suitable for launching.
+     * This call may block while the file is created.
+     */
+    File getLaunchableFile();
 
     /**
      * Returns a urn for the file being downloaded.

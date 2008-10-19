@@ -201,8 +201,13 @@ public class MockDownloadItem implements DownloadItem {
     }
 
     @Override
-    public File getFile() {
+    public File getDownloadingFile() {
         return new File("A FILE!");
+    }
+    
+    @Override
+    public File getLaunchableFile() {
+        return getDownloadingFile();
     }
 
     @Override

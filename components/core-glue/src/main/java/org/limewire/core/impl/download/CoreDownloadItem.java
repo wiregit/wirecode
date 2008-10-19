@@ -301,8 +301,13 @@ class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public File getFile() {
+    public File getDownloadingFile() {
         return downloader.getFile();
+    }
+    
+    @Override
+    public File getLaunchableFile() {
+        return downloader.getDownloadFragment();
     }
     
     @Override

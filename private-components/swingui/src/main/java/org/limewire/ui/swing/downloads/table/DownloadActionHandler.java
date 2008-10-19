@@ -1,9 +1,7 @@
 package org.limewire.ui.swing.downloads.table;
 
-import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.ui.swing.player.PlayerUtils;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
+import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -30,37 +28,25 @@ public class DownloadActionHandler {
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){
-        BackgroundExecutorService.schedule(new Runnable(){
-            public void run() {
-                if (actionCommmand == CANCEL_COMMAND) {
-                    item.cancel();
-                } else if (actionCommmand == PAUSE_COMMAND) {
-                    item.pause();
-                } else if (actionCommmand == RESUME_COMMAND) {
-                    item.resume();
-                } else if (actionCommmand == TRY_AGAIN_COMMAND) {
-                    item.resume();
-                } else if (actionCommmand == LINK_COMMAND){
-                    NativeLaunchUtils.openURL(ERROR_URL);
-                } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND){
-                    launch(item);
-                } else if (actionCommmand == LOCATE_COMMAND){
-                    NativeLaunchUtils.launchExplorer(item.getFile());
-                } else if (actionCommmand == PROPERTIES_COMMAND){
-                    //TODO properties
-                    throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
-                } else if (actionCommmand == REMOVE_COMMAND){
-                    downloadItems.remove(item);
-                }
-            }
-        });
-    }
-
-    private void launch(DownloadItem item) {
-        if(item.getCategory() == Category.AUDIO){
-            PlayerUtils.play(item.getFile());
-        } else {
-            NativeLaunchUtils.launchFile(item.getFile());
+        if (actionCommmand == CANCEL_COMMAND) {
+            item.cancel();
+        } else if (actionCommmand == PAUSE_COMMAND) {
+            item.pause();
+        } else if (actionCommmand == RESUME_COMMAND) {
+            item.resume();
+        } else if (actionCommmand == TRY_AGAIN_COMMAND) {
+            item.resume();
+        } else if (actionCommmand == LINK_COMMAND){
+            NativeLaunchUtils.openURL(ERROR_URL);
+        } else if (actionCommmand == PREVIEW_COMMAND || actionCommmand == LAUNCH_COMMAND){
+            DownloadItemUtils.launch(item);
+        } else if (actionCommmand == LOCATE_COMMAND){
+            NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
+        } else if (actionCommmand == PROPERTIES_COMMAND){
+            //TODO properties
+            throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
+        } else if (actionCommmand == REMOVE_COMMAND){
+            downloadItems.remove(item);
         }
     }
 }

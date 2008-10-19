@@ -1,18 +1,15 @@
 package org.limewire.ui.swing.downloads.table;
 
-import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
+
+import ca.odell.glazedlists.EventList;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
-import ca.odell.glazedlists.EventList;
 
 /**
  * Table showing DownloadItems. Provides popup menus and double click handling.
@@ -61,18 +58,10 @@ public class DownloadTable extends MouseableTable {
         TableDoubleClickHandler clickHandler = new TableDoubleClickHandler() {
             @Override
             public void handleDoubleClick(int row) {
-                final DownloadItem item = getDownloadItem(row);
-                BackgroundExecutorService.schedule(new Runnable(){
-                    public void run() {
-                        if (item.isLaunchable()) {
-                            if(item.getCategory() == Category.AUDIO && PlayerUtils.isPlayableFile(item.getFile())){
-                                PlayerUtils.play(item.getFile());
-                            } else {
-                                NativeLaunchUtils.launchFile(item.getFile());
-                            }
-                        }
-                    }
-                });
+                DownloadItem item = getDownloadItem(row);
+                if(item.isLaunchable()) {
+                    DownloadItemUtils.launch(item);
+                }
             }
         };
 

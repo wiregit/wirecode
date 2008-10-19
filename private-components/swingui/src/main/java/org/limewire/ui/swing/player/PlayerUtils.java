@@ -39,10 +39,10 @@ public class PlayerUtils {
         if (isPlayableFile(file)) {
             play(file);
             return true;
+        } else {    
+            NativeLaunchUtils.launchFile(file);
+            return false;
         }
-
-        NativeLaunchUtils.launchFile(file);
-        return false;
 
     }
 }
