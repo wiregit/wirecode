@@ -69,27 +69,10 @@ public class FileManagerEvent extends AbstractSourcedEvent<FileManager> {
         LOAD_FILE,
         
         /**
-         * Called when a folder and all of its contents has been added to FileManager
-         */
-        ADD_FOLDER,
-        
-        /**
-         * Called when a folder and all of its contents has been removed from FileManager
-         */
-        REMOVE_FOLDER,
-        
-        /**
          * Called once FileManager has begun a new load process of loading all files in all shared
          * and store directories
          */
         FILEMANAGER_LOAD_STARTED,
-        
-        /**
-         * Called prior to FileManager loading all the shared and store directories and the files
-         * contained within. This will completely trash all the previously loaded directories and
-         * files.
-         */
-        FILEMANAGER_LOAD_DIRECTORIES,
         
         /**
          * Called once FileManager is preparing to finish the loading process. 
@@ -98,12 +81,16 @@ public class FileManagerEvent extends AbstractSourcedEvent<FileManager> {
          *  1)Load_finishing
          *  2)save
          *  3)load_complete
+         *  
+         * The purpose of the multi-phased approach is to allow listeners
+         * of the SAVE event a chance to cleanup data prior to SAVE. 
          */
         FILEMANAGER_LOAD_FINISHING,
         
         /**
          * Called after load_finishing and prior to load_complete. Allows 
-         * anything to write to disk
+         * anything to write to disk.  It is also called periodially
+         * if FileManager has any changed that should be written to disk.
          */
         FILEMANAGER_SAVE,
         
@@ -337,34 +324,6 @@ public class FileManagerEvent extends AbstractSourcedEvent<FileManager> {
      */
     public boolean isAlreadySharedEvent() {
         return (type.equals(Type.FILE_ALREADY_ADDED));
-    }
-    
-    /**
-     * Returns true if this is a ADD_FOLDER event.
-     */
-    public boolean isAddFolderEvent() {
-        return type.equals(Type.ADD_FOLDER);
-    }
-    
-    /**
-     * Returns true if this is a REMOVE_FOLDER event
-     */
-    public boolean isRemoveFolderEvent() {
-        return type.equals(Type.REMOVE_FOLDER);
-    }
-    
-    /**
-     * Returns true if this is a FILEMANAGER_LOADING event
-     */
-    public boolean isFileManagerLoading() {
-        return type.equals(Type.FILEMANAGER_LOAD_DIRECTORIES);
-    }
-    
-    /**
-     * Returns true if this is a FILEMANAGER_LOADED event
-     */
-    public boolean isFileManagerLoaded() {
-        return type.equals(Type.FILEMANAGER_LOAD_COMPLETE);
     }
        
     @Override

@@ -323,7 +323,7 @@ public class TorrentManagerImpl implements TorrentManager {
         Runnable r = new Runnable() {
             public void run() {
             	if (SharingUtils.isFilePhysicallyShareable(f))
-            		fileManager.addSharedFileForFession(f);
+            		fileManager.addSharedFileForSession(f);
             }
         };
         threadPool.execute(r);

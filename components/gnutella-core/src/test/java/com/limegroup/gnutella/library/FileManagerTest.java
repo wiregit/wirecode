@@ -973,13 +973,6 @@ public class FileManagerTest extends FileManagerTestCase {
         MultiListener listener = new MultiListener();
         fman.addFileEventListener(listener);
         waitForLoad();
-        //should not have dipatched an event for the folder
-        for(FileManagerEvent fevt: listener.getFileManagerEventList()) {
-            if(fevt.isAddFolderEvent()) {
-                File file = fevt.getOldFile(); 
-                assertFalse(file.getParent().equals(SharingUtils.APPLICATION_SPECIAL_SHARE));
-            }
-        }
         specialShare = createNewNamedTestFile(10, "shared2", SharingUtils.APPLICATION_SPECIAL_SHARE);
         FileManagerEvent evt = addFileForSession(specialShare);
         assertTrue(evt.isAddEvent());
@@ -1610,8 +1603,8 @@ public class FileManagerTest extends FileManagerTestCase {
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
-        fman.addSharedFileForFession(store1);
-        fman.addSharedFileForFession(store2);
+        fman.addSharedFileForSession(store1);
+        fman.addSharedFileForSession(store2);
 
         assertEquals("Unexpected number of shared files", 2, fman.getGnutellaSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
@@ -1817,8 +1810,8 @@ public class FileManagerTest extends FileManagerTestCase {
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
-        fman.addSharedFileForFession(store1);
-        fman.addSharedFileForFession(store2);
+        fman.addSharedFileForSession(store1);
+        fman.addSharedFileForSession(store2);
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
         

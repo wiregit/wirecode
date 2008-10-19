@@ -319,7 +319,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // building tries should be fast and non-blocking so can be done in
         // dispatch thread
         switch (evt.getType()) {
-        case FILEMANAGER_LOAD_DIRECTORIES:
+        case FILEMANAGER_LOAD_STARTED:
             clear();
             break;
         case FILEMANAGER_LOAD_COMPLETE:

@@ -280,7 +280,7 @@ public class FileManagerTestCase extends LimeTestCase {
     protected FileManagerEvent addFileForSession(File f1) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        fman.addSharedFileForFession(f1);
+        fman.addSharedFileForSession(f1);
         fel.await(5000);
         return fel.evt;
     }

@@ -58,6 +58,7 @@ public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFil
             break;
         case FILEMANAGER_LOAD_STARTED:
             threadSafeList.clear();
+            lookup.clear();
             break;
         }
     }

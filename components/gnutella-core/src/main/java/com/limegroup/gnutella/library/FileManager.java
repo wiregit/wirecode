@@ -132,24 +132,6 @@ public interface FileManager {
     Set<File> getFolderNotToShare();
 
     /**
-     * Adds a folder to be managed. This folder will be checked everytime a
-     * refresh occurs
-     */
-    void addFolder(File folder);
-
-    /**
-     * Adds a set of folders to be managed.
-     */
-    void addFolders(Set<File> folders);
-
-    /**
-     * Removes a managed folder.
-     * 
-     * @param folder - folder to remove
-     */
-    void removeFolder(File folder);
-
-    /**
      * Creates a FileDesc for the file if one doesn't yet exist, then adds the
      * FileDesc to the sharedFileList
      */
@@ -179,7 +161,7 @@ public interface FileManager {
      * Creates a FileDesc for the file if one doesn't yet exist, then adds the
      * FileDesc to the sharedFileList only for the session.
      */
-    void addSharedFileForFession(File file);
+    void addSharedFileForSession(File file);
 
     /**
      * Creates a FileDesc for the file if one doesn't yet exist, then adds the

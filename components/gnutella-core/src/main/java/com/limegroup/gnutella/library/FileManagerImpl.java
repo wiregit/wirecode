@@ -168,12 +168,6 @@ class FileManagerImpl implements FileManager, Service {
     private Set<File> storeDirectories;
     
     /**
-     * Generic directories that are loaded. Subsets of these folders can be
-     * shared files/ store files/ shared with friends or none of the above. 
-     */
-    private Set<File> displayDirectories;
-    
-    /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
@@ -307,7 +301,6 @@ class FileManagerImpl implements FileManager, Service {
         _extensions = new HashSet<String>();
 		_completelySharedDirectories = new HashSet<File>();
         storeDirectories = new HashSet<File>();
-        displayDirectories = new HashSet<File>();
     }
 
     public String getServiceName() {
@@ -625,9 +618,6 @@ class FileManagerImpl implements FileManager, Service {
     }
 
     private void loadDirectories(int revision) {
-        //clear this, list of directories retrieved
-        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOAD_DIRECTORIES));
-
         _isUpdating = true;
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(SharingUtils.PROGRAM_SHARE, null, revision);
@@ -653,11 +643,6 @@ class FileManagerImpl implements FileManager, Service {
         File storeDir = SharingSettings.getSaveLWSDirectory();
         updateDirectories(storeDir.getAbsoluteFile(), null, revision, storeDirectories);
         
-        // Load all other directories that aren't necesarily shared or store folders
-        File[] directory = SharingSettings.DIRECTORIES_TO_DISPLAY.getValueAsArray();
-        for(int i = 0; i < directory.length && _revision == revision; i++)
-            updateDirectories(directory[i], null, revision, displayDirectories);
-        
         // Add specially shared files
         loadIndividualFiles(sharedFileList, revision);
             
@@ -675,9 +660,10 @@ class FileManagerImpl implements FileManager, Service {
      * Takes a collection of files and adds them to the supplied FileList
      */
     private void loadIndividualFiles(FileListPackage fileList, int revision) {
-        for(File file: fileList.getIndividualFiles()) {
-        if(_revision != revision)
+        for (File file : fileList.getIndividualFiles()) {
+            if (_revision != revision) {
                 break;
+            }
             fileList.addPendingFile(file);
             addFile(file);
         }
@@ -701,7 +687,6 @@ class FileManagerImpl implements FileManager, Service {
             
             //otherwise add this directory to list to avoid rescanning it
             savedDirectories.add(directory);
-            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, directory, parent));
         }
         
         // STEP 2:
@@ -759,92 +744,6 @@ class FileManagerImpl implements FileManager, Service {
             return new HashSet<File>(_data.DIRECTORIES_NOT_TO_SHARE);
         }
     }
-
-    public void addFolders(Set<File> folders) {
-        for (File folder : folders) {
-            addFolder(folder);
-        }
-	}
-	
-    public void addFolder(File folder) {
-        if (!folder.isDirectory())
-			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
-		
-	    try {
-	        folder = FileUtils.getCanonicalFile(folder);
-	    } catch(IOException ignored) {}
-
-        synchronized (displayDirectories) {
-            // if folder already exists, just return
-            if(displayDirectories.contains(folder))
-                return;
-            displayDirectories.add(folder);
-        }
-        
-        _isUpdating = true;
-        // add folder, then load files from within the folder
-        synchronized (SharingSettings.DIRECTORIES_TO_DISPLAY) {
-            SharingSettings.DIRECTORIES_TO_DISPLAY.add(folder);
-        }
-        updateDirectories(folder, null, _revision, displayDirectories);
-        _isUpdating = false;
-    }
-    
-    public void removeFolder(File folder) {
-        _isUpdating = true;
-        boolean contained;
-
-        // if this was in an old shared folder, remove it the old way
-        synchronized (_completelySharedDirectories) {
-            contained = _completelySharedDirectories.contains(folder);
-        }
-        if(contained) {
-            removeSharedFolder(folder);
-        }
-                
-        // if this was in a new folder, remove it the proper way
-        synchronized (displayDirectories) {
-           contained = displayDirectories.contains(folder);
-        }
-        if( contained )
-            removeFolder(folder, null);
-            
-        _isUpdating = false;
-           
-    }
-    
-    private void removeFolder(File folder, File parent) {
-        if(!folder.isDirectory() && folder.exists()) 
-            throw new IllegalArgumentException("Expected a directory, but given: " + folder);
-          
-        try {
-            folder = FileUtils.getCanonicalFile(folder);
-        } catch (IOException ignored) {}
-
-        synchronized (displayDirectories) {
-            // if the folder isn't loaded already, just return
-            if(!displayDirectories.remove(folder))
-                return;
-        }
-
-        // remove folder from disk
-        synchronized (SharingSettings.DIRECTORIES_TO_DISPLAY) {
-            SharingSettings.DIRECTORIES_TO_DISPLAY.remove(folder);
-            }
-            
-            File[] subs = folder.listFiles();
-            if(subs != null) {
-            for(File f : subs) {
-                    if(f.isDirectory())
-                    removeFolder(f, folder);
-                else if(f.isFile()){
-                    if(removeFile(f) == null)
-                            urnCache.get().clearPendingHashesFor(f, this);
-                    }
-                }
-            }
-        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
-    }
     
     //////////////////////////////////////////////////////////////////////////////
     //  File Accessors
@@ -899,7 +798,7 @@ class FileManagerImpl implements FileManager, Service {
         }
     }
     
-    public void addSharedFileForFession(File file) {
+    public void addSharedFileForSession(File file) {
         FileDesc fileDesc = getFileDesc(file);
         sharedFileList.addPendingFileForSession(file);
 
@@ -1643,7 +1542,7 @@ class FileManagerImpl implements FileManager, Service {
     
     private class Saver implements Runnable, EventListener<FileManagerEvent> {
         
-        private AtomicBoolean isDirty = new AtomicBoolean(false);
+        private final AtomicBoolean isDirty = new AtomicBoolean(false);
         
         public void run() {
             if (!shutdown && isDirty.get()) {
@@ -1662,10 +1561,8 @@ class FileManagerImpl implements FileManager, Service {
         public void handleEvent(FileManagerEvent evt) {
             switch(evt.getType()) {
                 case ADD_FILE:
-                case ADD_FOLDER:
                 case CHANGE_FILE:
                 case REMOVE_FILE:
-                case REMOVE_FOLDER:
                 case RENAME_FILE:
                     setDirty();
             }
@@ -1749,8 +1646,6 @@ class FileManagerImpl implements FileManager, Service {
                     }
                 }
             }
-            
-            dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
         }
     }
 
@@ -1861,9 +1756,6 @@ class FileManagerImpl implements FileManager, Service {
     
              if (isStoreDirectory)
                  _completelySharedDirectories.add(directory);
-             if (!isForcedShare) {
-                 dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, rootShare, depth, directory, parent));
-             }
          }
      
          // STEP 2:
