@@ -57,11 +57,6 @@ public interface FileManager {
     FileList getIncompleteFileList();
 
     /**
-     * Returns the number of pending files.
-     */
-    int getNumPendingFiles();
-
-    /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt> or
      * null if the file is not shared or not a store file.
      */
@@ -97,11 +92,6 @@ public interface FileManager {
      * Returns whether or not the loading is finished.
      */
     boolean isLoadFinished();
-
-    /**
-     * Returns whether or not the updating is finished.
-     */
-    boolean isUpdating();
 
     /**
      * Adds a given folder to be shared. NOTE: this remains for backwards

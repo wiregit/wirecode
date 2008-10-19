@@ -186,12 +186,6 @@ class FileManagerImpl implements FileManager, Service {
     private volatile int _updatingFinished = -1;
     
     /**
-     * If true, indicates that the FileManager is currently updating.
-     */
-    @InspectablePrimitive("filemanager currently updating")
-    private volatile boolean _isUpdating = false;
-    
-    /**
      * The last revision that finished both pending & updating.
      */
     private volatile int _loadingFinished = -1;
@@ -545,13 +539,6 @@ class FileManagerImpl implements FileManager, Service {
         return _loadingFinished == _revision;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isUpdating()
-     */
-    public boolean isUpdating() {
-        return _isUpdating;
-    }
-
     /** 
      * Loads all shared files, putting them in a queue for being added.
      *
@@ -618,7 +605,6 @@ class FileManagerImpl implements FileManager, Service {
     }
 
     private void loadDirectories(int revision) {
-        _isUpdating = true;
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(SharingUtils.PROGRAM_SHARE, null, revision);
         updateSharedDirectories(SharingUtils.PREFERENCE_SHARE, null, revision);
@@ -652,8 +638,6 @@ class FileManagerImpl implements FileManager, Service {
         //Friend files
         for(String key : friendFileLists.keySet())
             loadIndividualFiles(friendFileLists.get(key), revision);
-    
-        _isUpdating = false;
     }
     
     /**
@@ -1579,9 +1563,7 @@ class FileManagerImpl implements FileManager, Service {
    * @see com.limegroup.gnutella.FileManager#removeFolderIfShared(java.io.File)
    */
     public void removeSharedFolder(File folder) {
-        _isUpdating = true;
         removeSharedFolder(folder, null);
-        _isUpdating = false;
     }
   
   /**
@@ -1680,9 +1662,7 @@ class FileManagerImpl implements FileManager, Service {
         _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
         if (!isFolderShared(folder.getParentFile()))
             SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
-        _isUpdating = true;
         updateSharedDirectories(folder, folder, null, _revision, 1);
-        _isUpdating = false;
        
         return true;
     }
