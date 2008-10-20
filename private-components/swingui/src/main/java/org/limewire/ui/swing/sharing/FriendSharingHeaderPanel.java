@@ -117,6 +117,7 @@ public class FriendSharingHeaderPanel extends JXPanel {
 
         libraryButton.setForeground(fontColor);
         libraryButton.setBackgroundPainter(new ButtonPainter());
+        libraryButton.setBorderPainted(false);
         
         shareButton = new JXButton(I18n.tr("Share"), downIcon);       
         shareButton.setVisible(false);

@@ -13,12 +13,15 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.Border;
 
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -29,6 +32,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.CustomCheckBox;
 import org.limewire.ui.swing.components.HeadingLabel;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
+import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -156,8 +160,8 @@ public class MainDownloadPanel extends JPanel {
 	private class DownloadSettingsPanel extends JXPanel {	    	    
 		private final JButton pauseAllButton;
 		private final JButton resumeAllButton;
-	    private final JButton clearFinishedButton;
-		private final JCheckBox categorizeCheckBox;
+	    private final JXButton clearFinishedButton;
+		private final JCheckBox categoriseCheckBox;
 		private final JTextField searchBar;
 		private final JLabel titleLabel;
 		
@@ -172,16 +176,24 @@ public class MainDownloadPanel extends JPanel {
 
 			pauseAllButton = new JButton(pauseAction);	
 			resumeAllButton = new JButton(resumeAction);
-			clearFinishedButton = new JButton(clearAction);
-			categorizeCheckBox = new CustomCheckBox(categorizeAction);
+			clearFinishedButton = new JXButton(clearAction);
+			categoriseCheckBox = new CustomCheckBox(categorizeAction);
 
+			clearFinishedButton.setBackgroundPainter(new ButtonPainter());
+			clearFinishedButton.setOpaque(false);
+			clearFinishedButton.setForeground(Color.WHITE);
+			clearFinishedButton.setFont(new Font("Arial", Font.PLAIN, 10));
+			clearFinishedButton.setBorderPainted(false);
+			clearFinishedButton.setPreferredSize(
+			        new Dimension((int)clearFinishedButton.getPreferredSize().getWidth(), 21));
+						
 			titleLabel = new HeadingLabel(I18n.tr("Downloads"));
 			FontUtils.changeSize(titleLabel, 5);
 			FontUtils.changeStyle(titleLabel, Font.PLAIN);
 			
-			categorizeCheckBox.setOpaque(false);
-			categorizeCheckBox.setForeground(Color.WHITE);
-			FontUtils.changeStyle(categorizeCheckBox, Font.PLAIN);
+			categoriseCheckBox.setOpaque(false);
+			categoriseCheckBox.setForeground(Color.WHITE);
+			FontUtils.changeStyle(categoriseCheckBox, Font.PLAIN);
 			
 			searchBar = downloadMediator.getFilterTextField();
 			
@@ -206,27 +218,23 @@ public class MainDownloadPanel extends JPanel {
             gbc.gridy = 0;
             gbc.weightx = .5;
             gbc.insets = insets;
-            gbc.fill = GridBagConstraints.NONE;
+            gbc.fill = GridBagConstraints.VERTICAL;
             gbc.anchor = GridBagConstraints.LINE_START;
             titlePanel.add(titleLabel,gbc);
 			
 			JPanel restPanel = new JPanel();
 			restPanel.setOpaque(false);
 			
-         /*   gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.insets = insets;
-            restPanel.add(buttonPanel, gbc);          
-           */
-            
+			gbc.anchor = GridBagConstraints.NORTH;
             gbc.gridx++;
             gbc.gridy = 0;
             gbc.insets = insets;
-            restPanel.add(categorizeCheckBox, gbc);
+            restPanel.add(categoriseCheckBox, gbc);
 
+            gbc.anchor = GridBagConstraints.SOUTH;
 			gbc.gridx++;
 			gbc.gridy = 0;
-			gbc.insets = insets;
+            gbc.insets = insets;
 			restPanel.add(clearFinishedButton, gbc);
 			
 			gbc.gridx++;
@@ -235,18 +243,13 @@ public class MainDownloadPanel extends JPanel {
 			gbc.anchor = GridBagConstraints.LINE_END;
 			restPanel.add(searchBar, gbc);
 			
-			/*
-			gbc.gridx++;
-			restPanel.add(viewSelectionPanel, gbc);
-            */
-
 			add(titlePanel, BorderLayout.WEST);
             add(restPanel, BorderLayout.EAST);
 
 		}
 		
 		public boolean isCategorized(){
-	        return categorizeCheckBox.isSelected();
+	        return categoriseCheckBox.isSelected();
 	    }
 		
 	}

@@ -70,6 +70,7 @@ public class LibraryHeaderPanel extends JXPanel {
             shareAllButton.setForeground(fontColor);
             shareAllButton.setHorizontalTextPosition(SwingConstants.LEFT);
             shareAllButton.setBackgroundPainter(new ButtonPainter());
+            shareAllButton.setBorderPainted(false);
             shareAllButton.setFont(buttonFont);
             shareAllButton.setOpaque(false);
             shareAllButton.setFocusPainted(false);
