@@ -19,11 +19,11 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class RequestAuthenticatorImpl implements RequestAuthenticator {
-    final UserStore userStore;
+    final Authenticator userStore;
     final UriPatternMatcher protectedURIs;
     
     @Inject
-    public RequestAuthenticatorImpl(UserStore userStore) {
+    public RequestAuthenticatorImpl(Authenticator userStore) {
         this.userStore = userStore;
         protectedURIs = new UriPatternMatcher();
     }

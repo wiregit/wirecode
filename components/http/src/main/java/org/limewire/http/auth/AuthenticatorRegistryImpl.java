@@ -11,31 +11,34 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class UserStoreRegistryImpl implements UserStore, UserStoreRegistry {
+public class AuthenticatorRegistryImpl implements Authenticator, AuthenticatorRegistry {
     final ReadWriteLock lock;
-    final Set<UserStore> userStores;
+    final Set<Authenticator> userStores;
     
     @Inject
-    public UserStoreRegistryImpl() {
+    public AuthenticatorRegistryImpl() {
         lock = new ReentrantReadWriteLock();
-        userStores = new HashSet<UserStore>();
+        userStores = new HashSet<Authenticator>();
     }
 
-    public void register(UserStoreRegistry registry) {
+    public void register(AuthenticatorRegistry registry) {
     }
 
-    public void authenticate(Credentials credentials) {
+    public boolean authenticate(Credentials credentials) {
         lock.readLock().lock();
         try {
-            for(UserStore store : userStores) {
-                store.authenticate(credentials);
+            for(Authenticator store : userStores) {
+                if(store.authenticate(credentials)) {
+                    return true;
+                }
             }
         } finally {
             lock.readLock().unlock();
         }
+        return false;
     }
 
-    public void addStore(UserStore userStore) {
+    public void addAuthenticator(Authenticator userStore) {
         lock.writeLock().lock();
         try {
             userStores.add(userStore);

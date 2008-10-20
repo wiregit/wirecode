@@ -209,7 +209,7 @@ public class BrowseHostHandler {
         client.setSocket(socket);
         if(!friendPresence.getFriend().isAnonymous()) {
             String username = friendPresence.getFriend().getNetwork().getMyID();
-            String password = new String(friendPresence.getAuthToken());
+            String password = StringUtils.getUTF8String(friendPresence.getAuthToken());
             client.setCredentials(new UsernamePasswordCredentials(username, password));
         }
         // TODO
@@ -237,7 +237,7 @@ public class BrowseHostHandler {
         if(friendPresence.getFriend().isAnonymous()) {
             return "/";
         } else {
-            return "/browse/" + friendPresence.getFriend().getId();  // TODO URLEncode
+            return "/browse/friend";  // TODO URLEncode
         }
     }
 

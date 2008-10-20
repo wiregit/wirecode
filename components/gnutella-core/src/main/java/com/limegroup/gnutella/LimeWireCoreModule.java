@@ -28,11 +28,11 @@ import org.limewire.net.address.AddressEvent;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.promotion.LimeWirePromotionModule;
+import org.limewire.security.LimeWireSecurityModule;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
-import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
@@ -225,13 +225,13 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireHashTreeModule());        
         binder().install(new LimeWireDHTModule());
         binder().install(new LimeWireHttpModule());
+        binder().install(new LimeWireSecurityModule());
         binder().install(new LimeWireSearchModule());
         binder().install(new LimeWireStatisticsModule());
         binder().install(new LimeWireGnutellaStatisticsModule());
         binder().install(new LimeWireGnutellaRudpModule());
         binder().install(new LimeWireIOModule());
         binder().install(new LimeWireMojitoModule());
-        binder().install(new LimeWireSecurityCertificateModule());
         binder().install(new LimeWireGeocodeGlueModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());

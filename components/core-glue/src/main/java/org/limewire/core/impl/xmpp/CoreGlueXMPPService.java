@@ -4,27 +4,27 @@ import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
-import com.google.inject.Inject;
 import com.limegroup.gnutella.HTTPAcceptor;
-import com.limegroup.gnutella.uploader.BrowseRequestHandlerFactory;
+import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 
 @Singleton
 public class CoreGlueXMPPService implements Service {
 
     @Inject
     private final Provider<HTTPAcceptor> httpAcceptor;
-    private final BrowseRequestHandlerFactory browseRequestHandlerFactory;
-    private final Provider<AuthenticatingBrowseFriendListProvider> authenticatingBrowseFriendListProvider;
+    private final HttpRequestHandlerFactory httpRequestHandlerFactory;
+    private final Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider;
     
-    private final static String FRIEND_BROWSE_PATTERN = "/friend/browse/*";
+    private final static String FRIEND_BROWSE_PATTERN = "/friend/browse";
+    private final static String FRIEND_DOWNLOAD_PATTERN = "/friend/download";
 
-    public CoreGlueXMPPService(Provider<HTTPAcceptor> httpAcceptor, BrowseRequestHandlerFactory browseRequestHandlerFactory,
-           Provider<AuthenticatingBrowseFriendListProvider> authenticatingBrowseFriendListProvider) {
+    public CoreGlueXMPPService(Provider<HTTPAcceptor> httpAcceptor, HttpRequestHandlerFactory httpRequestHandlerFactory,
+           Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider) {
         this.httpAcceptor = httpAcceptor;
-        this.browseRequestHandlerFactory = browseRequestHandlerFactory;
+        this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.authenticatingBrowseFriendListProvider = authenticatingBrowseFriendListProvider;
     }
     
@@ -44,8 +44,8 @@ public class CoreGlueXMPPService implements Service {
 
     @Override
     public void start() {
-        httpAcceptor.get().registerHandler(FRIEND_BROWSE_PATTERN, browseRequestHandlerFactory.createBrowseRequestHandler(authenticatingBrowseFriendListProvider.get(), true)); 
-        httpAcceptor.get().registerHandler(FRIEND_BROWSE_PATTERN, browseRequestHandlerFactory.createBrowseRequestHandler(authenticatingBrowseFriendListProvider.get(), true));
+        httpAcceptor.get().registerHandler(FRIEND_BROWSE_PATTERN, httpRequestHandlerFactory.createBrowseRequestHandler(authenticatingBrowseFriendListProvider.get(), true)); 
+        httpAcceptor.get().registerHandler(FRIEND_DOWNLOAD_PATTERN, httpRequestHandlerFactory.createFileRequestHandler(authenticatingBrowseFriendListProvider.get(), true));
     }
 
     @Override

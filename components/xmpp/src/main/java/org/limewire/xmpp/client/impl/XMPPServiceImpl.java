@@ -22,6 +22,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.security.auth.UserStore;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -43,6 +44,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private XMPPErrorListener errorListener;
     private Provider<EventListener<XMPPConnectionEvent>> connectionListener;
     private AddressEvent lastEvent;
+    private final UserStore userStore;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
@@ -50,13 +52,14 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                     Provider<EventListener<FileOfferEvent>> fileOfferListener,
                     Provider<EventListener<LibraryChangedEvent>> libraryChangedListener,
                     Provider<EventListener<XMPPConnectionEvent>> connectionListener,
-                    AddressFactory addressFactory) {
+                    AddressFactory addressFactory, UserStore userStore) {
         this.configurations = configurations;
         this.rosterListener = rosterListener;
         this.fileOfferListener = fileOfferListener;
         this.libraryChangedListener = libraryChangedListener;
         this.connectionListener = connectionListener;
         this.addressFactory = addressFactory;
+        this.userStore = userStore;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
     }
     
@@ -134,7 +137,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
         synchronized (this) {
             XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(),
-                    fileOfferListener.get(), libraryChangedListener.get(), connectionListener.get(), addressFactory);
+                    fileOfferListener.get(), libraryChangedListener.get(), connectionListener.get(), addressFactory, userStore);
             connection.initialize();
             connections.add(connection);
             if(lastEvent != null) {

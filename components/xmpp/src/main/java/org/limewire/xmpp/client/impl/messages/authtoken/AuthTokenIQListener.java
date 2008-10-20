@@ -14,6 +14,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.security.auth.UserStore;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
@@ -26,15 +27,15 @@ public class AuthTokenIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AuthTokenIQListener.class);
 
     private final XMPPConnection connection;
-    //private final AuthTokenProvider provider;
+    private final UserStore userStore;
      
     private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
     private final RosterEventHandler rosterEventHandler;
 
-    public AuthTokenIQListener(XMPPConnection connection
-                             /*, AuthTokenProvider provider*/) {
+    public AuthTokenIQListener(XMPPConnection connection,
+                               UserStore userStore) {
         this.connection = connection;
-        //this.provider = provider;
+        this.userStore = userStore;
         this.rosterEventHandler = new RosterEventHandler();
     }
 
@@ -97,13 +98,17 @@ public class AuthTokenIQListener implements PacketListener {
     }
 
     private void sendResult(AuthTokenIQ packet) {
-        byte [] authToken = packet.getFrom().getBytes(); // provider.getAuthToken(packet.getFrom())
-        AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
-        queryResult.setTo(packet.getFrom());
-        queryResult.setFrom(packet.getTo());
-        queryResult.setPacketID(packet.getPacketID());
-        queryResult.setType(IQ.Type.RESULT);
-        connection.sendPacket(queryResult);
+        try {
+            byte [] authToken = userStore.getPassword(limePresences.get(packet.getFrom()).getFriend().getId()).getBytes("UTF-8");
+            AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
+            queryResult.setTo(packet.getFrom());
+            queryResult.setFrom(packet.getTo());
+            queryResult.setPacketID(packet.getPacketID());
+            queryResult.setType(IQ.Type.RESULT);
+            connection.sendPacket(queryResult);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+        }        
     }
 
     public PacketFilter getPacketFilter() {

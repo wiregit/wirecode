@@ -11,7 +11,6 @@
 	
     <import file="../common/build-macros.xml"/>
     <import file="../common/build.xml" />
-	<import file="../http/build.xml" />
 	<import file="../io/build.xml" />
     
     <target name="initialize" depends="lw-common.initialize, lw-http.initialize, lw-io.initialize" unless="initialized.security">
@@ -20,8 +19,10 @@
 			    <path refid="build.limewire.components.io.buildpath" />
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
 				<pathelement location="${limewire.lib.jars}/dnsjava.jar"/>
-			    <path refid="build.limewire.components.common.buildpath"/>
-				<path refid="build.limewire.components.http.buildpath"/>
+                <pathelement location="${limewire.lib.jars}/httpclient-4.0-beta1.jar"/>
+                <pathelement location="${limewire.lib.jars}/httpcore-4.0-beta2.jar"/>
+		       	<pathelement location="${limewire.lib.jars}/httpcore-nio-4.0-beta2.jar"/>
+                <path refid="build.limewire.components.common.buildpath"/>
 			</src-classpath>
         </do.setup-properties>
     </target>

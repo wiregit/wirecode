@@ -16,8 +16,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 
 import com.google.inject.Inject;
@@ -32,14 +32,14 @@ import com.google.inject.Singleton;
 class KeyStoreProviderImpl implements KeyStoreProvider {
     private volatile KeyStore keyStore = null;
 
-    private final Provider<LimeHttpClient> httpClient;
+    private final Provider<HttpClient> httpClient;
     private volatile File keyStoreLocation;
     private volatile char[] keyStorePassword;
 
     private final Log LOG = LogFactory.getLog(KeyStoreProviderImpl.class);
 
     @Inject
-    KeyStoreProviderImpl(Provider<LimeHttpClient> httpClient) {
+    KeyStoreProviderImpl(Provider<HttpClient> httpClient) {
         this.httpClient = httpClient;
         this.keyStoreLocation = CertificateTools.getKeyStoreLocation();
         this.keyStorePassword = CertificateTools.getKeyStorePassword();
@@ -87,7 +87,7 @@ class KeyStoreProviderImpl implements KeyStoreProvider {
     }
 
     KeyStore getKeyStoreFromNetwork() throws IOException {
-        LimeHttpClient client = httpClient.get();
+        HttpClient client = httpClient.get();
         HttpGet get = new HttpGet(CertificateTools.getKeyStoreURI());
         
 
@@ -117,7 +117,13 @@ class KeyStoreProviderImpl implements KeyStoreProvider {
                         + response.getStatusLine());
             }
         } finally {
-            client.releaseConnection(response);
+            if(response != null && response.getEntity() != null) {
+                try {
+                    response.getEntity().consumeContent();
+                } catch (IOException e) {
+                    LOG.error(e);
+                }            
+            }
         }
     }
 

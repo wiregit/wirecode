@@ -25,7 +25,7 @@ public class AuthenticatingBrowseFriendListProviderTest extends BaseTestCase {
     private Mockery context;
     private FileManager fileManager;
     private MACCalculator calculator;
-    private AuthenticatingBrowseFriendListProvider browseFriendListProvider;
+    private FriendFileListProvider browseFriendListProvider;
 
     public AuthenticatingBrowseFriendListProviderTest(String name) {
         super(name);
@@ -36,7 +36,7 @@ public class AuthenticatingBrowseFriendListProviderTest extends BaseTestCase {
         context = new Mockery();
         fileManager = context.mock(FileManager.class);
         calculator = context.mock(MACCalculator.class);
-        browseFriendListProvider = new AuthenticatingBrowseFriendListProvider(fileManager, calculator);
+        browseFriendListProvider = new FriendFileListProvider(fileManager);
     }
 
     public void testGetFriendForValidEntries() throws Exception {

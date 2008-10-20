@@ -1,7 +1,7 @@
 package org.limewire.xmpp.api.client;
 
-import org.limewire.listener.EventListener;
 import org.limewire.core.api.friend.Network;
+import org.limewire.listener.EventListener;
 
 /**
  * Allows the xmpp service user to provide configuration for xmpp login.

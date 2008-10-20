@@ -22,7 +22,6 @@ import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
 import com.google.inject.Provider;
-import com.google.inject.Inject;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
@@ -156,7 +155,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
         // process request
         if (fileRequest != null) {
-            FileDesc fd = getFileDesc(fileRequest);
+            FileDesc fd = getFileDesc(fileRequest, request, context);
             if (fd != null) {
                 uploader = findFileAndProcessHeaders(request, response, context, fileRequest, fd);
             } else {
@@ -446,7 +445,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
      * 
      * @return null, if <code>request</code> does not map to a file
      */
-    private FileDesc getFileDesc(FileRequest request) {
+    private FileDesc getFileDesc(FileRequest request, HttpRequest httpRequest, HttpContext context) throws IOException, HttpException {
         FileDesc fd = null;
 
         int index = request.index;
@@ -456,7 +455,9 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
         // first verify the file index
         fd = fileManager.get(index);
-        if(fd == null || (!fileManager.getGnutellaSharedFileList().contains(fd) 
+        // TODO incomplete file list should NOT be used in conjunction with friend file lists?
+        // TODO move into GnutellaFileListProvider?
+        if(fd == null || (!fileListProvider.getFileList(httpRequest, context).contains(fd) 
         			&& !fileManager.getIncompleteFileList().contains(fd)) ){
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid index in request does not map to file descriptor: " + request);

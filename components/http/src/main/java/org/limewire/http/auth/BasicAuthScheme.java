@@ -17,11 +17,11 @@ import com.google.inject.Singleton;
 @Singleton
 public class BasicAuthScheme implements ServerAuthScheme {
     
-    private final UserStore userStore;
+    private final Authenticator userStore;
     private boolean complete;
 
     @Inject
-    public BasicAuthScheme(UserStore userStore) {
+    public BasicAuthScheme(Authenticator userStore) {
         this.userStore = userStore;
     }
 

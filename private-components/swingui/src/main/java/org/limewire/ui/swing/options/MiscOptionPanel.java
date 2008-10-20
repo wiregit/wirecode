@@ -8,8 +8,6 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.limewire.core.settings.UISettings;
 import org.limewire.ui.swing.friends.XMPPEventHandler;
 import org.limewire.ui.swing.util.I18n;
@@ -17,6 +15,8 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Misc Option View
@@ -164,7 +164,7 @@ public class MiscOptionPanel extends OptionPanel {
             XMPPConnectionConfiguration config = xmppEventHandler.getConfig(GMAIL_SERVICE_NAME);
             return config.isAutoLogin() != signIntoOnStartupCheckBox.isSelected()
                     || !usernameTextField.getText().equals(config.getUsername())
-                    || !passwordField.getPassword().equals(config.getPassword());
+                    || !new String(passwordField.getPassword()).equals(config.getPassword());
         }
 
         @Override

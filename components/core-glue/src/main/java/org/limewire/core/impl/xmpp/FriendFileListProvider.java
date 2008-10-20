@@ -17,12 +17,12 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.uploader.HttpException;
 import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
-public class AuthenticatingBrowseFriendListProvider implements HttpRequestFileListProvider {
+public class FriendFileListProvider implements HttpRequestFileListProvider {
 
     private final FileManager fileManager;
 
     @Inject
-    public AuthenticatingBrowseFriendListProvider(FileManager fileManager) {
+    public FriendFileListProvider(FileManager fileManager) {
         this.fileManager = fileManager;
     }
     

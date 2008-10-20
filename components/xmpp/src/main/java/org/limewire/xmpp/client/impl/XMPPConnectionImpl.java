@@ -41,6 +41,7 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
+import org.limewire.security.auth.UserStore;
 
 //import com.limegroup.gnutella.BrowseHostReplyHandler;
 
@@ -62,18 +63,20 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     protected AuthTokenIQListener authTokenIQListener;
     protected LibraryChangedIQListener libChangedIQListener;
     protected volatile AddressEvent lastEvent;
+    private final UserStore userStore;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventListener<RosterEvent> rosterListener,
                        EventListener<FileOfferEvent> fileOfferListener,
                        EventListener<LibraryChangedEvent> libraryChangedEventEventListener,
                        EventListener<XMPPConnectionEvent> connectionListener,
-                       AddressFactory addressFactory) {
+                       AddressFactory addressFactory, UserStore userStore) {
         this.configuration = configuration;
         this.fileOfferListener = fileOfferListener;
         this.libraryChangedEventEventListener = libraryChangedEventEventListener;
         this.connectionListener = connectionListener;
         this.addressFactory = addressFactory;
+        this.userStore = userStore;
         this.rosterListeners = new EventListenerList<RosterEvent>();
         if(configuration.getRosterListener() != null) {
             this.rosterListeners.addListener(configuration.getRosterListener());
@@ -190,7 +193,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     fileTransferIQListener = new FileTransferIQListener(fileOfferListener);
                     connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());  
                     
-                    authTokenIQListener = new AuthTokenIQListener(connection);
+                    authTokenIQListener = new AuthTokenIQListener(connection, userStore);
                     XMPPConnectionImpl.this.rosterListeners.addListener(authTokenIQListener.getRosterListener());
                     connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
 
