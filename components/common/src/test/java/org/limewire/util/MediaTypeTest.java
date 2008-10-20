@@ -89,12 +89,22 @@ public class MediaTypeTest extends BaseTestCase {
         }
     }
     
+    /**
+     * Ensures an old snapshot of serialized media types is correctly deserialized
+     * and mapped to the instances of current default media types. 
+     */
     public void testDeserializationOfDefaultTypesWithOldDescriptionKeys() throws Exception {
         ObjectInputStream in = new ConverterObjectInputStream(new FileInputStream(mediatypesWithOldDescriptionKeys));
-        
-        for (MediaType type : MediaType.getDefaultMediaTypes()) {
+        while (in.available() > 0) {
             MediaType read = (MediaType)in.readObject();
-            assertSame(type, read);
+            boolean found =  false;
+            for (MediaType defaultType : MediaType.getDefaultMediaTypes()) {
+                if (read == defaultType) {
+                    found = true;
+                }
+            }
+            assertTrue("default mediatype not found", found);
         }
+     
     }
 }    
