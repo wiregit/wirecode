@@ -41,7 +41,7 @@ public class SearchResultMenu extends JPopupMenu {
             }
         });
 
-        add(new CopyMagnetLinkToClipboardAction(tr("Copy link to clipboard"), vsr));
+        add(new CopyMagnetLinkToClipboardAction(vsr));
 
         addSeparator();
 

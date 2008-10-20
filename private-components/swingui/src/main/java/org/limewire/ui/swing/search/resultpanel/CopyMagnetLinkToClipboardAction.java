@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -11,8 +13,8 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 final class CopyMagnetLinkToClipboardAction extends AbstractAction {
     private final VisualSearchResult vsr;
 
-    CopyMagnetLinkToClipboardAction(String name, VisualSearchResult vsr) {
-        super(name);
+    CopyMagnetLinkToClipboardAction(VisualSearchResult vsr) {
+        super(tr("Copy link to clipboard"));
         this.vsr = vsr;
     }
 
