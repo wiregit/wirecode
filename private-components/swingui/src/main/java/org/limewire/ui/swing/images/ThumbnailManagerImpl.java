@@ -71,7 +71,7 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
         if(file == null)
             return null;
         Icon icon = thumbnails.get(file);
-        if(icon == null && !loading.containsKey(file)) { System.out.println("loding " + file.getName());
+        if(icon == null && !loading.containsKey(file)) {
             loading.put(file, "");
             ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon, list, index));
         } else if(icon == null) {
