@@ -70,7 +70,6 @@ class FileRequestParser {
         }
     
         FileDesc desc = fileManager.getFileDesc(urn);
-        System.out.println("desc is: " + desc);
         if(desc == null || (!fileManager.getGnutellaSharedFileList().contains(desc) 
         			&& !fileManager.getIncompleteFileList().contains(desc))) {
             return null;
