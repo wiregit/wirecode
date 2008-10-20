@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -15,11 +14,18 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.components.Circle;
 import org.limewire.ui.swing.components.NumberedHyperLinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
 
-import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+/**
+ * Displays a set of hyperlinks to jump to the appropriate section that is
+ * being shared. Each hyperlink displays the number of shared files of that
+ * category next to it. Some hyperlinks are not always shown. For these
+ * the hyperlink disappears when its category size == 0
+ */
 public class SharingShortcutPanel extends JPanel {
 
     @Resource
@@ -28,11 +34,11 @@ public class SharingShortcutPanel extends JPanel {
     private int circleSize;
     
     private String[] names;
-    private List<EventList<LocalFileItem>> models;
+    private List<FilterList<LocalFileItem>> models;
     
     private List<ButtonCircleComponent> buttons;
      
-    public SharingShortcutPanel(String[] names, Action[] actions, List<EventList<LocalFileItem>> models, boolean[] alwaysShown) {
+    public SharingShortcutPanel(String[] names, Action[] actions, List<FilterList<LocalFileItem>> models, boolean[] alwaysShown) {
         this.names = names;
         this.models = models;
 
@@ -58,26 +64,42 @@ public class SharingShortcutPanel extends JPanel {
         }
     }
     
-    public void setModel(List<EventList<LocalFileItem>> model) {
+    /**
+     * Sets the model for all the hyperlinks
+     */
+    public void setModel(List<FilterList<LocalFileItem>> model) {
         for(int i = 0; i < model.size(); i++) {
             buttons.get(i).setModel(model.get(i));
         }
         this.models = model;
     }
     
+    /**
+     * Location for the circle to drawn in relation to the hyperlink
+     */
     public static enum CircleLocation {
         LEFT, RIGHT, NONE;
     }
     
+    /**
+     * Creates a hyperlink button. This hyperlink button jumps to the category 
+     * of shared files it represents. Besides the hyperlink is the number of 
+     * shared files for that category. The hyperlink can be chosen to only be
+     * displayed if the size of shared files for that category > 0. 
+     * 
+     * A circle can also be chosen to be drawn to the left, right or not at all.
+     */
     private class ButtonCircleComponent extends JPanel {
         
         private NumberedHyperLinkButton button;
-        private EventList<LocalFileItem> model;
+        private FilterList<LocalFileItem> model;
         private SharingListEventListener listener;
+        private boolean alwaysShow;
         
-        public ButtonCircleComponent(String name, Action action, EventList<LocalFileItem> model, CircleLocation loc, boolean alwaysShown) {
+        public ButtonCircleComponent(String name, Action action, FilterList<LocalFileItem> model, CircleLocation loc, boolean alwaysShown) {
             
             this.model = model;
+            this.alwaysShow = alwaysShown;
             createButton(name, action, alwaysShown);
             
             setLayout(new MigLayout("insets 0 0 0 0"));
@@ -105,27 +127,36 @@ public class SharingShortcutPanel extends JPanel {
             model.addListEventListener(listener);
         }
         
-        public void setModel(EventList<LocalFileItem> newModel) {
+        public void setModel(FilterList<LocalFileItem> newModel) {
             if(model != null) {
-                final EventList<LocalFileItem> toRemove = model;
-                SwingUtilities.invokeLater(new Runnable() {
-                     @Override
+                final FilterList<LocalFileItem> toRemove = model; 
+                
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
-                         toRemove.removeListEventListener(listener);
+                        toRemove.removeListEventListener(listener);
                     }
                 });
             }
             this.model = newModel;
             model.addListEventListener(listener);
             button.setDisplayNumber(model.size());
+            
+            //if link not always visible, only display if size > 0
+            if(!alwaysShow) {
+                setVisible(model.size() > 0);
+            }
         }
         
         public void setNumberLabel(int size) {
             button.setDisplayNumber(size);
         }
-        
 
-        
+        /**
+         * Listens for changes on this list. Updates the number of shared files next to the
+         * hyperlink button. If the hyperlink is not always shown, will hide/display
+         * the hyperlink as the list size changes.
+         */
         private class SharingListEventListener implements ListEventListener<LocalFileItem> {
             private boolean alwaysShow;
             
@@ -142,11 +173,9 @@ public class SharingShortcutPanel extends JPanel {
                 if(listChanges.getSourceList() == model) {                    
                     final int size = listChanges.getSourceList().size();
                     setNumberLabel(size);  
+                    // if link not always shown, only show if size > 0
                     if(!alwaysShow) {
-                        if(size == 0)// && button.isVisible())
-                            button.setVisible(false);
-                        else// if(!button.isVisible())
-                            button.setVisible(true);
+                        setVisible(size > 0);
                     }
                 }
             }

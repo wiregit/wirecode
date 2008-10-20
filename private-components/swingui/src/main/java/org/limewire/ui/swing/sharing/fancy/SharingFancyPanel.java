@@ -171,8 +171,8 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
                 Category.PROGRAM, Category.OTHER));
     }
     
-    private List<EventList<LocalFileItem>> getFilteredListsInOrderOf(Category... categories) {
-        List<EventList<LocalFileItem>> list = new ArrayList<EventList<LocalFileItem>>(categories.length);
+    private List<FilterList<LocalFileItem>> getFilteredListsInOrderOf(Category... categories) {
+        List<FilterList<LocalFileItem>> list = new ArrayList<FilterList<LocalFileItem>>(categories.length);
         for(Category category : categories) {
             list.add(filterLists.get(category));
         }
