@@ -117,17 +117,5 @@ public abstract class Dialog extends JDialog {
         }
     }
 
-    protected static class CopyToClipboard extends AbstractAction {
-    
-            public CopyToClipboard(String name) {
-                super(name);
-            }
-    
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //TODO
-            }
-        }
-
     protected abstract void commit();
 }

@@ -47,7 +47,7 @@ public class SearchResultPropertiesImpl extends Dialog implements SearchResultPr
         subheading.setText(vsr.getSubHeading());
         fileSize.setText(vsr.getPropertyString(PropertyKey.FILE_SIZE));
         metadata.setText("Key-value pairs go here");
-        copyToClipboard.setAction(new CopyToClipboard(tr("Copy link to clipboard")));
+        copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(tr("Copy link to clipboard"), vsr));
         
         //Clear the table
         readOnlyInfoModel.setRowCount(0);
