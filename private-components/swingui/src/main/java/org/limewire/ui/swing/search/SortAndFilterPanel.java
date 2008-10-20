@@ -39,6 +39,7 @@ import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.CommonUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
@@ -233,19 +234,9 @@ public class SortAndFilterPanel extends JXPanel {
             public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
                 String v1 = vsr1.getPropertyString(key);
                 String v2 = vsr2.getPropertyString(key);
-                Long l1 = parseLong(v1);
-                Long l2 = parseLong(v2);
+                Long l1 = CommonUtils.parseLongNoException(v1);
+                Long l2 = CommonUtils.parseLongNoException(v2);
                 return compareNullCheck(l1, l2, ascending, true);
-            }
-
-            private Long parseLong(String v) {
-                Long l = null;
-                try {
-                    l = Long.valueOf(v);
-                } catch (NumberFormatException e) {
-                    // continue value will be null
-                }
-                return l;
             }
         };
     }

@@ -571,4 +571,20 @@ public class CommonUtils {
         else
             return getUserHomeDir();
     }
+    
+    /**
+     * Parses a long from the given string swallowing any exceptions. null is
+     * returned if there is an error parsing the string.
+     */
+    public static Long parseLongNoException(String str) {
+        Long num = null;
+        if (str != null) {
+            try {
+                num = Long.valueOf(str);
+            } catch (NumberFormatException e) {
+                // continue; null is returned
+            }
+        }
+        return num;
+    }
 }
