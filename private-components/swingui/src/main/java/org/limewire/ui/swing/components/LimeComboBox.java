@@ -38,12 +38,17 @@ public class LimeComboBox extends JXButton {
     private final List<Action> actions;
     private Action             selectedAction;
     private JMenuItem          selectedComponent;
-            
+
+    private final List<SelectionListener> selectionListeners 
+        = new LinkedList<SelectionListener>();
+    
     private Color pressedTextColour  = null;
     private Color rolloverTextColour = null;
     
     private boolean hasSize = false;
     private boolean isMenuUpdated = false;
+    
+    private final LimeComboBox parent = this;
     
     private final JPopupMenu menu;
     
@@ -76,9 +81,7 @@ public class LimeComboBox extends JXButton {
             @Override
             public void mousePressed(MouseEvent e) {
                 updateMenu();
-        
-                selectedComponent.setBackground(ITEM_BACK);
-                
+                        
                 if (getText() == null)
                     menu.setPreferredSize(new Dimension(getWidth(), 
                             (int) menu.getPreferredSize().getHeight()));
@@ -93,23 +96,37 @@ public class LimeComboBox extends JXButton {
     public void  addActions(List<Action> actions) {
         this.isMenuUpdated = false;
         
+        if (actions == null) return;
+        
         this.actions.addAll(actions);
     }
     
     public void  addAction(Action action) {
         this.isMenuUpdated = false;
+        this.hasSize = false;
         
         this.actions.add(action);                
     }
     
+    public void  removeAllActions() {
+        this.isMenuUpdated = false;
+        this.hasSize = false;
+        
+        this.actions.clear();
+    }
+    
     public void  removeAction(Action action) {
         this.isMenuUpdated = false;
+        this.hasSize = false;
         
         this.actions.remove(action);
     }
     
     public void setSelectedAction(Action action) {
         this.selectedAction = action;
+        
+        this.isMenuUpdated = false;
+        
     }
     
     public Action getSelectedAction() {
@@ -246,6 +263,8 @@ public class LimeComboBox extends JXButton {
     }
     
     private void updateSize() {
+        if (this.getText() == null && this.actions.isEmpty())  return;
+        
         this.hasSize = true;
         
         Rectangle2D labelRect = null;
@@ -360,6 +379,10 @@ public class LimeComboBox extends JXButton {
             // Change selection in parent combo box
             selectedAction = this.wrappedAction;
             selectedComponent = (JMenuItem) e.getSource();
+
+          // Fire the parent listeners
+          for ( SelectionListener listener : selectionListeners )
+                listener.selectionChanged(wrappedAction);
             
             // Call original action
             this.wrappedAction.actionPerformed(e);   
@@ -417,8 +440,6 @@ public class LimeComboBox extends JXButton {
             }
             @Override
             public void mouseEntered(MouseEvent e) {
-                selectedComponent.setBackground(Color.WHITE);
-                selectedComponent.updateUI();
             }
             @Override
             public void mouseExited(MouseEvent e) {
@@ -432,7 +453,17 @@ public class LimeComboBox extends JXButton {
         });
     }
     
+   
+    public void addSelectionListener(SelectionListener listener) {
+        selectionListeners.add(listener);
+    }
     
+    public interface SelectionListener {
+        public void selectionChanged(Action item);
+    }
+    
+
+    // Test harness
     public static void main(String[] args) {
         
         JFrame window = new JFrame();
@@ -443,28 +474,17 @@ public class LimeComboBox extends JXButton {
         Action one = new AbstractAction("  one") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
             }
         };
         Action two = new AbstractAction("two two    ") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
             }
         };
         AbstractAction three = new AbstractAction("threethree three") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
-                
-                
             }
-            
-             
-            
         };
         
         Action[] actions = new Action[] {one,two,three};
