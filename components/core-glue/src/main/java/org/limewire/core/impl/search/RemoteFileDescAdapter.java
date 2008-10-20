@@ -94,7 +94,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                         .getValue(LimeXMLNames.VIDEO_WIDTH));
 
                 
-                int quality = toVideoQualityScore(getFileExtension(), bitrate, length, height,
+                int quality = toVideoQualityScore(getFileExtension(),getSize(), bitrate, length, height,
                         width);
                 if(quality > 0) {
                     set(properties, PropertyKey.QUALITY, quality);
@@ -407,9 +407,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                 } else {
                     quality = 3;
                 }
-            } else if ("wma".equalsIgnoreCase(fileExtension)
-
-            ) {
+            } else if ("wma".equalsIgnoreCase(fileExtension)) {
                 if (bitrate < 64) {
                     quality = 1;
                 } else if (bitrate < 128) {
@@ -445,13 +443,42 @@ public class RemoteFileDescAdapter implements SearchResult {
         }
         return quality;
     }
-
-    private int toVideoQualityScore(String fileExtension, Long bitrate, Long length, Long height,
+   
+   /**
+    * TODO use a better analysis to map video attributes to quality for now using the following articles as a guide for now.
+    * 
+    * Right now the scoring is somewhat arbitrary.
+    * 
+    * Returns 1 of 4 quality scores.
+    * 
+    * 0 - unscored
+    * 1 - poor
+    * 2 - good
+    * 3 - excellent
+    */
+    private int toVideoQualityScore(String fileExtension, Long fileSize, Long bitrate, Long length, Long height,
             Long width) {
         int quality = 0;
-        if (bitrate != null && length != null && height != null && width != null) {
-
-        }
+        
+        if( "mpg".equalsIgnoreCase(fileExtension) && height != null && width != null) {
+            if((height * width) < (352 * 240)) {
+                quality = 1;
+            } else if((height * width) < (352 * 480) ) {
+                quality = 2;
+            } else { 
+                quality = 3; 
+            }
+        } else if( length != null && length < 60) {
+            quality = 1;
+        } else if (fileSize != null) {
+            if(fileSize < (5 * 1024 * 1024)) {
+                quality = 1;
+            } else if (fileSize < (100 * 1024 * 1024)) {
+                quality = 2;
+            } else {
+                quality = 3;
+            }
+        } 
         return quality;
     }
 }

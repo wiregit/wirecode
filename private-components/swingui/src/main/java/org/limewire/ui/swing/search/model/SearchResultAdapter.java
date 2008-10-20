@@ -361,7 +361,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     }
 
     private String toQualityString(long qualityScore) {
-        if (qualityScore == 1) {
+        if (qualityScore <= 1) {
             return I18n.tr("Poor");
         } else if (qualityScore == 2) {
             return I18n.tr("Good");
