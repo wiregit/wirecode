@@ -20,17 +20,16 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
-import org.limewire.ui.swing.sharing.menu.FriendSharingActionHandler;
-import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
+import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Table for displaying a list of friends in the shared view.
@@ -56,39 +55,38 @@ public class FriendNameTable extends JXTable {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setShowGrid(false, false);
         setColumnSelectionAllowed(false);
-                       
-        final FriendSharingPopupHandler handler = new FriendSharingPopupHandler(this, new FriendSharingActionHandler(navigator, libraryManager), remoteLibraryManager, shareListManager);
 
         setTransferHandler(new FriendTransferHandler(shareListManager));
-        
         setDropMode(DropMode.ON);
-        
-        addMouseListener(new MouseAdapter() {
-            
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-
-            private void maybeShowPopup(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    int col = columnAtPoint(e.getPoint());
-                    int row = rowAtPoint(e.getPoint());
-                    if(row != getSelectedRow()) {
-                        setRowSelectionInterval(row, row);
-                    }
-                    if (row >= 0 && col >= 0) {
-                        handler.maybeShowPopup(
-                            e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-            }
-        });
+    }
+    
+    public void addPopupListener(final TablePopupHandler handler) {
+          addMouseListener(new MouseAdapter() {
+          
+          @Override
+          public void mouseReleased(MouseEvent e) {
+              maybeShowPopup(e);
+          }
+    
+          @Override
+          public void mousePressed(MouseEvent e) {
+              maybeShowPopup(e);
+          }
+    
+          private void maybeShowPopup(MouseEvent e) {
+              if (e.isPopupTrigger()) {
+                  int col = columnAtPoint(e.getPoint());
+                  int row = rowAtPoint(e.getPoint());
+                  if(row != getSelectedRow()) {
+                      setRowSelectionInterval(row, row);
+                  }
+                  if (row >= 0 && col >= 0) {
+                      handler.maybeShowPopup(
+                          e.getComponent(), e.getX(), e.getY());
+                  }
+              }
+          }
+      });
     }
     
     public void setTableModel(EventList<FriendItem> eventList, TableFormat<FriendItem> tableFormat) {

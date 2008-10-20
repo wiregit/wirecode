@@ -15,20 +15,16 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.sharing.actions.SharingAddAllAction;
-import org.limewire.ui.swing.sharing.friends.FriendUpdate;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
+public class SharingFriendEmptyPanel extends JPanel {
 
     @Resource
     Icon friendIcon;
@@ -49,8 +45,7 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
     private static final String TEXT_TEMPLATE = "To share with {0}, drag files here, or use the shortcuts below to share files.";
     
     @Inject
-    public SharingFriendEmptyPanel(LibraryManager libraryManager) {
-        
+    public SharingFriendEmptyPanel(LibraryManager libraryManager) {       
         GuiUtils.assignResources(this); 
         
         setBackground(Color.WHITE);
@@ -103,13 +98,8 @@ public class SharingFriendEmptyPanel extends JPanel implements FriendUpdate {
         }
     }
     
-    @Override
     public void setFriendName(String name) {
         setText(name);
-    }
-
-    @Override
-    public void setEventList(EventList<LocalFileItem> model) {
     }
     
     public void setUserFileList(FriendFileList fileList) {

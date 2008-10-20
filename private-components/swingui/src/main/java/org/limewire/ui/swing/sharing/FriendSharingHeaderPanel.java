@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.MessageFormat;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
@@ -18,24 +17,24 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.Category;
-import org.limewire.core.api.library.FriendFileList;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.ui.swing.components.HeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.painter.SubpanelPainter;
-import org.limewire.ui.swing.sharing.actions.SharingAddAction;
-import org.limewire.ui.swing.sharing.friends.FriendUpdate;
+import org.limewire.ui.swing.sharing.actions.AddNewAudioAction;
+import org.limewire.ui.swing.sharing.actions.AddNewImageAction;
+import org.limewire.ui.swing.sharing.actions.AddNewVideoAction;
+import org.limewire.ui.swing.sharing.actions.GoToLibraryAction;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import ca.odell.glazedlists.EventList;
 
 /**
  * Header for the Friend Sharing Panel. Displays the friend's name, 
@@ -48,7 +47,7 @@ import ca.odell.glazedlists.EventList;
  * file types with them.
  */
 @Singleton
-public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
+public class FriendSharingHeaderPanel extends JXPanel {
     
     private final String staticText = I18n.tr("Sharing with {0}", "");
     
@@ -65,6 +64,9 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
     @Resource 
     private int fontSize;
     
+    private final RemoteLibraryManager remoteLibraryManager;
+    private final Navigator navigator;
+    
     private HeadingLabel titleLabel;
     private JTextField filterBox;
     
@@ -75,15 +77,22 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
     private JCheckBoxMenuItem videoMenu;
     private JCheckBoxMenuItem imageMenu;
     
-    private SharingAddAction musicAction;
-    private SharingAddAction videoAction;
-    private SharingAddAction imageAction;
+    private AddNewAudioAction audioAction;
+    private AddNewImageAction imageAction;
+    private AddNewVideoAction videoAction;
     
     private JPopupMenu popup;
     
     @Inject
-    public FriendSharingHeaderPanel(LibraryManager libraryManager) {               
+    public FriendSharingHeaderPanel(LibraryManager libraryManager, RemoteLibraryManager remoteLibraryManager, Navigator navigator, AddNewAudioAction audioAction, AddNewImageAction imageAction, AddNewVideoAction videoAction) {               
         GuiUtils.assignResources(this);
+        
+        this.remoteLibraryManager = remoteLibraryManager;
+        this.navigator = navigator;
+        
+        this.audioAction = audioAction;
+        this.imageAction = imageAction;
+        this.videoAction = videoAction;
         
         setBackgroundPainter(new SubpanelPainter());
 
@@ -103,7 +112,7 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
         FontUtils.changeStyle(titleLabel, Font.PLAIN);
         filterBox = new PromptTextField();
             
-        libraryButton = new LibraryButton(I18n.tr("Library"));
+        libraryButton = new LibraryButton(new GoToLibraryAction(navigator, null));
         libraryButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
 
         libraryButton.setForeground(fontColor);
@@ -118,12 +127,8 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
     }
     
     private void createPopupMenu(LibraryManager libraryManager) {
-        musicAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.AUDIO);
-        videoAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.VIDEO);
-        imageAction = new SharingAddAction(libraryManager.getLibraryManagedList(), Category.IMAGE);
-        
         audioMenu = new JCheckBoxMenuItem(I18n.tr("All music in My Library"));
-        audioMenu.addActionListener(musicAction);
+        audioMenu.addActionListener(audioAction);
         
         videoMenu = new JCheckBoxMenuItem(I18n.tr("All videos in My Library"));
         videoMenu.addActionListener(videoAction);
@@ -157,47 +162,39 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
         add(filterBox, "gapafter 10");
     }
     
-    public void setModel(FriendFileList fileList) {
-        musicAction.setUserFileList(fileList);
-        videoAction.setUserFileList(fileList);
-        imageAction.setUserFileList(fileList);
-    }
-    
-    @Override
-    public void setFriendName(String name) {
-        titleLabel.setText(MessageFormat.format(staticText, name));
-        libraryButton.setFriend(name);
-    }
-
-    @Override
-    public void setEventList(EventList<LocalFileItem> model) {
+    public void setFriendName(Friend friend) {
+        titleLabel.setText(staticText + friend.getRenderName());
+        libraryButton.setFriend(friend);
     }
     
     private class LibraryButton extends JXButton {
-        private String friend;
         
-        public LibraryButton(String text) {
-            super(text);
+        private GoToLibraryAction action;
+        private Friend friend;
+        
+        
+        public LibraryButton(GoToLibraryAction action) {
+            super(action);
+            this.action = action;
             setFocusPainted(false);
         }
         
-        @Override
-        public void setEnabled(boolean value) {
-            super.setEnabled(value);
-            setTooltip();
-        }
-        
-        public void setFriend(String friend) {
+        public void setFriend(Friend friend) {
             this.friend = friend;
+            action.setFriend(friend);
+            setEnabled(remoteLibraryManager.hasFriendLibrary(friend));
             setTooltip();
+            
+            //TODO: add a presence change listener to friend, if they are added this button should
+            //   get enabled, if they were there and leave this button should get disabled
         }
         
         private void setTooltip() {
             if(isEnabled()) {
                 // {0}: name of the friend
-                setToolTipText(I18n.tr("View the files {0} is sharing with you.",friend));
+                setToolTipText(I18n.tr("View the files {0} is sharing with you.",friend.getRenderName()));
             } else {
-                setToolTipText(I18n.tr("{0} isn't logged in through LimeWire.",friend));
+                setToolTipText(I18n.tr("{0} isn't logged in through LimeWire.",friend.getRenderName()));
             }
         }
     }
@@ -206,10 +203,9 @@ public class FriendSharingHeaderPanel extends JXPanel implements FriendUpdate {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(!popup.isVisible()) {
-                //set the checkboxes to their selection value
-                audioMenu.setSelected(musicAction.getUserFileList().isAddNewAudioAlways());
-                videoMenu.setSelected(videoAction.getUserFileList().isAddNewVideoAlways());
-                imageMenu.setSelected(imageAction.getUserFileList().isAddNewImageAlways());
+                audioMenu.setSelected(audioAction.isSelected());
+                videoMenu.setSelected(videoAction.isSelected());
+                imageMenu.setSelected(imageAction.isSelected());
                 
                 popup.show(shareButton, 0, shareButton.getHeight());
             }

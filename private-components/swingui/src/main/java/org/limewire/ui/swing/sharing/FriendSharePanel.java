@@ -5,6 +5,8 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -35,6 +37,7 @@ import org.limewire.ui.swing.sharing.friends.FriendItem;
 import org.limewire.ui.swing.sharing.friends.FriendItemImpl;
 import org.limewire.ui.swing.sharing.friends.FriendNameTable;
 import org.limewire.ui.swing.sharing.friends.FriendTableFormat;
+import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
@@ -64,16 +67,18 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     
     private JScrollPane friendTableScrollPane;
 
+    private final Map<String, String> friendMap = new HashMap<String, String>();
     private final EventList<FriendItem> friendsList;
 
     private final FriendNameTable friendTable;
+    private final FriendSharingPopupHandler popupHandler;
     private final ShareListManager shareListManager;
     private final SharingFancyPanelFactory sharingFancyPanelFactory;
     private final FriendSharingHeaderPanel headerPanel;
     
     @Inject
     public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager, FriendNameTable friendNameTable, SharingFriendEmptyPanel emptyPanel, 
-                SharingFancyPanelFactory sharingFancyPanelFactory, FriendSharingHeaderPanel friendHeaderPanel) {        
+                SharingFancyPanelFactory sharingFancyPanelFactory, FriendSharingHeaderPanel friendHeaderPanel, FriendSharingPopupHandler popupHandler) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
 
@@ -81,6 +86,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         this.shareListManager = shareListManager;
         this.sharingFancyPanelFactory = sharingFancyPanelFactory;
         this.headerPanel = friendHeaderPanel;
+        this.popupHandler = popupHandler;
         
         viewCardLayout = new CardLayout();
         JPanel cardPanel = new JPanel();
@@ -132,6 +138,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         friendTableScrollPane.setViewportView(friendTable);
         
         friendTable.addKeyListener(friendSelectionListener);
+        friendTable.addPopupListener(popupHandler);
     }
     
     private void createCenterCards(FriendSharingHeaderPanel headerPanel, JPanel cardPanel) {
@@ -196,7 +203,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             }
         
             int index = friend.getSelectedRow();
-            if(index == -1) {
+            if(index == -1 || index >= friend.getModel().getRowCount()) {
                 return;
             }
             
@@ -207,7 +214,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             
             lastRenderedId = friendItem.getFriend().getId();
             
-            headerPanel.setFriendName(friendItem.getFriend().getRenderName());
+            headerPanel.setFriendName(friendItem.getFriend());
             emptyPanel.setFriendName(friendItem.getFriend().getRenderName());
 
             fileList = shareListManager.getOrCreateFriendShareList(friendItem.getFriend());
@@ -232,8 +239,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             
             emptyPanel.setUserFileList(fileList);
             if(!isPressed)
-                sharingFancyPanel.setModel(filteredList, fileList);
-            headerPanel.setModel(fileList);           
+                sharingFancyPanel.setModel(filteredList, fileList);         
             
             if(dropTarget == null) {
                 dropTarget = new ShareDropTarget(FriendSharePanel.this, fileList, true);
@@ -291,10 +297,14 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     @SwingEDTEvent
     public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
+            if(friendMap.containsKey(event.getSource().getId()))
+                return;
             LocalFileList fileList = shareListManager.getOrCreateFriendShareList(event.getSource());
             friendsList.add(new FriendItemImpl(event.getSource(), fileList.getSwingModel()));
+            friendMap.put(event.getSource().getId(), "");
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
             shareListManager.removeFriendShareList(event.getSource());
+            friendMap.remove(event.getSource().getId());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
@@ -302,6 +312,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
         friendsList.clear();
+        friendMap.clear();
     }
     
     /**
