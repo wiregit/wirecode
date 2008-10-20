@@ -92,7 +92,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         
         add(headerLabel, "gapbottom 4, push");       // first row
         add(new JLabel(I18n.tr("Unshare All")), "gapbottom 2, split 2");
-        add(unShareAllButton, "gapbottom 2, wrap");
+        add(unShareAllButton, "gapbottom 2, gapright 9, wrap");
         
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");

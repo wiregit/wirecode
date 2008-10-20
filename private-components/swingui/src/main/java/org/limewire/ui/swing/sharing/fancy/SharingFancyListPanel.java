@@ -110,7 +110,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         
         add(headerLabel, "gapbottom 4, push");       // first row
         add(unShareButtonLabel, "gapbottom 2, split 2");
-        add(unShareButton, "gapbottom 2, wrap");
+        add(unShareButton, "gapbottom 2, gapright 9, wrap");
         
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");
