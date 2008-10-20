@@ -33,7 +33,7 @@ public class SearchResultPropertiesImpl extends Dialog implements SearchResultPr
         
         addDetails();
         
-        location.setLayout(new MigLayout("", "[]", "[]"));
+        location.setLayout(new MigLayout("", "[50%!]", "[]"));
         readOnlyInfoModel.setColumnIdentifiers(new Object[] {tr("Address"), tr("Filename")});
         location.add(new JScrollPane(readOnlyInfo));
         

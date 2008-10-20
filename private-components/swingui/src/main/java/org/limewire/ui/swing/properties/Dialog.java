@@ -3,6 +3,7 @@ package org.limewire.ui.swing.properties;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
@@ -69,6 +70,8 @@ public abstract class Dialog extends JDialog {
 
     protected void showDialog(String fileName) {
         setTitle(tr("\"{0}\" properties", fileName));
+        setPreferredSize(new Dimension(557, 589));
+
         pack();
 
         setVisible(true);
