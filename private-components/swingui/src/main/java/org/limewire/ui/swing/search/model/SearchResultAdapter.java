@@ -23,6 +23,7 @@ import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.StringUtils;
 
@@ -54,14 +55,18 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             @Override
             public int compare(RemoteHost o1, RemoteHost o2) {
                 int compare = 0;
-                boolean anonymous1 = o1.getFriendPresence() == null || o1.getFriendPresence().getFriend() == null || o1.getFriendPresence().getFriend().isAnonymous();
-                boolean anonymous2 = o2.getFriendPresence() == null || o2.getFriendPresence().getFriend() == null || o2.getFriendPresence().getFriend().isAnonymous();
-                
+                boolean anonymous1 = o1.getFriendPresence() == null
+                        || o1.getFriendPresence().getFriend() == null
+                        || o1.getFriendPresence().getFriend().isAnonymous();
+                boolean anonymous2 = o2.getFriendPresence() == null
+                        || o2.getFriendPresence().getFriend() == null
+                        || o2.getFriendPresence().getFriend().isAnonymous();
+
                 if (anonymous1 == anonymous2) {
                     compare = o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
                 } else if (anonymous1) {
                     compare = 1;
-                } else if(anonymous2) {
+                } else if (anonymous2) {
                     compare = -1;
                 }
                 return compare;
@@ -283,8 +288,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         switch (getCategory()) {
         case AUDIO: {
             String albumTitle = getPropertyString(PropertyKey.ALBUM_TITLE);
-            String quality = getPropertyString(PropertyKey.QUALITY);
-            String length = getPropertyString(PropertyKey.LENGTH);
+            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.QUALITY));
+            Long length = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.LENGTH));
 
             boolean insertHypen = false;
             if (!StringUtils.isEmpty(albumTitle)) {
@@ -292,40 +297,37 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
                 insertHypen = true;
             }
 
-            if (!StringUtils.isEmpty(quality)) {
+            if (qualityScore != null) {
                 if (insertHypen) {
                     subheading += " - ";
                 }
-                subheading += quality;
+                subheading += toQualityString(qualityScore);
                 insertHypen = true;
             }
 
-            if (!StringUtils.isEmpty(length)) {
-                long len = parseLongNoException(length);
-                length = CommonUtils.seconds2time(len);
+            if (length != null) {
                 if (insertHypen) {
                     subheading += " - ";
                 }
-                subheading += length;
+                subheading += CommonUtils.seconds2time(length);
             }
         }
             break;
         case VIDEO: {
-            String quality = getPropertyString(PropertyKey.QUALITY);
-            String length = getPropertyString(PropertyKey.LENGTH);
-            boolean changed = false;
-            if (!StringUtils.isEmpty(quality)) {
-                subheading += quality;
-                changed = true;
+            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.QUALITY));
+            Long length = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.LENGTH));
+
+            boolean insertHyphen = false;
+            if (qualityScore != null) {
+                subheading += toQualityString(qualityScore);
+                insertHyphen = true;
             }
 
-            if (!StringUtils.isEmpty(length)) {
-                if (changed) {
+            if (length != null) {
+                if (insertHyphen) {
                     subheading += " - ";
                 }
-                long len = parseLongNoException(length);
-                length = CommonUtils.seconds2time(len);
-                subheading += length;
+                subheading += CommonUtils.seconds2time(length);
             }
         }
             break;
@@ -337,10 +339,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         }
             break;
         case PROGRAM: {
-            String fileSize = getPropertyString(PropertyKey.FILE_SIZE);
-            if (!StringUtils.isEmpty(fileSize)) {
-                long bytes = parseLongNoException(fileSize);
-                subheading = GuiUtils.toUnitbytes(bytes);
+            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.FILE_SIZE));
+            if (fileSize != null) {
+                subheading = GuiUtils.toUnitbytes(fileSize);
             }
         }
             break;
@@ -350,24 +351,22 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             // subheading = "{application name}";
             // TODO add name of program used to open this file, not included in
             // 5.0
-            String fileSize = getPropertyString(PropertyKey.FILE_SIZE);
-            if (!StringUtils.isEmpty(fileSize)) {
-                long bytes = parseLongNoException(fileSize);
-                subheading = GuiUtils.toUnitbytes(bytes);
+            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.FILE_SIZE));
+            if (fileSize != null) {
+                subheading = GuiUtils.toUnitbytes(fileSize);
             }
         }
         }
         return subheading;
     }
 
-    private long parseLongNoException(String fileSize) {
-        long bytes = 0;
-        try {
-
-            bytes = Long.parseLong(fileSize);
-        } catch (NumberFormatException e) {
-            // continue zero is returned
+    private String toQualityString(long qualityScore) {
+        if (qualityScore == 1) {
+            return I18n.tr("Poor");
+        } else if (qualityScore == 2) {
+            return I18n.tr("Good");
+        } else {
+           return I18n.tr("Excellent");
         }
-        return bytes;
     }
 }

@@ -71,7 +71,9 @@ public class RemoteFileDescAdapter implements SearchResult {
                         .getValue(LimeXMLNames.AUDIO_BITRATE));
 
                 int quality = toAudioQualityScore(getFileExtension(), bitrate);
-                set(properties, PropertyKey.QUALITY, quality);
+                if(quality > 0) {
+                    set(properties, PropertyKey.QUALITY, quality);
+                }
 
             } else if (LimeXMLNames.VIDEO_SCHEMA.equals(doc.getSchemaURI())) {
                 set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.VIDEO_PRODUCER));
@@ -91,9 +93,12 @@ public class RemoteFileDescAdapter implements SearchResult {
                 Long width = CommonUtils.parseLongNoException(doc
                         .getValue(LimeXMLNames.VIDEO_WIDTH));
 
+                
                 int quality = toVideoQualityScore(getFileExtension(), bitrate, length, height,
                         width);
-                set(properties, PropertyKey.QUALITY, quality);
+                if(quality > 0) {
+                    set(properties, PropertyKey.QUALITY, quality);
+                }
             } else if (LimeXMLNames.APPLICATION_SCHEMA.equals(doc.getSchemaURI())) {
                 set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.APPLICATION_NAME));
                 set(properties, PropertyKey.AUTHOR, doc
