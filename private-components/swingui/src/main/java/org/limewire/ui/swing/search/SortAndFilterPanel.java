@@ -9,16 +9,18 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -30,7 +32,11 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -68,14 +74,15 @@ public class SortAndFilterPanel extends JXPanel {
     private final String FILE_TYPE = tr("File type");
     private final String NAME = tr("Name");
     private final String RELEVANCE_ITEM = tr("Relevance");
- 
     private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
+
+    private final HashMap<String,Action> actions = new HashMap<String,Action>(); 
 
     @Resource private Icon listViewIcon;
     @Resource private Icon tableViewIcon;
     @Resource private Font sortLabelFont; 
 
-    private final JComboBox sortCombo = new JComboBox();
+    private final LimeComboBox sortCombo;
     
     private final JLabel sortLabel = new JLabel(tr("Sort by:"));
     private final JTextField filterBox = new PromptTextField();
@@ -94,8 +101,13 @@ public class SortAndFilterPanel extends JXPanel {
     private boolean repopulatingCombo;
 
     @Inject
-    SortAndFilterPanel() {
+    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory) {
         GuiUtils.assignResources(this);
+        
+        this.populateActionList();
+        
+        this.sortCombo = comboBoxFactory.createFullComboBox();
+        
         sortLabel.setForeground(Color.WHITE);
         sortLabel.setFont(sortLabelFont);
         listViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
@@ -105,6 +117,34 @@ public class SortAndFilterPanel extends JXPanel {
         layoutComponents();
     }
 
+    private void populateActionList() {
+        this.actions.put(COMPANY,createAction(COMPANY));
+        this.actions.put(PLATFORM,createAction(PLATFORM));
+        this.actions.put(TYPE,createAction(TYPE));
+        this.actions.put(DATE_CREATED,createAction(DATE_CREATED));
+        this.actions.put(YEAR,createAction(YEAR));
+        this.actions.put(FILE_EXTENSION,createAction(FILE_EXTENSION));
+        this.actions.put(TITLE,createAction(TITLE));
+        this.actions.put(LENGTH,createAction(LENGTH));
+        this.actions.put(ALBUM,createAction(ALBUM));
+        this.actions.put(ARTIST,createAction(ARTIST));
+        this.actions.put(SIZE_LOW_TO_HIGH,createAction(SIZE_LOW_TO_HIGH));
+        this.actions.put(SIZE_HIGH_TO_LOW,createAction(SIZE_HIGH_TO_LOW));
+        this.actions.put(FILE_TYPE,createAction(FILE_TYPE));
+        this.actions.put(NAME,createAction(NAME));
+        this.actions.put(RELEVANCE_ITEM,createAction(RELEVANCE_ITEM));
+    }
+    
+    private Action createAction(String name) {
+        return new AbstractAction(name) {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+
+                
+            }
+        };
+    }
+    
     public void addModeListener(ModeListener listener) {
         modeListeners.add(listener);
     }
@@ -171,12 +211,11 @@ public class SortAndFilterPanel extends JXPanel {
         EventList<VisualSearchResult> filteredList =
             GlazedListsFactory.filterList(sortedList, editor);
         
-        ItemListener listener = new ItemListener() {
+        SelectionListener listener = new SelectionListener() {
             @Override
-            public void itemStateChanged(ItemEvent e) {
-                String item = e.getItem().toString();
+            public void selectionChanged(Action action) {
+                String item = action.getValue("Name").toString();
                 if (!repopulatingCombo
-                    && e.getStateChange() == ItemEvent.SELECTED
                     && !item.equals(sortBy)) { // changing sort order
                     Comparator<VisualSearchResult> comparator =
                         getComparator(item);
@@ -187,10 +226,10 @@ public class SortAndFilterPanel extends JXPanel {
                 }
             }
         };
-        sortCombo.addItemListener(listener);
+        sortCombo.addSelectionListener(listener);
         
         // Trigger the initial sort.
-        sortCombo.setSelectedItem(RELEVANCE_ITEM);
+        sortCombo.setSelectedAction(actions.get(RELEVANCE_ITEM));
 
         return filteredList;
     }
@@ -502,9 +541,9 @@ public class SortAndFilterPanel extends JXPanel {
     }
 
     public void setSearchCategory(SearchCategory category) {
-        Object currentItem = sortCombo.getSelectedItem();
+        Action currentItem = sortCombo.getSelectedAction();
         repopulatingCombo = true;
-        sortCombo.removeAllItems();
+        sortCombo.removeAllActions();
         String[] items = null;
 
         switch (category) {
@@ -553,12 +592,12 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         for (String item : items) {
-            sortCombo.addItem(item);
+            sortCombo.addAction(this.actions.get(item));
         }
 
         repopulatingCombo = false;
 
-        sortCombo.setSelectedItem(currentItem);
+        sortCombo.setSelectedAction(currentItem);
     }
     
     private static class VisualSearchResultTextFilterator
