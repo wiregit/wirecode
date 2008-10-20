@@ -41,8 +41,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendSharingHeaderPanel extends JXPanel {
     
-    private final String staticText = I18n.tr("Sharing with {0}", "");
-    
     @Resource
     private Icon downIcon;
     @Resource
@@ -76,13 +74,13 @@ public class FriendSharingHeaderPanel extends JXPanel {
     }
     
     private void createComponents() {     
-        titleLabel = new HeadingLabel(staticText);
+        titleLabel = new HeadingLabel(I18n.tr("Sharing with"));
         titleLabel.setForeground(fontColor);
         FontUtils.setSize(titleLabel, fontSize);
         FontUtils.changeStyle(titleLabel, Font.PLAIN);
         filterBox = new PromptTextField();
         
-        shareButton = new JXButton("", downIcon);       
+        shareButton = new JXButton(" ", downIcon);       
         shareButton.setForeground(fontColor);
         shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
         shareButton.setBackgroundPainter(new ButtonPainter());

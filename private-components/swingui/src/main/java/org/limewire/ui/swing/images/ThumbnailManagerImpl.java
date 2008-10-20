@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.images;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -17,7 +18,15 @@ import com.google.inject.Singleton;
 @Singleton
 public class ThumbnailManagerImpl implements ThumbnailManager {
     
-    private final Map<File,Icon> thumbnails = new FixedsizeForgetfulHashMap<File,Icon>(1000);
+    /**
+     * List of images that have thumbnails created already
+     */
+    private final Map<File,Icon> thumbnails = new FixedsizeForgetfulHashMap<File,Icon>(2000);
+    
+    /**
+     * List of images that are queued to be loaded but haven't been loaded yet
+     */
+    private final Map<File, String> loading = new HashMap<File, String>();
     
     @Resource
     private Icon loadIcon;
@@ -34,9 +43,11 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
         if(file == null)
             return null;
         Icon icon = thumbnails.get(file);
-        if(icon == null) {
-            thumbnails.put(file, loadIcon);
-            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, file, errorIcon));
+        if(icon == null && !loading.containsKey(file)) {
+            loading.put(file, "");
+            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon));
+        } else if(icon == null) {
+            icon = loadIcon;
         }
         return icon;
     }
@@ -46,9 +57,11 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
         if(file == null)
             return null;
         Icon icon = thumbnails.get(file);
-        if(icon == null) {
-            thumbnails.put(file, loadIcon);
-            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, file, errorIcon, callback));
+        if(icon == null && !loading.containsKey(file)) { 
+            loading.put(file, "");
+            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon, callback));
+        } else if(icon == null) {
+            icon = loadIcon;
         }
         return icon;
     }
@@ -58,9 +71,11 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
         if(file == null)
             return null;
         Icon icon = thumbnails.get(file);
-        if(icon == null) {
-            thumbnails.put(file, loadIcon);
-            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, file, errorIcon, list, index));
+        if(icon == null && !loading.containsKey(file)) { System.out.println("loding " + file.getName());
+            loading.put(file, "");
+            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon, list, index));
+        } else if(icon == null) {
+            icon = loadIcon;
         }
         return icon;
     }

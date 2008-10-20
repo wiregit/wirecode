@@ -28,6 +28,7 @@ import org.limewire.ui.swing.util.GraphicsUtilities;
 public class ThumbnailCallable implements Callable<Void> {
     
     private final Map<File,Icon> thumbnailMap;
+    private final Map<File,String> loadingMap;
     private File file;
     private final Icon errorIcon;
     private final JComponent callback;
@@ -39,11 +40,12 @@ public class ThumbnailCallable implements Callable<Void> {
      * in the thumbnail map. If an error occurs, store the error icon instead.
      * 
      * @param thumbnailMap - map to store the thumbnail in
+     * @param loadingMap - map of files waiting to be loaded as thumbnails
      * @param file - image file to read and create a thumbnail from
      * @param errorIcon - icon to show if the file can't be read
      */
-    public ThumbnailCallable(Map<File,Icon> thumbnailMap, File file, Icon errorIcon) {
-        this(thumbnailMap, file, errorIcon, null);
+    public ThumbnailCallable(Map<File,Icon> thumbnailMap, Map<File,String> loadingMap, File file, Icon errorIcon) {
+        this(thumbnailMap, loadingMap, file, errorIcon, null);
     }
     
     /**
@@ -56,12 +58,14 @@ public class ThumbnailCallable implements Callable<Void> {
      * thumbnail is not created. 
      * 
      * @param thumbnailMap - map to store the thumbnail in
+     * @param loadingMap - map of files waiting to be loaded as thumbnails
      * @param file - image file to read and create a thumbnail from
      * @param errorIcon - icon to show if the file can't be read
      * @param callback - component to repaint once the thumbnail has been created.
      */
-    public ThumbnailCallable(Map<File,Icon> thumbnailMap, File file, Icon errorIcon, JComponent callback) {
+    public ThumbnailCallable(Map<File,Icon> thumbnailMap, Map<File,String> loadingMap, File file, Icon errorIcon, JComponent callback) {
         this.thumbnailMap = thumbnailMap;
+        this.loadingMap = loadingMap;
         this.file = file;
         this.errorIcon = errorIcon;
         this.callback = callback;
@@ -78,13 +82,15 @@ public class ThumbnailCallable implements Callable<Void> {
      * no longer shown in the list, the image is not loaded. 
      * 
      * @param thumbnailMap - map to store the thumbnail in
+     * @param loadingMap - map of files waiting to be loaded as thumbnails
      * @param file - image file to read and create a thumbnail from
      * @param errorIcon - icon to show if the file can't be read
      * @param callback - component to repaint once the thumbnail has been created.
      * @param index - index within this list, this thumbnail is intended for
      */
-    public ThumbnailCallable(Map<File,Icon> thumbnailMap, File file, Icon errorIcon, JList list, int index) {
+    public ThumbnailCallable(Map<File,Icon> thumbnailMap, Map<File,String> loadingMap, File file, Icon errorIcon, JList list, int index) {
         this.thumbnailMap = thumbnailMap;
+        this.loadingMap = loadingMap;
         this.file = file;
         this.errorIcon = errorIcon;
         this.callback = list;
@@ -97,11 +103,13 @@ public class ThumbnailCallable implements Callable<Void> {
         // don't waste the time loading the thumbnail
         if(callback != null) {
             if(!callback.isShowing()) {
-                thumbnailMap.put(file, null);
+                // thumbnail wasn't loaded, remove it from the list of pending thumbnails
+                loadingMap.remove(file);
                 return null;
             }
             if((callback instanceof JList) && index != -1 && (((JList)callback).getFirstVisibleIndex() > index || ((JList)callback).getLastVisibleIndex() < index)){
-                thumbnailMap.put(file, null);
+                // thumbnail wasn't loaded, remove it from the list of pending thumbnails
+                loadingMap.remove(file);
                 return null;
             }
         }
@@ -136,6 +144,7 @@ public class ThumbnailCallable implements Callable<Void> {
      */
     private void handleUpdate(Icon icon) {
         thumbnailMap.put(file, icon);
+        loadingMap.remove(file);
         if(callback != null && callback.isShowing()) {
             SwingUtilities.invokeLater(new Runnable(){
                 public void run() {
