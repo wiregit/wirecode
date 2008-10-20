@@ -1,9 +1,11 @@
 package org.limewire.core.api.spam;
 
+import java.util.List;
+
 import org.limewire.core.api.search.SearchResult;
 
 public interface SpamManager {
     public void clearFilterData();
-    public void handleUserMarkedSpam(SearchResult searchResult);
-    public void handleUserMarkedGood(SearchResult searchResult);
+    public void handleUserMarkedGood(List<SearchResult> searchResults);
+    public void handleUserMarkedSpam(List<SearchResult> searchResults);
 }

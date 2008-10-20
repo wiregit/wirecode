@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.ui.swing.search.model.SimilarResultsDetector;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -41,10 +40,7 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                             boolean newSpam = (Boolean) evt.getNewValue();
                             if (oldSpam != newSpam) {
                                 if (newSpam) {
-                                    for (SearchResult searchResult : visualSearchResult
-                                            .getCoreSearchResults()) {
-                                        spamManager.handleUserMarkedSpam(searchResult);
-                                    }
+                                    spamManager.handleUserMarkedSpam(visualSearchResult.getCoreSearchResults());
                                     VisualSearchResult parent = visualSearchResult
                                             .getSimilarityParent();
                                     VisualSearchResult newParent = null;
@@ -57,10 +53,7 @@ public class SpamListEventListener implements ListEventListener<VisualSearchResu
                                     
                                     similarResultsDetector.removeSpamItem(visualSearchResult, newParent);
                                 } else {
-                                    for (SearchResult searchResult : visualSearchResult
-                                            .getCoreSearchResults()) {
-                                        spamManager.handleUserMarkedGood(searchResult);
-                                    }
+                                    spamManager.handleUserMarkedGood(visualSearchResult.getCoreSearchResults());
                                     similarResultsDetector.detectSimilarResult(visualSearchResult);
                                 }
                             }
