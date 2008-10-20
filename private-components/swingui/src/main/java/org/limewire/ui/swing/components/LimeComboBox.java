@@ -79,9 +79,6 @@ public class LimeComboBox extends JXButton {
         
                 selectedComponent.setBackground(ITEM_BACK);
                 
-                
-                System.out.println(selectedComponent.getText());
-                
                 if (getText() == null)
                     menu.setPreferredSize(new Dimension(getWidth(), 
                             (int) menu.getPreferredSize().getHeight()));
