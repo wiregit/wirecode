@@ -69,8 +69,11 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                 Long bitrate = CommonUtils.parseLongNoException(doc
                         .getValue(LimeXMLNames.AUDIO_BITRATE));
+                
+                Long length = CommonUtils.parseLongNoException(doc
+                        .getValue(LimeXMLNames.AUDIO_SECONDS));
 
-                int quality = toAudioQualityScore(getFileExtension(), bitrate);
+                int quality = toAudioQualityScore(getFileExtension(), getSize(), bitrate, length);
                 if(quality > 0) {
                     set(properties, PropertyKey.QUALITY, quality);
                 }
@@ -394,7 +397,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      * 2 - good
      * 3 - excellent
      */
-    private static int toAudioQualityScore(String fileExtension, Long bitrate) {
+    private static int toAudioQualityScore(String fileExtension, Long fileSize, Long bitrate, Long length) {
         int quality = 0;
         if ("wav".equalsIgnoreCase(fileExtension) || "flac".equalsIgnoreCase(fileExtension)) {
             quality = 3;
@@ -435,6 +438,16 @@ public class RemoteFileDescAdapter implements SearchResult {
                 if (bitrate < 48) {
                     quality = 1;
                 } else if (bitrate < 96) {
+                    quality = 2;
+                } else {
+                    quality = 3;
+                }
+            } else if(length != null && length < 30) {
+                quality = 1;
+            } else if(fileSize != null) {
+                if(fileSize < (1 * 1024 * 1024)) {
+                    quality = 1;
+                } else if(fileSize < (3 * 1024 * 1024)) {
                     quality = 2;
                 } else {
                     quality = 3;
