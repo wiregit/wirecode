@@ -1,8 +1,10 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -55,7 +57,7 @@ public class DownloadButtonPanel extends JPanel {
 	 * Create the panel
 	 */
 	public DownloadButtonPanel(ActionListener actionListener) {
-	    super(new FlowLayout(FlowLayout.LEADING, 0,0));
+	    super(new BorderLayout(0,0));
 	    GuiUtils.assignResources(this);		
 
 		pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
@@ -81,10 +83,21 @@ public class DownloadButtonPanel extends JPanel {
 		tryAgainButton.setToolTipText(I18n.tr("Try Again"));
         
 		
-		add(resumeButton);
-		add(pauseButton);
-		add(tryAgainButton);
-		// add(cancelButton);
+		JPanel leadPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0,0));
+		leadPanel.setOpaque(false);
+		
+		leadPanel.add(resumeButton);
+		leadPanel.add(pauseButton);
+		leadPanel.add(tryAgainButton);
+		
+		JPanel cancelPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0,0));
+		cancelPanel.setOpaque(false);
+		cancelPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,15));
+		cancelPanel.add(cancelButton);
+		
+				
+		add(leadPanel, BorderLayout.WEST);
+		add(cancelPanel, BorderLayout.EAST);
 	}	
 	
 	public void setActionListener(ActionListener actionListener){
