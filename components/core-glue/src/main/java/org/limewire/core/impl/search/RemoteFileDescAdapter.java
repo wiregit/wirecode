@@ -386,6 +386,13 @@ public class RemoteFileDescAdapter implements SearchResult {
      * comparison.htm
      * 
      * http://ipod.about.com/od/introductiontoitunes/a/sound_qual_test.htm
+     * 
+     * Returns 1 of 4 quality scores.
+     * 
+     * 0 - unscored
+     * 1 - poor
+     * 2 - good
+     * 3 - excellent
      */
     private static int toAudioQualityScore(String fileExtension, Long bitrate) {
         int quality = 0;
