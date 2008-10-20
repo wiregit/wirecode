@@ -134,35 +134,26 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             String uri = request.getRequestLine().getUri();
             if (FileRequestParser.isURNGet(uri)) {
                 fileRequest = FileRequestParser.parseURNGet(fileManager, uri);
-                if (fileRequest == null) {
+                if(fileRequest == null) {
                     uploader = sessionManager.getOrCreateUploader(request, context,
                             UploadType.INVALID_URN, "Invalid URN query");
                     uploader.setState(UploadStatus.FILE_NOT_FOUND);
                     response.setStatusCode(HttpStatus.SC_NOT_FOUND);
                 }
             } else {
-                fileRequest = FileRequestParser.parseTraditionalGet(uri);
-                assert fileRequest != null;
+                throw new IOException();
             }
         } catch (IOException e) {
             uploader = sessionManager.getOrCreateUploader(request, context,
                     UploadType.MALFORMED_REQUEST, "Malformed Request");
             handleMalformedRequest(response, uploader);
         }
-
-        // process request
-        if (fileRequest != null) {
-            FileDesc fd = getFileDesc(fileRequest);
-            if (fd != null) {
-                uploader = findFileAndProcessHeaders(request, response, context, fileRequest, fd);
-            } else {
-                uploader = sessionManager.getOrCreateUploader(request, context,
-                        UploadType.SHARED_FILE, fileRequest.filename);
-                uploader.setState(UploadStatus.FILE_NOT_FOUND);
-                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
-            }
+        
+        if(fileRequest != null) {
+            assert uploader == null;
+            uploader = findFileAndProcessHeaders(request, response, context, fileRequest, fileRequest.getFileDesc());
         }
-
+        
         assert uploader != null;
 
         sessionManager.sendResponse(uploader, response);
@@ -172,8 +163,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
      * Looks up file in {@link FileManager} and processes request headers.
      */
     private HTTPUploader findFileAndProcessHeaders(HttpRequest request, HttpResponse response,
-            HttpContext context, FileRequest fileRequest, FileDesc fd) throws IOException,
-            HttpException {
+            HttpContext context, FileRequest fileRequest, FileDesc fd) throws IOException, HttpException {
         // create uploader
         UploadType type = (SharingUtils.isForcedShare(fd)) ? UploadType.FORCED_SHARE
                 : UploadType.SHARED_FILE;
@@ -253,7 +243,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
      * respect to the returned queue status.
      */
     private void handleFileUpload(HttpContext context, HttpRequest request, HttpResponse response,
-            HTTPUploader uploader, FileDesc fd) throws IOException, HttpException {
+            HTTPUploader uploader, FileDesc fd) throws HttpException, IOException {
         if (!uploader.getSession().isAccepted()) {
             QueueStatus queued = sessionManager.enqueue(context, request);
             switch (queued) {
@@ -348,7 +338,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
      * entity.
      */
     private void handleTHEXRequest(HttpRequest request, HttpResponse response, HttpContext context,
-            HTTPUploader uploader, FileDesc fd) throws HttpException, IOException {
+            HTTPUploader uploader, FileDesc fd) {
         // reset the poll interval to allow subsequent requests right away
         uploader.getSession().updatePollTime(QueueStatus.BYPASS);
 
@@ -404,7 +394,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
      * Processes a queued file upload by adding headers.
      */
     private void handleQueued(HttpContext context, HttpRequest request, HttpResponse response,
-            HTTPUploader uploader, FileDesc fd) throws IOException, HttpException {
+            HTTPUploader uploader, FileDesc fd)  {
         // if not queued, this should never be the state
         int position = uploader.getSession().positionInQueue();
         assert (position != -1);
@@ -435,40 +425,6 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
         uploader.setState(UploadStatus.QUEUED);
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
-    }
-
-    /**
-     * Returns the description for the file requested by <code>request</code>.
-     * 
-     * @return null, if <code>request</code> does not map to a file
-     */
-    private FileDesc getFileDesc(FileRequest request) {
-        FileDesc fd = null;
-
-        int index = request.index;
-
-        if(!fileManager.isValidIndex(index))
-       	    return null;
-
-        // first verify the file index
-        fd = fileManager.get(index);
-        if(fd == null || (!fileManager.getGnutellaSharedFileList().contains(fd) 
-        			&& !fileManager.getIncompleteFileList().contains(fd)) ){
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid index in request does not map to file descriptor: " + request);
-            }
-            return null;
-        }
-
-        if (!request.filename.equals(fd.getFileName())) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid file name in request: " + request + ", expected: "
-                        + fd.getFileName());
-            }
-            return null;
-        }
-
-        return fd;
     }
 
     private boolean validateHeaders(HTTPUploader uploader, boolean thexRequest) {

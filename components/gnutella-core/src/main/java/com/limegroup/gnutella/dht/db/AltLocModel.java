@@ -111,7 +111,7 @@ public class AltLocModel implements StorableModel {
                     
                 // And if it does then check if it is rare and needs
                 // publishing.
-                } else if (fileManager.get().isRareFile(fd) 
+                } else if (fd.isRareFile() 
                         && DatabaseUtils.isPublishingRequired(storable)) {
                     toPublish.add(storable);
                 }

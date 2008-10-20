@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -27,13 +30,11 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class CreationTimeCacheTest extends LimeTestCase {
@@ -354,32 +355,31 @@ public class CreationTimeCacheTest extends LimeTestCase {
         assertTrue("cache should not be present", !cacheExists() );
         
         CreationTimeCache cache = new CreationTimeCache(fileManager);
-        FileDesc[] descs = createFileDescs(cache);
-        assertNotNull("should have some file descs", descs);
-        assertGreaterThan("should have some file descs", 0, descs.length);
+        Collection<URN> sha1s = createLotsOfSha1s(cache);
+        assertNotNull("should have some file descs", sha1s);
+        assertGreaterThan("should have some file descs", 0, sha1s.size());
         cache.persistCache();
         assertTrue("cache should now exist", cacheExists());
-        for( int i = 0; i < descs.length; i++) {
-            Long cTime = cache.getCreationTime(descs[i].getSHA1Urn());
+        for(URN urn : sha1s) {
+            Long cTime = cache.getCreationTime(urn);
             assertNotNull("file should be present in cache", cTime);
         }
     }
 
-	private FileDesc[] createFileDescs(CreationTimeCache cache) throws Exception {
+	private Collection<URN> createLotsOfSha1s(CreationTimeCache cache) throws Exception {
         File path = TestUtils.getResourceFile(FILE_PATH);
         File[] files = path.listFiles(new FileFilter() { 
             public boolean accept(File file) {
                 return !file.isDirectory();
             }
         });
-		FileDesc[] fileDescs = new FileDesc[files.length];
+		List<URN> sha1s = new ArrayList<URN>();
 		for(int i=0; i<files.length; i++) {
 			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], injector.getInstance(UrnCache.class));            
-			fileDescs[i] = new FileDescImpl(null, files[i], urns, i);
-			cache.addTime(fileDescs[i].getSHA1Urn(),
-                                                 files[i].lastModified());
+			cache.addTime(UrnSet.getSha1(urns), files[i].lastModified());
+			sha1s.add(UrnSet.getSha1(urns));
 		}				
-		return fileDescs;
+		return sha1s;
 	}
 
 	private void deleteCacheFile() {
@@ -399,24 +399,22 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
 	@Singleton
     private static class MyFileManager extends FileManagerImpl {
-        private FileDescImpl fd = null;
+        private FileDesc fd = null;
         private URN toExclude = null;
         private URN defaultURN;
         private Set<URN> validUrns;
         
         @Inject
-        public MyFileManager(Provider<SimppManager> simppManager,
+        public MyFileManager(
                 Provider<UrnCache> urnCache,
                 Provider<ContentManager> contentManager,
-                Provider<AltLocManager> altLocManager,
-                Provider<ActivityCallback> activityCallback,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 EventBroadcaster<FileManagerEvent> fileManagerEventListener,
                 ListenerSupport<FileManagerEvent> eventBroadcaster,
-                SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster) {
-            super(simppManager, urnCache, contentManager, altLocManager,
-                    activityCallback, backgroundExecutor, fileManagerEventListener,
-                    eventBroadcaster, fileDescMulticaster);
+                SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
+                FileDescFactory fileDescFactory) {
+            super(urnCache, contentManager, backgroundExecutor, fileManagerEventListener,
+                    eventBroadcaster, fileDescMulticaster, fileDescFactory);
         }
         
         public void setDefaultUrn(URN urn) {
@@ -437,10 +435,9 @@ public class CreationTimeCacheTest extends LimeTestCase {
         @Override
         public FileDesc getFileDesc(URN urn) {
             if (fd == null) {
-                Set<URN> urnSet = new HashSet<URN>();
-                urnSet.add(defaultURN);
-                fd = new FileDescImpl(null, new File(_settingsDir, CREATION_CACHE_FILE), urnSet, 0);
+                fd = new FileDescStub("sam", defaultURN, 0);
             }
+            
             if ((toExclude != null) && toExclude.equals(urn)) {
                 return null;
             } else if (validUrns.contains(urn)) {

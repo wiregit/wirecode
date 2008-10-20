@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.library;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.hamcrest.Description;
@@ -15,7 +14,6 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnSet;
 
 public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
 
@@ -46,8 +44,8 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     @SuppressWarnings("unchecked")
     public void testRenamedFilesEvent() throws Exception {
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        final FileDesc originalFile = new FileDescImpl(null, new File("hello world"), new UrnSet(urn), 1);
-        final FileDesc newFile = new FileDescImpl(null, new File("goodbye world"), new UrnSet(urn), 2);
+        final FileDesc originalFile = new FileDescStub("hello world", urn, 1);
+        final FileDesc newFile = new FileDescStub("goodbye world", urn, 2);
         
         final GetterMatcher<Service> serviceGetter = GetterMatcher.create();
         final GetterMatcher<EventListener<FileListChangedEvent>> listenerGetter = GetterMatcher.create();

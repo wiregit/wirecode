@@ -119,8 +119,6 @@ public interface FileManager {
      */
     void addSharedFolders(Set<File> folders, Set<File> blackListedSet);
 
-    Set<File> getFolderNotToShare();
-
     /**
      * Creates a FileDesc for the file if one doesn't yet exist, then adds the
      * FileDesc to the sharedFileList
@@ -166,22 +164,15 @@ public interface FileManager {
     void addFile(File file);
 
     /**
-     * Adds the file to the master file list, using the given list of metadata.
-     */
-    void addFile(File file, List<? extends LimeXMLDocument> list);
-
-    /**
      * Returns the FileDesc located at the index in the list
      * 
      * @return the FileDesc if it exists, or null if the file no longer exists
      *         in this list.
      */
     FileDesc get(int index);
-
-    /**
-     * Returns true if this index exists, false otherwise.
-     */
-    boolean isValidIndex(int index);
+    
+    /** Returns all indexes this URN is at. */
+    IntSet getIndices(URN urn);
 
     /**
      * @modifies this
@@ -221,25 +212,10 @@ public interface FileManager {
     void renameFile(File oldName, File newName);
 
     /**
-     * Validates a file, moving it from 'SENSITIVE_DIRECTORIES_NOT_TO_SHARE' to
-     * SENSITIVE_DIRECTORIES_VALIDATED'.
-     */
-    void validateSensitiveFile(File dir);
-
-    /**
-     * Invalidates a file, removing it from the shared directories, validated
-     * sensitive directories, and adding it to the sensitive directories not to
-     * share (so we don't ask again in the future).
-     */
-    void invalidateSensitiveFile(File dir);
-
-    /**
      * @return true if currently we have any files that are shared by the
      *         application.
      */
     boolean hasApplicationSharedFiles();
-
-    boolean isRareFile(FileDesc fd);
 
     /**
      * Returns true if this file is in a directory that is completely shared.
@@ -247,53 +223,10 @@ public interface FileManager {
     boolean isFileInCompletelySharedDirectory(File f);
 
     /**
-     * Returns true if this dir is completely shared.
-     */
-    boolean isFolderShared(File dir);
-
-    /**
-     * Returns true if this directory is the folder that is selected to download
-     * LWS songs into or is a subfolder of the LWS folder and false otherwise.
-     * NOTE: this folder can be shared and can be the same as the currently
-     * selected root shared folder.
-     * 
-     * @param file
-     * @return
-     */
-    boolean isStoreDirectory(File file);
-
-    /**
-     * Returns true if this folder is sharable.
-     * <p>
-     * Unsharable folders include:
-     * <ul>
-     * <li>A non-directory or unreadable folder</li>
-     * <li>The incomplete directory</li>
-     * <li>The 'application special share directory'</li>
-     * <li>Any root directory</li>
-     * <li>Any directory listed in 'directories not to share' (<i>Only if
-     * includeExcludedDirectories is true</i>)</li>
-     * </ul>
-     * 
-     * @param folder The folder to check for sharability
-     * @param includeExcludedDirectories True if this should exclude the folder
-     *        from sharability if it is listed in DIRECTORIES_NOT_TO_SHARE
-     * @return true if the folder can be shared
-     */
-    boolean isFolderShareable(File folder, boolean includeExcludedDirectories);
-
-    /**
      * @return true if there exists an application-shared file with the provided
      *         name.
      */
     boolean isFileApplicationShared(String name);
-
-    IntSet getIndices(URN urn);
-
-    /**
-     * Returns the number of files
-     */
-    int size();
 
     /**
      * Allows a FileList to set a dirty flag so changes can be written to disk.

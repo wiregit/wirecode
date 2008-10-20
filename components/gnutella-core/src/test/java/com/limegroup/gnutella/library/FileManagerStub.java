@@ -17,13 +17,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.FileManagerEvent.Type;
-import com.limegroup.gnutella.simpp.SimppManager;
 
 /**
  * A simple FileManager that shares one file of (near) infinite length.
@@ -48,20 +45,21 @@ public class FileManagerStub extends FileManagerImpl {
         }
     }
     
+    private final FileDescFactory fileDescFactory;
+    
     @Inject
-    public FileManagerStub(Provider<SimppManager> simppManager,
+    public FileManagerStub(
             Provider<UrnCache> urnCache,
             Provider<ContentManager> contentManager,
-            Provider<AltLocManager> altLocManager,
-            Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             EventBroadcaster<FileManagerEvent> fileManagerEventListener,
             ListenerSupport<FileManagerEvent> eventBroadcaster,
-            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster) {
-        super(simppManager, urnCache, contentManager, altLocManager,
-                activityCallback, backgroundExecutor, fileManagerEventListener, eventBroadcaster,
-                fileDescMulticaster);
+            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
+            FileDescFactory fileDescFactory) {
+        super(urnCache, contentManager, backgroundExecutor, fileManagerEventListener, eventBroadcaster,
+                fileDescMulticaster, fileDescFactory);
 
+        this.fileDescFactory = fileDescFactory;
         fileListStub = new FileListStub(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE);
         
         super.resetVariables();
@@ -119,8 +117,8 @@ public class FileManagerStub extends FileManagerImpl {
         // IncompleteFileDesc... add it.
         int fileIndex = size();
         
-        IncompleteFileDesc ifd = new IncompleteFileDescImpl(
-        null, incompleteFile, urns, fileIndex, name, size, vf);
+        IncompleteFileDesc ifd = 
+            fileDescFactory.createIncompleteFileDesc(incompleteFile, urns, fileIndex, name, size, vf);
         getIncompleteFileList().add(ifd);
         
         files.add(ifd);

@@ -15,8 +15,8 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.library.FileDescFactory;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.IncompleteFileDescImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 @SuppressWarnings("unchecked")
@@ -28,6 +28,7 @@ public class IncompleteFileDescTest extends LimeTestCase {
     private Set urns;
     private VerifyingFile vf;
     private VerifyingFileFactory verifyingFileFactory;
+    private FileDescFactory fileDescFactory;
 
     public IncompleteFileDescTest(String name) {
         super(name);
@@ -46,10 +47,10 @@ public class IncompleteFileDescTest extends LimeTestCase {
         
         Injector injector = LimeTestUtils.createInjector();
         verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
+        fileDescFactory = injector.getInstance(FileDescFactory.class);
         vf = verifyingFileFactory.createVerifyingFile();
         
-        ifd = new IncompleteFileDescImpl(
-            null,
+        ifd = fileDescFactory.createIncompleteFileDesc(
             new File(fileName),
             urns,
             0,
@@ -91,8 +92,7 @@ public class IncompleteFileDescTest extends LimeTestCase {
         addUnverifiedInterval(small);
         
         urns.add(UrnHelper.TTROOT);
-        ifd = new IncompleteFileDescImpl(
-                null,
+        ifd = fileDescFactory.createIncompleteFileDesc(
                 new File(fileName),
                 urns,
                 0,

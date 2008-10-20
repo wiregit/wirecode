@@ -1,17 +1,12 @@
 
 package com.limegroup.gnutella.library;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.library.IncompleteFileDescImpl;
 
 /**
  * A stub that is identical to FileDescStub.  The code uses instanceof,
@@ -21,52 +16,38 @@ import com.limegroup.gnutella.library.IncompleteFileDescImpl;
  * need arises.
  */
 @SuppressWarnings("unchecked")
-public class IncompleteFileDescStub extends IncompleteFileDescImpl {
-	public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
-    public static final Set set;
-    private static Set localSet2,globalSet;
-    public Set localSet;
+public class IncompleteFileDescStub extends FileDescStub implements IncompleteFileDesc {
+	public static final String urnString = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+	private static final URN urn;
     
     private IntervalSet.ByteIntervals _ranges;
     
     public static final int size = 1126400;
     static {
-        set = new HashSet();
-        globalSet=new HashSet();
+        URN u;
         try {
-            set.add(URN.createSHA1Urn(urn));
-            globalSet.addAll(set);
-        } catch(IOException ioe) {
-            ErrorService.error(ioe);
+            u = URN.createSHA1Urn(urnString);
+        } catch(IOException iox) {
+            throw new RuntimeException(iox);
         }
+        urn = u;
     }
     
     public IncompleteFileDescStub() {
-        this("abc.txt");
-    }
-    
-    public IncompleteFileDescStub(String name) {
-        super(null, FileDescStub.createStubFile(new File(name)), set,0,name,size, null);
-        localSet=new HashSet();
+        this("abc.txt", urn, 0);
     }
     
     public IncompleteFileDescStub(String name, URN urn, int index) {
-    	super(null, FileDescStub.createStubFile(new File(name)),createUrnSet(urn),index,name,size, null);
-    	localSet=localSet2;
-    }
-    
-    private static Set createUrnSet(URN urn) {
-    	localSet2 = new HashSet();
-    	localSet2.add(urn);
-    	globalSet.add(urn);
-    	return localSet2;
+        super(name, urn, index);
     }
     
     @Override
     public boolean containsUrn(URN urn) {
-    	if (globalSet.contains(urn))
-    		return true;
-    	else return super.containsUrn(urn);
+        if(urn.equals(IncompleteFileDescStub.urn)) {
+            return true;
+        } else {
+            return super.containsUrn(urn);
+        }
     }
     
     @Override
@@ -74,16 +55,6 @@ public class IncompleteFileDescStub extends IncompleteFileDescImpl {
         return size;
     }
     
-    @Override
-    public URN getSHA1Urn() {
-    	if (localSet.isEmpty())
-    		return super.getSHA1Urn();
-    	else return
-			(URN)localSet.toArray()[0];
-    }
-	/* (non-Javadoc)
-	 * @see com.limegroup.gnutella.IncompleteFileDesc#getRangesAsByte()
-	 */
     @Override
 	public IntervalSet.ByteIntervals getRangesAsByte() {
 		return _ranges;
@@ -98,6 +69,48 @@ public class IncompleteFileDescStub extends IncompleteFileDescImpl {
         for(Range intvl : intervals)
             set.add(intvl);
         _ranges = set.toBytes();
+    }
+
+    @Override
+    public String getAvailableRanges() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Range getAvailableSubRange(long low, long high) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean hasUrnsAndPartialData() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isRangeSatisfiable(long low, long high) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isRangeSatisfiable(Range range) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean loadResponseRanges(IntervalSet dest) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public String httpStringValue() {
+        // TODO Auto-generated method stub
+        return null;
     }
 	
 }

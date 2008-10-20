@@ -7,7 +7,6 @@ import com.limegroup.bittorrent.disk.BlockRangeMap;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
-import com.limegroup.gnutella.library.FileDesc;
 
 /**
  * Defines an interface for a class parsing information in a .torrent file.
@@ -51,13 +50,6 @@ public interface BTMetaInfo {
      * @return infohash URN
      */
     public abstract URN getURN();
-
-    /**
-     * @return FileDesc for the GUI.
-     */
-    public abstract FileDesc getFileDesc();
-
-    public abstract void resetFileDesc();
 
     /**
      * @return number of pieces in this torrent

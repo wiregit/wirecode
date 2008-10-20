@@ -53,13 +53,13 @@ public class FileListStub extends GnutellaSharedFileListImpl {
     public boolean contains(FileDesc fileDesc) {
         if(fileDesc == null)
             return false;
-        
-        if(fileDescs.contains(fileDesc))
+        if(fileDescs.contains(fileDesc)) {
             return true;
-        else if(fileDesc.getFile().equals(fdStub.getFile()) ||
-                fileDesc.getFile().equals(defaultStub.getFile()))
+        } else if(fileDesc.getFile().equals(fdStub.getFile()) || 
+                fileDesc.getFile().equals(defaultStub.getFile())) {
             return true;
-        else 
+        } else { 
             return false;
+        }
     }
 }

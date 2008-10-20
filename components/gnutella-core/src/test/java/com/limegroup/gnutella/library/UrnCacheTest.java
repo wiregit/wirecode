@@ -2,17 +2,19 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
 import org.limewire.util.TestUtils;
 
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.library.FileDescImpl;
-import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -61,36 +63,46 @@ public final class UrnCacheTest extends LimeTestCase {
     public void testPersistence() throws Exception {
         assertTrue("cache should not be present", !cacheExists() );
         
-        FileDesc[] descs = createFileDescs();
-        assertNotNull("should have some file descs", descs);
-        assertGreaterThan("should have some file descs", 0, descs.length);
+        Collection<FileAndUrns> faus = createLotsOfUrns();
+        assertNotNull("should have some file descs", faus);
+        assertGreaterThan("should have some file descs", 0, faus.size());
         assertTrue("cache should still not be present", !cacheExists() );
         urnCache.persistCache();
         assertTrue("cache should now exist", cacheExists());
-        for( int i = 0; i < descs.length; i++) {
-            Set set = urnCache.getUrns(descs[i].getFile());
+        for(FileAndUrns fau : faus) {
+            Set set = urnCache.getUrns(fau.file);
             assertTrue("file should be present in cache",
                !set.equals(EMPTY_SET)
             );
             assertTrue("URN set should not be empty", !set.isEmpty());
             assertEquals("URN set should be same as that in desc",
-                descs[i].getUrns(), set);
+                fau.urns, set);
         }
     }
 
-	private FileDesc[] createFileDescs() throws Exception {
+	private Collection<FileAndUrns> createLotsOfUrns() throws Exception {
         File path = TestUtils.getResourceFile(FILE_PATH);
         File[] files = path.listFiles(new FileFilter() { 
             public boolean accept(File file) {
                 return !file.isDirectory();
             }
         });
-		FileDesc[] fileDescs = new FileDesc[files.length];
+		List<FileAndUrns> faus = new ArrayList<FileAndUrns>();
 		for(int i=0; i<files.length; i++) {
-			Set urns = UrnHelper.calculateAndCacheURN(files[i], urnCache);
-			fileDescs[i] = new FileDescImpl(null, files[i], urns, i);
+			Set<URN> urns = UrnHelper.calculateAndCacheURN(files[i], urnCache);
+			faus.add(new FileAndUrns(files[i], urns));
 		}				
-		return fileDescs;
+		return faus;
+	}
+	
+	private class FileAndUrns {
+	    private final Set<URN> urns;
+	    private final File file;
+	    
+	    public FileAndUrns(File file, Set<URN> urns) {
+            this.urns = urns;
+            this.file = file;
+        }
 	}
 
 	/**

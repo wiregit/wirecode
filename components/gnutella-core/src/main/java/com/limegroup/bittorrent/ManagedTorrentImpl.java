@@ -870,7 +870,6 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         LOG.trace("saved files");
         context.initializeDiskManager(true);
         LOG.trace("initialized folder");
-        context.getMetaInfo().resetFileDesc();
 
         // and re-open it for seeding.
         _folder = context.getDiskManager();

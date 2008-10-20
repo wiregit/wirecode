@@ -51,7 +51,7 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public FileDesc getFileDesc() {
-		return _info.getFileDesc();
+		return null;
 	}
 
 	public int getIndex() {

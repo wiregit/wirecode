@@ -36,7 +36,6 @@ import org.limewire.util.StringUtils;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
@@ -53,7 +52,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -941,11 +939,8 @@ public class FileManagerTest extends FileManagerTestCase {
         
         // simulate restart
         fman = new FileManagerImpl(
-                injector.getProvider(SimppManager.class),
                 injector.getProvider(UrnCache.class),
                 injector.getProvider(ContentManager.class),
-                injector.getProvider(AltLocManager.class),
-                injector.getProvider(ActivityCallback.class), 
                 injector.getInstance(
                         Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor"))),
                 injector.getInstance(
@@ -953,7 +948,8 @@ public class FileManagerTest extends FileManagerTestCase {
                 injector.getInstance(
                         Key.get(new TypeLiteral<ListenerSupport<FileManagerEvent>>(){})),
                 injector.getInstance(
-                        Key.get(new TypeLiteral<SourcedEventMulticaster<FileDescChangeEvent, FileDesc>>(){})));
+                        Key.get(new TypeLiteral<SourcedEventMulticaster<FileDescChangeEvent, FileDesc>>(){})),
+                injector.getInstance(FileDescFactory.class));
         waitForLoad();
         
         //  assert that "shared" is shared

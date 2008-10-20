@@ -1,16 +1,13 @@
 package com.limegroup.bittorrent;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
@@ -22,8 +19,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
-import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileDescImpl;
 import com.limegroup.gnutella.security.SHA1;
 
 /**
@@ -66,11 +61,6 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * An array for URI[] containing all webseeds of this torrent.
      */
     private URI[] _webSeeds;
-
-    /**
-     * FileDesc for the GUI
-     */
-    private FileDesc _desc = null;
 
     /**
      * Object that can save/restore the diskManager
@@ -205,29 +195,6 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      */
     public URN getURN() {
         return _infoHashURN;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.BTMetaInfo#getFileDesc()
-     */
-    public FileDesc getFileDesc() {
-        if (_desc == null) {
-            Set<URN> s = new HashSet<URN>();
-            s.add(getURN());
-            _desc = new FakeFileDesc(fileSystem.getCompleteFile(), s);
-        }
-        return _desc;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.BTMetaInfo#resetFileDesc()
-     */
-    public void resetFileDesc() {
-        _desc = null;
     }
 
     /*
@@ -406,12 +373,6 @@ public class BTMetaInfoImpl implements BTMetaInfo {
             ret.add(hash);
         }
         return ret;
-    }
-
-    public static class FakeFileDesc extends FileDescImpl {
-        public FakeFileDesc(File file, Set<? extends URN> s) {
-            super(null, file, s, Integer.MAX_VALUE);
-        }
     }
 
     /*

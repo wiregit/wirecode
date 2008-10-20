@@ -21,7 +21,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileDescImpl;
+import com.limegroup.gnutella.library.FileDescFactory;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -78,6 +78,8 @@ public class CollectionTest extends LimeTestCase {
         limeXMLProperties = injector.getInstance(LimeXMLProperties.class);
         metaDataReader = injector.getInstance(MetaDataReader.class);
         
+        FileDescFactory factory = injector.getInstance(FileDescFactory.class);
+        
         files = new FileDesc[3];
         assertTrue("Necessary file nullfile.null cannot be found!", mason.exists());
         assertTrue("Necessary file test1.mp3 cannot be found!", test1.exists());
@@ -85,11 +87,11 @@ public class CollectionTest extends LimeTestCase {
         
         Set<URN> urns;
         urns = UrnHelper.calculateAndCacheURN(mason, urnCache);
-        files[0] = new FileDescImpl(null, mason, urns, 0);
+        files[0] = factory.createFileDesc(mason, urns, 0);
         urns = UrnHelper.calculateAndCacheURN(test1, urnCache);
-        files[1] = new FileDescImpl(null, test1, urns, 1);
+        files[1] = factory.createFileDesc(test1, urns, 1);
         urns = UrnHelper.calculateAndCacheURN(test2, urnCache);
-        files[2] = new FileDescImpl(null, test2, urns, 2);
+        files[2] = factory.createFileDesc(test2, urns, 2);
 
         
     }

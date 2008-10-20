@@ -14,6 +14,7 @@ import org.limewire.core.settings.DHTSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -111,6 +112,7 @@ public class FileDescImpl implements FileDesc {
     private final AtomicBoolean storeFile = new AtomicBoolean(false);
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
+    private final RareFileDefinition rareFileDefinition;
 	
 	    
     /**
@@ -121,29 +123,35 @@ public class FileDescImpl implements FileDesc {
      * @param urns the URNs to associate with this FileDesc
      * @param index the index in the FileManager
      */
-    public FileDescImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster,
-            File file, Set<? extends URN> urns, int index) {
-        if ((file == null))
-			throw new NullPointerException("cannot create a FileDesc with a null File");
-		if(index < 0)
+    FileDescImpl(RareFileDefinition rareFileDefinition,
+            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster,
+            File file,
+            Set<? extends URN> urns,
+            int index) {
+		if(index < 0) {
 			throw new IndexOutOfBoundsException("negative index (" + index + ") not permitted in FileDesc");
-		if(urns == null)
-			throw new NullPointerException("cannot create a FileDesc with a null URN Set");
+		}
 
+		this.rareFileDefinition = rareFileDefinition;
 		this.multicaster = multicaster;
-		FILE = file;
+		FILE = Objects.nonNull(file, "file");
         _index = index;
         _name = I18NConvert.instance().compose(FILE.getName());
         _path = FILE.getAbsolutePath();
         _size = FILE.length();
         assert _size >= 0 && _size <= MAX_FILE_SIZE : "invalid size "+_size+" of file "+FILE;
         _modTime = FILE.lastModified();
-        URNS = Collections.unmodifiableSet(urns);
+        URNS = Collections.unmodifiableSet(Objects.nonNull(urns, "urns"));
 		SHA1_URN = extractSHA1();
 		if(SHA1_URN == null)
 			throw new IllegalArgumentException("no SHA1 URN");
 
         _hits = 0; // Starts off with 0 hits
+    }
+    
+    @Override
+    public boolean isRareFile() {
+        return rareFileDefinition.isRareFile(this);
     }
 
 	/* (non-Javadoc)

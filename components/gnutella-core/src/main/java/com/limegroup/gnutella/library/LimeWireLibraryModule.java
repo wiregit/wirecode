@@ -31,6 +31,8 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(new TypeLiteral<SourcedListenerSupport<FileDescChangeEvent, FileDesc>>(){}).toInstance(fileDescMulticaster);
         bind(new TypeLiteral<ListenerSupport<FileDescChangeEvent>>(){}).toInstance(fileDescMulticaster);
         bind(new TypeLiteral<SourcedEventMulticaster<FileDescChangeEvent, FileDesc>>(){}).toInstance(fileDescMulticaster);
+
+        bind(FileDescFactory.class).to(FileDescFactoryImpl.class);
         
     }
 

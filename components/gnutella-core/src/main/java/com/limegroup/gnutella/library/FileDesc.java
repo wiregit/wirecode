@@ -12,7 +12,9 @@ import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEvent> {
-
+    
+    /** Returns true if this is considered a rare file. */
+    boolean isRareFile();
 
     /**
      * Returns the index of this file in our file data structure.

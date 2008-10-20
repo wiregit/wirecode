@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.inspection.Inspectable;
@@ -49,9 +48,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
@@ -59,8 +56,6 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.FileManagerEvent.Type;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -214,17 +209,12 @@ class FileManagerImpl implements FileManager, Service {
             return f.isDirectory();
         }        
     };
-         
-    /** Contains the definition of a rare file */
-    private final RareFileDefinition rareDefinition;
     
-    private final Provider<SimppManager> simppManager;
     private final Provider<UrnCache> urnCache;
     private final Provider<ContentManager> contentManager;
-    private final Provider<AltLocManager> altLocManager;
-    private final Provider<ActivityCallback> activityCallback;
     private final ScheduledExecutorService backgroundExecutor;
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster;
+    private final FileDescFactory fileDescFactory;
     
     private final Executor fileListExecutor;
     
@@ -232,24 +222,20 @@ class FileManagerImpl implements FileManager, Service {
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
     @Inject
-    public FileManagerImpl(Provider<SimppManager> simppManager,
-            Provider<UrnCache> urnCache,
+    public FileManagerImpl(Provider<UrnCache> urnCache,
             Provider<ContentManager> contentManager,
-            Provider<AltLocManager> altLocManager,
-            Provider<ActivityCallback> activityCallback,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             EventBroadcaster<FileManagerEvent> fileManagerEventBroadcaster,
             ListenerSupport<FileManagerEvent> listenerSupport,
-            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster) {
-        this.simppManager = simppManager;
+            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
+            FileDescFactory fileDescFactory) {
         this.urnCache = urnCache;
         this.contentManager = contentManager;
-        this.altLocManager = altLocManager;
-        this.activityCallback = activityCallback;
         this.backgroundExecutor = backgroundExecutor;
         this.listenerSupport = listenerSupport;
         this.eventBroadcaster = fileManagerEventBroadcaster;
         this.fileDescMulticaster = fileDescMulticaster;
+        this.fileDescFactory = fileDescFactory;
         
         fileListExecutor = ExecutorsHelper.newProcessingQueue("FileListDispatchThread");
         
@@ -268,7 +254,6 @@ class FileManagerImpl implements FileManager, Service {
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
         // overwrite all these variables
-        rareDefinition = new RareFileDefinition();
         resetVariables();
     }
     
@@ -451,13 +436,7 @@ class FileManagerImpl implements FileManager, Service {
         if(index < 0 || index >= files.size())
             return null;
         return files.get(index);
-        }
-    
-    public synchronized boolean isValidIndex(int index) {
-        if( index >= 0 && index < files.size() )
-            return true;
-        return false;
-	}
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     //  Loading 
@@ -718,16 +697,7 @@ class FileManagerImpl implements FileManager, Service {
             canonical = files;
         }
         return canonical;
-    }
-    
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getFolderNotToShare()
-     */
-    public Set<File> getFolderNotToShare() {
-        synchronized (_data.DIRECTORIES_NOT_TO_SHARE) {
-            return new HashSet<File>(_data.DIRECTORIES_NOT_TO_SHARE);
-        }
-    }
+    }    
     
     //////////////////////////////////////////////////////////////////////////////
     //  File Accessors
@@ -804,7 +774,7 @@ class FileManagerImpl implements FileManager, Service {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File, java.util.List)
      */
-    public void addFile(File file, List<? extends LimeXMLDocument> list) {
+    private void addFile(File file, List<? extends LimeXMLDocument> list) {
         addFile(file, list, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE, null);
     }
     
@@ -936,7 +906,7 @@ class FileManagerImpl implements FileManager, Service {
      * @return
      */
     private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
-        FileDesc fileDesc = new FileDescImpl(fileDescMulticaster, file, urns, index);
+        FileDesc fileDesc = fileDescFactory.createFileDesc(file, urns, index);
         ContentResponseData r = contentManager.get().getResponse(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
@@ -1028,8 +998,8 @@ class FileManagerImpl implements FileManager, Service {
         
         // no indices were found for any URN associated with this
         // IncompleteFileDesc... add it.
-        IncompleteFileDesc incompleteFileDesc = new IncompleteFileDescImpl(fileDescMulticaster,
-                incompleteFile, urns, files.size(), name, size, vf);
+        IncompleteFileDesc incompleteFileDesc = 
+            fileDescFactory.createIncompleteFileDesc(incompleteFile, urns, files.size(), name, size, vf);
         
         numFiles += 1;
         files.add(incompleteFileDesc);
@@ -1141,23 +1111,6 @@ class FileManagerImpl implements FileManager, Service {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#validateSensitiveFile(java.io.File)
-     */
-	public void validateSensitiveFile(File dir) {
-        _data.SENSITIVE_DIRECTORIES_VALIDATED.add(dir);
-        _data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.remove(dir);
-    }
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#invalidateSensitiveFile(java.io.File)
-     */
-	public void invalidateSensitiveFile(File dir) {
-        _data.SENSITIVE_DIRECTORIES_VALIDATED.remove(dir);
-        _data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.add(dir);
-        SharingSettings.DIRECTORIES_TO_SHARE.remove(dir);   
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#hasApplicationSharedFiles()
      */
     public boolean hasApplicationSharedFiles() {
@@ -1189,13 +1142,6 @@ class FileManagerImpl implements FileManager, Service {
             }
         }
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isRareFile(com.limegroup.gnutella.FileDesc)
-     */
-    public boolean isRareFile(FileDesc fd) {
-        return rareDefinition.evaluate(fd);
-    }
 	
     /** Returns true if file has a shareable extension.  Case is ignored. */
     static boolean hasShareableExtension(File file) {
@@ -1226,7 +1172,7 @@ class FileManagerImpl implements FileManager, Service {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isSharedDirectory(java.io.File)
      */
-	public boolean isFolderShared(File dir) {
+	boolean isFolderShared(File dir) {
 		if (dir == null)
 			return false;
 		
@@ -1234,24 +1180,12 @@ class FileManagerImpl implements FileManager, Service {
 			return _completelySharedDirectories.contains(dir);
 		}
 	}
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isStoreDirectory(java.io.File)
-     */
-    public boolean isStoreDirectory(File file) {
-        if(file == null)
-            return false;
-        
-        synchronized(storeDirectories) {
-            return storeDirectories.contains(file);
-        }
-    }
        
  
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isFolderShareable(java.io.File, boolean)
      */
-    public boolean isFolderShareable(File folder, boolean includeExcludedDirectories) {
+    boolean isFolderShareable(File folder, boolean includeExcludedDirectories) {
         if(!folder.isDirectory() || !folder.canRead())
             return false;
         
@@ -1285,7 +1219,7 @@ class FileManagerImpl implements FileManager, Service {
         return getGnutellaSharedFileList().contains(getFileDesc(file));
     }
     
-    public int size() {
+    protected int size() {
         return numFiles;
     }
   
@@ -1409,14 +1343,14 @@ class FileManagerImpl implements FileManager, Service {
                 if (fd instanceof IncompleteFileDesc)
                     continue;
                 total++;
-                if (isRareFile(fd))
+                if (fd.isRareFile())
                     rare++;
                 // locking FM->ALM ok.
-                int numAlts = altLocManager.get().getNumLocs(fd.getSHA1Urn());
-                if (!nonZero || numAlts > 0) {
-                    alts.add((double)numAlts);
-                    topAltsFDs.put(numAlts,fd);
-                }
+//                int numAlts = altLocManager.get().getNumLocs(fd.getSHA1Urn());
+//                if (!nonZero || numAlts > 0) {
+//                    alts.add((double)numAlts);
+//                    topAltsFDs.put(numAlts,fd);
+//                }
                 int hitCount = fd.getHitCount();
                 if (!nonZero || hitCount > 0) {
                     hits.add((double)hitCount);
@@ -1494,28 +1428,6 @@ class FileManagerImpl implements FileManager, Service {
             ret.put("altsq",topAlts.getRawDump());
             
             return ret;
-        }
-    }
-    
-    private class RareFileDefinition implements SimppListener {
-        
-        private RPNParser parser;
-        RareFileDefinition() {
-            simppUpdated(0);
-            // TODO cleanup listener leaking
-            simppManager.get().addListener(this);
-        }
-        
-        public synchronized void simppUpdated(int ignored) {
-            parser = new RPNParser(DHTSettings.RARE_FILE_DEFINITION.getValue());
-        }
-        
-        private synchronized boolean evaluate(FileDesc fd) {
-            try {
-                return parser.evaluate(fd);
-            } catch (IllegalArgumentException badSimpp) {
-                return false;
-            }
         }
     }
     
@@ -1708,12 +1620,13 @@ class FileManagerImpl implements FileManager, Service {
              }
              
              // if we haven't already validated the sensitive directory, ask about it.
-             if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
-                 //  ask the user whether the sensitive directory should be shared
-                 // THIS CALL CAN BLOCK.
-                 if (!activityCallback.get().warnAboutSharingSensitiveDirectory(directory))
-                     return;
-             }
+// TODO: Revise sensitive directory management.
+//             if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
+//                 //  ask the user whether the sensitive directory should be shared
+//                 // THIS CALL CAN BLOCK.
+//                 if (!activityCallback.get().warnAboutSharingSensitiveDirectory(directory))
+//                     return;
+//             }
          }
      
          // Exit quickly (without doing the dir lookup) if revisions changed.

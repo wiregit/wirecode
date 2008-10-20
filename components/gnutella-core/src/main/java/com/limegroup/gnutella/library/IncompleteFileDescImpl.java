@@ -39,10 +39,16 @@ public class IncompleteFileDescImpl extends FileDescImpl implements IncompleteFi
     /**
      * Constructor for the IncompleteFileDesc object.
      */
-    public IncompleteFileDescImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster, File file,
-            Set<? extends URN> urns, int index, String completedName, long completedSize,
+    public IncompleteFileDescImpl(
+            RareFileDefinition rareFileDefinition,
+            SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
+            File file,
+            Set<? extends URN> urns,
+            int index,
+            String completedName,
+            long completedSize,
             VerifyingFile vf) {
-        super(fileDescMulticaster, file, urns, index);
+        super(rareFileDefinition, fileDescMulticaster, file, urns, index);
         _name = completedName;
         _size = completedSize;
         _verifyingFile = vf;

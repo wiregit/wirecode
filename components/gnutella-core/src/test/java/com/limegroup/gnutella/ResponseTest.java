@@ -36,9 +36,8 @@ import com.limegroup.gnutella.filters.XMLDocFilterTest;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileDescImpl;
+import com.limegroup.gnutella.library.FileDescFactory;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.IncompleteFileDescImpl;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -60,6 +59,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     private AlternateLocationFactory alternateLocationFactory;
     private LimeXMLDocumentHelper limeXMLDocumentHelper;
     private Injector injector;
+    private FileDescFactory fileDescFactory;
     
     /**
 	 * Constructs a new test instance for responses.
@@ -87,6 +87,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
 	    alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
+	    fileDescFactory = injector.getInstance(FileDescFactory.class);
 	    
 	    final CountDownLatch latch = new CountDownLatch(1);
 	    injector.getInstance(LocalIPFilter.class).refreshHosts(new IPFilterCallback() {
@@ -904,7 +905,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         PrivilegedAccessor.setValue(vf,"verifiedBlocks",verified);
         
         
-        IncompleteFileDesc ifd = new IncompleteFileDescImpl(null,new File("a"),set,11,"a",1024 * 1024, vf);
+        IncompleteFileDesc ifd =
+            fileDescFactory.createIncompleteFileDesc(new File("a"),set,11,"a",1024 * 1024, vf);
         Response resp = responseFactoryImpl.createResponse(ifd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
@@ -940,7 +942,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         PrivilegedAccessor.setValue(vf,"partialBlocks",partial);
         
         
-        IncompleteFileDesc ifd = new IncompleteFileDescImpl(null,new File("a"),set,11,"a",1024 * 1024, vf);
+        IncompleteFileDesc ifd =
+            fileDescFactory.createIncompleteFileDesc(new File("a"),set,11,"a",1024 * 1024, vf);
         Response resp = responseFactoryImpl.createResponse(ifd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
@@ -973,7 +976,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
                 return 1;
             }
         };
-        FileDesc fd = new FileDescImpl(null, f, set, 1);
+        FileDesc fd = fileDescFactory.createFileDesc(f, set, 1);
         Response resp = responseFactoryImpl.createResponse(fd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));
@@ -1003,7 +1006,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
                 return 1;
             }
         };
-        FileDesc fd = new FileDescImpl(null, f, set, 1);
+        FileDesc fd = fileDescFactory.createFileDesc(f, set, 1);
         Response resp = responseFactoryImpl.createResponse(fd);
         assertTrue(resp.getUrns().contains(UrnHelper.SHA1));
         assertTrue(resp.getUrns().contains(UrnHelper.TTROOT));

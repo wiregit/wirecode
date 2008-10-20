@@ -3,11 +3,12 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Provides methods for parsing Gnutella request URIs.
@@ -46,46 +47,6 @@ class FileRequestParser {
     }
 
     /**
-     * Parses a Gnutella GET request.
-     * 
-     * @param uri the requested URI
-     * @return information about the requested file
-     * @throws IOException if the request is malformed
-     */
-    public static FileRequest parseTraditionalGet(final String uri)
-            throws IOException {
-        try {
-            int index = -1;
-    
-            // file information part: /get/0/sample.txt
-            String fileName = null;
-    
-            int g = uri.indexOf("/get/");
-    
-            // find the next "/" after the "/get/", the number in between is the
-            // index
-            int d = uri.indexOf("/", (g + 5));
-    
-            // get the index
-            String str_index = uri.substring((g + 5), d);
-            index = java.lang.Integer.parseInt(str_index);
-            // get the filename, which should be right after
-            // the "/", and before the next " ".
-            try {
-                fileName = URLDecoder.decode(uri.substring(d + 1));
-            } catch (IllegalArgumentException e) {
-                fileName = uri.substring(d + 1);
-            }
-    
-            return new FileRequest(index, fileName);
-        } catch (NumberFormatException e) {
-            throw new IOException();
-        } catch (IndexOutOfBoundsException e) {
-            throw new IOException();
-        }
-    }
-
-    /**
      * Parses a URN request.
      * 
      * @param uri the <tt>String</tt> instance containing the get request
@@ -109,43 +70,39 @@ class FileRequestParser {
         }
     
         FileDesc desc = fileManager.getFileDesc(urn);
+        System.out.println("desc is: " + desc);
         if(desc == null || (!fileManager.getGnutellaSharedFileList().contains(desc) 
         			&& !fileManager.getIncompleteFileList().contains(desc))) {
             return null;
         }
     
-        return new FileRequest(desc.getIndex(), desc.getFileName(), requestType);
+        return new FileRequest(desc, requestType);
     }
 
     /** Record for storing information about a file request. */
     static class FileRequest {
-
-        /** Requested filename. */
-        String filename;
         
-        /** Requested index. */
-        int index;
+        private final FileDesc fileDesc;
     
         /** Type of the requested resource. */ 
-        RequestType requestType;
+        private final RequestType requestType;
     
-        public FileRequest(int index, String filename, RequestType requestType) {
-            this.index = index;
-            this.filename = filename;
+        public FileRequest(FileDesc fileDesc, RequestType requestType) {
+            this.fileDesc = fileDesc;
             this.requestType = requestType;
-        }
-    
-        public FileRequest(int index, String filename) {
-            this(index, filename, RequestType.FILE);
         }
     
         public boolean isThexRequest() {
             return this.requestType == RequestType.THEX;
         }
         
+        public FileDesc getFileDesc() {
+            return fileDesc;
+        }
+        
         @Override
         public String toString() {
-            return getClass().getName() + " [index=" + index + ",filename=" + filename + ",type=" + requestType + "]";
+            return StringUtils.toString(this);
         }
         
     }
