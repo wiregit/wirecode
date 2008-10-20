@@ -6,6 +6,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -47,9 +48,6 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
     
     private final FriendNameTable table;
     private final RemoteLibraryManager remoteLibraryManager;
-
-    private FriendItem currentFriend;
-//    private FriendFileList friendFileList;
     
     @Inject
     public FriendSharingPopupHandler(FriendNameTable table, RemoteLibraryManager remoteLibraryManager, 
@@ -106,8 +104,28 @@ public class FriendSharingPopupHandler implements TablePopupHandler {
         popupRow = table.rowAtPoint(new Point(x, y));
         
         EventTableModel<FriendItem> model = table.getEventTableModel();
-        currentFriend = model.getElementAt(popupRow);
+        FriendItem currentFriend = model.getElementAt(popupRow);
 //        friendFileList = shareListManager.getOrCreateFriendShareList(currentFriend.getFriend());
+
+        //if friend signed on through LW, make library view enabled
+        viewLibraryItem.setEnabled(remoteLibraryManager.hasFriendLibrary(currentFriend.getFriend()));
+        libraryAction.setFriend(currentFriend.getFriend());
+        //display if always share types are selected already
+        musicShareAllItem.setSelected(audioAction.isSelected());
+        videoShareAllItem.setSelected(videoAction.isSelected());
+        imageShareAllItem.setSelected(imageAction.isSelected());       
+        //if sharing something, enable clear all selection
+        unshareAllItem.setEnabled(currentFriend.getShareListSize() > 0);
+        
+        popupMenu.show(component, x, y);
+    }
+    
+    public void showPopup(JComponent component, int x, int y) {
+        if(table.getSelectedRow() < 0)
+            return;
+        
+        EventTableModel<FriendItem> model = table.getEventTableModel();
+        FriendItem currentFriend = model.getElementAt(table.getSelectedRow());
 
         //if friend signed on through LW, make library view enabled
         viewLibraryItem.setEnabled(remoteLibraryManager.hasFriendLibrary(currentFriend.getFriend()));

@@ -77,6 +77,9 @@ public class FriendNameTable extends JXTable {
               if (e.isPopupTrigger()) {
                   int col = columnAtPoint(e.getPoint());
                   int row = rowAtPoint(e.getPoint());
+                  if(row < 0 || row >= getRowCount())
+                      return;
+                  
                   if(row != getSelectedRow()) {
                       setRowSelectionInterval(row, row);
                   }

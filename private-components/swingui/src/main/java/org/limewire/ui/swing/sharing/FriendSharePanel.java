@@ -249,7 +249,6 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                 emptyDropTarget.setModel(fileList);
             }
 
-            headerPanel.setEnabled(currentList.size() > 0); 
             if(currentList.size() > 0) {
                 viewCardLayout.show(cardPanel, NONEMPTY);
             } else {
