@@ -96,8 +96,6 @@ public class AltLocUploadTest extends LimeTestCase {
 
     private static final String fileName = "alphabet test file#2.txt";
 
-    private static final String fileNameUrl = "http://localhost:" + PORT + "/get/0/alphabet%20test+file%232.txt";
-
     /** The hash of the file contents. */
     private static final String baseHash = "GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
     
@@ -244,7 +242,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(3, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        HttpGet method = new HttpGet(fileNameUrl);
+        HttpGet method = new HttpGet(hashUrl);
         method.addHeader("X-Alt", "");
         HttpResponse response = null;
         try {
@@ -284,7 +282,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(3, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        HttpGet method = new HttpGet(fileNameUrl);
+        HttpGet method = new HttpGet(hashUrl);
         method.addHeader(FALTFeatures);
         HttpResponse response = null;
         try {
@@ -329,7 +327,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(3, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        HttpGet method = new HttpGet(fileNameUrl);
+        HttpGet method = new HttpGet(hashUrl);
         method.addHeader(FWALTFeatures);
         HttpResponse response = null;
         try {
@@ -361,7 +359,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertEquals(0, altLocManager.getNumLocs(
                 fd.getSHA1Urn()));
 
-        HttpGet method = new HttpGet(fileNameUrl);
+        HttpGet method = new HttpGet(hashUrl);
         method.addHeader("X-Alt", direct.httpStringValue());
         method.addHeader("X-FAlt", push.httpStringValue());
         HttpResponse response = null;

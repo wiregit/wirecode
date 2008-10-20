@@ -196,7 +196,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
     public void testAmountRead() throws Exception {
         HTTPUploader uploader;
-        HttpGet method = new HttpGet(host + "/get/0/" + fd1.getFileName());
+        HttpGet method = new HttpGet(host + "/uri-res/N2R?" + urn1);
         HttpResponse response = null;
         try {
             response = client.execute(method);

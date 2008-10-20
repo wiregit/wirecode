@@ -73,6 +73,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
+import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.library.FileManagerEvent.Type;
@@ -92,23 +93,23 @@ import com.limegroup.gnutella.util.LimeTestCase;
 //ITEST
 public class PushUploadTest extends LimeTestCase {
 
-    private static final int PORT = 6668;
+    private final int PORT = 6668;
 
     /** Our listening port for pushes. */
-    private static final int PUSH_PORT = 6671;
+    private final int PUSH_PORT = 6671;
 
-    private static String testDirName = "com/limegroup/gnutella/uploader/data";
+    private String testDirName = "com/limegroup/gnutella/uploader/data";
 
-    private static String fileName = "alphabet test file#2.txt";
+    private String fileName = "alphabet test file#2.txt";
 
-    private static String url = "/get/0/alphabet%20test+file%232.txt";
+    private String url;
 
-    private static byte[] guid;
+    private byte[] guid;
 
-    private static Socket socket;
+    private Socket socket;
 
     /** The file contents. */
-    private static final String alphabet = "abcdefghijklmnopqrstuvwxyz";
+    private final String alphabet = "abcdefghijklmnopqrstuvwxyz";
 
     private FileManager fm;
 
@@ -132,7 +133,7 @@ public class PushUploadTest extends LimeTestCase {
         return buildTestSuite(PushUploadTest.class);
     }
 
-    private static void doSettings() throws Exception {
+    private void doSettings() throws Exception {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
                 .setValue(new String[] { "*.*.*.*" });
@@ -169,9 +170,8 @@ public class PushUploadTest extends LimeTestCase {
         // we must use a separate copy method
         // because the filename has a # in it which can't be a resource.
         LimeTestUtils.copyFile(testFile, sharedFile);
-        assertTrue("should exist", new File(_sharedDir, fileName).exists());
-        assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
-                .length());
+        assertTrue("should exist", sharedFile.exists());
+        assertGreaterThan("should have data", 0, sharedFile.length());
 
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
@@ -184,6 +184,8 @@ public class PushUploadTest extends LimeTestCase {
         // start services
         fm = injector.getInstance(FileManager.class);
         startAndWait(4000);
+        FileDesc fd = fm.getFileDesc(sharedFile);
+        url = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
         
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
         lifeCycleManager.start();

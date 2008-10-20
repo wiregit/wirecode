@@ -39,6 +39,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     private static final String STATUS_503 = "HTTP/1.1 503 Service Unavailable";
 
     private static final String STATUS_404 = "HTTP/1.1 404 Not Found";
+    private static final String STATUS_400 = "HTTP/1.1 400 Malformed Request";
 
     private FileManager fileManager;
 
@@ -107,7 +108,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
         try {
             for (FileDesc fd: fileManager.getGnutellaSharedFileList().getAllFileDescs()) {
-                String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
+                String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
                 BasicHttpRequest request = new BasicHttpRequest("GET", uri,
                         HttpVersion.HTTP_1_1);
@@ -151,10 +152,10 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
                     HttpVersion.HTTP_1_1);
-            sendRequestThatShouldFail(request, STATUS_404);
+            sendRequestThatShouldFail(request, STATUS_400);
 
             request = new BasicHttpRequest("HEAD", uri, HttpVersion.HTTP_1_1);
-            sendRequestThatShouldFail(request, STATUS_404);
+            sendRequestThatShouldFail(request, STATUS_400);
         }
     }
 
@@ -164,7 +165,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     public void testTraditionalGetForReturnedUrn() throws Exception {
         for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs() ) {
-            String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
+            String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
                     HttpVersion.HTTP_1_1);
@@ -187,7 +188,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     public void testTraditionalGetWithContentUrn() throws Exception {
         for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs() ) {
-            String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
+            String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
                     HttpVersion.HTTP_1_1);
@@ -205,7 +206,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     public void testTraditionalGetWithInvalidContentUrn() throws Exception {
         for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs() ) {
-            String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
+            String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
                     HttpVersion.HTTP_1_1);
@@ -226,9 +227,9 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     public void testInvalidTraditionalGetWithValidContentUrn() throws Exception {
         for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs() ) {
-            String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName()
-                    + "invalid";
-
+            String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
+            uri = uri.substring(0, uri.length() - 2)+ "xx";
+            
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
                     HttpVersion.HTTP_1_1);
             sendRequestThatShouldFail(request, STATUS_404);

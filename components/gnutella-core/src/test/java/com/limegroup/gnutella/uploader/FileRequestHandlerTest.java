@@ -113,7 +113,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
 
-        HttpRequest request = new BasicHttpRequest("GET", "/get/0/abc1.txt");
+        HttpRequest request = new BasicHttpRequest("GET", LimeTestUtils.getRelativeRequest(urn1));
         request.addHeader("X-Features", "fwalt/0.1,browse/1.0,chat/0.1");
         request.addHeader("X-Node", "127.0.0.1:1234");
         request.addHeader("X-Downloaded", "123456");
@@ -142,7 +142,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
 
-        HttpRequest request = new BasicHttpRequest("GET", "/get/0/abc1.txt");
+        HttpRequest request = new BasicHttpRequest("GET", LimeTestUtils.getRelativeRequest(urn1));
         request.addHeader("Chat", "128.0.0.1:5678");
         fileRequestHandler.handle(request, response, new BasicHttpContext(null));
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
@@ -163,7 +163,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
 
-        HttpRequest request = new BasicHttpRequest("GET", "/get/0/abc1.txt");
+        HttpRequest request = new BasicHttpRequest("GET", LimeTestUtils.getRelativeRequest(urn1));
         
         String pushEndpoint = "FF9EEA9E8B2E1D737828EFD1B7DAC500;129.168.0.1:5555";
         

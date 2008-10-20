@@ -11,7 +11,7 @@ public enum UploadType {
     PUSH_PROXY,
     UPDATE_FILE,
     MALFORMED_REQUEST,
-    INVALID_URN,
+    FILE_NOT_FOUND,
     FILE_VIEW,
     RESOURCE_FILE,
     BROWSER_CONTROL,

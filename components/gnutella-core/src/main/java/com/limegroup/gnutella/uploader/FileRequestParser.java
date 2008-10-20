@@ -22,29 +22,6 @@ class FileRequestParser {
         /** Indicates a request for a THEX tree. */ 
         THEX 
     }; 
-    
-    /**
-     * Returns whether or not the get request for the specified line is a URN
-     * request.
-     * 
-     * @param requestLine the <tt>String</tt> to parse to check whether it's
-     *        following the URN request syntax as specified in HUGE v. 0.93
-     * @return <tt>true</tt> if the request is a valid URN request,
-     *         <tt>false</tt> otherwise
-     */
-    public static boolean isURNGet(final String requestLine) {
-        // check if the string between the first pair of slashes is "uri-res"
-        int slash1Index = requestLine.indexOf("/");
-        int slash2Index = requestLine.indexOf("/", slash1Index + 1);
-        if ((slash1Index == -1) || (slash2Index == -1)) {
-            return false;
-        }
-        String idString = requestLine.substring(slash1Index + 1, slash2Index);
-        return idString.equalsIgnoreCase("uri-res");
-        
-        // much simpler implementation:
-        // return requestLine.startsWith("/uri-res/");
-    }
 
     /**
      * Parses a URN request.
@@ -54,7 +31,12 @@ class FileRequestParser {
      *         request type is invalid or the URN does not map to a valid file
      * @throws IOException thrown if the request is malformed
      */
-    public static FileRequest parseURNGet(final FileManager fileManager, final String uri) throws IOException {
+    public static FileRequest parseRequest(final FileManager fileManager, final String uri) throws IOException {
+        // Only parse URI requests.
+        if(!uri.toLowerCase(Locale.US).startsWith("/uri-res/")) {
+            throw new IOException("invalid request");
+        }
+        
         URN urn = URN.createSHA1UrnFromHttpRequest(uri + " HTTP/1.1");
     
         // Parse the service identifier, whether N2R, N2X or something

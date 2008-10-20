@@ -21,6 +21,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.Base32;
@@ -253,6 +254,38 @@ public class LimeTestUtils {
         finally {
             IOUtils.close(s);
         }
+    }
+    
+    public static String getRelativeRequest(URN urn) {
+        return getRelativeRequest(urn.httpStringValue());
+    }
+    
+    public static String getRelativeRequest(String urn) {
+        return "/uri-res/N2R?" + urn;
+    }
+    
+    public static String getRequest(IpPort host, URN urn) {
+        return getRequest(host.getAddress(), host.getPort(), urn);
+    }
+    
+    public static String getRequest(IpPort host, String urn) {
+        return getRequest(host.getAddress(), host.getPort(), urn);
+    }
+    
+    public static String getRequest(String host, int port, URN urn) {
+        return getRequest(host + ":" + port, urn);
+    }
+    
+    public static String getRequest(String host, int port, String urn) {
+        return getRequest(host + ":" + port, urn);
+    }
+    
+    public static String getRequest(String hostAndPort, URN urn) {
+        return getRequest(hostAndPort, urn.httpStringValue());
+    }
+    
+    public static String getRequest(String hostAndPort, String urn) {
+        return "http://" + hostAndPort + getRelativeRequest(urn);
     }
     
     /**

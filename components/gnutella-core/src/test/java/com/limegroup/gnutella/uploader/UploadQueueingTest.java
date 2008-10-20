@@ -66,17 +66,11 @@ public class UploadQueueingTest extends LimeTestCase {
     private HTTPUploadManager uploadManager;
 
     private FileManagerStub fm;
+    
+    private String url1; //, url2, url3, url4, url5;
 
-    private RemoteFileDesc rfd1;
-
-    private RemoteFileDesc rfd2;
-
-    private RemoteFileDesc rfd3;
-
-    private RemoteFileDesc rfd4;
-
-    private RemoteFileDesc rfd5;
-
+    private RemoteFileDesc rfd1, rfd2, rfd3, rfd4, rfd5;
+    
     private URN urn1, urn2, urn3, urn4, urn5;
 
     private int savedNIOWatchdogDelay;
@@ -154,6 +148,7 @@ public class UploadQueueingTest extends LimeTestCase {
         rfd1 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 0, "abc1.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
+        url1 = LimeTestUtils.getRelativeRequest(urn1);
 
         descStub = new FileDescStub("abc2.txt", urn2, 1);
         urns.put(urn2, descStub);
@@ -161,6 +156,7 @@ public class UploadQueueingTest extends LimeTestCase {
         rfd2 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.2", 1, 1, "abc2.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
+       // url2 = LimeTestUtils.getRelativeRequest(urn2);
 
         descStub = new FileDescStub("abc3.txt", urn3, 2);
         urns.put(urn3, descStub);
@@ -168,6 +164,7 @@ public class UploadQueueingTest extends LimeTestCase {
         rfd3 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.3", 1, 2, "abc3.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
+       // url3 = LimeTestUtils.getRelativeRequest(urn3);
 
         descStub = new FileDescStub("abc4.txt", urn4, 3);
         urns.put(urn4, descStub);
@@ -175,6 +172,7 @@ public class UploadQueueingTest extends LimeTestCase {
         rfd4 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.4", 1, 3, "abc4.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
+        //url4 = LimeTestUtils.getRelativeRequest(urn4);
 
         descStub = new FileDescStub("abc5.txt", urn5, 4);
         urns.put(urn5, descStub);
@@ -182,6 +180,7 @@ public class UploadQueueingTest extends LimeTestCase {
         rfd5 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.5", 1, 4, "abc5.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
+       // url5 = LimeTestUtils.getRelativeRequest(urn5);
 
         fm.setUrns(urns);
         fm.setFileDesc(descs);
@@ -517,7 +516,7 @@ public class UploadQueueingTest extends LimeTestCase {
             Socket sb = psf.getSocketB();
             OutputStream os = sb.getOutputStream();
             out = new BufferedWriter(new OutputStreamWriter(os));
-            out.write("GET /get/0/abc1.txt HTTP/1.1\r\n");
+            out.write("GET " + url1 + " HTTP/1.1\r\n");
             out.write("User-Agent: " + LimeWireUtils.getHttpServer() + "\r\n");
             out.write("X-Queue: 0.1\r\n");// we support remote queueing
             out.write("Range: bytes=0-12000 \r\n");
@@ -552,7 +551,7 @@ public class UploadQueueingTest extends LimeTestCase {
                 if (d > 11999)
                     break;
             }
-            out.write("GET /get/0/abc1.txt HTTP/1.1\r\n");
+            out.write("GET " + url1 + " HTTP/1.1\r\n");
             out.write("User-Agent: " + LimeWireUtils.getHttpServer() + "\r\n");
             out.write("X-Queue: 0.1\r\n");// we support remote queueing
             out.write("Range: bytes=1200-2400 \r\n");

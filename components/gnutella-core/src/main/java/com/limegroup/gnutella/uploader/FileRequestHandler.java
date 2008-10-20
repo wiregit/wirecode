@@ -129,20 +129,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         FileRequest fileRequest = null;
         HTTPUploader uploader = null;
 
-        // parse request
         try {
-            String uri = request.getRequestLine().getUri();
-            if (FileRequestParser.isURNGet(uri)) {
-                fileRequest = FileRequestParser.parseURNGet(fileManager, uri);
-                if(fileRequest == null) {
-                    uploader = sessionManager.getOrCreateUploader(request, context,
-                            UploadType.INVALID_URN, "Invalid URN query");
-                    uploader.setState(UploadStatus.FILE_NOT_FOUND);
-                    response.setStatusCode(HttpStatus.SC_NOT_FOUND);
-                }
-            } else {
-                throw new IOException();
-            }
+            fileRequest = FileRequestParser.parseRequest(fileManager, request.getRequestLine().getUri());
         } catch (IOException e) {
             uploader = sessionManager.getOrCreateUploader(request, context,
                     UploadType.MALFORMED_REQUEST, "Malformed Request");
@@ -152,6 +140,11 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         if(fileRequest != null) {
             assert uploader == null;
             uploader = findFileAndProcessHeaders(request, response, context, fileRequest, fileRequest.getFileDesc());
+        } else if(uploader == null) {
+            uploader = sessionManager.getOrCreateUploader(request, context,
+                    UploadType.FILE_NOT_FOUND, "Unknown Query");
+            uploader.setState(UploadStatus.FILE_NOT_FOUND);
+            response.setStatusCode(HttpStatus.SC_NOT_FOUND);
         }
         
         assert uploader != null;
