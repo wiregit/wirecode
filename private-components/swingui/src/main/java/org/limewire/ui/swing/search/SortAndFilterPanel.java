@@ -23,7 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
@@ -32,9 +31,6 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.components.PromptTextField;
-import org.limewire.ui.swing.friends.ChatLoginState;
-import org.limewire.ui.swing.friends.SignoffEvent;
-import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -71,11 +67,8 @@ public class SortAndFilterPanel extends JXPanel {
     private final String SIZE_HIGH_TO_LOW = tr("Size (high to low)");
     private final String FILE_TYPE = tr("File type");
     private final String NAME = tr("Name");
-    private final String FRIEND_ITEM = tr("Friend (a-z)");
     private final String RELEVANCE_ITEM = tr("Relevance");
-
-    private ChatLoginState chatLoginState;
-    
+ 
     private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
 
     @Resource private Icon listViewIcon;
@@ -101,8 +94,7 @@ public class SortAndFilterPanel extends JXPanel {
     private boolean repopulatingCombo;
 
     @Inject
-    SortAndFilterPanel(ChatLoginState chatLoginState) {
-        this.chatLoginState = chatLoginState;
+    SortAndFilterPanel() {
         GuiUtils.assignResources(this);
         sortLabel.setForeground(Color.WHITE);
         sortLabel.setFont(sortLabelFont);
@@ -346,16 +338,12 @@ public class SortAndFilterPanel extends JXPanel {
             };
         }
 
-        if (FRIEND_ITEM.equals(item)) {
-            return null; // TODO: RMV What to do here?
-        }
-
         if (LENGTH.equals(item)) {
             return new SimilarResultsGroupingComparator() {
                 private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
 
                 private Comparator<VisualSearchResult> propertyComparator = getLongComparator(
-                        PropertyKey.LENGTH, true);
+                        PropertyKey.LENGTH, false);
 
                 @Override
                 public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
@@ -368,12 +356,8 @@ public class SortAndFilterPanel extends JXPanel {
             };
         }
 
-        if (NAME.equals(item)) {
+        if (NAME.equals(item) || TITLE.equals(item)) {
             return getNameComparator(true);
-        }
-
-        if (TITLE.equals(item)) {
-            return getStringPropertyPlusNameComparator(PropertyKey.ALBUM_TITLE, true);
         }
 
         if (PLATFORM.equals(item)) {
@@ -472,16 +456,6 @@ public class SortAndFilterPanel extends JXPanel {
         return ascending ? compareToNull(c1, c2, nullsFirst) : compareToNull(c2, c1, nullsFirst);
     }
     
-    @EventSubscriber
-    public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
-        sortCombo.addItem(FRIEND_ITEM);
-    }
-    
-    @EventSubscriber
-    public void handleSignoffEvent(SignoffEvent event) {
-        sortCombo.removeItem(FRIEND_ITEM);
-    }
-
     private void layoutComponents() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -580,10 +554,6 @@ public class SortAndFilterPanel extends JXPanel {
 
         for (String item : items) {
             sortCombo.addItem(item);
-        }
-
-        if (chatLoginState.isLoggedIn()) {
-            sortCombo.addItem(FRIEND_ITEM);
         }
 
         repopulatingCombo = false;
