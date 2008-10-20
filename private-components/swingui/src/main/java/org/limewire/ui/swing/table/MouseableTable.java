@@ -30,13 +30,17 @@ public class MouseableTable extends StripedJXTable {
 
 	private TableDoubleClickHandler doubleClickHandler;
 	
-	private TableColors colors = new TableColors();
+	private TableColors colors = newTableColors();
 	
 	private boolean stripesPainted = false;
 	
 	public MouseableTable() {
 		initialize();
 	}
+	
+	protected TableColors newTableColors() {
+        return new TableColors();
+    }
 	
 	public MouseableTable(TableModel model) {
 		super(model);

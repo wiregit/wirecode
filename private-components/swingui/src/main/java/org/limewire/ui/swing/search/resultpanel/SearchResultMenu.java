@@ -35,9 +35,9 @@ public class SearchResultMenu extends JPopupMenu {
             }
         });
 
-        add(new AbstractAction(tr("Mark as spam")) {
+        add(new AbstractAction(vsr.isSpam() ? tr("Unmark as spam") : tr("Mark as spam")) {
             public void actionPerformed(ActionEvent e) {
-                vsr.setSpam(true);
+                vsr.setSpam(!vsr.isSpam());
             }
         });
 

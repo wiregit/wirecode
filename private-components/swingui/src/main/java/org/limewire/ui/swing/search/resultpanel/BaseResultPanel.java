@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -38,6 +39,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory; 
     
     private static final int TABLE_ROW_HEIGHT = 26;
+    private static final int ROW_HEIGHT = 56;
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
@@ -76,8 +78,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
             SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final SearchResultProperties properties) {
-        resultsList = new ConfigurableTable<VisualSearchResult>(false);
-        resultsList.setShowGrid(false, false);
+        resultsList = new ListViewTable();
+        resultsList.setShowGrid(true, false);
         preserver.addRowPreservationListener(resultsList);
 
         resultsList.setEventList(eventList);
@@ -114,9 +116,11 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             resultsList.setColumnWidth(columnIndex, initialColumnWidth);
         }
         
-        resultsList.getColumnModel().getColumn(2).setMaxWidth(ListViewTableFormat.ACTIONS_WIDTH);
-
-        resultsList.setRowHeight(ListViewTableEditorRenderer.HEIGHT);
+//        resultsList.getColumnModel().getColumn(2).setMaxWidth(ListViewTableFormat.ACTIONS_WIDTH);
+        
+        resultsList.setRowHeightEnabled(true);
+        //TODO: add listener to table model to set row heights based on contents of the search results
+        resultsList.setRowHeight(ROW_HEIGHT);
         
         resultsList.addMouseListener(new ResultDownloaderAdaptor());
 
@@ -249,5 +253,25 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
     public Scrollable getScrollable() {
         return visibileComponent;
+    }
+    
+    public static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
+        
+        public ListViewTable() {
+            super(false);
+            
+            setGridColor(Color.decode("#EBEBEB"));
+        }
+
+        @Override
+        protected TableColors newTableColors() {
+            TableColors colors = super.newTableColors();
+            
+            colors.evenColor = Color.WHITE;
+            colors.oddColor = Color.WHITE;
+            colors.getEvenHighLighter().setBackground(colors.evenColor);
+            colors.getOddHighLighter().setBackground(colors.oddColor);
+            return colors;
+        }
     }
 }

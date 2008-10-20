@@ -77,8 +77,8 @@ implements TableCellEditor, TableCellRenderer {
     private final PropertyKeyComparator PROGRAMS_COMPARATOR = 
         new PropertyKeyComparator(PropertyKey.PLATFORM, PropertyKey.COMPANY);
 
-    public static final int HEIGHT = 56;
-    public static final int WIDTH = 740;
+    
+//    public static final int WIDTH = 740;
 
     private String searchText;
     @Resource private Icon similarResultsIcon;
@@ -89,6 +89,8 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
     @Resource private Font similarResultsButtonFont;
+    @Resource private Icon spamIcon;
+    @Resource private Icon downloadingIcon;
     
     private final ActionColumnTableCellEditor actionEditor;
     private final RowColorResolver<VisualSearchResult> rowColorResolver;
@@ -104,7 +106,7 @@ implements TableCellEditor, TableCellRenderer {
     private final JXHyperlink downloadingLink = new JXHyperlink();
 
     private VisualSearchResult vsr;
-    private int column;
+//    private int column;
     private JComponent similarResultIndentation;
     private JPanel indentablePanel;
     private JPanel leftPanel;
@@ -216,7 +218,7 @@ implements TableCellEditor, TableCellRenderer {
         final JTable table, Object value, boolean isSelected, int row, final int col) {
 
         vsr = (VisualSearchResult) value;
-        column = col;
+//        column = col;
         LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
 
         actionButtonPanel =
@@ -226,16 +228,16 @@ implements TableCellEditor, TableCellRenderer {
         if (editorComponent == null) {
             editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
 
-                @Override
-                public void setBackground(Color bg) {
-                    super.setBackground(bg);
-                    if (column == 2) {
-                        actionButtonPanel.setBackground(bg);
-                    }
-                }
+//                @Override
+//                public void setBackground(Color bg) {
+//                    super.setBackground(bg);
+//                    if (column == 2) {
+//                        actionButtonPanel.setBackground(bg);
+//                    }
+//                }
             };
             
-            actionButtonPanel.configureForListView(table);
+//            actionButtonPanel.configureForListView(table);
             
             itemIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -311,6 +313,20 @@ implements TableCellEditor, TableCellRenderer {
         
         headingLabel.setForeground(headingLabelColor);
         headingLabel.setFont(headingFont);
+        headingLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        headingLabel.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                FontUtils.underline(headingLabel);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                FontUtils.removeUnderline(headingLabel);
+            }
+        });
 
         subheadingLabel.setForeground(subHeadingLabelColor);
         subheadingLabel.setFont(subHeadingFont);
@@ -373,10 +389,10 @@ implements TableCellEditor, TableCellRenderer {
         return indentablePanel;
     }
 
-    private void markAsJunk(boolean junk) {
-        float opacity = junk ? 0.2f : 1.0f;
-        editorComponent.setAlpha(opacity);
-    }
+//    private void markAsSpam(boolean spam) {
+//        float opacity = spam ? 0.2f : 1.0f;
+//        editorComponent.setAlpha(opacity);
+//    }
 
     private void populateFrom(VisualSearchResult vsr) {
         Collection<RemoteHost> sources = vsr.getSources();
@@ -425,7 +441,7 @@ implements TableCellEditor, TableCellRenderer {
                 indentablePanel.remove(similarResultIndentation);
             }
             
-            itemIconLabel.setIcon(categoryIconManager.getIcon(vsr.getCategory()));
+            itemIconLabel.setIcon(getIcon(vsr));
 
             boolean headingDecorated = populateHeading(vsr);
 
@@ -457,11 +473,20 @@ implements TableCellEditor, TableCellRenderer {
             }
             
         } else  { //col 2
-            actionButtonPanel.setDownloadingDisplay(vsr);
-            rightPanel.removeAll();
-            rightPanel.add(actionButtonPanel);
+//            actionButtonPanel.setDownloadingDisplay(vsr);
+//            rightPanel.removeAll();
+//            rightPanel.add(actionButtonPanel);
         }
-        markAsJunk(actionButtonPanel.getSpamButton().isSelected());
+//        markAsSpam(vsr.isSpam());
+    }
+
+    private Icon getIcon(VisualSearchResult vsr) {
+        if (vsr.isSpam()) {
+            return spamIcon;
+        } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+            return downloadingIcon;
+        }
+        return categoryIconManager.getIcon(vsr.getCategory());
     }
 
     private void populateSearchResultTextPanel() {

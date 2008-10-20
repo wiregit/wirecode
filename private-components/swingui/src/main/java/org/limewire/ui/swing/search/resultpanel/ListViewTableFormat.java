@@ -12,10 +12,11 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 public class ListViewTableFormat
 extends ResultsTableFormat<VisualSearchResult> {
 
-    static final int ACTIONS_WIDTH = 140;
+//    static final int ACTIONS_WIDTH = 140;
 
     public ListViewTableFormat() {
-        super(3, 2, tr("not used"), tr("also not used"), tr("nor this"));
+//        super(3, 2, tr("not used"), tr("also not used"), tr("nor this"));
+        super(2, 1, tr("not used"), tr("also not used"));
     }
 
     @Override
@@ -31,13 +32,14 @@ extends ResultsTableFormat<VisualSearchResult> {
 
     @Override
     public int getInitialColumnWidth(int index) {
-        switch(index) {
-        case 0:
-            return 400;
-        case 1:
-            return 170;
-        default:
-            return ACTIONS_WIDTH;
-        }
+//        switch(index) {
+//        case 0:
+//            return 400;
+//        case 1:
+//            return 170;
+//        default:
+//            return ACTIONS_WIDTH;
+//        }
+        return index == 0 ? 400 : 170;
     }
 }
