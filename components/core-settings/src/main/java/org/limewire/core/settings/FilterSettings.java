@@ -51,6 +51,12 @@ public class FilterSettings extends LimeProps {
     	FACTORY.createBooleanSetting("FILTER_WMV_ASF",true);
     
     /**
+     * Sets whether or not search results of know malware are banned.
+     */
+    public static final BooleanSetting FILTER_MALWARE =
+        FACTORY.createBooleanSetting("FILTER_MALWARE", true);
+    
+    /**
 	 * Sets whether or not duplicate search results are
 	 * banned.
 	 */
