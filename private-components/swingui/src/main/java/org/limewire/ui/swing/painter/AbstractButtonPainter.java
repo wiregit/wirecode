@@ -12,7 +12,7 @@ abstract class AbstractButtonPainter extends AbstractPainter<JXButton> {
     
     private final ButtonColors colors = new ButtonColors();
         
-    private final int ANTIALIAS_OFFSET = 2;
+    private final int ANTIALIAS_OFFSET = 1;
     
     @Override
     protected void doPaint(Graphics2D g, JXButton button, int width, int height) {
@@ -23,7 +23,7 @@ abstract class AbstractButtonPainter extends AbstractPainter<JXButton> {
         
         //turn on antialiasing
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);    
-        
+          
         // draw the border
         g.setPaint(new GradientPaint(0,0, colors.borderTop, 0, height, colors.borderBottom, false));
         g.drawRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, colors.arcWidth, colors.arcHeight);

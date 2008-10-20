@@ -3,6 +3,7 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -12,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,8 +23,11 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.Icon;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeListener;
 
 import org.jdesktop.swingx.JXButton;
@@ -31,9 +36,10 @@ import org.limewire.ui.swing.action.AbstractAction;
 public class LimeComboBox extends JXButton {
     
     private final List<Action> actions;
-    private Action   selectedAction;
+    private Action             selectedAction;
+    private JMenuItem          selectedComponent;
             
-    private Color pressedTextColour = null;
+    private Color pressedTextColour  = null;
     private Color rolloverTextColour = null;
     
     private boolean hasSize = false;
@@ -42,6 +48,9 @@ public class LimeComboBox extends JXButton {
     private final JPopupMenu menu;
     
     LimeComboBox(List<Action> actions) {
+        
+        final Color ITEM_BACK = (Color)UIManager.get("Menu.selectionBackground");
+        
         this.setText(null);
         
         this.actions = new LinkedList<Action>();
@@ -67,6 +76,11 @@ public class LimeComboBox extends JXButton {
             @Override
             public void mousePressed(MouseEvent e) {
                 updateMenu();
+        
+                selectedComponent.setBackground(ITEM_BACK);
+                
+                
+                System.out.println(selectedComponent.getText());
                 
                 if (getText() == null)
                     menu.setPreferredSize(new Dimension(getWidth(), 
@@ -348,6 +362,7 @@ public class LimeComboBox extends JXButton {
         public void actionPerformed(ActionEvent e) {
             // Change selection in parent combo box
             selectedAction = this.wrappedAction;
+            selectedComponent = (JMenuItem) e.getSource();
             
             // Call original action
             this.wrappedAction.actionPerformed(e);   
@@ -387,6 +402,9 @@ public class LimeComboBox extends JXButton {
             menuItem.setBorder(BorderFactory.createEmptyBorder(0,ix1,0,0));
             
             this.menu.add(menuItem);
+            
+            if (action == this.selectedAction)
+                this.selectedComponent = menuItem;
         }
 
     }
@@ -395,6 +413,78 @@ public class LimeComboBox extends JXButton {
         this.menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
         this.menu.setBackground(Color.WHITE);
         this.menu.setForeground(Color.BLACK);
+        
+        this.menu.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                selectedComponent.setBackground(Color.WHITE);
+                selectedComponent.updateUI();
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            } 
+        });
     }
     
+    
+    public static void main(String[] args) {
+        
+        JFrame window = new JFrame();
+        
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.setBackground(Color.WHITE);
+        
+        Action one = new AbstractAction("  one") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                
+            }
+        };
+        Action two = new AbstractAction("two two    ") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                
+            }
+        };
+        AbstractAction three = new AbstractAction("threethree three") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                
+                
+                
+            }
+            
+             
+            
+        };
+        
+        Action[] actions = new Action[] {one,two,three};
+        
+        LinkedList<Action> actList = new LinkedList<Action>();
+        
+        for ( Action a : actions)
+            actList.add(a);
+        
+        panel.add(new LimeComboBoxFactory().createFullComboBox(actList));
+        
+        panel.add(new LimeComboBoxFactory().createMiniComboBox("hello",actList));
+        
+        window.add(panel);
+        window.pack();
+        window.validate();
+        window.setVisible(true);
+        window.setSize(new Dimension(500,500));
+    }
 }
