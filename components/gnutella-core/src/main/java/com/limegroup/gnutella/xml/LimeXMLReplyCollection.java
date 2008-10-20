@@ -723,7 +723,7 @@ public class LimeXMLReplyCollection {
             return retVal;
             
         File file = new File(fileName);
-        FileDesc fd = fileManager.get().getFileDesc(file);
+        FileDesc fd = fileManager.get().getManagedFileList().getFileDesc(file);
         
         // if a FileDesc for this file exists, write out the changes to disk
         // and update the FileDesc in the FileManager

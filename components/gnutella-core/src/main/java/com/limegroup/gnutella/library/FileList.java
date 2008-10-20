@@ -6,11 +6,35 @@ import java.util.List;
 
 import org.limewire.listener.EventListener;
 
+import com.limegroup.gnutella.URN;
+
 
 /**
  * A collection of FileDescs.
  */
 public interface FileList {
+
+    /**
+     * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt> or
+     * null if the file is not shared or not a store file.
+     */
+    FileDesc getFileDesc(File f);
+
+    /**
+     * Returns the <tt>FileDesc</tt> for the specified URN. This only returns
+     * one <tt>FileDesc</tt>, even though multiple indices are possible with
+     * HUGE v. 0.93.
+     * 
+     * @param urn the urn for the file
+     * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
+     *         <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
+     */
+    FileDesc getFileDesc(final URN urn);
+    
+    /**
+     * Adds a file to the list.
+     */
+    public void add(File file);
     
     /**
      * Given a non-null FileDesc, adds this FileDesc to this list. If FileDesc
@@ -20,12 +44,23 @@ public interface FileList {
     public boolean add(FileDesc fileDesc);
     
     /**
+     * Removes the File from this list if there exists a FileDesc wrapper for
+     * that file. If the value existed returns true, false if it did not exist
+     * and nothing was removed. This method simply removes this FileDesc from
+     * this list. If FileDesc is null, throws an IllegalArguementException.
+     */
+    public boolean remove(File file);
+    
+    /**
      * Removes the FileDesc from the list if it exists. If the value existed 
      * returns true, false if it did not exist and nothing was removed. This 
      * method simply removes this FileDesc from this list. If FileDesc is 
      * null, throws an IllegalArguementException. 
     */
     public boolean remove(FileDesc fileDesc);
+    
+    /** Returns true if this list contains a FileDesc for the given file. */
+    public boolean contains(File file);
     
     /**
      * Return true if this list contains this FileDesc, false otherwise.
@@ -153,12 +188,6 @@ public interface FileList {
      * returned by getAllFileDescs.
      */
     public File[] getIndividualFiles();
-    
-    /**
-     * Returns true if this list contains at least one individual files, 
-     * false otherwise.
-     */
-    public boolean hasIndividualFiles();
     
     /**
      * Returns the number of individual files in this FileList.

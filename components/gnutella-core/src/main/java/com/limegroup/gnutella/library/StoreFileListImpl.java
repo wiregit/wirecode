@@ -12,10 +12,15 @@ import org.limewire.util.FileUtils;
 /**
  * A collection of FileDescs containing only files purchased from the LWS.
  */
-public class StoreFileListImpl extends FileListImpl {
+class StoreFileListImpl extends FileListImpl {
 
-    public StoreFileListImpl(Executor executor, FileManager fileManager, Set<File> individualFiles) {
+    public StoreFileListImpl(Executor executor, FileManagerImpl fileManager, Set<File> individualFiles) {
         super(executor, fileManager, individualFiles);
+    }
+    
+    @Override
+    public void add(File file) {
+        throw new UnsupportedOperationException("cannot add");
     }
     
     /**

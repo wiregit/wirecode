@@ -162,10 +162,10 @@ public class DownloadTHEXTest extends DownloadTestCase {
         // there should be an entry for the sha1 urn.
         URN ttroot = tree.getTreeRootUrn();
         FileManager fm = injector.getInstance(FileManager.class);
-        assertNotNull(fm.getFileDesc(TestFile.hash()));
+        assertNotNull(fm.getGnutellaSharedFileList().getFileDesc(TestFile.hash()));
         
         // and the filedesc should have both
-        FileDesc fd = fm.getFileDesc(TestFile.hash());
+        FileDesc fd = fm.getGnutellaSharedFileList().getFileDesc(TestFile.hash());
         assertTrue(fd.getUrns().contains(TestFile.hash()));
         assertTrue(fd.getUrns().contains(ttroot));
     }
@@ -195,10 +195,10 @@ public class DownloadTHEXTest extends DownloadTestCase {
         
         // the sha1 should point to the filedesc 
         FileManager fm = injector.getInstance(FileManager.class);
-        assertNotNull(fm.getFileDesc(TestFile.hash()));
+        assertNotNull(fm.getGnutellaSharedFileList().getFileDesc(TestFile.hash()));
         
         // and the filedesc should have both
-        FileDesc fd = fm.getFileDesc(TestFile.hash());
+        FileDesc fd = fm.getGnutellaSharedFileList().getFileDesc(TestFile.hash());
         assertInstanceof(IncompleteFileDesc.class, fd);
         assertTrue(fd.getUrns().contains(TestFile.hash()));
         assertTrue(fd.getUrns().contains(ttroot));

@@ -462,7 +462,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.removeFile(file);
+                fileManager.getManagedFileList().remove(file);
                 fileManager.addSharedFile(file);
                 return false;
             }

@@ -232,7 +232,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
         IntSet ret = priors;
         for (URN urn : urnsIter) {
-            if (fileManager.getGnutellaSharedFileList().contains(fileManager.getFileDesc(urn))) {
+            if (fileManager.getGnutellaSharedFileList().getFileDesc(urn) != null) {
                 IntSet hits = fileManager.getIndices(urn);
 
                 if (hits != null) {
@@ -277,7 +277,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         Set<Response> resps = new HashSet<Response>(urnList.size());
         for (int i = 0; i < urnList.size(); i++) {
             URN currURN = urnList.get(i);
-            FileDesc desc = fileManager.getFileDesc(currURN);
+            FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
 
             // should never happen since we don't add times for IFDs and
             // we clear removed files...
@@ -615,8 +615,8 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             if (file == null) { // pure metadata (no file)
                 res = responseFactory.get().createPureMetadataResponse();
             } else { // meta-data about a specific file
-                FileDesc fd = fileManager.getFileDesc(file);
-                if (fd == null || !fileManager.getGnutellaSharedFileList().contains(fd)) {
+                FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(file);
+                if (fd == null) {
                     // fd == null is bad -- would mean MetaFileManager is out of
                     // sync.
                     // fd incomplete should never happen, but apparently is

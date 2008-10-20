@@ -177,7 +177,7 @@ public class AltLocUploadTest extends LimeTestCase {
         FileManager fileManager = injector.getInstance(FileManager.class);
         FileManagerTestUtils.waitForLoad(fileManager, 2000);
         
-        fd = fileManager.getFileDesc(sharedFile);
+        fd = fileManager.getGnutellaSharedFileList().getFileDesc(sharedFile);
         assertNotNull(fd);
         
         altLocManager = injector.getInstance(AltLocManager.class);

@@ -89,6 +89,7 @@ class FileManagerImpl implements FileManager, Service {
      */
     protected final LibraryData _data = new LibraryData();
     
+    private final FileListPackage managedFileList;
     private final FileListPackage sharedFileList;
     private final FileListPackage storeFileList; 
     private final FileListPackage allFriendsFileList;
@@ -239,6 +240,7 @@ class FileManagerImpl implements FileManager, Service {
         
         fileListExecutor = ExecutorsHelper.newProcessingQueue("FileListDispatchThread");
         
+        managedFileList = new ManagedFileList(fileListExecutor, this);
         sharedFileList = new SynchronizedFileList(new GnutellaSharedFileListImpl(fileListExecutor, this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl(fileListExecutor, this, _data.SPECIAL_STORE_FILES));
         allFriendsFileList = new SynchronizedFileList(new FriendFileListImpl(fileListExecutor, this, _data.getFriendList("All"), "All"));
@@ -311,7 +313,7 @@ class FileManagerImpl implements FileManager, Service {
      * @see com.limegroup.gnutella.FileManager#start()
      */
     public void start() {
-        _data.clean();
+      //  _data.clean(); // avoid cleaning for now, too slow.
         cleanIndividualFiles();
 		loadSettings();
     }
@@ -332,6 +334,11 @@ class FileManagerImpl implements FileManager, Service {
     /////////////////////////////////////////////////////////////////////////
     //  FileList Accessors
     ////////////////////////////////////////////////////////////////////////
+    
+    @Override
+    public FileList getManagedFileList() {
+        return managedFileList;
+    }
     
     public FileList getGnutellaSharedFileList() {
         return sharedFileList;

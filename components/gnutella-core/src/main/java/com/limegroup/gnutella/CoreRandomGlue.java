@@ -161,8 +161,7 @@ class CoreRandomGlue {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(fileManager.getFileDesc(tFile) != null &&
-                    !fileManager.getGnutellaSharedFileList().contains(fileManager.getFileDesc(tFile)) &&
+            if(fileManager.getGnutellaSharedFileList().getFileDesc(tFile) != null && 
                     tFile.lastModified() < purgeLimit) {
                 tFile.delete();
             }

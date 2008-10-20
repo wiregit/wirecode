@@ -36,12 +36,12 @@ public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFil
     
     @Override
     public void addFile(File file) {
-        fileManager.addFile(file);
+        fileManager.getManagedFileList().add(file);
     }
 
     @Override
     public void removeFile(File file) {
-        fileManager.removeFile(file);
+        fileManager.getManagedFileList().remove(file);
     }
 
     @Override
@@ -64,13 +64,13 @@ public class LibraryFileListImpl extends LocalFileListImpl implements LibraryFil
     }
    
     public boolean contains(File file) {
-       return fileManager.getFileDesc(file) != null;
+       return fileManager.getManagedFileList().getFileDesc(file) != null;
     }
     
     public boolean contains(URN urn) {
         if(urn instanceof URNImpl) {
             URNImpl urnImpl = (URNImpl)urn; 
-            FileDesc fileDesc = fileManager.getFileDesc(urnImpl.getUrn());
+            FileDesc fileDesc = fileManager.getManagedFileList().getFileDesc(urnImpl.getUrn());
             return fileDesc != null && ! (fileDesc instanceof IncompleteFileDesc);
         }
         return false;

@@ -414,8 +414,7 @@ public class DownloadAltLocTest extends DownloadTestCase {
             public void run() {
                 try {
                     Thread.sleep(complete ? 4000 : 1500);
-                    FileDesc fd = fileManager.
-                        getFileDesc(TestFile.hash());
+                    FileDesc fd = fileManager.getManagedFileList().getFileDesc(TestFile.hash());
                     assertTrue(fd instanceof IncompleteFileDesc);
                     altLocManager.add(
                             alternateLocationFactory.create(rfd2),this);
@@ -478,8 +477,7 @@ public class DownloadAltLocTest extends DownloadTestCase {
         ifm.addEntry(incFile, verifyingFileFactory.createVerifyingFile(TestFile.length()), true);
         
         // Get the IncompleteFileDesc and add these alt locs to it.
-        FileDesc fd =
-            fileManager.getFileDesc(TestFile.hash());
+        FileDesc fd = fileManager.getManagedFileList().getFileDesc(TestFile.hash());
         assertNotNull(fd);
         assertInstanceof(IncompleteFileDesc.class, fd);
         altLocManager.add(al1, null);

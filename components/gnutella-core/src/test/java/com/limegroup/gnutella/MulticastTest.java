@@ -430,7 +430,7 @@ public class MulticastTest extends LimeTestCase {
 
         File temp = new File(_savedDir, "metadata.mp3");
         if (temp.exists()) {
-            fileManager.removeFile(temp);
+            fileManager.getManagedFileList().remove(temp);
             temp.delete();
         }
         sleep(2 * DELAY);

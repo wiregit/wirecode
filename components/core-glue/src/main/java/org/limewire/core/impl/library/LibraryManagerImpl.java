@@ -136,7 +136,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
 
         @Override
         public void removeFile(File file) {
-            fileManager.getGnutellaSharedFileList().remove(fileManager.getFileDesc(file));
+            fileManager.getGnutellaSharedFileList().remove(file);
         }
         
         @Override
@@ -187,7 +187,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
 
         @Override
         public void removeFile(File file) {
-            fileManager.getFriendFileList(name).remove(fileManager.getFileDesc(file));
+            fileManager.getFriendFileList(name).remove(file);
         }
         
         @Override

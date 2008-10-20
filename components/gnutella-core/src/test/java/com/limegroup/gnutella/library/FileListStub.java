@@ -13,7 +13,7 @@ public class FileListStub extends GnutellaSharedFileListImpl {
     private FileDescStub fdStub = new FileDescStub();
     private FileDescStub defaultStub = new FileDescStub("other.txt");
     
-    public FileListStub(FileManager fileManager, Set<File> individual, Set<File> files) {
+    public FileListStub(FileManagerImpl fileManager, Set<File> individual, Set<File> files) {
         super(new Executor() {
             public void execute(Runnable command) {
                 command.run();

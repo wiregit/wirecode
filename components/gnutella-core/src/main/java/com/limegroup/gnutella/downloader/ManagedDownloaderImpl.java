@@ -993,7 +993,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if( incompleteFile == null ) // no incomplete, no big deal.
             return;
         
-        FileDesc fd = fileManager.getFileDesc(incompleteFile);
+        FileDesc fd = fileManager.getIncompleteFileList().getFileDesc(incompleteFile);
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
             // Assert that the SHA1 of the IFD and our sha1 match.
@@ -1006,7 +1006,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                            "\nour hash    : " + getSha1Urn() +
                            "\ntheir hashes: " + ifd.getUrns()+
                            "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
-                fileManager.removeFile(incompleteFile);
+                fileManager.getManagedFileList().remove(incompleteFile);
             }
         }
         
@@ -1968,7 +1968,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
         if (commonOutFile.getHashTree() == null) 
-            fileManager.removeFile(incompleteFile);
+            fileManager.getManagedFileList().remove(incompleteFile);
         
         // purge the tree
         tigerTreeCache.get().purgeTree(getSha1Urn());
@@ -2039,7 +2039,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
-            fileManager.removeFile(saveFile);
+            fileManager.getManagedFileList().remove(saveFile);
 
         // add file hash to manager for fast lookup
         addFileHash(fileHash, saveFile);
@@ -2856,7 +2856,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             URN ttroot = tree.getTreeRootUrn();
             tigerTreeCache.get().addRoot(sha1, ttroot);
             synchronized(fileManager) {
-                FileDesc fd = fileManager.getFileDesc(sha1);
+                FileDesc fd = fileManager.getManagedFileList().getFileDesc(sha1);
                 if (fd == null) // possible for in-network downloads
                     return;
                 fd.setTTRoot(ttroot);

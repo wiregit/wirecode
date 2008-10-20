@@ -23,6 +23,11 @@ public interface FileManager {
     void start();
 
     void stop();
+    
+    /**
+     * Returns the Managed file list.
+     */
+    FileList getManagedFileList();
 
     /**
      * Returns the FileList containing Shared files.
@@ -55,23 +60,6 @@ public interface FileManager {
      * Returns the FileList containing Incomplete files.
      */
     FileList getIncompleteFileList();
-
-    /**
-     * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt> or
-     * null if the file is not shared or not a store file.
-     */
-    FileDesc getFileDesc(File f);
-
-    /**
-     * Returns the <tt>FileDesc</tt> for the specified URN. This only returns
-     * one <tt>FileDesc</tt>, even though multiple indices are possible with
-     * HUGE v. 0.93.
-     * 
-     * @param urn the urn for the file
-     * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
-     *         <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
-     */
-    FileDesc getFileDesc(final URN urn);
 
     /**
      * Starts a new revision of the library, ensuring that only items present in
@@ -159,11 +147,6 @@ public interface FileManager {
     void addFriendFile(String id, File file);
 
     /**
-     * Adds the file to the master file list.
-     */
-    void addFile(File file);
-
-    /**
      * Returns the FileDesc located at the index in the list
      * 
      * @return the FileDesc if it exists, or null if the file no longer exists
@@ -173,15 +156,6 @@ public interface FileManager {
     
     /** Returns all indexes this URN is at. */
     IntSet getIndices(URN urn);
-
-    /**
-     * @modifies this
-     * @effects ensures the first instance of the given file is not shared.
-     *          Returns FileDesc iff the file was removed. In this case, the
-     *          file's index will not be assigned to any other files. Note that
-     *          the file is not actually removed from disk.
-     */
-    FileDesc removeFile(File f);
 
     /**
      * Adds an incomplete file to be used for partial file sharing.

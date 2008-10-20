@@ -625,14 +625,14 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
             
             if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().isLoadFinished()) {
                 
-                FileDesc shared = fileManager.get().getFileDesc(next.getUpdateURN());
+                FileDesc fd = fileManager.get().getManagedFileList().getFileDesc(next.getUpdateURN());
                 //TODO: remove the cast
                 ManagedDownloader md = (ManagedDownloader)downloadManager.get().getDownloaderForURN(next.getUpdateURN());
                 if(LOG.isDebugEnabled())
-                    LOG.debug("Looking for: " + next + ", got: " + shared);
+                    LOG.debug("Looking for: " + next + ", got: " + fd);
                 
-                if(shared != null && !(shared instanceof IncompleteFileDesc)) {
-                    // if it's already shared, stop any existing download.
+                if(fd != null && !(fd instanceof IncompleteFileDesc)) {
+                    // if it's already downloaded, stop any existing download.
                     if(md != null)
                         md.stop();
                     continue;
@@ -680,7 +680,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
             List<FileDesc> shared = fileManager.get().getGnutellaSharedFileList().getFilesInDirectory(SharingUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
-                    fileManager.get().removeFile(fd.getFile());
+                    fileManager.get().getManagedFileList().remove(fd.getFile());
                     fd.getFile().delete();
                 }
             }
@@ -846,7 +846,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
         if (myUrn == null)
             return true;
         
-        FileDesc desc = fileManager.get().getFileDesc(myUrn);
+        FileDesc desc = fileManager.get().getManagedFileList().getFileDesc(myUrn);
         
         if (desc == null)
             return false;

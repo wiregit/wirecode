@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.limewire.listener.EventListener;
 
+import com.limegroup.gnutella.URN;
+
 
 public class SynchronizedFileList implements FileListPackage {
 
@@ -24,10 +26,45 @@ public class SynchronizedFileList implements FileListPackage {
             fileList.clear();
         }
     }
+    
+    @Override
+    public FileDesc getFileDesc(File f) {
+        synchronized(mutex) {
+            return fileList.getFileDesc(f);
+        }
+    }
+    
+    @Override
+    public FileDesc getFileDesc(URN urn) {
+        synchronized(mutex) {
+            return fileList.getFileDesc(urn);
+        }
+    }
 
     public boolean add(FileDesc fileDesc) {
         synchronized (mutex) {
             return fileList.add(fileDesc);
+        }
+    }
+    
+    @Override
+    public void add(File file) {
+        synchronized (mutex) {
+            fileList.add(file);
+        }
+    }
+
+    @Override
+    public boolean contains(File file) {
+        synchronized (mutex) {
+            return fileList.contains(file);
+        }
+    }
+
+    @Override
+    public boolean remove(File file) {
+        synchronized (mutex) {
+            return fileList.remove(file);
         }
     }
 
@@ -176,12 +213,6 @@ public class SynchronizedFileList implements FileListPackage {
     public int getNumIndividualFiles() {
         synchronized (mutex) {
             return fileList.getNumIndividualFiles();
-        }
-    }
-
-    public boolean hasIndividualFiles() {
-        synchronized (mutex) {
-            return fileList.hasIndividualFiles();
         }
     }
 

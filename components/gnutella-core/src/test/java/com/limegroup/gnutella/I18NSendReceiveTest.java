@@ -307,7 +307,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
     private void addMetaData(String fname, String xmlstr) throws Exception {
         FileManager fm = fileManager;
         FileDesc fd = 
-            fm.getFileDesc(new File(_sharedDir, fname));
+            fm.getManagedFileList().getFileDesc(new File(_sharedDir, fname));
         
         LimeXMLDocument newDoc = 
             limeXMLDocumentFactory.createLimeXMLDocument(buildXMLString(xmlstr));

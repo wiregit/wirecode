@@ -197,9 +197,12 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         GGEP ggep = new GGEP();
         
         URN urn = ping.getUrn();
-        FileDesc desc = fileManager.get().getFileDesc(urn);
+        FileDesc desc = fileManager.get().getGnutellaSharedFileList().getFileDesc(urn);
+        if(desc == null) {
+            desc = fileManager.get().getIncompleteFileList().getFileDesc(urn);
+        }
         // Easy case: no file, add code & exit
-        if(desc == null || (!fileManager.get().getGnutellaSharedFileList().contains(desc) && !fileManager.get().getIncompleteFileList().contains(desc))) {
+        if(desc == null) {
             ggep.put(HeadPong.CODE, HeadPong.FILE_NOT_FOUND);
             return writeGGEP(ggep);
         }
@@ -285,7 +288,10 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	DataOutputStream daos = new DataOutputStream(caos);
     	byte retCode=0;
     	URN urn = ping.getUrn();
-    	FileDesc desc = fileManager.get().getFileDesc(urn);
+    	FileDesc desc = fileManager.get().getGnutellaSharedFileList().getFileDesc(urn);
+    	if(desc == null) {
+    	    desc = fileManager.get().getIncompleteFileList().getFileDesc(urn);
+    	}
     	boolean didNotSendAltLocs=false;
     	boolean didNotSendPushAltLocs = false;
     	boolean didNotSendRanges = false;
@@ -298,9 +304,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     			LOG.debug("writing features "+features);
     		
     		//if we don't have the file or its too large...
-    		if (desc == null || (!fileManager.get().getGnutellaSharedFileList().contains(desc) &&
-    		       !fileManager.get().getIncompleteFileList().contains(desc))
-    						 || desc.getFileSize() > Integer.MAX_VALUE) {
+    		if (desc == null || desc.getFileSize() > Integer.MAX_VALUE) {
     			LOG.debug("we do not have the file");
     			daos.write(HeadPong.FILE_NOT_FOUND);
     			return baos.toByteArray();

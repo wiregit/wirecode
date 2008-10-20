@@ -21,7 +21,7 @@ class FriendFileListImpl extends FileListImpl {
     private boolean addNewVideoAlways = false;
     
 
-    public FriendFileListImpl(Executor executor, FileManager fileManager, Set<File> filesToShare, String id) {
+    public FriendFileListImpl(Executor executor, FileManagerImpl fileManager, Set<File> filesToShare, String id) {
         super(executor, fileManager, filesToShare);
         if(id == null)
             throw new NullPointerException("ID cannot be null");
@@ -30,6 +30,11 @@ class FriendFileListImpl extends FileListImpl {
         addNewAudioAlways = SharingSettings.containsFriendShareNewAudio(id);
         addNewImagesAlways = SharingSettings.containsFriendShareNewImages(id);
         addNewVideoAlways = SharingSettings.containsFriendShareNewVideo(id);
+    }
+    
+    @Override
+    public void add(File file) {
+        fileManager.addFriendFile(idName, file);
     }
 
     /**

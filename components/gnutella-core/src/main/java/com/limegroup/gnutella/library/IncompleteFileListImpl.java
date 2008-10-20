@@ -10,8 +10,13 @@ import java.util.concurrent.Executor;
  */
 class IncompleteFileListImpl extends FileListImpl {
 
-    public IncompleteFileListImpl(Executor executor, FileManager fileManager, Set<File> individualFiles) {
+    public IncompleteFileListImpl(Executor executor, FileManagerImpl fileManager, Set<File> individualFiles) {
         super(executor, fileManager, individualFiles);
+    }
+    
+    @Override
+    public void add(File file) {
+        throw new UnsupportedOperationException("cannot add from here");
     }
     
     @Override

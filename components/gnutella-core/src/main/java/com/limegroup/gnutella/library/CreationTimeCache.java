@@ -217,7 +217,7 @@ public final class CreationTimeCache {
                     // check to see if file still exists
                     // NOTE: technically a URN can map to multiple FDs, but I only want
                     // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                    FileDesc fd = fileManager.getFileDesc(currURN);
+                    FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
                     if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                         dirty = true;
                         iter.remove();
@@ -335,7 +335,7 @@ public final class CreationTimeCache {
                             break;
                         
                         // we only want shared FDs, store files also have cached urns
-                        FileDesc fd = fileManager.getFileDesc(currURN);
+                        FileDesc fd = fileManager.getManagedFileList().getFileDesc(currURN);
                         
                     	// don't remove store files from the urn cache list
                     	if( fd != null && fileManager.getStoreFileList().contains(fd))

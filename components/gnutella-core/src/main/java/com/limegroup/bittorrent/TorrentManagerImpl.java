@@ -25,7 +25,6 @@ import com.google.inject.name.Named;
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.SharingUtils;
 
@@ -341,13 +340,14 @@ public class TorrentManagerImpl implements TorrentManager {
         final boolean fdelete = delete || t.getState().equals(TorrentState.TRACKER_FAILURE); 
         Runnable r = new Runnable() {
             public void run() {
-                FileDesc fd = fileManager.getFileDesc(f);
-                if(fd != null)
-                    fileManager.getGnutellaSharedFileList().remove(fd);      
-                if(fd != null && fdelete){
-                    FileUtils.delete(fd.getFile(), false);
-                } else
-                	f.setLastModified(System.currentTimeMillis());
+                if(fileManager.getManagedFileList().remove(f)) {
+                    fileManager.getGnutellaSharedFileList().remove(f);      
+                    if(fdelete) {
+                        FileUtils.delete(f, false);
+                    } else {
+                        f.setLastModified(System.currentTimeMillis());
+                    }
+                }
             }
         };
         threadPool.execute(r);

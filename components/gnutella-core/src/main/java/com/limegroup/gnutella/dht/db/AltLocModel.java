@@ -97,7 +97,7 @@ public class AltLocModel implements StorableModel {
                 URN urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
-                FileDesc fd = fileManager.get().getFileDesc(urn);
+                FileDesc fd = fileManager.get().getGnutellaSharedFileList().getFileDesc(urn);
                 
                 // If it doesn't then remove it from the values map and
                 // replace the entity value with the empty value

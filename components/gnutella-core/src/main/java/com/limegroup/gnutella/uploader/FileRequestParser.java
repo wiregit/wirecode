@@ -51,13 +51,16 @@ class FileRequestParser {
             return null;
         }
     
-        FileDesc desc = fileManager.getFileDesc(urn);
-        if(desc == null || (!fileManager.getGnutellaSharedFileList().contains(desc) 
-        			&& !fileManager.getIncompleteFileList().contains(desc))) {
-            return null;
+        FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDesc(urn);
+        if(desc == null) {
+            desc = fileManager.getIncompleteFileList().getFileDesc(urn);
         }
-    
-        return new FileRequest(desc, requestType);
+        
+        if(desc == null) {
+            return null;
+        } else {
+            return new FileRequest(desc, requestType);
+        }
     }
 
     /** Record for storing information about a file request. */

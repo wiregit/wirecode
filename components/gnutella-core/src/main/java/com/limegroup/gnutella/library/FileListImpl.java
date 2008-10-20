@@ -17,6 +17,7 @@ import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -70,6 +71,24 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         
         clear();
     }
+    
+    @Override
+    public FileDesc getFileDesc(File f) {
+        return checkContains(fileManager.getManagedFileList().getFileDesc(f));
+    }
+    
+    @Override
+    public FileDesc getFileDesc(URN urn) {
+        return checkContains(fileManager.getManagedFileList().getFileDesc(urn));
+    }
+    
+    private FileDesc checkContains(FileDesc fd) {
+        if(contains(fd)) {
+            return fd;
+        } else {
+            return null;
+        }
+    }
 
     public void addPendingFileAlways(File file) {
         addPendingFile(file);
@@ -122,6 +141,16 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
             return false;
     }
     
+    public boolean remove(File file) {
+        FileDesc fd = fileManager.getManagedFileList().getFileDesc(file);
+        if(fd != null) {
+            return remove(fd);
+        } else {
+            return false;
+        }
+        
+    }
+    
     public boolean remove(FileDesc fileDesc) {
         if(removeFileDesc(fileDesc)) {
             fileManager.setDirtySaveLater();
@@ -155,9 +184,15 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         }
     }
     
+    @Override
+    public boolean contains(File file) {
+        return contains(fileManager.getManagedFileList().getFileDesc(file));
+    }
+    
     public boolean contains(FileDesc fileDesc) {
-        if(fileDesc == null)
+        if(fileDesc == null) {
             return false;
+        }
         
         return fileDescs.contains(fileDesc) || pendingFiles.contains(fileDesc.getFile());
     }

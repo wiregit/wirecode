@@ -36,7 +36,7 @@ class GnutellaSharedFileListImpl extends FileListImpl {
      */
     private Collection<File> individualSharedFiles; 
     
-    public GnutellaSharedFileListImpl(Executor executor, FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
+    public GnutellaSharedFileListImpl(Executor executor, FileManagerImpl fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
         super(executor, fileManager, individualFiles);
         
         this.filesNotToShare = filesNotToShare;
@@ -66,6 +66,11 @@ class GnutellaSharedFileListImpl extends FileListImpl {
                 transientSharedFiles.add(file);    
         }
         addPendingFile(file);
+    }
+    
+    @Override
+    public void add(File file) {
+        fileManager.addSharedFileAlways(file);
     }
     
     @Override

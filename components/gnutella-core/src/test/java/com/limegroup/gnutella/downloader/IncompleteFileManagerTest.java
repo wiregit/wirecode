@@ -189,7 +189,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         // make sure it's associated with a URN.
         URN urn = URN.createSHA1Urn(    
             "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        FileDesc fd = fm.getFileDesc(urn);
+        FileDesc fd = fm.getIncompleteFileList().getFileDesc(urn);
         assertNotNull(urn);
         assertInstanceof(com.limegroup.gnutella.library.IncompleteFileDesc.class, fd);
         
