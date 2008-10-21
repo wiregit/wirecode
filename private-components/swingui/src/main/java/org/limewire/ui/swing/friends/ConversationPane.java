@@ -361,6 +361,14 @@ public class ConversationPane extends JPanel implements Displayable {
 
     public void offerFile(LocalFileItem file) {
         if(chatFriend.getPresence() instanceof LimePresence) {
+
+            // update the chat state in case the remote user has not started conversation with us
+            try {
+                writer.setChatState(ChatState.active);
+            } catch (XMPPException e) {
+                LOG.error("Unable to set chat state prior to file offer", e);
+            }
+
             FileMetaData metadata = file.offer((LimePresence)chatFriend.getPresence());
             new MessageReceivedEvent(new MessageFileOfferImpl(loggedInID, null, friendId,
                         Message.Type.Sent, metadata)).publish();
