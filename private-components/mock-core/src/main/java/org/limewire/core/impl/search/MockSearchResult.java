@@ -16,6 +16,8 @@ import org.limewire.core.impl.search.MockSearch.MockRemoteHost;
 
 public class MockSearchResult implements Cloneable, SearchResult {
 
+    public MockSearchResult(){}
+    
     private MockURN urn = null;
 
     private List<RemoteHost> sources = new ArrayList<RemoteHost>();

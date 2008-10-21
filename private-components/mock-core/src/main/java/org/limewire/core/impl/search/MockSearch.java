@@ -19,13 +19,15 @@ import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
 
 public class MockSearch implements Search {
     public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
-    
+
+    private SearchDetails searchDetails;
     private CopyOnWriteArrayList<SearchListener> listeners =
         new CopyOnWriteArrayList<SearchListener>();
 
     private int repeatCount = 0;
 
     public MockSearch(SearchDetails searchDetails) {
+        this.searchDetails = searchDetails;
     }
 
     @Override
@@ -98,15 +100,40 @@ public class MockSearch implements Search {
     }
 
     private void addRecords(int i) {
+        
+        String query = searchDetails.getSearchQuery();
+        query = query.toLowerCase();
+        if(query.indexOf("juggl") > -1){
+          addRcordsJuggling(i);
+        }
+        if(query.indexOf("paris") > -1){
+            addRecordsParis(i);
+        }
+        if(query.indexOf("chicken") > -1){
+            addRecordsWedding(i);
+        }
+        if(query.indexOf("monkey") > -1){
+            addRecordsWedding(i);
+            addRecordsMonkey(i);
+        }
+        if(query.indexOf("water") > -1){
+            addRecordsWater(i);
+        }
+
+        addRecordsSpam(i);
+        addRecordsGeneral(i);
+
+    }
+
+    private void addRecordsGeneral(int i){
         MockSearchResult msr;
         String name;
-
         // Create a search result that will be categorized as "Documents".
         msr = new MockSearchResult();
         name = "Lab19";
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
-        msr.setSize(4567L);
+        msr.setSize(45367L);
         msr.addSource("ross");
         msr.addSource("phoebe");
         msr.addSource("rachel");
@@ -120,12 +147,15 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
 
         handleSearchResult(msr);
+        try {
+            Thread.sleep(1000);
+        } catch(InterruptedException ignored) {}
 
         msr = new MockSearchResult();
         name = "Lab19";
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
-        msr.setSize(4567L);
+        msr.setSize(45267L);
         msr.addSource("similar");
         msr.setUrn("similar-www.mizzou.edu" + i);
         msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
@@ -137,12 +167,15 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
         
         handleSearchResult(msr);
+        try {
+            Thread.sleep(1000);
+        } catch(InterruptedException ignored) {}
 
         msr = new MockSearchResult();
         name = "Lab19";
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
-        msr.setSize(4567L);
+        msr.setSize(14567L);
         msr.addSource("similar2");
         msr.setUrn("similar2-www.mizzou.edu" + i);
         msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
@@ -154,13 +187,16 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
         
         handleSearchResult(msr);
+        try {
+            Thread.sleep(1000);
+        } catch(InterruptedException ignored) {}
 
         // Create a search result that will be categorized as "Other".
         msr = new MockSearchResult();
         name = "When Everyone has a Sweet Party and you're invited! I was at this totally swinging hepcat party last weekend. Oh man, that joint was jumpin!";
         msr.setExtension("tmp");
         msr.setResultType(Category.OTHER);
-        msr.setSize(1L);
+        msr.setSize(12L);
         msr.addSource("phoebe");
         msr.setUrn("www.partytime.com" + i);
         msr.setProperty(PropertyKey.ARTIST_NAME, "Night Life");
@@ -172,13 +208,16 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
         msr.setProperty(PropertyKey.QUALITY, "good quality");
         handleSearchResult(msr);
+        try {
+            Thread.sleep(1000);
+        } catch(InterruptedException ignored) {}
 
         // Create a search result that will be categorized as "Music".
         msr = new MockSearchResult();
         name = "The Night Won't Last Long";
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
-        msr.setSize(1234L);
+        msr.setSize(4234L);
         msr.addSource("monica");
         msr.setUrn("www.solarsystem.net" + i);
         msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
@@ -202,8 +241,8 @@ public class MockSearch implements Search {
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
         msr.setSize(1234L);
+        msr.setUrn("www.solarsystem.net" + i);
         msr.addSource("monica-similar");
-        msr.setUrn("similar-www.solarsystem.net" + i);
         msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
         msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
         msr.setProperty(PropertyKey.BITRATE, "192");
@@ -224,7 +263,7 @@ public class MockSearch implements Search {
         name = "The Night Won't Last Long";
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
-        msr.setSize(1234L);
+        msr.setSize(21234L);
         for(int j = 0; j < i; j++) {
             msr.addSource("monica-similar2" + j);
         }
@@ -249,9 +288,9 @@ public class MockSearch implements Search {
         name = "The Night Won't Last Long";
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
-        msr.setSize(1234L);
+        msr.setSize(71234L);
+        msr.setUrn("www.miza.com");
         msr.addSource("monica-similar3-is-a-loooooooooong-name");
-        msr.setUrn("similar-www.solarsystem.net3" + i);
         msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
         msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
         msr.setProperty(PropertyKey.BITRATE, "192");
@@ -267,15 +306,40 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(PropertyKey.TRACK_NUMBER, "3");
         handleSearchResult(msr);
+        try {
+            Thread.sleep(1000);
+        } catch(InterruptedException ignored) {}
 
         // Create a search result that will be categorized as "Video".
+
+        
+        SponsoredResult sponsored = new MockSponsoredResult(
+            "Internal Ad",
+            "a ad a daflad fajla\naldjfla awejl sdaf", 
+            "store.limewire.com",
+            "http://www.store.limewire.com/store/app/pages/help/Help/",
+            SponsoredResultTarget.STORE);
+        SponsoredResult sponsored2 = new MockSponsoredResult(
+            "External Ad",
+            "a ad a daflad fajla\naldjfla awejl sdaf",
+            "google.com",
+            "http://google.com",
+            SponsoredResultTarget.EXTERNAL);
+        handleSponsoredResults(sponsored, sponsored2);
+        
+    }
+    private void addRecordsMonkey(int i){
+        //monkey
+        MockSearchResult msr;
+        String name;
+
         msr = new MockSearchResult();
         name = "Monkey on Skateboard";
         msr.setExtension("ogm");
         msr.setResultType(Category.VIDEO);
         msr.setSize(9876L);
-        msr.addSource("chandler");
-        msr.addSource("joey");
+        msr.addSource("127.1.1.21");
+        msr.addSource("134.11.4.123");
         msr.setUrn("www.stlzoo.com" + i);
         msr.setProperty(PropertyKey.ARTIST_NAME, "St. Louis Zoo");
         msr.setProperty(PropertyKey.BITRATE, "5000");
@@ -294,15 +358,160 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
+        msr = new MockSearchResult();
+        name = "No Monkeying in the cafeteria";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9876L);
+        msr.addSource("127.1.1.21");
+        msr.addSource("134.11.4.123");
+        msr.setUrn("www.bracket.edu" + i);
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Bracket High School");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "Jo Hendricks");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.WIDTH, "230");
+        msr.setProperty(PropertyKey.YEAR, "2007");
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Monkey see monkey do";
+        msr.setExtension("png");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(9876L);
+        msr.addSource("127.1.1.21");
+        msr.addSource("134.11.4.123");
+        msr.setUrn("www.bracket.edu" + i);
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Monkey Matt");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "Matt Meddler");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.WIDTH, "230");
+        msr.setProperty(PropertyKey.YEAR, "2007");
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Monkey in the middle";
+        msr.setExtension("txt");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("127.1.1.21");
+        msr.addSource("134.11.4.123");
+        msr.setUrn("www.bracket.edu" + i);
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Fleet Corrs");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "Fleet Corrs");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.WIDTH, "230");
+        msr.setProperty(PropertyKey.YEAR, "2007");
+        handleSearchResult(msr);
+    }
+    private void addRecordsWater(int i){
+        MockSearchResult msr;
+        String name;
+
+        //waterfall
+        msr = new MockSearchResult();
+        name = "Waterfall";
+        msr.setExtension("bmp");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(4567L);
+        msr.setUrn("www.Fenix.edu" + i);
+        msr.setProperty(PropertyKey.AUTHOR, "DownTown Stumpy");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 27).getTimeInMillis());
+        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Floss Sential");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "water under the bridge";
+        msr.setExtension("jpg");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(4567L);
+        msr.setUrn("www.mizzou.edu" + i);
+        msr.setProperty(PropertyKey.AUTHOR, "Jonsie Java");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 27).getTimeInMillis());
+        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Moss Sential");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "water mellon dessert recipe";
+        msr.setExtension("txt");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(4567L);
+        msr.setUrn("www.mizzou.edu" + i);
+        msr.setProperty(PropertyKey.AUTHOR, "Chef Sarah");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 4, 27).getTimeInMillis());
+        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Sarah Thistle");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "water fight";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(4567L);
+        msr.setUrn("www.mizzou.edu" + i);
+        msr.setProperty(PropertyKey.AUTHOR, "Spencer Turtle");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 4, 27).getTimeInMillis());
+        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Spencer");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+        
+    }
+    private void addRecordsSpam(int i){
+        MockSearchResult msr;
+        String name;
+        
         // Create a search result that will be categorized as "Programs".
         msr = new MockSearchResult();
-        name = "SuperSpreadsheet";
+        name = "SuperSpread";
         msr.setExtension("exe");
         msr.setResultType(Category.PROGRAM);
         msr.setSize(8765L);
         msr.addSource("chandler");
         msr.setUrn("www.superspread.org" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "James Gosling");
+        msr.setProperty(PropertyKey.AUTHOR, "James Vanderbing");
         msr.setProperty(PropertyKey.COMPANY, "FriendSoft");
         msr.setProperty(PropertyKey.FILE_SIZE, 3.4);
         msr.setProperty(PropertyKey.NAME, name);
@@ -313,6 +522,7 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.6f);
         handleSearchResult(msr);
 
+        
         // Create a search result that will be categorized as "Images".
         msr = new MockSearchResult();
         name = "EightGoldMedals";
@@ -330,25 +540,265 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
-        try {
-            Thread.sleep(1000);
-        } catch(InterruptedException ignored) {}
-
-        SponsoredResult sponsored = new MockSponsoredResult(
-            "Internal Ad",
-            "a ad a daflad fajla\naldjfla awejl sdaf", 
-            "store.limewire.com",
-            "http://www.store.limewire.com/store/app/pages/help/Help/",
-            SponsoredResultTarget.STORE);
-        SponsoredResult sponsored2 = new MockSponsoredResult(
-            "External Ad",
-            "a ad a daflad fajla\naldjfla awejl sdaf",
-            "google.com",
-            "http://google.com",
-            SponsoredResultTarget.EXTERNAL);
-        handleSponsoredResults(sponsored, sponsored2);
+        
     }
+    private void addRecordsWedding(int i){
+        MockSearchResult msr;
+        String name;
+        
+        msr = new MockSearchResult();
+        name = "TheChickenDance";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9876L);
+        msr.addSource("1.1.1.123");
+        msr.setUrn("www.johnswedding.com");
+        msr.setProperty(PropertyKey.ARTIST_NAME, "John's Wedding");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Someone likes to dance");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "John Stone");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.WIDTH, "640");
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
 
+        msr = new MockSearchResult();
+        name = "Chicken Filet Recipe";
+        msr.setExtension("doc");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("1.1.43.123");
+        msr.setUrn("www.catering.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Chef Sarah");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.6f);
+        handleSearchResult(msr);
+       
+        msr = new MockSearchResult();
+        name = "Don't be a chicken";
+        msr.setExtension("jpg");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(9876L);
+        msr.addSource("1.1.1.123");
+        msr.setUrn("www.joeswedding.com");
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Joe's Wedding");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Live life to live");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.OWNER, "Brent Sarah");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Chicken pox treatment instructions";
+        msr.setExtension("mp3");
+        msr.setResultType(Category.AUDIO);
+        msr.setSize(9876L);
+        msr.addSource("1.1.1.123");
+        msr.setUrn("www.medicalMe.com");
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Dr. John");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "don't itch");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.OWNER, "John Hill");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(PropertyKey.NAME, name);
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Cookies";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9876L);
+        msr.addSource("1.1.1.123");
+        msr.setUrn("www.GoodForSole.com");
+        msr.setProperty(PropertyKey.ARTIST_NAME, "PB&J");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Peanut butter ones are the best");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "John Stone");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.WIDTH, "640");
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
+        
+
+        
+    }
+    private void addRcordsJuggling(int i){
+
+        MockSearchResult msr;
+        String name;
+        msr = new MockSearchResult();
+        name = "Juggling at night";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("Greg");
+        msr.setUrn("www.asdf.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Greg Green");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Ten ball Juggling";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("Mike");
+        msr.setUrn("www.asdf.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Michael Madison");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Juggling a busy day";
+        msr.setExtension("wav");
+        msr.setResultType(Category.AUDIO);
+        msr.setSize(5678L);
+        msr.addSource("Dr. Mike");
+        msr.setUrn("www.asdf3asdf.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Michael Madison");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "How to juggle";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("Mike Crede");
+        msr.setUrn("www.ddasdrf.net");
+        msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Michael Crede");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Chainsaw Juggling";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("Greg");
+        msr.setUrn("www.3asdfNet.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Greg Green");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+    }
+    private void addRecordsParis(int i){
+        MockSearchResult msr;
+        String name;
+
+        msr = new MockSearchResult();
+        name = "Notes on Paris";
+        msr.setExtension("txt");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("1.12.13.2");
+        msr.setUrn("www.23sola3rsystem.net3");
+        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Fred Teller");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Paris at night";
+        msr.setExtension(".jpg");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(9876L);
+        msr.setUrn("www.1mizaz.com");
+        msr.addSource("1.13.1.12");
+        msr.setProperty(PropertyKey.FILE_SIZE, 31.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Sammy Teufle");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Passport to Paris ";
+        msr.setExtension(".doc");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("13.1.1.13");
+        msr.setUrn("www.t3iza.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 11.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "John Bakker");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Ode to Paris ";
+        msr.setExtension(".txt");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(976L);
+        msr.addSource("11.1.13.1");
+        msr.setUrn("www.figiza.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 1.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "John Derrick");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Paris, Texas";
+        msr.setExtension(".jpg");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(9476L);
+        msr.addSource("1.121.1.1");
+        msr.setUrn("www.azaiza4.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 10.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Eric Johanson");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        handleSearchResult(msr);
+
+    }
     static class MockRemoteHost implements RemoteHost {
         private final String description;
 

@@ -84,12 +84,18 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 	
 	private void initializeMockData(){
-	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 446,
+	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 4146,
 				DownloadState.DOWNLOADING, Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("Frank"));
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		item.addDownloadSource(new MockDownloadSource("Joey"));
 		addDownload(item);
+		
+		 item = new MockDownloadItem("Life is a sailboat", 4446,
+	                DownloadState.DOWNLOADING, Category.VIDEO);
+	        item.addDownloadSource(new MockDownloadSource("Joey"));
+	        addDownload(item);
+
 		
 		item = new MockDownloadItem("FINISHING", 446,
 				DownloadState.FINISHING, Category.AUDIO);
