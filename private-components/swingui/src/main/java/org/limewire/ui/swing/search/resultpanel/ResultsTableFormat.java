@@ -57,7 +57,7 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
         String ext = vsr.getFileExtension();
         Icon icon = iconManager.getIconForExtension(ext);
 
-        String name = (String) getProperty(PropertyKey.NAME);
+        final String name = vsr.getHeading();
 
         JXLabel label = new JXLabel(name, icon, JLabel.LEFT);
 
@@ -66,7 +66,16 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
 
         label.setOpaque(false);
 
-        JXPanel panel = new JXPanel(new FlowLayout(FlowLayout.LEFT));
+        JXPanel panel = new JXPanel(new FlowLayout(FlowLayout.LEFT)){
+            @Override
+            public String toString() {
+                //this is kind of hacky but inside the glazed list tables
+                //toString is being used to sort with the Component column type
+                //we could potentially try overriding the column comparator as well,
+                // I initially tried that and it didn't work
+                return name;
+            }
+        };
         panel.add(label);
 
         panel.setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
