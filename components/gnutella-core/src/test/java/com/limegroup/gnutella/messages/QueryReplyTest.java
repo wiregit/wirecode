@@ -1200,8 +1200,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         addAlternateLocationsToFiles();
         
         boolean checked = false;
-		for(int i = 0; i < fileManager.getGnutellaSharedFileList().size(); i++) {
-			FileDesc fd = fileManager.get(i);
+        for(FileDesc fd : fileManager.getGnutellaSharedFileList().iterable()) {
 			Response testResponse = responseFactory.createResponse(fd);
 
             String name = fd.getFileName();
@@ -1264,8 +1263,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         addFilesToLibrary();
         addCreationTimeToFiles();
         boolean checked = false;
-		for(int i = 0; i < fileManager.getGnutellaSharedFileList().size(); i++) {
-			FileDesc fd = fileManager.get(i);
+        for(FileDesc fd : fileManager.getGnutellaSharedFileList().iterable()) {
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = responseFactory.createResponse(fd);
 			assertEquals(fd.toString(), expectTime, testResponse.getCreateTime());

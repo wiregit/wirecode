@@ -34,6 +34,13 @@ public class SynchronizedFileList implements FileListPackage {
     }
     
     @Override
+    public FileDesc getFileDescForIndex(int index) {
+        synchronized(mutex) {
+            return fileList.getFileDescForIndex(index);
+        }
+    }
+    
+    @Override
     public FileDesc getFileDesc(File f) {
         synchronized(mutex) {
             return fileList.getFileDesc(f);
@@ -44,6 +51,13 @@ public class SynchronizedFileList implements FileListPackage {
     public FileDesc getFileDesc(URN urn) {
         synchronized(mutex) {
             return fileList.getFileDesc(urn);
+        }
+    }
+    
+    @Override
+    public List<FileDesc> getFileDescsMatching(URN urn) {
+        synchronized(mutex) {
+            return fileList.getFileDescsMatching(urn);
         }
     }
 
@@ -96,6 +110,11 @@ public class SynchronizedFileList implements FileListPackage {
 
     public Iterator<FileDesc> iterator() {
         return fileList.iterator();
+    }
+    
+    @Override
+    public Iterable<FileDesc> iterable() {
+        return fileList.iterable();
     }
 
     public List<FileDesc> getAllFileDescs() {

@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import org.limewire.collection.IntSet;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -104,6 +107,11 @@ class ManagedFileList implements FileList, FileListPackage, EventListener<FileMa
     public List<FileDesc> getAllFileDescs() {
         throw new UnsupportedOperationException("cannot get all from managed list");
     }
+    
+    @Override
+    public FileDesc getFileDescForIndex(int index) {
+        return fileManager.get(index);
+    }
 
     @Override
     public FileDesc getFileDesc(File f) {
@@ -113,6 +121,21 @@ class ManagedFileList implements FileList, FileListPackage, EventListener<FileMa
     @Override
     public FileDesc getFileDesc(URN urn) {
         return fileManager.getFileDesc(urn);
+    }
+    
+    @Override
+    public List<FileDesc> getFileDescsMatching(URN urn) {
+        IntSet urnsMatching = fileManager.getIndices(urn);
+        if(urnsMatching.size() == 0) {
+            return Collections.emptyList();
+        } else {
+            List<FileDesc> fds = new ArrayList<FileDesc>(urnsMatching.size());
+            Iterator<FileDesc> fdIter = new FileListIndexedIterator(this, urnsMatching);
+            while(fdIter.hasNext()) {
+                fds.add(fdIter.next());
+            }
+            return fds;
+        }
     }
 
     @Override
@@ -172,6 +195,11 @@ class ManagedFileList implements FileList, FileListPackage, EventListener<FileMa
 
     @Override
     public Iterator<FileDesc> iterator() {
+        throw new UnsupportedOperationException("not supported");
+    }
+    
+    @Override
+    public Iterable<FileDesc> iterable() {
         throw new UnsupportedOperationException("not supported");
     }
     

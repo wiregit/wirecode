@@ -194,13 +194,12 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // Iterate through our hit indices to create a list of results.
         for (IntSet.IntSetIterator iter = matches.iterator(); iter.hasNext();) {
             int i = iter.next();
-            FileDesc desc = fileManager.get(i);
+            FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDescForIndex(i);
+            if(desc == null) {
+                desc = fileManager.getIncompleteFileList().getFileDescForIndex(i);
+            }
 
             assert desc != null : "unexpected null in FileManager for query:\n" + request;
-
-            if (!(fileManager.getGnutellaSharedFileList().contains(desc) || fileManager
-                    .getIncompleteFileList().contains(desc)))
-                continue;
 
             if ((filter != null) && !filter.allow(desc.getFileName()))
                 continue;
@@ -232,27 +231,12 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
         IntSet ret = priors;
         for (URN urn : urnsIter) {
-            if (fileManager.getGnutellaSharedFileList().getFileDesc(urn) != null) {
-                IntSet hits = fileManager.getIndices(urn);
-
-                if (hits != null) {
-                    // double-check hits to be defensive (not strictly needed)
-                    IntSet.IntSetIterator iter = hits.iterator();
-                    while (iter.hasNext()) {
-                        FileDesc fd = fileManager.get(iter.next());
-
-                        // If the file is unshared or an incomplete file
-                        // DO NOT SEND IT.
-                        if (fd == null || (fd instanceof IncompleteFileDesc))
-                            continue;
-                        if (fd.containsUrn(urn)) {
-                            // still valid
-                            if (ret == null)
-                                ret = new IntSet();
-                            ret.add(fd.getIndex());
-                        }
-                    }
+            List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getFileDescsMatching(urn);
+            for(FileDesc fd : fds) {
+                if(ret == null) {
+                    ret = new IntSet();
                 }
+                ret.add(fd.getIndex());
             }
         }
         return ret;

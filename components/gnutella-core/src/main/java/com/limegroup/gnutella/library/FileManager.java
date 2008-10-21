@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.collection.IntSet;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.URN;
@@ -106,17 +105,6 @@ public interface FileManager {
      *        shared
      */
     void addSharedFolders(Set<File> folders, Set<File> blackListedSet);
-
-    /**
-     * Returns the FileDesc located at the index in the list
-     * 
-     * @return the FileDesc if it exists, or null if the file no longer exists
-     *         in this list.
-     */
-    FileDesc get(int index);
-    
-    /** Returns all indexes this URN is at. */
-    IntSet getIndices(URN urn);
 
     /**
      * Adds an incomplete file to be used for partial file sharing.

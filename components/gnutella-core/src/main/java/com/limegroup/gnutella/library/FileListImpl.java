@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+import org.limewire.collection.IntSet;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -33,11 +34,7 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
      */
     private final EventMulticaster<FileListChangedEvent> listenerSupport;
     
-    /**
-     * List of all the FileDescs in this FileList. This is a continous non-null
-     * list.
-     */
-    protected final List<FileDesc> fileDescs;
+    protected final IntSet fileDescIndexes;
     
     /**
      * List of files whose FileDescs are in the List and are not located in a 
@@ -62,7 +59,7 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         this.eventThread = eventThread;
         this.fileManager = fileManager;
         this.individualFiles = filesToShare;
-        this.fileDescs = new ArrayList<FileDesc>();
+        this.fileDescIndexes = new IntSet();
         pendingFiles = new ArrayList<File>();
     
         fileManager.addFileEventListener(this);
@@ -70,6 +67,16 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
         
         clear();
+    }
+    
+    @Override
+    public FileDesc getFileDescForIndex(int index) {
+        FileDesc fd = fileManager.getManagedFileList().getFileDescForIndex(index);
+        if(contains(fd)) {
+            return fd;
+        } else {
+            return null;
+        }
     }
     
     @Override
@@ -87,6 +94,26 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
             return fd;
         } else {
             return null;
+        }
+    }
+    
+    @Override
+    public List<FileDesc> getFileDescsMatching(URN urn) {
+        List<FileDesc> fds = null;
+        List<FileDesc> matching = fileManager.getManagedFileList().getFileDescsMatching(urn);
+        for(FileDesc fd : matching) {
+            if(contains(fd)) {
+                if(fds == null) {
+                    fds = new ArrayList<FileDesc>(matching.size());
+                }
+                fds.add(fd);
+            }
+        }
+        
+        if(fds == null) {
+            return Collections.emptyList();
+        } else {
+            return fds;
         }
     }
 
@@ -140,13 +167,13 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         // always remove pending file, whether it is allowed to get added or not
         pendingFiles.remove(fileDesc.getFile());
         
-        if(!fileDescs.contains(fileDesc) && isFileAddable(fileDesc)) {
-            fileDescs.add(fileDesc);
+        if(isFileAddable(fileDesc) && fileDescIndexes.add(fileDesc.getIndex())) {
             numBytes += fileDesc.getFileSize();
             addAsIndividualFile(fileDesc);
             return true;
-        } else
+        } else {
             return false;
+        }
     }
     
     public boolean remove(File file) {
@@ -181,10 +208,8 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         // some reason, remove it from pending files anyways
         pendingFiles.remove(fileDesc.getFile());
     
-        if(fileDescs.contains(fileDesc)) {
-            fileDescs.remove(fileDesc);
+        if(fileDescIndexes.remove(fileDesc.getIndex())) {
             numBytes -= fileDesc.getFileSize();
-    
             removeAsIndividualFile(fileDesc);
             return true;
         } else {
@@ -202,15 +227,28 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
             return false;
         }
         
-        return fileDescs.contains(fileDesc) || pendingFiles.contains(fileDesc.getFile());
+        return fileDescIndexes.contains(fileDesc.getIndex()) || pendingFiles.contains(fileDesc.getFile());
     }
     
     public Iterator<FileDesc> iterator() {
-        return fileDescs.iterator();
+        return new FileListIndexedIterator(this, fileDescIndexes);
+    }
+    
+    public Iterable<FileDesc> iterable() {
+        return new Iterable<FileDesc>() {
+            @Override
+            public Iterator<FileDesc> iterator() {
+                return FileListImpl.this.iterator();
+            }
+        };
     }
 
-    public List<FileDesc> getAllFileDescs() { 
-        return new ArrayList<FileDesc>(fileDescs);
+    public List<FileDesc> getAllFileDescs() {
+        List<FileDesc> fds = new ArrayList<FileDesc>(size());
+        for(FileDesc fd : iterable()) {
+            fds.add(fd);
+        }
+        return fds;
     }
 
     public int getNumBytes() {
@@ -218,11 +256,11 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
     }
 
     public int size() {
-        return fileDescs.size();
+        return fileDescIndexes.size();
     }
 
     public void clear() {
-        fileDescs.clear();
+        fileDescIndexes.clear();
         pendingFiles.clear();
         numBytes = 0;
     }
@@ -244,7 +282,7 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
 
         List<FileDesc> list = new ArrayList<FileDesc>();
 
-        for(FileDesc fd : fileDescs) {
+        for(FileDesc fd : iterable()) {
             if( fd == null)
                 continue;
             if(directory.equals(fd.getFile().getParentFile()))
@@ -257,7 +295,7 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
     public Object inspect() {
         Map<String,Object> inspections = new HashMap<String,Object>();
         inspections.put("size of files", Long.valueOf(numBytes));
-        inspections.put("num of files", Integer.valueOf(fileDescs.size()));
+        inspections.put("num of files", Integer.valueOf(fileDescIndexes.size()));
         return inspections;
     }
     

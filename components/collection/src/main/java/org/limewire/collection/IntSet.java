@@ -113,7 +113,7 @@ public class IntSet {
         //Don't forget to check last interval.
         Interval last=get(list.size()-1);
         assert last.low<=last.high :
-                    "Backwards interval: "+toString();
+                    "Backwards interval: " + this;
         countedSize+=(last.high-last.low+1);
 
         assert countedSize==size :
@@ -168,6 +168,11 @@ public class IntSet {
 
     public int size() {
         return this.size;
+    }
+
+    public void clear() {
+        this.size = 0;
+        this.list.clear();
     }
 
     public boolean contains(int x) {

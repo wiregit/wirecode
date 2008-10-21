@@ -174,7 +174,7 @@ public class FileManagerTest extends FileManagerTestCase {
         assertNull("should have not been able to remove f3", 
                    fman.removeFile(f3));
                    
-        assertEquals("first file should be f1", f1, fman.get(0).getFile());
+        assertEquals("first file should be f1", f1, fman.getGnutellaSharedFileList().getFileDescForIndex(0).getFile());
         
         sharedFiles=fman.getGnutellaSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected length of shared files", 1, sharedFiles.size());
@@ -223,8 +223,8 @@ public class FileManagerTest extends FileManagerTestCase {
 
         //Remove file that's shared.  Back to 1 file.                   
         assertEquals(2, fman.getGnutellaSharedFileList().size());     
-        assertNull("shouldn't have been able to remove unshared file",  fman.removeFile(f3));
-        assertNotNull("should have been able to remove shared file", fman.removeFile(f2));
+        assertFalse("shouldn't have been able to remove unshared file",  fman.getGnutellaSharedFileList().remove(f3));
+        assertTrue("should have been able to remove shared file", fman.getGnutellaSharedFileList().remove(f2));
         assertEquals("unexpected fman size", 1, fman.getGnutellaSharedFileList().getNumBytes());
         assertEquals("unexpected number of files", 1, fman.getGnutellaSharedFileList().size());
         responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
@@ -269,10 +269,11 @@ public class FileManagerTest extends FileManagerTestCase {
         assertNotEquals("unexpected response[0] index", 1, responses[0].getIndex());
         assertNotEquals("unexpected response[1] index", 1, responses[1].getIndex());
 
-        assertTrue(fman.getGnutellaSharedFileList().contains(fman.get(0)));
-        assertTrue(fman.getGnutellaSharedFileList().contains(fman.get(2)));
-        assertFalse("should be null (unshared)", fman.getGnutellaSharedFileList().contains(fman.get(1)));
-        assertNull(fman.get(3));
+        assertNotNull(fman.getGnutellaSharedFileList().getFileDescForIndex(0));
+        assertNotNull(fman.getGnutellaSharedFileList().getFileDescForIndex(2));
+        assertNull(fman.getGnutellaSharedFileList().getFileDescForIndex(1));
+        // TODO: we could check that 1 exists in the manage list & remove it from the gnutella, not managed.
+        assertNull(fman.getManagedFileList().getFileDescForIndex(3));
 
         responses=keywordIndex.query(queryRequestFactory.createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
@@ -693,8 +694,8 @@ public class FileManagerTest extends FileManagerTestCase {
         // ensure it got shared.
         sharedFiles=fman.getGnutellaSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals( f3, sharedFiles.get(0).getFile() );
-        fd = fman.get(0);
-        assertTrue(fman.getGnutellaSharedFileList().contains(fd));
+        fd = fman.getGnutellaSharedFileList().getFileDescForIndex(0);
+        assertNotNull(fd);
         urn = fd.getSHA1Urn();
         urns = fd.getUrns();
         
@@ -1428,8 +1429,8 @@ public class FileManagerTest extends FileManagerTestCase {
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
         waitForLoad();
-        fman.get(0).addLimeXMLDocument(document);
-        fman.get(1).addLimeXMLDocument(document);
+        fman.getGnutellaSharedFileList().getFileDescForIndex(0).addLimeXMLDocument(document);
+        fman.getGnutellaSharedFileList().getFileDescForIndex(1).addLimeXMLDocument(document);
         f3 = createNewTestFile(11);
 
         assertEquals(2, fman.getGnutellaSharedFileList().size());

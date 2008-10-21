@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +13,8 @@ public class FileListStub extends GnutellaSharedFileListImpl {
     private List<File> whitelist;
     private FileDescStub fdStub = new FileDescStub();
     private FileDescStub defaultStub = new FileDescStub("other.txt");
+    
+    private List<FileDesc> descs;
     
     public FileListStub(FileManagerImpl fileManager, Set<File> individual, Set<File> files) {
         super(new Executor() {
@@ -25,16 +28,18 @@ public class FileListStub extends GnutellaSharedFileListImpl {
         this.whitelist = Arrays.asList(files);
     }
 
-    public void setDescs(List<FileDesc> descs) {
-        for(FileDesc fd : descs ) {
-            fileDescs.add(fd);
+    public void setDescs(List<FileDesc> newDescs) {
+        this.descs = new ArrayList<FileDesc>();
+        for(FileDesc fd : newDescs ) {
+            descs.add(fd);
             numBytes += fd.getFile().length();
         }
     }
     
-    public void setDescsAddIndividual(List<FileDesc> files) {
-        for(FileDesc fd: files) {
-            fileDescs.add(fd);
+    public void setDescsAddIndividual(List<FileDesc> newDescs) {
+        this.descs = new ArrayList<FileDesc>();
+        for(FileDesc fd: newDescs) {
+            descs.add(fd);
             numBytes += fd.getFile().length();
             individualFiles.add(fd.getFile());
         }
@@ -53,7 +58,7 @@ public class FileListStub extends GnutellaSharedFileListImpl {
     public boolean contains(FileDesc fileDesc) {
         if(fileDesc == null)
             return false;
-        if(fileDescs.contains(fileDesc)) {
+        if(descs.contains(fileDesc)) {
             return true;
         } else if(fileDesc.getFile().equals(fdStub.getFile()) || 
                 fileDesc.getFile().equals(defaultStub.getFile())) {

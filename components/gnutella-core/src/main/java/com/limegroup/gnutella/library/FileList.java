@@ -30,7 +30,20 @@ public interface FileList {
      * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
      *         <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
      */
-    FileDesc getFileDesc(final URN urn);
+    FileDesc getFileDesc(URN urn);
+    
+    /**
+     * Returns all FileDescs that match this URN.
+     */
+    List<FileDesc> getFileDescsMatching(URN urn);
+
+    /**
+     * Returns the FileDesc at the given index.
+     * This returns the FileDesc for which FileDesc.getIndex == index.
+     * This is supported as an optimization so that classes can efficiently
+     * locate matches.
+     */
+    FileDesc getFileDescForIndex(int index);
     
     /**
      * Adds a folder to the FileList.
@@ -94,6 +107,9 @@ public interface FileList {
      * in a multi-threaded way.
      */    
     Iterator<FileDesc> iterator();
+    
+    /** Returns an iterable that returns iterator(). */
+    Iterable<FileDesc> iterable();
     
     /**
      * Returns a copy of a List containing all the FileDescs associated with 

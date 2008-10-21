@@ -138,7 +138,7 @@ class GnutellaSharedFileListImpl extends FileListImpl {
     
     @Override 
     public int size() {
-        return fileDescs.size() - numForcedFiles;
+        return super.size() - numForcedFiles;
     }
     
     @Override
@@ -176,7 +176,7 @@ class GnutellaSharedFileListImpl extends FileListImpl {
     public Object inspect() {
         Map<String,Object> inspections = new HashMap<String,Object>();
         inspections.put("size of files", Long.valueOf(numBytes));
-        inspections.put("num of files", Integer.valueOf(fileDescs.size()));
+        inspections.put("num of files", Integer.valueOf(super.size()));
         inspections.put("num forced shared files", Integer.valueOf(numForcedFiles));
         
         return inspections;
