@@ -6,6 +6,7 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.auth.Credentials;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.NHttpRequestHandler;
@@ -52,18 +53,19 @@ public class RequestAuthenticatorImpl implements RequestAuthenticator {
     }
 
     public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
-        if (response == null) {
-            throw new IllegalArgumentException("HTTP response may not be null");
-        }
-        if (context == null) {
-            throw new IllegalArgumentException("HTTP context may not be null");
-        }
-        
-        ServerAuthState authState = (ServerAuthState) context.getAttribute(ServerAuthState.AUTH_STATE);
-        ServerAuthScheme authScheme = authState.getScheme();
-        if (!authScheme.isComplete()) {
-            response.addHeader(authScheme.createChallenge());    
-        } 
+        int i = 0;
+//        if (response == null) {
+//            throw new IllegalArgumentException("HTTP response may not be null");
+//        }
+//        if (context == null) {
+//            throw new IllegalArgumentException("HTTP context may not be null");
+//        }
+//        
+//        ServerAuthState authState = (ServerAuthState) context.getAttribute(ServerAuthState.AUTH_STATE);
+//        ServerAuthScheme authScheme = authState.getScheme();
+//        if (!authScheme.isComplete()) {
+//            response.addHeader(authScheme.createChallenge());    
+//        } 
     }
     
     public NHttpRequestHandler guardedHandler(String url, NHttpRequestHandler handler) {
@@ -92,7 +94,7 @@ public class RequestAuthenticatorImpl implements RequestAuthenticator {
             if(authScheme.isComplete()) {
                 return handler.entityRequest(request, context);
             } else {
-                return null;
+                return null; // TODO ?    
             }
         }
 
@@ -101,6 +103,9 @@ public class RequestAuthenticatorImpl implements RequestAuthenticator {
             ServerAuthScheme authScheme = authState.getScheme();
             if(authScheme.isComplete()) {
                 handler.handle(request, response, trigger, context);
+            } else {
+                response.setStatusCode(HttpStatus.SC_UNAUTHORIZED);
+                response.addHeader(authScheme.createChallenge());    
             }
         }
     }
