@@ -134,9 +134,9 @@ public class MockSearch implements Search {
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(45367L);
-        msr.addSource("ross");
-        msr.addSource("phoebe");
-        msr.addSource("rachel");
+        msr.addSource("123.12.1.21");
+        msr.addSource("123.123.1.21");
+        msr.addSource("123.12.1.221");
         msr.setUrn("www.mizzou.edu" + i);
         msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
         msr.setProperty(PropertyKey.DATE_CREATED,
@@ -153,7 +153,7 @@ public class MockSearch implements Search {
         msr.setExtension("doc");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(45267L);
-        msr.addSource("similar");
+        msr.addSource("123.12.2.21");
         msr.setUrn("similar-www.mizzou.edu" + i);
         msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
         msr.setProperty(PropertyKey.DATE_CREATED,
@@ -188,7 +188,7 @@ public class MockSearch implements Search {
         msr.setExtension("tmp");
         msr.setResultType(Category.OTHER);
         msr.setSize(12L);
-        msr.addSource("phoebe");
+        msr.addSource("12.12.1.21");
         msr.setUrn("www.partytime.com" + i);
         msr.setProperty(PropertyKey.ARTIST_NAME, "Night Life");
         msr.setProperty(PropertyKey.COMMENTS, "Our album is awesome!");
@@ -206,7 +206,7 @@ public class MockSearch implements Search {
         msr.setExtension("mp3");
         msr.setResultType(Category.AUDIO);
         msr.setSize(4234L);
-        msr.addSource("monica");
+        msr.addSource("123.2.1.21");
         msr.setUrn("www.solarsystem.net" + i);
         msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
         msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
@@ -253,7 +253,7 @@ public class MockSearch implements Search {
         msr.setResultType(Category.AUDIO);
         msr.setSize(21234L);
         for(int j = 0; j < i; j++) {
-            msr.addSource("monica-similar2" + j);
+            msr.addSource("123.12.1.21-similar2" + j);
         }
         msr.setUrn("similar-www.solarsystem.net2");
         msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
@@ -278,7 +278,7 @@ public class MockSearch implements Search {
         msr.setResultType(Category.AUDIO);
         msr.setSize(71234L);
         msr.setUrn("www.miza.com");
-        msr.addSource("monica-similar3-is-a-loooooooooong-name");
+        msr.addSource("123.12.1.21-similar3-is-a-loooooooooong-name");
         msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
         msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
         msr.setProperty(PropertyKey.BITRATE, "192");
@@ -318,6 +318,56 @@ public class MockSearch implements Search {
         MockSearchResult msr;
         String name;
 
+        msr = new MockSearchResult();
+        name = "Monkey business";
+        msr.setExtension("ogm");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9876L);
+        msr.addSource("127.1.1.21");
+        msr.addSource("134.11.4.123");
+        msr.setUrn("www.mtownzoo.com" + i);
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Morristown Zoo");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Who knew they could do that?");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
+        msr.setProperty(PropertyKey.WIDTH, "640");
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Dog on Skateboard";
+        msr.setExtension("ogm");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9876L);
+        msr.addSource("127.1.1.21");
+        msr.addSource("134.11.4.123");
+        msr.setUrn("www.sdzoo.com" + i);
+        msr.setProperty(PropertyKey.ARTIST_NAME, "San Diego Zoo");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Who knew they could do that?");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
+        msr.setProperty(PropertyKey.WIDTH, "640");
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
+        
         msr = new MockSearchResult();
         name = "Monkey on Skateboard";
         msr.setExtension("ogm");
@@ -490,7 +540,7 @@ public class MockSearch implements Search {
         
         // Create a search result that will be categorized as "Programs".
         msr = new MockSearchResult();
-        name = "SuperSpread";
+        name = "SuperSilly";
         msr.setExtension("exe");
         msr.setResultType(Category.PROGRAM);
         msr.setSize(8765L);
@@ -500,7 +550,7 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.COMPANY, "FriendSoft");
         msr.setProperty(PropertyKey.FILE_SIZE, 3.4);
         msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(PropertyKey.OWNER, "Ding Bing");
         msr.setProperty(PropertyKey.PLATFORM, "Mac OS X");
         msr.setProperty(PropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 9, 2).getTimeInMillis());
@@ -514,12 +564,12 @@ public class MockSearch implements Search {
         msr.setExtension("png");
         msr.setResultType(Category.IMAGE);
         msr.setSize(5678L);
-        msr.addSource("rachel");
-        msr.addSource("phoebe");
+        msr.addSource("143.12.1.21");
+        msr.addSource("123.32.1.21");
         msr.setUrn("www.swimming.org" + i);
         msr.setProperty(PropertyKey.FILE_SIZE, 0.9);
         msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Rachel Green");
+        msr.setProperty(PropertyKey.OWNER, "Mister Green");
         msr.setProperty(PropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
@@ -643,8 +693,9 @@ public class MockSearch implements Search {
         msr.setExtension("avi");
         msr.setResultType(Category.VIDEO);
         msr.setSize(5678L);
-        msr.addSource("Greg");
-        msr.setUrn("www.asdf.com");
+        msr.addSource("143.12.1.21");
+        msr.addSource("123.32.1.21");
+        msr.setUrn("www.juggling.org" + i);
         msr.setProperty(PropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(PropertyKey.NAME, name);
         msr.setProperty(PropertyKey.OWNER, "Greg Green");
@@ -654,11 +705,27 @@ public class MockSearch implements Search {
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
+        name = "Juggling at Mignight";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("123.132.1.21");
+        msr.setUrn("similar-www.juggling.com");
+        msr.setProperty(PropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Greg Green");
+        msr.setProperty(PropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        
+        msr = new MockSearchResult();
         name = "Ten ball Juggling";
         msr.setExtension("avi");
         msr.setResultType(Category.VIDEO);
         msr.setSize(5678L);
-        msr.addSource("Mike");
+        msr.addSource("123.123.1.21");
         msr.setUrn("www.asdf.com");
         msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
         msr.setProperty(PropertyKey.NAME, name);
@@ -673,7 +740,7 @@ public class MockSearch implements Search {
         msr.setExtension("wav");
         msr.setResultType(Category.AUDIO);
         msr.setSize(5678L);
-        msr.addSource("Dr. Mike");
+        msr.addSource("123.18.1.21");
         msr.setUrn("www.asdf3asdf.com");
         msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
         msr.setProperty(PropertyKey.NAME, name);
@@ -688,7 +755,7 @@ public class MockSearch implements Search {
         msr.setExtension("avi");
         msr.setResultType(Category.VIDEO);
         msr.setSize(5678L);
-        msr.addSource("Mike Crede");
+        msr.addSource("123.12.12.21");
         msr.setUrn("www.ddasdrf.net");
         msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
         msr.setProperty(PropertyKey.NAME, name);
@@ -703,7 +770,7 @@ public class MockSearch implements Search {
         msr.setExtension("avi");
         msr.setResultType(Category.VIDEO);
         msr.setSize(5678L);
-        msr.addSource("Greg");
+        msr.addSource("123.12.1.21");
         msr.setUrn("www.3asdfNet.com");
         msr.setProperty(PropertyKey.FILE_SIZE, 5.9);
         msr.setProperty(PropertyKey.NAME, name);
@@ -719,7 +786,7 @@ public class MockSearch implements Search {
         String name;
 
         msr = new MockSearchResult();
-        name = "Notes on Paris";
+        name = "Train schedules to Paris";
         msr.setExtension("txt");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(9876L);
@@ -732,11 +799,88 @@ public class MockSearch implements Search {
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
+        name = "Proposal at Paris";
+        msr.setExtension("ogm");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9876L);
+        msr.addSource("127.1.1.21");
+        msr.setUrn("www.stlzood.com" + i);
+        msr.setProperty(PropertyKey.ARTIST_NAME, "I'm engaged");
+        msr.setProperty(PropertyKey.BITRATE, "5000");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Who knew they could do that?");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.HEIGHT, "480");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.LENGTH, "0:48");
+        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
+        msr.setProperty(PropertyKey.WIDTH, "640");
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "My Dog Paris";
+        msr.setExtension("jpg");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(9876L);
+        msr.addSource("1.1.1.123");
+        msr.setUrn("www.joeswedding.com");
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Joe's Wedding");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Live life to live");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.OWNER, "Brent Sarah");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Paris Museum";
+        msr.setExtension("jpg");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(9876L);
+        msr.addSource("1.1.1.123");
+        msr.setUrn("www.jsdfoeswedding.com");
+        msr.setProperty(PropertyKey.ARTIST_NAME, "Joe's Wedding");
+        msr.setProperty(PropertyKey.COMMENTS,
+            "Live life to live");
+        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(PropertyKey.OWNER, "Sarah");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.RATING, "8");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(PropertyKey.QUALITY, "excellent");
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.YEAR, "2008");
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Paris Trip Plans";
+        msr.setExtension("doc");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("1.12.13.234");
+        msr.setUrn("www.23sola3ddddrsystem.net3");
+        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Fred Teller");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
         name = "Paris at night";
         msr.setExtension(".jpg");
         msr.setResultType(Category.IMAGE);
         msr.setSize(9876L);
-        msr.setUrn("www.1mizaz.com");
+        msr.setUrn("www.1sdfmizaz.com");
         msr.addSource("1.13.1.12");
         msr.setProperty(PropertyKey.FILE_SIZE, 31.9);
         msr.setProperty(PropertyKey.NAME, name);
@@ -749,12 +893,25 @@ public class MockSearch implements Search {
         msr.setExtension(".doc");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(9876L);
-        msr.addSource("13.1.1.13");
-        msr.setUrn("www.t3iza.com");
+        msr.addSource("2.1.1.13");
+        msr.setUrn("www.tadsf3iza.com");
         msr.setProperty(PropertyKey.FILE_SIZE, 11.9);
         msr.setProperty(PropertyKey.NAME, name);
         msr.setProperty(PropertyKey.OWNER, "John Bakker");
         msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        handleSearchResult(msr);
+        msr = new MockSearchResult();
+
+        name = "Notes on Paris";
+        msr.setExtension("txt");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("81.12.13.32");
+        msr.setUrn("www.23sol3324a3rsystem.net3");
+        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(PropertyKey.OWNER, "Fred Teller");
+        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -776,7 +933,7 @@ public class MockSearch implements Search {
         msr.setResultType(Category.IMAGE);
         msr.setSize(9476L);
         msr.addSource("1.121.1.1");
-        msr.setUrn("www.azaiza4.com");
+        msr.setUrn("www.azdfaiza4.com");
         msr.setProperty(PropertyKey.FILE_SIZE, 10.9);
         msr.setProperty(PropertyKey.NAME, name);
         msr.setProperty(PropertyKey.OWNER, "Eric Johanson");
