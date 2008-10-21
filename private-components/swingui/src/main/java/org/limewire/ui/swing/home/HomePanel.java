@@ -31,7 +31,7 @@ public class HomePanel extends JXPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         Browser browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN);
-        browser.load(application.getUniqueUrl("http://www.limewire.com/client"));
+        browser.load(application.getUniqueUrl("http://www.limewire.com/client_startup/"));
         add(browser, gbc);
     }
 }
