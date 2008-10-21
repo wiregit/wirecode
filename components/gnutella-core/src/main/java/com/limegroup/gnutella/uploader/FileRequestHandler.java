@@ -463,7 +463,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
                 fileManager.getManagedFileList().remove(file);
-                fileManager.addSharedFile(file);
+                fileManager.getGnutellaSharedFileList().add(file); // TODO: use reload so it gets re-added to the right list
                 return false;
             }
         }

@@ -1,11 +1,14 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 
@@ -21,6 +24,16 @@ class StoreFileListImpl extends FileListImpl {
     @Override
     public void add(File file) {
         throw new UnsupportedOperationException("cannot add");
+    }
+    
+    @Override
+    public void add(File file, List<LimeXMLDocument> documents) {
+        throw new UnsupportedOperationException("cannot add");
+    }
+    
+    @Override
+    public void addForSession(File file) {
+        throw new UnsupportedOperationException("will not add");
     }
     
     /**

@@ -108,45 +108,6 @@ public interface FileManager {
     void addSharedFolders(Set<File> folders, Set<File> blackListedSet);
 
     /**
-     * Creates a FileDesc for the file if one doesn't yet exist, then adds the
-     * FileDesc to the sharedFileList
-     */
-    void addSharedFile(File file);
-
-    /**
-     * Creates a FileDesc for the file if one doesn't yet exist using the
-     * supplied xml document, then adds the FileDesc to the sharedFileList
-     */
-    void addSharedFile(File file, List<? extends LimeXMLDocument> list);
-
-    /**
-     * Creates a FileDesc for the file if one doesn't yet exist, then adds the
-     * FileDesc to the sharedFileList even if the file is not shareable by
-     * default.
-     */
-    void addSharedFileAlways(File file);
-
-    /**
-     * Creates a FileDesc for the file if one doesn't yet exist, then adds the
-     * FileDesc to the sharedFileList even if the file is not shareable by
-     * default.
-     */
-    void addSharedFileAlways(File file, List<? extends LimeXMLDocument> list);
-
-    /**
-     * Creates a FileDesc for the file if one doesn't yet exist, then adds the
-     * FileDesc to the sharedFileList only for the session.
-     */
-    void addSharedFileForSession(File file);
-
-    /**
-     * Creates a FileDesc for the file if one doesn't yet exist, then adds the
-     * FileDesc to the friend list with the given name. If no friend list by that
-     * name exists no action is performed.
-     */
-    void addFriendFile(String id, File file);
-
-    /**
      * Returns the FileDesc located at the index in the list
      * 
      * @return the FileDesc if it exists, or null if the file no longer exists

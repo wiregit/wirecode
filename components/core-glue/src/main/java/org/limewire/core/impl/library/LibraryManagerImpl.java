@@ -130,8 +130,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
         
         @Override
         public void addFile(File file) {
-            //TODO: check this
-            fileManager.addSharedFileAlways(file);
+            fileManager.getGnutellaSharedFileList().add(file);
         }
 
         @Override
@@ -182,7 +181,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
         
         @Override
         public void addFile(File file) {
-            fileManager.addFriendFile(name, file);
+            fileManager.getFriendFileList(name).add(file);
         }
 
         @Override

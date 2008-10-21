@@ -7,6 +7,7 @@ import java.util.List;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**
@@ -32,16 +33,35 @@ public interface FileList {
     FileDesc getFileDesc(final URN urn);
     
     /**
+     * Adds a folder to the FileList.
+     * Depending on the kind of FileList, this may either add all
+     * current contents of the folder, or the folder itself (allowing
+     * for future items in the folder to be added).
+     */
+    void addFolder(File folder);
+    
+    /**
      * Adds a file to the list.
      */
-    public void add(File file);
+    void add(File file);
+    
+    /**
+     * Adds the specific file, using the given LimeXMLDocuments as the default
+     * documents for that file.
+     */
+    void add(File file, List<LimeXMLDocument> documents);    
+
+    /**
+     * Adds this FileList just for this session.
+     */
+    void addForSession(File file);
     
     /**
      * Given a non-null FileDesc, adds this FileDesc to this list. If FileDesc
      * is null, throws an IllegalArguementException. 
      * @param fileDesc - FileDesc to be added to this list
      */
-    public boolean add(FileDesc fileDesc);
+    boolean add(FileDesc fileDesc);
     
     /**
      * Removes the File from this list if there exists a FileDesc wrapper for
@@ -49,7 +69,7 @@ public interface FileList {
      * and nothing was removed. This method simply removes this FileDesc from
      * this list. If FileDesc is null, throws an IllegalArguementException.
      */
-    public boolean remove(File file);
+    boolean remove(File file);
     
     /**
      * Removes the FileDesc from the list if it exists. If the value existed 
@@ -57,15 +77,15 @@ public interface FileList {
      * method simply removes this FileDesc from this list. If FileDesc is 
      * null, throws an IllegalArguementException. 
     */
-    public boolean remove(FileDesc fileDesc);
+    boolean remove(FileDesc fileDesc);
     
     /** Returns true if this list contains a FileDesc for the given file. */
-    public boolean contains(File file);
+    boolean contains(File file);
     
     /**
      * Return true if this list contains this FileDesc, false otherwise.
      */
-    public boolean contains(FileDesc fileDesc);
+    boolean contains(FileDesc fileDesc);
     
     /**
      * Returns an iterator over this list of FileDescs.
@@ -73,13 +93,13 @@ public interface FileList {
      * NOTE: This must be synchronized upon by the caller if accessed
      * in a multi-threaded way.
      */    
-    public Iterator<FileDesc> iterator();
+    Iterator<FileDesc> iterator();
     
     /**
      * Returns a copy of a List containing all the FileDescs associated with 
      * this FileList.
      */
-    public List<FileDesc> getAllFileDescs();
+    List<FileDesc> getAllFileDescs();
 
      /**
      * Returns the size of all files within this list, in <b>bytes</b>.  
@@ -87,22 +107,22 @@ public interface FileList {
      * NOTE: the largest value that can be returned is Integer.MAX_VALUE, 
      * i.e., ~2GB. If more bytes are being shared, returns this value.
      */
-    public int getNumBytes();
+    int getNumBytes();
     
     /**
      * Returns the number of files in this list. 
      */
-    public int size();
+    int size();
     
     /**
      * Resets all values within this list.
      */
-    public void clear();
+    void clear();
     
     /**
      * Returns true if this file can be added to this list, false otherwise.
      */
-    public boolean isFileAddable(File file);
+    boolean isFileAddable(File file);
     
     /**
      * Returns a list of all the file descriptors in this list that exist 
@@ -114,31 +134,31 @@ public interface FileList {
      * 
      * This operation is <b>not</b> efficient, and should not be done often.
      */
-    public List<FileDesc> getFilesInDirectory(File directory);
+    List<FileDesc> getFilesInDirectory(File directory);
     
-    public int getNumForcedFiles();
+    int getNumForcedFiles();
        
     /**
      * Adds a listener to this list
      */
-    public void addFileListListener(EventListener<FileListChangedEvent> listener);
+    void addFileListListener(EventListener<FileListChangedEvent> listener);
     
     /**
      * Removes a listener from this list
      */
-    public void removeFileListListener(EventListener<FileListChangedEvent> listener);
+    void removeFileListListener(EventListener<FileListChangedEvent> listener);
     
     /**
      * Returns an object which to lock on when iterating over this FileList. The
      * Lock should be used only during iteration, all other calls are thread safe
      * when used with SynchronizedFileList.
      */
-    public Object getLock();
+    Object getLock();
     
     /**
      * Removes any listeners this list might be holding prior to its destruction.
      */
-    public void cleanupListeners();
+    void cleanupListeners();
     
     /**
      * Changes the smart sharing value for images. If true, all new images added to
@@ -146,12 +166,12 @@ public interface FileList {
      * the library will not be automatically shared with this list but current images
      * will not be removed.
      */
-    public void setAddNewImageAlways(boolean value);
+    void setAddNewImageAlways(boolean value);
     
     /**
      * Returns true if image files are being smartly shraed with this friend, false otherwise.
      */
-    public boolean isAddNewImageAlways();
+    boolean isAddNewImageAlways();
     
     /**
      * Changes the smart sharing value for audio files. If true, all new audio files added to
@@ -159,12 +179,12 @@ public interface FileList {
      * the library will not be automatically shared with this list but current audio files
      * will not be removed.
      */
-    public void setAddNewAudioAlways(boolean value);
+    void setAddNewAudioAlways(boolean value);
     
     /**
      * Returns true if audio files are being smartly shared with this friend, false otherwise.
      */
-    public boolean isAddNewAudioAlways();
+    boolean isAddNewAudioAlways();
     
     /**
      * Changes the smart sharing value for videos. If true, all new videos added to
@@ -172,12 +192,12 @@ public interface FileList {
      * the library will not be automatically shared with this list but current videos
      * will not be removed.
      */
-    public void setAddNewVideoAlways(boolean value);
+    void setAddNewVideoAlways(boolean value);
     
     /**
      * Returns true if videos are being smartly shared with this friend, false otherwise.
      */
-    public boolean isAddNewVideoAlways();
+    boolean isAddNewVideoAlways();
         
     ///// BELOW for backwards compatibility with LW 4.x. Notion of an individual file ////
     /////   does not exist in 5.x  ////
@@ -187,16 +207,16 @@ public interface FileList {
      * a complete directory for this FileList type. This is a subset of files
      * returned by getAllFileDescs.
      */
-    public File[] getIndividualFiles();
+    File[] getIndividualFiles();
     
     /**
      * Returns the number of individual files in this FileList.
      */
-    public int getNumIndividualFiles();
+    int getNumIndividualFiles();
     
     /**
      * Returns true if this file exists in this FileList and is an individual
      * file in this FileList, false otherwise.
      */
-    public boolean isIndividualFile(File file);
+    boolean isIndividualFile(File file);
 }

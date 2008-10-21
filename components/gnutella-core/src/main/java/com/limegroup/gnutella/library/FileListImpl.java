@@ -56,9 +56,9 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
      */
     protected long numBytes;
     
-    protected final FileManager fileManager;
+    protected final FileManagerImpl fileManager;
     
-    public FileListImpl(Executor eventThread, FileManager fileManager, Set<File> filesToShare) {
+    public FileListImpl(Executor eventThread, FileManagerImpl fileManager, Set<File> filesToShare) {
         this.eventThread = eventThread;
         this.fileManager = fileManager;
         this.individualFiles = filesToShare;
@@ -101,6 +101,14 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
     public void addPendingFile(File file) {
         if(!pendingFiles.contains(file))
             pendingFiles.add(file);
+    }
+    
+    @Override
+    public void addFolder(File folder) {
+        // TODO: Add the folder to managelist as a managed folder,
+        //       then iterate through the contents and share every resulting
+        //       FD.
+        
     }
     
     public boolean add(FileDesc fileDesc) {

@@ -10,6 +10,7 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class ManagedFileList implements FileList, FileListPackage, EventListener<FileManagerEvent> {
     
@@ -60,8 +61,23 @@ class ManagedFileList implements FileList, FileListPackage, EventListener<FileMa
     }
     
     @Override
+    public void addFolder(File folder) {
+        throw new UnsupportedOperationException("TODO: Implement Managed Folders");
+    }
+    
+    @Override
     public void add(File file) {
         fileManager.addFile(file);
+    }
+    
+    @Override
+    public void add(File file, List<LimeXMLDocument> documents) {
+        fileManager.addFile(file, documents);
+    }
+    
+    @Override
+    public void addForSession(File file) {
+        throw new UnsupportedOperationException("will not add");
     }
 
     @Override

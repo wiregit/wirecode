@@ -230,14 +230,11 @@ public class FileManagerTestCase extends LimeTestCase {
         private final CountDownLatch latch = new CountDownLatch(1);
         public FileManagerEvent evt;
         public void handleEvent(FileManagerEvent fme) {
-            switch(fme.getType()) {
-                case LOAD_FILE:
-                    return;
+            if(fme.getType() != FileManagerEvent.Type.LOAD_FILE) {
+                evt = fme;
+                latch.countDown();
+                fme.getSource().removeFileEventListener(this);
             }
-
-            evt = fme;
-            latch.countDown();
-            fme.getSource().removeFileEventListener(this);
         }
         
         void await(long timeout) throws Exception {
@@ -280,7 +277,7 @@ public class FileManagerTestCase extends LimeTestCase {
     protected FileManagerEvent addFileForSession(File f1) throws Exception {
         Listener fel = new Listener();
         fman.addFileEventListener(fel);
-        fman.addSharedFileForSession(f1);
+        fman.getGnutellaSharedFileList().addForSession(f1);
         fel.await(5000);
         return fel.evt;
     }

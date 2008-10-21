@@ -6,12 +6,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import org.limewire.collection.MultiCollection;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 class GnutellaSharedFileListImpl extends FileListImpl {
@@ -71,6 +74,16 @@ class GnutellaSharedFileListImpl extends FileListImpl {
     @Override
     public void add(File file) {
         fileManager.addSharedFileAlways(file);
+    }
+    
+    @Override
+    public void add(File file, List<LimeXMLDocument> documents) {
+        fileManager.addSharedFileAlways(file, documents);
+    }
+    
+    @Override
+    public void addForSession(File file) {
+        fileManager.addSharedFileForSession(file);
     }
     
     @Override

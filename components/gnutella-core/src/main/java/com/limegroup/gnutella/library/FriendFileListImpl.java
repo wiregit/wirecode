@@ -1,12 +1,15 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**
@@ -35,6 +38,16 @@ class FriendFileListImpl extends FileListImpl {
     @Override
     public void add(File file) {
         fileManager.addFriendFile(idName, file);
+    }
+    
+    @Override
+    public void add(File file, List<LimeXMLDocument> documents) {
+        fileManager.addFriendFile(idName, file, documents);
+    }
+    
+    @Override
+    public void addForSession(File file) {
+        throw new UnsupportedOperationException("will not add");
     }
 
     /**

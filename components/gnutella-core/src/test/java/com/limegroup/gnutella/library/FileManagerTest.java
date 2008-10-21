@@ -915,7 +915,7 @@ public class FileManagerTest extends FileManagerTestCase {
         File notShared = createNewNamedTestFile(10, "notShared", _sharedDir.getParentFile());
         File sessionShared = createNewNamedTestFile(10, "sessionShared", _sharedDir.getParentFile());
         getLibraryData().SPECIAL_FILES_TO_SHARE.add(shared);
-        fman.addSharedFile(shared);
+        fman.getGnutellaSharedFileList().add(shared);
         waitForLoad();
 
         addAlways(shared);
@@ -1504,7 +1504,7 @@ public class FileManagerTest extends FileManagerTestCase {
                    fman.removeFile(store2));
 
         // try sharing the store file
-        fman.addSharedFile(store1);
+        fman.getGnutellaSharedFileList().add(store1);
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
 
@@ -1587,26 +1587,20 @@ public class FileManagerTest extends FileManagerTestCase {
         assertEquals("Unexpected number of responses", 0, responses.length);
                 
         // try sharing the store file
-        fman.addSharedFile(store1);
-        fman.addSharedFile(store2);
-        assertEquals("Unexpected number of shared files", 2, fman.getGnutellaSharedFileList().size());
-        assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
-        
-        // try forcing the sharing
-        fman.addSharedFileAlways(store1);
-        fman.addSharedFileAlways(store2);
+        fman.getGnutellaSharedFileList().add(store1);
+        fman.getGnutellaSharedFileList().add(store2);
         assertEquals("Unexpected number of shared files", 2, fman.getGnutellaSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
-        fman.addSharedFileForSession(store1);
-        fman.addSharedFileForSession(store2);
+        fman.getGnutellaSharedFileList().addForSession(store1);
+        fman.getGnutellaSharedFileList().addForSession(store2);
 
         assertEquals("Unexpected number of shared files", 2, fman.getGnutellaSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
 
-        fman.addSharedFileAlways(f1);
-        fman.addSharedFileAlways(f2);
+        fman.getGnutellaSharedFileList().add(f1);
+        fman.getGnutellaSharedFileList().add(f2);
         
 
         // no store files should be shareable in the file descriptors
@@ -1793,21 +1787,14 @@ public class FileManagerTest extends FileManagerTestCase {
         waitForLoad();
 
         // try sharing the store file
-        fman.addSharedFile(store1);
-        fman.addSharedFile(store2);
-        assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().size());
-        assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
-        
-        // try forcing the sharing
-        fman.addSharedFileAlways(store1);
-        fman.addSharedFileAlways(store2);
-
+        fman.getGnutellaSharedFileList().add(store1);
+        fman.getGnutellaSharedFileList().add(store2);
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
-        fman.addSharedFileForSession(store1);
-        fman.addSharedFileForSession(store2);
+        fman.getGnutellaSharedFileList().addForSession(store1);
+        fman.getGnutellaSharedFileList().addForSession(store2);
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().size());
         assertEquals("Unexpected number of shared files", 0, fman.getGnutellaSharedFileList().getNumForcedFiles());
         

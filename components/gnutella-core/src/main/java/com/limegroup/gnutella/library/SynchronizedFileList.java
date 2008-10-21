@@ -7,6 +7,7 @@ import java.util.List;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 public class SynchronizedFileList implements FileListPackage {
@@ -25,6 +26,11 @@ public class SynchronizedFileList implements FileListPackage {
         synchronized (mutex) {
             fileList.clear();
         }
+    }
+    
+    @Override
+    public void addFolder(File folder) {
+        fileList.addFolder(folder); // TODO: lock?
     }
     
     @Override
@@ -51,6 +57,20 @@ public class SynchronizedFileList implements FileListPackage {
     public void add(File file) {
         synchronized (mutex) {
             fileList.add(file);
+        }
+    }
+    
+    @Override
+    public void add(File file, List<LimeXMLDocument> documents) {
+        synchronized (mutex) {
+            fileList.add(file, documents);
+        }        
+    }
+    
+    @Override
+    public void addForSession(File file) {
+        synchronized(mutex) {
+            fileList.addForSession(file);
         }
     }
 

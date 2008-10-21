@@ -104,7 +104,7 @@ public class KeywordIndexPerformanceSearcher {
             LimeXMLDocument limeXmlDoc = createLimeXmlDocument(commonWords);
             File sharedFile = createTempSharedFileWithContent(fileName, limeXmlDoc.getXMLString());
 
-            fman.addSharedFileAlways(sharedFile, Collections.singletonList(limeXmlDoc));
+            fman.getGnutellaSharedFileList().add(sharedFile, Collections.singletonList(limeXmlDoc));
         }
         boolean success = numFilesListener.awaitFinish(8);
 

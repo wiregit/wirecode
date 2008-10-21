@@ -710,7 +710,7 @@ class FileManagerImpl implements FileManager, Service {
     //  File Accessors
     //////////////////////////////////////////////////////////////////////////////
 	
-    public void addFriendFile(String name, File file) {
+    void addFriendFile(String name, File file) {
         FileListPackage fileList;
         synchronized(this) {
             fileList = friendFileLists.get(name);
@@ -728,6 +728,25 @@ class FileManagerImpl implements FileManager, Service {
             }
         }
 	}
+    
+    void addFriendFile(String name, File file, List<LimeXMLDocument> xmlDocs) {
+        FileListPackage fileList;
+        synchronized(this) {
+            fileList = friendFileLists.get(name);
+        }
+        
+        if(fileList != null) {
+            fileList.addPendingFile(file);
+            
+            FileDesc fileDesc = getFileDesc(file);
+            if(fileDesc != null) {
+                fileList.add(fileDesc);
+                dispatchFileEvent(new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, fileDesc));
+            } else {
+                addFile(file, xmlDocs);
+            }
+        }
+    }
 	
     public void addSharedFile(File file) {
         addSharedFile(file, LimeXMLDocument.EMPTY_LIST);
@@ -774,14 +793,14 @@ class FileManagerImpl implements FileManager, Service {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File)
      */
-    public void addFile(File file) {
+    void addFile(File file) {
         addFile(file, LimeXMLDocument.EMPTY_LIST);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File, java.util.List)
      */
-    private void addFile(File file, List<? extends LimeXMLDocument> list) {
+    void addFile(File file, List<? extends LimeXMLDocument> list) {
         addFile(file, list, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE, null);
     }
     
