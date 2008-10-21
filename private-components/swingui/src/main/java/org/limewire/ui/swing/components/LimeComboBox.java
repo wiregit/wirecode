@@ -48,9 +48,7 @@ public class LimeComboBox extends JXButton {
     private boolean hasSize = false;
     private boolean isMenuUpdated = false;
     
-    private final LimeComboBox parent = this;
-    
-    private final JPopupMenu menu;
+    private JPopupMenu menu = null;
     
     LimeComboBox(List<Action> actions) {
         
@@ -68,14 +66,13 @@ public class LimeComboBox extends JXButton {
         
         this.setModel(this.getModel());
         
-        this.menu = new JPopupMenu();
-        this.initMenu();
-        
         this.addMouseListener(new MouseAdapter() {
             private boolean hide = false;
             
             @Override
             public void mouseEntered(MouseEvent e) {
+                if (menu == null)  return;
+                
                 if (menu.isVisible()) this.hide = true;                
             }
 
@@ -85,8 +82,9 @@ public class LimeComboBox extends JXButton {
             }
             
             @Override
-            public void mousePressed(MouseEvent e) {                
-               
+            public void mousePressed(MouseEvent e) {
+                if (menu == null)  return;
+                
                 if (this.hide) {
                     this.hide = false;
                     return;
@@ -104,6 +102,18 @@ public class LimeComboBox extends JXButton {
             }
         });
     }
+    
+    public void createPopupMenu() {
+        this.menu = new JPopupMenu();
+        this.initMenu();
+    }
+    
+    
+    
+    public void overrideMenu(JPopupMenu menu) {
+        this.menu = menu;
+        this.initMenu();
+    }
 
     
     public void  addActions(List<Action> actions) {
@@ -116,8 +126,11 @@ public class LimeComboBox extends JXButton {
         
         if (this.selectedAction == null)
             this.selectedAction = actions.get(0);
-        
+
         this.updateSize();
+        
+        if (this.menu == null) 
+            this.createPopupMenu();
     }
     
     public void  addAction(Action action) {
@@ -132,6 +145,9 @@ public class LimeComboBox extends JXButton {
             this.selectedAction = actions.get(0);
         
         this.updateSize();
+        
+        if (this.menu == null) 
+            this.createPopupMenu();
     }
     
     public void  removeAllActions() {
@@ -185,7 +201,7 @@ public class LimeComboBox extends JXButton {
             public boolean isSelected() { return delegate.isSelected(); }
             public boolean isEnabled() { return delegate.isEnabled(); }
             public boolean isPressed() { 
-                return delegate.isPressed() || menu.isVisible(); 
+                return delegate.isPressed() || menu != null && menu.isVisible(); 
             }
             public boolean isRollover() { return delegate.isRollover(); }
             public void setArmed(boolean b) { delegate.setArmed(b); }

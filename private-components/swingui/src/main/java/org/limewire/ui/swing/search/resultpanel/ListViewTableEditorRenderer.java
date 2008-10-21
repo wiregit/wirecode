@@ -100,7 +100,7 @@ implements TableCellEditor, TableCellRenderer {
     private final SearchHeadingDocumentBuilder headingBuilder;
 //    private final RowColorResolver<VisualSearchResult> rowColorResolver;
     private ActionButtonPanel actionButtonPanel;
-    private FromWidget fromWidget;
+    private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
     private JXHyperlink similarButton = new JXHyperlink();
 //    private JLabel heading = new JLabel();
@@ -122,7 +122,9 @@ implements TableCellEditor, TableCellRenderer {
 
     //TODO - Remove RowColorResolver param if uniform background color change is made permanent
     @AssistedInject
-    ListViewTableEditorRenderer(CategoryIconManager categoryIconManager,
+    ListViewTableEditorRenderer(
+            CategoryIconManager categoryIconManager,
+            SearchResultFromWidgetFactory fromWidgetFactory,
         @Assisted ActionColumnTableCellEditor actionEditor, 
         @Assisted String searchText, 
         @Assisted RemoteHostActions remoteHostActions, 
@@ -141,7 +143,7 @@ implements TableCellEditor, TableCellRenderer {
 
         similarButton.setFont(similarResultsButtonFont);
         
-        fromWidget = new FromWidget(remoteHostActions);
+        fromWidget = fromWidgetFactory.create(remoteHostActions);
         
         makePanel(navigator);
     }

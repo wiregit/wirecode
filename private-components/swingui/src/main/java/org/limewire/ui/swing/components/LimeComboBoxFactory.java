@@ -66,6 +66,10 @@ public class LimeComboBoxFactory {
         
     }
     
+    public LimeComboBox createMiniComboBox() {
+        return createMiniComboBox(null,null);
+    }
+    
     public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
     
         LimeComboBox box = new LimeComboBox(items);
