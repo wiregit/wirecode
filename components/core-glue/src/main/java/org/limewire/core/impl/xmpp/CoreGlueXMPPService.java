@@ -13,7 +13,6 @@ import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 @Singleton
 public class CoreGlueXMPPService implements Service {
 
-    @Inject
     private final Provider<HTTPAcceptor> httpAcceptor;
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
     private final Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider;
@@ -21,6 +20,7 @@ public class CoreGlueXMPPService implements Service {
     private final static String FRIEND_BROWSE_PATTERN = "/friend/browse";
     private final static String FRIEND_DOWNLOAD_PATTERN = "/friend/download";
 
+    @Inject
     public CoreGlueXMPPService(Provider<HTTPAcceptor> httpAcceptor, HttpRequestHandlerFactory httpRequestHandlerFactory,
            Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider) {
         this.httpAcceptor = httpAcceptor;

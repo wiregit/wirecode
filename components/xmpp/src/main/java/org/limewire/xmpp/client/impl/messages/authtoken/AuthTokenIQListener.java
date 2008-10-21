@@ -11,6 +11,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -99,7 +100,7 @@ public class AuthTokenIQListener implements PacketListener {
 
     private void sendResult(AuthTokenIQ packet) {
         try {
-            byte [] authToken = userStore.getPassword(limePresences.get(packet.getFrom()).getFriend().getId()).getBytes("UTF-8");
+            byte [] authToken = userStore.getPassword(StringUtils.parseBareAddress(packet.getFrom())).getBytes("UTF-8");
             AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
             queryResult.setTo(packet.getFrom());
             queryResult.setFrom(packet.getTo());

@@ -2,6 +2,7 @@ package org.limewire.core.impl.xmpp;
 
 import java.io.UnsupportedEncodingException;
 
+import org.apache.http.auth.Credentials;
 import org.limewire.http.auth.Authenticator;
 import org.limewire.http.auth.AuthenticatorRegistry;
 import org.limewire.listener.ListenerSupport;
@@ -13,10 +14,10 @@ import org.limewire.security.SecurityToken;
 import org.limewire.security.auth.UserStore;
 import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.apache.http.auth.Credentials;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 @Singleton
 public class XMPPAuthenticator implements RegisteringEventListener<RosterEvent>, Authenticator {
@@ -26,7 +27,7 @@ public class XMPPAuthenticator implements RegisteringEventListener<RosterEvent>,
     private final MACCalculator passwordCreator;    
 
     @Inject
-    XMPPAuthenticator(UserStore userStore, MACCalculator macCalculator) {
+    XMPPAuthenticator(UserStore userStore, @Named("xmppMACCalculator") MACCalculator macCalculator) {
         this.userStore = userStore;
         this.passwordCreator = macCalculator;
     }

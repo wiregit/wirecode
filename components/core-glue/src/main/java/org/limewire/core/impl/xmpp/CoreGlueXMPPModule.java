@@ -23,6 +23,8 @@ public class CoreGlueXMPPModule extends AbstractModule {
         bind(FriendShareListRefresher.FriendShareListEventImpl.class);
         bind(FriendShareListRefresher.RosterEventListenerImpl.class);
         bind(MACCalculator.class).annotatedWith(Names.named("xmppMACCalculator")).toProvider(XMPPSessionMACCalculatorProvider.class);
+        bind(XMPPAuthenticator.class);
+        bind(CoreGlueXMPPService.class);
     }
     
     private static class XMPPSessionMACCalculatorProvider extends AbstractLazySingletonProvider<MACCalculator> {

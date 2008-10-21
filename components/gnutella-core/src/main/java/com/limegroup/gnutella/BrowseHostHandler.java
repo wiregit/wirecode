@@ -237,7 +237,7 @@ public class BrowseHostHandler {
         if(friendPresence.getFriend().isAnonymous()) {
             return "/";
         } else {
-            return "/browse/friend";  // TODO URLEncode
+            return "/friend/browse";  // TODO URLEncode
         }
     }
 
