@@ -72,19 +72,23 @@ public class LimeComboBox extends JXButton {
         this.initMenu();
         
         this.addMouseListener(new MouseAdapter() {
+            private boolean hide = false;
+            
             @Override
-            public void mouseEntered(MouseEvent e) {}
+            public void mouseEntered(MouseEvent e) {
+                if (menu.isVisible()) this.hide = true;                
+            }
 
             @Override
-            public void mouseExited(MouseEvent e) {}
-
+            public void mouseExited(MouseEvent e) {
+                this.hide = false;                
+            }
+            
             @Override
-            public void mousePressed(MouseEvent e) {
-                
-                // Hide menu if bar is clicked again
-                if (menu.isEnabled()) {
-                    menu.setVisible(false);
-                    menu.setEnabled(false);
+            public void mousePressed(MouseEvent e) {                
+               
+                if (this.hide) {
+                    this.hide = false;
                     return;
                 }
                 
@@ -95,8 +99,8 @@ public class LimeComboBox extends JXButton {
                             (int) menu.getPreferredSize().getHeight()));
                 
                 menu.show((Component) e.getSource(), 0, getHeight()-1);
-                menu.setEnabled(true);
                 
+                this.hide = true;
             }
         });
     }
@@ -110,6 +114,9 @@ public class LimeComboBox extends JXButton {
         
         this.actions.addAll(actions);
         
+        if (this.selectedAction == null)
+            this.selectedAction = actions.get(0);
+        
         this.updateSize();
     }
     
@@ -120,6 +127,11 @@ public class LimeComboBox extends JXButton {
         this.hasSize = false;
         
         this.actions.add(action);
+        
+        if (this.selectedAction == null)
+            this.selectedAction = actions.get(0);
+        
+        this.updateSize();
     }
     
     public void  removeAllActions() {
@@ -127,6 +139,9 @@ public class LimeComboBox extends JXButton {
         this.hasSize = false;
         
         this.actions.clear();
+        
+        this.selectedAction = null;
+        this.selectedComponent = null;
     }
     
     public void  removeAction(Action action) {
@@ -134,9 +149,18 @@ public class LimeComboBox extends JXButton {
         this.hasSize = false;
         
         this.actions.remove(action);
+        
+        if (action == this.selectedAction) {
+            this.selectedAction = null;
+            this.selectedComponent = null;
+        }
     }
     
     public void setSelectedAction(Action action) {
+        
+        // Make sure the selected action is in the list
+        if (!this.actions.contains(action))  return;
+        
         this.selectedAction = action;
         
         this.isMenuUpdated = false;
@@ -250,6 +274,8 @@ public class LimeComboBox extends JXButton {
     }
     
     private String unpackText(Object object) {
+        if (object == null)  return null;
+        
         if (object instanceof Action) 
             return ((Action) object).getValue("Name").toString();
         else
@@ -310,7 +336,7 @@ public class LimeComboBox extends JXButton {
         
         this.setSize(this.getPreferredSize());
         
-        this.invalidate();
+        this.repaint();
     }
     
         
@@ -394,15 +420,13 @@ public class LimeComboBox extends JXButton {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            // Disable closed popup
-            menu.setEnabled(false);
-            
+
             // Change selection in parent combo box
             selectedAction = this.wrappedAction;
             selectedComponent = (JMenuItem) e.getSource();
 
-          // Fire the parent listeners
-          for ( SelectionListener listener : selectionListeners )
+            // Fire the parent listeners
+            for ( SelectionListener listener : selectionListeners )
                 listener.selectionChanged(wrappedAction);
             
             // Call original action
@@ -454,7 +478,7 @@ public class LimeComboBox extends JXButton {
         this.menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
         this.menu.setBackground(Color.WHITE);
         this.menu.setForeground(Color.BLACK);
-        this.menu.setEnabled(false);
+        this.menu.setVisible(false);
         
         this.menu.addMouseListener(new MouseListener() {
             @Override
