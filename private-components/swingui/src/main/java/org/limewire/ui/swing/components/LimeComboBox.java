@@ -102,6 +102,8 @@ public class LimeComboBox extends JXButton {
     }
     
     public void  addAction(Action action) {
+        if (action == null)  throw new IllegalArgumentException("Null Action added");
+        
         this.isMenuUpdated = false;
         this.hasSize = false;
         

@@ -122,6 +122,7 @@ public class SortAndFilterPanel extends JXPanel {
         this.actions.put(PLATFORM,createAction(PLATFORM));
         this.actions.put(TYPE,createAction(TYPE));
         this.actions.put(DATE_CREATED,createAction(DATE_CREATED));
+        this.actions.put(QUALITY,createAction(QUALITY));
         this.actions.put(YEAR,createAction(YEAR));
         this.actions.put(FILE_EXTENSION,createAction(FILE_EXTENSION));
         this.actions.put(TITLE,createAction(TITLE));
