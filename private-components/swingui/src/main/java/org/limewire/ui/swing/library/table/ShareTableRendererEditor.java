@@ -17,7 +17,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 
-public class ShareTableRendererEditor extends TableRendererEditor{
+public class ShareTableRendererEditor extends TableRendererEditor implements Configurable{
     @Resource
     private Icon shareGnutellaIcon;
     @Resource
@@ -51,27 +51,24 @@ public class ShareTableRendererEditor extends TableRendererEditor{
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        configure(table, value, isSelected, hasFocus, row, column);
+        configure((LocalFileItem)value);
         return this;
     }
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        configure(table, value, isSelected, false, row, column);
+        configure((LocalFileItem)value);
         return this;
     }
     
-    private void configure(JTable table, Object value, boolean isSelected,
-            boolean hasFocus, int row, int column) {
-        if(value instanceof LocalFileItem) {
-            LocalFileItem item = (LocalFileItem)value;
-            gnutellaLabel.setVisible(item.isSharedWithGnutella());
-            int friendCount = item.getFriendShareCount();
-            friendsLabel.setVisible(friendCount > 0 && !item.isIncomplete());
-            friendsLabel.setText(GuiUtils.toLocalizedInteger(item.getFriendShareCount()));
-            shareButton.setVisible(item.isShareable() && !item.isIncomplete());
-        }
+    @Override
+    public void configure(LocalFileItem item) {
+        gnutellaLabel.setVisible(item.isSharedWithGnutella());
+        int friendCount = item.getFriendShareCount();
+        friendsLabel.setVisible(friendCount > 0 && !item.isIncomplete());
+        friendsLabel.setText(GuiUtils.toLocalizedInteger(item.getFriendShareCount()));
+        shareButton.setVisible(item.isShareable() && !item.isIncomplete());
     }
 
 }

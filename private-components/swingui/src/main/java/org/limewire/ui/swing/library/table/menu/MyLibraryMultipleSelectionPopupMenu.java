@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.table.menu;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
@@ -17,7 +18,6 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
-import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -37,15 +37,15 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
     final private JMenu friendUnshareSubMenu;
     
 
-    private LibraryTable table;
+    private Component repaintComponent;
 
     private List<SharingTarget> friendList;
 
     public MyLibraryMultipleSelectionPopupMenu(Category category, LibraryManager libraryManager,
-            ShareListManager shareListManager, LibraryTable table, List<SharingTarget> friendList) {
+            ShareListManager shareListManager, Component repaintComponent, List<SharingTarget> friendList) {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
-        this.table = table;
+        this.repaintComponent = repaintComponent;
         this.friendList = friendList;
         
         gnutellaShareItem = new JMenuItem(gnutellaShareAction);
@@ -157,7 +157,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            table.repaint();
+                            repaintComponent.repaint();
                         }
                     });
                 }
@@ -181,7 +181,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            table.repaint();
+                            repaintComponent.repaint();
                         }
                     });
                 }
@@ -210,7 +210,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            table.repaint();
+                            repaintComponent.repaint();
                         }
                     });
                 }
@@ -239,7 +239,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                     SwingUtils.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            table.repaint();
+                            repaintComponent.repaint();
                         }
                     });
                 }

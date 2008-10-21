@@ -22,6 +22,7 @@ import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
@@ -43,7 +44,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
-    private final LibraryTable<LocalFileItem> table;
+    private LibraryTable<LocalFileItem> table;
     private final LibraryHeaderPanel header;
     private LibrarySharePanel sharePanel;
     private JXLayer<JTable> layer;
@@ -66,55 +67,67 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
         
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(eventList, 
                 new TextComponentMatcherEditor<LocalFileItem>(header.getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
-        table = tableFactory.createTable(category, filterList, null);
-        table.enableSharing(sharePanel);
-        table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel()));
-                
-        layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>());
-        scrollPane = new JScrollPane(layer);
-        scrollPane.setColumnHeaderView(table.getTableHeader());
-        if(table.isColumnControlVisible()){
-            scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
-            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        }
-        
-        //necessary to fill table with stripes and have scrollbar appear properly
-        scrollPane.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                adjustSize();
+        if (category != Category.IMAGE) {
+            table = tableFactory.createTable(category, filterList, null);
+            table.enableSharing(sharePanel);
+            table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel()));
+
+            layer = new JXLayer<JTable>(table, new AbstractLayerUI<JTable>());
+            scrollPane = new JScrollPane(layer);
+            scrollPane.setColumnHeaderView(table.getTableHeader());
+            if (table.isColumnControlVisible()) {
+                scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
+                scrollPane
+                        .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             }
-        });
-        
-        listListener = new ListEventListener<LocalFileItem>() {
-            @Override
-            public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                adjustSize();
-            }
-        };
-        
-        eventList.addListEventListener(listListener);
-        
-        
-        //for absolute positioning of LibrarySharePanel
-        layer.getGlassPane().setLayout(null);
-        sharePanel.setBounds(0,0, sharePanel.getPreferredSize().width, sharePanel.getPreferredSize().height);
-        layer.getGlassPane().add(sharePanel);
-        sharePanel.setVisible(false);
-        
-        //make sharePanel disappear when the user clicks elsewhere
-        AWTEventListener eventListener = new AWTEventListener(){
-            @Override
-            public void eventDispatched(AWTEvent event) {
-                if (sharePanel.isVisible() && (event.getID() == MouseEvent.MOUSE_PRESSED)){
-                    MouseEvent e = (MouseEvent)event;
-                    if (sharePanel != e.getComponent() && !sharePanel.contains(e.getComponent()) && !scrollPane.getVerticalScrollBar().contains(e.getPoint())) {
-                        sharePanel.setVisible(false);
+
+            // necessary to fill table with stripes and have scrollbar appear
+            // properly
+            scrollPane.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    adjustSize();
+                }
+            });
+
+            listListener = new ListEventListener<LocalFileItem>() {
+                @Override
+                public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                    adjustSize();
+                }
+            };
+
+            eventList.addListEventListener(listListener);
+
+            // for absolute positioning of LibrarySharePanel
+            layer.getGlassPane().setLayout(null);
+            sharePanel.setBounds(0, 0, sharePanel.getPreferredSize().width, sharePanel
+                    .getPreferredSize().height);
+            layer.getGlassPane().add(sharePanel);
+            sharePanel.setVisible(false);
+
+            // make sharePanel disappear when the user clicks elsewhere
+            AWTEventListener eventListener = new AWTEventListener() {
+                @Override
+                public void eventDispatched(AWTEvent event) {
+                    if (sharePanel.isVisible() && (event.getID() == MouseEvent.MOUSE_PRESSED)) {
+                        MouseEvent e = (MouseEvent) event;
+                        if (sharePanel != e.getComponent()
+                                && !sharePanel.contains(e.getComponent())
+                                && !scrollPane.getVerticalScrollBar().contains(e.getPoint())) {
+                            sharePanel.setVisible(false);
+                        }
                     }
                 }
-            }
-        };
-        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
+            };
+            Toolkit.getDefaultToolkit().addAWTEventListener(eventListener,
+                    AWTEvent.MOUSE_EVENT_MASK);
+
+        } else {//Category.IMAGE
+            //TODO merge with table for disposing and enabling sharing
+            LibraryImagePanel imagePanel = tableFactory.createImagePanel(eventList);
+            scrollPane = new JScrollPane(imagePanel);
+        }
 
         add(scrollPane, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);

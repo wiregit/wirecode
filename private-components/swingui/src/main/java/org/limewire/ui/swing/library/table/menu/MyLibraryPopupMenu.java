@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.table.menu;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -21,7 +22,6 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
-import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -36,7 +36,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private ShareListManager shareListManager;
     
 
-    private LibraryTable table;
+    private Component repaintComponent;
     
     private JCheckBoxMenuItem gnutellaShareItem;
     
@@ -48,11 +48,11 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private MagnetLinkFactory magnetFactory;
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
-            ShareListManager shareListManager, MagnetLinkFactory magnetFactory, LibraryTable table, List<SharingTarget> friendList) {
+            ShareListManager shareListManager, MagnetLinkFactory magnetFactory, Component repaintComponent, List<SharingTarget> friendList) {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.magnetFactory = magnetFactory;
-        this.table = table;
+        this.repaintComponent = repaintComponent;
         this.friendList = friendList;
         initializeCategory(category);
     }
@@ -195,7 +195,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
             } else {
                 shareListManager.getGnutellaShareList().removeFile(getFile());
             }
-            table.repaint();
+            repaintComponent.repaint();
         }        
    };
    
@@ -213,7 +213,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
             } else {
                 shareListManager.getFriendShareList(friend).removeFile(getFile());
             }
-            table.repaint();
+            repaintComponent.repaint();
         }
     };
 

@@ -23,6 +23,10 @@ public class ImageListModel extends EventListModel<LocalFileItem>{
         fileList.removeFile(item.getFile());
     }
     
+    public void addFileItem(LocalFileItem file){
+        fileItems.add(file);
+    }
+    
     public LocalFileList getFileList() {
         return fileList;
     }

@@ -27,11 +27,15 @@ import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.images.ThumbnailManager;
+import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
+import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -41,6 +45,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.gui.I18n;
 
 @Singleton
 public class LibraryTableFactoryImpl implements LibraryTableFactory, RegisteringEventListener<RosterEvent>{
@@ -54,10 +59,14 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
     private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
     private DownloadListManager downloadListManager;
     private MagnetLinkFactory magnetLinkFactory;
+    private CategoryIconManager categoryIconManager;
+    private ThumbnailManager thumbnailManager;
 
     @Inject
-    public LibraryTableFactoryImpl(IconManager iconManager, LibraryManager libraryManager, 
+    public LibraryTableFactoryImpl(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, IconManager iconManager, LibraryManager libraryManager, 
             ShareListManager shareListManager, AudioPlayer player, DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory){
+        this.thumbnailManager = thumbnailManager;
+        this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -67,12 +76,18 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         EventAnnotationProcessor.subscribe(this);
     }
     
+    @Override
+    public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList) {
+        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager, shareListManager,  magnetLinkFactory, friendList);
+        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList, libraryManager.getLibraryManagedList(), 
+                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
+    }
+    
     /**
      * 
      * @param friend null for MyLibrary
      * @return
      */
-    @SuppressWarnings("unchecked")
     public <T extends FileItem>LibraryTable<T> createTable(Category category,
             EventList<T> eventList, Friend friend) {
         
@@ -109,16 +124,26 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         
         if(friend != null){
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
-            libTable.setPopupHandler(new FriendLibraryPopupHandler((LibraryTable<RemoteFileItem>)libTable, downloadListManager, magnetLinkFactory));
+            libTable.setPopupHandler(new FriendLibraryPopupHandler(castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory));
         } else {//Local            
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
-            libTable.setPopupHandler(new MyLibraryPopupHandler((LibraryTable<LocalFileItem>)libTable, category, libraryManager, shareListManager, magnetLinkFactory, friendList));
+            libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, magnetLinkFactory, friendList));
         }
         
             libTable.setDropMode(DropMode.ON);
         
         return libTable;
         
+    }
+    
+    @SuppressWarnings({ "unchecked", "cast" })
+    private LibraryTable<RemoteFileItem> castToRemoteLibraryTable(LibraryTable table){
+        return (LibraryTable<RemoteFileItem>)table;
+    }
+    
+    @SuppressWarnings({ "unchecked", "cast" })
+    private LibraryTable<LocalFileItem> castToLocalLibraryTable(LibraryTable table){
+        return (LibraryTable<LocalFileItem>)table;
     }
     
     private class MyLibraryTransferHandler extends TransferHandler {
@@ -172,6 +197,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             return new LocalFileTransferable(files);
         }
     }
+
     
     private class FriendLibraryTransferHandler extends TransferHandler {
         
@@ -272,5 +298,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             }
         });
     }
+
+
 
 }
