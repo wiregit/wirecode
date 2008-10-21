@@ -147,9 +147,6 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
 
         handleSearchResult(msr);
-        try {
-            Thread.sleep(1000);
-        } catch(InterruptedException ignored) {}
 
         msr = new MockSearchResult();
         name = "Lab19";
@@ -167,9 +164,6 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
         
         handleSearchResult(msr);
-        try {
-            Thread.sleep(1000);
-        } catch(InterruptedException ignored) {}
 
         msr = new MockSearchResult();
         name = "Lab19";
@@ -187,9 +181,6 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
         
         handleSearchResult(msr);
-        try {
-            Thread.sleep(1000);
-        } catch(InterruptedException ignored) {}
 
         // Create a search result that will be categorized as "Other".
         msr = new MockSearchResult();
@@ -208,9 +199,6 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
         msr.setProperty(PropertyKey.QUALITY, "good quality");
         handleSearchResult(msr);
-        try {
-            Thread.sleep(1000);
-        } catch(InterruptedException ignored) {}
 
         // Create a search result that will be categorized as "Music".
         msr = new MockSearchResult();
@@ -306,9 +294,6 @@ public class MockSearch implements Search {
         msr.setProperty(PropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(PropertyKey.TRACK_NUMBER, "3");
         handleSearchResult(msr);
-        try {
-            Thread.sleep(1000);
-        } catch(InterruptedException ignored) {}
 
         // Create a search result that will be categorized as "Video".
 
