@@ -15,6 +15,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -23,7 +24,6 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
-import com.limegroup.gnutella.gui.I18n;
 
 public class LibraryImagePanel  extends JPanel implements ListEventListener<List<LocalFileItem>> {
 

@@ -36,6 +36,7 @@ import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.Image
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -45,7 +46,6 @@ import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.gui.I18n;
 
 @Singleton
 public class LibraryTableFactoryImpl implements LibraryTableFactory, RegisteringEventListener<RosterEvent>{
