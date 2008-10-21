@@ -1,13 +1,13 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
-import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,10 +21,14 @@ import java.util.Comparator;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -47,7 +51,6 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.RowColorResolver;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.assistedinject.Assisted;
@@ -85,6 +88,7 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Color headingLabelColor;
     @Resource private Color subHeadingLabelColor;
     @Resource private Color metadataLabelColor;
+    @Resource private Color similarResultsBackgroundColor;
     @Resource private Font headingFont;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
@@ -93,40 +97,46 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Icon downloadingIcon;
     
     private final ActionColumnTableCellEditor actionEditor;
-    private final RowColorResolver<VisualSearchResult> rowColorResolver;
+    private final SearchHeadingDocumentBuilder headingBuilder;
+//    private final RowColorResolver<VisualSearchResult> rowColorResolver;
     private ActionButtonPanel actionButtonPanel;
     private FromWidget fromWidget;
     private JLabel itemIconLabel;
     private JXHyperlink similarButton = new JXHyperlink();
-    private JLabel headingLabel = new JLabel();
+//    private JLabel heading = new JLabel();
+    private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new JLabel();
     private JLabel metadataLabel = new JLabel();
     private JXPanel rightPanel = new JXPanel();
     private JXPanel editorComponent;
-    private final JXHyperlink downloadingLink = new JXHyperlink();
+//    private final JXHyperlink downloadingLink = new JXHyperlink();
 
     private VisualSearchResult vsr;
 //    private int column;
+    private JTable table;
     private JComponent similarResultIndentation;
     private JPanel indentablePanel;
     private JPanel leftPanel;
     private JPanel centerPanel;
     private JXPanel searchResultTextPanel;
 
+    //TODO - Remove RowColorResolver param if uniform background color change is made permanent
     @AssistedInject
     ListViewTableEditorRenderer(CategoryIconManager categoryIconManager,
         @Assisted ActionColumnTableCellEditor actionEditor, 
         @Assisted String searchText, 
         @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
-        @Assisted RowColorResolver<VisualSearchResult> colorResolver) {
+        @Assisted RowColorResolver<VisualSearchResult> colorResolver,
+        SearchHeadingDocumentBuilder headingBuilder) {
 
         this.categoryIconManager = categoryIconManager;
         
         this.actionEditor = actionEditor;
         this.searchText = searchText;
-        this.rowColorResolver = colorResolver;
-
+        this.headingBuilder = headingBuilder;
+//        this.rowColorResolver = colorResolver;
+        
         GuiUtils.assignResources(this);
 
         similarButton.setFont(similarResultsButtonFont);
@@ -219,6 +229,7 @@ implements TableCellEditor, TableCellRenderer {
 
         vsr = (VisualSearchResult) value;
 //        column = col;
+        this.table = table;
         LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
 
         actionButtonPanel =
@@ -311,20 +322,28 @@ implements TableCellEditor, TableCellRenderer {
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         itemIconLabel.setOpaque(false);
         
-        headingLabel.setForeground(headingLabelColor);
-        headingLabel.setFont(headingFont);
-        headingLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        heading.setContentType("text/html");
+        heading.setEditable(false);
+        heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
         
-        headingLabel.addMouseListener(new MouseAdapter() {
+//        heading.setForeground(headingLabelColor);
+//        heading.setFont(headingFont);
+//        heading.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        heading.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                FontUtils.underline(headingLabel);
+                //TODO
+//                FontUtils.underline(heading);
+                populateHeading(vsr, true);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                FontUtils.removeUnderline(headingLabel);
+                //TODO
+//                FontUtils.removeUnderline(heading);
+                populateHeading(vsr, false);
             }
         });
 
@@ -340,7 +359,7 @@ implements TableCellEditor, TableCellRenderer {
 
         searchResultTextPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "5[]0[]0[]0"));
         searchResultTextPanel.setOpaque(false);
-        searchResultTextPanel.add(headingLabel, "wrap, wmin 350");
+        searchResultTextPanel.add(heading, "wrap, wmin 350");
         searchResultTextPanel.add(subheadingLabel, "wrap, wmin 350");
         searchResultTextPanel.add(metadataLabel, "wmin 350");
 
@@ -351,23 +370,44 @@ implements TableCellEditor, TableCellRenderer {
         panel.add(downloadPanel);
         panel.add(searchResultTextPanel);
         
-        FontUtils.changeSize(downloadingLink, -2.0f);
-        downloadingLink.addActionListener(new ActionListener() {
+//        FontUtils.changeSize(downloadingLink, -2.0f);
+        heading.addHyperlinkListener(new HyperlinkListener() {
+
             @Override
-            public void actionPerformed(ActionEvent e) {
-                BasicDownloadState downloadState = vsr.getDownloadState();
-                if (downloadState == BasicDownloadState.DOWNLOADING) {
-                    navigator.getNavItem(
-                        NavCategory.DOWNLOAD,
-                        MainDownloadPanel.NAME).select(vsr);
-                } else if (downloadState == BasicDownloadState.DOWNLOADED || downloadState == BasicDownloadState.LIBRARY) {
-                    navigator.getNavItem(
-                        NavCategory.LIBRARY,
-                        LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select(vsr);
-                    
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (EventType.ACTIVATED == e.getEventType()) {
+                    if (e.getDescription().equals("#download")) {
+                        actionButtonPanel.startDownload();
+                        table.editingStopped(new ChangeEvent(table));
+                    } else if (e.getDescription().equals("#downloading")) {
+                        navigator.getNavItem(
+                            NavCategory.DOWNLOAD,
+                            MainDownloadPanel.NAME).select(vsr);
+                    } else if (e.getDescription().equals("#library")) {
+                        navigator.getNavItem(
+                            NavCategory.LIBRARY,
+                            LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select(vsr);
+                        
+                    }
                 }
             }
         });
+//        downloadingLink.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                BasicDownloadState downloadState = vsr.getDownloadState();
+//                if (downloadState == BasicDownloadState.DOWNLOADING) {
+//                    navigator.getNavItem(
+//                        NavCategory.DOWNLOAD,
+//                        MainDownloadPanel.NAME).select(vsr);
+//                } else if (downloadState == BasicDownloadState.DOWNLOADED || downloadState == BasicDownloadState.LIBRARY) {
+//                    navigator.getNavItem(
+//                        NavCategory.LIBRARY,
+//                        LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select(vsr);
+//                    
+//                }
+//            }
+//        });
 
         return panel;
     }
@@ -402,12 +442,13 @@ implements TableCellEditor, TableCellRenderer {
     /**
      * Returns a value to indicate whether the heading was decorated to highlight
      * parts of the content that match search terms
+     * @param isMouseOver TODO
      */
-    private boolean populateHeading(VisualSearchResult vsr) {
+    private boolean populateHeading(VisualSearchResult vsr, boolean isMouseOver) {
         String heading = vsr.getHeading();
         String highlightMatches = highlightMatches(heading);
         LOG.debugf("Heading: {0} highlightedMatches: {1}", heading, highlightMatches);
-        headingLabel.setText(highlightMatches);
+        this.heading.setText(headingBuilder.getHeadingDocument(highlightMatches, vsr.getDownloadState(), isMouseOver));
         return isDifferentLength(heading, highlightMatches);
     }
 
@@ -435,33 +476,34 @@ implements TableCellEditor, TableCellRenderer {
         if (column == 0) {
             if (vsr.getSimilarityParent() != null) {
                 indentablePanel.add(similarResultIndentation, "cell 0 0, height 100%");
-                Color backgroundColor = rowColorResolver.getColorForItemRow(vsr.getSimilarityParent());
-                similarResultIndentation.setBackground(backgroundColor);
+//                Color backgroundColor = rowColorResolver.getColorForItemRow(vsr.getSimilarityParent());
+//                similarResultIndentation.setBackground(backgroundColor);
+                similarResultIndentation.setBackground(similarResultsBackgroundColor);
             } else {
                 indentablePanel.remove(similarResultIndentation);
             }
             
             itemIconLabel.setIcon(getIcon(vsr));
 
-            boolean headingDecorated = populateHeading(vsr);
+            boolean headingDecorated = populateHeading(vsr, false);
 
             populateSearchResultTextPanel();
             
             switch (vsr.getDownloadState()) {
             case NOT_STARTED:
-                downloadingLink.setText("");
+//                downloadingLink.setText("");
                 boolean subheadingDecorated = populateSubheading(vsr);
                 populateOther(vsr, headingDecorated || subheadingDecorated);
                 break;
-            case DOWNLOADING:
-                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
-                break;
-            case DOWNLOADED:
-                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
-                break;
-            case LIBRARY:
-                downloadingLink.setText(hyperlinkText(tr("In Your Library")));
-                break;
+//            case DOWNLOADING:
+//                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
+//                break;
+//            case DOWNLOADED:
+//                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
+//                break;
+//            case LIBRARY:
+//                downloadingLink.setText(hyperlinkText(tr("In Your Library")));
+//                break;
             }
             
         } else if (column == 1) {
@@ -491,7 +533,7 @@ implements TableCellEditor, TableCellRenderer {
 
     private void populateSearchResultTextPanel() {
         if (vsr.getDownloadState() == BasicDownloadState.NOT_STARTED) {
-            searchResultTextPanel.remove(downloadingLink);
+//            searchResultTextPanel.remove(downloadingLink);
             
             searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
             searchResultTextPanel.add(metadataLabel, "cell 0 2, wmin 350");
@@ -499,7 +541,7 @@ implements TableCellEditor, TableCellRenderer {
             searchResultTextPanel.remove(subheadingLabel);
             searchResultTextPanel.remove(metadataLabel);
             
-            searchResultTextPanel.add(downloadingLink, "cell 0 1");
+//            searchResultTextPanel.add(downloadingLink, "cell 0 1");
         }
     }
 

@@ -16,6 +16,8 @@ import org.limewire.ui.swing.search.resultpanel.OtherResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.OtherResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.ProgramResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
+import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl;
 import org.limewire.ui.swing.search.resultpanel.SearchResultProperties;
 import org.limewire.ui.swing.search.resultpanel.SearchResultPropertiesImpl;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
@@ -75,5 +77,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(RemoteHostActions.class).to(RemoteHostActionsImpl.class);
 
         bind(SearchResultProperties.class).to(SearchResultPropertiesImpl.class);
+        
+        bind(SearchHeadingDocumentBuilder.class).to(SearchHeadingDocumentBuilderImpl.class);
     }
 }

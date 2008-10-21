@@ -15,6 +15,7 @@ import org.limewire.core.api.search.SearchResult.PropertyKey;
 public class MockVisualSearchResult implements VisualSearchResult {
     private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();
     private String name;
+    private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private VisualSearchResult similarityParent;
     
     public MockVisualSearchResult(String name) {
@@ -41,8 +42,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public BasicDownloadState getDownloadState() {
-        // TODO Auto-generated method stub
-        return null;
+        return downloadState;
     }
 
     @Override
@@ -106,8 +106,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public void setDownloadState(BasicDownloadState downloadState) {
-        // TODO Auto-generated method stub
-        
+        this.downloadState = downloadState;
     }
 
     @Override
