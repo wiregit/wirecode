@@ -1,14 +1,44 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXTable;
+import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -16,6 +46,8 @@ import com.google.inject.Singleton;
 /**
  * Network Interface Option View
  */
+//TODO: check this for thread safety on glazed lists
+//TODO: fix the table checkbox renderering
 @Singleton
 public class NetworkInterfaceOptionPanel extends OptionPanel {
 
@@ -23,6 +55,12 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
     
     private JRadioButton limewireChooseRadioButton;
     private JRadioButton meChooseRadioButton;
+    private NetworkTable table;
+    private JScrollPane scrollPane;
+    
+    private NetworkItem selectedItem;
+    
+    private EventList<NetworkItem> eventList;
     
     @Inject
     public NetworkInterfaceOptionPanel() {
@@ -42,31 +80,271 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
         buttonGroup = new ButtonGroup();
         buttonGroup.add(limewireChooseRadioButton);
         buttonGroup.add(meChooseRadioButton);
+        
+        eventList = GlazedLists.threadSafeList(new BasicEventList<NetworkItem>());
+        table = new NetworkTable(new EventTableModel<NetworkItem>(eventList, new NetworkTableFormat()));
+        scrollPane = new JScrollPane(table);
+        scrollPane.setVisible(false);
+        
+        meChooseRadioButton.addItemListener(new RadioListener(scrollPane, meChooseRadioButton));
 
         p.add(limewireChooseRadioButton);
         p.add(new JLabel(I18n.tr("Let LimeWire choose my network interface (Recommended)")), "wrap");
         
         p.add(meChooseRadioButton);
-        p.add(new JLabel(I18n.tr("Let me choose a specific network interface")), "wrap");
+        p.add(new JLabel(I18n.tr("Let me choose a specific network interface")), "push, wrap");
+        
+        p.add(scrollPane, "grow, span");
         
         return p;
     }
     
     @Override
     void applyOptions() {
-        // TODO Auto-generated method stub
-        
+        ConnectionSettings.CUSTOM_NETWORK_INTERFACE.setValue(meChooseRadioButton.isSelected());
+        for(NetworkItem item : eventList) {
+            if(item.isSelected()) {
+                ConnectionSettings.CUSTOM_INETADRESS.setValue(item.getAddress());
+                break;
+            }
+        }
     }
 
     @Override
     boolean hasChanged() {
-        // TODO Auto-generated method stub
-        return false;
+        if(!ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue())
+            return !limewireChooseRadioButton.isSelected();
+        
+        String expect = ConnectionSettings.CUSTOM_INETADRESS.getValue();
+        for(NetworkItem item : eventList) {
+            if(expect.equals(item.getAddress()));
+                return false;
+        }
+        return true;
     }
 
     @Override
     public void initOptions() {
-        // TODO Auto-generated method stub
+        limewireChooseRadioButton.setSelected(!ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue());
+        meChooseRadioButton.setSelected(ConnectionSettings.CUSTOM_NETWORK_INTERFACE.getValue());
         
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            
+            // Add the available interfaces / addresses
+            while(interfaces.hasMoreElements()) {
+                NetworkInterface ni = interfaces.nextElement();
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if(address.isAnyLocalAddress() || address.isLinkLocalAddress() || address.isLoopbackAddress())
+                        continue;
+                    NetworkItem networkItem = new NetworkItem(address, ni.getDisplayName());
+                    if(ConnectionSettings.CUSTOM_INETADRESS.getValue().equals(address.getHostAddress())) {
+                        networkItem.setSelected(true);
+                        selectedItem = networkItem;
+                    }
+                    eventList.add(networkItem);
+                }
+            }
+            if(selectedItem == null) { 
+                eventList.get(0).setSelected(true); 
+                selectedItem = eventList.get(0);
+            }
+        } catch (SocketException e) {
+            meChooseRadioButton.setEnabled(false);
+        }
+        if(eventList.size() == 0 )
+            meChooseRadioButton.setEnabled(false);
+    }
+    
+    private class RadioListener implements ItemListener {
+
+        private JScrollPane scrollPane;
+        private JRadioButton radioButton;
+        
+        public RadioListener(JScrollPane scrollPane, JRadioButton button) {
+            this.scrollPane = scrollPane;
+            this.radioButton = button;
+        }
+        
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+            scrollPane.setVisible(radioButton.isSelected());
+        }
+    }
+    
+    private class NetworkTable extends JXTable {
+        
+        public NetworkTable(EventTableModel<NetworkItem> model) {
+            super(model);
+            setShowGrid(false, false);
+            setColumnSelectionAllowed(false);
+            getColumn(0).setCellRenderer(new CheckBoxRenderer());
+            getColumn(0).setCellEditor(new CheckBoxRenderer());
+            getColumn(0).setMaxWidth(30);
+        }
+        
+        //Don't set the cell value when editing is cancelled
+        @Override
+        public void editingStopped(ChangeEvent e) {
+            TableCellEditor editor = getCellEditor();
+            if (editor != null) {          
+                removeEditor();
+            }
+        }
+        
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
+                return false;
+            }
+            return getColumnModel().getColumn(col).getCellEditor() != null;
+        }
+    }
+    
+    private class NetworkTableFormat extends AbstractTableFormat<NetworkItem> {
+
+        private static final int CHECK_INDEX = 0;
+        private static final int ADDRESS_INDEX = 1;
+        private static final int NAME_INDEX = 2;
+        
+        public NetworkTableFormat() {
+            super("", I18n.tr("Address"), I18n.tr("Name"));
+        }
+
+        @Override
+        public Object getColumnValue(NetworkItem baseObject, int column) {
+            switch(column) {
+                case CHECK_INDEX: return baseObject;
+                case ADDRESS_INDEX: return baseObject.getAddress();
+                case NAME_INDEX: return baseObject.getName();
+            }
+                
+            throw new IllegalStateException("Unknown column:" + column);
+        }   
+    }
+    
+    private class NetworkItem {
+        private final PropertyChangeSupport support = new PropertyChangeSupport(this);
+        
+        private boolean isSelected = false;
+        private InetAddress address;
+        private String displayName;
+        
+        public NetworkItem(InetAddress address, String displayName) {
+            this.address = address;
+            this.displayName = displayName;
+        }
+        
+        public String getAddress() {
+            return address.getHostAddress();
+        }
+        
+        public String getName() {
+            return displayName;
+        }
+        
+        public boolean isSelected() {
+            return isSelected;
+        }
+        
+        public void setSelected(boolean value) {
+            this.isSelected = value;
+            support.firePropertyChange("isSelected", !value, value);
+        }
+        
+        public void addPropertyChangeListener(PropertyChangeListener l) {
+            support.addPropertyChangeListener(l);
+        }
+        
+        public void removePropertyChangeListener(PropertyChangeListener l) {
+            support.removePropertyChangeListener(l);
+        }
+    }
+    
+    private class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, TableCellEditor {
+
+        private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
+        
+        public CheckBoxRenderer() {
+            addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    NetworkItem currentItem = eventList.get(table.getSelectedRow());
+                    if(!currentItem.getAddress().equals(selectedItem.getAddress())) {
+                        selectedItem.setSelected(false);
+                        selectedItem = currentItem;
+                    }
+                    currentItem.setSelected(CheckBoxRenderer.this.isSelected());
+                    CheckBoxRenderer.this.repaint();
+                }
+            });
+        }
+        
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+            NetworkItem item = (NetworkItem) value;
+            this.setSelected(item.isSelected);
+            
+            if(isSelected) 
+                setBackground(table.getSelectionBackground());
+            else    
+                setBackground(table.getBackground());
+            
+            return this;
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            return getTableCellRendererComponent(table, value, true, true, row, column);
+        }
+
+        @Override
+        public void cancelCellEditing() {
+            synchronized (listeners) {
+                for (int i=0, N=listeners.size(); i<N; i++) {
+                    listeners.get(i).editingCanceled(new ChangeEvent(this));
+                }
+            }
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return null;
+        }
+
+        @Override
+        public boolean isCellEditable(EventObject anEvent) {
+            return true;
+        }
+
+        @Override
+        public void removeCellEditorListener(CellEditorListener lis) {
+            synchronized (listeners) {
+                if (listeners.contains(lis)) listeners.remove(lis);
+            }
+        }
+        
+        @Override
+        public void addCellEditorListener(CellEditorListener lis) {
+            synchronized (listeners) {
+                if (!listeners.contains(lis)) listeners.add(lis);
+            }
+        }
+
+        @Override
+        public boolean shouldSelectCell(EventObject anEvent) {
+            return true;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            cancelCellEditing();
+            return true;
+        }
     }
 }
