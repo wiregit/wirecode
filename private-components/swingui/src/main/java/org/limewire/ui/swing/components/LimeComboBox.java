@@ -336,7 +336,9 @@ public class LimeComboBox extends JXButton {
         
         this.setSize(this.getPreferredSize());
         
-        this.repaint();
+        this.setMinimumSize(this.getPreferredSize());
+        
+        this.revalidate();
     }
     
         
