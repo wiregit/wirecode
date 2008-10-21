@@ -80,6 +80,14 @@ public class LimeComboBox extends JXButton {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                
+                // Hide menu if bar is clicked again
+                if (menu.isEnabled()) {
+                    menu.setVisible(false);
+                    menu.setEnabled(false);
+                    return;
+                }
+                
                 updateMenu();
                         
                 if (getText() == null)
@@ -87,6 +95,7 @@ public class LimeComboBox extends JXButton {
                             (int) menu.getPreferredSize().getHeight()));
                 
                 menu.show((Component) e.getSource(), 0, getHeight()-1);
+                menu.setEnabled(true);
                 
             }
         });
@@ -94,11 +103,14 @@ public class LimeComboBox extends JXButton {
 
     
     public void  addActions(List<Action> actions) {
-        this.isMenuUpdated = false;
-        
         if (actions == null) return;
         
+        this.isMenuUpdated = false;
+        this.hasSize = false;
+        
         this.actions.addAll(actions);
+        
+        this.updateSize();
     }
     
     public void  addAction(Action action) {
@@ -107,7 +119,7 @@ public class LimeComboBox extends JXButton {
         this.isMenuUpdated = false;
         this.hasSize = false;
         
-        this.actions.add(action);                
+        this.actions.add(action);
     }
     
     public void  removeAllActions() {
@@ -128,7 +140,6 @@ public class LimeComboBox extends JXButton {
         this.selectedAction = action;
         
         this.isMenuUpdated = false;
-        
     }
     
     public Action getSelectedAction() {
@@ -267,6 +278,9 @@ public class LimeComboBox extends JXButton {
     private void updateSize() {
         if (this.getText() == null && this.actions.isEmpty())  return;
         
+        // Component is not being drawn yet so can't get a size        
+        if (this.getGraphics() == null) return;
+        
         this.hasSize = true;
         
         Rectangle2D labelRect = null;
@@ -295,6 +309,8 @@ public class LimeComboBox extends JXButton {
                 (int)labelRect.getHeight()  + iy1 + iy2));
         
         this.setSize(this.getPreferredSize());
+        
+        this.invalidate();
     }
     
         
@@ -378,6 +394,9 @@ public class LimeComboBox extends JXButton {
         
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Disable closed popup
+            menu.setEnabled(false);
+            
             // Change selection in parent combo box
             selectedAction = this.wrappedAction;
             selectedComponent = (JMenuItem) e.getSource();
@@ -435,6 +454,7 @@ public class LimeComboBox extends JXButton {
         this.menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
         this.menu.setBackground(Color.WHITE);
         this.menu.setForeground(Color.BLACK);
+        this.menu.setEnabled(false);
         
         this.menu.addMouseListener(new MouseListener() {
             @Override

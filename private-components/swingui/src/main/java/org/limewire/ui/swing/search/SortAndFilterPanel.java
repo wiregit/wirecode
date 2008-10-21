@@ -15,6 +15,7 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -592,9 +593,13 @@ public class SortAndFilterPanel extends JXPanel {
                 break;
         }
 
+        List<Action> actionList = new LinkedList<Action>();
+        
         for (String item : items) {
-            sortCombo.addAction(this.actions.get(item));
+            actionList.add(this.actions.get(item));
         }
+        
+        sortCombo.addActions(actionList);
 
         repopulatingCombo = false;
 
