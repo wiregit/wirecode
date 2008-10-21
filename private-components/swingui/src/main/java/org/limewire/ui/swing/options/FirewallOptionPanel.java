@@ -128,6 +128,7 @@ public class FirewallOptionPanel extends OptionPanel {
         private final JRadioButton plugAndPlayRadioButton;
         private final JRadioButton portForwardRadioButton;
         private final JTextField portTextField;
+        private final JLabel starLabel;
         private final JRadioButton doNothingRadioButton;
         
         private final ButtonGroup buttonGroup;
@@ -144,8 +145,11 @@ public class FirewallOptionPanel extends OptionPanel {
             buttonGroup.add(portForwardRadioButton);
             buttonGroup.add(doNothingRadioButton);
             
-            portTextField = new JTextField(5);
             //TODO: change this to an integerTextField
+            portTextField = new JTextField(5);
+            starLabel = new JLabel(I18n.tr("* You must also configure your router"));
+            starLabel.setVisible(false);
+            
             
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             
@@ -154,7 +158,8 @@ public class FirewallOptionPanel extends OptionPanel {
             
             add(portForwardRadioButton, "split");
             add(new JLabel("Manual Port Forward:"), "split");
-            add(portTextField,"wrap");
+            add(portTextField,"split");
+            add(starLabel, "wrap");
             
             add(doNothingRadioButton, "split");
             add(new JLabel("Do Nothing"));
@@ -194,6 +199,7 @@ public class FirewallOptionPanel extends OptionPanel {
         private void updateTextField() {
             portTextField.setEnabled(portForwardRadioButton.isSelected());
             portTextField.setEditable(portForwardRadioButton.isSelected());
+            starLabel.setVisible(portForwardRadioButton.isSelected());
         }
     }
 

@@ -40,6 +40,12 @@ public class ProxyOptionPanel extends OptionPanel {
     private JTextField userNameTextField;
     private JPasswordField passwordField;
     
+    private JLabel proxyLabel;
+    private JLabel portLabel;
+    private JLabel enableLabel;
+    private JLabel userNameLabel;
+    private JLabel passwordLabel;
+    
     @Inject
     public ProxyOptionPanel() {
         super();
@@ -75,6 +81,12 @@ public class ProxyOptionPanel extends OptionPanel {
         userNameTextField = new JTextField(15);
         passwordField = new JPasswordField(15);
         
+        proxyLabel = new JLabel(I18n.tr("Proxy:"));
+        portLabel = new JLabel(I18n.tr("Port:"));
+        enableLabel = new JLabel(I18n.tr("Enable Authentication"));
+        userNameLabel = new JLabel(I18n.tr("Username:"));
+        passwordLabel = new JLabel(I18n.tr("Password:"));
+        
         p.add(noProxyRadioButton, "split");
         p.add(new JLabel(I18n.tr("No Proxy")), "wrap");
         
@@ -87,17 +99,17 @@ public class ProxyOptionPanel extends OptionPanel {
         p.add(httpRadioButton, "split");
         p.add(new JLabel(I18n.tr("HTTP")), "wrap");
         
-        p.add(new JLabel(I18n.tr("Proxy:")), "split");
+        p.add(proxyLabel, "split");
         p.add(proxyTextField, "gap unrelated");
-        p.add(new JLabel(I18n.tr("Port:")));
+        p.add(portLabel);
         p.add(portTextField, "wrap");
         
         p.add(authenticationCheckBox, "gapleft 25, split");
-        p.add(new JLabel(I18n.tr("Enable Authentication")), "wrap");
+        p.add(enableLabel, "wrap");
         
-        p.add(new JLabel(I18n.tr("Username:")), "gapleft 25, split");
+        p.add(userNameLabel, "gapleft 25, split");
         p.add(userNameTextField, "wrap");
-        p.add(new JLabel(I18n.tr("Password:")), "gapleft 25, split");
+        p.add(passwordLabel, "gapleft 25, split");
         p.add(passwordField);
         
         return p;
@@ -175,19 +187,35 @@ public class ProxyOptionPanel extends OptionPanel {
     
     private void updateProxy(boolean value) {
         proxyTextField.setEnabled(value);
-        
         portTextField.setEnabled(value);
+        
+        proxyLabel.setVisible(value);
+        proxyTextField.setVisible(value);
+        portLabel.setVisible(value);
+        portTextField.setVisible(value);
     }
     
     private void updateAuthentication(boolean value) {
         authenticationCheckBox.setEnabled(value);
+        authenticationCheckBox.setVisible(value);
+        enableLabel.setVisible(value);
         
         if(authenticationCheckBox.isSelected() && authenticationCheckBox.isEnabled()) {
             userNameTextField.setEnabled(value);
             passwordField.setEnabled(value);
+            
+            userNameLabel.setVisible(value);
+            userNameTextField.setVisible(value);
+            passwordLabel.setVisible(value);
+            passwordField.setVisible(value);
         } else {
             userNameTextField.setEnabled(false);
             passwordField.setEnabled(false);
+            
+            userNameLabel.setVisible(false);
+            userNameTextField.setVisible(false);
+            passwordLabel.setVisible(false);
+            passwordField.setVisible(false);
         }
     }
     
