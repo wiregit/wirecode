@@ -90,13 +90,7 @@ public class MockDownloadListManager implements DownloadListManager {
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		item.addDownloadSource(new MockDownloadSource("Joey"));
 		addDownload(item);
-		
-		 item = new MockDownloadItem("Life is a sailboat", 4446,
-	                DownloadState.DOWNLOADING, Category.VIDEO);
-	        item.addDownloadSource(new MockDownloadSource("Joey"));
-	        addDownload(item);
 
-		
 		item = new MockDownloadItem("FINISHING", 446,
 				DownloadState.FINISHING, Category.AUDIO);
 		item.addDownloadSource(new MockDownloadSource("Henry"));
@@ -107,7 +101,7 @@ public class MockDownloadListManager implements DownloadListManager {
 		item.addDownloadSource(new MockDownloadSource("Jolene"));
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		addDownload(item);
-		
+
 		item = new MockDownloadItem("queued video", 55,
 				DownloadState.LOCAL_QUEUED, Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("Barack"));
@@ -159,6 +153,7 @@ public class MockDownloadListManager implements DownloadListManager {
         item.addDownloadSource(new MockDownloadSource("Bob"));
         item.setErrorState(ErrorState.UNABLE_TO_CONNECT);
         addDownload(item);
+        
 	}
 	
 	private class RemoveCancelledListener implements PropertyChangeListener {
