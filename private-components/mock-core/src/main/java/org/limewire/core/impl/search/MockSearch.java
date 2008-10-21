@@ -119,6 +119,9 @@ public class MockSearch implements Search {
         if(query.indexOf("water") > -1){
             addRecordsWater(i);
         }
+        if(query.indexOf("cookie") > -1){
+            addRecordsWedding(i);
+        }
 
         addRecordsSpam(i);
         addRecordsGeneral(i);
