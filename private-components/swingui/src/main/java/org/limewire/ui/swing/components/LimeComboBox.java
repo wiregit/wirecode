@@ -400,11 +400,11 @@ public class LimeComboBox extends JXButton {
             
         
         if (this.getText() != null) {
-            g2.drawString(this.getText(), ix1, fm.getAscent()+1);
+            g2.drawString(this.getText(), ix1, fm.getAscent()+2);
             
             if (icon != null) {
                 icon.paintIcon(this, g2, this.getWidth() - ix2 + 3, 
-                        this.getHeight()/2 - icon.getIconHeight()/2-1);
+                        this.getHeight()/2 - icon.getIconHeight()/2);
             }
         } else {
             if (this.selectedAction != null) {

@@ -79,7 +79,7 @@ public class SearchResultFromWidget extends JPanel implements MouseListener {
 
     private void layoutComponents() {
         this.setLayout(new BorderLayout());
-        this.setBorder(BorderFactory.createEmptyBorder(0,8,0,0));
+        this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         
         JLabel fromLabel = new JLabel(tr("From"));
         fromLabel.setFont(new Font("Arial", Font.BOLD, 10));
