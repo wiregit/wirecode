@@ -105,7 +105,8 @@ public class RequestAuthenticatorImpl implements RequestAuthenticator {
                 handler.handle(request, response, trigger, context);
             } else {
                 response.setStatusCode(HttpStatus.SC_UNAUTHORIZED);
-                response.addHeader(authScheme.createChallenge());    
+                response.addHeader(authScheme.createChallenge());
+                trigger.submitResponse(response);
             }
         }
     }

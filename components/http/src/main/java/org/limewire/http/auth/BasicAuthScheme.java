@@ -36,7 +36,7 @@ public class BasicAuthScheme implements ServerAuthScheme {
     public Credentials authenticate(HttpRequest request) {
         Header authHeader = request.getFirstHeader(AUTH.WWW_AUTH_RESP);
         if(authHeader != null) {
-            StringTokenizer st = new StringTokenizer(authHeader.getValue(), ":");
+            StringTokenizer st = new StringTokenizer(authHeader.getValue());
             if(st.hasMoreTokens()) {
                 if(st.nextToken().trim().equalsIgnoreCase("Basic")) {
                     if(st.hasMoreTokens()) {
@@ -53,6 +53,6 @@ public class BasicAuthScheme implements ServerAuthScheme {
     }
 
     public Header createChallenge() {
-        return new BasicHeader(AUTH.WWW_AUTH, "Basic");
+        return new BasicHeader(AUTH.WWW_AUTH, "Basic realm=\"secure\"");
     }
 }
