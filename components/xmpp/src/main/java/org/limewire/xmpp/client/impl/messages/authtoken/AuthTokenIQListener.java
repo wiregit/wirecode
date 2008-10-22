@@ -34,9 +34,9 @@ public class AuthTokenIQListener implements PacketListener {
     private final RosterEventHandler rosterEventHandler;
 
     public AuthTokenIQListener(XMPPConnection connection,
-            XMPPAuthenticator userStore) {
+            XMPPAuthenticator authenticator) {
         this.connection = connection;
-        this.userStore = userStore;
+        this.userStore = authenticator;
         this.rosterEventHandler = new RosterEventHandler();
     }
 
@@ -100,7 +100,7 @@ public class AuthTokenIQListener implements PacketListener {
 
     private void sendResult(AuthTokenIQ packet) {
         try {
-            byte [] authToken = userStore.getPassword(StringUtils.parseBareAddress(packet.getFrom())).getBytes("UTF-8");
+            byte [] authToken = userStore.getAuthToken(StringUtils.parseBareAddress(packet.getFrom())).getBytes("UTF-8");
             AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
             queryResult.setTo(packet.getFrom());
             queryResult.setFrom(packet.getTo());

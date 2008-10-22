@@ -62,20 +62,20 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     protected AuthTokenIQListener authTokenIQListener;
     protected LibraryChangedIQListener libChangedIQListener;
     protected volatile AddressEvent lastEvent;
-    private final XMPPAuthenticator userStore;
+    private final XMPPAuthenticator authenticator;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventListener<RosterEvent> rosterListener,
                        EventListener<FileOfferEvent> fileOfferListener,
                        EventListener<LibraryChangedEvent> libraryChangedEventEventListener,
                        EventListener<XMPPConnectionEvent> connectionListener,
-                       AddressFactory addressFactory, XMPPAuthenticator userStore) {
+                       AddressFactory addressFactory, XMPPAuthenticator authenticator) {
         this.configuration = configuration;
         this.fileOfferListener = fileOfferListener;
         this.libraryChangedEventEventListener = libraryChangedEventEventListener;
         this.connectionListener = connectionListener;
         this.addressFactory = addressFactory;
-        this.userStore = userStore;
+        this.authenticator = authenticator;
         this.rosterListeners = new EventListenerList<RosterEvent>();
         if(configuration.getRosterListener() != null) {
             this.rosterListeners.addListener(configuration.getRosterListener());
@@ -195,7 +195,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     fileTransferIQListener = new FileTransferIQListener(fileOfferListener);
                     connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());  
                     
-                    authTokenIQListener = new AuthTokenIQListener(connection, userStore);
+                    authTokenIQListener = new AuthTokenIQListener(connection, authenticator);
                     XMPPConnectionImpl.this.rosterListeners.addListener(authTokenIQListener.getRosterListener());
                     connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
 

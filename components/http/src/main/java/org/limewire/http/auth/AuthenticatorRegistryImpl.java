@@ -7,27 +7,21 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.http.auth.Credentials;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class AuthenticatorRegistryImpl implements Authenticator, AuthenticatorRegistry {
-    final ReadWriteLock lock;
-    final Set<Authenticator> userStores;
     
-    @Inject
-    public AuthenticatorRegistryImpl() {
-        lock = new ReentrantReadWriteLock();
-        userStores = new HashSet<Authenticator>();
-    }
-
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Set<Authenticator> authenticators = new HashSet<Authenticator>();
+    
     public void register(AuthenticatorRegistry registry) {
     }
 
     public boolean authenticate(Credentials credentials) {
         lock.readLock().lock();
         try {
-            for(Authenticator store : userStores) {
+            for(Authenticator store : authenticators) {
                 if(store.authenticate(credentials)) {
                     return true;
                 }
@@ -38,10 +32,10 @@ public class AuthenticatorRegistryImpl implements Authenticator, AuthenticatorRe
         return false;
     }
 
-    public void addAuthenticator(Authenticator userStore) {
+    public void addAuthenticator(Authenticator authenticator) {
         lock.writeLock().lock();
         try {
-            userStores.add(userStore);
+            authenticators.add(authenticator);
         } finally {
             lock.writeLock().unlock();
         }
