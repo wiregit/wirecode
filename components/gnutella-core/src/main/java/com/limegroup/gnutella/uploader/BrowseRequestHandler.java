@@ -109,8 +109,6 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         private final HTTPUploader uploader;
 
         private Iterator<FileDesc> iterator;
-        
-        private List<FileDesc> sharedFiles;
 
         private MessageWriter sender;
         
@@ -145,8 +143,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             sender.setWriteChannel(new NoInterestWritableByteChannel(new ContentEncoderChannel(
                     contentEncoder)));
             
-            sharedFiles = fileManager.getGnutellaSharedFileList().getAllFileDescs();
-            iterator = sharedFiles.iterator();
+            iterator = fileManager.getGnutellaSharedFileList().threadSafeIterable().iterator();
         }
         
         @Override

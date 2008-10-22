@@ -125,6 +125,21 @@ public class IntSet {
         return list.get(i);
     }
 
+    public int max() {
+        if(list.isEmpty()) {
+            return -1;
+        } else {
+            return list.get(list.size()-1).high;
+        }
+    }
+    
+    public int min() {
+        if(list.isEmpty()) {
+            return -1;
+        } else {
+            return list.get(0).low;
+        }
+    }
 
     /**
      * Returns the largest i s.t. list[i].low<=x, or -1 if no such i.

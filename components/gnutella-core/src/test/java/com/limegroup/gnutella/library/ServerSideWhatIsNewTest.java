@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
@@ -653,7 +655,8 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         Map longToUrns = ctCache.getTimeToUrn();
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs()) {
+        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList().iterable());
+        for (FileDesc fd : fds) {
             fileManager.getGnutellaSharedFileList().remove(fd.getFile());
             fd.getFile().delete();
         }
@@ -703,7 +706,8 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList().getAllFileDescs()) {
+        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList().iterable());
+        for (FileDesc fd : fds) {
             fileManager.getGnutellaSharedFileList().remove(fd.getFile());
             fd.getFile().delete();
         }

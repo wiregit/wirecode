@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -66,12 +67,11 @@ public class AltLocModel implements StorableModel {
         List<Storable> toRemove = new ArrayList<Storable>();
         List<Storable> toPublish = new ArrayList<Storable>();
         
-        List<FileDesc> fds = fileManager.get().getGnutellaSharedFileList().getAllFileDescs();
-        
+        FileList sharedFiles = fileManager.get().getGnutellaSharedFileList();
         synchronized (values) {
-        
-            // Step One: Add every new FileDesc to the Map
-            for (FileDesc fd : fds) {
+            synchronized(sharedFiles) {
+                // Step One: Add every new FileDesc to the Map
+                for(FileDesc fd : sharedFiles.iterable()) {
                     URN urn = fd.getSHA1Urn();
                     KUID primaryKey = KUIDUtils.toKUID(urn);
                     if (!values.containsKey(primaryKey)) {
@@ -86,6 +86,7 @@ public class AltLocModel implements StorableModel {
                         values.put(primaryKey, new Storable(primaryKey, value));
                     }
                 }
+            }
             
             // Step Two: Remove every Storable that is no longer
             // associated with a FileDesc (i.e. the FileDesc was deleted)
@@ -97,7 +98,7 @@ public class AltLocModel implements StorableModel {
                 URN urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
-                FileDesc fd = fileManager.get().getGnutellaSharedFileList().getFileDesc(urn);
+                FileDesc fd = sharedFiles.getFileDesc(urn);
                 
                 // If it doesn't then remove it from the values map and
                 // replace the entity value with the empty value

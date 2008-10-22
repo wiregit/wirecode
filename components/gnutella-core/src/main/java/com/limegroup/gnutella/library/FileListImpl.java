@@ -230,27 +230,25 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
         return fileDescIndexes.contains(fileDesc.getIndex()) || pendingFiles.contains(fileDesc.getFile());
     }
     
-    public Iterator<FileDesc> iterator() {
-        return new FileListIndexedIterator(this, fileDescIndexes);
-    }
-    
     public Iterable<FileDesc> iterable() {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
-                return FileListImpl.this.iterator();
+                return new FileListIterator(FileListImpl.this, fileDescIndexes);
             }
         };
     }
-
-    public List<FileDesc> getAllFileDescs() {
-        List<FileDesc> fds = new ArrayList<FileDesc>(size());
-        for(FileDesc fd : iterable()) {
-            fds.add(fd);
-        }
-        return fds;
+    
+    @Override
+    public Iterable<FileDesc> threadSafeIterable() {
+        return new Iterable<FileDesc>() {
+            @Override
+            public Iterator<FileDesc> iterator() {
+                return new ThreadSafeFileListIterator(FileListImpl.this);
+            }
+        };
     }
-
+    
     public int getNumBytes() {
         return ByteUtils.long2int(numBytes);
     }
@@ -282,9 +280,7 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
 
         List<FileDesc> list = new ArrayList<FileDesc>();
 
-        for(FileDesc fd : iterable()) {
-            if( fd == null)
-                continue;
+        for(FileDesc fd : threadSafeIterable()) {
             if(directory.equals(fd.getFile().getParentFile()))
                 list.add(fd);
         }
@@ -486,5 +482,13 @@ abstract class FileListImpl implements FileListPackage, EventListener<FileManage
 
     public boolean isIndividualFile(File file) {
         return individualFiles.contains(file);
+    }
+    
+    protected int getMaxIndex() {
+        return fileDescIndexes.max();
+    }
+    
+    protected int getMinIndex() {
+        return fileDescIndexes.min();
     }
 }

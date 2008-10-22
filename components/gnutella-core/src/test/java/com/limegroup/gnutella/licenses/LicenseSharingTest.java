@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -102,7 +103,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getAllFileDescs();
+	    List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList().iterable());
 	    assertEquals(5, fds.size());
 	    for(FileDesc fd : fds )
 	        assertTrue(fd.toString(), fd.isLicensed());

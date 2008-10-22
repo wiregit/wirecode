@@ -1521,8 +1521,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
         AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
-        List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getAllFileDescs();
-        for(FileDesc fd : fds ) {
+        for(FileDesc fd : fileManager.getGnutellaSharedFileList().iterable()) {
             URN urn = fd.getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
                 altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
@@ -1533,8 +1532,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private void addCreationTimeToFiles() throws Exception {
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
-        List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getAllFileDescs();
-        for(FileDesc fd : fds ) {
+        for(FileDesc fd : fileManager.getGnutellaSharedFileList().iterable()) {
             long time = (fd.getIndex() + 1) * 10013;
             creationTimeCache.addTime(fd.getSHA1Urn(), time);
             creationTimeCache.commitTime(fd.getSHA1Urn());

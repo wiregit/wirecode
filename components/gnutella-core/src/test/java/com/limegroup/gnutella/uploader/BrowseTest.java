@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -141,15 +140,12 @@ public class BrowseTest extends LimeTestCase {
 
             assertEquals(fileManager.getGnutellaSharedFileList().size(), files.size());
             synchronized (fileManager.getGnutellaSharedFileList().getLock()) {
-                for (Iterator<FileDesc> it = fileManager.getGnutellaSharedFileList().iterator(); it.hasNext();) {
-                FileDesc result = it.next();
-                boolean contained = files.remove(result.getFileName());
-                assertTrue("File is missing in browse response: "
-                        + result.getFileName(), contained);
+                for(FileDesc result : fileManager.getGnutellaSharedFileList().iterable()) {
+                    boolean contained = files.remove(result.getFileName());
+                    assertTrue("File is missing in browse response: " + result.getFileName(), contained);
+                }
             }
-            }
-            assertTrue("Browse returned more results than shared: " + files,
-                    files.isEmpty());
+            assertTrue("Browse returned more results than shared: " + files, files.isEmpty());
         } finally {
             HttpClientUtils.releaseConnection(response);
         }

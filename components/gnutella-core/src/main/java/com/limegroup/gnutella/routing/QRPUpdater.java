@@ -25,6 +25,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescChangeEvent;
+import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
@@ -145,28 +146,33 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 queryRouteTable.addIndivisible(entry);
             }
         }
-        List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getAllFileDescs();
-        for (FileDesc fd : fds) {
-            queryRouteTable.add(fd.getPath());
+        FileList gnutella = fileManager.getGnutellaSharedFileList();
+        synchronized(gnutella) {
+            for (FileDesc fd : gnutella.iterable()) {
+                queryRouteTable.add(fd.getPath());
+            }
         }
         
         //if partial sharing is allowed, add incomplete file keywords also
-        if(SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-               SharingSettings.PUBLISH_PARTIAL_QRP.getValue()) {
-            List<FileDesc> incompleteFds = fileManager.getIncompleteFileList().getAllFileDescs();
-            for(FileDesc fd: incompleteFds) {
-                IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-                if (ifd.hasUrnsAndPartialData()) {
-                    queryRouteTable.add(ifd.getFileName());
+        if(SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && SharingSettings.PUBLISH_PARTIAL_QRP.getValue()) {
+            FileList incompletes = fileManager.getIncompleteFileList();
+            synchronized(incompletes) {
+                for(FileDesc fd : incompletes.iterable()) {
+                    IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
+                    if (ifd.hasUrnsAndPartialData()) {
+                        queryRouteTable.add(ifd.getFileName());
+                    }
                 }
             }
         }
 
-        for (String string : getXMLKeyWords())
+        for (String string : getXMLKeyWords()) {
             queryRouteTable.add(string);
+        }
 
-        for (String string : getXMLIndivisibleKeyWords())
+        for (String string : getXMLIndivisibleKeyWords()) {
             queryRouteTable.addIndivisible(string);
+        }
     }
 
     /**

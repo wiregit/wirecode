@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 
 import org.limewire.listener.EventListener;
@@ -107,19 +106,18 @@ public class SynchronizedFileList implements FileListPackage {
             return fileList.contains(fileDesc);
         }
     }
-
-    public Iterator<FileDesc> iterator() {
-        return fileList.iterator();
-    }
     
     @Override
     public Iterable<FileDesc> iterable() {
-        return fileList.iterable();
+        synchronized(mutex) {
+            return fileList.iterable();
+        }
     }
-
-    public List<FileDesc> getAllFileDescs() {
-        synchronized (mutex) {
-            return fileList.getAllFileDescs();
+    
+    @Override
+    public Iterable<FileDesc> threadSafeIterable() {
+        synchronized(mutex) {
+            return fileList.threadSafeIterable();
         }
     }
 
@@ -166,9 +164,7 @@ public class SynchronizedFileList implements FileListPackage {
     }
     
     public List<FileDesc> getFilesInDirectory(File directory) {
-        synchronized (mutex) {
-            return fileList.getFilesInDirectory(directory);
-        }
+        return fileList.getFilesInDirectory(directory);
     }
 
     public int getNumForcedFiles() {

@@ -102,11 +102,6 @@ class ManagedFileList implements FileList, FileListPackage, EventListener<FileMa
     public void clear() {
         throw new UnsupportedOperationException("cannot clear managed list");
     }
-
-    @Override
-    public List<FileDesc> getAllFileDescs() {
-        throw new UnsupportedOperationException("cannot get all from managed list");
-    }
     
     @Override
     public FileDesc getFileDescForIndex(int index) {
@@ -130,7 +125,7 @@ class ManagedFileList implements FileList, FileListPackage, EventListener<FileMa
             return Collections.emptyList();
         } else {
             List<FileDesc> fds = new ArrayList<FileDesc>(urnsMatching.size());
-            Iterator<FileDesc> fdIter = new FileListIndexedIterator(this, urnsMatching);
+            Iterator<FileDesc> fdIter = new FileListIterator(this, urnsMatching);
             while(fdIter.hasNext()) {
                 fds.add(fdIter.next());
             }
@@ -192,14 +187,14 @@ class ManagedFileList implements FileList, FileListPackage, EventListener<FileMa
     public boolean isIndividualFile(File file) {
         throw new UnsupportedOperationException("not supported");
     }
-
+    
     @Override
-    public Iterator<FileDesc> iterator() {
+    public Iterable<FileDesc> iterable() {
         throw new UnsupportedOperationException("not supported");
     }
     
     @Override
-    public Iterable<FileDesc> iterable() {
+    public Iterable<FileDesc> threadSafeIterable() {
         throw new UnsupportedOperationException("not supported");
     }
     

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 
 import org.limewire.listener.EventListener;
@@ -101,21 +100,18 @@ public interface FileList {
     boolean contains(FileDesc fileDesc);
     
     /**
-     * Returns an iterator over this list of FileDescs.
-     * <p>
-     * NOTE: This must be synchronized upon by the caller if accessed
-     * in a multi-threaded way.
-     */    
-    Iterator<FileDesc> iterator();
-    
-    /** Returns an iterable that returns iterator(). */
+     * Returns an iterable that returns iterator().
+     * The returned Iterable is *NOT* thread safe.
+     * You must lock on FileList while using it.
+     */
     Iterable<FileDesc> iterable();
     
     /**
-     * Returns a copy of a List containing all the FileDescs associated with 
-     * this FileList.
+     * Returns an iterable that is thread-safe, albeit
+     * slower and more inefficient than the non-thread-safe variety.
+     * Only use this if you must iterate in passes.
      */
-    List<FileDesc> getAllFileDescs();
+    Iterable<FileDesc> threadSafeIterable();
 
      /**
      * Returns the size of all files within this list, in <b>bytes</b>.  

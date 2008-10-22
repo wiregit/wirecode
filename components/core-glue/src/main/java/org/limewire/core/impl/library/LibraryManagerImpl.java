@@ -3,7 +3,6 @@ package org.limewire.core.impl.library;
 import java.awt.EventQueue;
 import java.io.File;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -232,9 +231,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
                 fileManager.getFriendFileList(name);  
 
               synchronized (fileList.getLock()) {
-                  Iterator<FileDesc> iter = fileList.iterator();
-                  while(iter.hasNext()) {
-                      FileDesc fileDesc = iter.next();
+                  for(FileDesc fileDesc : fileList.iterable()) {
                       LocalFileItem newItem = coreLocalFileItemFactory.createCoreLocalFileItem(fileDesc);
                       lookup.put(fileDesc.getFile(), newItem);
                       threadSafeList.add(newItem);

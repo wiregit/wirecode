@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -500,58 +499,57 @@ public final class DaapManager {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileList sharedFileList = fileManager.get().getGnutellaSharedFileList();
-  
-        List<FileDesc> files = sharedFileList.getAllFileDescs();
+        FileList sharedFileList = fileManager.get().getGnutellaSharedFileList();    
+        synchronized(sharedFileList) {
+            for(FileDesc fd : sharedFileList.iterable()) {
+                String name = fd.getFileName().toLowerCase(Locale.US);
+                boolean audio = isSupportedAudioFormat(name);
+                
+                if(!audio && !isSupportedVideoFormat(name)) {
+                    continue;
+                }
+                
+                URN urn = fd.getSHA1Urn();
+                
+                // 1)
+                // _Remove_ URN from the current 'map'...
+                Song song = urnToSong.remove(urn);
+                    
+                // Check if URN is already in the tmpMap.
+                // If so do nothing as we don't want add 
+                // the same file multible times...
+                if(tmpUrnToSong.containsKey(urn)) {
+                    continue;
+                }
+                
+                // This URN was already mapped with a Song.
+                // Save the Song (again) and update the meta
+                // data if necessary
+                if (song != null) {
+                    tmpUrnToSong.put(urn, song);
+                    
+                    if (audio) {
+                        updateSongAudioMeta(txn, song, fd);
+                    } else {
+                        updateSongVideoMeta(txn, song, fd);
+                    }
+                    
+                } else if (size < maxPlaylistSize) {
     
-        for(FileDesc fd: files){
-            String name = fd.getFileName().toLowerCase(Locale.US);
-            boolean audio = isSupportedAudioFormat(name);
-            
-            if(!audio && !isSupportedVideoFormat(name)) {
-                continue;
-            }
-            
-            URN urn = fd.getSHA1Urn();
-            
-            // 1)
-            // _Remove_ URN from the current 'map'...
-            Song song = urnToSong.remove(urn);
-                
-            // Check if URN is already in the tmpMap.
-            // If so do nothing as we don't want add 
-            // the same file multible times...
-            if(tmpUrnToSong.containsKey(urn)) {
-                continue;
-            }
-            
-            // This URN was already mapped with a Song.
-            // Save the Song (again) and update the meta
-            // data if necessary
-            if (song != null) {
-                tmpUrnToSong.put(urn, song);
-                
-                if (audio) {
-                    updateSongAudioMeta(txn, song, fd);
-                } else {
-                    updateSongVideoMeta(txn, song, fd);
+                    song = createSong(fd, audio);
+                    tmpUrnToSong.put(urn, song);
+                    database.getMasterPlaylist().addSong(txn, song);
+                    
+                    if (fd.isLicensed()) {
+                        creativecommons.addSong(txn, song);
+                    }
+                    
+                    if (isSupportedVideoFormat(name)) {
+                        videos.addSong(txn, song);
+                    }
+                    
+                    size++;
                 }
-                
-            } else if (size < maxPlaylistSize) {
-
-                song = createSong(fd, audio);
-                tmpUrnToSong.put(urn, song);
-                database.getMasterPlaylist().addSong(txn, song);
-                
-                if (fd.isLicensed()) {
-                    creativecommons.addSong(txn, song);
-                }
-                
-                if (isSupportedVideoFormat(name)) {
-                    videos.addSong(txn, song);
-                }
-                
-                size++;
             }
         }
         

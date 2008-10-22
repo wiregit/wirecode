@@ -20,6 +20,7 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.SearchSettings;
@@ -281,7 +282,7 @@ public class FileManagerTest extends FileManagerTestCase {
         sharedFiles = fman.getGnutellaSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
         assertSharedFiles(sharedFiles, f1, f3);
-        sharedFiles= fman.getGnutellaSharedFileList().getAllFileDescs();
+        sharedFiles = CollectionUtils.listOf(fman.getGnutellaSharedFileList().iterable());
         assertEquals("unexpected files length", 2, fman.getGnutellaSharedFileList().size());
         assertSharedFiles(sharedFiles, f1, f3);            
     }
@@ -717,8 +718,7 @@ public class FileManagerTest extends FileManagerTestCase {
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         
         addFilesToLibrary();
-        for(Iterator<FileDesc> iter = fman.getGnutellaSharedFileList().iterator(); iter.hasNext();) {
-            FileDesc fd = iter.next();
+        for(FileDesc fd : fman.getGnutellaSharedFileList().iterable()) {
             Response testResponse = responseFactory.createResponse(fd);
             URN urn = fd.getSHA1Urn();
             assertEquals("FileDescs should match", fd, 
@@ -756,8 +756,7 @@ public class FileManagerTest extends FileManagerTestCase {
         addFilesToLibrary();
         
         boolean checked = false;
-        for(Iterator<FileDesc> iter = fman.getGnutellaSharedFileList().iterator(); iter.hasNext();) {
-            FileDesc fd = iter.next();
+        for(FileDesc fd : fman.getGnutellaSharedFileList().iterable()) {
             Response testResponse = responseFactory.createResponse(fd);
             URN urn = fd.getSHA1Urn();
             String name = I18NConvert.instance().getNorm(fd.getFileName());
@@ -797,8 +796,7 @@ public class FileManagerTest extends FileManagerTestCase {
         
         addFilesToLibrary();
 
-        List<FileDesc> fds = fman.getGnutellaSharedFileList().getAllFileDescs();
-        for(FileDesc fd : fds) {
+        for(FileDesc fd : fman.getGnutellaSharedFileList().iterable()) {
             URN urn = fd.getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
                 altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
@@ -806,8 +804,7 @@ public class FileManagerTest extends FileManagerTestCase {
         }
         
         boolean checked = false;
-        for(Iterator<FileDesc> iter = fman.getGnutellaSharedFileList().iterator(); iter.hasNext();) {
-            FileDesc fd = iter.next();
+        for(FileDesc fd : fman.getGnutellaSharedFileList().iterable()) {
             Response testResponse = responseFactory.createResponse(fd);
             String name = I18NConvert.instance().getNorm(fd.getFileName());
             
@@ -1420,7 +1417,7 @@ public class FileManagerTest extends FileManagerTestCase {
         }
     }
     
-    public void testGetIndexingIterator() throws Exception {
+    public void testThreadSafeIterator() throws Exception {
         LimeXMLDocument document = injector.getInstance(LimeXMLDocumentFactory.class).createLimeXMLDocument("<?xml version=\"1.0\"?>"+
         "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
         "  <audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
@@ -1434,7 +1431,7 @@ public class FileManagerTest extends FileManagerTestCase {
         f3 = createNewTestFile(11);
 
         assertEquals(2, fman.getGnutellaSharedFileList().size());
-        Iterator<FileDesc> it = fman.getGnutellaSharedFileList().iterator();
+        Iterator<FileDesc> it = fman.getGnutellaSharedFileList().threadSafeIterable().iterator();
         FileDesc response = it.next();
         assertEquals(response.getFileName(), f1.getName());
         assertNotNull(response.getXMLDocument());
@@ -1448,7 +1445,7 @@ public class FileManagerTest extends FileManagerTestCase {
         } catch (NoSuchElementException e) {
         }
         
-        it = fman.getGnutellaSharedFileList().iterator();
+        it = fman.getGnutellaSharedFileList().threadSafeIterable().iterator();
         assertTrue(it.hasNext());
         assertTrue(it.hasNext());
         assertTrue(it.hasNext());
@@ -1456,7 +1453,7 @@ public class FileManagerTest extends FileManagerTestCase {
         fman.removeFile(f2);
         assertFalse(it.hasNext());
 
-        it = fman.getGnutellaSharedFileList().iterator();
+        it = fman.getGnutellaSharedFileList().threadSafeIterable().iterator();
         response = it.next();
         assertNotNull(response.getXMLDocument());
         assertFalse(it.hasNext());

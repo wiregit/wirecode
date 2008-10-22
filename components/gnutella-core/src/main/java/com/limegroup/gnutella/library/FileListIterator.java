@@ -5,12 +5,12 @@ import java.util.Iterator;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.IntSet.IntSetIterator;
 
-class FileListIndexedIterator implements Iterator<FileDesc> {
+class FileListIterator implements Iterator<FileDesc> {
     
     private final FileList fileList;
     private final IntSetIterator iter;
     
-    public FileListIndexedIterator(FileList fileList, IntSet intSet) {
+    public FileListIterator(FileList fileList, IntSet intSet) {
         this.fileList = fileList;
         this.iter = intSet.iterator();
     }

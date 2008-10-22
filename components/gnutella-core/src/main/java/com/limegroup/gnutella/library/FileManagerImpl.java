@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -1312,10 +1313,13 @@ class FileManagerImpl implements FileManager, Service {
                 int matched = 0;
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.getValue());
-                    for (FileDesc fd : getGnutellaSharedFileList().getAllFileDescs()){
-                        total++;
-                        if (parser.evaluate(fd))
-                            matched++;
+                    FileList shareList = getGnutellaSharedFileList();
+                    synchronized(shareList) {
+                        for (FileDesc fd : shareList.iterable()){
+                            total++;
+                            if (parser.evaluate(fd))
+                                matched++;
+                        }
                     }
                 } catch (IllegalArgumentException badSimpp) {
                     ret.put("error",badSimpp.toString());
@@ -1360,7 +1364,11 @@ class FileManagerImpl implements FileManager, Service {
             Map<Integer, FileDesc> topAltsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
 
-            List<FileDesc> fds = getGnutellaSharedFileList().getAllFileDescs();
+            List<FileDesc> fds;
+            FileList shareList = getGnutellaSharedFileList();
+            synchronized(shareList) {
+                fds = CollectionUtils.listOf(shareList.iterable());
+            }
             hits.ensureCapacity(fds.size());
             uploads.ensureCapacity(fds.size());
             int rare = 0;

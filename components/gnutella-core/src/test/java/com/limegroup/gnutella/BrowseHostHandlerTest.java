@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -171,8 +170,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         assertEquals(fileManager.getGnutellaSharedFileList().size(), files.size());
 
         synchronized (fileManager.getGnutellaSharedFileList().getLock()) {
-            for (Iterator<FileDesc> it = fileManager.getGnutellaSharedFileList().iterator(); it.hasNext();) {
-                FileDesc result = it.next();
+            for(FileDesc result : fileManager.getGnutellaSharedFileList().iterable()) {
                 boolean contained = files.remove(result.getFileName());
                 assertTrue("File is missing in browse response: "
                     + result.getFileName(), contained);
