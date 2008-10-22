@@ -23,6 +23,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.security.auth.UserStore;
 import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
@@ -41,9 +42,8 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
-import org.limewire.security.auth.UserStore;
 
-//import com.limegroup.gnutella.BrowseHostReplyHandler;
+
 
 class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection, EventListener<AddressEvent> {
     
@@ -109,8 +109,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 LOG.info("connecting to " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + "...");
                 connection.connect();
                 LOG.info("connected.");
-                LOG.info("logging in " + configuration.getUsername() + "...");
-                connection.login(configuration.getUsername(), configuration.getPassword());
+                if (LOG.isInfoEnabled())
+                    LOG.infof("logging in " + configuration.getUsername() + " with resource: " + configuration.getResource());
+                connection.login(configuration.getUsername(), configuration.getPassword(), configuration.getResource());
                 LOG.info("logged in.");
                 connectionListener.handleEvent(new XMPPConnectionEvent(configuration.getUsername(), ConnectionEvent.LOGIN));
             } catch (org.jivesoftware.smack.XMPPException e) {
@@ -128,7 +129,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 addressIQListener = null;
                 fileTransferIQListener = null;
                 authTokenIQListener = null;
-                users.clear();
+                synchronized (users) {
+                    users.clear();
+                }
                 LOG.info("disconnected.");
             }
         }
@@ -409,6 +412,13 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
             if(addressIQListener != null) {
                 addressIQListener.getAddressListener().handleEvent(event);    
             }
+        }
+    }
+
+    @Override
+    public User getUser(String id) {
+        synchronized (users) { 
+            return users.get(id);
         }
     }
 }

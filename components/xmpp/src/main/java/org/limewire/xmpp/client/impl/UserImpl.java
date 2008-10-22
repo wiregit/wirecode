@@ -121,11 +121,6 @@ public class UserImpl implements User {
         firePresenceListeners(updatedPresence);
     }
 
-    @Override
-    public boolean jidBelongsTo(String jid) {
-        return presences.containsKey(jid);
-    }
-    
     Presence getPresence(String jid) {
         return presences.get(jid);
     }

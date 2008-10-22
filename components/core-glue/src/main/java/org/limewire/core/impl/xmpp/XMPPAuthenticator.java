@@ -1,7 +1,5 @@
 package org.limewire.core.impl.xmpp;
 
-import java.io.UnsupportedEncodingException;
-
 import org.apache.http.auth.Credentials;
 import org.limewire.http.auth.Authenticator;
 import org.limewire.http.auth.AuthenticatorRegistry;
@@ -43,15 +41,11 @@ public class XMPPAuthenticator implements RegisteringEventListener<RosterEvent>,
     }
 
     public void handleEvent(final RosterEvent event) {
-        try {
-            userStore.addUser(event.getSource().getId(), new String(passwordCreator.getMACBytes(new SecurityToken.TokenData() {
-                public byte[] getData() {
-                    return StringUtils.toUTF8Bytes(event.getSource().getId());
-                }
-            }), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        userStore.addUser(event.getSource().getId(), StringUtils.getUTF8String(passwordCreator.getMACBytes(new SecurityToken.TokenData() {
+            public byte[] getData() {
+                return StringUtils.toUTF8Bytes(event.getSource().getId());
+            }
+        })));
     }
 
     public boolean authenticate(Credentials credentials) {

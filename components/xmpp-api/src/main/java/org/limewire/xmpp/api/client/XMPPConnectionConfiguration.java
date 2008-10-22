@@ -19,4 +19,5 @@ public interface XMPPConnectionConfiguration extends Network {
     public void setAutoLogin(boolean autoLogin);
     public EventListener<RosterEvent> getRosterListener();
     public XMPPErrorListener getErrorListener();
+    public String getResource();
 }

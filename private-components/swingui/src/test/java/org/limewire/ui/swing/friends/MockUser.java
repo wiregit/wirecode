@@ -44,12 +44,6 @@ public class MockUser implements User {
     }
 
     @Override
-    public boolean jidBelongsTo(String jid) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public Map<String, Presence> getPresences() {
         return new HashMap<String, Presence>();
     }

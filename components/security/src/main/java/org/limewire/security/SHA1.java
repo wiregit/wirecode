@@ -14,7 +14,7 @@
  * put("MessageDigest.SHA-1", "com.limegroup.gnutella.security.SHA1");
  */
  
-package com.limegroup.gnutella.security;
+package org.limewire.security;
 
 import java.security.DigestException;
 import java.security.MessageDigest;

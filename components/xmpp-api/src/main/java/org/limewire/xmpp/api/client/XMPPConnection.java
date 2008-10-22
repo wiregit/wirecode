@@ -39,4 +39,12 @@ public interface XMPPConnection {
      * @throws XMPPException
      */
     public void removeUser(String id) throws XMPPException;
+
+    /**
+     * Returns the user belonging to <code>id</code>. <code>id</code>
+     * is the user's email address.
+     * 
+     * @return null if id is not registered on this connection
+     */
+    public User getUser(String id);
 }

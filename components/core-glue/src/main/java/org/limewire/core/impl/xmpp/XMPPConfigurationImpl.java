@@ -11,15 +11,17 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     private final XMPPUserSettings.XMPPUserConfiguration userConfiguration;
     private final EventListener<RosterEvent> rosterListener;
     private final XMPPErrorListener errorListener;
+    private String resource;
 
     public XMPPConfigurationImpl(XMPPServerSettings.XMPPServerConfiguration serverConfiguration,
                                  XMPPUserSettings.XMPPUserConfiguration userConfiguration,
                                  EventListener<RosterEvent> rosterListener,
-                                 XMPPErrorListener errorListener) {
+                                 XMPPErrorListener errorListener, String resource) {
         this.serverConfiguration = serverConfiguration;
         this.userConfiguration = userConfiguration;
         this.rosterListener = rosterListener;
         this.errorListener = errorListener;
+        this.resource = resource;
     }
 
     public boolean isDebugEnabled() {
@@ -77,4 +79,10 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     public String getNetworkName() {
         return getServiceName();
     }
+
+    @Override
+    public String getResource() {
+        return resource;
+    }
+    
 }

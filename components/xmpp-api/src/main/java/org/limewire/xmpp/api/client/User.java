@@ -18,14 +18,6 @@ public interface User extends Friend {
     public void addPresenceListener(PresenceListener presenceListener);
     
     /**
-     * Provides an indication of whether the supplied String (assumed to be a Presence jid)
-     * belongs to this user
-     * @param jid
-     * @return true if the the jid belongs to this user, otherwise false
-     */
-    public boolean jidBelongsTo(String jid);
-
-    /**
      * @return an unmodifiable map of all <code>Presence</code>s for this <code>User</code>. 
      * Keys are fully qualified jids of the form <code>"user@domain.com/resourceXYZ"</code>
      */
