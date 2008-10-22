@@ -22,6 +22,7 @@ import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
+import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -116,6 +117,7 @@ public class AppFrame extends SingleFrameApplication {
             }
         };
         if (injector == null) {
+            LimeMozillaInitializer.initialize();
             injector = Guice.createInjector(Stage.PRODUCTION, new MockModule(), new LimeWireSwingUiModule(), thiz);
             return injector;
         } else {
