@@ -49,7 +49,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
 
     private final SimpleBandwidthTracker down;
 
-    private final File saveFile;
+    private final File incompleteFile;
 
     private final AtomicLong contentLength;
 
@@ -73,7 +73,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
         changeState(state);
         this.totalProgress = new AtomicLong();
         this.down = new SimpleBandwidthTracker();
-        this.saveFile = new File(download.getTarget().getPath());
+        this.incompleteFile = new File(download.getTargetFile().getPath());
         this.contentLength = new AtomicLong(download.getSize());
 
     }
@@ -229,7 +229,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
 
     @Override
     public File getIncompleteFile() {
-        return saveFile;
+        return incompleteFile;
     }
 
     @Override
