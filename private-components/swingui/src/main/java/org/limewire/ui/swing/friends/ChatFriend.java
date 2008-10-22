@@ -56,4 +56,6 @@ public interface ChatFriend {
     Presence getPresence();
     
     void releasePresence(Presence presence);
+
+    void updatePresence(Presence presence);
 }

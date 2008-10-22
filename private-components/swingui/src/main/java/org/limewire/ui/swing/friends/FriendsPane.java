@@ -17,6 +17,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.AbstractAction;
@@ -114,7 +116,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private final EventList<ChatFriend> chatFriends;
     private final JTable friendsTable;
     private final IconLibrary icons;
-    private final WeakHashMap<String, ChatFriend> idToFriendMap;
+    private final Map<String, ChatFriend> idToFriendMap;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final FriendsCountUpdater friendsCountUpdater;
     private final ShareListManager libraryManager;
@@ -132,7 +134,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         super(new BorderLayout());
         this.icons = icons;
         this.chatFriends = new BasicEventList<ChatFriend>();
-        this.idToFriendMap = new WeakHashMap<String, ChatFriend>();
+        this.idToFriendMap = new HashMap<String, ChatFriend>();
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
@@ -373,33 +375,29 @@ public class FriendsPane extends JPanel implements FriendRemover {
         switch(presence.getType()) {
             case available:
                 if(chatFriend == null) {
-                    final ChatFriendImpl newFriend = new ChatFriendImpl(presence);
-                    presence.setIncomingChatListener(new IncomingChatListener() {
-                        public MessageReader incomingChat(MessageWriter writer) {
-                            LOG.debugf("{0} is typing a message", presence.getJID());
-                            MessageWriter writerWrapper = new MessageWriterImpl(myID, newFriend, writer);
-                            ConversationStartedEvent event = new ConversationStartedEvent(newFriend, writerWrapper, false);
-                            event.publish();
-                            //Hang out until a responder has processed this event
-                            event.await();
-                            return new MessageReaderImpl(newFriend);
-                        }
-                    });
-                    chatFriend = newFriend;
+                    chatFriend = new ChatFriendImpl(presence);
                     chatFriends.add(chatFriend);
                     idToFriendMap.put(user.getId(), chatFriend);
+                } else {
+                    chatFriend.updatePresence(presence);
                 }
-                chatFriend.setStatus(presence.getStatus());
-                chatFriend.setMode(presence.getMode());
+                final ChatFriend initChatFriend = chatFriend;
+                presence.setIncomingChatListener(new IncomingChatListener() {
+                    public MessageReader incomingChat(MessageWriter writer) {
+                        LOG.debugf("{0} is typing a message", presence.getJID());
+                        MessageWriter writerWrapper = new MessageWriterImpl(myID, initChatFriend, writer);
+                        ConversationStartedEvent event = new ConversationStartedEvent(initChatFriend, writerWrapper, false);
+                        event.publish();
+                        //Hang out until a responder has processed this event
+                        event.await();
+                        return new MessageReaderImpl(initChatFriend);
+                    }
+                });
                 break;
             case unavailable:
                 if (chatFriend != null) {
                     chatFriend.releasePresence(presence);
-                    Presence newPresence = chatFriend.getPresence();
-                    if (newPresence != null) {
-                        chatFriend.setStatus(newPresence.getStatus());
-                        chatFriend.setMode(newPresence.getMode());
-                    } else {
+                    if (!chatFriend.isChatting()) {
                         chatFriends.remove(idToFriendMap.remove(user.getId()));
                     }
                 } 
@@ -454,7 +452,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
             //TODO notify that chat no longer possible.
         }
     }
-    
+
     private void fireConversationStarted(ChatFriend chatFriend) {
         MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
         MessageWriter writerWrapper = new MessageWriterImpl(myID, chatFriend, writer);

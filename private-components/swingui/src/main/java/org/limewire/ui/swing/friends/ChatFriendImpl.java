@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.friend.Friend;
@@ -13,6 +12,7 @@ import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.User;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -21,26 +21,30 @@ import org.limewire.xmpp.api.client.Presence.Mode;
 public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     private boolean chatting;
     private boolean activeConversation;
-    private AtomicReference<Presence> presence;
+    private final Object presenceLock;
+    private Presence presence;
+    private final User user;
     private String status;
     private Mode mode;
     private long chatStartTime;
     private boolean hasUnviewedMessages;
     
     ChatFriendImpl(Presence presence) {
-        this.presence = new AtomicReference<Presence>(presence);
+        this.presence = presence;
+        this.presenceLock = new Object();
+        this.user = presence.getUser();
         this.status = presence.getStatus();
         this.mode = presence.getMode();
     }
     
     @Override
     public Friend getFriend() {
-        return presence.get().getUser();
+        return user;
     }
     
     @Override
     public String getID() {
-        return presence.get().getUser().getId();
+        return user.getId();
     }
 
     @Override
@@ -57,7 +61,7 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public String getName() {
-        return safe(presence.get().getUser().getName(), presence.get().getUser().getId());
+        return safe(user.getName(), user.getId());
     }
     
     /**
@@ -93,7 +97,9 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public MessageWriter createChat(MessageReader reader) {
-        return presence.get().createChat(reader);
+        synchronized (presenceLock) {
+            return presence.createChat(reader);
+        }
     }
 
     @Override
@@ -129,7 +135,9 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public boolean isSignedInToLimewire() {
-        return presence.get() instanceof LimePresence;
+        synchronized (presenceLock) {
+            return presence instanceof LimePresence;
+        }
     }
 
     @Override
@@ -146,22 +154,40 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public boolean jidBelongsTo(String jid) {
-        return presence.get().getUser().jidBelongsTo(jid);
+        return user.jidBelongsTo(jid);
     }
 
     public Presence getPresence() {
-        return presence.get();
+        synchronized (presenceLock) {
+            return presence;
+        }
     }
     
     @Override
     public void releasePresence(Presence presence) {
-        if (this.presence.get().getJID().equals(presence.getJID())) {
-            this.presence.set(getHighestPriorityPresence());
+        synchronized (presenceLock) {
+            if (this.presence.getJID().equals(presence.getJID())) {
+                this.presence = getHighestPriorityPresence();
+
+                if (this.presence != null) {
+                    setMode(presence.getMode());
+                    setStatus(presence.getStatus());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updatePresence(Presence presence) {
+        synchronized (presenceLock) {
+            this.presence = presence;
+            setMode(presence.getMode());
+            setStatus(presence.getStatus());
         }
     }
 
     private Presence getHighestPriorityPresence() {
-        Collection<Presence> values = presence.get().getUser().getPresences().values();
+        Collection<Presence> values = this.user.getPresences().values();
         ArrayList<Presence> presences = new ArrayList<Presence>(values);
         Collections.sort(presences, new PresenceSorter());
         return presences.size() == 0 ? null : presences.get(0);

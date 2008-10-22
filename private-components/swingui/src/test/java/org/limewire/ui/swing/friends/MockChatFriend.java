@@ -154,4 +154,9 @@ class MockChatFriend implements ChatFriend {
     public void releasePresence(Presence presence) {
         // TODO Auto-generated method stub
     }
+
+    @Override
+    public void updatePresence(Presence presence) {
+        // TODO Auto-generated method stub
+    }
 }
