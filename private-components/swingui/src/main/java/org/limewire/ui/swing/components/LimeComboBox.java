@@ -45,10 +45,13 @@ public class LimeComboBox extends JXButton {
     private Color pressedTextColour  = null;
     private Color rolloverTextColour = null;
     
+    private boolean isMenuOverrided = false;
     private boolean hasSize = false;
     private boolean isMenuUpdated = false;
     
     private JPopupMenu menu = null;
+    
+    private UpdateHandler updateHandler = null;
     
     LimeComboBox(List<Action> actions) {
         
@@ -83,6 +86,7 @@ public class LimeComboBox extends JXButton {
             
             @Override
             public void mousePressed(MouseEvent e) {
+                
                 if (menu == null)  return;
                 
                 if (this.hide) {
@@ -111,6 +115,7 @@ public class LimeComboBox extends JXButton {
     
     
     public void overrideMenu(JPopupMenu menu) {
+        this.isMenuOverrided = true;
         this.menu = menu;
         this.initMenu();
     }
@@ -458,6 +463,18 @@ public class LimeComboBox extends JXButton {
     
     
     private void updateMenu() {
+        
+        if (this.isMenuOverrided) {
+            
+            if (this.updateHandler == null)  return;
+            
+            // Notify that the overrided menu
+            //  is ready to be updated
+            this.updateHandler.fireUpdate();
+            
+            return;
+        }
+        
         if (this.isMenuUpdated) return;
         this.isMenuUpdated = true;
         
@@ -498,6 +515,7 @@ public class LimeComboBox extends JXButton {
         this.menu.setBackground(Color.WHITE);
         this.menu.setForeground(Color.BLACK);
         this.menu.setVisible(false);
+        this.menu.setFont(this.getFont());
         
         this.menu.addMouseListener(new MouseListener() {
             @Override
@@ -525,6 +543,14 @@ public class LimeComboBox extends JXButton {
     
     public interface SelectionListener {
         public void selectionChanged(Action item);
+    }
+    
+    public interface UpdateHandler {
+        public void fireUpdate();
+    }
+    
+    public void addUpdateHandler(UpdateHandler updateHandler) {
+        this.updateHandler = updateHandler;        
     }
     
 

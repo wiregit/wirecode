@@ -75,7 +75,7 @@ public class LimeComboBoxFactory {
         LimeComboBox box = new LimeComboBox(items);
         
         box.setBackgroundPainter(new PopupButtonPainter());
-        box.setBorder(BorderFactory.createEmptyBorder(3,6,2,15));
+        box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
         box.setText(promptText);
         box.setFont(this.miniTextFont);
         box.setForegrounds(this.miniRegTextColour, 

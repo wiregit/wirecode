@@ -5,28 +5,29 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
+import org.limewire.ui.swing.components.LimeComboBox.UpdateHandler;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.util.Objects;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class SearchResultFromWidget extends JPanel implements MouseListener {
+public class SearchResultFromWidget extends JPanel implements UpdateHandler {
 
     private final LimeComboBox comboBox;
     private final JPopupMenu comboBoxMenu;
@@ -34,7 +35,6 @@ public class SearchResultFromWidget extends JPanel implements MouseListener {
     private final RemoteHostActions fromActions;
     private List<RemoteHost> people;
     
-
     @AssistedInject
     SearchResultFromWidget(LimeComboBoxFactory comboBoxFactory, @Assisted RemoteHostActions fromActions) {
         this.fromActions = Objects.nonNull(fromActions, "fromActions");
@@ -42,13 +42,12 @@ public class SearchResultFromWidget extends JPanel implements MouseListener {
         this.comboBox = comboBoxFactory.createMiniComboBox();
         this.comboBoxMenu = new JPopupMenu();
         this.comboBox.overrideMenu(this.comboBoxMenu);
-        this.comboBox.addMouseListener(this);
+        this.comboBox.addUpdateHandler(this);
         
         this.layoutComponents();
         this.setOpaque(false);
     }
-
-
+    
     private Action getChatAction(final RemoteHost person) {
         return new AbstractAction(tr("Chat")) {
             @Override
@@ -99,6 +98,20 @@ public class SearchResultFromWidget extends JPanel implements MouseListener {
                 .getRenderName() : tr("{0} people", people.size());
     }
 
+    private void assertParentProps(JComponent item) {
+        item.setFont(this.comboBoxMenu.getFont());
+        item.setForeground(this.comboBoxMenu.getForeground());
+        item.setBackground(this.comboBoxMenu.getBackground());
+    }
+    
+    private JMenuItem createItem(Action a) {
+        JMenuItem item = new JMenuItem(a);
+        
+        assertParentProps(item);
+        
+        return item;
+    }
+    
     private void updateMenus() {
         
         this.comboBoxMenu.removeAll();
@@ -110,13 +123,13 @@ public class SearchResultFromWidget extends JPanel implements MouseListener {
             RemoteHost person = people.get(0);
 
             if (person.isChatEnabled()) {
-                this.comboBoxMenu.add(getChatAction(person));
+                this.comboBoxMenu.add(createItem(getChatAction(person)));
             }
             if (person.isBrowseHostEnabled()) {
-                this.comboBoxMenu.add(getLibraryAction(person));
+                this.comboBoxMenu.add(createItem(getLibraryAction(person)));
             }
             if (person.isSharingEnabled()) {
-                this.comboBoxMenu.add(getSharingAction(person));
+                this.comboBoxMenu.add(createItem(getSharingAction(person)));
             }
 
         } else {
@@ -125,17 +138,18 @@ public class SearchResultFromWidget extends JPanel implements MouseListener {
                         || person.isSharingEnabled()) {
 
                     JMenu submenu = new JMenu(person.getRenderName());
+                    assertParentProps(submenu);
 
                     if (person.isChatEnabled()) {
-                        submenu.add(getChatAction(person));
+                        submenu.add(createItem(getChatAction(person)));
                     }
 
                     if (person.isBrowseHostEnabled()) {
-                        submenu.add(getLibraryAction(person));
+                        submenu.add(createItem(getLibraryAction(person)));
                     }
 
                     if (person.isSharingEnabled()) {
-                        submenu.add(getSharingAction(person));
+                        submenu.add(createItem(getSharingAction(person)));
                     }
                     this.comboBoxMenu.add(submenu);
                 }
@@ -144,19 +158,7 @@ public class SearchResultFromWidget extends JPanel implements MouseListener {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        updateMenus();
-    }
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-    @Override
-    public void mouseReleased(MouseEvent e) {
+    public void fireUpdate() {
+        this.updateMenus();
     }
 }
