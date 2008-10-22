@@ -76,11 +76,13 @@ public class LimeComboBoxFactory {
         
         box.setBackgroundPainter(new PopupButtonPainter());
         box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
-        box.setText(promptText);
         box.setFont(this.miniTextFont);
         box.setForegrounds(this.miniRegTextColour, 
                 this.miniHoverTextColour, this.miniDownTextColour);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
+        System.out.println("---");
+        box.setText(promptText);
+        System.out.println("===");
         
         return box;
         

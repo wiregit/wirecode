@@ -14,6 +14,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +47,6 @@ public class LimeComboBox extends JXButton {
     private Color rolloverTextColour = null;
     
     private boolean isMenuOverrided = false;
-    private boolean hasSize = false;
     private boolean isMenuUpdated = false;
     
     private JPopupMenu menu = null;
@@ -125,7 +125,6 @@ public class LimeComboBox extends JXButton {
         if (actions == null) return;
         
         this.isMenuUpdated = false;
-        this.hasSize = false;
         
         this.actions.addAll(actions);
         
@@ -142,7 +141,6 @@ public class LimeComboBox extends JXButton {
         if (action == null)  throw new IllegalArgumentException("Null Action added");
         
         this.isMenuUpdated = false;
-        this.hasSize = false;
         
         this.actions.add(action);
         
@@ -157,7 +155,6 @@ public class LimeComboBox extends JXButton {
     
     public void  removeAllActions() {
         this.isMenuUpdated = false;
-        this.hasSize = false;
         
         this.actions.clear();
         
@@ -167,7 +164,6 @@ public class LimeComboBox extends JXButton {
     
     public void  removeAction(Action action) {
         this.isMenuUpdated = false;
-        this.hasSize = false;
         
         this.actions.remove(action);
         
@@ -194,9 +190,10 @@ public class LimeComboBox extends JXButton {
     
     @Override
     public void setText(String promptText) {
-        this.hasSize = false;
-        
         super.setText(promptText);
+        
+        if (promptText != null)        
+            this.updateSize();
     }
 
     @Override 
@@ -205,7 +202,7 @@ public class LimeComboBox extends JXButton {
             public boolean isArmed() { return delegate.isArmed(); }
             public boolean isSelected() { return delegate.isSelected(); }
             public boolean isEnabled() { return delegate.isEnabled(); }
-            public boolean isPressed() { 
+            public boolean isPressed() {
                 return delegate.isPressed() || menu != null && menu.isVisible(); 
             }
             public boolean isRollover() { return delegate.isRollover(); }
@@ -304,15 +301,15 @@ public class LimeComboBox extends JXButton {
     }
     
     private Rectangle2D getLongestTextArea(Object... objects) {
-        Graphics2D g2 = (Graphics2D) this.getGraphics();
+        FontRenderContext frc = new FontRenderContext(null,false,false);
         
         Rectangle2D largestRect = this.getFont().getStringBounds(unpackText(objects[0]), 
-                g2.getFontRenderContext());
+                frc);
         
         for ( int i=1 ; i<objects.length ; i++ ) {
             
             Rectangle2D currentRect = this.getFont().getStringBounds(unpackText(objects[i]), 
-                    g2.getFontRenderContext());
+                    frc);
             
             if (currentRect.getWidth() > largestRect.getWidth()) {
                 largestRect = currentRect;
@@ -323,12 +320,10 @@ public class LimeComboBox extends JXButton {
     }
     
     private void updateSize() {
-        if (this.getText() == null && this.actions.isEmpty())  return;
         
-        // Component is not being drawn yet so can't get a size        
-        if (this.getGraphics() == null) return;
+        if (this.getText() == null && (this.actions == null || this.actions.isEmpty()))
+            return;
         
-        this.hasSize = true;
         
         Rectangle2D labelRect = null;
                 
@@ -358,9 +353,10 @@ public class LimeComboBox extends JXButton {
         this.setSize(this.getPreferredSize());
         
         this.setMinimumSize(this.getPreferredSize());
-        
+                
         this.revalidate();
         this.repaint();
+
     }
     
         
@@ -371,8 +367,7 @@ public class LimeComboBox extends JXButton {
     
     @Override
     protected void paintComponent(Graphics g) {
-        if (!this.hasSize) this.updateSize();
-        
+
         Graphics2D g2 = (Graphics2D) g;        
         
         this.getBackgroundPainter().paint(g2, this, this.getWidth(), this.getHeight());  
@@ -585,7 +580,7 @@ public class LimeComboBox extends JXButton {
         for ( Action a : actions)
             actList.add(a);
         
-        panel.add(new LimeComboBoxFactory().createFullComboBox(actList));
+      //  panel.add(new LimeComboBoxFactory().createFullComboBox(actList));
         
         panel.add(new LimeComboBoxFactory().createMiniComboBox("hello",actList));
         
