@@ -1,7 +1,7 @@
 package org.limewire.core.api.download;
 
-import java.util.List;
 import java.io.IOException;
+import java.util.List;
 
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
@@ -47,5 +47,5 @@ public interface ResultDownloader {
      * 
      */
     public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException;
-
+    
 }
