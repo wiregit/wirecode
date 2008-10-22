@@ -33,6 +33,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, User user) {
         super(presence, connection, user);
+        address = new AtomicReference<Address>();
         authToken = new AtomicReference<byte []>();
     }
 

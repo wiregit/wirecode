@@ -79,14 +79,16 @@ public class AuthTokenIQListener implements PacketListener {
         synchronized (this) {
             LimePresenceImpl presence = limePresences.get(iq.getFrom());
             if(presence != null) {
-                if(LOG.isDebugEnabled()) {
-                    try {
-                        LOG.debug("updating auth token on presence " + presence.getJID() + " to " + new String(Base64.encodeBase64(iq.getAuthToken()), "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        // TODO
+                if(iq.getAuthToken() != null) {
+                    if(LOG.isDebugEnabled()) {
+                        try {
+                            LOG.debug("updating auth token on presence " + presence.getJID() + " to " + new String(Base64.encodeBase64(iq.getAuthToken()), "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
                     }
+                    presence.setAuthToken(iq.getAuthToken());
                 }
-                presence.setAuthToken(iq.getAuthToken());
             }
         }
     }
