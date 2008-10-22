@@ -21,8 +21,8 @@ public class AuthenticatorRegistryImpl implements Authenticator, AuthenticatorRe
     public boolean authenticate(Credentials credentials) {
         lock.readLock().lock();
         try {
-            for(Authenticator store : authenticators) {
-                if(store.authenticate(credentials)) {
+            for(Authenticator authenticator : authenticators) {
+                if(authenticator.authenticate(credentials)) {
                     return true;
                 }
             }
