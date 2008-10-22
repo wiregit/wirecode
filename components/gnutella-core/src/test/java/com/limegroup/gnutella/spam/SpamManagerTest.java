@@ -5,6 +5,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.IpPortSet;
 
@@ -72,7 +73,9 @@ public class SpamManagerTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         SearchSettings.ENABLE_SPAM_FILTER.setValue(true);
-        SearchSettings.FILTER_SPAM_RESULTS.revertToDefault();
+        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
+        String[] whitelist = new String[] {addr1, addr2, addr3, addr4}; 
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(whitelist);
         
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
@@ -85,7 +88,6 @@ public class SpamManagerTest extends LimeTestCase {
 		remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
 		manager = injector.getInstance(SpamManager.class);
         manager.clearFilterData();
-        SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
         
         doc1 = limeXMLDocumentFactory.createLimeXMLDocument(xml1);
         doc2 = limeXMLDocumentFactory.createLimeXMLDocument(xml2);
@@ -253,6 +255,30 @@ public class SpamManagerTest extends LimeTestCase {
     }
     
     /**
+     * Tests that the approximate size of the result affects the spam rating
+     */
+    public void testApproximateSizeAffects() throws Exception {
+        int size5 = 1024, size6 = 1025, size7 = 2048;
+        
+        // A result arrives and the user marks it as spam
+        RemoteFileDesc marked = createRFD(addr1, port1, badger, null, urn1, size5);
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{marked});
+        assertTrue(marked.isSpam());
+        assertGreaterThan(0f, marked.getSpamRating());
+        
+        // A result with nothing in common but similar in size should receive
+        // a non-zero rating (TODO: should it be considered spam?)
+        RemoteFileDesc sameAddress = createRFD(addr2, port2, mushroom, null, urn2, size6);
+        assertGreaterThan(0f, sameAddress.getSpamRating());
+        assertLessThan(marked.getSpamRating(), sameAddress.getSpamRating());
+        
+        // A result with nothing in common should receive a zero spam rating
+        RemoteFileDesc unrelated = createRFD(addr3, port3, snake, null, urn3, size7);
+        assertFalse(unrelated.isSpam());
+        assertEquals(0f, unrelated.getSpamRating());
+    }
+    
+    /**
      * Tests that any XML documents in the result affect the spam rating
      */
     public void testXMLAffects() throws Exception {
@@ -270,6 +296,40 @@ public class SpamManagerTest extends LimeTestCase {
         
         // A result with nothing in common should receive a zero spam rating
         RemoteFileDesc unrelated = createRFD(addr3, port3, snake, doc2, urn3, size3);
+        assertFalse(unrelated.isSpam());
+        assertEquals(0f, unrelated.getSpamRating());
+    }
+    
+    /**
+     * Tests that the extension of the result affects the spam rating less
+     * than an ordinary keyword 
+     */
+    public void testKeywordBeatsExtension() throws Exception {
+        String ext1 = ".foo", ext2 = ".bar";
+        
+        // A result arrives and the user marks it as spam
+        RemoteFileDesc marked = createRFD(addr1, port1, badger+ext1, null, urn1, size1);
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{marked});
+        assertTrue(marked.isSpam());
+        assertGreaterThan(0f, marked.getSpamRating());
+        
+        // A result with nothing in common but the extension should receive a
+        // non-zero rating
+        RemoteFileDesc sameExt = createRFD(addr2, port2, mushroom+ext1, null, urn2, size2);
+        assertGreaterThan(0f, sameExt.getSpamRating());
+        assertLessThan(marked.getSpamRating(), sameExt.getSpamRating());
+        
+        // A result with nothing in common but an ordinary keyword should
+        // receive a non-zero rating
+        RemoteFileDesc sameWord = createRFD(addr3, port3, badger+ext2, null, urn3, size3);
+        assertGreaterThan(0f, sameWord.getSpamRating());
+        assertLessThan(marked.getSpamRating(), sameWord.getSpamRating());
+        
+        // The extension should have less effect than the keyword
+        assertLessThan(sameWord.getSpamRating(), sameExt.getSpamRating());
+        
+        // A result with nothing in common should receive a zero spam rating
+        RemoteFileDesc unrelated = createRFD(addr4, port4, snake, null, urn4, size4);
         assertFalse(unrelated.isSpam());
         assertEquals(0f, unrelated.getSpamRating());
     }

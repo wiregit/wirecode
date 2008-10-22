@@ -91,7 +91,9 @@ public class Tokenizer {
 			LOG.debug("Tokenizing " + desc);
         String name = desc.getFileName();
         getKeywordTokens(FileUtils.getFilenameNoExtension(name), set);
-        set.add(new FileExtensionToken(FileUtils.getFileExtension(name)));
+        String ext = FileUtils.getFileExtension(name);
+        if(!ext.equals(""))
+            set.add(new FileExtensionToken(ext));
         LimeXMLDocument xml = desc.getXMLDocument();
         if(xml != null)
 		    getKeywordTokens(xml, set);
