@@ -80,9 +80,6 @@ public class LimeComboBoxFactory {
         box.setForegrounds(this.miniRegTextColour, 
                 this.miniHoverTextColour, this.miniDownTextColour);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
-        System.out.println("---");
-        box.setText(promptText);
-        System.out.println("===");
         
         return box;
         
