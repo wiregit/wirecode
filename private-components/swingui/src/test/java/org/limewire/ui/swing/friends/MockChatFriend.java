@@ -136,11 +136,6 @@ class MockChatFriend implements ChatFriend {
         this.receivingUnviewedMessages = hasMessages;
     }
 
-    @Override
-    public boolean jidBelongsTo(String jid) {
-        return false;
-    }
-
     public Presence getPresence() {
         return null;
     }

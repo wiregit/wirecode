@@ -22,7 +22,6 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
-import org.limewire.security.auth.UserStore;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -44,7 +43,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private XMPPErrorListener errorListener;
     private Provider<EventListener<XMPPConnectionEvent>> connectionListener;
     private AddressEvent lastEvent;
-    private final UserStore userStore;
+    private final XMPPAuthenticator userStore;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
@@ -52,7 +51,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                     Provider<EventListener<FileOfferEvent>> fileOfferListener,
                     Provider<EventListener<LibraryChangedEvent>> libraryChangedListener,
                     Provider<EventListener<XMPPConnectionEvent>> connectionListener,
-                    AddressFactory addressFactory, UserStore userStore) {
+                    AddressFactory addressFactory, XMPPAuthenticator userStore) {
         this.configurations = configurations;
         this.rosterListener = rosterListener;
         this.fileOfferListener = fileOfferListener;

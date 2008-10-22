@@ -23,7 +23,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.security.auth.UserStore;
 import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
@@ -63,14 +62,14 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     protected AuthTokenIQListener authTokenIQListener;
     protected LibraryChangedIQListener libChangedIQListener;
     protected volatile AddressEvent lastEvent;
-    private final UserStore userStore;
+    private final XMPPAuthenticator userStore;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventListener<RosterEvent> rosterListener,
                        EventListener<FileOfferEvent> fileOfferListener,
                        EventListener<LibraryChangedEvent> libraryChangedEventEventListener,
                        EventListener<XMPPConnectionEvent> connectionListener,
-                       AddressFactory addressFactory, UserStore userStore) {
+                       AddressFactory addressFactory, XMPPAuthenticator userStore) {
         this.configuration = configuration;
         this.fileOfferListener = fileOfferListener;
         this.libraryChangedEventEventListener = libraryChangedEventEventListener;

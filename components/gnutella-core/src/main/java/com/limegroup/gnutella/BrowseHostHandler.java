@@ -19,6 +19,7 @@ import org.apache.http.HttpVersion;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
@@ -224,7 +225,7 @@ public class BrowseHostHandler {
         get.addHeader(HTTPHeaderName.HOST.create(NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort()));
         get.addHeader(HTTPHeaderName.USER_AGENT.create(LimeWireUtils.getVendor()));
         get.addHeader(HTTPHeaderName.ACCEPT.create(Constants.QUERYREPLY_MIME_TYPE));
-        get.addHeader(HTTPHeaderName.CONNECTION.create("close"));
+        get.addHeader(HTTPHeaderName.CONNECTION.create(HTTP.CONN_KEEP_ALIVE));
         
         if (!networkManager.acceptedIncomingConnection() && networkManager.canDoFWT()) {
             get.addHeader(HTTPHeaderName.FW_NODE_INFO.create(pushEndpointFactory.createForSelf()));

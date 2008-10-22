@@ -12,6 +12,7 @@ import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.impl.XMPPAddressResolver;
 import org.limewire.xmpp.client.impl.XMPPAddressSerializer;
 import org.limewire.xmpp.client.impl.XMPPServiceImpl;
+import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -41,5 +42,7 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(XMPPAddressResolver.class).asEagerSingleton();
         // dito
         bind(XMPPAddressSerializer.class).asEagerSingleton();
+        
+        bind(XMPPAuthenticator.class).asEagerSingleton();
     }
 }

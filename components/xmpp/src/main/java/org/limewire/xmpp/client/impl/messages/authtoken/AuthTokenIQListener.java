@@ -15,26 +15,26 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.security.auth.UserStore;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.client.impl.LimePresenceImpl;
+import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class AuthTokenIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AuthTokenIQListener.class);
 
     private final XMPPConnection connection;
-    private final UserStore userStore;
+    private final XMPPAuthenticator userStore;
      
     private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
     private final RosterEventHandler rosterEventHandler;
 
     public AuthTokenIQListener(XMPPConnection connection,
-                               UserStore userStore) {
+            XMPPAuthenticator userStore) {
         this.connection = connection;
         this.userStore = userStore;
         this.rosterEventHandler = new RosterEventHandler();

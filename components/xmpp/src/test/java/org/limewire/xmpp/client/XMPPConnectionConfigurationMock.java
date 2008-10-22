@@ -91,4 +91,9 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     public String getNetworkName() {
         return getServiceName();
     }
+
+    @Override
+    public String getResource() {
+        return "LimeWire";
+    }
 }

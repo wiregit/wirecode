@@ -1,5 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
+import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
@@ -43,5 +44,10 @@ public class MockXMPPConnection implements XMPPConnection {
 
     public void removeUser(String id) throws XMPPException {
         
+    }
+
+    @Override
+    public User getUser(String id) {
+        return null;
     }
 }
