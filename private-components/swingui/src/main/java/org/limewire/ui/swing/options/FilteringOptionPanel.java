@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -256,6 +257,7 @@ public class FilteringOptionPanel extends OptionPanel {
             setBorder(null);
             setContentAreaFilled(false);
             FontUtils.underline(this);
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
             addActionListener(new ActionListener(){
                 @Override

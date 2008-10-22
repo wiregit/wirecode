@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.ContentSettings;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
@@ -151,19 +152,15 @@ public class SecurityOptionPanel extends OptionPanel {
     
     private class FilteringPanel extends OptionPanel {
 
-        private FilterFileExtensionsOptionPanel filterExtensionsPanel;
         private FilterKeywordOptionPanel filterKeywordPanel;
         
         private JCheckBox unlicensedCheckBox;
         private JCheckBox adultContentCheckBox;
-        private JButton filterFileExtensionsButton;
         private JButton filterKeywordsButton;
         
         public FilteringPanel() {
             super(I18n.tr("Filtering"));
             
-            filterExtensionsPanel = new FilterFileExtensionsOptionPanel(new OKDialogAction());
-            filterExtensionsPanel.setPreferredSize(new Dimension(300,400));
             filterKeywordPanel = new FilterKeywordOptionPanel(new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
             
@@ -171,9 +168,6 @@ public class SecurityOptionPanel extends OptionPanel {
             unlicensedCheckBox.setContentAreaFilled(false);
             adultContentCheckBox = new JCheckBox();
             adultContentCheckBox.setContentAreaFilled(false);
-            filterFileExtensionsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
-                    filterExtensionsPanel, I18n.tr("Filter file extensions"),
-                    I18n.tr("Filter file extensions"),I18n.tr("Restrict search results with certain file extension from being displayed")));
             filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
                     I18n.tr("Filter Keywords"),I18n.tr("Restrict files with certain words from being displayed in search results")));
@@ -186,28 +180,27 @@ public class SecurityOptionPanel extends OptionPanel {
             add(adultContentCheckBox, "split, gapleft 20");
             add(new JLabel("Don't show adult content"), "wrap");
             
-            add(filterFileExtensionsButton, "split");
             add(filterKeywordsButton);
         }
         
         @Override
-        void applyOptions() { //TODO: link adult content check box here
+        void applyOptions() { //TODO: the old IgnoreResultTypesPaneItem called SearchMediator.rebuildInputPanel() if adult content changed
+            FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
             ContentSettings.USER_WANTS_MANAGEMENTS.setValue(unlicensedCheckBox.isSelected());
-            filterExtensionsPanel.applyOptions();
             filterKeywordPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != unlicensedCheckBox.isSelected() 
-                    || filterExtensionsPanel.hasChanged() 
+            return  FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
+                    || ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != unlicensedCheckBox.isSelected() 
                     || filterKeywordPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
+            adultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
             unlicensedCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue());
-            filterExtensionsPanel.initOptions();
             filterKeywordPanel.initOptions();
         }
     }
