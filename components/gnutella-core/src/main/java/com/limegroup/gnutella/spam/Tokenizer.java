@@ -18,6 +18,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.XMLStringUtils;
+import org.limewire.util.FileUtils;
 
 /**
  * This class splits a RemoteFileDesc or a QueryRequest into tokens that will
@@ -88,7 +89,9 @@ public class Tokenizer {
     private void tokenize(RemoteFileDesc desc, Set<Token> set) {
 		if(LOG.isDebugEnabled())
 			LOG.debug("Tokenizing " + desc);
-        getKeywordTokens(desc.getFileName(), set);
+        String name = desc.getFileName();
+        getKeywordTokens(FileUtils.getFilenameNoExtension(name), set);
+        set.add(new FileExtensionToken(FileUtils.getFileExtension(name)));
         LimeXMLDocument xml = desc.getXMLDocument();
         if(xml != null)
 		    getKeywordTokens(xml, set);
@@ -96,6 +99,7 @@ public class Tokenizer {
 		if(urn != null)
 			set.add(new UrnToken(urn.toString()));
 		set.add(new SizeToken(desc.getSize()));
+        set.add(new ApproximateSizeToken(desc.getSize()));
 		set.add(new AddressToken(desc.getAddress()));
 	}
 

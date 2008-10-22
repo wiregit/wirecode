@@ -4,10 +4,9 @@ package com.limegroup.gnutella.spam;
  * A token representing the file size
  */
 public class SizeToken extends Token {
-	private static final long serialVersionUID = 3906652994404955696L;
 
     /** 
-     * File size is a fairly accurate identifier of a file, so we will
+     * Exact file size is a fairly accurate identifier of a file, so we will
      * consider a certain file size spam after only a couple of bad ratings.
      */
     private static final float SIZE_WEIGHT = 0.6f;
@@ -24,12 +23,12 @@ public class SizeToken extends Token {
     }
     
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return (int)size;
     }
     
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if(o == null)
             return false;
         if(!(o instanceof SizeToken))

@@ -8,7 +8,6 @@ import org.limewire.io.IP;
  * A token representing an IP address
  */
 public class AddressToken extends Token {
-	private static final long serialVersionUID = 3257568416670824244L;
     
     /**
      * A node is unlikely to return spam and non-spam results in the same

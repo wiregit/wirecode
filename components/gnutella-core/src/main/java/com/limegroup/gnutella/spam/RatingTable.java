@@ -45,13 +45,13 @@ public class RatingTable implements Service {
      * this many entries to disk. The size is a tradeoff - tokens should be
      * discarded when they become irrelevant, but not before.
 	 */
-	private static final int MAX_SIZE = 10000;
+	private static final int MAX_SIZE = 5000;
     
     /**
      * Initial size of the rating table - should not be too large as many
      * users probably don't use the spam filter.
      */
-    private static final int INITIAL_SIZE = 1000;
+    private static final int INITIAL_SIZE = 100;
     
 	/**
 	 * A map containing a limited number of tokens. We use a map rather than
@@ -180,9 +180,11 @@ public class RatingTable implements Service {
 	 */
 	private void rateInternal(Set<Token> tokens, float rating) {
 		for(Token t : tokens) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Rating " + t + " as " + rating);
+            float before = t.getRating();
 			t.updateRating(rating);
+            float after = t.getRating();
+            if(LOG.isDebugEnabled())
+                LOG.debug(t + " was rated " + before + ", now rated " + after);
         }
 	}
 

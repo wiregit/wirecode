@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.spam;
 
 /**
- * A token representing a keyword from a file name or query string
+ * A token representing a keyword from a file name (excluding the
+ * extension) or a query string
  */
 public class KeywordToken extends Token {
-	private static final long serialVersionUID = 3257850995487748662L;
     
     /**
      * Spammers often echo the search tokens in the result, but we ignore
@@ -12,7 +12,7 @@ public class KeywordToken extends Token {
      * indicator of spam. However, the same keyword may occur in a large
      * number of files, so we don't want to be too hasty.
      */
-    private static final float KEYWORD_WEIGHT = 0.1f;
+    private static final float KEYWORD_WEIGHT = 0.15f;
     
 	protected final String keyword;
     

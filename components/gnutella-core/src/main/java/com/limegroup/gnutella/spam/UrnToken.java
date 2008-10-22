@@ -4,7 +4,6 @@ package com.limegroup.gnutella.spam;
  * A token representing a SHA1 URN
  */
 public class UrnToken extends KeywordToken {
-	private static final long serialVersionUID = 3546925779406631222L;
 
     /**
      * We consider a URN to be a very accurate spam indicator - if the user
