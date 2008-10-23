@@ -14,8 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -36,7 +34,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
@@ -138,6 +135,10 @@ implements TableCellEditor, TableCellRenderer {
         return vsr;
     }
 
+    private int getSimilarResultsCount() {
+        return vsr == null ? 0 : vsr.getSimilarResults().size();
+    }
+    
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, final int col) {
 
@@ -172,10 +173,6 @@ implements TableCellEditor, TableCellRenderer {
         editorComponent.add(panel, "height 100%");
 
         return editorComponent;
-    }
-
-    private int getSimilarResultsCount() {
-        return vsr == null ? 0 : vsr.getSimilarResults().size();
     }
 
     public Component getTableCellRendererComponent(
@@ -306,8 +303,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populateFrom(VisualSearchResult vsr) {
-        Collection<RemoteHost> sources = vsr.getSources();
-        fromWidget.setPeople(new ArrayList<RemoteHost>(sources));
+        fromWidget.setPeople(vsr.getSources());
     }
 
     private void populateHeading(RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {

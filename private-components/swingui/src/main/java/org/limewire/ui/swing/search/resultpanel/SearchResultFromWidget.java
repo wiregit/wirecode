@@ -5,6 +5,8 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -88,8 +90,8 @@ public class SearchResultFromWidget extends JPanel implements UpdateHandler {
     }
 
     
-    public void setPeople(List<RemoteHost> people) {
-        this.people = people;
+    public void setPeople(Collection<RemoteHost> people) {
+        this.people = new LinkedList<RemoteHost>(people);
         this.comboBox.setText(getFromText());
     }
 

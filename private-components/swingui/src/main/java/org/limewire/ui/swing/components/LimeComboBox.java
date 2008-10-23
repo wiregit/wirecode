@@ -509,7 +509,6 @@ public class LimeComboBox extends JXButton {
         this.menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
         this.menu.setBackground(Color.WHITE);
         this.menu.setForeground(Color.BLACK);
-        this.menu.setVisible(false);
         this.menu.setFont(this.getFont());
         
         this.menu.addMouseListener(new MouseListener() {

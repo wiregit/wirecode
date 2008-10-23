@@ -80,6 +80,7 @@ public class LimeComboBoxFactory {
         box.setForegrounds(this.miniRegTextColour, 
                 this.miniHoverTextColour, this.miniDownTextColour);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
+        box.setText(promptText);
         
         return box;
         
