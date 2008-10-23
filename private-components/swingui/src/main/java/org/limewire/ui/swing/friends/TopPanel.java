@@ -247,8 +247,10 @@ public class TopPanel extends JPanel {
             dialog.setModalityType(ModalityType.MODELESS);
             dialog.setLayout(new MigLayout("", "[right]2[]2[]", "[]2[]2[]"));
             dialog.add(new JLabel(tr("Friend ID:")));
-            final JTextField idTextField = new JTextField(25);
-            dialog.add(idTextField, "span, wrap");
+            final JLabel errorLabel = new JLabel(" ");
+            final JTextField idTextField = new JTextField(18);
+            dialog.add(idTextField);
+            dialog.add(new JLabel("@gmail.com"), "wrap");
             dialog.add(new JLabel(tr("Name:")));
             final JTextField nameField = new JTextField(25);
             dialog.add(nameField, "span, wrap");
@@ -257,9 +259,24 @@ public class TopPanel extends JPanel {
             ok.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (idTextField.getText().length() > 0)
+
+                    // strip out the host info after @
+                    String idOfFriend = idTextField.getText().trim();
+                    if (idOfFriend.contains("@")) {
+                        int indexOfLastAtSign = idOfFriend.lastIndexOf('@');
+                        idOfFriend = idOfFriend.substring(0, indexOfLastAtSign);
+                    }
+
+                    // validate that Friend ID field has text
+                    if (idOfFriend.equals("")) {
+                        errorLabel.setText(tr("Friend ID is required"));
+                        errorLabel.setForeground(Color.RED);
+                        dialog.setVisible(true);
+                        return;
+                    }
+                    idOfFriend += "@gmail.com";
                     dialog.setVisible(false);
-                    new AddFriendEvent(idTextField.getText(), nameField.getText()).publish();
+                    new AddFriendEvent(idOfFriend, nameField.getText()).publish();
                 }
             });
             
@@ -272,7 +289,8 @@ public class TopPanel extends JPanel {
             });
             
             dialog.add(ok, "cell 1 2");
-            dialog.add(cancel, "cell 2 2");
+            dialog.add(cancel, "cell 2 2, wrap");
+            dialog.add(errorLabel, "center, span");
             dialog.pack();
             dialog.setVisible(true);
         }
