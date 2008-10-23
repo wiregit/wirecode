@@ -57,6 +57,12 @@ public class FilterSettings extends LimeProps {
         FACTORY.createBooleanSetting("FILTER_MALWARE", true);
     
     /**
+     * An array of malware URNs that should be filtered
+     */
+    public static final StringArraySetting MALWARE_URNS = 
+        FACTORY.createStringArraySetting("MALWARE_URNS", new String[0]);
+    
+    /**
 	 * Sets whether or not duplicate search results are
 	 * banned.
 	 */
