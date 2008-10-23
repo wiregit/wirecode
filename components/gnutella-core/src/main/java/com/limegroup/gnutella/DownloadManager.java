@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.net.Socket;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -206,6 +207,19 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
      */
     public Downloader download(DownloadInformation info, long now) throws SaveLocationException;
 
+    /**
+     * Downloads the torrent file from the specified URI then begins the torrent download as a seperate item.
+     */
+    public Downloader downloadTorrent(URI torrentURI, boolean overwrite) throws SaveLocationException;
+    
+    /**
+     * Opens the torrent for the specified file, and begins the torrent download.
+     */
+    public Downloader downloadTorrent(File torrentFile, boolean overwrite) throws SaveLocationException;
+    
+    /**
+     * Downloads the given torrent specified by the meta info object.
+     */
     public Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
             throws SaveLocationException;
 

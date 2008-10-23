@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +40,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
+import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -783,9 +785,26 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         return d;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#downloadTorrent(com.limegroup.bittorrent.BTMetaInfo, boolean)
-     */
+    @Override
+    public Downloader downloadTorrent(URI torrentURI, final boolean overwrite) throws SaveLocationException {
+        final BTTorrentFileDownloader torrentDownloader = coreDownloaderFactory.createTorrentFileDownloader(torrentURI, true);
+        initializeDownload(torrentDownloader, false);
+        return torrentDownloader;
+    }
+
+    @Override
+    public Downloader downloadTorrent(File torrentFile, boolean overwrite) throws SaveLocationException {
+        BTMetaInfo btMetaInfo = null;
+        try {
+            btMetaInfo = btMetaInfoFactory.createMetaInfo(torrentFile);
+        } catch (IOException e) {
+            //TODO implement good user feedback
+            throw new UnsupportedOperationException("Need to implement good user feedback.");
+        }
+        return downloadTorrent(btMetaInfo, overwrite);
+    }
+    
+    @Override
     public synchronized Downloader downloadTorrent(BTMetaInfo info, boolean overwrite) 
     throws SaveLocationException {
         TorrentFileSystem system = info.getFileSystem();
@@ -844,7 +863,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private synchronized void initializeDownload(CoreDownloader md, boolean saveState) {
+    private synchronized void initializeDownload(final CoreDownloader md, boolean saveState) {
         md.initialize();
         waiting.add(md);
         callback(md).addDownload(md);

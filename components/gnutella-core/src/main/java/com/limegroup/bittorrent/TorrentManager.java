@@ -50,4 +50,10 @@ public interface TorrentManager extends FileLocker, ConnectionAcceptor, TorrentE
      *         is somewhat arbitrary
      */
     int getMaxTorrentConnections();
+
+    /**
+     * Checks to see if the given torrent file can be shared with the gnutella network. 
+     * If it can, the file is saved to a special location on disk and shared.
+     */
+    public void shareTorrentFile(BTMetaInfo m, byte[] body);
 }

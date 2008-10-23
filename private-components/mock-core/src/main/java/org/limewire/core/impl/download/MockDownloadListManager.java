@@ -2,6 +2,8 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -168,6 +170,16 @@ public class MockDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public DownloadItem addDownload(URI uri) throws SaveLocationException {
+        return null;
+    }
+
+    @Override
+    public DownloadItem addDownload(File file) {
         return null;
     }
 }

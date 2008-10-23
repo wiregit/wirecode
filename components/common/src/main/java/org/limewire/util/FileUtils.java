@@ -733,6 +733,7 @@ public class FileUtils {
                 out.write(buf, 0, read);
             }
         } catch (IOException ignore) {
+            LOG.error(ignore.getMessage(), ignore);
         } finally {
             close(in);
             flush(out);

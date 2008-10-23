@@ -3,6 +3,7 @@ package org.limewire.core.impl.download;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,9 +30,11 @@ import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.listener.EventListener;
 import org.limewire.setting.FileSetting;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
+import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 
@@ -43,11 +46,16 @@ import ca.odell.glazedlists.ObservableElementList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.downloader.CoreDownloader;
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
 
@@ -253,7 +261,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     }
 
 
-    private static class CoreDownloadListener implements DownloadListener {
+    private class CoreDownloadListener implements DownloadListener {
 	    
 	    private final List<DownloadItem> list;
 	    private final QueueTimeCalculator queueTimeCalculator;
@@ -267,18 +275,84 @@ public class CoreDownloadListManager implements DownloadListManager {
         public void downloadAdded(Downloader downloader) {
             DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator);
             downloader.setAttribute(DOWNLOAD_ITEM, item, false);
+            downloader.addListener(new TorrentListener(downloader));
             list.add(item);
         }
 
         @Override
         public void downloadRemoved(Downloader downloader) {
-            DownloadItem item = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+            DownloadItem item = getDownloadItem(downloader);
             //don't automatically remove finished downloads or downloads in error states
             if (item.getState() != DownloadState.DONE && item.getState() != DownloadState.ERROR) {
                 list.remove(item);
             }
         }
 
+        private DownloadItem getDownloadItem(Downloader downloader) {
+            DownloadItem item = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+            return item;
+        }
+        
+        
+        /**
+         * Listens for downloads of .torrent files to complete. 
+         * When the download finishes then the torrent download will be started.
+         */
+        private class TorrentListener implements EventListener<DownloadStatusEvent> {
+            private final Downloader downloader;
+            public TorrentListener(Downloader downloader) {
+                this.downloader = Objects.nonNull(downloader, "downloader");
+                if(downloader.getState() == DownloadStatus.COMPLETE) {
+                    //TODO not sure why Downloader and CoreDownloader are not merged into one class.
+                    //No classes implement Downloader, CoreDownloader extends Downloader, and all downloaders implement CoreDownloader
+                    if(downloader instanceof CoreDownloader) {
+                        handleEvent(new DownloadStatusEvent((CoreDownloader)downloader, DownloadStatus.COMPLETE));
+                    }
+                }
+            }
+            @Override
+            public void handleEvent(DownloadStatusEvent event) {
+                DownloadStatus downloadStatus = event.getType();
+                if(DownloadStatus.COMPLETE == downloadStatus) {
+                    try {
+                        if(downloader instanceof BTTorrentFileDownloader){
+                            BTTorrentFileDownloader btTorrentFileDownloader = (BTTorrentFileDownloader)downloader;
+                            BTMetaInfo btMetaInfo = btTorrentFileDownloader.getBtMetaInfo();
+                            list.remove(getDownloadItem(downloader));
+                            downloadManager.downloadTorrent(btMetaInfo, true);
+                            
+                        } else {
+                            File possibleTorrentFile = downloader.getSaveFile();
+                            String fileExtension = FileUtils.getFileExtension(possibleTorrentFile);
+                            if("torrent".equalsIgnoreCase(fileExtension)) {
+                                list.remove(getDownloadItem(downloader));
+                                downloadManager.downloadTorrent(possibleTorrentFile, true);
+                            }
+                        }
+                    } catch (SaveLocationException e) {
+                        //TODO implement good user feedback
+                        throw new UnsupportedOperationException("Need to implement good user feedback.");
+                    }
+                }
+            }
+        }
+    }
+
+
+    @Override
+    public DownloadItem addDownload(URI uri) throws SaveLocationException {
+        //TODO figure out what type of download this is based on the file name and delegate to the correct downloader.
+        //right now defaulting to bit torrent
+        Downloader downloader =  downloadManager.downloadTorrent(uri, true);
+        return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+    }
+
+    @Override
+    public DownloadItem addDownload(File file) throws SaveLocationException {
+        //TODO figure out what type of download this is based on the file name and delegate to the correct downloader.
+        //right now defaulting to bit torrent
+        Downloader downloader = downloadManager.downloadTorrent(file, true);
+        return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
     }
 
 }

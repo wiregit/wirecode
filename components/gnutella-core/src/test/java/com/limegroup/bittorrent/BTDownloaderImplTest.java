@@ -33,7 +33,7 @@ public class BTDownloaderImplTest extends LimeTestCase {
      * A directory containing the torrent data for this unit test.
      */
     public static final File TORRENT_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/torrents");
+            .getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents");
 
     /**
      * A directory containing the download data for this unit test.

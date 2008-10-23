@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -12,6 +13,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -32,6 +34,8 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
     private final Provider<StoreDownloader> storeDownloaderFactory;
 
     private final Provider<BTDownloader> btDownloaderFactory;
+    
+    private final Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory;
 
     @Inject
     public CoreDownloaderFactoryImpl(Provider<ManagedDownloader> managedDownloaderFactory,
@@ -39,13 +43,15 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
             Provider<InNetworkDownloader> inNetworkDownloaderFactory,
             Provider<ResumeDownloader> resumeDownloaderFactory,
             Provider<StoreDownloader> storeDownloaderFactory,
-            Provider<BTDownloader> btDownloaderFactory) {
+            Provider<BTDownloader> btDownloaderFactory,
+            Provider<BTTorrentFileDownloader> torrentFileDownloaderFactory) {
         this.managedDownloaderFactory = managedDownloaderFactory;
         this.magnetDownloaderFactory = magnetDownloaderFactory;
         this.inNetworkDownloaderFactory = inNetworkDownloaderFactory;
         this.resumeDownloaderFactory = resumeDownloaderFactory;
         this.storeDownloaderFactory = storeDownloaderFactory;
         this.btDownloaderFactory = btDownloaderFactory;
+        this.torrentFileDownloaderFactory = torrentFileDownloaderFactory;
     }
 
     public ManagedDownloader createManagedDownloader(RemoteFileDesc[] files,
@@ -102,6 +108,13 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         BTDownloader bd = btDownloaderFactory.get();
         bd.initBtMetaInfo(info);
         return bd;
+    }
+    
+    @Override
+    public BTTorrentFileDownloader createTorrentFileDownloader(URI torrentURI, boolean overwrite) {
+        BTTorrentFileDownloader torrentFileDownloader = torrentFileDownloaderFactory.get();
+        torrentFileDownloader.initDownloadInformation(torrentURI, overwrite);
+        return torrentFileDownloader;
     }
 
     public CoreDownloader createFromMemento(DownloadMemento memento) throws InvalidDataException {

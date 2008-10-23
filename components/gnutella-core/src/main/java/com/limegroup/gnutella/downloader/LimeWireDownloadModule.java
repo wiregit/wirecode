@@ -4,6 +4,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTDownloaderImpl;
+import com.limegroup.bittorrent.BTTorrentFileDownloader;
+import com.limegroup.bittorrent.BTTorrentFileDownloaderImpl;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettingsImpl;
@@ -23,6 +25,7 @@ public class LimeWireDownloadModule extends AbstractModule {
         bind(ResumeDownloader.class).to(ResumeDownloaderImpl.class);
         bind(StoreDownloader.class).to(StoreDownloaderImpl.class);
         bind(BTDownloader.class).to(BTDownloaderImpl.class);
+        bind(BTTorrentFileDownloader.class).to(BTTorrentFileDownloaderImpl.class);
         
         bind(RemoteFileDescFactory.class).to(RemoteFileDescFactoryImpl.class);
         bind(DownloadCallback.class).annotatedWith(Names.named("inNetwork")).to(InNetworkCallback.class);        

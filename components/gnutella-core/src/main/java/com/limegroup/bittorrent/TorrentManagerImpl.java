@@ -1,6 +1,10 @@
 package com.limegroup.bittorrent;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.io.IOUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.util.FileUtils;
@@ -361,5 +366,37 @@ public class TorrentManagerImpl implements TorrentManager {
         String fileName = info.getFileSystem().getName().concat(".torrent");
         File f = new File(SharingUtils.APPLICATION_SPECIAL_SHARE, fileName);
         return f;
+    }
+
+    @Override
+    public void shareTorrentFile(BTMetaInfo m, byte[] body) {
+        if (SharingSettings.SHARE_TORRENT_META_FILES.getValue() && !m.isPrivate()) {
+            final File tFile = getSharedTorrentMetaDataFile(m);
+            fileManager.getGnutellaSharedFileList().remove(tFile);
+
+            File backup = null;
+            if (tFile.exists()) {
+                backup = new File(tFile.getParent(), tFile.getName().concat(".bak"));
+                FileUtils.forceRename(tFile, backup);
+            }
+            OutputStream out = null;
+            try {
+                out = new BufferedOutputStream(new FileOutputStream(tFile));
+                out.write(body);
+                out.flush();
+                if (backup != null) {
+                    backup.delete();
+                }
+            } catch (IOException ioe) {
+                if (backup != null) {
+                    // restore backup
+                    if (FileUtils.forceRename(backup, tFile)) {
+                        fileManager.getGnutellaSharedFileList().add(tFile);
+                    }
+                }
+            } finally {
+                IOUtils.close(out);
+            }
+        }
     }
 }	
