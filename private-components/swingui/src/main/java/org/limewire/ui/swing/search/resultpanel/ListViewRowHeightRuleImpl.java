@@ -27,6 +27,10 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
 
     @Override
     public RowDisplayResult getDisplayResult(VisualSearchResult vsr, String searchText) {
+        if (vsr.isSpam()) {
+            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam());
+        }
+            
         switch(vsr.getDownloadState()) {
         case DOWNLOADING:
         case DOWNLOADED:

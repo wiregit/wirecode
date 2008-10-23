@@ -19,6 +19,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
     private String subheading = "";
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private VisualSearchResult similarityParent;
+    private boolean spam;
     private HashMap<PropertyKey, Object> properties = new HashMap<PropertyKey, Object>();
     
     public MockVisualSearchResult(String name) {
@@ -136,13 +137,12 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public boolean isSpam() {
-        return false;
+        return spam;
     }
 
     @Override
     public void setSpam(boolean spam) {
-        // TODO Auto-generated method stub
-        
+        this.spam = spam;
     }
 
     @Override
