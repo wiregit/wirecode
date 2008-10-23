@@ -59,4 +59,6 @@ public interface ThumbnailManager {
      * Returns true if the thumbnail is available immediately.
      */
     public boolean isThumbnailForFileAvailable(File file);
+    
+    public boolean isErrorIcon(File file);
 }

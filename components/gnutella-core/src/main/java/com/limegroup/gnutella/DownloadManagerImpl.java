@@ -412,7 +412,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                 cleanupCompletedDownload(md, false);
             }
             // handle downloads from LWS separately, only allow 1 at a time
-            else if( storeDownloadCount == 0 && md.getDownloadType() == DownloaderType.STORE ) {
+            else if( storeDownloadCount < 3 && md.getDownloadType() == DownloaderType.STORE ) {
                     i.remove();
                     storeDownloadCount++;
                     active.add(md);

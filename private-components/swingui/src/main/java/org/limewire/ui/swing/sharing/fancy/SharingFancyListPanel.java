@@ -91,7 +91,7 @@ public class SharingFancyListPanel extends JPanel implements ListEventListener<L
         imageList = new ImageList(eventList, fileList);
         imageList.setTransferHandler(transferHandler);
         imageList.setPopupHandler(new SharingPopupHandler(imageList, new SharingActionHandler()));
-        
+
         ImageCellRenderer renderer = new ImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight(), thumbnailManager);
         renderer.setButtonComponent(new ImageButtonPanel());
         imageList.setImageCellRenderer(renderer);

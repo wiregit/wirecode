@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
@@ -17,8 +18,8 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
     
-    private Border border;
-    private Border selectedBorder;
+    protected Border border;
+    protected Border selectedBorder;
     
     @Resource
     protected Color cellBackgroundColor;
@@ -27,7 +28,7 @@ public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
     @Resource
     protected Color cellBorderSelectionColor;
     @Resource
-    protected int topPadding;
+    protected Icon errorIcon;
     
     private ThumbnailManager thumbnailManager;
     
@@ -35,7 +36,6 @@ public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
         super(width, height);
         
         this.thumbnailManager = thumbnailManager;
-        super.topPadding = topPadding;
         
         GuiUtils.assignResources(this);
         
@@ -51,6 +51,10 @@ public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
 
         LocalFileItem item = (LocalFileItem)value;
         setIcon(thumbnailManager.getThumbnailForFile(item.getFile(), list, index));
+        if(thumbnailManager.isErrorIcon(item.getFile()))
+            setText(item.getFileName());
+        else
+            setText("");
         
         if(isSelected)
             this.setBorder(selectedBorder);

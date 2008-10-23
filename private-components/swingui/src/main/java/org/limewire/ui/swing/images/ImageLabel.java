@@ -1,11 +1,14 @@
 package org.limewire.ui.swing.images;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
 import org.limewire.ui.swing.util.GuiUtils;
@@ -23,6 +26,8 @@ public class ImageLabel extends JComponent {
     
     private JComponent buttonComponent;
     
+    private JLabel label;
+    
     private int x = 0;
     private int y = 0;
     
@@ -34,6 +39,14 @@ public class ImageLabel extends JComponent {
         setPreferredSize(new Dimension(width, height));
         setSize(getPreferredSize());
         setLayout(null);
+        
+        label = new JLabel();
+        label.setVisible(false);
+        label.setOpaque(false);
+        label.setForeground(Color.BLACK);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        calculateLabelDimnensions();
+        add(label);
     }
     
     public void setIcon(Icon icon) {
@@ -60,6 +73,15 @@ public class ImageLabel extends JComponent {
         this.buttonComponent = buttonPanel;        
         calculateSubPanelDimensions();
         add(buttonPanel);
+        add(label);
+    }
+    
+    public void setText(String text) {
+        label.setText(text);
+        if(text == null || text.length() == 0)
+            label.setVisible(false);
+        else
+            label.setVisible(true);
     }
     
     /**
@@ -76,6 +98,12 @@ public class ImageLabel extends JComponent {
         int height =  getHeight() - ThumbnailManager.HEIGHT - topPadding - getInsets().top - getInsets().bottom;
 
         buttonComponent.setBounds(x, y, width, height);
+    }
+    
+    private void calculateLabelDimnensions() {
+        int x = (getWidth() - getInsets().left - getInsets().right - ThumbnailManager.WIDTH)/2 + getInsets().left;
+        int y = getInsets().top + ThumbnailManager.HEIGHT +  topPadding;
+        label.setBounds(x, y - 10, ThumbnailManager.WIDTH, 26);
     }
     
     @Override

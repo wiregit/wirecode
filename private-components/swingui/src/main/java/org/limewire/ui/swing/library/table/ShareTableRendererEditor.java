@@ -34,6 +34,8 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     public ShareTableRendererEditor(Action shareAction){
         GuiUtils.assignResources(this);
         
+        setOpaque(false);
+        
         gnutellaLabel = new JLabel(shareGnutellaIcon);
         friendsLabel = new JLabel(shareFriendsIcon);
         shareButton = new IconButton(shareButtonIcon, shareButtonIcon, shareButtonPressedIcon);

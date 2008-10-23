@@ -84,4 +84,9 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
     public boolean isThumbnailForFileAvailable(File file) {
         return thumbnails.containsKey(file);
     }
+    
+    public boolean isErrorIcon(File file) {
+        return thumbnails.containsKey(file) && 
+                thumbnails.get(file).equals(errorIcon);
+    }
 }
