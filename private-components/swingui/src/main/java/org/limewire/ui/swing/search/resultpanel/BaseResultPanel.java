@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Calendar;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
@@ -53,6 +55,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private ConfigurableTable<VisualSearchResult> resultsTable;
     private final Search search;
     private final ResultDownloader resultDownloader;
+    //cache for RowDisplayResult which could be expensive to generate with large search result sets
+    private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
+        new WeakHashMap<VisualSearchResult, RowDisplayResult>();
     
     private Scrollable visibileComponent;
     
@@ -145,8 +150,11 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                         for(int row = 0; row < model.getRowCount(); row++) {
                             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
                             long start = System.currentTimeMillis();
-                            RowDisplayResult result = 
-                                rowHeightRule.getDisplayResult(vsr, searchInfo.getQuery());
+                            RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
+                            if (result == null || result.isStale(vsr)) {
+                                result = rowHeightRule.getDisplayResult(vsr, searchInfo.getQuery());
+                                vsrToRowDisplayResultMap.put(vsr, result);
+                            } 
                             long end = System.currentTimeMillis();
                             int newRowHeight = result.getConfig().getRowHeight();
                             if (resultsList.getRowHeight(row) != newRowHeight) {

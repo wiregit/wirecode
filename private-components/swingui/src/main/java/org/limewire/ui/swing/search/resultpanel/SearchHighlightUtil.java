@@ -24,7 +24,7 @@ class SearchHighlightUtil {
         
         StringBuilder bldr = new StringBuilder();
         int index = 0;
-        Matcher matcher = Pattern.compile("\\b(" + search.replace(" ", "|") + ")", Pattern.CASE_INSENSITIVE).matcher(content);
+        Matcher matcher = Pattern.compile("\\b(" + search.replaceAll(" ", "|") + ")", Pattern.CASE_INSENSITIVE).matcher(content);
         index = 0;
         while (matcher.find()) {
             MatchResult result = matcher.toMatchResult();

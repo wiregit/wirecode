@@ -12,6 +12,7 @@ import java.util.Comparator;
 import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
@@ -30,14 +31,14 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     @Override
     public RowDisplayResult getDisplayResult(VisualSearchResult vsr, String searchText) {
         if (vsr.isSpam()) {
-            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam());
+            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState());
         }
             
         switch(vsr.getDownloadState()) {
         case DOWNLOADING:
         case DOWNLOADED:
         case LIBRARY:
-            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam());
+            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam(), vsr.getDownloadState());
         case NOT_STARTED:
             String heading = vsr.getHeading();
             String highlightedHeading = highlightMatches(heading, searchText);
@@ -76,7 +77,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             }
         }
         
-        return new RowDisplayResultImpl(config, heading, propertyMatch, subheading, vsr.isSpam());
+        return new RowDisplayResultImpl(config, heading, propertyMatch, subheading, vsr.isSpam(), vsr.getDownloadState());
     }
 
     private boolean emptyOrNull(String val) {
@@ -143,14 +144,16 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         private final String subheading;
         private final PropertyMatch metadata;
         private final boolean spam;
+        private final BasicDownloadState initialDownloadState;
         
         public RowDisplayResultImpl(RowDisplayConfig config, String heading, PropertyMatch metadata,
-                String subheading, boolean spam) {
+                String subheading, boolean spam, BasicDownloadState downloadState) {
             this.config = config;
             this.heading = heading;
             this.metadata = metadata;
             this.subheading = subheading;
             this.spam = spam;
+            this.initialDownloadState = downloadState;
         }
 
         @Override
@@ -176,6 +179,11 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         @Override
         public boolean isSpam() {
             return spam;
+        }
+
+        @Override
+        public boolean isStale(VisualSearchResult vsr) {
+            return vsr.getDownloadState() != initialDownloadState || vsr.isSpam() != spam;
         }
     }
     

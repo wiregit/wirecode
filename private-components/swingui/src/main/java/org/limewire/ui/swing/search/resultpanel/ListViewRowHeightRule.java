@@ -28,6 +28,7 @@ public interface ListViewRowHeightRule {
         PropertyMatch getMetadata();
         RowDisplayConfig getConfig();
         boolean isSpam();
+        boolean isStale(VisualSearchResult vsr);
     }
     
     public static interface PropertyMatch {
