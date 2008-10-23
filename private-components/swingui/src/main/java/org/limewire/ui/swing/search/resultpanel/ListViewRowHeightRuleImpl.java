@@ -54,7 +54,9 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             
                 PropertyMatch propertyMatch = getPropertyMatch(vsr, searchText);
                 
-                return newResult(HeadingSubHeadingAndMetadata, vsr, highlightedHeading, highlightedSubheading, propertyMatch);
+                if (propertyMatch != null) {
+                    return newResult(HeadingSubHeadingAndMetadata, vsr, highlightedHeading, highlightedSubheading, propertyMatch);
+                }
             }
             
             return newResult(HeadingAndSubheading, vsr, highlightedHeading, highlightedSubheading, null);

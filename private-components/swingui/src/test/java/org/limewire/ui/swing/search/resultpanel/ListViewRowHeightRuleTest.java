@@ -64,6 +64,7 @@ public class ListViewRowHeightRuleTest extends TestCase {
         mock.setHeading("bar");
         mock.setSubHeading("foo");
         assertStuff(BasicDownloadState.NOT_STARTED, "foo", HeadingAndSubheading, false, true);
+        assertStuff(BasicDownloadState.NOT_STARTED, "baz", HeadingAndSubheading, false, true);
     }
 
     public void testHeadingSubHeadingAndMetadata() {
