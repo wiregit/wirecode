@@ -1,7 +1,8 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingAndSubheading;
 import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingOnly;
+import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingAndSubheading;
+import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingAndMetadata;
 import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             if (propertyMatch == null || (propertyMatch.getKey() == null || EMPTY_STRING.equals(propertyMatch.getKey()))) {
                 config = HeadingOnly;
             } else {
-                //TODO - Subheading empty but metadata is not, need another config state
+                config = HeadingAndMetadata;
             }
         }
         

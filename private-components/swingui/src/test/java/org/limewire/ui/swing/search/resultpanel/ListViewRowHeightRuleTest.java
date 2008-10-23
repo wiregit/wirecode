@@ -24,12 +24,28 @@ public class ListViewRowHeightRuleTest extends TestCase {
         assertStuff(BasicDownloadState.DOWNLOADING, "bar", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADED, "bar", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.LIBRARY, "bar", HeadingOnly, true, true);
+    }
+    
+    public void testHeadingOnlyWhenSubheadingAndMetadataIsEmptyOrNull() {
         assertStuff(BasicDownloadState.DOWNLOADING, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.DOWNLOADING, null, HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADED, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.DOWNLOADED, null, HeadingOnly, true, true);
         assertStuff(BasicDownloadState.LIBRARY, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.LIBRARY, null, HeadingOnly, true, true);
         assertStuff(BasicDownloadState.NOT_STARTED, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.NOT_STARTED, null, HeadingOnly, true, true);
+    }
+    
+    public void testHeadingOnlyForSpam() {
         mock.setSpam(true);
         assertStuff(BasicDownloadState.NOT_STARTED, "bar", HeadingOnly, true, true);
+    }
+    
+    public void testHeadingAndMetadataOnly() {
+        mock.setHeading("bar");
+        mock.getProperties().put(PropertyKey.NAME, "foo");
+        assertStuff(BasicDownloadState.NOT_STARTED, "foo", HeadingAndMetadata, true, false);
     }
 
     private void assertStuff(BasicDownloadState state, String search, RowDisplayConfig config, boolean subHeadingEmpty, boolean metadataNull) {

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
+import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingAndMetadata;
 import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 import static org.limewire.ui.swing.util.I18n.trn;
 
@@ -318,7 +319,8 @@ implements TableCellEditor, TableCellRenderer {
     
     private void populateOther(RowDisplayResult result) {
         metadataLabel.setText("");
-        if (result.getConfig() != HeadingSubHeadingAndMetadata) { 
+        RowDisplayConfig config = result.getConfig();
+        if (config != HeadingSubHeadingAndMetadata && config != RowDisplayConfig.HeadingAndMetadata) { 
             return;
         }
         
@@ -383,8 +385,12 @@ implements TableCellEditor, TableCellRenderer {
             searchResultTextPanel.remove(metadataLabel);
             break;
         case HeadingAndSubheading:
-            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
+            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350");
             searchResultTextPanel.remove(metadataLabel);
+            break;
+        case HeadingAndMetadata:
+            searchResultTextPanel.remove(subheadingLabel);
+            searchResultTextPanel.add(metadataLabel, "cell 0 1, wmin 350");
             break;
         case HeadingSubHeadingAndMetadata:
             searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
