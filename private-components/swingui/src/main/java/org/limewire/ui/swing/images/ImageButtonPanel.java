@@ -1,7 +1,11 @@
 package org.limewire.ui.swing.images;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 import javax.swing.Action;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -28,10 +32,27 @@ public class ImageButtonPanel extends JPanel {
     /**
      * For painting a cell editor, actions are needed since the button is clickable
      */
-    public ImageButtonPanel(Action unshareAction) {
+    public ImageButtonPanel(Action unshareAction, final ImageList imageList) {
         setOpaque(false);
 
-        UnshareButton b = new UnshareButton(unshareAction);
+        final UnshareButton b = new UnshareButton(unshareAction);
+        b.addMouseListener(new MouseListener(){
+            @Override
+            public void mouseClicked(MouseEvent e) {}
+            @Override
+            public void mouseEntered(MouseEvent e) {}
+            @Override
+            public void mouseExited(MouseEvent e) {}
+            @Override
+            public void mouseReleased(MouseEvent e) {}
+            //select the cell in the table if it was clicked
+            @Override
+            public void mousePressed(MouseEvent e) {
+                int index = imageList.locationToIndex(SwingUtilities.convertPoint(b, e.getPoint(), imageList));
+                if( index > -1)
+                    imageList.setSelectedIndex(index);
+            }
+        });
         
         setLayout(new MigLayout("fill, insets 0 6 0 6"));
         
