@@ -39,6 +39,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
+import com.limegroup.gnutella.ActiveLimeWireCheck;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
@@ -263,12 +264,12 @@ public final class Initializer {
         }
         
         // Exit if another LimeWire is already running...
-//        ActiveLimeWireCheck activeLimeWireCheck = new ActiveLimeWireCheck(args, StartupSettings.ALLOW_MULTIPLE_INSTANCES.getValue());
-//        stopwatch.resetAndLog("Create ActiveLimeWireCheck");
-//        if (activeLimeWireCheck.checkForActiveLimeWire()) {
-//            System.exit(0);
-//        }
-//        stopwatch.resetAndLog("Run ActiveLimeWireCheck");
+        ActiveLimeWireCheck activeLimeWireCheck = new ActiveLimeWireCheck(args, StartupSettings.ALLOW_MULTIPLE_INSTANCES.getValue());
+        stopwatch.resetAndLog("Create ActiveLimeWireCheck");
+        if (activeLimeWireCheck.checkForActiveLimeWire()) {
+            System.exit(0);
+        }
+        stopwatch.resetAndLog("Run ActiveLimeWireCheck");
     }
     
     /** Wires together LimeWire. */
