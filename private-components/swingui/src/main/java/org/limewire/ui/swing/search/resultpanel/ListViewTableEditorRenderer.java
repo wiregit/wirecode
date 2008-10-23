@@ -254,7 +254,7 @@ implements TableCellEditor, TableCellRenderer {
 
         searchResultTextPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "5[]0[]0[]0"));
         searchResultTextPanel.setOpaque(false);
-        searchResultTextPanel.add(heading, "wrap, wmin 350");
+        searchResultTextPanel.add(heading, "wrap");
         searchResultTextPanel.add(subheadingLabel, "wrap, wmin 350");
         searchResultTextPanel.add(metadataLabel, "wmin 350");
 
