@@ -4,6 +4,6 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 
 public interface SearchHeadingDocumentBuilder {
 
-    String getHeadingDocument(String heading, BasicDownloadState downloadState, boolean mouseOver);
+    String getHeadingDocument(String heading, BasicDownloadState downloadState, boolean mouseOver, boolean isSpam);
 
 }

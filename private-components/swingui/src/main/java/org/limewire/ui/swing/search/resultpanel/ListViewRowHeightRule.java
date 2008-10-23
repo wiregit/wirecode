@@ -27,6 +27,7 @@ public interface ListViewRowHeightRule {
         String getSubheading();
         PropertyMatch getMetadata();
         RowDisplayConfig getConfig();
+        boolean isSpam();
     }
     
     public static interface PropertyMatch {

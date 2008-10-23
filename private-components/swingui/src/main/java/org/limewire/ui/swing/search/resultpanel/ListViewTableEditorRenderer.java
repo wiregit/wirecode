@@ -313,7 +313,7 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populateHeading(RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {
-        this.heading.setText(headingBuilder.getHeadingDocument(result.getHeading(), downloadState, isMouseOver));
+        this.heading.setText(headingBuilder.getHeadingDocument(result.getHeading(), downloadState, isMouseOver, result.isSpam()));
     }
     
     private void populateOther(RowDisplayResult result) {

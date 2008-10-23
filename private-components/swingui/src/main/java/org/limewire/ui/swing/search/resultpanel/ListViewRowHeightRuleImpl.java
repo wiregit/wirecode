@@ -31,7 +31,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         case DOWNLOADING:
         case DOWNLOADED:
         case LIBRARY:
-            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null);
+            return new RowDisplayResultImpl(HeadingOnly, vsr.getHeading(), null, null, vsr.isSpam());
         case NOT_STARTED:
             String heading = vsr.getHeading();
             String highlightedHeading = highlightMatches(heading, searchText);
@@ -48,10 +48,10 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             
                 PropertyMatch propertyMatch = getPropertyMatch(vsr, searchText);
                 
-                return new RowDisplayResultImpl(HeadingSubHeadingAndMetadata, highlightedHeading, propertyMatch, highlightedSubheading);
+                return new RowDisplayResultImpl(HeadingSubHeadingAndMetadata, highlightedHeading, propertyMatch, highlightedSubheading, vsr.isSpam());
             }
             
-            return new RowDisplayResultImpl(HeadingAndSubheading, highlightedHeading, null, highlightedSubheading);
+            return new RowDisplayResultImpl(HeadingAndSubheading, highlightedHeading, null, highlightedSubheading, vsr.isSpam());
             
         default:
             throw new UnsupportedOperationException("Unhandled download state: " + vsr.getDownloadState());
@@ -117,13 +117,15 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         private final String heading;
         private final String subheading;
         private final PropertyMatch metadata;
+        private final boolean spam;
         
         public RowDisplayResultImpl(RowDisplayConfig config, String heading, PropertyMatch metadata,
-                String subheading) {
+                String subheading, boolean spam) {
             this.config = config;
             this.heading = heading;
             this.metadata = metadata;
             this.subheading = subheading;
+            this.spam = spam;
         }
 
         @Override
@@ -144,6 +146,11 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         @Override
         public String getSubheading() {
             return subheading;
+        }
+
+        @Override
+        public boolean isSpam() {
+            return spam;
         }
     }
     

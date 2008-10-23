@@ -18,23 +18,27 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
             "<body>";
     static String DOCUMENT_END = "</body></html>";
 
-    public String getHeadingDocument(String heading, BasicDownloadState downloadState, boolean mouseOver) {
+    public String getHeadingDocument(String heading, BasicDownloadState downloadState, boolean mouseOver, boolean isSpam) {
         heading = heading.replace("<html>", "").replace("</html>", "");
         StringBuilder bldr = new StringBuilder();
         bldr.append(DOCUMENT_START);
         String headingText = wrapHeading(heading, false);
-        switch(downloadState) {
-        case DOWNLOADING:
-            bldr.append(tr("You are <a href=\"#downloading\">downloading</a> {0}", headingText));
-            break;
-        case NOT_STARTED:
-            bldr.append(wrapHeading(heading, mouseOver));
-            break;
-        case DOWNLOADED:
-        case LIBRARY:
-            String content = tr("{0} is in <a href=\"#library\">Your Library</a>", headingText);
-            bldr.append(content);
-            break;
+        if (isSpam) {
+            bldr.append(tr("{0} is Spam", headingText));
+        } else {
+            switch(downloadState) {
+            case DOWNLOADING:
+                bldr.append(tr("You are <a href=\"#downloading\">downloading</a> {0}", headingText));
+                break;
+            case NOT_STARTED:
+                bldr.append(wrapHeading(heading, mouseOver));
+                break;
+            case DOWNLOADED:
+            case LIBRARY:
+                String content = tr("{0} is in <a href=\"#library\">Your Library</a>", headingText);
+                bldr.append(content);
+                break;
+            }
         }
         bldr.append(DOCUMENT_END);
         return bldr.toString();
