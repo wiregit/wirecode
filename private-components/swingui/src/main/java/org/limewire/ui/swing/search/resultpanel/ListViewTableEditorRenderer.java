@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
-import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingAndMetadata;
 import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 import static org.limewire.ui.swing.util.I18n.trn;
 
@@ -249,7 +248,7 @@ implements TableCellEditor, TableCellRenderer {
         metadataLabel.setForeground(metadataLabelColor);
         metadataLabel.setFont(metadataFont);
         
-        JXPanel downloadPanel = new JXPanel(new MigLayout("insets 7 0 0 5", "0[]", "0[top]0"));
+        JXPanel downloadPanel = new JXPanel(new MigLayout("insets 7 0 0 5", "0[]", "0[]0"));
         downloadPanel.setOpaque(false);
         downloadPanel.add(itemIconLabel);
 
@@ -260,7 +259,6 @@ implements TableCellEditor, TableCellRenderer {
         searchResultTextPanel.add(metadataLabel, "wmin 350");
 
         JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "5[][]0", "0[]0"));
-
         panel.setOpaque(false);
 
         panel.add(downloadPanel);
@@ -282,7 +280,6 @@ implements TableCellEditor, TableCellRenderer {
                         navigator.getNavItem(
                             NavCategory.LIBRARY,
                             LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select(vsr);
-                        
                     }
                 }
             }
