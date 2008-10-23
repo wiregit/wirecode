@@ -24,15 +24,19 @@ public class ListViewRowHeightRuleTest extends TestCase {
         assertStuff(BasicDownloadState.DOWNLOADING, "bar", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADED, "bar", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.LIBRARY, "bar", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.DOWNLOADING, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.DOWNLOADED, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.LIBRARY, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.NOT_STARTED, "", HeadingOnly, true, true);
         mock.setSpam(true);
         assertStuff(BasicDownloadState.NOT_STARTED, "bar", HeadingOnly, true, true);
     }
 
-    private void assertStuff(BasicDownloadState state, String search, RowDisplayConfig config, boolean subHeadingNull, boolean metadataNull) {
+    private void assertStuff(BasicDownloadState state, String search, RowDisplayConfig config, boolean subHeadingEmpty, boolean metadataNull) {
         mock.setDownloadState(state);
         RowDisplayResult result = rule.getDisplayResult(mock, search);
         assertEquals(config, result.getConfig());
-        assertEquals(subHeadingNull , result.getSubheading() == null);
+        assertEquals(subHeadingEmpty , result.getSubheading() == null || "".equals(result.getSubheading()));
         assertEquals(metadataNull, result.getMetadata() == null);
     }
     

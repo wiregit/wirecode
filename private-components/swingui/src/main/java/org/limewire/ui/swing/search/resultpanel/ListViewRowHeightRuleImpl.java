@@ -14,6 +14,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
+    private static final String EMPTY_STRING = "";
     private final Log LOG = LogFactory.getLog(getClass());
     private final PropertyKeyComparator AUDIO_COMPARATOR = 
         new PropertyKeyComparator(PropertyKey.GENRE, PropertyKey.BITRATE, PropertyKey.TRACK_NUMBER, PropertyKey.SAMPLE_RATE);
@@ -52,14 +53,31 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             
                 PropertyMatch propertyMatch = getPropertyMatch(vsr, searchText);
                 
-                return new RowDisplayResultImpl(HeadingSubHeadingAndMetadata, highlightedHeading, propertyMatch, highlightedSubheading, vsr.isSpam());
+                return newResult(HeadingSubHeadingAndMetadata, vsr, highlightedHeading, highlightedSubheading, propertyMatch);
             }
             
-            return new RowDisplayResultImpl(HeadingAndSubheading, highlightedHeading, null, highlightedSubheading, vsr.isSpam());
+            return newResult(HeadingAndSubheading, vsr, highlightedHeading, highlightedSubheading, null);
             
         default:
             throw new UnsupportedOperationException("Unhandled download state: " + vsr.getDownloadState());
         }
+    }
+
+    private RowDisplayResultImpl newResult(RowDisplayConfig config, VisualSearchResult vsr, String heading,
+            String subheading, PropertyMatch propertyMatch) {
+        if (emptyOrNull(subheading)) {
+            if (propertyMatch == null || (propertyMatch.getKey() == null || EMPTY_STRING.equals(propertyMatch.getKey()))) {
+                config = HeadingOnly;
+            } else {
+                //TODO - Subheading empty but metadata is not, need another config state
+            }
+        }
+        
+        return new RowDisplayResultImpl(config, heading, propertyMatch, subheading, vsr.isSpam());
+    }
+
+    private boolean emptyOrNull(String val) {
+        return val == null || EMPTY_STRING.equals(val.trim());
     }
     
     private PropertyMatch getPropertyMatch(VisualSearchResult vsr, String searchText) {
