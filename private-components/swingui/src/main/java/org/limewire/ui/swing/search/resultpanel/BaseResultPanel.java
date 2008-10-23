@@ -9,6 +9,7 @@ import java.util.Calendar;
 
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -18,6 +19,8 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
 import org.limewire.ui.swing.search.ModeListener;
@@ -27,16 +30,19 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
 
 import ca.odell.glazedlists.EventList;
-
-import com.google.inject.assistedinject.AssistedInject;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     
-    private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory; 
+    private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
+    private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
     
     private static final int TABLE_ROW_HEIGHT = 26;
     private static final int ROW_HEIGHT = 56;
@@ -50,7 +56,6 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     
     private Scrollable visibileComponent;
     
-    @AssistedInject
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
@@ -58,7 +63,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
-            Navigator navigator, RemoteHostActions remoteHostActions, SearchResultProperties properties) {
+            Navigator navigator, RemoteHostActions remoteHostActions, SearchResultProperties properties, 
+            ListViewRowHeightRule rowHeightRule) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         
@@ -68,7 +74,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         setLayout(layout);
                 
-        configureList(eventList, preserver, navigator, searchInfo, remoteHostActions, properties);
+        configureList(eventList, preserver, navigator, searchInfo, remoteHostActions, properties, rowHeightRule);
         configureTable(eventList, tableFormat, navigator);
  
         add(resultsList, ModeListener.Mode.LIST.name());
@@ -77,11 +83,13 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
-            SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final SearchResultProperties properties) {
+            final SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final SearchResultProperties properties, 
+            final ListViewRowHeightRule rowHeightRule) {
         resultsList = new ListViewTable();
         resultsList.setShowGrid(true, false);
+        //TODO - Get rid of this if the simplified list view stays
         preserver.addRowPreservationListener(resultsList);
-
+        
         resultsList.setEventList(eventList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();
         resultsList.setTableFormat(tableFormat);
@@ -119,7 +127,40 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 //        resultsList.getColumnModel().getColumn(2).setMaxWidth(ListViewTableFormat.ACTIONS_WIDTH);
         
         resultsList.setRowHeightEnabled(true);
-        //TODO: add listener to table model to set row heights based on contents of the search results
+        //add listener to table model to set row heights based on contents of the search results
+        eventList.addListEventListener(new ListEventListener<VisualSearchResult>() {
+            @Override
+            public void listChanged(ListEvent<VisualSearchResult> listChanges) {
+                
+                final EventTableModel model = (EventTableModel) resultsList.getModel();
+                if (model.getRowCount() == 0) {
+                    return;
+                }
+                
+                //Push row resizing to the end of the event dispatch queue
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        long loopStart = System.currentTimeMillis();
+                        for(int row = 0; row < model.getRowCount(); row++) {
+                            VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
+                            long start = System.currentTimeMillis();
+                            RowDisplayResult result = 
+                                rowHeightRule.getDisplayResult(vsr, searchInfo.getQuery());
+                            long end = System.currentTimeMillis();
+                            int newRowHeight = result.getConfig().getRowHeight();
+                            if (resultsList.getRowHeight(row) != newRowHeight) {
+                                LOG.debugf("Row: {0} vsr: {1} config: {2} elapsed: {3}", row, vsr.getHeading(), 
+                                        result.getConfig(), (end - start));
+                                resultsList.setRowHeight(row, newRowHeight);
+                            }
+                            long loopEnd = System.currentTimeMillis() - loopStart;
+                            LOG.debugf("Total loop time: {0}", loopEnd);
+                        }
+                    }
+                });
+            }
+        });
         resultsList.setRowHeight(ROW_HEIGHT);
         
         resultsList.addMouseListener(new ResultDownloaderAdaptor());
@@ -149,7 +190,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
-
+        
         CalendarTableCellRenderer calendarRenderer =
             new CalendarTableCellRenderer();
         ComponentTableCellRenderer componentRenderer =

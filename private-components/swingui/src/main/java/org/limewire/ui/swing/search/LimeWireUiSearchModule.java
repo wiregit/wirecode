@@ -10,6 +10,8 @@ import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule;
+import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRuleImpl;
 import org.limewire.ui.swing.search.resultpanel.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.OtherResultsPanel;
@@ -85,5 +87,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(SearchResultFromWidgetFactory.class).toProvider(
                 FactoryProvider.newFactory(
                         SearchResultFromWidgetFactory.class, SearchResultFromWidget.class));
+        
+        bind(ListViewRowHeightRule.class).to(ListViewRowHeightRuleImpl.class);
     }
 }

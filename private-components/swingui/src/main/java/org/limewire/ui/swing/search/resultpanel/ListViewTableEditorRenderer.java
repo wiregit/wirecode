@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
+import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.BorderLayout;
@@ -15,8 +16,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -37,9 +36,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
@@ -49,6 +46,9 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.PropertyMatch;
+import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig;
+import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.RowColorResolver;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -70,20 +70,8 @@ implements TableCellEditor, TableCellRenderer {
     private static final String HTML = "<html>";
     private static final String CLOSING_HTML_TAG = "</html>";
     private final Log LOG = LogFactory.getLog(getClass());
-    private final PropertyKeyComparator AUDIO_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.GENRE, PropertyKey.BITRATE, PropertyKey.TRACK_NUMBER, PropertyKey.SAMPLE_RATE);
-    private final PropertyKeyComparator VIDEO_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.YEAR, PropertyKey.RATING, PropertyKey.COMMENTS, PropertyKey.HEIGHT, 
-                                  PropertyKey.WIDTH, PropertyKey.BITRATE);
-    private final PropertyKeyComparator DOCUMENTS_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.DATE_CREATED, PropertyKey.AUTHOR);
-    private final PropertyKeyComparator PROGRAMS_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.PLATFORM, PropertyKey.COMPANY);
 
-    
-//    public static final int WIDTH = 740;
-
-    private String searchText;
+    private final String searchText;
     @Resource private Icon similarResultsIcon;
     @Resource private Color headingLabelColor;
     @Resource private Color subHeadingLabelColor;
@@ -98,21 +86,18 @@ implements TableCellEditor, TableCellRenderer {
     
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
-//    private final RowColorResolver<VisualSearchResult> rowColorResolver;
+    private final ListViewRowHeightRule rowHeightRule;
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
     private JXHyperlink similarButton = new JXHyperlink();
-//    private JLabel heading = new JLabel();
     private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new JLabel();
     private JLabel metadataLabel = new JLabel();
     private JXPanel rightPanel = new JXPanel();
     private JXPanel editorComponent;
-//    private final JXHyperlink downloadingLink = new JXHyperlink();
 
     private VisualSearchResult vsr;
-//    private int column;
     private JTable table;
     private JComponent similarResultIndentation;
     private JPanel indentablePanel;
@@ -130,14 +115,15 @@ implements TableCellEditor, TableCellRenderer {
         @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
         @Assisted RowColorResolver<VisualSearchResult> colorResolver,
-        SearchHeadingDocumentBuilder headingBuilder) {
+        SearchHeadingDocumentBuilder headingBuilder,
+        ListViewRowHeightRule rowHeightRule) {
 
         this.categoryIconManager = categoryIconManager;
         
         this.actionEditor = actionEditor;
         this.searchText = searchText;
         this.headingBuilder = headingBuilder;
-//        this.rowColorResolver = colorResolver;
+        this.rowHeightRule = rowHeightRule;
         
         GuiUtils.assignResources(this);
 
@@ -148,80 +134,6 @@ implements TableCellEditor, TableCellRenderer {
         makePanel(navigator);
     }
 
-    /**
-     * Adds an HTML bold tag around every occurrence of highlightText.
-     * Note that comparisons are case insensitive.
-     * @param text the text to be modified
-     * @return the text containing bold tags
-     */
-    private String highlightMatches(String sourceText) {
-        boolean haveSearchText = searchText != null && searchText.length() > 0;
-
-        // If there is no search or filter text then return sourceText as is.
-        if (!haveSearchText)
-            return sourceText;
-        
-        return SearchHighlightUtil.highlight(searchText, sourceText);
-    }
-
-    private PropertyMatch getPropertyMatch(VisualSearchResult vsr) {
-        if(searchText == null)
-            return null;
-        
-        ArrayList<PropertyKey> properties = new ArrayList<PropertyKey>(vsr.getProperties().keySet());
-        Collections.sort(properties, getComparator());
-        for (PropertyKey key : properties) {
-            String value = vsr.getPropertyString(key);
-
-            String propertyMatch = highlightMatches(value);
-            if (value != null && isDifferentLength(value, propertyMatch)) {
-                String betterKey = key.toString().toLowerCase();
-                betterKey = betterKey.replace('_', ' ');
-                return new PropertyMatch(betterKey, propertyMatch);
-            }
-        }
-
-        // No match found.
-        return null;
-    }
-
-    private Comparator<PropertyKey> getComparator() {
-        switch (getCategory()) {
-        case AUDIO:
-            return AUDIO_COMPARATOR;
-        case VIDEO:
-            return VIDEO_COMPARATOR;
-        case DOCUMENT:
-            return DOCUMENTS_COMPARATOR;
-        default:
-            return PROGRAMS_COMPARATOR;
-        }
-    }
-    
-    private static class PropertyKeyComparator implements Comparator<PropertyKey> {
-        private final PropertyKey[] keyOrder;
-
-        public PropertyKeyComparator(PropertyKey... keys) {
-            this.keyOrder = keys;
-        }
-
-        @Override
-        public int compare(PropertyKey o1, PropertyKey o2) {
-            if (o1 == o2) {
-                return 0;
-            }
-            
-            for(PropertyKey key : keyOrder) {
-                if (o1 == key) {
-                    return -1;
-                } else if (o2 == key) {
-                    return 1;
-                }
-            }
-            return 0;
-        }
-    }
-
     public Object getCellEditorValue() {
         return vsr;
     }
@@ -230,7 +142,6 @@ implements TableCellEditor, TableCellRenderer {
         final JTable table, Object value, boolean isSelected, int row, final int col) {
 
         vsr = (VisualSearchResult) value;
-//        column = col;
         this.table = table;
         LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
 
@@ -239,18 +150,7 @@ implements TableCellEditor, TableCellRenderer {
                     table, value, isSelected, row, col);
         
         if (editorComponent == null) {
-            editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
-
-//                @Override
-//                public void setBackground(Color bg) {
-//                    super.setBackground(bg);
-//                    if (column == 2) {
-//                        actionButtonPanel.setBackground(bg);
-//                    }
-//                }
-            };
-            
-//            actionButtonPanel.configureForListView(table);
+            editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0"));
             
             itemIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -327,25 +227,18 @@ implements TableCellEditor, TableCellRenderer {
         heading.setContentType("text/html");
         heading.setEditable(false);
         heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
-        
-//        heading.setForeground(headingLabelColor);
-//        heading.setFont(headingFont);
-//        heading.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        heading.setOpaque(false);
         
         heading.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                //TODO
-//                FontUtils.underline(heading);
-                populateHeading(vsr, true);
+                populateHeading(rowHeightRule.getDisplayResult(vsr, searchText), vsr.getDownloadState(), true);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                //TODO
-//                FontUtils.removeUnderline(heading);
-                populateHeading(vsr, false);
+                populateHeading(rowHeightRule.getDisplayResult(vsr, searchText), vsr.getDownloadState(), false);
             }
         });
 
@@ -372,7 +265,6 @@ implements TableCellEditor, TableCellRenderer {
         panel.add(downloadPanel);
         panel.add(searchResultTextPanel);
         
-//        FontUtils.changeSize(downloadingLink, -2.0f);
         heading.addHyperlinkListener(new HyperlinkListener() {
 
             @Override
@@ -394,22 +286,6 @@ implements TableCellEditor, TableCellRenderer {
                 }
             }
         });
-//        downloadingLink.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                BasicDownloadState downloadState = vsr.getDownloadState();
-//                if (downloadState == BasicDownloadState.DOWNLOADING) {
-//                    navigator.getNavItem(
-//                        NavCategory.DOWNLOAD,
-//                        MainDownloadPanel.NAME).select(vsr);
-//                } else if (downloadState == BasicDownloadState.DOWNLOADED || downloadState == BasicDownloadState.LIBRARY) {
-//                    navigator.getNavItem(
-//                        NavCategory.LIBRARY,
-//                        LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select(vsr);
-//                    
-//                }
-//            }
-//        });
 
         return panel;
     }
@@ -431,43 +307,28 @@ implements TableCellEditor, TableCellRenderer {
         return indentablePanel;
     }
 
-//    private void markAsSpam(boolean spam) {
-//        float opacity = spam ? 0.2f : 1.0f;
-//        editorComponent.setAlpha(opacity);
-//    }
-
     private void populateFrom(VisualSearchResult vsr) {
         Collection<RemoteHost> sources = vsr.getSources();
         fromWidget.setPeople(new ArrayList<RemoteHost>(sources));
     }
 
-    /**
-     * Returns a value to indicate whether the heading was decorated to highlight
-     * parts of the content that match search terms
-     * @param isMouseOver TODO
-     */
-    private boolean populateHeading(VisualSearchResult vsr, boolean isMouseOver) {
-        String heading = vsr.getHeading();
-        String highlightMatches = highlightMatches(heading);
-        LOG.debugf("Heading: {0} highlightedMatches: {1}", heading, highlightMatches);
-        this.heading.setText(headingBuilder.getHeadingDocument(highlightMatches, vsr.getDownloadState(), isMouseOver));
-        return isDifferentLength(heading, highlightMatches);
+    private void populateHeading(RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {
+        this.heading.setText(headingBuilder.getHeadingDocument(result.getHeading(), downloadState, isMouseOver));
     }
-
-    private void populateOther(VisualSearchResult vsr, boolean shouldHidePropertyMatches) {
+    
+    private void populateOther(RowDisplayResult result) {
         metadataLabel.setText("");
-        if (shouldHidePropertyMatches) { 
+        if (result.getConfig() != HeadingSubHeadingAndMetadata) { 
             return;
         }
         
-        PropertyMatch pm = getPropertyMatch(vsr);
+        PropertyMatch pm = result.getMetadata();
         
         if (pm != null) {
-            String html = pm.highlightedValue;
-            String tag = HTML;
+            String html = pm.getHighlightedValue();
             // Insert the following: the key, a colon and a space after the html start tag, then the closing tags.
-            html = tag + pm.key + ": " + 
-                    html.substring(tag.length(), html.length() - CLOSING_HTML_TAG.length()) + CLOSING_HTML_TAG;
+            html = html.replace(HTML, "").replace(CLOSING_HTML_TAG, "");
+            html = HTML + pm.getKey() + ":" + html + CLOSING_HTML_TAG;
             metadataLabel.setText(html);
         }
     }
@@ -478,8 +339,6 @@ implements TableCellEditor, TableCellRenderer {
         if (column == 0) {
             if (vsr.getSimilarityParent() != null) {
                 indentablePanel.add(similarResultIndentation, "cell 0 0, height 100%");
-//                Color backgroundColor = rowColorResolver.getColorForItemRow(vsr.getSimilarityParent());
-//                similarResultIndentation.setBackground(backgroundColor);
                 similarResultIndentation.setBackground(similarResultsBackgroundColor);
             } else {
                 indentablePanel.remove(similarResultIndentation);
@@ -487,26 +346,15 @@ implements TableCellEditor, TableCellRenderer {
             
             itemIconLabel.setIcon(getIcon(vsr));
 
-            boolean headingDecorated = populateHeading(vsr, false);
-
-            populateSearchResultTextPanel();
+            RowDisplayResult result = rowHeightRule.getDisplayResult(vsr, searchText);
             
-            switch (vsr.getDownloadState()) {
-            case NOT_STARTED:
-//                downloadingLink.setText("");
-                boolean subheadingDecorated = populateSubheading(vsr);
-                populateOther(vsr, headingDecorated || subheadingDecorated);
-                break;
-//            case DOWNLOADING:
-//                downloadingLink.setText(hyperlinkText(tr("Downloading...")));
-//                break;
-//            case DOWNLOADED:
-//                downloadingLink.setText(hyperlinkText(tr("Download Complete")));
-//                break;
-//            case LIBRARY:
-//                downloadingLink.setText(hyperlinkText(tr("In Your Library")));
-//                break;
-            }
+            populateHeading(result, vsr.getDownloadState(), false);
+            
+            populateSearchResultTextPanel(result.getConfig());
+
+            populateSubheading(result);
+            populateOther(result);
+            
             
         } else if (column == 1) {
             similarButton.setVisible(getSimilarResultsCount() > 0);
@@ -516,12 +364,7 @@ implements TableCellEditor, TableCellRenderer {
                 similarButton.setText(getHideShowSimilarFilesButtonText());
             }
             
-        } else  { //col 2
-//            actionButtonPanel.setDownloadingDisplay(vsr);
-//            rightPanel.removeAll();
-//            rightPanel.add(actionButtonPanel);
-        }
-//        markAsSpam(vsr.isSpam());
+        } 
     }
 
     private Icon getIcon(VisualSearchResult vsr) {
@@ -533,17 +376,19 @@ implements TableCellEditor, TableCellRenderer {
         return categoryIconManager.getIcon(vsr.getCategory());
     }
 
-    private void populateSearchResultTextPanel() {
-        if (vsr.getDownloadState() == BasicDownloadState.NOT_STARTED) {
-//            searchResultTextPanel.remove(downloadingLink);
-            
-            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
-            searchResultTextPanel.add(metadataLabel, "cell 0 2, wmin 350");
-        } else {
+    private void populateSearchResultTextPanel(RowDisplayConfig config) {
+        switch(config) {
+        case HeadingOnly:
             searchResultTextPanel.remove(subheadingLabel);
             searchResultTextPanel.remove(metadataLabel);
-            
-//            searchResultTextPanel.add(downloadingLink, "cell 0 1");
+            break;
+        case HeadingAndSubheading:
+            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
+            searchResultTextPanel.remove(metadataLabel);
+            break;
+        case HeadingSubHeadingAndMetadata:
+            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
+            searchResultTextPanel.add(metadataLabel, "cell 0 2, wmin 350");
         }
     }
 
@@ -551,17 +396,8 @@ implements TableCellEditor, TableCellRenderer {
      * Returns a value to indicate whether the subheading was decorated to highlight
      * parts of the content that match search terms
      */
-    private boolean populateSubheading(VisualSearchResult vsr) {
-        String subheading = vsr.getSubHeading();
-
-        String highlightMatches = highlightMatches(subheading);
-        LOG.debugf("Subheading: {0} highlightedMatches: {1}", subheading, highlightMatches);
-        subheadingLabel.setText(highlightMatches);
-        return isDifferentLength(subheading, highlightMatches);
-    }
-
-    private boolean isDifferentLength(String str1, String str2) {
-        return str1 != null && str2 != null && str1.length() != str2.length();
+    private void populateSubheading(RowDisplayResult result) {
+        subheadingLabel.setText(result.getSubheading());
     }
 
     private String getHideShowSimilarFilesButtonText() {
@@ -570,18 +406,5 @@ implements TableCellEditor, TableCellRenderer {
             return hyperlinkText(trn("Hide 1 similar file", "Hide {0} similar files", similarResultsCount));
         }
         return hyperlinkText(trn("Show 1 similar file", "Show {0} similar files", similarResultsCount));
-    }
-
-    private Category getCategory() {
-        return vsr.getCategory();
-    }
-
-    private static class PropertyMatch {
-        private final String key;
-        private final String highlightedValue;
-        PropertyMatch(String key, String highlightedProperty) {
-            this.key = key;
-            this.highlightedValue = highlightedProperty;
-        }
     }
 }

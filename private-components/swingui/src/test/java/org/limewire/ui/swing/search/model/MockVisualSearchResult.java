@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.model;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +16,10 @@ import org.limewire.core.api.search.SearchResult.PropertyKey;
 public class MockVisualSearchResult implements VisualSearchResult {
     private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();
     private String name;
+    private String subheading = "";
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private VisualSearchResult similarityParent;
+    private HashMap<PropertyKey, Object> properties = new HashMap<PropertyKey, Object>();
     
     public MockVisualSearchResult(String name) {
         this.name = name;
@@ -30,8 +33,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public Category getCategory() {
-        // TODO Auto-generated method stub
-        return null;
+        return Category.AUDIO;
     }
 
     @Override
@@ -53,8 +55,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public Map<PropertyKey, Object> getProperties() {
-        // TODO Auto-generated method stub
-        return null;
+        return properties;
     }
 
     @Override
@@ -68,8 +69,8 @@ public class MockVisualSearchResult implements VisualSearchResult {
 
     @Override
     public String getPropertyString(PropertyKey key) {
-        // TODO Auto-generated method stub
-        return null;
+        Object val = getProperties().get(key);
+        return val == null ? null : val.toString();
     }
     
     public void setSimilarResults(List<VisualSearchResult> similarResults) {
@@ -178,14 +179,22 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public String getMagnetLink() {
         return null;
     }
+    
+    public void setHeading(String heading) {
+        this.name = heading;
+    }
 
     @Override
     public String getHeading() {
         return name;
     }
+    
+    public void setSubHeading(String subheading) {
+        this.subheading = subheading;
+    }
 
     @Override
     public String getSubHeading() {
-        return "";
+        return subheading;
     }
 }

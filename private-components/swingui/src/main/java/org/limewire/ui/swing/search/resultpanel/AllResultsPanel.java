@@ -26,10 +26,11 @@ public class AllResultsPanel extends BaseResultPanel {
         Navigator navigator,
         RemoteHostActions remoteHostActions,
         ListViewTableEditorRendererFactory listViewEditorRendererFactory,
-        SearchResultProperties properties) {
+        SearchResultProperties properties,
+        ListViewRowHeightRule rowHeightRule) {
         
         super(listViewEditorRendererFactory, eventList, tableFormat,
-            resultDownloader, search, searchInfo, preserver, navigator, remoteHostActions, properties);
+            resultDownloader, search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
         
     }
 }

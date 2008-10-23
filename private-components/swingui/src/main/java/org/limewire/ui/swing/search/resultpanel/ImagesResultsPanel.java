@@ -25,11 +25,12 @@ public class ImagesResultsPanel extends BaseResultPanel {
         Navigator navigator,
         RemoteHostActions remoteHostActions,
         ListViewTableEditorRendererFactory listViewEditorRendererFactory,
-        SearchResultProperties properties) {
+        SearchResultProperties properties,
+        ListViewRowHeightRule rowHeightRule) {
         
         super(listViewEditorRendererFactory,
             eventList, new ImageTableFormat(), resultDownloader,
-            search, searchInfo, preserver, navigator, remoteHostActions, properties);
+            search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
         
     }
 }
