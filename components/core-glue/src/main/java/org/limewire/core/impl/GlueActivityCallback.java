@@ -7,14 +7,17 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.io.IpPort;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -34,7 +37,11 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     private final List<DownloadListener> downloadListeners = new CopyOnWriteArrayList<DownloadListener>();
 
-    public GlueActivityCallback() {
+    private final DownloadManager downloadManager;
+    
+    @Inject
+    public GlueActivityCallback(DownloadManager downloadManager) {
+        this.downloadManager = downloadManager;
         queryReplyListeners = new ConcurrentSkipListMap<byte[], List<QueryReplyListener>>(
                 GUID.GUID_BYTE_COMPARATOR);
     }
@@ -161,8 +168,11 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void handleTorrent(File torrentFile) {
-        // TODO Auto-generated method stub
-
+        try {
+            downloadManager.downloadTorrent(torrentFile, true);
+        } catch (SaveLocationException e) {
+          throw new UnsupportedOperationException("give user feedback", e);
+        }
     }
 
     public void installationCorrupted() {

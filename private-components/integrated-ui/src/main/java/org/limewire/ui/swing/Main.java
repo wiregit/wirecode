@@ -10,11 +10,10 @@ public class Main {
     
     public static void main(String[] args) {
         Frame splash = null;
-        Image splashImage = null;
+        Image splashImage = getSplashImage();
         
         // show initial splash screen only if there are no arguments
         if (args == null || args.length == 0) {
-            splashImage = getSplashImage();
             if(splashImage != null) {
                 splash = AWTSplashWindow.splash(splashImage);
             }

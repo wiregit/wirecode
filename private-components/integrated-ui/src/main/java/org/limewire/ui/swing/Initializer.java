@@ -43,6 +43,7 @@ import com.limegroup.gnutella.ActiveLimeWireCheck;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
+import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
 import com.limegroup.gnutella.util.MacOSXUtils;
@@ -125,7 +126,9 @@ public final class Initializer {
 //        stopwatch.resetAndLog("construct SetupManager");
 
         // Move from the AWT splash to the Swing splash & start early core.
+        //assuming not showing splash screen if there are program arguments
         switchSplashes(awtSplash, splashImage);
+        
         startEarlyCore(/*setupManager,*/ limeWireCore);
         
         // Initialize early UI components, display the setup manager (if necessary),
@@ -317,6 +320,7 @@ public final class Initializer {
         stopwatch.resetAndLog("Check for NIO dispatcher");
     }
     
+
     /**
      * Initializes any code that is dependent on external controls.
      * Specifically, GURLHandler & MacEventHandler on OS X,
@@ -324,8 +328,8 @@ public final class Initializer {
      * and processing any arguments that were passed to LimeWire.
      */ 
     private void runExternalChecks(LimeWireCore limeWireCore, String[] args) {        
-//        ExternalControl externalControl = limeWireCore.getExternalControl();
-//        stopwatch.resetAndLog("Get externalControl");
+        ExternalControl externalControl = limeWireCore.getExternalControl();
+        stopwatch.resetAndLog("Get externalControl");
 //        if(OSUtils.isMacOSX()) {
 //            GURLHandler.getInstance().enable(externalControl);
 //            stopwatch.resetAndLog("Enable GURL");
@@ -335,12 +339,12 @@ public final class Initializer {
         
         // Test for preexisting LimeWire and pass it a magnet URL if one
         // has been passed in.
-//        if (args.length > 0 && !args[0].equals("-startup")) {
-//            String arg = ExternalControl.preprocessArgs(args);
-//            stopwatch.resetAndLog("Preprocess args");
-//            externalControl.enqueueControlRequest(arg);
-//            stopwatch.resetAndLog("Enqueue control req");
-//        }
+        if (args.length > 0 && !args[0].equals("-startup")) {
+            String arg = ExternalControl.preprocessArgs(args);
+            stopwatch.resetAndLog("Preprocess args");
+            externalControl.enqueueControlRequest(arg);
+            stopwatch.resetAndLog("Enqueue control req");
+        }
     }
     
     /** Installs any system properties. */
