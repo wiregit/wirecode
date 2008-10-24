@@ -40,7 +40,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
         super(presence, connection, limePresence.getUser());
         address = new AtomicReference<Address>(Objects.nonNull(limePresence, "limePresence").getPresenceAddress());
-        authToken = new AtomicReference<byte []>();
+        authToken = new AtomicReference<byte []>(Objects.nonNull(limePresence, "authToken").getAuthToken());
     }
 
     @Override
