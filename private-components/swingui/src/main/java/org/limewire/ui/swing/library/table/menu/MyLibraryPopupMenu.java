@@ -26,6 +26,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
 
 public class MyLibraryPopupMenu extends JPopupMenu {
    
@@ -181,7 +182,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         public void actionPerformed(ActionEvent e) {
             FileUtils.unlockFile(getFile());
             libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
-            FileUtils.delete(getFile(), true);
+            //TODO offload delete from the event queue?
+            FileUtils.delete(getFile(), OSUtils.supportsTrash());
         }
 
     };
