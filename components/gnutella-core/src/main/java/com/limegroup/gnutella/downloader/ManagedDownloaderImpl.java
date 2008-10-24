@@ -661,6 +661,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case COMPLETE:
             case DISK_PROBLEM:
             case CORRUPT_FILE:
+            case INFECTED_FILE:
                 clearingNeeded = true;
                 setState(status);
                 break;
@@ -869,6 +870,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         case ABORTED:
         case DISK_PROBLEM:
         case CORRUPT_FILE:
+        case INFECTED_FILE:
         case INVALID:
             return true;
         }
@@ -1870,11 +1872,14 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     /**
-     * Verifies the completed file against the SHA1 hash and saves it.  If
-     * there is corruption, it asks the user whether to discard or keep the file 
-     * @return {@link DownloadStatus#COMPLETE} if all went fine, 
-     * {@link DownloadStatus#DISK_PROBLEM} if not.
-     * @throws InterruptedException if we get interrupted while waiting for user
+     * Verifies the completed file against the SHA1 hash, scans it for
+     * viruses, and saves it. If the file is corrupted, asks the user whether
+     * to discard or keep the file. 
+     * @return {@link DownloadStatus#COMPLETE} if all went fine,
+     * {@link DownloadStatus#CORRUPT_FILE} if the hash does not match,
+     * {@link DownloadStatus#INFECTED_FILE} if a virus is detected, or 
+     * {@link DownloadStatus#DISK_PROBLEM} if there's a problem saving the file.
+     * @throws InterruptedException if interrupted while waiting for the user's
      * response.
      */
     private DownloadStatus verifyAndSave() throws InterruptedException {
@@ -1886,6 +1891,30 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // TODO is this what cleanup Corrupt expects?
             cleanupCorrupt(incompleteFile, getSaveFile().getName());
             return DownloadStatus.CORRUPT_FILE;
+        }
+        // Scan the file for viruses
+        if(DownloadSettings.SCAN_FOR_VIRUSES.getValue()) {
+            String[] cmd = DownloadSettings.VIRUS_SCANNER.getValue();
+            String[] cmd1 = new String[cmd.length + 1];
+            for(int i = 0; i < cmd.length; i++)
+                cmd1[i] = cmd[i];
+            cmd1[cmd.length] = incompleteFile.getAbsolutePath();
+            try {
+                Process p = Runtime.getRuntime().exec(cmd1);
+                int exitCode = p.waitFor();
+                if(exitCode == 0) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug(getSaveFile().getName() + " is infected");
+                    incompleteFile.delete();
+                    return DownloadStatus.INFECTED_FILE;
+                } else if (exitCode != 0) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Virus scanner exit code " + exitCode);
+                }
+            } catch(Exception x) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Error while scanning for viruses: " + x);
+            }
         }
         
         // Save the file to disk.

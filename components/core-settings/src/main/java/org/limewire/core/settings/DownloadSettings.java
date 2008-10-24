@@ -106,5 +106,17 @@ public class DownloadSettings extends LimeProps {
     public static final ProbabilisticBooleanSetting REPORT_DISK_PROBLEMS =
         FACTORY.createRemoteProbabilisticBooleanSetting("REPORT_HTTP_DISK_PROBLEMS", 0f, 
                 "DownloadSettings.reportDiskProblems", 0f, 1f);
-        
+    
+    /**
+     * Whether to scan downloaded files for viruses
+     */
+    public static final BooleanSetting SCAN_FOR_VIRUSES =
+        FACTORY.createBooleanSetting("SCAN_FOR_VIRUSES", true);
+    
+    /**
+     * Location and command line arguments for the virus scanner
+     */
+    public static final StringArraySetting VIRUS_SCANNER =
+        FACTORY.createStringArraySetting("VIRUS_SCANNER",
+                new String[]{"/usr/bin/clamscan", "--quiet"}); // FIXME
 }

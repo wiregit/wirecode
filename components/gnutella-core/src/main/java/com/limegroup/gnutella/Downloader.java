@@ -28,6 +28,7 @@ public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadSt
         DISK_PROBLEM,
         WAITING_FOR_GNET_RESULTS,
         CORRUPT_FILE,
+        INFECTED_FILE,
         REMOTE_QUEUED,
         HASHING,
         SAVING,
