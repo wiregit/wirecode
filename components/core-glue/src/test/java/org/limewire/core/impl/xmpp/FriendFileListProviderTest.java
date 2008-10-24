@@ -2,11 +2,13 @@ package org.limewire.core.impl.xmpp;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.AUTH;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.protocol.BasicHttpContext;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.http.auth.ServerAuthState;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
 
@@ -68,7 +70,11 @@ public class FriendFileListProviderTest extends BaseTestCase {
         }});
         BasicHttpRequest request = new BasicHttpRequest("GET", "/friend/me%40me.com");
         request.addHeader(new BasicHeader(AUTH.WWW_AUTH_RESP, "Basic " + StringUtils.getASCIIString(Base64.encodeBase64(StringUtils.toUTF8Bytes("me@me.com:password")))));
-        Iterable<FileList> fileLists = friendFileListProvider.getFileList(request, new BasicHttpContext());
+        BasicHttpContext httpContext = new BasicHttpContext();
+        ServerAuthState serverAuthState = new ServerAuthState();
+        serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
+        httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
+        Iterable<FileList> fileLists = friendFileListProvider.getFileList(request, httpContext);
         assertSame(expectedFileList, fileLists.iterator().next());
         context.assertIsSatisfied();
     }
@@ -79,9 +85,13 @@ public class FriendFileListProviderTest extends BaseTestCase {
             will(returnValue(null));
         }});
         BasicHttpRequest request = new BasicHttpRequest("GET", "/friend/me%40me.com");
+        BasicHttpContext httpContext = new BasicHttpContext();
+        ServerAuthState serverAuthState = new ServerAuthState();
+        serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
+        httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
         request.addHeader(new BasicHeader(AUTH.WWW_AUTH_RESP, "Basic " + StringUtils.getASCIIString(Base64.encodeBase64(StringUtils.toUTF8Bytes("me@me.com:me@me.com")))));
         try {
-            friendFileListProvider.getFileList(request, new BasicHttpContext());
+            friendFileListProvider.getFileList(request, httpContext);
             fail("should have thrown exception");
         } catch (HttpException e) {
         }
