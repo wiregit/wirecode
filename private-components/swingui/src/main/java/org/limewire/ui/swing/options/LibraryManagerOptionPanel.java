@@ -7,11 +7,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
@@ -23,7 +23,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     private JCheckBox imageCheckBox;
     private JCheckBox docCheckBox;
     
-    private JTable libraryTable;
+    private LibraryManagerTreeTable treeTable;
     
     private JButton okButton;
     private JButton cancelButton;
@@ -36,7 +36,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         
         add(new JLabel(I18n.tr("LimeWire will automatically scan the folders below and place files in your library.")), "span 2, wrap");
     
-        add(new JScrollPane(libraryTable), "span 2, growx, wrap");
+        add(new JScrollPane(treeTable), "span 2, growx, wrap");
         add(addFolderButton, "skip 1, alignx right, wrap");
         
         add(new JLabel(I18n.tr("Add the following types of files to your Library")), "span 2, wrap");
@@ -48,8 +48,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     }
     
     private void createComponents(Action okAction, Action cancelAction) {
-        
-        libraryTable = new JTable();
+        treeTable = new LibraryManagerTreeTable();
         addFolderButton = new JButton(I18n.tr("Add New Folder"));
         
         musicCheckBox = new JCheckBox();
@@ -105,8 +104,12 @@ public class LibraryManagerOptionPanel extends OptionPanel {
 
     @Override
     public void initOptions() {
-        // TODO Auto-generated method stub
-        
+        //TODO: read folders from FileManager
+//        ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
+//        items.add(new LibraryManagerItemImpl(new File("C:\\ant"), false));
+//        items.add(new LibraryManagerItemImpl(new File("C:\\workspace"), true));
+//        
+//        treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));
     }
     
 }

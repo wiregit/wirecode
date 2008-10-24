@@ -175,7 +175,7 @@ public class FilteringOptionPanel extends OptionPanel {
     
         @Override
         public void initOptions() {
-            String[] allowedIps = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue(); System.out.println(allowedIps.length);
+            String[] allowedIps = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
             FilterModel model = new FilterModel(new ArrayList<String>(Arrays.asList(allowedIps)));
             filterTable.setModel(model);
         }
