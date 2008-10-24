@@ -38,9 +38,6 @@ import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionListen
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.MediaType; // TODO: convert NamedMediaType!
 
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.gui.GUIUtils;
-import com.limegroup.gnutella.gui.GuiCoreMediator;
 
 
 /**
@@ -579,7 +576,7 @@ public final class FileTypeOptionPanelManager {
         String newList = this.getExtensions();
               
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(newList);
-        GuiCoreMediator.getFileManager().loadSettings();
+        //GuiCoreMediator.getFileManager().loadSettings();
                
         SharingSettings.DISABLE_SENSITIVE.setValue(
                    this.disableSensitive == null 
@@ -708,7 +705,7 @@ public final class FileTypeOptionPanelManager {
             }
             
             Icon icon = null; // TODO: IconManager.instance().getIconForExtension(obj);
-            return icon != null ? icon : new GUIUtils.EmptyIcon(obj, 16, 16);
+            return null; // TODO: ? icon : new GUIUtils.EmptyIcon(obj, 16, 16);
         }
         
     }
@@ -759,13 +756,13 @@ public final class FileTypeOptionPanelManager {
             }
 
             if      (CUSTOM.equals(obj.toString())) {  // TODO: = old getName()??
-                Icon icon = GUIMediator.getThemeImage("custom");
+                Icon icon = null;// TODO:GUIMediator.getThemeImage("custom");
                 if (icon != null) {
                     return icon;
                 }
             }
             else if (OTHER.equals(obj.toString())) {  // TODO: = old getName()??
-                Icon icon = GUIMediator.getThemeImage("lime");
+                Icon icon = null;// TODO:GUIMediator.getThemeImage("lime");
                 if (icon != null) {
                     return icon;
                 }
