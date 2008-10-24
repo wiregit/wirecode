@@ -1,18 +1,12 @@
 package org.limewire.core.impl.xmpp;
 
-import java.util.Arrays;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.AUTH;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.protocol.BasicHttpContext;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.security.MACCalculator;
-import org.limewire.security.SecurityToken.TokenData;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
 
@@ -69,41 +63,19 @@ public class FriendFileListProviderTest extends BaseTestCase {
     public void testGetFileListToBrowse() throws Exception {
         final FileList expectedFileList = context.mock(FileList.class);
         context.checking(new Expectations() { {
-            one(calculator).getMACBytes(with(new BaseMatcher<TokenData>() {
-                @Override
-                public boolean matches(Object item) {
-                    TokenData tokenData = (TokenData)item;
-                    return Arrays.equals(tokenData.getData(), StringUtils.toUTF8Bytes("me@me.com"));
-                }
-                @Override
-                public void describeTo(Description description) {
-                }
-            }));
-            will(returnValue(StringUtils.toUTF8Bytes("password")));
-            one(fileManager).getBuddyFileList("me@me.com");
+            one(fileManager).getFriendFileList("me@me.com");
             will(returnValue(expectedFileList));
         }});
         BasicHttpRequest request = new BasicHttpRequest("GET", "/friend/me%40me.com");
         request.addHeader(new BasicHeader(AUTH.WWW_AUTH_RESP, "Basic " + StringUtils.getASCIIString(Base64.encodeBase64(StringUtils.toUTF8Bytes("me@me.com:password")))));
-        FileList fileList = friendFileListProvider.getFileList(request, new BasicHttpContext());
-        assertSame(expectedFileList, fileList);
+        Iterable<FileList> fileLists = friendFileListProvider.getFileList(request, new BasicHttpContext());
+        assertSame(expectedFileList, fileLists.iterator().next());
         context.assertIsSatisfied();
     }
     
     public void testGetFileListToBrowseWithNoFileList() throws Exception {
         context.checking(new Expectations() { {
-            one(calculator).getMACBytes(with(new BaseMatcher<TokenData>() {
-                @Override
-                public boolean matches(Object item) {
-                    TokenData tokenData = (TokenData)item;
-                    return Arrays.equals(tokenData.getData(), StringUtils.toUTF8Bytes("me@me.com"));
-                }
-                @Override
-                public void describeTo(Description description) {
-                }
-            }));
-            will(returnValue(StringUtils.toUTF8Bytes("me@me.com")));
-            one(fileManager).getBuddyFileList("me@me.com");
+            one(fileManager).getFriendFileList("me@me.com");
             will(returnValue(null));
         }});
         BasicHttpRequest request = new BasicHttpRequest("GET", "/friend/me%40me.com");
