@@ -26,7 +26,6 @@ import org.limewire.ui.swing.library.sharing.FileShareModel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -44,8 +43,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     
     public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format) {
         super(new LibraryTableModel<T>(libraryItems, format));
-        
-        GuiUtils.assignResources(this);
         
         this.format = format;
 
