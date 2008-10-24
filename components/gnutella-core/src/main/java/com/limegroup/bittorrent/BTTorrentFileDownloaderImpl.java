@@ -50,8 +50,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     private final BTMetaInfoFactory btMetaInfoFactory;
 
-    private final ActivityCallback activityCallback;
-
     private final EventListenerList<DownloadStatusEvent> eventListenerList;
 
     private DownloadStatus downloadStatus = DownloadStatus.QUEUED;
@@ -81,7 +79,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         this.httpExecutor = Objects.nonNull(httpExecutor, "httpExecutor");
         this.torrentManager = Objects.nonNull(torrentManager, "torrentMaanger");
         this.btMetaInfoFactory = Objects.nonNull(btMetaInfoFactory, "btMetaInfoFactory");
-        this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
         this.eventListenerList = new EventListenerList<DownloadStatusEvent>();
         addListener(this);
     }
@@ -115,15 +112,14 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
             if (body == null || body.length == 0)
                 throw new IOException("invalid response");
 
-            m = btMetaInfoFactory.createBTMetaInfoFromBytes(body);
-            synchronized (this) {
-                urn = m.getURN();
-            }
+            m = btMetaInfoFactory.createBTMetaInfoFromBytes(body);           
         } catch (SaveLocationException security) {
+            throw new UnsupportedOperationException("Need to implement feedback.", security);
             // TODO show warning
             // GUIMediator.showWarning(I18n.tr(
             // "The selected .torrent file may contain a security hazard."));
         } catch (IOException iox) {
+            throw new UnsupportedOperationException("Need to implement feedback.", iox);
             // TODO show warning
             // GUIMediator.showWarning(I18n.tr(
             // "LimeWire could not download a .torrent file from the provided URL."
@@ -133,10 +129,15 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         }
 
         if (m == null) {
-            removeDataLine();
+            downloadStatus = DownloadStatus.INVALID;
+            urn = null;
             return false;
         }
 
+        synchronized (this) {
+            urn = m.getURN();
+        }
+        
         torrentManager.shareTorrentFile(m, body);
         downloadStatus = DownloadStatus.COMPLETE;
         this.btMetaInfo = m;
@@ -144,14 +145,9 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
         return false;
     }
 
-    private synchronized void removeDataLine() {
-        downloadStatus = DownloadStatus.INVALID;
-        urn = null;
-        activityCallback.removeDownload(this);
-    }
-
     public boolean requestFailed(HttpUriRequest method, HttpResponse response, IOException exc) {
         downloadStatus = DownloadStatus.INVALID;
+        downloadManager.remove(this, true);
         return false;
     }
 
@@ -383,7 +379,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     public boolean shouldBeRemoved() {
-        return isCompleted();
+        return isCompleted() || downloadStatus == DownloadStatus.ABORTED || downloadStatus == DownloadStatus.INVALID;
     }
 
     public boolean shouldBeRestarted() {
