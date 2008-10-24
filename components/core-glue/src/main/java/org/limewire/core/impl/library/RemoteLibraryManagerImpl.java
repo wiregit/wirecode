@@ -15,21 +15,21 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.UniqueList;
-import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.ReadOnlyList;
 import ca.odell.glazedlists.util.concurrent.Lock;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 @Singleton
 public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
@@ -229,47 +229,36 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
         private PresenceLibraryImpl getOrCreatePresenceLibrary(FriendPresence presence) {
             PresenceLibraryImpl library;
-            boolean created = false;
             
             Lock lock = allPresenceLibraries.getReadWriteLock().writeLock();
             lock.lock();
             try {
                 library = findPresenceLibrary(presence);
                 if(library == null) {
-                    created = true;
                     library = new PresenceLibraryImpl(presence, createMemberList());
                     allPresenceLibraries.add(library);
+                    addMemberList(library);
+                    library.commit();
                 }
             } finally {
                 lock.unlock();
-            }
-            
-            if(created) {
-                library.commit();
-                addMemberList(library);
             }
             
             return library;
         }
 
         private void removePresenceLibrary(FriendPresence presence) {
-            PresenceLibraryImpl removed = null;
-            
             Lock lock = allPresenceLibraries.getReadWriteLock().writeLock();
             lock.lock();
             try {
                 PresenceLibraryImpl presenceLibrary = findPresenceLibrary(presence);
                 if(presenceLibrary != null) {
-                    removed = presenceLibrary;
                     allPresenceLibraries.remove(presenceLibrary);
                     presenceLibrary.dispose();
+                    removeMemberList(presenceLibrary);
                 }
             } finally {
                 lock.unlock();
-            }
-            
-            if(removed != null) {
-                removeMemberList(removed);
             }
         }
 
