@@ -1,5 +1,7 @@
 package org.limewire.core.impl.xmpp;
 
+import junit.framework.Test;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.AUTH;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -33,7 +35,11 @@ public class FriendFileListProviderTest extends BaseTestCase {
         fileManager = context.mock(FileManager.class);
         friendFileListProvider = new FriendFileListProvider(fileManager);
     }
-
+    
+    public static Test suite() {
+        return buildTestSuite(FriendFileListProviderTest.class);
+    }
+    
     public void testGetFriendForValidEntries() throws Exception {
         BasicHttpRequest request = new BasicHttpRequest("GET", "/friend/me%40me.com");
         assertEquals("me@me.com", friendFileListProvider.getFriend(request));
@@ -62,7 +68,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         }
     }
     
-    public void testGetFileListToBrowse() throws Exception {
+    public void testGetFileList() throws Exception {
         final FileList expectedFileList = context.mock(FileList.class);
         context.checking(new Expectations() { {
             one(fileManager).getFriendFileList("me@me.com");
@@ -79,7 +85,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
     
-    public void testGetFileListToBrowseWithNoFileList() throws Exception {
+    public void testGetFileListWithFileListNotFound() throws Exception {
         context.checking(new Expectations() { {
             one(fileManager).getFriendFileList("me@me.com");
             will(returnValue(null));
@@ -89,11 +95,29 @@ public class FriendFileListProviderTest extends BaseTestCase {
         ServerAuthState serverAuthState = new ServerAuthState();
         serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
-        request.addHeader(new BasicHeader(AUTH.WWW_AUTH_RESP, "Basic " + StringUtils.getASCIIString(Base64.encodeBase64(StringUtils.toUTF8Bytes("me@me.com:me@me.com")))));
         try {
             friendFileListProvider.getFileList(request, httpContext);
             fail("should have thrown exception");
         } catch (HttpException e) {
+            assertEquals(404, e.getErrorCode());
+        }
+        context.assertIsSatisfied();
+    }
+    
+    public void testGetFileListNotAuthorized() throws Exception {
+        context.checking(new Expectations() { {
+            never(fileManager).getFriendFileList("me@me.com");
+        }});
+        BasicHttpRequest request = new BasicHttpRequest("GET", "/friend/you%40me.com");
+        BasicHttpContext httpContext = new BasicHttpContext();
+        ServerAuthState serverAuthState = new ServerAuthState();
+        serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
+        httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
+        try {
+            friendFileListProvider.getFileList(request, httpContext);
+            fail("should have thrown exception");
+        } catch (HttpException e) {
+            assertEquals(401, e.getErrorCode());
         }
         context.assertIsSatisfied();
     }
