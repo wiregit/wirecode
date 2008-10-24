@@ -40,6 +40,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
@@ -58,10 +59,10 @@ import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
+import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.nav.NavigationListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
-import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -759,6 +760,10 @@ public class LibraryNavigator extends JXPanel {
 
         @Override
         public void setName(String name) {
+        }
+
+        public Network getNetwork() {
+            return null;
         }
     }
 }

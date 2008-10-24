@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 
 import org.limewire.logging.LogFactory;
+import org.limewire.security.SHA1;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BEncoder;
 import org.limewire.util.CommonUtils;
@@ -23,7 +24,6 @@ import org.limewire.util.StringUtils;
 import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.security.SHA1;
 
 /**
  * Contains type safe representations of all understand information

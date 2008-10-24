@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -35,6 +36,7 @@ public class LimeWireHttpClientModule extends AbstractModule {
         bind(ReapingClientConnectionManager.class).annotatedWith(Names.named("nonBlockingConnectionManager")).toProvider(LimeClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
         bind(ReapingClientConnectionManager.class).annotatedWith(Names.named("socketWrappingConnectionManager")).toProvider(SocketWrappingClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
         bind(LimeHttpClient.class).toProvider(NonBlockingLimeHttpClientProvider.class);
+        bind(HttpClient.class).toProvider(NonBlockingLimeHttpClientProvider.class);
         bind(SocketWrappingHttpClient.class).toProvider(SocketWrappingLimeHttpClientProvider.class);
         bind(SchemeRegistry.class).annotatedWith(Names.named("limeSchemeRegistry")).toProvider(LimeSchemeRegistryProvider.class);
         bind(SchemeRegistry.class).annotatedWith(Names.named("socketWrappingSchemeRegistry")).toProvider(SocketWrappingSchemeRegistryProvider.class);

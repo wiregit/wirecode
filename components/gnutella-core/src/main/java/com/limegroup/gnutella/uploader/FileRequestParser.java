@@ -3,12 +3,16 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.protocol.HttpContext;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
 /**
  * Provides methods for parsing Gnutella request URIs.
@@ -30,8 +34,10 @@ class FileRequestParser {
      * @return information about the requested file, <code>null</code> if the
      *         request type is invalid or the URN does not map to a valid file
      * @throws IOException thrown if the request is malformed
+     * @throws HttpException 
      */
-    public static FileRequest parseRequest(final FileManager fileManager, final String uri) throws IOException {
+    public static FileRequest parseRequest(HttpRequestFileListProvider fileListProvider, final String uri,
+            HttpRequest request, HttpContext context) throws IOException, HttpException {
         // Only parse URI requests.
         if(!uri.toLowerCase(Locale.US).startsWith("/uri-res/")) {
             throw new IOException("invalid request");
@@ -51,11 +57,13 @@ class FileRequestParser {
             return null;
         }
     
-        FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDesc(urn);
-        if(desc == null) {
-            desc = fileManager.getIncompleteFileList().getFileDesc(urn);
+        FileDesc desc = null;
+        for (FileList fileList : fileListProvider.getFileList(request, context)) {
+            desc = fileList.getFileDesc(urn);
+            if (desc != null) {
+                break;
+            }
         }
-        
         if(desc == null) {
             return null;
         } else {

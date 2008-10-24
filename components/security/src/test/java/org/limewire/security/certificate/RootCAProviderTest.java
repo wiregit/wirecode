@@ -2,8 +2,8 @@ package org.limewire.security.certificate;
 
 import junit.framework.Test;
 
-import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.http.httpclient.SimpleLimeHttpClient;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.limewire.security.LimeWireSecurityModule;
 import org.limewire.util.BaseTestCase;
 
@@ -27,7 +27,7 @@ public class RootCAProviderTest extends BaseTestCase {
         Injector injector = Guice.createInjector(new LimeWireSecurityModule(), new AbstractModule() {
             @Override
             protected void configure() {
-                bind(LimeHttpClient.class).to(SimpleLimeHttpClient.class);
+                bind(HttpClient.class).to(DefaultHttpClient.class);
             }
         });
         rootCAProvider = injector.getInstance(RootCAProvider.class);

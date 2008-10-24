@@ -21,7 +21,6 @@ import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
 import org.limewire.http.RangeHeaderInterceptor.Range;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.PushEndpointFactory;
@@ -47,6 +46,7 @@ import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
 import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
+import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
 /**
  * Handles upload requests for files and THEX trees.
@@ -92,7 +92,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private final HashTreeWriteHandlerFactory tigerWriteHandlerFactory;
 
-    @Inject
+    private final HttpRequestFileListProvider fileListProvider;
+
     FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager,
             HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory,
             Provider<CreationTimeCache> creationTimeCache,
@@ -100,7 +101,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             AlternateLocationFactory alternateLocationFactory,
             Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache,
             PushEndpointFactory pushEndpointFactory,
-            HashTreeWriteHandlerFactory tigerWriteHandlerFactory) {
+            HashTreeWriteHandlerFactory tigerWriteHandlerFactory, 
+            HttpRequestFileListProvider fileListProvider) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -113,6 +115,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         this.tigerTreeCache = tigerTreeCache;
         this.pushEndpointFactory = pushEndpointFactory;
         this.tigerWriteHandlerFactory = tigerWriteHandlerFactory;
+        this.fileListProvider = fileListProvider;
     }
     
     public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
@@ -130,7 +133,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         HTTPUploader uploader = null;
 
         try {
-            fileRequest = FileRequestParser.parseRequest(fileManager, request.getRequestLine().getUri());
+            fileRequest = FileRequestParser.parseRequest(fileListProvider, request.getRequestLine().getUri(), request, context);
         } catch (IOException e) {
             uploader = sessionManager.getOrCreateUploader(request, context,
                     UploadType.MALFORMED_REQUEST, "Malformed Request");
@@ -139,7 +142,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         
         if(fileRequest != null) {
             assert uploader == null;
-            uploader = findFileAndProcessHeaders(request, response, context, fileRequest, fileRequest.getFileDesc());
+            uploader = findFileAndProcessHeaders(request, response, context, fileRequest);
         } else if(uploader == null) {
             uploader = sessionManager.getOrCreateUploader(request, context,
                     UploadType.FILE_NOT_FOUND, "Unknown Query");
@@ -156,13 +159,13 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
      * Looks up file in {@link FileManager} and processes request headers.
      */
     private HTTPUploader findFileAndProcessHeaders(HttpRequest request, HttpResponse response,
-            HttpContext context, FileRequest fileRequest, FileDesc fd) throws IOException, HttpException {
+            HttpContext context, FileRequest fileRequest) throws IOException, HttpException {
+        FileDesc fileDesc = fileRequest.getFileDesc();
         // create uploader
-        UploadType type = (SharingUtils.isForcedShare(fd)) ? UploadType.FORCED_SHARE
+        UploadType type = (SharingUtils.isForcedShare(fileDesc)) ? UploadType.FORCED_SHARE
                 : UploadType.SHARED_FILE;
-        HTTPUploader uploader = sessionManager.getOrCreateUploader(request, context, type, fd
-                .getFileName());
-        uploader.setFileDesc(fd);
+        HTTPUploader uploader = sessionManager.getOrCreateUploader(request, context, type, fileDesc.getFileName());
+        uploader.setFileDesc(fileDesc);
 
         // process headers
         BasicHeaderProcessor processor = new BasicHeaderProcessor();
@@ -200,7 +203,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             if (rangeHeaderInterceptor.hasRequestedRanges()) {
                 Range[] ranges = rangeHeaderInterceptor.getRequestedRanges();
                 if (ranges.length > 1) {
-                    handleInvalidRange(response, uploader, fd);
+                    handleInvalidRange(response, uploader, fileDesc);
                     return uploader;
                 }
 
@@ -210,16 +213,16 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             }
 
             if (!uploader.validateRange()) {
-                handleInvalidRange(response, uploader, fd);
+                handleInvalidRange(response, uploader, fileDesc);
                 return uploader;
             }
         }
 
         // start upload
         if (fileRequest.isThexRequest()) {
-            handleTHEXRequest(request, response, context, uploader, fd);
+            handleTHEXRequest(request, response, context, uploader, fileDesc);
         } else {
-            handleFileUpload(context, request, response, uploader, fd);
+            handleFileUpload(context, request, response, uploader, fileDesc);
         }
 
         return uploader;

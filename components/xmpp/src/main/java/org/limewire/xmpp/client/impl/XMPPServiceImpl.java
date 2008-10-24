@@ -43,6 +43,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private XMPPErrorListener errorListener;
     private Provider<EventListener<XMPPConnectionEvent>> connectionListener;
     private AddressEvent lastEvent;
+    private final XMPPAuthenticator authenticator;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
@@ -50,13 +51,14 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                     Provider<EventListener<FileOfferEvent>> fileOfferListener,
                     Provider<EventListener<LibraryChangedEvent>> libraryChangedListener,
                     Provider<EventListener<XMPPConnectionEvent>> connectionListener,
-                    AddressFactory addressFactory) {
+                    AddressFactory addressFactory, XMPPAuthenticator authenticator) {
         this.configurations = configurations;
         this.rosterListener = rosterListener;
         this.fileOfferListener = fileOfferListener;
         this.libraryChangedListener = libraryChangedListener;
         this.connectionListener = connectionListener;
         this.addressFactory = addressFactory;
+        this.authenticator = authenticator;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
     }
     
@@ -134,7 +136,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
         synchronized (this) {
             XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(),
-                    fileOfferListener.get(), libraryChangedListener.get(), connectionListener.get(), addressFactory);
+                    fileOfferListener.get(), libraryChangedListener.get(), connectionListener.get(), addressFactory, authenticator);
             connection.initialize();
             connections.add(connection);
             if(lastEvent != null) {

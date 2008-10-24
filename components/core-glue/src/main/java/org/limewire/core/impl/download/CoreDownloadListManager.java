@@ -17,6 +17,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -36,12 +37,6 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.LimePresence;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -58,6 +53,11 @@ import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 
 
 @Singleton
@@ -173,7 +173,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     }
     
     @Override
-    public DownloadItem addDownload(LimePresence presence, FileMetaData fileMeta)
+    public DownloadItem addDownload(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
         Category category = MediaTypeConverter.toCategory(
                 MediaType.getMediaTypeForExtension(
@@ -184,7 +184,7 @@ public class CoreDownloadListManager implements DownloadListManager {
                 null, null, null, false, category);
     }
 
-    private RemoteFileDesc createRfdFromChatResult(LimePresence presence, FileMetaData fileMeta)
+    private RemoteFileDesc createRfdFromChatResult(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
         Connectable publicAddress;
         Address address = presence.getPresenceAddress();

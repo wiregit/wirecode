@@ -83,4 +83,17 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
             }
         };
     }
+
+    public String getMyID() {
+        return getUsername();
+    }
+
+    public String getNetworkName() {
+        return getServiceName();
+    }
+
+    @Override
+    public String getResource() {
+        return "LimeWire";
+    }
 }

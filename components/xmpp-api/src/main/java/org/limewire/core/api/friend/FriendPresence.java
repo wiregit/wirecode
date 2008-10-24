@@ -24,4 +24,5 @@ public interface FriendPresence {
      */
     Address getPresenceAddress();
 
+    byte [] getAuthToken();
 }

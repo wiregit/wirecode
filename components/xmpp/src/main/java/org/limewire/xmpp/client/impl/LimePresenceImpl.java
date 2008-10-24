@@ -1,5 +1,7 @@
 package org.limewire.xmpp.client.impl;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketCollector;
@@ -26,16 +28,19 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
 
-    private Address address;
-    private byte [] authToken;
+    private AtomicReference<Address> address;
+    private AtomicReference<byte []> authToken;
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, User user) {
         super(presence, connection, user);
+        address = new AtomicReference<Address>();
+        authToken = new AtomicReference<byte []>();
     }
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
         super(presence, connection, limePresence.getUser());
-        address = Objects.nonNull(limePresence, "limePresence").getPresenceAddress();
+        address = new AtomicReference<Address>(Objects.nonNull(limePresence, "limePresence").getPresenceAddress());
+        authToken = new AtomicReference<byte []>();
     }
 
     @Override
@@ -45,7 +50,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     @Override
     public Address getPresenceAddress() {
-        return address;
+        return address.get();
     }
 
     @Override
@@ -54,15 +59,15 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
 
     public void setPresenceAddress(Address address) {
-        this.address = address;
+        this.address.set(address);
     }
 
     public byte [] getAuthToken() {
-        return authToken;
+        return authToken.get();
     }
 
     public void setAuthToken(byte [] authToken) {
-        this.authToken = authToken;
+        this.authToken.set(authToken);
     }
 
     void subscribeAndWaitForAddress() throws InvalidDataException {
@@ -80,7 +85,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         if (response instanceof ExceptionalAddressIQ) {
             throw new InvalidDataException(((ExceptionalAddressIQ)response).getException());
         }
-        address = response.getAddress();
+        address.set(response.getAddress());
         addressCollector.cancel();
 
         final AuthTokenIQ authTokenIQ = new AuthTokenIQ();
@@ -94,7 +99,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         if (authTokenResponse instanceof AuthTokenIQProvider.ExceptionalAuthTokenIQ) {
             throw new InvalidDataException(((AuthTokenIQProvider.ExceptionalAuthTokenIQ)authTokenResponse).getException());
         }
-        authToken = authTokenResponse.getAuthToken();
+        authToken.set(authTokenResponse.getAuthToken());
         authTokenCollector.cancel();
     }
 

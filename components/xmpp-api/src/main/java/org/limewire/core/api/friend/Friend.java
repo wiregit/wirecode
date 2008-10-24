@@ -38,4 +38,6 @@ public interface Friend {
      * permanent or not.
      */
     boolean isAnonymous();
+    
+    Network getNetwork();
 }

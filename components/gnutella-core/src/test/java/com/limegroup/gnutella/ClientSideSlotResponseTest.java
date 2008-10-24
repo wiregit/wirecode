@@ -31,6 +31,7 @@ import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
 
 /**
  * Tests how the availability of upload slots affects responses, as well
@@ -136,9 +137,10 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
                 HttpRequestHandlerFactory httpRequestHandlerFactory,
                 Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
                 Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
-                TcpBandwidthStatistics tcpBandwidthStatistics) {
+                TcpBandwidthStatistics tcpBandwidthStatistics,
+                Provider<GnutellaUploadFileListProvider> gnutellaBrowseRequestFileListProviderProvider) {
             super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor,
-                    fileManager, activityCallback, tcpBandwidthStatistics);
+                    fileManager, activityCallback, tcpBandwidthStatistics, gnutellaBrowseRequestFileListProviderProvider);
         }
 		@Override
 		public synchronized boolean isServiceable() {

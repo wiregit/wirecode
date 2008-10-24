@@ -14,7 +14,7 @@
  * put("MessageDigest.SHA-1", "com.limegroup.gnutella.security.SHA1");
  */
  
-package com.limegroup.gnutella.security;
+package org.limewire.security;
 
 import java.security.DigestException;
 import java.security.MessageDigest;
@@ -67,7 +67,7 @@ public final class SHA1 extends MessageDigest implements Cloneable {
     /**
      * This implementation returns a fixed-size digest.
      */
-    private static final int HASH_LENGTH = 20; // bytes == 160 bits
+    public static final int HASH_LENGTH = 20; // bytes == 160 bits
 
     /**
      * Private context for incomplete blocks and padding bytes.

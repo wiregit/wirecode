@@ -142,7 +142,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         try {
-            browseHostHandler.browseHost(socket);
+            browseHostHandler.browseHost(socket, null);
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -155,7 +155,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
-        browseHostHandler.browseHost(socket);
+        browseHostHandler.browseHost(socket, null);
 
         List<String> files = new ArrayList<String>();
         for(QueryReply reply : queryReplyHandler.replies) {
@@ -170,7 +170,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         assertEquals(fileManager.getGnutellaSharedFileList().size(), files.size());
 
         synchronized (fileManager.getGnutellaSharedFileList().getLock()) {
-            for(FileDesc result : fileManager.getGnutellaSharedFileList().iterable()) {
+            for (FileDesc result : fileManager.getGnutellaSharedFileList().iterable()) {
                 boolean contained = files.remove(result.getFileName());
                 assertTrue("File is missing in browse response: "
                     + result.getFileName(), contained);
@@ -201,7 +201,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
         try {
-            browseHostHandler.browseHost(socket);
+            browseHostHandler.browseHost(socket, null);
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -228,7 +228,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         try {
-            browseHostHandler.browseHost(socket);
+            browseHostHandler.browseHost(socket, null);
             fail();
         } catch (IOException ioe) {
             // expected result

@@ -1,29 +1,10 @@
 package com.limegroup.gnutella;
 
-import java.util.Set;
-
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.io.Address;
-import org.limewire.io.Connectable;
-import org.limewire.io.IpPort;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.util.MediaType;
 
 public interface SearchServices {
-
-    /**
-     * Browses the passed host
-     * @param host The host to browse
-     * @param port The port at which to browse
-     * @param guid The guid to be used for the query replies received 
-     * while browsing host
-     * @param serventID The guid of the client to browse from.  I need this in
-     * case I need to push....
-     * @param proxies the list of PushProxies we can use - may be null.
-     * @param canDoFWTransfer true if the remote host supports fw transfer
-     */
-    public BrowseHostHandler doAsynchronousBrowseHost(final Connectable host,
-            GUID guid, GUID serventID, final Set<? extends IpPort> proxies,
-            final boolean canDoFWTransfer);
 
     /** 
      * Returns true if the given response for the query with the given guid is a
@@ -123,6 +104,6 @@ public interface SearchServices {
      * Initiates a non-blocking browse of <code>address</code> with
      * session guid <code>browseGuid</code>.
      */
-    public BrowseHostHandler doAsynchronousBrowseHost(Address address, GUID browseGuid, BrowseListener browseListener);
+    public BrowseHostHandler doAsynchronousBrowseHost(FriendPresence friendPresence, GUID browseGuid, BrowseListener browseListener);
 
 }

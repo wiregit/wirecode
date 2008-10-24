@@ -12,6 +12,7 @@ import java.util.ListIterator;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.io.InvalidDataException;
+import org.limewire.security.SHA1;
 import org.limewire.util.URIUtils;
 
 import com.limegroup.bittorrent.disk.BlockRangeMap;
@@ -19,7 +20,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
-import com.limegroup.gnutella.security.SHA1;
 
 /**
  * Contains information usually parsed in a .torrent file

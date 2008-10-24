@@ -15,6 +15,7 @@ import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.core.api.friend.Network;
 
 public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
@@ -23,9 +24,11 @@ public class UserImpl implements User {
     private AtomicReference<RosterEntry> rosterEntry;
     private final ConcurrentHashMap<String, Presence> presences;
     private final CopyOnWriteArrayList<PresenceListener> presenceListeners;
+    private final Network network;
 
-    UserImpl(String id, RosterEntry rosterEntry) {
+    UserImpl(String id, RosterEntry rosterEntry, Network network) {
         this.id = id;
+        this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
         this.presences = new ConcurrentHashMap<String, Presence>(); 
         this.presenceListeners = new CopyOnWriteArrayList<PresenceListener>();
@@ -118,12 +121,11 @@ public class UserImpl implements User {
         firePresenceListeners(updatedPresence);
     }
 
-    @Override
-    public boolean jidBelongsTo(String jid) {
-        return presences.containsKey(jid);
-    }
-    
     Presence getPresence(String jid) {
         return presences.get(jid);
+    }
+
+    public Network getNetwork() {
+        return network;
     }
 }

@@ -3,12 +3,12 @@ package org.limewire.core.api.download;
 import java.io.IOException;
 import java.util.List;
 
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.InvalidDataException;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.LimePresence;
 
 public interface ResultDownloader {
 
@@ -36,7 +36,7 @@ public interface ResultDownloader {
      *         saving the file
      * @throws InvalidDataException if the FileMetaData is malformed
      */
-    public DownloadItem addDownload(LimePresence presence, FileMetaData chatFileDesc)
+    public DownloadItem addDownload(FriendPresence presence, FileMetaData chatFileDesc)
             throws SaveLocationException, InvalidDataException;
 
     /**

@@ -11,6 +11,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -20,21 +21,22 @@ import org.limewire.xmpp.api.client.PresenceListener;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.client.impl.LimePresenceImpl;
+import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class AuthTokenIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AuthTokenIQListener.class);
 
     private final XMPPConnection connection;
-    //private final AuthTokenProvider provider;
+    private final XMPPAuthenticator userStore;
      
     private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
     private final RosterEventHandler rosterEventHandler;
 
-    public AuthTokenIQListener(XMPPConnection connection
-                             /*, AuthTokenProvider provider*/) {
+    public AuthTokenIQListener(XMPPConnection connection,
+            XMPPAuthenticator authenticator) {
         this.connection = connection;
-        //this.provider = provider;
+        this.userStore = authenticator;
         this.rosterEventHandler = new RosterEventHandler();
     }
 
@@ -77,14 +79,16 @@ public class AuthTokenIQListener implements PacketListener {
         synchronized (this) {
             LimePresenceImpl presence = limePresences.get(iq.getFrom());
             if(presence != null) {
-                if(LOG.isDebugEnabled()) {
-                    try {
-                        LOG.debug("updating auth token on presence " + presence.getJID() + " to " + new String(Base64.encodeBase64(iq.getAuthToken()), "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        // TODO
+                if(iq.getAuthToken() != null) {
+                    if(LOG.isDebugEnabled()) {
+                        try {
+                            LOG.debug("updating auth token on presence " + presence.getJID() + " to " + new String(Base64.encodeBase64(iq.getAuthToken()), "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
                     }
+                    presence.setAuthToken(iq.getAuthToken());
                 }
-                presence.setAuthToken(iq.getAuthToken());
             }
         }
     }
@@ -97,13 +101,17 @@ public class AuthTokenIQListener implements PacketListener {
     }
 
     private void sendResult(AuthTokenIQ packet) {
-        byte [] authToken = packet.getFrom().getBytes(); // provider.getAuthToken(packet.getFrom())
-        AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
-        queryResult.setTo(packet.getFrom());
-        queryResult.setFrom(packet.getTo());
-        queryResult.setPacketID(packet.getPacketID());
-        queryResult.setType(IQ.Type.RESULT);
-        connection.sendPacket(queryResult);
+        try {
+            byte [] authToken = userStore.getAuthToken(StringUtils.parseBareAddress(packet.getFrom())).getBytes("UTF-8");
+            AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
+            queryResult.setTo(packet.getFrom());
+            queryResult.setFrom(packet.getTo());
+            queryResult.setPacketID(packet.getPacketID());
+            queryResult.setType(IQ.Type.RESULT);
+            connection.sendPacket(queryResult);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e.getMessage(), e);
+        }        
     }
 
     public PacketFilter getPacketFilter() {
