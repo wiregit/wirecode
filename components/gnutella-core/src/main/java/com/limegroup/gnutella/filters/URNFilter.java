@@ -21,10 +21,14 @@ public class URNFilter implements SpamFilter {
     
     private static final Log LOG = LogFactory.getLog(URNFilter.class);
     private static final HashSet<URN> blacklist = new HashSet<URN>();
-    
-    public URNFilter() {
+
+    // Called when the spam service starts and on SIMPP updates
+    public void refreshURNs() {
+        blacklist.clear();
         try {
-            for(String s : FilterSettings.MALWARE_URNS.getValue())
+            for(String s : FilterSettings.FILTERED_URNS_LOCAL.getValue())
+                blacklist.add(URN.createSHA1Urn("urn:sha1:" + s));
+            for(String s : FilterSettings.FILTERED_URNS_REMOTE.getValue())
                 blacklist.add(URN.createSHA1Urn("urn:sha1:" + s));
         } catch (Exception x) {
             if(LOG.isDebugEnabled())

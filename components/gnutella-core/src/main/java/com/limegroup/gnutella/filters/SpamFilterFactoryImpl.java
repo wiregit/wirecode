@@ -69,7 +69,7 @@ public class SpamFilterFactoryImpl implements SpamFilterFactory {
         buf.add(mutableGUIDFilter.get());
         
         //5. URN filters
-        if(FilterSettings.FILTER_MALWARE.getValue())
+        if(FilterSettings.FILTER_URNS.getValue())
             buf.add(urnFilter.get());
 
         return compose(buf);

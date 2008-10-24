@@ -13,21 +13,25 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
+import com.limegroup.gnutella.filters.URNFilter;
 
 @Singleton
 public class SpamServicesImpl implements SpamServices {
     
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
+    private final Provider<URNFilter> urnFilter;
     private final SpamFilterFactory spamFilterFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
 
     @Inject
     public SpamServicesImpl(Provider<ConnectionManager> connectionManager,
-            Provider<IPFilter> ipFilter, SpamFilterFactory spamFilterFactory,
+            Provider<IPFilter> ipFilter, Provider<URNFilter> urnFilter,
+            SpamFilterFactory spamFilterFactory,
             UDPReplyHandlerCache udpReplyHandlerCache) {
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
+        this.urnFilter = urnFilter;
         this.spamFilterFactory = spamFilterFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
     }
@@ -56,6 +60,10 @@ public class SpamServicesImpl implements SpamServices {
                 adjustSpamFilters();
             }
         });
+    }
+    
+    public void reloadURNFilter() {
+        urnFilter.get().refreshURNs();
     }
 
 
