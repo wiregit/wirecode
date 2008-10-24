@@ -18,12 +18,15 @@ import org.apache.http.HttpResponse;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.TestUtils;
 
@@ -114,14 +117,6 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         injector.getInstance(LifecycleManager.class).shutdown();
     }
     
-    public void testCreateInvalidHost() throws Exception {
-        Connectable host = BrowseHostHandler.createInvalidHost();
-        assertNotNull(host);
-        assertEquals("0.0.0.0", host.getAddress());
-        assertFalse(NetworkUtils.isValidAddress(host.getAddress()));
-        assertTrue(NetworkUtils.isValidPort(host.getPort()));
-    }
-
     public void testBrowseHostBadHTTPStatus() throws Exception {
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
         httpAcceptor.registerHandler("/", new SimpleNHttpRequestHandler() {
@@ -233,6 +228,72 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         } catch (IOException ioe) {
             // expected result
         }
+    }
+    
+    public void testGetPathForNonAnonymousFriend() {
+        assertEquals("/friend/browse/me%40you.com/", browseHostHandler.getPath(new StubFriendPresence("me@you.com")));
+        assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new StubFriendPresence("Hello There")));
+    }
+    
+    private static class StubFriendPresence implements FriendPresence {
+
+        private final String presenceId;
+
+        public StubFriendPresence(String presenceId) {
+            this.presenceId = presenceId;
+        }
+        
+        @Override
+        public byte[] getAuthToken() {
+            return null;
+        }
+
+        @Override
+        public Friend getFriend() {
+            return new Friend() {
+
+                @Override
+                public String getId() {
+                    return null;
+                }
+
+                @Override
+                public String getName() {
+                    return null;
+                }
+
+                @Override
+                public Network getNetwork() {
+                    return null;
+                }
+
+                @Override
+                public String getRenderName() {
+                    return null;
+                }
+
+                @Override
+                public boolean isAnonymous() {
+                    return false;
+                }
+
+                @Override
+                public void setName(String name) {
+                }
+                
+            };
+        }
+
+        @Override
+        public Address getPresenceAddress() {
+            return null;
+        }
+
+        @Override
+        public String getPresenceId() {
+            return presenceId;
+        }
+        
     }
 
     @Singleton

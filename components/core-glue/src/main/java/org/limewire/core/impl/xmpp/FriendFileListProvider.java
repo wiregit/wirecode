@@ -32,7 +32,11 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
         ServerAuthState authState = (ServerAuthState)httpContext.getAttribute(ServerAuthState.AUTH_STATE);
         if(authState != null) {
             Credentials credentials = authState.getCredentials();
-            if(credentials != null) {
+            if (credentials != null) {
+                // authorized by checking if friend is asking for their own list of files
+                if (!credentials.getUserPrincipal().getName().equals(getFriend(request))) {
+                    throw new HttpException("not authorized", HttpStatus.SC_UNAUTHORIZED);
+                }
                 FileList buddyFileList = fileManager.getFriendFileList(credentials.getUserPrincipal().getName());
                 if (buddyFileList == null) {
                     throw new HttpException("no such list for: " + credentials.getUserPrincipal().getName(), HttpStatus.SC_NOT_FOUND);

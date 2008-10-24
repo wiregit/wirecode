@@ -1,0 +1,166 @@
+0      DEBUG [NIODispatcher] nio.NIODispatcher.process - Selected keys: (0), polled: (0). wokeup true immediate false
+137    DEBUG [main] rudp.UDPConnectionProcessor.debug - Connecting to: /127.0.0.1:9999
+155    DEBUG [NIODispatcher] nio.NIODispatcher.process - Selected keys: (0), polled: (0). wokeup true immediate false
+596    DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+604    DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+605    DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047005618
+1036   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+1041   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+1043   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047006055
+1452   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+1452   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+1453   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047006466
+1858   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+1858   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+1859   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047006872
+2260   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+2263   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+2264   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047007277
+2664   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+2665   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+2666   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047007679
+3069   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+3070   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+3071   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047008083
+3486   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+3487   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+3487   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047008500
+3889   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+3890   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+3890   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047008903
+4292   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+4293   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+4294   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047009306
+4695   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+4696   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+4697   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047009710
+5098   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+5099   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+5099   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047010112
+5501   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+5502   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+5502   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047010515
+5915   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+5916   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+5916   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047010929
+6318   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+6319   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+6319   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047011332
+6721   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+6722   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+6722   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047011735
+7123   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+7124   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+7124   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047012137
+7528   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+7529   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+7536   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047012549
+7931   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+7932   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+7932   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047012945
+8341   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+8342   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+8342   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047013355
+8744   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+8744   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+8745   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047013758
+9155   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+9156   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+9157   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047014169
+9558   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+9559   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+9560   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047014573
+9961   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+9962   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+9963   DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047014976
+10366  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+10367  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+10368  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047015381
+10769  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+10770  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+10770  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047015783
+11173  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+11174  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+11174  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047016187
+11576  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+11577  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+11577  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047016590
+11981  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+11982  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+11982  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047016995
+12384  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+12385  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+12386  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047017398
+12787  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+12788  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+12788  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047017801
+13190  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+13191  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+13191  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047018204
+13604  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+13605  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+13611  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047018624
+14007  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+14008  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+14008  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047019021
+14411  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+14412  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+14412  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047019425
+14824  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+14825  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+14826  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047019838
+15234  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+15235  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+15235  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047020248
+15637  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+15637  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+15638  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047020651
+16040  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+16040  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+16041  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047021054
+16443  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+16443  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+16444  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047021457
+16847  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+16847  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+16848  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047021861
+17251  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+17251  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+17252  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047022265
+17667  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+17667  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+17668  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047022681
+18069  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+18070  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+18070  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047023083
+18471  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+18472  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+18473  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047023486
+18882  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+18882  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+18883  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047023896
+19286  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+19287  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+19287  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047024300
+19691  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+19692  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+19692  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047024705
+20096  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+20096  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Sending SYN: SynMessage DestID:0 SrcID:1 vNo:0
+20097  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - send:SynMessage DestID:0 SrcID:1 vNo:0 to: /127.0.0.1:9999, t:1218047025110
+20499  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Running SYN Event
+20499  DEBUG [UDPScheduler] rudp.UDPConnectionProcessor.debug - Timed out, waited for: 20362
+20505  DEBUG [NIODispatcher] nio.NIODispatcher.process - Selected keys: (0), polled: (0). wokeup true immediate false
+20506  DEBUG [NIODispatcher] nio.NIODispatcher.process - Selected keys: (0), polled: (1). wokeup false immediate true
+20508  DEBUG [NIODispatcher] nio.NIODispatcher.processConnect - Handling connect: UDPConnection:org.limewire.rudp.UDPSocketChannel@96cf11
+20512  WARN  [NIODispatcher] nio.NIODispatcher.process - IOX processing
+java.nio.channels.ClosedChannelException
+	at org.limewire.rudp.UDPConnectionProcessor.prepareOpenConnection(UDPConnectionProcessor.java:446)
+	at org.limewire.rudp.UDPSocketChannel.finishConnect(UDPSocketChannel.java:370)
+	at org.limewire.nio.NIODispatcher.processConnect(NIODispatcher.java:445)
+	at org.limewire.nio.NIODispatcher.process(NIODispatcher.java:778)
+	at org.limewire.nio.NIODispatcher.process(NIODispatcher.java:690)
+	at org.limewire.nio.NIODispatcher.run(NIODispatcher.java:871)
+	at java.lang.Thread.run(Thread.java:619)
+20522  DEBUG [NIODispatcher] nio.AbstractNBSocket.shutdown - Shutting down socket & streams for: UDPConnection:org.limewire.rudp.UDPSocketChannel@96cf11
+20532  DEBUG [NIODispatcher] nio.NIODispatcher.process - Selected keys: (0), polled: (0). wokeup true immediate false

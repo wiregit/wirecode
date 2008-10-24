@@ -3,9 +3,10 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -23,8 +24,6 @@ import org.apache.http.protocol.HTTP;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
-import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.BlockingConnectObserver;
@@ -36,9 +35,9 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -138,13 +137,6 @@ public class BrowseHostHandler {
     }
     
     /**
-     * Creates an invalid host for pushes.
-     */
-    static Connectable createInvalidHost() throws UnknownHostException {
-        return new ConnectableImpl("0.0.0.0", 1, false);
-    }
-
-    /**
      * Returns the current percentage complete of the state
      * of the browse host.
      */
@@ -234,11 +226,15 @@ public class BrowseHostHandler {
         return client.execute(get);
     }
 
-    private String getPath(FriendPresence friendPresence) {
+    String getPath(FriendPresence friendPresence) {
         if(friendPresence.getFriend().isAnonymous()) {
             return "/";
         } else {
-            return "/friend/browse";  // TODO URLEncode
+            try {
+                return "/friend/browse/" +  URLEncoder.encode(friendPresence.getPresenceId(), "UTF-8") + "/";
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

@@ -1,0 +1,3653 @@
+? torrent-meta.patch
+? components/log.txt
+? components/geocode/build/classes
+? components/geocode/build/tests
+? components/net/build/classes/org
+? components/net/build/tests/org
+? components/player/build/classes/org/limewire/player/impl/AudioSourceImpl.class
+? components/player/build/classes/org/limewire/player/impl/LimeAudioFormat.class
+? components/player/build/classes/org/limewire/player/impl/LimeWirePlayer$1.class
+? components/player/build/classes/org/limewire/player/impl/LimeWirePlayer$2.class
+? components/player/build/classes/org/limewire/player/impl/LimeWirePlayer$3.class
+? components/player/build/classes/org/limewire/player/impl/LimeWirePlayer$LoadSongBuffer.class
+? components/player/build/classes/org/limewire/player/impl/LimeWirePlayer.class
+? components/player/build/classes/org/limewire/player/impl/RandomAudioInputStream.class
+? components/player/build/tests/org
+? components/player-api/build/classes/org/limewire/player/api/AudioPlayer.class
+? components/player-api/build/classes/org/limewire/player/api/AudioPlayerEvent.class
+? components/player-api/build/classes/org/limewire/player/api/AudioPlayerListener.class
+? components/player-api/build/classes/org/limewire/player/api/AudioSource.class
+? components/player-api/build/classes/org/limewire/player/api/PlayerState.class
+? components/promotion/build/classes
+? components/promotion/build/tests
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/AbstractPieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/ChainedPieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/EndGamePieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/LargestGapStartPieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/PartialPieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/PieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/PrettyRareWithBiggestDistanceFromCompletedPieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/RandomGapStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/RandomPieceStrategy.class
+? core/com/limegroup/bittorrent/handshaking/piecestrategy/RarestPieceFirstStrategy.class
+? core/com/limegroup/bittorrent/metadata/TorrentMetaData$NameValueListBuilder.class
+? core/com/limegroup/bittorrent/metadata/TorrentMetaData.class
+? core/com/limegroup/bittorrent/metadata/TorrentMetaReader.class
+? core/com/limegroup/bittorrent/swarm/BTNECallable$1.class
+? core/com/limegroup/bittorrent/swarm/BTNECallable.class
+? core/com/limegroup/bittorrent/swarm/BTSwarmCoordinator.class
+? core/com/limegroup/bittorrent/swarm/BTSwarmFile.class
+? core/com/limegroup/bittorrent/swarm/BTSwarmHttpSource.class
+? core/com/limegroup/bittorrent/swarm/BTSwarmWriteJob.class
+Index: components/log4j.properties
+===================================================================
+RCS file: components/log4j.properties
+diff -N components/log4j.properties
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ components/log4j.properties	9 Sep 2008 20:03:15 -0000
+@@ -0,0 +1,97 @@
++########
++# log4j configuration file.
++########
++
++#########
++# Valid thresholds can be:
++# OFF, FATAL, ERROR, WARN, INFO, DEBUG, ALL 
++
++#
++# The default logger that is used prints out log statements
++# on the console.  If you want those redirected to a file,
++# enable TextFile logger.  If you want those stored in an xml
++# format (either for chainsaw or for inclusing in xml documents)
++# use the XMLFile logger.  If you want to use chainsaw to watch
++# the logs of a running application use the "socket" logger
++
++########
++
++# Set the root loggers
++log4j.rootLogger=ALL, TextFile, XMLFile,socket
++
++
++######
++#  The TextFile logger
++# if you want to enable logging to file in standard format:
++# 1. comment out the first line
++# 2. uncomment/edit the other lines
++# to disable this type of logging do the oppposite.
++
++#log4j.appender.TextFile=org.apache.log4j.varia.NullAppender
++log4j.appender.TextFile=org.apache.log4j.RollingFileAppender
++log4j.appender.TextFile.File=log.txt
++log4j.appender.TextFile.MaxFileSize=5000MB
++log4j.appender.TextFile.MaxBackupIndex=5
++log4j.appender.TextFile.layout=org.apache.log4j.PatternLayout
++log4j.appender.TextFile.layout.ConversionPattern=%-6r %-5p [%t] %c{2}.%M - %m%n
++log4j.appender.TextFile.ImmediateFlush=true
++########
++
++
++######
++# The XMLFile logger
++# if you want to enable logging to XML file for the chainsaw viwer:
++# 1. comment out the first line
++# 2. uncomment/edit the other lines
++# to disable this type of logging do the oppposite.
++
++log4j.appender.XMLFile=org.apache.log4j.varia.NullAppender
++#log4j.appender.XMLFile=org.apache.log4j.RollingFileAppender
++#log4j.appender.XMLFile.File=log.xml
++#log4j.appender.XMLFile.MaxFileSize=100MB
++#log4j.appender.XMLFile.MaxBackupIndex=5
++#log4j.appender.XMLFile.layout=org.apache.log4j.xml.XMLLayout
++#log4j.appender.XMLFile.layout.LocationInfo=true
++#log4j.appender.XMLFile.ImmediateFlush=false
++#####
++
++
++
++#########
++# The "socket" logger
++# If you want to use the Chainsaw viewer on a running program:
++# 1. comment out the first line
++# 2. uncomment/edit the other lines
++# to disable this type of logging do the oppposite.
++# Make sure the viewer is running before starting limewire!
++
++#log4j.appender.socket=org.apache.log4j.varia.NullAppender
++log4j.appender.socket=org.apache.log4j.net.SocketAppender
++log4j.appender.socket.RemoteHost=localhost
++log4j.appender.socket.port=4445
++log4j.appender.socket.LocationInfo=true
++#########
++
++# stdout is set to be ConsoleAppender sending its output to System.out
++#log4j.appender.stdout=org.apache.log4j.varia.NullAppender
++log4j.appender.stdout=org.apache.log4j.ConsoleAppender
++
++# stdout uses PatternLayout.
++log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
++
++# The conversion pattern is:
++# time elapsed since start of logging (left justified, pads extra spaces if less than 0)
++# logging priority (left justified, pads extra spaces if less than 5)
++# [thread name]
++# packagename.classname.methodname (only the last part of the package is kept)
++# - message
++# newline
++
++log4j.appender.stdout.layout.ConversionPattern=%-6r %-5p [%t] %c{2}.%M - %m%n
++
++
++###  To set the value for specific classes/packages, use the following format:
++## log4j.logger.<package.class>=LEVEL
++
++#log4j.logger.org.limewire.mojito=ALL
++#log4j.logger.org.limewire.mojito.manager=ALL
+Index: components/common/src/main/java/org/limewire/util/MediaType.java
+===================================================================
+RCS file: /cvs/components/common/src/main/java/org/limewire/util/MediaType.java,v
+retrieving revision 1.5
+retrieving revision 1.5.4.1
+diff -u -b -B -d -w -U5 -r1.5 -r1.5.4.1
+--- components/common/src/main/java/org/limewire/util/MediaType.java	3 Sep 2008 17:03:43 -0000	1.5
++++ components/common/src/main/java/org/limewire/util/MediaType.java	9 Sep 2008 01:23:54 -0000	1.5.4.1
+@@ -1,9 +1,7 @@
+ package org.limewire.util;
+ 
+-import java.io.ObjectStreamException;
+-import java.io.Serializable;
+ import java.util.Arrays;
+ import java.util.Collections;
+ import java.util.HashSet;
+ import java.util.Set;
+ import java.util.TreeSet;
+@@ -19,12 +17,11 @@
+  * 
+  * Implementation note: Since MediaType implements serialization and there
+  * are inner anonymous classes be careful where to add new inner classes
+  * and fields.
+  */
+-public class MediaType implements Serializable {
+-    private static final long serialVersionUID = 3999062781289258389L;
++public class MediaType {
+     
+     // These values should match standard MIME content-type
+     // categories and/or XSD Mime Type names.
+     public static final String SCHEMA_ANY_TYPE = "*";
+     public static final String SCHEMA_CUSTOM = "custom";
+@@ -265,11 +262,11 @@
+     }
+     
+     /**
+      * Returns the MIME-Type of this.
+      */
+-    public String getMimeType() {
++    public String getSchema() {
+         return schema;
+     }
+     
+     /**
+      * Determines whether or not this is a default media type.
+@@ -341,23 +338,10 @@
+         hash = 41*hash + (exts != null ? exts.hashCode() : 0);
+         hash = 41*hash + (isDefault ? 1 : 0);
+         return hash;
+     }
+         
+-    /*
+-     * We canoncialize the default mediatypes, but since MediaType has
+-     * a public constructor only 'equals' comparisons should be used.
+-     */
+-    Object readResolve() throws ObjectStreamException {
+-        for (MediaType type : ALL_MEDIA_TYPES) {
+-            if (equals(type)) {
+-                return type;
+-            }
+-        }
+-        return this;
+-    }
+- 
+     /**
+      * Retrieves the any media type.
+      */
+     public static MediaType getAnyTypeMediaType() {
+         return TYPE_ANY;
+Index: components/common/src/main/java/org/limewire/util/StringUtils.java
+===================================================================
+RCS file: /cvs/components/common/src/main/java/org/limewire/util/StringUtils.java,v
+retrieving revision 1.16
+retrieving revision 1.16.4.2
+diff -u -b -B -d -w -U5 -r1.16 -r1.16.4.2
+--- components/common/src/main/java/org/limewire/util/StringUtils.java	2 Sep 2008 22:36:18 -0000	1.16
++++ components/common/src/main/java/org/limewire/util/StringUtils.java	8 Sep 2008 18:53:25 -0000	1.16.4.2
+@@ -4,11 +4,10 @@
+ import java.lang.reflect.Array;
+ import java.lang.reflect.Field;
+ import java.text.Collator;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+-import java.util.Collection;
+ import java.util.IdentityHashMap;
+ import java.util.Iterator;
+ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Locale;
+@@ -416,11 +415,11 @@
+ 	 * <pre>
+      *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot; &quot;) == &quot;a b&quot;
+      *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot;&quot;) == &quot;ab&quot;
+ 	 * </pre>
+ 	 */
+-    public static String explode(String[] array, String delimeter) {
++    public static String explode(Object[] array, String delimeter) {
+ 		StringBuilder sb = new StringBuilder();
+ 		if (array.length > 0) {
+ 			sb.append(array[0]);
+ 			for (int i = 1; i < array.length; i++) {
+ 				sb.append(delimeter);
+@@ -429,28 +428,33 @@
+ 		}
+ 		return sb.toString();
+     }
+     
+     /**
+-     * Returns the tokens of a collection concanated to a delimited by the given
+-     * delimiter.
++     * Concatenates/joins the elements of <code>iteratble</code> together, 
++     * separated by <code>delimiter</code>
++     * 
++     * <pre>
++     *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot; &quot;) == &quot;a b&quot;
++     *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot;&quot;) == &quot;ab&quot;
++     * </pre>
++     * @return "" if iterable doesn't have elements
+      */
+-    public static String explode(Collection<String> collection, String delimiter) {
+-        StringBuilder sb = new StringBuilder();
+-        if (!collection.isEmpty()) {
+-            Iterator<String> i = collection.iterator(); 
+-            sb.append(i.next());
+-            while (i.hasNext()) {
+-                sb.append(delimiter);
+-                sb.append(i.next());
++    public static <T> String explode(Iterable<T> iterable, String delimiter) {
++        Iterator<T> iterator = iterable.iterator();
++        if (!iterator.hasNext()) {
++            return "";
+             }
++        StringBuilder builder = new StringBuilder();
++        builder.append(iterator.next());
++        while (iterator.hasNext()) {
++            builder.append(delimiter);
++            builder.append(iterator.next());
+         }
+-        return sb.toString();
++        return builder.toString();
+     }
+     
+-    //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
+-
+     /**
+      * A wrapped version of {@link String#getBytes(String)} that changes the
+      * unlikely encoding exception into a runtime exception. Returns empty array
+      * if the passed in string is null.
+      */
+@@ -477,11 +481,11 @@
+     /**
+      * A wrapped version of {@link String#String(byte[], String)} that changes
+      * the unlikely encoding exception into a runtime exception. Returns null if
+      * the passed in array is null.
+      */
+-    public static String toStringFromUTF8Bytes(byte[] bytes) {
++    public static String toUTF8String(byte[] bytes) {
+         if (bytes == null)
+             return null;
+         try {
+             return new String(bytes, "UTF-8");
+         } catch (UnsupportedEncodingException ex) {
+Index: components/common/src/test/java/org/limewire/util/StringUtilsTest.java
+===================================================================
+RCS file: /cvs/components/common/src/test/java/org/limewire/util/StringUtilsTest.java,v
+retrieving revision 1.10
+retrieving revision 1.10.6.1
+diff -u -b -B -d -w -U5 -r1.10 -r1.10.6.1
+--- components/common/src/test/java/org/limewire/util/StringUtilsTest.java	14 Aug 2008 04:10:23 -0000	1.10
++++ components/common/src/test/java/org/limewire/util/StringUtilsTest.java	7 Sep 2008 04:30:30 -0000	1.10.6.1
+@@ -274,12 +274,12 @@
+ 
+         in = new String[] {"a", "b"}; 
+         assertEquals("ab", StringUtils.explode(in, ""));
+     }
+     
+-    public void testCollectionExplode() {
+-        Collection<String> in = Arrays.asList("a" , "b", " c "); 
++    public void testIterableExplode() {
++        Collection<?> in = Arrays.asList("a" , "b", " c "); 
+         assertEquals("a/b/ c ", StringUtils.explode(in, "/"));
+ 
+         in = Collections.emptyList(); 
+         assertEquals("", StringUtils.explode(in, "/"));
+ 
+@@ -293,10 +293,13 @@
+         assertEquals("ab", StringUtils.explode(in, ""));
+         
+         // single element
+         in = Collections.singletonList("h");
+         assertEquals("h", StringUtils.explode(in, "kfkdf"));
++        
++        in = Arrays.asList(5, 4, 4, 4);
++        assertEquals("5,4,4,4", StringUtils.explode(in, ","));
+     }
+     
+     public void testToString() {
+         AllFields fields = new AllFields();
+         String result = fields.toString();
+Index: components/core-api/src/main/java/org/limewire/core/api/search/ResultType.java
+===================================================================
+RCS file: /cvs/components/core-api/src/main/java/org/limewire/core/api/search/ResultType.java,v
+retrieving revision 1.3
+retrieving revision 1.3.4.1
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.4.1
+--- components/core-api/src/main/java/org/limewire/core/api/search/ResultType.java	3 Sep 2008 00:12:48 -0000	1.3
++++ components/core-api/src/main/java/org/limewire/core/api/search/ResultType.java	9 Sep 2008 01:23:54 -0000	1.3.4.1
+@@ -1,5 +1,5 @@
+ package org.limewire.core.api.search;
+ 
+ public enum ResultType {
+-    AUDIO, VIDEO, IMAGE, DOCUMENT, PROGRAM, OTHER
++    AUDIO, VIDEO, IMAGE, DOCUMENT, PROGRAM, OTHER, ARCHIVE
+ }
+\ No newline at end of file
+Index: components/core-settings/src/main/java/org/limewire/core/settings/SharingSettings.java
+===================================================================
+RCS file: /cvs/components/core-settings/src/main/java/org/limewire/core/settings/SharingSettings.java,v
+retrieving revision 1.1
+retrieving revision 1.1.8.1
+diff -u -b -B -d -w -U5 -r1.1 -r1.1.8.1
+--- components/core-settings/src/main/java/org/limewire/core/settings/SharingSettings.java	4 Aug 2008 23:06:55 -0000	1.1
++++ components/core-settings/src/main/java/org/limewire/core/settings/SharingSettings.java	9 Sep 2008 01:23:54 -0000	1.1.8.1
+@@ -538,16 +538,16 @@
+ 	 * true.  Use {@link #DIRECTORY_FOR_SAVING_FILES} instead then.
+ 	 * @param type the mediatype for which to look up the file setting
+ 	 * @return the filesetting for the media type
+ 	 */
+ 	public static final FileSetting getFileSettingForMediaType(MediaType type) {
+-		FileSetting setting = downloadDirsByDescription.get(type.getMimeType());
++		FileSetting setting = downloadDirsByDescription.get(type.getSchema());
+ 		if (setting == null) {
+ 			setting = FACTORY.createProxyFileSetting
+-			("DIRECTORY_FOR_SAVING_" + type.getMimeType() + "_FILES",
++			("DIRECTORY_FOR_SAVING_" + type.getSchema() + "_FILES",
+ 			 DIRECTORY_FOR_SAVING_FILES);
+-			downloadDirsByDescription.put(type.getMimeType(), setting);
++			downloadDirsByDescription.put(type.getSchema(), setting);
+ 		}
+ 		return setting;
+ 	}
+ 	
+ 	/**
+Index: components/promotion/src/main/java/org/limewire/promotion/containers/MapMessageContainer.java
+===================================================================
+RCS file: /cvs/components/promotion/src/main/java/org/limewire/promotion/containers/MapMessageContainer.java,v
+retrieving revision 1.2
+retrieving revision 1.2.42.1
+diff -u -b -B -d -w -U5 -r1.2 -r1.2.42.1
+--- components/promotion/src/main/java/org/limewire/promotion/containers/MapMessageContainer.java	17 Apr 2008 12:00:33 -0000	1.2
++++ components/promotion/src/main/java/org/limewire/promotion/containers/MapMessageContainer.java	8 Sep 2008 18:53:25 -0000	1.2.42.1
+@@ -62,11 +62,11 @@
+     protected String getString(String key) {
+         if (key == null)
+             throw new NullPointerException("key must not be null.");
+         if (!payload.hasKey(key))
+             return null;
+-        return StringUtils.toStringFromUTF8Bytes(payload.get(key));
++        return StringUtils.toUTF8String(payload.get(key));
+     }
+ 
+     /**
+      * @return the value corresponding to the given key, or null if the key is
+      *         not set or there is a problem parsing.
+Index: components/promotion/src/main/java/org/limewire/promotion/containers/PromotionMessageContainer.java
+===================================================================
+RCS file: /cvs/components/promotion/src/main/java/org/limewire/promotion/containers/PromotionMessageContainer.java,v
+retrieving revision 1.5
+retrieving revision 1.5.28.1
+diff -u -b -B -d -w -U5 -r1.5 -r1.5.28.1
+--- components/promotion/src/main/java/org/limewire/promotion/containers/PromotionMessageContainer.java	27 May 2008 22:18:48 -0000	1.5
++++ components/promotion/src/main/java/org/limewire/promotion/containers/PromotionMessageContainer.java	8 Sep 2008 18:53:25 -0000	1.5.28.1
+@@ -211,11 +211,11 @@
+      */
+     public Locale[] getTerritories() {
+         List<Locale> territoryList = new ArrayList<Locale>();
+         String territories;
+         try {
+-            territories = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_TERRITORIES));
++            territories = StringUtils.toUTF8String(payload.getBytes(KEY_TERRITORIES));
+         } catch (BadGGEPPropertyException ex) {
+             throw new RuntimeException("GGEP exception parsing territories.", ex);
+         }
+         for (int i = 0; i < territories.length() - 1; i += 2)
+             territoryList.add(new Locale("", territories.substring(i, i + 2)));
+@@ -356,11 +356,11 @@
+      *         set or the field has an encoding error. Never null.
+      */
+     public Map<String, String> getProperties() {
+         Map<String, String> properties = new HashMap<String, String>();
+         try {
+-            String encoded = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_PROPERTIES));
++            String encoded = StringUtils.toUTF8String(payload.getBytes(KEY_PROPERTIES));
+             StringTokenizer tokens = new StringTokenizer(encoded, "\t");
+             while (tokens.hasMoreTokens()) {
+                 String token = tokens.nextToken();
+                 if (token.indexOf('=') > 0) {
+                     String key = token.substring(0, token.indexOf('='));
+@@ -489,11 +489,11 @@
+     /** Parses out the given key, or returns "" if the key is not present. */
+     private String get(String key) {
+         try {
+             if (!payload.hasKey(key))
+                 return "";
+-            return StringUtils.toStringFromUTF8Bytes(payload.getBytes(key));
++            return StringUtils.toUTF8String(payload.getBytes(key));
+         } catch (BadGGEPPropertyException ex) {
+             throw new RuntimeException("GGEP exception parsing value." + ex.getMessage());
+         }
+     }
+ 
+Index: components/promotion/src/main/java/org/limewire/promotion/containers/SignedMessageContainer.java
+===================================================================
+RCS file: /cvs/components/promotion/src/main/java/org/limewire/promotion/containers/SignedMessageContainer.java,v
+retrieving revision 1.2
+retrieving revision 1.2.42.1
+diff -u -b -B -d -w -U5 -r1.2 -r1.2.42.1
+--- components/promotion/src/main/java/org/limewire/promotion/containers/SignedMessageContainer.java	17 Apr 2008 12:00:33 -0000	1.2
++++ components/promotion/src/main/java/org/limewire/promotion/containers/SignedMessageContainer.java	8 Sep 2008 18:53:25 -0000	1.2.42.1
+@@ -87,11 +87,11 @@
+      * @return a {@link MessageContainer} parsed from the <code>payload</code>.
+      */
+     public MessageContainer getAndVerifyWrappedMessage(CipherProvider cipherProvider,
+             KeyStoreProvider keyStore, CertificateVerifier certificateVerifier) throws IOException {
+         try {
+-            String keyAlias = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_ALIAS));
++            String keyAlias = StringUtils.toUTF8String(payload.getBytes(KEY_ALIAS));
+             Certificate cert = keyStore.getKeyStore().getCertificate(keyAlias);
+             if (!certificateVerifier.isValid(cert))
+                 throw new IOException("Invalid certificate retrieved.");
+             byte[] wrappedBytes = payload.getBytes(KEY_WRAPPED_BYTES);
+             if (!cipherProvider.verify(wrappedBytes, payload.getBytes(KEY_SIGNATURE), cert
+Index: components/resources/src/main/resources/org/limewire/xml/schema/torrent.xsd
+===================================================================
+RCS file: components/resources/src/main/resources/org/limewire/xml/schema/torrent.xsd
+diff -N components/resources/src/main/resources/org/limewire/xml/schema/torrent.xsd
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ components/resources/src/main/resources/org/limewire/xml/schema/torrent.xsd	8 Sep 2008 21:13:12 -0000	1.1.2.2
+@@ -0,0 +1,28 @@
++<?xml version="1.0" encoding="iso-8859-1"?>
++<schema xml:lang="en"
++ xmlns="http://www.w3.org/2001/XMLSchema"
++ xmlns:i18n="http://www.limewire.com/schemas/i18n"
++ i18n:locales="http://www.limewire.com/schemas/i18n/torrent.locales.xml"
++ targetNamespace="http://www.limewire.com/schemas/torrent.xsd">
++
++  <element name="torrents">
++    <complexType>
++      <element name="torrent" minOccurs="1" maxOccurs="unbounded" type="torrentType"/>
++    </complexType>
++  </element>
++
++  <complexType name="torrentType">
++  	<all>
++  	<attribute name="infohash" type="string"></attribute>
++  	<attribute name="announce" type="string"></attribute>	
++  	<attribute name="length" type="int"></attribute>
++  	<attribute name="name" type="string"></attribute>
++  	<attribute name="private" type="boolean"></attribute>
++  	<attribute name="piecelength" type="int"></attribute>
++  	<attribute name="webseeds" type="string"></attribute>
++  	<attribute name="filepaths" type="string"></attribute>
++  	<attribute name="filelengths" type="string"></attribute>
++  	</all>
++  </complexType>
++
++</schema>
+Index: core/com/limegroup/bittorrent/BTData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/bittorrent/BTData.java,v
+retrieving revision 1.10
+retrieving revision 1.10.4.1
+diff -u -b -B -d -w -U5 -r1.10 -r1.10.4.1
+--- core/com/limegroup/bittorrent/BTData.java	2 Sep 2008 22:36:18 -0000	1.10
++++ core/com/limegroup/bittorrent/BTData.java	8 Sep 2008 18:53:25 -0000	1.10.4.1
+@@ -13,11 +13,14 @@
+     /** A structure for storing information about files within the .torrent. */
+     public static class BTFileData {
+         private final Long length;
+         private final String path;
+         
+-        BTFileData(Long length, String path) {
++        /**
++         * public for testing
++         */
++        public BTFileData(Long length, String path) {
+             this.length = length;
+             this.path = path;
+         }
+     
+         public Long getLength() {
+Index: core/com/limegroup/bittorrent/BTMetaInfoFactory.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/bittorrent/BTMetaInfoFactory.java,v
+retrieving revision 1.3
+retrieving revision 1.3.18.1
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.18.1
+--- core/com/limegroup/bittorrent/BTMetaInfoFactory.java	30 Jun 2008 18:36:42 -0000	1.3
++++ core/com/limegroup/bittorrent/BTMetaInfoFactory.java	7 Sep 2008 04:30:30 -0000	1.3.18.1
+@@ -1,7 +1,8 @@
+ package com.limegroup.bittorrent;
+ 
++import java.io.File;
+ import java.io.IOException;
+ 
+ import org.limewire.io.InvalidDataException;
+ 
+ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
+@@ -22,6 +23,14 @@
+      * @param torrent byte array with the contents of .torrent
+      * @return new instance of BTMetaInfo if all went well
+      * @throws IOException if parsing or reading failed.
+      */
+     BTMetaInfo createBTMetaInfoFromBytes(byte []torrent) throws IOException;        
++    
++    /**
++     * Creates meta info object from file.
++     * 
++     * @throws IOException if there was a problem reading the file or parsing
++     * the torrent
++     */
++    BTMetaInfo createMetaInfo(File torrentFile) throws IOException;
+ }
+\ No newline at end of file
+Index: core/com/limegroup/bittorrent/BTMetaInfoFactoryImpl.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/bittorrent/BTMetaInfoFactoryImpl.java,v
+retrieving revision 1.2
+retrieving revision 1.2.50.1
+diff -u -b -B -d -w -U5 -r1.2 -r1.2.50.1
+--- core/com/limegroup/bittorrent/BTMetaInfoFactoryImpl.java	13 Mar 2008 19:24:38 -0000	1.2
++++ core/com/limegroup/bittorrent/BTMetaInfoFactoryImpl.java	7 Sep 2008 04:30:30 -0000	1.2.50.1
+@@ -1,13 +1,15 @@
+ package com.limegroup.bittorrent;
+ 
++import java.io.File;
+ import java.io.IOException;
+ import java.util.Map;
+ 
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+ import org.limewire.io.InvalidDataException;
++import org.limewire.util.FileUtils;
+ 
+ import com.limegroup.bittorrent.bencoding.Token;
+ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
+ 
+ public class BTMetaInfoFactoryImpl implements BTMetaInfoFactory {
+@@ -44,6 +46,12 @@
+      * @throws IOException if data passed is incorrect
+      */
+     private BTMetaInfo createBTMetaInfoFromData (BTData data) throws IOException {
+         return new BTMetaInfoImpl(data);
+     }
++
++    @Override
++    public BTMetaInfo createMetaInfo(File torrentFile) throws IOException {
++        byte[] torrentBytes = FileUtils.readFileFully(torrentFile);
++        return createBTMetaInfoFromBytes(torrentBytes);
++    }
+ }
+Index: core/com/limegroup/bittorrent/BittorrentModule.java
+===================================================================
+RCS file: core/com/limegroup/bittorrent/BittorrentModule.java
+diff -N core/com/limegroup/bittorrent/BittorrentModule.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ core/com/limegroup/bittorrent/BittorrentModule.java	9 Sep 2008 01:23:54 -0000	1.1.2.2
+@@ -0,0 +1,14 @@
++package com.limegroup.bittorrent;
++
++import com.google.inject.AbstractModule;
++import com.limegroup.bittorrent.metadata.TorrentMetaReader;
++
++public class BittorrentModule extends AbstractModule {
++
++    @Override
++    protected void configure() {
++        // bound eagerly so it registers itself with MetaDataFactory
++        bind(TorrentMetaReader.class).asEagerSingleton();
++    }
++
++}
+Index: core/com/limegroup/bittorrent/metadata/TorrentMetaData.java
+===================================================================
+RCS file: core/com/limegroup/bittorrent/metadata/TorrentMetaData.java
+diff -N core/com/limegroup/bittorrent/metadata/TorrentMetaData.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ core/com/limegroup/bittorrent/metadata/TorrentMetaData.java	8 Sep 2008 21:13:12 -0000	1.1.2.5
+@@ -0,0 +1,125 @@
++package com.limegroup.bittorrent.metadata;
++
++import java.io.IOException;
++import java.net.URI;
++import java.net.URISyntaxException;
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++
++import org.limewire.http.URIUtils;
++import org.limewire.util.Base32;
++import org.limewire.util.NameValue;
++import org.limewire.util.StringUtils;
++
++import com.limegroup.bittorrent.BTData;
++import com.limegroup.bittorrent.BTData.BTFileData;
++import com.limegroup.gnutella.metadata.MetaData;
++import com.limegroup.gnutella.xml.LimeXMLDocument;
++
++public class TorrentMetaData implements MetaData {
++
++    public static final String TORRENT_SCHEMA = "http://www.limewire.com/schemas/torrent.xsd";
++    
++    public static final String INFO_HASH = "torrents__torrent__infohash__";
++    
++    public static final String ANNOUNCE = "torrents__torrent__announce__";
++    
++    public static final String LENGTH = "torrents__torrent__length__";
++    
++    public static final String NAME = "torrents__torrent__name__";
++    
++    public static final String PRIVATE = "torrents__torrent__private__";
++    
++    public static final String PIECE_LENGTH = "torrents__torrent__piecelength__";
++    
++    public static final String WEBSEEDS = "torrents__torrent__webseeds__";
++    
++    public static final String FILE_PATHS = "torrents__torrent__filepaths__";
++    
++    public static final String FILE_LENGTHS = "torrents__torrent__filelengths__";
++
++    private List<NameValue<String>> nameValues;
++
++    public TorrentMetaData(BTData data) throws IOException {
++        nameValues = Collections.unmodifiableList(buildNameValueList(data));
++    }
++
++    @Override
++    public String getSchemaURI() {
++        return TORRENT_SCHEMA;
++    }
++
++    @Override
++    public void populate(LimeXMLDocument doc) {
++        throw new UnsupportedOperationException("not implemented yet");
++    }
++
++    private List<NameValue<String>> buildNameValueList(BTData data) throws IOException {
++        NameValueListBuilder builder = new NameValueListBuilder();
++        builder.add(INFO_HASH, Base32.encode(data.getInfoHash()));
++        try {
++            builder.add(ANNOUNCE, URIUtils.toURI(data.getAnnounce()).toASCIIString());
++        } catch (URISyntaxException ie) {
++            throw new IOException(ie);
++        }
++        Long length = data.getLength();
++        if (length != null) {
++            builder.add(LENGTH, length);
++        }
++        builder.add(NAME, data.getName());
++        // unimportant information not parsed and sent for now
++//        builder.add(PIECE_LENGTH, data.getPieceLength());
++        boolean isPrivate = data.isPrivate();
++        if (isPrivate) {
++            builder.add(PRIVATE, Boolean.TRUE.toString());
++        }
++        String uris = StringUtils.explode(data.getWebSeeds(), "\t");
++        if (uris.length() > 0) {
++            builder.add(WEBSEEDS, uris);
++        }
++        List<BTFileData> files = data.getFiles();
++        if (files != null) {
++            List<String> filePaths = new ArrayList<String>(files.size());
++            List<Long> fileLengths = new ArrayList<Long>(files.size());
++            for (BTFileData file : files) {
++                try {
++                    filePaths.add(URIUtils.toURI(file.getPath()).toASCIIString());
++                } catch (URISyntaxException e) {
++                    throw new IOException(e);
++                }
++                fileLengths.add(file.getLength());
++            }
++            builder.add(FILE_PATHS, StringUtils.explode(filePaths, "\t"));
++            builder.add(FILE_LENGTHS, StringUtils.explode(fileLengths, "\t"));
++        }
++        return builder.toList();
++    }
++    
++    @Override
++    public List<NameValue<String>> toNameValueList() {
++        return nameValues;
++    }
++
++    private static class NameValueListBuilder {
++
++        private List<NameValue<String>> values = new ArrayList<NameValue<String>>();
++
++        public void add(String name, String value) {
++            values.add(new NameValue<String>(name, value));
++        }
++
++        public void add(String name, URI uri) {
++            values.add(new NameValue<String>(name, uri.toASCIIString()));
++        }
++
++        public void add(String name, long value) {
++            values.add(new NameValue<String>(name, Long.toString(value)));
++        }
++
++        List<NameValue<String>> toList() {
++            return values;
++        }
++    }
++
++}
+Index: core/com/limegroup/bittorrent/metadata/TorrentMetaReader.java
+===================================================================
+RCS file: core/com/limegroup/bittorrent/metadata/TorrentMetaReader.java
+diff -N core/com/limegroup/bittorrent/metadata/TorrentMetaReader.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ core/com/limegroup/bittorrent/metadata/TorrentMetaReader.java	9 Sep 2008 18:42:07 -0000	1.1.2.3
+@@ -0,0 +1,41 @@
++package com.limegroup.bittorrent.metadata;
++
++import java.io.File;
++import java.io.IOException;
++import java.util.Map;
++
++import org.limewire.util.FileUtils;
++
++import com.google.inject.Inject;
++import com.google.inject.Singleton;
++import com.limegroup.bittorrent.BTDataImpl;
++import com.limegroup.bittorrent.ValueException;
++import com.limegroup.bittorrent.bencoding.Token;
++import com.limegroup.gnutella.metadata.MetaData;
++import com.limegroup.gnutella.metadata.MetaDataFactory;
++import com.limegroup.gnutella.metadata.MetaReader;
++
++@Singleton
++public class TorrentMetaReader implements MetaReader {
++
++    @Override
++    public MetaData parse(File file) throws IOException {
++        byte[] contents = FileUtils.readFileFully(file);
++        Object obj = Token.parse(contents);
++        if (!(obj instanceof Map)) {
++            throw new ValueException("expected map");
++        }
++        return new TorrentMetaData(new BTDataImpl((Map)obj));
++    }
++
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "torrent" };
++    }
++    
++    @Inject
++    public void register(MetaDataFactory metaDataFactory) {
++        metaDataFactory.registerReader(this);
++    }
++
++}
+Index: core/com/limegroup/gnutella/LimeWireCoreModule.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/LimeWireCoreModule.java,v
+retrieving revision 1.124
+retrieving revision 1.124.8.1
+diff -u -b -B -d -w -U5 -r1.124 -r1.124.8.1
+--- core/com/limegroup/gnutella/LimeWireCoreModule.java	11 Aug 2008 16:25:44 -0000	1.124
++++ core/com/limegroup/gnutella/LimeWireCoreModule.java	8 Sep 2008 20:03:17 -0000	1.124.8.1
+@@ -46,10 +46,11 @@
+ import com.limegroup.bittorrent.BTConnectionFactoryImpl;
+ import com.limegroup.bittorrent.BTContextFactory;
+ import com.limegroup.bittorrent.BTContextFactoryImpl;
+ import com.limegroup.bittorrent.BTMetaInfoFactory;
+ import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
++import com.limegroup.bittorrent.BittorrentModule;
+ import com.limegroup.bittorrent.BTUploaderFactory;
+ import com.limegroup.bittorrent.BTUploaderFactoryImpl;
+ import com.limegroup.bittorrent.ManagedTorrentFactory;
+ import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
+ import com.limegroup.bittorrent.TorrentEvent;
+@@ -233,10 +234,11 @@
+         binder().install(new LimeWireMojitoModule());
+         binder().install(new LimeWireSecurityCertificateModule());
+         binder().install(new LimeWireGeocodeGlueModule());        
+         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
+         binder().install(new LimeWireSimppModule());
++        binder().install(new BittorrentModule());
+         
+         binder().install(ProviderMethods.from(new FileEventListenerProvider()));
+         
+         bind(LimeWireCore.class);
+         
+Index: core/com/limegroup/gnutella/SharedFilesKeywordIndexImpl.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/SharedFilesKeywordIndexImpl.java,v
+retrieving revision 1.9
+retrieving revision 1.9.6.1
+diff -u -b -B -d -w -U5 -r1.9 -r1.9.6.1
+--- core/com/limegroup/gnutella/SharedFilesKeywordIndexImpl.java	18 Aug 2008 15:56:35 -0000	1.9
++++ core/com/limegroup/gnutella/SharedFilesKeywordIndexImpl.java	9 Sep 2008 01:23:54 -0000	1.9.6.1
+@@ -514,11 +514,11 @@
+     	List<LimeXMLReplyCollection> collections = new ArrayList<LimeXMLReplyCollection>(mediaTypes.size());
+     	for (MediaType mt : mediaTypes) {
+ 
+             // get schema uri from media type
+             LimeXMLReplyCollection col = mapper.getReplyCollection(
+-                    getSchemaUriFromMimeType(mt.getMimeType()));
++                    getSchemaUriFromMimeType(mt.getSchema()));
+ 
+             if (col != null) {
+     		    collections.add(col);
+             }
+         }
+Index: core/com/limegroup/gnutella/bootstrap/UDPHostCache.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/bootstrap/UDPHostCache.java,v
+retrieving revision 1.26
+retrieving revision 1.26.8.1
+diff -u -b -B -d -w -U5 -r1.26 -r1.26.8.1
+--- core/com/limegroup/gnutella/bootstrap/UDPHostCache.java	6 Aug 2008 18:28:11 -0000	1.26
++++ core/com/limegroup/gnutella/bootstrap/UDPHostCache.java	7 Sep 2008 04:30:30 -0000	1.26.8.1
+@@ -399,13 +399,16 @@
+                     if(LOG.isTraceEnabled())
+                         LOG.trace("No response from cache: " + ep);
+                     ep.recordUDPHostCacheFailure();
+                     dirty = true;
+                     writeDirty = true;
+-                    if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
++                    if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES) {
++                        LOG.debug("maximum failures reached: " + ep);
++                        LOG.debug("failures: " + ep.getUDPHostCacheFailures());
+                         remove(ep);
+                 }
++                }
+                 // Then record the successes...
+                 allHosts.removeAll(hosts);
+                 for(ExtendedEndpoint ep : allHosts) {
+                     if(LOG.isTraceEnabled())
+                         LOG.trace("Valid response from cache: " + ep);
+Index: core/com/limegroup/gnutella/downloader/StoreDownloaderImpl.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/downloader/StoreDownloaderImpl.java,v
+retrieving revision 1.11
+retrieving revision 1.11.8.1
+diff -u -b -B -d -w -U5 -r1.11 -r1.11.8.1
+--- core/com/limegroup/gnutella/downloader/StoreDownloaderImpl.java	4 Aug 2008 23:06:55 -0000	1.11
++++ core/com/limegroup/gnutella/downloader/StoreDownloaderImpl.java	9 Sep 2008 01:23:54 -0000	1.11.8.1
+@@ -32,11 +32,10 @@
+ import com.limegroup.gnutella.filters.IPFilter;
+ import com.limegroup.gnutella.guess.OnDemandUnicaster;
+ import com.limegroup.gnutella.messages.QueryRequest;
+ import com.limegroup.gnutella.messages.QueryRequestFactory;
+ import com.limegroup.gnutella.metadata.MetaDataFactory;
+-import com.limegroup.gnutella.metadata.MetaReader;
+ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+ import com.limegroup.gnutella.templates.StoreFileNameTemplateProcessor;
+ import com.limegroup.gnutella.templates.StoreSubDirectoryTemplateProcessor;
+ import com.limegroup.gnutella.templates.StoreTemplateProcessor;
+ import com.limegroup.gnutella.templates.StoreTemplateProcessor.IllegalTemplateException;
+@@ -179,12 +178,11 @@
+             return defaultSaveFile;
+ 
+         // parse the meta data of this file
+         AudioMetaData metaData = null;
+         try {
+-            MetaReader reader = metaDataFactory.parse(newDownloadFile);
+-            metaData = (AudioMetaData) reader.getMetaData();
++            metaData = (AudioMetaData) metaDataFactory.parse(newDownloadFile);
+         } catch (IOException e) {
+             // don't catch this exception, problem reading the ID3 tags, just
+             // use default locations instead
+             return defaultSaveFile;
+         }
+Index: core/com/limegroup/gnutella/metadata/MetaDataFactory.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/MetaDataFactory.java,v
+retrieving revision 1.2
+retrieving revision 1.2.62.3
+diff -u -b -B -d -w -U5 -r1.2 -r1.2.62.3
+--- core/com/limegroup/gnutella/metadata/MetaDataFactory.java	1 Feb 2008 21:09:58 -0000	1.2
++++ core/com/limegroup/gnutella/metadata/MetaDataFactory.java	9 Sep 2008 18:42:07 -0000	1.2.62.3
+@@ -16,7 +16,14 @@
+     
+     /**
+      * Reads the meta data from the file if the file type is supported
+      * or return null if reading the file meta data if not supprted
+      */
+-    public MetaReader parse(File f) throws IOException;
++    public MetaData parse(File f) throws IOException;
++    
++    /**
++     * Registers a reader factory for a number of file extensions
++     * @throws IllegalArgumentException if another factory is already registered
++     * for one of the given extensions
++     */
++    void registerReader(MetaReader reader);
+ }
+Index: core/com/limegroup/gnutella/metadata/MetaDataFactoryImpl.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/MetaDataFactoryImpl.java,v
+retrieving revision 1.4
+retrieving revision 1.4.32.4
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.32.4
+--- core/com/limegroup/gnutella/metadata/MetaDataFactoryImpl.java	2 May 2008 14:53:35 -0000	1.4
++++ core/com/limegroup/gnutella/metadata/MetaDataFactoryImpl.java	9 Sep 2008 18:42:07 -0000	1.4.32.4
+@@ -1,14 +1,18 @@
+ package com.limegroup.gnutella.metadata;
+ 
+ import java.io.File;
+ import java.io.IOException;
++import java.util.Locale;
++import java.util.concurrent.ConcurrentHashMap;
++import java.util.concurrent.ConcurrentMap;
+ 
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
++import org.limewire.util.FileUtils;
+ 
+-import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
++import com.google.inject.Singleton;
+ import com.limegroup.gnutella.metadata.audio.reader.AudioDataReader;
+ import com.limegroup.gnutella.metadata.audio.reader.MP3MetaData;
+ import com.limegroup.gnutella.metadata.audio.reader.OGGMetaData;
+ import com.limegroup.gnutella.metadata.audio.reader.WMAMetaData;
+ import com.limegroup.gnutella.metadata.audio.writer.FlacDataEditor;
+@@ -24,14 +28,30 @@
+ 
+ /**
+  * Implementation of MetaDataFactory. Returns the appropriate reader/writer for
+  * the file type if one exists, null if one does not exist 
+  */
++@Singleton
+ public class MetaDataFactoryImpl implements MetaDataFactory {
+ 
+     private static final Log LOG = LogFactory.getLog(MetaDataFactory.class); 
+     
++    private final ConcurrentMap<String, MetaReader> readerByExtension = new ConcurrentHashMap<String, MetaReader>();
++    
++    public MetaDataFactoryImpl() {
++        registerReader(new WMMetaReader());
++        registerReader(new MP3MetaData());
++        registerReader(new OGGMetaData());
++        registerReader(new AudioDataReader());
++        registerReader(new WMAMetaData());
++        registerReader(new RIFFMetaData());
++        registerReader(new OGMMetaData());
++        registerReader(new WMVMetaData());
++        registerReader(new MPEGMetaData());
++        registerReader(new MOVMetaData());
++    }
++    
+     /**
+      * factory method which returns an instance of MetaDataEditor which
+      * should be used with the specific file
+      * @param name the name of the file to be annotated
+      * @return the MetaDataEditor that will do the annotation.  null if the
+@@ -40,40 +60,44 @@
+     public MetaWriter getEditorForFile(String name) {
+         if (LimeXMLUtils.isSupportedAudioFormat(name))
+             return getAudioEditorForFile(name);
+         //add video types here
+         return null;
++    }
+         
++    @Override
++    public void registerReader(MetaReader reader) {
++        for (String extension : reader.getSupportedExtensions()) {
++            MetaReader existingReader= readerByExtension.put(extension, reader);
++            if (existingReader != null) {
++                throw new IllegalArgumentException("factory: " + existingReader.getClass() + " already resistered for: " + extension);
++            }
++        }
+     }
+     
+-    /** Creates MetaData for the file, if possible. */  
+-    public MetaReader parse(File f) throws IOException {
++    public MetaData parse(File file) throws IOException {
+         try {
+-            if (LimeXMLUtils.isSupportedAudioFormat(f))
+-                return parseAudioFile(f);
+-            else if (LimeXMLUtils.isSupportedVideoFormat(f))
+-                return parseVideoMetaData(f);          
+-            else if (LimeXMLUtils.isSupportedMultipleFormat(f))
+-                return parseMultipleFormat(f);
++            MetaReader reader = getMetaReader(file);
++            if (reader != null) {
++                return reader.parse(file);
++            }
+         } catch (OutOfMemoryError e) {
+             LOG.warn("Ran out of memory while parsing.",e);
+             throw (IOException)new IOException().initCause(e);
+         } catch (Exception e) {
+             LOG.warn("Exception parsing file.",e);
+             throw (IOException)new IOException().initCause(e);
+         }
+         return null;
+     }
+     
+-    /** Figures out what kind of MetaData should exist for this file. */
+-    private MetaReader parseMultipleFormat(File f) throws IOException {
+-        if(LimeXMLUtils.isASFFile(f)) {
+-            ASFParser p = new ASFParser(f);
+-            if(p.hasVideo())
+-                return new WMVMetaData(p);
+-            else if(p.hasAudio())
+-                return new WMAMetaData(p);
++    /** Creates MetaData for the file, if possible. */  
++    public MetaReader getMetaReader(File file) {
++        String extension = FileUtils.getFileExtension(file);
++        if (extension != null) {
++            MetaReader reader = readerByExtension.get(extension.toLowerCase(Locale.US));
++            return reader;
+         }
+         return null;
+     }
+     
+     /**
+@@ -90,44 +114,6 @@
+         if (LimeXMLUtils.isFLACFile(name))
+             return new FlacDataEditor();
+         return null;
+     }
+     
+-    /**
+-     * Reads the meta data for the audio file if LimeWire can parse
+-     * it, otherwise return null if file type is not supported
+-     */
+-    private MetaReader parseAudioFile(File f) throws IOException, IllegalArgumentException { 
+-        if (LimeXMLUtils.isMP3File(f))
+-            return new MP3MetaData(f);
+-        if (LimeXMLUtils.isOGGFile(f))
+-            return new OGGMetaData(f);
+-        if (LimeXMLUtils.isFLACFile(f))
+-            return new AudioDataReader(f);
+-        if (LimeXMLUtils.isM4AFile(f))
+-            return new AudioDataReader(f);
+-        if (LimeXMLUtils.isWMAFile(f))
+-            return new WMAMetaData(f);
+-        
+-        return null;
+-    }
+-    
+-    /**
+-     * Reads the meta data for the video file if LimeWire can parse
+-     * it, otherwise return null if the file type is not suported
+-     */
+-    private MetaReader parseVideoMetaData(File file)
+-            throws IOException {
+-        if (LimeXMLUtils.isRIFFFile(file))
+-            return new RIFFMetaData(file);
+-        else if (LimeXMLUtils.isOGMFile(file))
+-            return new OGMMetaData(file);
+-        else if(LimeXMLUtils.isWMVFile(file))
+-            return new WMVMetaData(file);
+-        else if(LimeXMLUtils.isMPEGFile(file))
+-            return new MPEGMetaData(file);
+-        else if (LimeXMLUtils.isQuickTimeFile(file))
+-            return new MOVMetaData(file);
+-            
+-        return null;
+-    }
+ }
+Index: core/com/limegroup/gnutella/metadata/MetaDataReader.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/MetaDataReader.java,v
+retrieving revision 1.17
+retrieving revision 1.17.48.1
+diff -u -b -B -d -w -U5 -r1.17 -r1.17.48.1
+--- core/com/limegroup/gnutella/metadata/MetaDataReader.java	20 Mar 2008 16:05:53 -0000	1.17
++++ core/com/limegroup/gnutella/metadata/MetaDataReader.java	9 Sep 2008 01:23:54 -0000	1.17.48.1
+@@ -39,11 +39,11 @@
+     /**
+      * Generates a LimeXMLDocument from this file, only parsing it if it's the
+      * given schemaURI.
+      */
+     public LimeXMLDocument readDocument(File file) throws IOException {
+-        MetaReader data = metaDataFactory.parse(file);
++        MetaData data = metaDataFactory.parse(file);
+         if (data == null)
+             throw new IOException("unable to parse file");
+ 
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         if (nameValList.isEmpty())
+Index: core/com/limegroup/gnutella/metadata/MetaReader.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/MetaReader.java,v
+retrieving revision 1.3
+retrieving revision 1.3.50.1
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.50.1
+--- core/com/limegroup/gnutella/metadata/MetaReader.java	20 Mar 2008 16:05:53 -0000	1.3
++++ core/com/limegroup/gnutella/metadata/MetaReader.java	9 Sep 2008 01:23:54 -0000	1.3.50.1
+@@ -1,18 +1,14 @@
+ package com.limegroup.gnutella.metadata;
+ 
+-import java.util.List;
+-
+-import org.limewire.util.NameValue;
++import java.io.File;
++import java.io.IOException;
+ 
+ /**
+  *  Reads meta-data from a file. Each type of media type reader
+  *  must implement this interface
+  */
+ public interface MetaReader {
++    public MetaData parse(File file) throws IOException;
+     
+-    public List<NameValue<String>> toNameValueList();
+-    
+-    public String getSchemaURI();
+-    
+-    public MetaData getMetaData();
++    public String[] getSupportedExtensions();
+ }
+Index: core/com/limegroup/gnutella/metadata/MetaReaderFactory.java
+===================================================================
+RCS file: core/com/limegroup/gnutella/metadata/MetaReaderFactory.java
+diff -N core/com/limegroup/gnutella/metadata/MetaReaderFactory.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ core/com/limegroup/gnutella/metadata/MetaReaderFactory.java	9 Sep 2008 01:23:54 -0000	1.1.2.2
+@@ -0,0 +1,18 @@
++package com.limegroup.gnutella.metadata;
++
++import java.io.File;
++import java.io.IOException;
++
++/**
++ * Defines factory for {@link MetaReader} objects.
++ */
++public interface MetaReaderFactory {
++    
++    /**
++     * Creates a new reader for parsing <code>file</code>.
++     * @param file file to parse
++     * @throws IOException if parsing of the file fails for some reason
++     */
++    MetaReader createReader(File file) throws IOException;
++    
++}
+Index: core/com/limegroup/gnutella/metadata/WMMetaReader.java
+===================================================================
+RCS file: core/com/limegroup/gnutella/metadata/WMMetaReader.java
+diff -N core/com/limegroup/gnutella/metadata/WMMetaReader.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ core/com/limegroup/gnutella/metadata/WMMetaReader.java	9 Sep 2008 01:23:54 -0000	1.1.2.1
+@@ -0,0 +1,27 @@
++package com.limegroup.gnutella.metadata;
++
++import java.io.File;
++import java.io.IOException;
++
++import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
++import com.limegroup.gnutella.metadata.audio.reader.WMAMetaData;
++import com.limegroup.gnutella.metadata.video.reader.WMVMetaData;
++
++public class WMMetaReader implements MetaReader {
++
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "asf", "wm" };
++    }
++    
++    @Override
++    public MetaData parse(File file) throws IOException {
++        ASFParser p = new ASFParser(file);
++        if (p.hasVideo())
++            return new WMVMetaData().parse(p);
++        else if(p.hasAudio())
++            return new WMAMetaData().parse(p);
++        else 
++            throw new IOException("could not parse file");
++    }
++}
+Index: core/com/limegroup/gnutella/metadata/audio/reader/AudioDataReader.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/audio/reader/AudioDataReader.java,v
+retrieving revision 1.5
+retrieving revision 1.5.50.2
+diff -u -b -B -d -w -U5 -r1.5 -r1.5.50.2
+--- core/com/limegroup/gnutella/metadata/audio/reader/AudioDataReader.java	20 Mar 2008 16:05:53 -0000	1.5
++++ core/com/limegroup/gnutella/metadata/audio/reader/AudioDataReader.java	9 Sep 2008 18:42:07 -0000	1.5.50.2
+@@ -1,25 +1,21 @@
+ package com.limegroup.gnutella.metadata.audio.reader;
+ 
+ import java.io.File;
+ import java.io.IOException;
+-import java.util.List;
+ 
+ import org.jaudiotagger.audio.AudioFile;
+ import org.jaudiotagger.audio.AudioFileIO;
+ import org.jaudiotagger.audio.AudioHeader;
+ import org.jaudiotagger.audio.exceptions.CannotReadException;
+ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+ import org.jaudiotagger.tag.Tag;
+ import org.jaudiotagger.tag.TagException;
+-import org.limewire.util.NameValue;
+ 
+-import com.limegroup.gnutella.metadata.MetaData;
+ import com.limegroup.gnutella.metadata.MetaReader;
+ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+-import com.limegroup.gnutella.xml.LimeXMLNames;
+ 
+ /**
+  *  Handles the reading of most audio files. All file types supported by 
+  *  jAudioTagger can use this class to read their meta data
+  */
+@@ -27,34 +23,27 @@
+ 
+     public static final String ISO_LATIN_1 = "8859_1";
+     public static final String UNICODE = "Unicode";
+     public static final String MAGIC_KEY = "NOT CLEARED";
+     
+-    protected final AudioMetaData audioData;
+-    
+-    public AudioDataReader(File f) throws IOException, IllegalArgumentException {
+-        audioData = new AudioMetaData();
+-        parseFile(f);
+-    }
+-    
+     /**
+      * Reads header information about the file. All audio formats contain
+      * some sort of header information to describe how the audio file is encoded.
+      * This typically includes sample rate, bit rate, length, encoding scheme, etc..
+      */
+-    private void readHeader(AudioHeader header) {
++    private void readHeader(AudioMetaData audioData, AudioHeader header) {
+         audioData.setVBR(header.isVariableBitRate());
+         audioData.setSampleRate(header.getSampleRateAsNumber());
+         audioData.setBitrate((int)header.getBitRateAsNumber());
+         audioData.setLength(header.getTrackLength());
+     }
+     
+     /**
+      * Reads any metadata the user may have added to this audio format. Each audio
+      * type has its own format for describing the audio file. 
+      */
+-    protected void readTag(AudioFile audioFile, Tag tag){
++    protected void readTag(AudioMetaData audioData, AudioFile audioFile, Tag tag){
+         audioData.setTitle(tag.getFirstTitle());
+         audioData.setArtist(tag.getFirstArtist());
+         audioData.setAlbum(tag.getFirstAlbum());
+         audioData.setYear(tag.getFirstYear());
+         audioData.setComment(tag.getFirstComment());
+@@ -65,15 +54,18 @@
+     /**
+      * Handles the reading and parsing of this file
+      * @param file - file to read
+      * @throws IOException - thrown if the file can't be read, is corrupted, etc..
+      */
+-    private void parseFile(File file) throws IOException, IllegalArgumentException { 
++    @Override
++    public AudioMetaData parse(File file) throws IOException { 
+         try { 
++            AudioMetaData audioData = new AudioMetaData();
+             AudioFile audioFile = AudioFileIO.read(file);
+-            readHeader(audioFile.getAudioHeader());          
+-            readTag(audioFile, audioFile.getTag());
++            readHeader(audioData, audioFile.getAudioHeader());          
++            readTag(audioData, audioFile, audioFile.getTag());
++            return audioData;
+         } catch (CannotReadException e) { 
+             throw (IOException)new IOException().initCause(e);
+         } catch (TagException e) {
+             throw (IOException)new IOException().initCause(e);
+         } catch (ReadOnlyFileException e) {
+@@ -81,27 +73,11 @@
+         } catch (InvalidAudioFrameException e) {
+             throw (IOException)new IOException().initCause(e);
+         }
+     }
+ 
+-    /**
+-     * @return the MetaData of this file
+-     */
+-    public MetaData getMetaData() {
+-        return audioData;
+-    }
+-
+-    /**
+-     * @return the XML schema of this file
+-     */
+-    public String getSchemaURI() {
+-        return LimeXMLNames.AUDIO_SCHEMA;
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "fla", "flac", "m4a", "m4p" };
+     }
+ 
+-    /**
+-     * @return the MetaData of this file in a NameValue 
+-     * List representation
+-     */
+-    public List<NameValue<String>> toNameValueList() {
+-        return audioData.toNameValueList();
+-    }
+ }
+Index: core/com/limegroup/gnutella/metadata/audio/reader/MP3MetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/audio/reader/MP3MetaData.java,v
+retrieving revision 1.5
+retrieving revision 1.5.52.2
+diff -u -b -B -d -w -U5 -r1.5 -r1.5.52.2
+--- core/com/limegroup/gnutella/metadata/audio/reader/MP3MetaData.java	6 Mar 2008 16:16:48 -0000	1.5
++++ core/com/limegroup/gnutella/metadata/audio/reader/MP3MetaData.java	9 Sep 2008 18:42:07 -0000	1.5.52.2
+@@ -1,9 +1,7 @@
+ 
+ package com.limegroup.gnutella.metadata.audio.reader;
+-import java.io.File;
+-import java.io.IOException;
+ import java.io.UnsupportedEncodingException;
+ import java.util.Iterator;
+ 
+ import org.jaudiotagger.audio.AudioFile;
+ import org.jaudiotagger.audio.mp3.MP3File;
+@@ -11,44 +9,43 @@
+ import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
+ import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
+ import org.jaudiotagger.tag.id3.ID3v1Tag;
+ import org.jaudiotagger.tag.id3.ID3v24Frames;
+ 
++import com.limegroup.gnutella.metadata.audio.AudioMetaData;
++
+ /**
+  *  Reads MetaData from MP3 files. This extends AudioDataReader which also
+  *  handles this format. However, store files need to get checked and parsed
+  *  correctly so we do that here. 
+  */
+ public class MP3MetaData extends AudioDataReader {
+ 	
+-	public MP3MetaData(File f) throws IOException, IllegalArgumentException {
+-		super(f);
+-	}
+ 	
+     @Override
+-    protected void readTag(AudioFile audioFile, Tag tag) {
++    protected void readTag(AudioMetaData audioData, AudioFile audioFile, Tag tag) {
+         
+         MP3File mp3File = ((MP3File)audioFile);
+         mp3File.getID3v1Tag();
+         
+         AbstractID3v2Tag v2Tag = mp3File.getID3v2Tag();
+         ID3v1Tag v1Tag = mp3File.getID3v1Tag();
+ 
+         // check v2 tags first if they exist
+         if( v2Tag != null )
+-            readV2Tag(v2Tag);
++            readV2Tag(audioData, v2Tag);
+ 
+         // check v1 tags next
+         if( v1Tag != null )
+-            readV1Tag(v1Tag);
++            readV1Tag(audioData, v1Tag);
+     }
+     
+     /**
+      * Reads v1 tags from the mp3. Only writes the field to the AudioData if
+      * it has not been filled in by v2 tags
+      */
+-    private void readV1Tag(ID3v1Tag tag){
++    private void readV1Tag(AudioMetaData audioData, ID3v1Tag tag){
+         if( audioData.getTitle() == null || audioData.getTitle().length() == 0)
+             audioData.setTitle(tag.getFirstTitle());
+         if( audioData.getArtist() == null || audioData.getArtist().length() == 0)
+             audioData.setArtist(tag.getFirstArtist());
+         if( audioData.getAlbum() == null || audioData.getAlbum().length() == 0)
+@@ -70,11 +67,11 @@
+     }
+     
+     /**
+      * Reads v2 tags from the mp3. 
+      */
+-    private void readV2Tag(AbstractID3v2Tag tag){
++    private void readV2Tag(AudioMetaData audioData, AbstractID3v2Tag tag){
+         audioData.setTitle(tag.getFirstTitle());
+         audioData.setArtist(tag.getFirstArtist());
+         audioData.setAlbum(tag.getFirstAlbum());
+         audioData.setYear(tag.getFirstYear()); 
+         audioData.setComment(tag.getFirstComment());
+@@ -96,34 +93,34 @@
+             if( !(o.getId().equals("TIT2") || o.getId().equals("TALB") || o.getId().equals("TOAL") ||
+                     o.getId().equals("TOPE") || o.getId().equals("TPE1") || o.getId().equals("TPE2")
+                     || o.getId().equals("TPE3") || o.getId().equals("TPE4")) )
+             
+             if( o.getBody().getObject("Text") != null )
+-                checkLWS(o.getBody().getObject("Text").toString());
++                checkLWS(audioData, o.getBody().getObject("Text").toString());
+             else 
+-                isRawCheck(o.getRawContent());
++                isRawCheck(audioData, o.getRawContent());
+         }
+     }
+        
+     /**
+      * Checks a raw content field for the magic String. This is always in UTF-8 encoding so use the 
+      * content byte array instead. 
+      */
+-    private void isRawCheck(byte[] contentBytes) {
++    private void isRawCheck(AudioMetaData audioDatas, byte[] contentBytes) {
+         try {
+             String content = new String(contentBytes,"UTF-8"); 
+-            checkLWS(content);
++            checkLWS(audioDatas, content);
+         } catch (UnsupportedEncodingException e) {
+         }
+     }
+ 
+     /**
+      * If the song is not a LWS already, do a substring search to see if
+      * it is a LWS song
+      * @param content - ID3 tag to scan for a substring
+      */
+-    private void checkLWS(String content) { 
++    private void checkLWS(AudioMetaData audioData, String content) { 
+         if( audioData.getLicenseType() == null || !audioData.getLicenseType().equals(MAGIC_KEY))
+             if( content.indexOf(MAGIC_KEY) != -1) { 
+                 audioData.setLicenseType(MAGIC_KEY);
+             }
+     }
+@@ -146,6 +143,11 @@
+             cleanGenre = genre.substring(startIndex);
+         }
+         return cleanGenre;
+         
+     }
++    
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "mp3" };
++    }
+ }
+Index: core/com/limegroup/gnutella/metadata/audio/reader/OGGMetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/audio/reader/OGGMetaData.java,v
+retrieving revision 1.3
+retrieving revision 1.3.52.2
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.52.2
+--- core/com/limegroup/gnutella/metadata/audio/reader/OGGMetaData.java	21 Feb 2008 14:46:59 -0000	1.3
++++ core/com/limegroup/gnutella/metadata/audio/reader/OGGMetaData.java	9 Sep 2008 18:42:07 -0000	1.3.52.2
+@@ -1,23 +1,23 @@
+ package com.limegroup.gnutella.metadata.audio.reader;
+ 
+-import java.io.File;
+-import java.io.IOException;
+-
+ import org.jaudiotagger.audio.AudioFile;
+ import org.jaudiotagger.tag.Tag;
+ import org.jaudiotagger.tag.TagFieldKey;
+ 
+-public class OGGMetaData extends AudioDataReader {
++import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+ 
+-    public OGGMetaData(File f) throws IOException, IllegalArgumentException {
+-        super(f);
+-    }
++public class OGGMetaData extends AudioDataReader {
+ 
+     @Override
+-    protected void readTag(AudioFile audioFile, Tag tag) {
++    protected void readTag(AudioMetaData audioData, AudioFile audioFile, Tag tag) {
+         if(tag != null ) {
+-            super.readTag(audioFile, tag);
++            super.readTag(audioData, audioFile, tag);
+             audioData.setLicense(tag.getFirst(TagFieldKey.COPYRIGHT));
+         }
+     }
++    
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "ogg" };
++    }
+ }
+Index: core/com/limegroup/gnutella/metadata/audio/reader/WMAMetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/audio/reader/WMAMetaData.java,v
+retrieving revision 1.3
+retrieving revision 1.3.50.2
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.50.2
+--- core/com/limegroup/gnutella/metadata/audio/reader/WMAMetaData.java	20 Mar 2008 16:05:53 -0000	1.3
++++ core/com/limegroup/gnutella/metadata/audio/reader/WMAMetaData.java	9 Sep 2008 18:42:07 -0000	1.3.50.2
+@@ -1,47 +1,32 @@
+ package com.limegroup.gnutella.metadata.audio.reader;
+ 
+ import java.io.File;
+ import java.io.IOException;
+-import java.util.List;
+-
+-import org.limewire.util.NameValue;
+ 
+-import com.limegroup.gnutella.metadata.MetaData;
+ import com.limegroup.gnutella.metadata.MetaReader;
+ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+-import com.limegroup.gnutella.xml.LimeXMLNames;
+ 
+ 
+ /**
+  * Sets WMA metadata using the ASF parser.
+  */
+ public class WMAMetaData implements MetaReader {
+     
+-    //private static final Log LOG = LogFactory.getLog(WMAMetaData.class);
+-    protected final AudioMetaData audioData;
+-    
+-    /** Sets WMA data. */
+-    public WMAMetaData(File f) throws IOException {
+-        audioData = new AudioMetaData();
+-        parseFile(f);
+-    }
+-    
+-    /** Constructs a WMAMetadata from a parser. */
+-    public WMAMetaData(ASFParser p) throws IOException {
+-        audioData = new AudioMetaData();
+-        set(p);
++    @Override
++    public AudioMetaData parse(File f) throws IOException {
++        return parse(new ASFParser(f));
+     }
+     
+-    /** Parse using the ASF Parser. */
+-    private void parseFile(File f) throws IOException {
+-        ASFParser data = new ASFParser(f);
+-        set(data);
++    public AudioMetaData parse(ASFParser parser) throws IOException {
++        AudioMetaData audioData = new AudioMetaData();
++        set(audioData, parser);
++        return audioData;
+     }
+     
+     /** Sets data based on an ASF Parser. */
+-    private void set(ASFParser data) throws IOException {
++    private void set(AudioMetaData audioData, ASFParser data) throws IOException {
+         if(data.hasVideo())
+             throw new IOException("use WMV instead!");
+         if(!data.hasAudio())
+             throw new IOException("no audio data!");
+             
+@@ -58,20 +43,11 @@
+         
+         if(data.getLicenseInfo() != null)
+             audioData.setLicenseType(data.getLicenseInfo());
+     }
+ 
+-    public MetaData getMetaData() {
+-        return audioData;
+-    }
+-
+-    /**
+-     * @return the XML schema for this file
+-     */
+-    public String getSchemaURI() {
+-        return LimeXMLNames.AUDIO_SCHEMA;
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "wma" };
+     }
+ 
+-    public List<NameValue<String>> toNameValueList() {
+-        return audioData.toNameValueList();
+-    }
+ }
+Index: core/com/limegroup/gnutella/metadata/video/reader/MOVMetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/video/reader/MOVMetaData.java,v
+retrieving revision 1.4
+retrieving revision 1.4.36.2
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.36.2
+--- core/com/limegroup/gnutella/metadata/video/reader/MOVMetaData.java	28 Apr 2008 18:44:59 -0000	1.4
++++ core/com/limegroup/gnutella/metadata/video/reader/MOVMetaData.java	9 Sep 2008 18:42:07 -0000	1.4.36.2
+@@ -11,50 +11,51 @@
+ import java.util.zip.DataFormatException;
+ import java.util.zip.Inflater;
+ 
+ import org.limewire.io.IOUtils;
+ 
++import com.limegroup.gnutella.metadata.MetaReader;
++import com.limegroup.gnutella.metadata.video.VideoMetaData;
++
+ 
+ 
+ 
+ /**
+  * A metadata parser for files that are using the QuickTime File Format
+  * to store metadata. Such files are .mov and .m4v (MPEG-4/Podcasts) for
+  * example.
+  *  
+  * http://developer.apple.com/documentation/QuickTime/QTFF/index.html
+  */
+-public class MOVMetaData extends VideoDataReader {
++public class MOVMetaData implements MetaReader {
+     
+     /** Length of File */
+     private long length = -1;
+     
+-    public MOVMetaData(File f) throws IOException {
+-        super(f);
+-    }
+-
+     @Override
+-    protected void parseFile(File f) throws IOException {
++    public VideoMetaData parse(File f) throws IOException {
+         RandomAccessFile in = null;
+-        
+         try {
+             length = f.length();
+             in = new RandomAccessFile(f, "r");
+-            parseAtoms(in);
++            VideoMetaData videoData = new VideoMetaData();
++            parseAtoms(videoData, in);
++            return videoData;
+         } finally {
+             IOUtils.close(in); 
+         }
+     }
+     
+     /**
+      * Entry point for the parser
++     * @param videoData 
+      */
+-    private void parseAtoms(DataInput in) throws IOException {
++    private void parseAtoms(VideoMetaData videoData, DataInput in) throws IOException {
+         Atom atom = null;
+         while((atom = nextAtom(in)) != null) {
+             if (atom.isType("moov")) {
+-                moov(atom, in);
++                moov(videoData, atom, in);
+                 break;
+             }
+             skip(atom.remaining, in);
+         }
+     }
+@@ -63,20 +64,20 @@
+      * Movie Atom
+      * 
+      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
+      * chapter_3_section_2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCGDJID">MOOV</a>}
+      */
+-    private void moov(Atom moov, DataInput in) throws IOException {
++    private void moov(VideoMetaData videoData, Atom moov, DataInput in) throws IOException {
+         long length = 0L;
+         Atom atom = null;
+         while(length < moov.remaining && (atom = nextAtom(in)) != null) {
+             if (atom.isType("mvhd")) {
+-                mvhd(atom, in);
++                mvhd(videoData, atom, in);
+             } else if (atom.isType("cmov")) {
+-                cmov(atom, in);
++                cmov(videoData, atom, in);
+             } else if (atom.isType("trak")) {
+-                trak(atom, in);
++                trak(videoData, atom, in);
+             } else {
+                 skip(atom.remaining, in);
+             }
+             length += atom.size;
+         }
+@@ -85,12 +86,13 @@
+     /**
+      * Movie Header Atom
+      * 
+      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
+      * chapter_3_section_2.html#//apple_ref/doc/uid/TP40000939-CH204-25527">MVHD</a>}
++     * @param videoData 
+      */
+-    private void mvhd(Atom mvhd, DataInput in) throws IOException {
++    private void mvhd(VideoMetaData videoData, Atom mvhd, DataInput in) throws IOException {
+         assert (mvhd.remaining == 100L);
+         
+         in.skipBytes(12);
+         
+         int timeScale = in.readInt();
+@@ -110,16 +112,16 @@
+      * Compressed Movie Resources
+      * 
+      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
+      * chapter_3_section_6.html#//apple_ref/doc/uid/TP40000939-CH204-BBCDACCD">CMOV</a>}
+      */
+-    private void cmov(Atom cmov, DataInput in) throws IOException {
++    private void cmov(VideoMetaData videoData, Atom cmov, DataInput in) throws IOException {
+         long length = 0L;
+         Atom atom = null;
+         while(length < cmov.remaining && (atom = nextAtom(in)) != null) {
+             if (atom.isType("cmvd")) {
+-                cmvd(atom, in);
++                cmvd(videoData, atom, in);
+             } else {
+                 skip(atom.remaining, in);
+             }
+             
+             length += atom.size;
+@@ -132,11 +134,11 @@
+      * {@see <a href="http://wiki.multimedia.cx/index.php?title=Apple_QuickTime
+      * #Decompressing_Compressed_moov_Atoms_With_zlib">ZLIB Compressed Atoms</a>}
+      * 
+      * @see #cmov(com.limegroup.gnutella.metadata.MOVMetaData.Atom, DataInput)
+      */
+-    private void cmvd(Atom cmvd, DataInput in) throws IOException {
++    private void cmvd(VideoMetaData videoData, Atom cmvd, DataInput in) throws IOException {
+         int decompressedSize = in.readInt();
+         
+         if( cmvd == null || cmvd.remaining - 4 > Integer.MAX_VALUE || cmvd.remaining < 4 )
+             throw new IOException("File smaller than expected");
+         
+@@ -166,11 +168,11 @@
+             }
+             
+             ByteArrayInputStream bais = new ByteArrayInputStream(decompressed);
+             DataInputStream dis = new DataInputStream(bais);
+             try {
+-                parseAtoms(dis);
++                parseAtoms(videoData, dis);
+             } finally {
+                 dis.close();
+             }
+         } finally {
+             IOUtils.close(decompresser);
+@@ -181,17 +183,17 @@
+      * Track Atom
+      * 
+      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
+      * chapter_3_section_3.html#//apple_ref/doc/uid/TP40000939-CH204-BBCBEAIF">TRAK</a>}
+      */
+-    private void trak(Atom trak, DataInput in) throws IOException {
++    private void trak(VideoMetaData videoData, Atom trak, DataInput in) throws IOException {
+         long length = 0L;
+         Atom atom = null;
+         while(length < trak.remaining && (atom = nextAtom(in)) != null) {
+             
+             if (atom.isType("tkhd")) {
+-                tkhd(atom, in);
++                tkhd(videoData, atom, in);
+             } else {
+                 skip(atom.remaining, in);
+             }
+             
+             length += atom.size;
+@@ -202,11 +204,11 @@
+      * Track Header Atom
+      * 
+      * {@see <a href="http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap2/
+      * chapter_3_section_3.html#//apple_ref/doc/uid/TP40000939-CH204-25550">TKHD</a>}
+      */
+-    private void tkhd(Atom tkhd, DataInput in) throws IOException {
++    private void tkhd(VideoMetaData videoData, Atom tkhd, DataInput in) throws IOException {
+         
+         assert (tkhd.remaining == 84);
+         skip(76, in);
+         
+         // Width and Height are Fixpoint Ints!
+@@ -320,6 +322,11 @@
+         @Override
+         public String toString() {
+             return name + "/" + size + "/" + Long.toHexString(size);
+         }
+     }
++
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "mov", "m4v", "mp4", "3gp" };
++    }
+ }
+Index: core/com/limegroup/gnutella/metadata/video/reader/MPEGMetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/video/reader/MPEGMetaData.java,v
+retrieving revision 1.3
+retrieving revision 1.3.36.2
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.36.2
+--- core/com/limegroup/gnutella/metadata/video/reader/MPEGMetaData.java	28 Apr 2008 18:44:59 -0000	1.3
++++ core/com/limegroup/gnutella/metadata/video/reader/MPEGMetaData.java	9 Sep 2008 18:42:07 -0000	1.3.36.2
+@@ -6,45 +6,46 @@
+ 
+ import org.apache.commons.logging.Log;
+ import org.apache.commons.logging.LogFactory;
+ import org.limewire.io.IOUtils;
+ 
++import com.limegroup.gnutella.metadata.MetaReader;
++import com.limegroup.gnutella.metadata.video.VideoMetaData;
++
+ 
+ 
+ 
+ /**
+  * Constructs metadata for an MPEG 1 & 2 video file.
+  * 
+  * This is based off the work of XNap, at: 
+  * http://xnap.sourceforge.net/xref/org/xnap/plugin/viewer/videoinfo/VideoFile.html
+  */
+-public class MPEGMetaData extends VideoDataReader {
++public class MPEGMetaData implements MetaReader {
+     
+     private static final Log LOG = LogFactory.getLog(MPEGMetaData.class);
+     
+     private static final int PACK_START_CODE = 0x000001BA;
+     private static final int SEQ_START_CODE = 0x000001B3;
+     private static final int MAX_FORWARD_READ_LENGTH = 50000;
+     private static final int MAX_BACKWARD_READ_LENGTH = 3000000;
+ 
+ 
+-    public MPEGMetaData(File f) throws IOException {
+-        super(f);
+-    }
+-
+     @Override
+-    protected void parseFile(File f) throws IOException {
++    public VideoMetaData parse(File f) throws IOException {
+         RandomAccessFile raf = null;
+         try {
+             raf = new RandomAccessFile(f, "r");
+-            parseMPEG(raf);
++            VideoMetaData videoData = new VideoMetaData();
++            parseMPEG(videoData, raf);
++            return videoData;
+         } finally {
+             IOUtils.close(raf);
+         }
+     }
+ 
+-    private void parseMPEG(RandomAccessFile raf) throws IOException {
++    private void parseMPEG(VideoMetaData videoData, RandomAccessFile raf) throws IOException {
+         boolean firstGOP = false;
+         boolean firstSEQ = false;
+         boolean lastGOP = false;
+         
+         long initialHMS = -1;
+@@ -186,7 +187,12 @@
+         } else {
+             return -1;
+         }
+     }
+ 
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "mpg", "mpeg" };
++    }
++
+ 
+ }
+Index: core/com/limegroup/gnutella/metadata/video/reader/OGMMetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/video/reader/OGMMetaData.java,v
+retrieving revision 1.4
+retrieving revision 1.4.36.2
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.36.2
+--- core/com/limegroup/gnutella/metadata/video/reader/OGMMetaData.java	28 Apr 2008 18:44:59 -0000	1.4
++++ core/com/limegroup/gnutella/metadata/video/reader/OGMMetaData.java	9 Sep 2008 18:42:07 -0000	1.4.36.2
+@@ -9,14 +9,17 @@
+ import java.util.Set;
+ 
+ import org.limewire.io.IOUtils;
+ import org.limewire.util.ByteUtils;
+ 
++import com.limegroup.gnutella.metadata.MetaReader;
++import com.limegroup.gnutella.metadata.video.VideoMetaData;
++
+ /**
+  * Reads MetaData from Ogg Media Formats
+  */
+-public class OGMMetaData extends VideoDataReader {
++public class OGMMetaData implements MetaReader {
+ 
+ 	public static final String TITLE_TAG = "title";
+ 
+ 	public static final String COMMENT_TAG = "comment";
+ 
+@@ -24,22 +27,20 @@
+ 
+ 	private static final String DATE_TAG = "date";
+ 
+ 	private static final String LANGUAGE_TAG = "language";
+ 
+-	public OGMMetaData(File f) throws IOException {
+-		super(f);
+-	}
+-
+ 	@Override
+-    protected void parseFile(File file) throws IOException {
++    public VideoMetaData parse(File file) throws IOException {
+ 		InputStream is = null;
+ 		try {
+ 			is = new FileInputStream(file);
+ 			DataInputStream dis = new DataInputStream(is);
+ 			Set<String> set = readMetaData(dis);
+-			parseMetaData(set);
++			VideoMetaData videoData = new VideoMetaData();
++			parseMetaData(videoData, set);
++			return videoData;
+ 		} finally {
+ 			IOUtils.close(is);
+ 		}
+ 	}
+ 
+@@ -154,11 +155,11 @@
+ 	 * extracts usable information from a Set of Vorbis comments
+ 	 * 
+ 	 * @param data
+ 	 *            a Set of String containing Vorbis comments
+ 	 */
+-	private void parseMetaData(Set<String> data) {
++	private void parseMetaData(VideoMetaData videoData, Set<String> data) {
+         for(String comment : data) {
+ 			int index = comment.indexOf('=');
+ 			if (index <= 0)
+ 				continue;
+ 			String key = comment.substring(0, index);
+@@ -181,6 +182,13 @@
+ 			} else if (key.equalsIgnoreCase(DATE_TAG)) {
+ 			    videoData.setYear(value);
+ 			}
+ 		}
+ 	}
++
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "ogm" };
++    }
++
++
+ }
+Index: core/com/limegroup/gnutella/metadata/video/reader/RIFFMetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/video/reader/RIFFMetaData.java,v
+retrieving revision 1.4
+retrieving revision 1.4.36.2
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.36.2
+--- core/com/limegroup/gnutella/metadata/video/reader/RIFFMetaData.java	28 Apr 2008 18:44:59 -0000	1.4
++++ core/com/limegroup/gnutella/metadata/video/reader/RIFFMetaData.java	9 Sep 2008 18:42:07 -0000	1.4.36.2
+@@ -7,32 +7,33 @@
+ import java.io.InputStream;
+ 
+ import org.limewire.io.IOUtils;
+ import org.limewire.util.ByteUtils;
+ 
++import com.limegroup.gnutella.metadata.MetaReader;
++import com.limegroup.gnutella.metadata.video.VideoMetaData;
++
+ /**
+  *  Reads RIFF files meta data 
+  */
+-public class RIFFMetaData extends VideoDataReader {
+-
+-	public RIFFMetaData(File f) throws IOException {
+-		super(f);
+-	}
++public class RIFFMetaData implements MetaReader {
+ 
+ 	@Override
+-    protected void parseFile(File f) throws IOException {
++    public VideoMetaData parse(File f) throws IOException {
+ 		InputStream is = null;
+ 		try {
+ 			is = new FileInputStream(f);
+ 			DataInputStream dis = new DataInputStream(is);
+-			readRIFFHeader(dis);
++			VideoMetaData videoData = new VideoMetaData();
++			readRIFFHeader(videoData, dis);
++			return videoData;
+ 		} finally {
+             IOUtils.close(is);
+ 		}
+ 	}
+ 
+-	private void readRIFFHeader(DataInputStream dis) throws IOException {
++	private void readRIFFHeader(VideoMetaData videoData, DataInputStream dis) throws IOException {
+ 		byte[] dword = new byte[4];
+ 		dis.readFully(dword);
+ 
+ 		if (dword[0] != 'R' || dword[1] != 'I' || dword[2] != 'F' || dword[3] != 'F')
+ 			return;
+@@ -84,6 +85,11 @@
+ 		IOUtils.ensureSkip(dis, 16);
+ 
+ 		// there are more headers but we are not currently interested in parsing
+ 		// them
+ 	}
++
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "avi" };
++    }
+ }
+Index: core/com/limegroup/gnutella/metadata/video/reader/VideoDataReader.java
+===================================================================
+RCS file: core/com/limegroup/gnutella/metadata/video/reader/VideoDataReader.java
+diff -N core/com/limegroup/gnutella/metadata/video/reader/VideoDataReader.java
+--- core/com/limegroup/gnutella/metadata/video/reader/VideoDataReader.java	20 Mar 2008 16:05:53 -0000	1.3
++++ /dev/null	1 Jan 1970 00:00:00 -0000
+@@ -1,40 +0,0 @@
+-package com.limegroup.gnutella.metadata.video.reader;
+-
+-import java.io.File;
+-import java.io.IOException;
+-import java.util.List;
+-
+-import org.limewire.util.NameValue;
+-
+-import com.limegroup.gnutella.metadata.MetaData;
+-import com.limegroup.gnutella.metadata.MetaReader;
+-import com.limegroup.gnutella.metadata.video.VideoMetaData;
+-import com.limegroup.gnutella.xml.LimeXMLNames;
+-
+-/**
+- *
+- */
+-public abstract class VideoDataReader implements MetaReader{
+-
+-    protected final VideoMetaData videoData;
+-    
+-    public VideoDataReader(File file) throws IOException {
+-        videoData = new VideoMetaData();
+-        parseFile(file);
+-    }
+-    
+-    public MetaData getMetaData() {
+-        return videoData;
+-    }
+-
+-    public String getSchemaURI() {
+-        return LimeXMLNames.VIDEO_SCHEMA;
+-    }
+-
+-    public List<NameValue<String>> toNameValueList() {
+-        return videoData.toNameValueList();
+-    }
+-    
+-    protected abstract void parseFile(File file) throws IOException;
+-
+-}
+Index: core/com/limegroup/gnutella/metadata/video/reader/WMVMetaData.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/metadata/video/reader/WMVMetaData.java,v
+retrieving revision 1.3
+retrieving revision 1.3.50.2
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.50.2
+--- core/com/limegroup/gnutella/metadata/video/reader/WMVMetaData.java	20 Mar 2008 16:05:53 -0000	1.3
++++ core/com/limegroup/gnutella/metadata/video/reader/WMVMetaData.java	9 Sep 2008 18:42:07 -0000	1.3.50.2
+@@ -1,14 +1,10 @@
+ package com.limegroup.gnutella.metadata.video.reader;
+ 
+ import java.io.File;
+ import java.io.IOException;
+-import java.util.List;
+-
+-import org.limewire.util.NameValue;
+ 
+-import com.limegroup.gnutella.metadata.MetaData;
+ import com.limegroup.gnutella.metadata.MetaReader;
+ import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
+ import com.limegroup.gnutella.metadata.video.VideoMetaData;
+ 
+ 
+@@ -16,32 +12,24 @@
+ /**
+  * Sets WMV metadata using the ASF parser.
+  */
+ public class WMVMetaData implements MetaReader {
+     
+-    private final VideoMetaData videoData;
+-    
+-    /** Sets WMV data. */
+-    public WMVMetaData(File f) throws IOException {
+-        videoData = new VideoMetaData();
+-        parseFile(f);
+-    }
+-    
+-    /** Constructs a WMVMetadata from a parser. */
+-    public WMVMetaData(ASFParser p) throws IOException {
+-        videoData = new VideoMetaData();
+-        set(p);
++    /** Parse using the ASF Parser. */
++    @Override
++    public VideoMetaData parse(File f) throws IOException {
++        return parse(new ASFParser(f));
+     }
+     
+-    /** Parse using the ASF Parser. */
+-    protected void parseFile(File f) throws IOException {
+-        ASFParser data = new ASFParser(f);
+-        set(data);
++    public VideoMetaData parse(ASFParser parser) throws IOException {
++        VideoMetaData videoData = new VideoMetaData();
++        set(videoData, parser);
++        return videoData;
+     }
+     
+     /** Sets data based on an ASF Parser. */
+-    private void set(ASFParser data) throws IOException {
++    private void set(VideoMetaData videoData, ASFParser data) throws IOException {
+         if(!data.hasVideo())
+             throw new IOException("no video data!");
+             
+         videoData.setTitle(data.getTitle());
+         videoData.setYear(data.getYear());
+@@ -52,17 +40,11 @@
+         
+         if(data.getLicenseInfo() != null)
+             videoData.setLicenseType(data.getLicenseInfo());
+     }
+ 
+-    public MetaData getMetaData() {
+-        return videoData;
+-    }
+-
+-    public String getSchemaURI() {
+-        return videoData.getSchemaURI();
++    @Override
++    public String[] getSupportedExtensions() {
++        return new String[] { "wmv" };
+     }
+ 
+-    public List<NameValue<String>> toNameValueList() {
+-        return videoData.toNameValueList();
+-    }
+ }
+Index: core/com/limegroup/gnutella/xml/LimeXMLProperties.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/xml/LimeXMLProperties.java,v
+retrieving revision 1.27
+retrieving revision 1.27.94.1
+diff -u -b -B -d -w -U5 -r1.27 -r1.27.94.1
+--- core/com/limegroup/gnutella/xml/LimeXMLProperties.java	10 Jan 2008 17:18:01 -0000	1.27
++++ core/com/limegroup/gnutella/xml/LimeXMLProperties.java	8 Sep 2008 21:13:12 -0000	1.27.94.1
+@@ -16,11 +16,11 @@
+      * The default index for responses when there is no file and 
+      * hence none to download. The value is set to 2^32 -1
+      */
+     public static final long DEFAULT_NONFILE_INDEX = 0x00000000FFFFFFFFl;
+     
+-    private String[] BUILT_IN_SCHEMAS = { "application", "audio", "document", "image", "video" };
++    private String[] BUILT_IN_SCHEMAS = { "application", "audio", "document", "image", "video", "torrent" };
+ 
+     /** schema resource directory. */
+     private static final String SCHEMA_RESOURCE_PATH = "org/limewire/xml/schema/";
+     
+     /** image resource directory. */
+Index: core/com/limegroup/gnutella/xml/LimeXMLReplyCollection.java
+===================================================================
+RCS file: /cvs/core/com/limegroup/gnutella/xml/LimeXMLReplyCollection.java,v
+retrieving revision 1.93
+retrieving revision 1.93.6.1
+diff -u -b -B -d -w -U5 -r1.93 -r1.93.6.1
+--- core/com/limegroup/gnutella/xml/LimeXMLReplyCollection.java	18 Aug 2008 15:56:35 -0000	1.93
++++ core/com/limegroup/gnutella/xml/LimeXMLReplyCollection.java	9 Sep 2008 01:23:54 -0000	1.93.6.1
+@@ -30,17 +30,17 @@
+ 
+ import com.google.inject.Provider;
+ import com.limegroup.gnutella.FileDesc;
+ import com.limegroup.gnutella.FileManager;
+ import com.limegroup.gnutella.URN;
+-import com.limegroup.gnutella.util.QueryUtils;
+ import com.limegroup.gnutella.licenses.LicenseType;
++import com.limegroup.gnutella.metadata.MetaData;
+ import com.limegroup.gnutella.metadata.MetaDataFactory;
+ import com.limegroup.gnutella.metadata.MetaDataReader;
+ import com.limegroup.gnutella.metadata.MetaDataWriter;
+-import com.limegroup.gnutella.metadata.MetaReader;
+ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
++import com.limegroup.gnutella.util.QueryUtils;
+ 
+ /**
+  * Maps LimeXMLDocuments for FileDescs in a specific schema.
+  */
+ 
+@@ -669,19 +669,19 @@
+         MetaDataWriter newValues = new MetaDataWriter(fileName, metaDataFactory);
+         newValues.populate(doc);
+         
+         
+         // try reading the file off of disk
+-        MetaReader existing = null;
++        MetaData existing = null;
+         try {
+             existing = metaDataFactory.parse(new File(fileName));
+         } catch (IOException e) {
+             return null;
+         }
+         
+         //We are supposed to pick and chose the better set of tags
+-        if(!newValues.needsToUpdate(existing.getMetaData())) {
++        if(!newValues.needsToUpdate(existing)) {
+             LOG.debug("tag read from disk is same as XML doc.");
+             return null;
+         }
+             
+         // Commit using this Meta data editor ... 
+Index: gui/com/limegroup/gnutella/gui/library/LibraryTree.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/library/LibraryTree.java,v
+retrieving revision 1.138
+retrieving revision 1.138.8.1
+diff -u -b -B -d -w -U5 -r1.138 -r1.138.8.1
+--- gui/com/limegroup/gnutella/gui/library/LibraryTree.java	4 Aug 2008 23:06:55 -0000	1.138
++++ gui/com/limegroup/gnutella/gui/library/LibraryTree.java	9 Sep 2008 01:23:54 -0000	1.138.8.1
+@@ -265,11 +265,11 @@
+     }
+ 
+     private void addPerMediaTypeDirectories() {
+         for (Iterator i = NamedMediaType.getAllNamedMediaTypes().iterator(); i.hasNext();) {
+             NamedMediaType nm = (NamedMediaType) i.next();
+-            if (nm.getMediaType().getMimeType().equals(MediaType.SCHEMA_ANY_TYPE))
++            if (nm.getMediaType().getSchema().equals(MediaType.SCHEMA_ANY_TYPE))
+                 continue;
+ 
+             FileSetting fs = SharingSettings.getFileSettingForMediaType(nm.getMediaType());
+             DirectoryHolder dh = new MediaTypeSavedFilesDirectoryHolder(fs, nm.getName(), nm
+                     .getMediaType());
+Index: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java,v
+retrieving revision 1.10
+retrieving revision 1.10.60.1
+diff -u -b -B -d -w -U5 -r1.10 -r1.10.60.1
+--- gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java	4 Feb 2008 16:20:26 -0000	1.10
++++ gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java	9 Sep 2008 01:23:54 -0000	1.10.60.1
+@@ -10,11 +10,10 @@
+ 
+ import org.limewire.util.CommonUtils;
+ 
+ import com.limegroup.gnutella.gui.GuiCoreMediator;
+ import com.limegroup.gnutella.gui.I18n;
+-import com.limegroup.gnutella.metadata.MetaReader;
+ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+ 
+ /**
+  *  Wrapper for a local or remote audio file/stream that is to be added to the 
+  *  playlist queue to be played by the local media player. Audio properties 
+@@ -165,16 +164,12 @@
+     private void initMetaData(){
+         //if is a file, try to read ID3 tag to fill in missing meta data
+         if( isLocal ){
+             try {
+                 File file = new File(uri);
+-                MetaReader data = GuiCoreMediator.getMetaDataFactory().parse(file);
+-                // if we can't parse this file type return
+-                if(data == null)
+-                    return;
++                AudioMetaData amd = (AudioMetaData) GuiCoreMediator.getMetaDataFactory().parse(file);
+                 
+-                AudioMetaData amd = (AudioMetaData) data.getMetaData();
+                 // if it has no meta data we can read just return
+                 if(amd == null)
+                     return;                
+                 if( !properties.containsKey(ARTIST))
+                     properties.put(ARTIST, amd.getArtist());
+Index: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java,v
+retrieving revision 1.18
+retrieving revision 1.18.8.1
+diff -u -b -B -d -w -U5 -r1.18 -r1.18.8.1
+--- gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java	4 Aug 2008 23:06:55 -0000	1.18
++++ gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java	9 Sep 2008 01:23:54 -0000	1.18.8.1
+@@ -128,11 +128,11 @@
+ 	 */
+ 	public void initOptions() {
+ 		DATA_MODEL.clear();
+ 		for (Iterator i = NamedMediaType.getAllNamedMediaTypes().iterator(); i.hasNext();) {
+ 			NamedMediaType nm = (NamedMediaType) i.next();
+-			if (!nm.getMediaType().getMimeType().equals(MediaType.SCHEMA_ANY_TYPE))
++			if (!nm.getMediaType().getSchema().equals(MediaType.SCHEMA_ANY_TYPE))
+ 				DATA_MODEL.add(nm);
+ 		}
+ 		//  sort alphabetically, so sort twice
+ 		DATA_MODEL.sort(0);
+ 		DATA_MODEL.sort(0);
+Index: gui/com/limegroup/gnutella/gui/search/FilterPanel.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/search/FilterPanel.java,v
+retrieving revision 1.29
+retrieving revision 1.29.8.1
+diff -u -b -B -d -w -U5 -r1.29 -r1.29.8.1
+--- gui/com/limegroup/gnutella/gui/search/FilterPanel.java	4 Aug 2008 23:06:55 -0000	1.29
++++ gui/com/limegroup/gnutella/gui/search/FilterPanel.java	9 Sep 2008 01:23:54 -0000	1.29.8.1
+@@ -69,11 +69,11 @@
+      *
+      */
+     public FilterPanel(final ResultPanel results) {
+         super(BoxLayout.Y_AXIS);
+         
+-        String searchType = results.getMediaType().getMimeType();
++        String searchType = results.getMediaType().getSchema();
+         Selector one = SelectorsHandler.getSelector(searchType, 0);
+         Selector two = SelectorsHandler.getSelector(searchType, 1);
+         Selector three = SelectorsHandler.getSelector(searchType, 2);
+         
+         MetadataModel model = results.getMetadataModel();
+@@ -271,11 +271,11 @@
+         /**
+          * Notification that the selectors have changed for a box.
+          * TODO: Update only the depth that changed.
+          */
+         public void stateChanged(ChangeEvent event) {
+-            String type = RESULTS.getMediaType().getMimeType();
++            String type = RESULTS.getMediaType().getSchema();
+             SelectorsHandler.setSelector(type, 0, BOX_1.getSelector());
+             SelectorsHandler.setSelector(type, 1, BOX_2.getSelector());
+             SelectorsHandler.setSelector(type, 2, BOX_3.getSelector());
+             if(event != null) {
+                 FilterBox box = (FilterBox)event.getSource();
+Index: gui/com/limegroup/gnutella/gui/search/MetadataModel.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/search/MetadataModel.java,v
+retrieving revision 1.13
+retrieving revision 1.13.36.1
+diff -u -b -B -d -w -U5 -r1.13 -r1.13.36.1
+--- gui/com/limegroup/gnutella/gui/search/MetadataModel.java	28 Apr 2008 18:44:59 -0000	1.13
++++ gui/com/limegroup/gnutella/gui/search/MetadataModel.java	9 Sep 2008 01:23:54 -0000	1.13.36.1
+@@ -196,11 +196,11 @@
+         // First iterate through our schemas
+         for(Iterator i = MODEL.entrySet().iterator(); i.hasNext();) {
+             Map.Entry entry = (Map.Entry)i.next();
+             
+             NamedMediaType nmt = (NamedMediaType)entry.getKey();
+-            String schema = nmt.getMediaType().getMimeType();
++            String schema = nmt.getMediaType().getSchema();
+             // Then add the fields of those schemas.
+             Iterator fields = ((Map)entry.getValue()).keySet().iterator();
+             for(; fields.hasNext();) {
+                 String next = (String)fields.next();
+                 if(!UNKNOWN.equals(next))
+Index: gui/com/limegroup/gnutella/gui/search/NamedMediaType.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/search/NamedMediaType.java,v
+retrieving revision 1.27
+retrieving revision 1.27.8.1
+diff -u -b -B -d -w -U5 -r1.27 -r1.27.8.1
+--- gui/com/limegroup/gnutella/gui/search/NamedMediaType.java	4 Aug 2008 23:06:55 -0000	1.27
++++ gui/com/limegroup/gnutella/gui/search/NamedMediaType.java	9 Sep 2008 01:23:54 -0000	1.27.8.1
+@@ -145,11 +145,11 @@
+     public static NamedMediaType getFromExtension(String extension) {
+         MediaType mt = MediaType.getMediaTypeForExtension(extension);
+         if(mt == null)
+             return null;
+             
+-        String description = mt.getMimeType();
++        String description = mt.getSchema();
+         return getFromDescription(description);
+     }
+     
+     /**
+      * Retrieves all possible media types, wrapped in a NamedMediaType.
+@@ -196,11 +196,11 @@
+     
+     /**
+      * Retrieves the named media type for the specified media type.
+      */
+     public static NamedMediaType getFromMediaType(MediaType media) {
+-        String description = media.getMimeType();
++        String description = media.getSchema();
+         NamedMediaType type = CACHED_TYPES.get(description);
+         if(type != null)
+             return type;
+             
+         type = new NamedMediaType(media, null);
+@@ -227,11 +227,11 @@
+         final ImageIcon icon;
+         
+         if(type == MediaType.getAnyTypeMediaType())
+             icon = GUIMediator.getThemeImage("lime");
+         else {
+-            String location = GuiCoreMediator.getLimeXMLProperties().getXMLImagesResourcePath() + type.getMimeType();
++            String location = GuiCoreMediator.getLimeXMLProperties().getXMLImagesResourcePath() + type.getSchema();
+             icon = GUIMediator.getImageFromResourcePath(location);
+             if(icon == null) {
+                 return new GUIUtils.EmptyIcon(getName(), 16, 16);
+             }
+         }
+@@ -255,11 +255,11 @@
+                 // oh well, will capitalize the mime-type
+             }
+             
+             // If still no name, capitalize the mime-type.
+             if(name == null) {
+-				name = type.getMimeType();
++				name = type.getSchema();
+                 name = name.substring(0, 1).toUpperCase(Locale.US) + name.substring(1);
+             }
+         } else {
+             name = XMLUtils.getTitleForSchema(schema);
+         }
+Index: gui/com/limegroup/gnutella/gui/search/SearchInformation.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/search/SearchInformation.java,v
+retrieving revision 1.22
+retrieving revision 1.22.8.1
+diff -u -b -B -d -w -U5 -r1.22 -r1.22.8.1
+--- gui/com/limegroup/gnutella/gui/search/SearchInformation.java	4 Aug 2008 23:06:55 -0000	1.22
++++ gui/com/limegroup/gnutella/gui/search/SearchInformation.java	9 Sep 2008 01:23:54 -0000	1.22.8.1
+@@ -110,11 +110,14 @@
+             throw new NullPointerException("null type");
+         this.type = type.intValue();
+ 
+         query = (String) map.get(MAP_QUERY);
+         xml   = (String) map.get(MAP_XML);
+-        media = (MediaType) map.get(MAP_MEDIA);
++        
++        String schema =  (String) map.get(MAP_MEDIA);
++        media = MediaType.getMediaTypeForSchema(schema);
++        
+         title = (String) map.get(MAP_TITLE);
+ 
+         if(media == null)
+             throw new NullPointerException("null media");
+         if(query == null)
+@@ -250,11 +253,11 @@
+     public Map<String, Serializable> toMap() {
+         Map<String, Serializable> map = new HashMap<String, Serializable>(5);
+         map.put(MAP_TYPE, new Integer(type));
+         map.put(MAP_QUERY, query);
+         map.put(MAP_XML, xml);
+-        map.put(MAP_MEDIA, media);
++        map.put(MAP_MEDIA, media.getSchema());
+         map.put(MAP_TITLE, title);
+         return map;
+     }
+ 
+     /**
+Index: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java
+===================================================================
+RCS file: /cvs/gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java,v
+retrieving revision 1.49
+retrieving revision 1.49.8.1
+diff -u -b -B -d -w -U5 -r1.49 -r1.49.8.1
+--- gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java	4 Aug 2008 23:06:55 -0000	1.49
++++ gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java	9 Sep 2008 01:23:54 -0000	1.49.8.1
+@@ -651,11 +651,11 @@
+             final SearchInformation info;
+             
+             if(isWhatIsNewSearchType()) {
+                 info = SearchInformation.createWhatsNewSearch(
+                     SCHEMA_BOX.getSelectedItem(), mt);
+-                whatsNewSearches.count(mt != null ? mt.getMimeType() : "all");
++                whatsNewSearches.count(mt != null ? mt.getSchema() : "all");
+             } else if(isNormalSearchType()) {
+                 String query = null;
+                 String xml = null;
+                 String title = null;
+                 if(SCHEMA_BOX.getSelectedSchema() != null) {
+@@ -671,11 +671,11 @@
+                 } else {
+                     query = SEARCH_FIELD.getText();
+                     title = query;
+                 }
+                 info = SearchInformation.createTitledKeywordSearch(query, xml, mt, title);
+-                regularSearches.count(mt != null ? mt.getMimeType() : "all");
++                regularSearches.count(mt != null ? mt.getSchema() : "all");
+             } else if(isBrowseHostSearchType()) {
+                 String user = BROWSE_HOST_FIELD.getText();
+                 if (!NetworkUtils.isAddress(user)) {
+                     GUIMediator.showError(I18n.tr("The address format is incorrect, please use host:port."));
+                     return;
+Index: tests/com/limegroup/bittorrent/BTDownloaderImplTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/bittorrent/BTDownloaderImplTest.java,v
+retrieving revision 1.3
+retrieving revision 1.3.4.1
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.4.1
+--- tests/com/limegroup/bittorrent/BTDownloaderImplTest.java	3 Sep 2008 15:29:51 -0000	1.3
++++ tests/com/limegroup/bittorrent/BTDownloaderImplTest.java	7 Sep 2008 04:30:30 -0000	1.3.4.1
+@@ -12,11 +12,10 @@
+ import org.limewire.util.TestUtils;
+ 
+ import com.google.inject.Guice;
+ import com.google.inject.Injector;
+ import com.google.inject.Stage;
+-import com.limegroup.bittorrent.swarm.BTSwarmCoordinatorTest;
+ import com.limegroup.gnutella.ActivityCallbackAdapter;
+ import com.limegroup.gnutella.LimeWireCoreModule;
+ import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
+ import com.limegroup.gnutella.util.LimeTestCase;
+ 
+@@ -320,13 +319,13 @@
+         return torrentFile;
+     }
+ 
+     private BTDownloaderImpl createBTDownloader(File torrentFile) throws IOException {
+         AssertComparisons.assertTrue(torrentFile.exists());
+-        final BTMetaInfo metaInfo = BTSwarmCoordinatorTest.createMetaInfo(torrentFile);
+         Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(
+                 ActivityCallbackAdapter.class));
++        final BTMetaInfo metaInfo  = injector.getInstance(BTMetaInfoFactory.class).createMetaInfo(torrentFile);
+ 
+         CoreDownloaderFactory coreDownloaderFactory = injector
+                 .getInstance(CoreDownloaderFactory.class);
+         BTDownloaderImpl downloader = (BTDownloaderImpl) coreDownloaderFactory
+                 .createBTDownloader(metaInfo);
+Index: tests/com/limegroup/bittorrent/metadata/TorrentMetaDataTest.java
+===================================================================
+RCS file: tests/com/limegroup/bittorrent/metadata/TorrentMetaDataTest.java
+diff -N tests/com/limegroup/bittorrent/metadata/TorrentMetaDataTest.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tests/com/limegroup/bittorrent/metadata/TorrentMetaDataTest.java	8 Sep 2008 21:13:12 -0000	1.1.2.4
+@@ -0,0 +1,98 @@
++package com.limegroup.bittorrent.metadata;
++
++import java.net.URI;
++import java.net.URISyntaxException;
++import java.util.Arrays;
++import java.util.List;
++import java.util.Random;
++
++import junit.framework.Test;
++
++import org.jmock.Expectations;
++import org.jmock.Mockery;
++import org.limewire.http.URIUtils;
++import org.limewire.util.Base32;
++import org.limewire.util.BaseTestCase;
++import org.limewire.util.NameValue;
++
++import com.limegroup.bittorrent.BTData;
++import com.limegroup.bittorrent.BTData.BTFileData;
++
++public class TorrentMetaDataTest extends BaseTestCase {
++
++    private Mockery context;
++
++    public TorrentMetaDataTest(String name) {
++        super(name);
++    }
++
++    public static Test suite() {
++        return buildTestSuite(TorrentMetaDataTest.class);
++    }
++    
++    @Override
++    protected void setUp() throws Exception {
++        context = new Mockery();
++    }
++    
++    public void testToNameValueList() throws Exception {
++        final BTData data = context.mock(BTData.class);
++        final byte[] infoHash = new byte[20];
++        new Random().nextBytes(infoHash);
++        context.checking(new Expectations() {{ 
++           allowing(data).getInfoHash();
++           will(returnValue(infoHash));
++           allowing(data).getAnnounce();
++           will(returnValue("http://localhost/announce"));
++           allowing(data).getLength();
++           will(returnValue(300L));
++           allowing(data).getName();
++           will(returnValue("torrent file"));
++           allowing(data).getPieceLength();
++           will(returnValue(2L));
++           allowing(data).isPrivate();
++           will(returnValue(true));
++           allowing(data).getWebSeeds();
++           will(returnValue(getUris()));
++           allowing(data).getFiles();
++           will(returnValue(Arrays.asList(new BTFileData(200L, "home/test me \"hello world\""), new BTFileData(100L, "home/me/\u30d5\u30a1"))));
++        }});
++        
++        List<NameValue<String>> values = new TorrentMetaData(data).toNameValueList();
++        assertContainsNameValue(values, TorrentMetaData.INFO_HASH, Base32.encode(infoHash));
++        assertContainsNameValue(values, TorrentMetaData.ANNOUNCE, "http://localhost/announce");
++        assertContainsNameValue(values, TorrentMetaData.LENGTH, "300");
++        assertContainsNameValue(values, TorrentMetaData.NAME, "torrent file");
++        // not sent right now
++        // assertContainsNameValue(values, TorrentMetaData.PIECE_LENGTH, "2");
++        assertContainsNameValue(values, TorrentMetaData.PRIVATE, "true");
++        assertContainsNameValue(values, TorrentMetaData.WEBSEEDS, "http://localhost/name%09hello\thttp://test/%22me%22");
++        assertContainsNameValue(values, TorrentMetaData.FILE_PATHS, "home/test+me+%22hello+world%22\thome/me/%E3%83%95%E3%82%A1");
++        assertContainsNameValue(values, TorrentMetaData.FILE_LENGTHS, "200\t100");
++    }
++    
++    private void assertContainsNameValue(List<NameValue<String>> values, String name,
++            String value) {
++        NameValue<String> nameValue = new NameValue<String>(name, value);
++        for (NameValue<String> elem : values) {
++            if (elem.getName().equals(name)) {
++                if (elem.getValue().equals(value)) {
++                    return;
++                } else {
++                    fail(nameValue + " not found, but " + elem);
++                }
++            }
++        }
++        fail(nameValue + " not found in " + values);
++    }
++
++    private URI[] getUris() {
++        try {
++            return new URI[] { URIUtils.toURI("http://localhost/name\thello"), URIUtils.toURI("http://test/\"me\"") };
++        } catch (URISyntaxException e) {
++            throw new RuntimeException(e);
++        }
++    }
++    
++    
++}
+Index: tests/com/limegroup/bittorrent/swarm/BTSwarmCoordinatorTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/bittorrent/swarm/BTSwarmCoordinatorTest.java,v
+retrieving revision 1.5
+retrieving revision 1.5.4.1
+diff -u -b -B -d -w -U5 -r1.5 -r1.5.4.1
+--- tests/com/limegroup/bittorrent/swarm/BTSwarmCoordinatorTest.java	3 Sep 2008 16:53:10 -0000	1.5
++++ tests/com/limegroup/bittorrent/swarm/BTSwarmCoordinatorTest.java	7 Sep 2008 04:30:30 -0000	1.5.4.1
+@@ -27,11 +27,10 @@
+ import com.google.inject.Guice;
+ import com.google.inject.Injector;
+ import com.limegroup.bittorrent.BTContext;
+ import com.limegroup.bittorrent.BTMetaInfo;
+ import com.limegroup.bittorrent.BTMetaInfoFactory;
+-import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
+ import com.limegroup.bittorrent.FileServer;
+ import com.limegroup.bittorrent.TorrentContext;
+ import com.limegroup.bittorrent.TorrentFileSystem;
+ import com.limegroup.bittorrent.disk.DiskManagerFactory;
+ import com.limegroup.bittorrent.disk.LoggingDiskListener;
+@@ -62,10 +61,12 @@
+ 
+     private FileServer fileServer = null;
+ 
+     private Injector injector;
+ 
++    private BTMetaInfoFactory metaInfoFactory;
++
+     public BTSwarmCoordinatorTest(String name) {
+         super(name);
+     }
+ 
+     public static Test suite() {
+@@ -73,10 +74,11 @@
+     }
+ 
+     @Override
+     protected void setUp() throws Exception {
+         injector = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class));
++        metaInfoFactory = injector.getInstance(BTMetaInfoFactory.class);
+         fileServer = new FileServer(TEST_PORT, FILE_DIR);
+         fileServer.start();
+     }
+ 
+     @Override
+@@ -87,11 +89,11 @@
+ 
+     public void testSingleFileTorrent() throws Exception {
+ 
+         File torrentFile = getFile("test-single-webseed-single-file-no-peer.torrent");
+ 
+-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
++        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
+         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+         File completeFile = torrentFileSystem.getCompleteFile();
+         completeFile.delete();
+         File downloadedFile = torrentFileSystem.getIncompleteFiles().get(0);
+@@ -111,11 +113,11 @@
+ 
+     public void testMultiFileTorrentDefaultPieceStrategy() throws Exception {
+ 
+         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
+ 
+-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
++        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
+         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+         File completeFile = torrentFileSystem.getCompleteFile();
+         completeFile.delete();
+         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+@@ -140,11 +142,11 @@
+ 
+     public void testMultiFileTorrentRandomGapStrategy() throws Exception {
+ 
+         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
+ 
+-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
++        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
+         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+         File completeFile = torrentFileSystem.getCompleteFile();
+         completeFile.delete();
+         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+@@ -170,11 +172,11 @@
+ 
+     public void testMultiFileTorrentLargestGapStartPieceStrategy() throws Exception {
+ 
+         File torrentFile = getFile("test-single-webseed-multiple-file-no-peer.torrent");
+ 
+-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
++        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
+         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+         File completeFile = torrentFileSystem.getCompleteFile();
+         completeFile.delete();
+         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+@@ -201,11 +203,11 @@
+ 
+     public void testVuzeCreatedTorrent() throws Exception {
+ 
+         File torrentFile = getFile("test_vuze_getright.torrent");
+ 
+-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
++        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
+         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+         File completeFile = torrentFileSystem.getCompleteFile();
+         completeFile.delete();
+         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+@@ -231,11 +233,11 @@
+ 
+     public void testMultipleWebseedSingleFileTorrent() throws Exception {
+ 
+         File torrentFile = getFile("test-multiple-webseed-single-file-no-peer.torrent");
+ 
+-        final BTMetaInfo metaInfo = createMetaInfo(torrentFile);
++        final BTMetaInfo metaInfo = metaInfoFactory.createMetaInfo(torrentFile);
+         final TorrentContext torrentContext = new BTContext(metaInfo, new DiskManagerFactory());
+         TorrentFileSystem torrentFileSystem = torrentContext.getFileSystem();
+         File completeFile = torrentFileSystem.getCompleteFile();
+         completeFile.delete();
+         File downloadedFile1 = torrentFileSystem.getIncompleteFiles().get(0);
+@@ -264,17 +266,10 @@
+     private File getFile(String fileName) {
+         File torrentFile = new File(TORRENT_DIR.getAbsoluteFile() + "/" + fileName);
+         return torrentFile;
+     }
+ 
+-    public static BTMetaInfo createMetaInfo(File torrentFile) throws IOException {
+-        byte[] torrentBytes = FileUtils.readFileFully(torrentFile);
+-        BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
+-        final BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(torrentBytes);
+-        return metaInfo;
+-    }
+-
+     private Swarmer createSwarmer(TorrentContext torrentContext, PieceStrategy pieceStrategy)
+             throws IOException {
+ 
+         if (pieceStrategy == null) {
+             pieceStrategy = new RandomPieceStrategy(torrentContext.getMetaInfo());
+Index: tests/com/limegroup/gnutella/downloader/serial/conversion/OldDownloadConverterImplTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/downloader/serial/conversion/OldDownloadConverterImplTest.java,v
+retrieving revision 1.6
+retrieving revision 1.6.48.1
+diff -u -b -B -d -w -U5 -r1.6 -r1.6.48.1
+--- tests/com/limegroup/gnutella/downloader/serial/conversion/OldDownloadConverterImplTest.java	20 Mar 2008 16:05:53 -0000	1.6
++++ tests/com/limegroup/gnutella/downloader/serial/conversion/OldDownloadConverterImplTest.java	9 Sep 2008 01:23:54 -0000	1.6.48.1
+@@ -175,11 +175,11 @@
+             assertEquals(1, mem.getSavedBlocks().size());
+             assertEquals(Range.createRange(3276800, 3316399), mem.getSavedBlocks().get(0));
+             
+             Map<String, Object> attributes = mem.getAttributes();
+             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
+-            assertEquals("*", so.getMediaType().getMimeType());
++            assertEquals("*", so.getMediaType().getSchema());
+             assertEquals("limewire", so.getQuery());
+             assertEquals(null, so.getXML());
+             assertTrue(so.isKeywordSearch());
+             assertEquals("limewire", so.getTitle());
+             assertEquals(4495072L, mem.getContentLength());
+@@ -240,11 +240,11 @@
+             assertEquals(Range.createRange(786432, 823029), mem.getSavedBlocks().get(1));
+             assertEquals(Range.createRange(3801088, 3932159), mem.getSavedBlocks().get(2));
+             
+             Map<String, Object> attributes = mem.getAttributes();
+             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
+-            assertEquals("*", so.getMediaType().getMimeType());
++            assertEquals("*", so.getMediaType().getSchema());
+             assertEquals("limewire", so.getQuery());
+             assertEquals(null, so.getXML());
+             assertTrue(so.isKeywordSearch());
+             assertEquals("limewire", so.getTitle());
+             assertEquals(4400168L, mem.getContentLength());
+@@ -266,11 +266,11 @@
+             assertEquals(Range.createRange(2621440, 2661103), mem.getSavedBlocks().get(4));
+             assertEquals(Range.createRange(3145728, 3381279), mem.getSavedBlocks().get(5));
+             
+             Map<String, Object> attributes = mem.getAttributes();
+             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
+-            assertEquals("*", so.getMediaType().getMimeType());
++            assertEquals("*", so.getMediaType().getSchema());
+             assertEquals("limewire", so.getQuery());
+             assertEquals(null, so.getXML());
+             assertTrue(so.isKeywordSearch());
+             assertEquals("limewire", so.getTitle());
+             assertEquals(3381280L, mem.getContentLength());
+@@ -290,11 +290,11 @@
+             assertEquals(Range.createRange(1572864, 1654783), mem.getSavedBlocks().get(2));
+             assertEquals(Range.createRange(1835008, 2097151), mem.getSavedBlocks().get(3));
+             
+             Map<String, Object> attributes = mem.getAttributes();
+             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
+-            assertEquals("*", so.getMediaType().getMimeType());
++            assertEquals("*", so.getMediaType().getSchema());
+             assertEquals("limewire", so.getQuery());
+             assertEquals(null, so.getXML());
+             assertTrue(so.isKeywordSearch());
+             assertEquals("limewire", so.getTitle());
+             assertEquals(2305127L, mem.getContentLength());
+@@ -315,11 +315,11 @@
+             assertEquals(Range.createRange(1310720, 2621439), mem.getSavedBlocks().get(3));
+             assertEquals(Range.createRange(3145728, 3238639), mem.getSavedBlocks().get(4));
+             
+             Map<?, ?> attributes = mem.getAttributes();
+             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
+-            assertEquals("*", so.getMediaType().getMimeType());
++            assertEquals("*", so.getMediaType().getSchema());
+             assertEquals("limewire", so.getQuery());
+             assertEquals(null, so.getXML());
+             assertTrue(so.isKeywordSearch());
+             assertEquals("limewire", so.getTitle());
+             assertEquals(3380048L, mem.getContentLength());
+@@ -338,11 +338,11 @@
+             assertEquals(Range.createRange(1572864, 1886959), mem.getSavedBlocks().get(1));
+             assertEquals(Range.createRange(2097152, 2191925), mem.getSavedBlocks().get(2));
+             
+             Map<String, Object> attributes = mem.getAttributes();
+             SearchInformation so = SearchInformation.createFromMap((Map)attributes.get("searchInformationMap"));
+-            assertEquals("*", so.getMediaType().getMimeType());
++            assertEquals("*", so.getMediaType().getSchema());
+             assertEquals("limewire", so.getQuery());
+             assertEquals(null, so.getXML());
+             assertTrue(so.isKeywordSearch());
+             assertEquals("limewire", so.getTitle());
+             assertEquals(3064200L, mem.getContentLength());
+Index: tests/com/limegroup/gnutella/filters/XMLDocFilterTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/filters/XMLDocFilterTest.java,v
+retrieving revision 1.10
+retrieving revision 1.10.48.1
+diff -u -b -B -d -w -U5 -r1.10 -r1.10.48.1
+--- tests/com/limegroup/gnutella/filters/XMLDocFilterTest.java	20 Mar 2008 16:05:53 -0000	1.10
++++ tests/com/limegroup/gnutella/filters/XMLDocFilterTest.java	7 Sep 2008 04:30:30 -0000	1.10.48.1
+@@ -128,10 +128,11 @@
+         return createReply(responseFactory.createResponse(5, 5, response), new GUID(), 5555, address, queryReplyFactory); 
+     }
+     
+     public static QueryReply createReply(Response resp, GUID guid, int port, byte[] address, QueryReplyFactory queryReplyFactory) {
+         String xmlCollectionString = LimeXMLDocumentHelper.getAggregateString(new Response [] { resp } );
++        System.out.println(xmlCollectionString);
+         if (xmlCollectionString == null)
+             xmlCollectionString = "";
+ 
+         byte[] xmlBytes = null;
+         try {
+Index: tests/com/limegroup/gnutella/licenses/LicenseReadingTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/licenses/LicenseReadingTest.java,v
+retrieving revision 1.13
+retrieving revision 1.13.48.1
+diff -u -b -B -d -w -U5 -r1.13 -r1.13.48.1
+--- tests/com/limegroup/gnutella/licenses/LicenseReadingTest.java	20 Mar 2008 16:05:53 -0000	1.13
++++ tests/com/limegroup/gnutella/licenses/LicenseReadingTest.java	9 Sep 2008 18:42:07 -0000	1.13.48.1
+@@ -12,11 +12,10 @@
+ import org.limewire.util.TestUtils;
+ 
+ import com.google.inject.Injector;
+ import com.limegroup.gnutella.LimeTestUtils;
+ import com.limegroup.gnutella.metadata.MetaDataFactory;
+-import com.limegroup.gnutella.metadata.MetaReader;
+ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+ import com.limegroup.gnutella.util.LimeTestCase;
+ import com.limegroup.gnutella.xml.LimeXMLDocument;
+ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+ 
+@@ -49,16 +48,15 @@
+ 	
+ 	public void testReadID3AndXML() throws Exception {
+ 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
+ 	    assertTrue(f.exists());
+ 	    
+-	    MetaReader data = metaDataFactory.parse(f);
+-	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
+-	    assertNotNull(data);
++	    AudioMetaData amd= (AudioMetaData) metaDataFactory.parse(f);
++	    assertNotNull(amd);
+ 	    
+ 	    boolean foundLicense = false;
+-	    List<NameValue<String>> nvList = data.toNameValueList();
++	    List<NameValue<String>> nvList = amd.toNameValueList();
+ 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
+ 	        NameValue nv = (NameValue)i.next();
+ 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
+ 	        foundLicense |= nv.getName().equals("audios__audio__license__");
+ 	    }
+@@ -108,16 +106,15 @@
+     
+     public void testReadOGG() throws Exception {
+  	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
+ 	    assertTrue(f.exists());
+ 	    
+-	    MetaReader data = metaDataFactory.parse(f);
+-	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
+-	    assertNotNull(data);
++	    AudioMetaData amd= (AudioMetaData) metaDataFactory.parse(f);
++        assertNotNull(amd);
+ 	    
+ 	    boolean foundLicense = false;
+-	    List nvList = data.toNameValueList();
++	    List nvList = amd.toNameValueList();
+ 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
+ 	        NameValue nv = (NameValue)i.next();
+ 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
+ 	        foundLicense |= nv.getName().equals("audios__audio__license__");
+ 	    }
+@@ -129,16 +126,15 @@
+ 
+ 
+  	    f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.ogg");
+ 	    assertTrue(f.exists());
+ 	    
+-	    data = metaDataFactory.parse(f);
+-	    amd = (AudioMetaData)data.getMetaData();
+-	    assertNotNull(data);
++	    amd = (AudioMetaData) metaDataFactory.parse(f);
++	    assertNotNull(amd);
+ 	    
+ 	    foundLicense = false;
+-	    nvList = data.toNameValueList();
++	    nvList = amd.toNameValueList();
+ 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
+ 	        NameValue nv = (NameValue)i.next();
+ 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
+ 	        foundLicense |= nv.getName().equals("audios__audio__license__");
+ 	    }
+@@ -151,14 +147,14 @@
+     
+     public void testReadWeed() throws Exception {
+ 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
+ 	    assertTrue(f.exists());
+ 	    
+-	    MetaReader data = metaDataFactory.parse(f);
+-	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
+-	    assertNotNull(data);
+-	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(data.toNameValueList(), data.getSchemaURI());
++	    AudioMetaData amd= (AudioMetaData) metaDataFactory.parse(f);
++        assertNotNull(amd);
++	    
++	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
+ 	    assertTrue(doc.isLicenseAvailable());
+ 	    assertEquals(amd.getLicenseType(), doc.getLicenseString());
+ 	    assertEquals("<?xml version=\"1.0\"?>" +
+ "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">" +
+ "<audio title=\"Love Everybody\" artist=\"The Presidents of the United States of America\" album=" +
+Index: tests/com/limegroup/gnutella/metadata/ASFParsingTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/ASFParsingTest.java,v
+retrieving revision 1.7
+retrieving revision 1.7.36.1
+diff -u -b -B -d -w -U5 -r1.7 -r1.7.36.1
+--- tests/com/limegroup/gnutella/metadata/ASFParsingTest.java	28 Apr 2008 18:45:00 -0000	1.7
++++ tests/com/limegroup/gnutella/metadata/ASFParsingTest.java	9 Sep 2008 18:42:07 -0000	1.7.36.1
+@@ -35,12 +35,11 @@
+ 	
+ 	public void testWMASimpleDescription() throws IOException {
+ 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/simple description.wma");
+ 	    assertTrue(f.exists());
+ 	    
+-	    MetaReader data = metaDataFactory.parse(f);
+-	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
++	    AudioMetaData  amd = (AudioMetaData) metaDataFactory.parse(f);
+ 	    
+ 	    assertEquals("Normal Author", amd.getArtist());
+ 	    assertEquals("Normal Title", amd.getTitle());
+ 	    assertEquals("Normal Copyright", amd.getLicense());
+ 	    assertEquals("Normal Description", amd.getComment());
+@@ -59,12 +58,11 @@
+ 
+ 	public void testWMAExtendedDescription() throws IOException {
+ 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/extended description.wma");
+ 	    assertTrue(f.exists());
+ 	    
+-	    MetaReader data = metaDataFactory.parse(f);
+-	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
++	    AudioMetaData amd = (AudioMetaData) metaDataFactory.parse(f);
+ 	       
+ 	    assertEquals("An Artist", amd.getArtist());
+ 	    assertEquals("A Title", amd.getTitle());
+ 	    assertEquals("This is a copyright", amd.getLicense());
+ 	    assertEquals("This is a comment", amd.getComment());
+@@ -82,12 +80,11 @@
+ 
+ 	public void testASFVBR() throws IOException {
+ 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/vbr encoding.asf");
+ 	    assertTrue(f.exists());
+ 	    
+-	    MetaReader data = metaDataFactory.parse(f);
+-	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
++	    AudioMetaData amd = (AudioMetaData) metaDataFactory.parse(f);
+ 	    
+ 	    assertEquals("Another Artist", amd.getArtist());
+ 	    assertEquals("Another Title", amd.getTitle());
+ 	    assertEquals("None", amd.getLicense());
+ 	    assertEquals("This is a small comment.", amd.getComment());
+Index: tests/com/limegroup/gnutella/metadata/FLACReaderTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/FLACReaderTest.java,v
+retrieving revision 1.4
+retrieving revision 1.4.36.1
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.36.1
+--- tests/com/limegroup/gnutella/metadata/FLACReaderTest.java	28 Apr 2008 18:45:00 -0000	1.4
++++ tests/com/limegroup/gnutella/metadata/FLACReaderTest.java	9 Sep 2008 18:42:07 -0000	1.4.36.1
+@@ -37,9 +37,9 @@
+ 
+     public void testFlac() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"Flac.flac");
+         assertTrue("file should exist", file.exists());
+         
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+     }
+ }
+\ No newline at end of file
+Index: tests/com/limegroup/gnutella/metadata/FLACWriterTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/FLACWriterTest.java,v
+retrieving revision 1.5
+retrieving revision 1.5.36.1
+diff -u -b -B -d -w -U5 -r1.5 -r1.5.36.1
+--- tests/com/limegroup/gnutella/metadata/FLACWriterTest.java	28 Apr 2008 18:45:00 -0000	1.5
++++ tests/com/limegroup/gnutella/metadata/FLACWriterTest.java	9 Sep 2008 18:42:07 -0000	1.5.36.1
+@@ -58,13 +58,13 @@
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+         
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData) data.getMetaData());
++        validateTag(data);
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -80,12 +80,11 @@
+         MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+         
+         assertEquals(MetaDataState.NORMAL,retVal);
+         
+         // read the file again
+-        data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        AudioMetaData amd = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         
+         // test the values, changes values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+Index: tests/com/limegroup/gnutella/metadata/ID3ReaderTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/ID3ReaderTest.java,v
+retrieving revision 1.8
+retrieving revision 1.8.36.1
+diff -u -b -B -d -w -U5 -r1.8 -r1.8.36.1
+--- tests/com/limegroup/gnutella/metadata/ID3ReaderTest.java	28 Apr 2008 18:45:00 -0000	1.8
++++ tests/com/limegroup/gnutella/metadata/ID3ReaderTest.java	9 Sep 2008 18:42:07 -0000	1.8.36.1
+@@ -42,68 +42,68 @@
+     */
+     public void testID3v10Tags() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"ID3V1.mp3");
+         assertTrue("file should exist", file.exists());
+         
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+     }
+ 
+     /**
+      * Tests ID3v1.1b
+      */
+     public void testID3v11Tags() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"ID3V11.mp3");
+         assertTrue("file should exist", file.exists());
+ 
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+     }
+     
+     /**
+      * Tests ID3v2.2
+      */
+     public void testID3v22Tags() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"ID3V22.mp3");
+         assertTrue("file should exist", file.exists());
+ 
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+      }
+  
+      /**
+      * Tests ID3v2.3
+       */
+     public void testID3v23Tags() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"ID3V23.mp3");
+         assertTrue("file should exist", file.exists());
+         
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+     }
+ 
+     /**
+      * Tests ID3v2.4
+      */
+     public void testID3v24Tags() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"ID3V24.mp3");
+         assertTrue("file should exist", file.exists());
+ 
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+      }
+      
+     /**
+      * tests that only v2 tag is read if both v1 tag exists
+      *  and v2 tag exists
+      */
+     public void testBothTagsExistReadv2() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"ID3All.mp3");
+         assertTrue("file should exist", file.exists());
+         
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+     }
+         
+     public void testBadTag() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"corruptFileWithBadHeaders.mp3");
+         assertTrue("file should exist", file.exists());
+Index: tests/com/limegroup/gnutella/metadata/ID3WriterTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/ID3WriterTest.java,v
+retrieving revision 1.4
+retrieving revision 1.4.36.1
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.36.1
+--- tests/com/limegroup/gnutella/metadata/ID3WriterTest.java	28 Apr 2008 18:45:00 -0000	1.4
++++ tests/com/limegroup/gnutella/metadata/ID3WriterTest.java	9 Sep 2008 18:42:07 -0000	1.4.36.1
+@@ -58,13 +58,13 @@
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+         
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData) data.getMetaData());
++        validateTag(data);
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -80,12 +80,12 @@
+         MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+         
+         assertEquals(MetaDataState.NORMAL,retVal);
+         
+         // read the file again
+-        data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
++        AudioMetaData amd = data;
+         
+         // test the values, changes values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+@@ -108,13 +108,13 @@
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+         
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData) data.getMetaData());
++        validateTag(data);
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -130,12 +130,12 @@
+         MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+         
+         assertEquals(MetaDataState.NORMAL,retVal);
+         
+         // read the file again
+-        data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
++        AudioMetaData amd = data;
+         
+         // test the values, changes values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+@@ -156,15 +156,15 @@
+         TEST_FILE.delete();
+         FileUtils.copy(f, TEST_FILE);
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+-        
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData) data.getMetaData());
++        validateTag(data);
++        
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -180,12 +180,12 @@
+         MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+         
+         assertEquals(MetaDataState.NORMAL,retVal);
+         
+         // read the file again
+-        data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
++        AudioMetaData amd = data;
+         
+         // test the values, changes values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+@@ -206,15 +206,15 @@
+         TEST_FILE.delete();
+         FileUtils.copy(f, TEST_FILE);
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+-        
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData) data.getMetaData());
++        validateTag(data);
++        
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -230,12 +230,12 @@
+         MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+         
+         assertEquals(MetaDataState.NORMAL,retVal);
+         
+         // read the file again
+-        data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
++        AudioMetaData amd = data;
+         
+         // test the values, changes values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+@@ -256,15 +256,15 @@
+         TEST_FILE.delete();
+         FileUtils.copy(f, TEST_FILE);
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+-        
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData) data.getMetaData());
++        validateTag(data);
++    
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -280,12 +280,12 @@
+         MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+         
+         assertEquals(MetaDataState.NORMAL,retVal);
+         
+         // read the file again
+-        data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
++        AudioMetaData amd = data;
+         
+         // test the values, changes values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+Index: tests/com/limegroup/gnutella/metadata/M4AReaderTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/M4AReaderTest.java,v
+retrieving revision 1.3
+retrieving revision 1.3.36.1
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.36.1
+--- tests/com/limegroup/gnutella/metadata/M4AReaderTest.java	28 Apr 2008 18:45:00 -0000	1.3
++++ tests/com/limegroup/gnutella/metadata/M4AReaderTest.java	9 Sep 2008 18:42:07 -0000	1.3.36.1
+@@ -37,10 +37,10 @@
+ 
+     public void testM4A() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"M4A.m4a");
+         assertTrue("file should exist", file.exists());
+         
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(file);
++        validateTag(data);
+     }
+ }
+ 
+Index: tests/com/limegroup/gnutella/metadata/M4AWriterTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/M4AWriterTest.java,v
+retrieving revision 1.4
+retrieving revision 1.4.36.1
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.36.1
+--- tests/com/limegroup/gnutella/metadata/M4AWriterTest.java	28 Apr 2008 18:45:00 -0000	1.4
++++ tests/com/limegroup/gnutella/metadata/M4AWriterTest.java	9 Sep 2008 18:42:07 -0000	1.4.36.1
+@@ -58,13 +58,13 @@
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+         
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        AudioMetaData data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData)data.getMetaData());
++        validateTag(data);
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -80,12 +80,12 @@
+         MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+         
+         assertEquals(MetaDataState.NORMAL,retVal);
+         
+         // read the file again
+-        data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        data = (AudioMetaData) metaDataFactory.parse(TEST_FILE);
++        AudioMetaData amd = data;
+         
+         // test the values, chanages values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+Index: tests/com/limegroup/gnutella/metadata/MetaDataFactoryImplTest.java
+===================================================================
+RCS file: tests/com/limegroup/gnutella/metadata/MetaDataFactoryImplTest.java
+diff -N tests/com/limegroup/gnutella/metadata/MetaDataFactoryImplTest.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tests/com/limegroup/gnutella/metadata/MetaDataFactoryImplTest.java	9 Sep 2008 01:23:54 -0000	1.1.2.2
+@@ -0,0 +1,79 @@
++package com.limegroup.gnutella.metadata;
++
++import java.io.File;
++import java.util.List;
++
++import junit.framework.Test;
++
++import org.limewire.util.NameValue;
++import org.limewire.util.TestUtils;
++
++import com.google.inject.Injector;
++import com.limegroup.bittorrent.metadata.TorrentMetaData;
++import com.limegroup.gnutella.LimeTestUtils;
++import com.limegroup.gnutella.util.LimeTestCase;
++
++public class MetaDataFactoryImplTest extends LimeTestCase {
++
++    private MetaDataFactoryImpl metaDataFactory;
++
++    public MetaDataFactoryImplTest(String name) {
++        super(name);
++    }
++    
++    public static Test suite() {
++        return buildTestSuite(MetaDataFactoryImplTest.class);
++    }
++    
++    @Override
++    protected void setUp() throws Exception {
++        Injector injector = LimeTestUtils.createInjector();
++        metaDataFactory = (MetaDataFactoryImpl) injector.getInstance(MetaDataFactory.class);
++    }
++    
++    /**
++     * Integration test to ensure {@link TorrentMetaReaderFactory} is registered
++     * with {@link MetaDataFactoryImpl} and multi file torrents are parsed correctly.
++     */
++    @SuppressWarnings("null")
++    public void testReadsMultiFileTorrentMetaData() throws Exception {
++        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", getClass());
++        assertTrue(torrentFile.exists());
++        
++        MetaData metaData = metaDataFactory.parse(torrentFile);
++        assertTrue(metaData instanceof TorrentMetaData);
++        List<NameValue<String>> values = metaData.toNameValueList();
++        String filepaths = null;
++        for (NameValue<String> value : values) {
++            if (value.getName().equals(TorrentMetaData.FILE_PATHS)) {
++                filepaths = value.getValue();
++                break;
++            }
++        }
++        assertNotNull(filepaths);
++        String[] fileUris = filepaths.split("\t");
++        assertEquals(9, fileUris.length);
++    }
++    
++    /**
++     * Integration test to ensure {@link TorrentMetaReaderFactory} is registered
++     * with {@link MetaDataFactoryImpl} and single file torrents are parsed correctly.
++     */
++    public void testReadsSingleFileTorrentMetaData() throws Exception {
++        File torrentFile = TestUtils.getResourceInPackage("bthavetest.torrent", getClass());
++        assertTrue(torrentFile.exists());
++        
++        MetaData metaData = metaDataFactory.parse(torrentFile);
++        assertTrue(metaData instanceof TorrentMetaData);
++        List<NameValue<String>> values = metaData.toNameValueList();
++        String name = null;
++        for (NameValue<String> value : values) {
++            if (value.getName().equals(TorrentMetaData.NAME)) {
++                name = value.getValue();
++                break;
++            }
++        }
++        assertEquals("BTHaveTest.class", name);
++    }
++
++}
+Index: tests/com/limegroup/gnutella/metadata/MetaDataReaderTest.java
+===================================================================
+RCS file: tests/com/limegroup/gnutella/metadata/MetaDataReaderTest.java
+diff -N tests/com/limegroup/gnutella/metadata/MetaDataReaderTest.java
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tests/com/limegroup/gnutella/metadata/MetaDataReaderTest.java	8 Sep 2008 21:13:12 -0000	1.1.2.1
+@@ -0,0 +1,36 @@
++package com.limegroup.gnutella.metadata;
++
++import java.io.File;
++
++import org.limewire.util.TestUtils;
++
++import com.google.inject.Injector;
++import com.limegroup.gnutella.LimeTestUtils;
++import com.limegroup.gnutella.util.LimeTestCase;
++import com.limegroup.gnutella.xml.LimeXMLDocument;
++
++public class MetaDataReaderTest extends LimeTestCase {
++
++    private MetaDataReader metaDataReader;
++
++    public MetaDataReaderTest(String name) {
++        super(name);
++    }
++
++    @Override
++    protected void setUp() throws Exception {
++        Injector injector = LimeTestUtils.createInjector();
++        metaDataReader = injector.getInstance(MetaDataReader.class);
++    }
++    
++    /**
++     * Integration test to ensure torrents are read into xml documents correctly. 
++     */
++    public void testReadsTorrentDocument() throws Exception {
++        File torrentFile = TestUtils.getResourceInPackage("messages.torrent", getClass());
++        assertTrue(torrentFile.exists());
++        LimeXMLDocument document = metaDataReader.readDocument(torrentFile);
++        assertEquals("http://www.limewire.com/schemas/torrent.xsd", document.getSchemaURI());
++    }
++
++}
+Index: tests/com/limegroup/gnutella/metadata/OGGReaderTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/OGGReaderTest.java,v
+retrieving revision 1.3
+retrieving revision 1.3.36.1
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.36.1
+--- tests/com/limegroup/gnutella/metadata/OGGReaderTest.java	28 Apr 2008 18:45:00 -0000	1.3
++++ tests/com/limegroup/gnutella/metadata/OGGReaderTest.java	9 Sep 2008 18:42:07 -0000	1.3.36.1
+@@ -37,20 +37,20 @@
+ 
+     public void testOgg() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"oggAll.ogg");
+         assertTrue("file should exist", file.exists());
+         
+-        MetaReader data = metaDataFactory.parse(file);
+-        validateTag((AudioMetaData) data.getMetaData());
++        MetaData data = metaDataFactory.parse(file);
++        validateTag((AudioMetaData) data);
+     }
+     
+     public void testNoFieldsOgg() throws Exception {
+         File file = TestUtils.getResourceFile(dir+"oggNone.ogg");
+         assertTrue("file should exist", file.exists());
+         
+-        MetaReader data = metaDataFactory.parse(file);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        MetaData data = metaDataFactory.parse(file);
++        AudioMetaData amd = (AudioMetaData) data;
+         assertEquals("", amd.getTitle());
+         assertEquals("", amd.getArtist());
+         assertEquals("", amd.getAlbum());
+         assertEquals("", amd.getComment());
+         assertEquals("", amd.getTrack());
+Index: tests/com/limegroup/gnutella/metadata/OGGWriterTest.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/OGGWriterTest.java,v
+retrieving revision 1.4
+retrieving revision 1.4.36.1
+diff -u -b -B -d -w -U5 -r1.4 -r1.4.36.1
+--- tests/com/limegroup/gnutella/metadata/OGGWriterTest.java	28 Apr 2008 18:45:00 -0000	1.4
++++ tests/com/limegroup/gnutella/metadata/OGGWriterTest.java	9 Sep 2008 18:42:07 -0000	1.4.36.1
+@@ -58,13 +58,13 @@
+         assertTrue(TEST_FILE.exists());
+         TEST_FILE.deleteOnExit();
+         
+         
+         // read the meta data from the current audio file
+-        MetaReader data = metaDataFactory.parse(TEST_FILE);
++        MetaData data = metaDataFactory.parse(TEST_FILE);
+         // test the contents to be sure its valid
+-        validateTag((AudioMetaData) data.getMetaData());
++        validateTag((AudioMetaData) data);
+         
+         // get the meta-data and update some of the values
+         List<NameValue<String>> nameValList = data.toNameValueList();
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, newTitle));
+         nameValList.add(new NameValue<String>(LimeXMLNames.AUDIO_ARTIST, newArtist));
+@@ -82,11 +82,11 @@
+         assertEquals(MetaDataState.NORMAL,retVal);
+ 
+         assertTrue(TEST_FILE.canRead());
+         // read the file again
+         data = metaDataFactory.parse(TEST_FILE);
+-        AudioMetaData amd = (AudioMetaData) data.getMetaData();
++        AudioMetaData amd = (AudioMetaData) data;
+         
+         // test the values, chanages values should be read
+         assertEquals(newTitle, amd.getTitle());
+         assertEquals(newArtist, amd.getArtist());
+         assertEquals(newAlbum, amd.getAlbum());
+Index: tests/com/limegroup/gnutella/metadata/RandomMP3Test.java
+===================================================================
+RCS file: /cvs/tests/com/limegroup/gnutella/metadata/RandomMP3Test.java,v
+retrieving revision 1.3
+retrieving revision 1.3.60.1
+diff -u -b -B -d -w -U5 -r1.3 -r1.3.60.1
+--- tests/com/limegroup/gnutella/metadata/RandomMP3Test.java	6 Feb 2008 20:57:59 -0000	1.3
++++ tests/com/limegroup/gnutella/metadata/RandomMP3Test.java	9 Sep 2008 18:42:07 -0000	1.3.60.1
+@@ -57,12 +57,12 @@
+     }
+     
+     private AudioMetaData newMP3Info(String resource) throws Exception {
+         MetaDataFactory factory = new MetaDataFactoryImpl();
+         File file = TestUtils.getResourceInPackage(resource, RandomMP3Test.class);
+-        MetaReader reader = factory.parse(file);
+-        return (AudioMetaData)reader.getMetaData();
++        MetaData data = factory.parse(file);
++        return (AudioMetaData)data;
+     }
+     
+     /**
+      *
+      * All values (where possible) have been validated by
+Index: tests/com/limegroup/gnutella/metadata/bthavetest.torrent
+===================================================================
+RCS file: tests/com/limegroup/gnutella/metadata/bthavetest.torrent
+diff -N tests/com/limegroup/gnutella/metadata/bthavetest.torrent
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tests/com/limegroup/gnutella/metadata/bthavetest.torrent	8 Sep 2008 20:02:58 -0000	1.1.2.1
+@@ -0,0 +1 @@
++d8:announce25:http://localhost/announce10:created by14:KTorrent 2.2.513:creation datei1220903793e4:infod6:lengthi1434e4:name16:BTHaveTest.class12:piece lengthi262144e6:pieces20:—´#0hGlh:ÿUª#ee
+\ No newline at end of file
+Index: tests/com/limegroup/gnutella/metadata/messages.torrent
+===================================================================
+RCS file: tests/com/limegroup/gnutella/metadata/messages.torrent
+diff -N tests/com/limegroup/gnutella/metadata/messages.torrent
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ tests/com/limegroup/gnutella/metadata/messages.torrent	8 Sep 2008 20:02:58 -0000	1.1.2.1
+@@ -0,0 +1,2 @@
++d8:announce25:http://localhost/announce10:created by14:KTorrent 2.2.513:creation datei1220901339e4:infod5:filesld6:lengthi1307e4:pathl20:BTBitFieldTest.classeed6:lengthi1896e4:pathl18:BTCancelTest.classeed6:lengthi1247e4:pathl17:BTChokeTest.classeed6:lengthi1434e4:pathl16:BTHaveTest.classeed6:lengthi1286e4:pathl22:BTInterestedTest.classeed6:lengthi1311e4:pathl25:BTNotInterestedTest.classeed6:lengthi1942e4:pathl24:BTPieceMessageTest.classeed6:lengthi1902e4:pathl19:BTRequestTest.classeed6:lengthi1263e4:pathl19:BTUnChokeTest.classeee4:name8:messages12:piece lengthi262144e6:pieces20:×­ÈBi_™ø„îÀä?u
++Goee
+\ No newline at end of file
