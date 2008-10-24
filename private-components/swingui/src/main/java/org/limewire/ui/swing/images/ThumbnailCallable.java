@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -113,19 +114,19 @@ public class ThumbnailCallable implements Callable<Void> {
                 return null;
             }
         }
-        
+
         BufferedImage image = null;
         try {  
             URL url = file.toURI().toURL();
-            image = GraphicsUtilities.loadCompatibleImage(url);
-        } catch (Throwable e) { 
+            image = ImageIO.read(url);
+        } catch (Throwable e) {
             handleUpdate(errorIcon);
             return null;
         }  
         if(image == null) {
             handleUpdate(errorIcon);
             return null;
-        } 
+        }
         // if the image is larger than our viewport, resize the image before saving
         if(image.getWidth() > ThumbnailManager.WIDTH || image.getHeight() > ThumbnailManager.HEIGHT) { 
             //TODO: this can be optimized for pictures within one step away from the target size

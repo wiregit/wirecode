@@ -1,5 +1,9 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.io.File;
+
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -10,9 +14,11 @@ import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
+import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 
 public class LibraryManagerOptionPanel extends OptionPanel {
@@ -49,7 +55,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     
     private void createComponents(Action okAction, Action cancelAction) {
         treeTable = new LibraryManagerTreeTable();
-        addFolderButton = new JButton(I18n.tr("Add New Folder"));
+        addFolderButton = new JButton(new AddDirectoryAction(this));
         
         musicCheckBox = new JCheckBox();
         videoCheckBox = new JCheckBox();
@@ -106,10 +112,34 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     public void initOptions() {
         //TODO: read folders from FileManager
 //        ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
-//        items.add(new LibraryManagerItemImpl(new File("C:\\ant"), false));
-//        items.add(new LibraryManagerItemImpl(new File("C:\\workspace"), true));
+//        items.add(new LibraryManagerItemImpl(new File("C:\\Documents and Settings\\meverett\\Desktop"), false));
+//        items.add(new LibraryManagerItemImpl(new File("C:\\Documents and Settings\\meverett\\My Documents"), true));
 //        
 //        treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));
     }
     
+    private class AddDirectoryAction extends AbstractAction {
+
+        private Container parent;
+        
+        public AddDirectoryAction(Container parent) {
+            this.parent = parent;
+            
+            putValue(Action.NAME, I18n.tr("Add New Folder"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Choose a folder to automatically scan for changes"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            File directory = FileChooser.getInputDirectory(parent, null);
+            
+            if(directory == null)
+                return;
+            
+//            try {
+//                String newDirectory = directory.getCanonicalPath();
+//                currentDirectoryTextField.setText(newDirectory);
+//            }catch(IOException ioe) {}
+        }
+    }    
 }

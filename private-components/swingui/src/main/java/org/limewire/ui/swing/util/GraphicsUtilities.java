@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.4 2008-09-30 19:50:52 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.5 2008-10-24 23:10:52 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -439,7 +439,11 @@ public class GraphicsUtilities {
             }
 
             if (temp == null || isTranslucent) {
-                temp = createCompatibleImage(image, width, height);
+                try {
+                    temp = createCompatibleImage(image, width, height);
+                } catch(Throwable e) {
+                    temp = new BufferedImage(width, height, image.getType());
+                }
                 if(g2 != null)
                     g2.dispose();
                 g2 = temp.createGraphics();
