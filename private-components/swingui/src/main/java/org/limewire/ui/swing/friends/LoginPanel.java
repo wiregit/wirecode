@@ -49,6 +49,9 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
     @Resource private Icon gmail;
     @Resource private Icon facebook;
 
+    private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
+    private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
+
     private JToggleButton googleTalkButton;
     private JToggleButton facebookButton;
     private JPasswordField passwordField;
@@ -177,6 +180,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
                 if (error == LoginErrorState.UsernameOrPasswordError) {
                     passwordField.setText("");
                 }
+                enableSignInButton();
             }
 
         });
@@ -198,6 +202,11 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         builder.nextLine();
         builder.addLabel(tr(error.getMessage()));
         return builder.getPanel();
+    }
+
+    private void enableSignInButton() {
+        signInButton.setEnabled(true);
+        signInButton.setText(SIGNIN_ENABLED_TEXT);
     }
     
     private JPanel getDetailsPanel() {
@@ -254,10 +263,13 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
     
     class SignInAction extends AbstractAction {
         public SignInAction() {
-            super(tr("Sign in"));
+            super(SIGNIN_ENABLED_TEXT);
         }
         
         public void actionPerformed(ActionEvent e) {
+            signInButton.setEnabled(false);
+            signInButton.setText(SIGNIN_DISABLED_TEXT);
+            
             String userNameFieldValue = userNameField.getText().trim();
             final String serviceName = networkGroup.getSelection().getActionCommand();
             if (GMAIL_SERVICE_NAME.equals(serviceName)) {
@@ -280,6 +292,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
                             @Override
                             public void run() {
                                 setTopPanelMessage(normalTopPanel());
+                                enableSignInButton();
                             }
                         });
 
