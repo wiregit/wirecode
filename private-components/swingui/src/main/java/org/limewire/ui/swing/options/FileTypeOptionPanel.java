@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import java.io.IOException;
-
 import org.limewire.ui.swing.util.I18n;
 
 
