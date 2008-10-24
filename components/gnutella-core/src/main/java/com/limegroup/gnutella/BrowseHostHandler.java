@@ -231,7 +231,7 @@ public class BrowseHostHandler {
             return "/";
         } else {
             try {
-                return "/friend/browse/" +  URLEncoder.encode(friendPresence.getFriend().getId(), "UTF-8") + "/";
+                return "/friend/browse/" +  URLEncoder.encode(friendPresence.getFriend().getNetwork().getMyID(), "UTF-8") + "/";
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
