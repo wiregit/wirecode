@@ -97,9 +97,12 @@ public class CoreSearch implements Search {
     private void doSearch(boolean initial) {
         searchGuid = searchServices.newQueryGUID();
         listenerList.addQueryReplyListener(searchGuid, qrListener);
-
-        searchServices.query(searchGuid, QueryUtils.removeIllegalChars(searchDetails.getSearchQuery()), "",
-                MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
+        
+        String gnutellaSearch = QueryUtils.removeIllegalChars(searchDetails.getSearchQuery());
+        if(gnutellaSearch.length() > 0) {
+            searchServices.query(searchGuid, gnutellaSearch, "",
+                    MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
+        }
         
         backgroundExecutor.execute(new Runnable() {
             @Override
