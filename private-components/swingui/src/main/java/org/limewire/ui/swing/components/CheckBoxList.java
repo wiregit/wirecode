@@ -122,6 +122,8 @@ public class CheckBoxList<E> extends BoxPanel {
 
     private CheckBoxCellEditor editor;
 
+    private boolean checkBoxesVisible;
+
    
     /**
      * Constructs a checkbox list for a collection of elements.
@@ -262,6 +264,10 @@ public class CheckBoxList<E> extends BoxPanel {
     @Override
     public void setEnabled(boolean enabled) {
         this.checkBoxList.setEnabled(enabled);
+    }
+    
+    public void setCheckBoxesVisible(boolean visible) {
+        this.checkBoxesVisible = false;
     }
     
     /**
@@ -1030,6 +1036,7 @@ public class CheckBoxList<E> extends BoxPanel {
             label = new JLabel();
             label.setBorder(blankBorder);
             checkBox = new JCheckBox("", true);
+            checkBox.setVisible(checkBoxesVisible);
 
             button = new DeleteButton();
       

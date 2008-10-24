@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.ui.swing.components.CheckBoxList;
@@ -194,7 +195,7 @@ public final class FileTypeOptionPanelManager {
         String[] selectedExtensions;
         
         
-        migrate = true; //TODO: SharingSettings.EXTENSIONS_MIGRATE.getValue();
+        migrate = SharingSettings.EXTENSIONS_MIGRATE.getValue();
         
         if (migrate) { 
             selectedExtensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase());
@@ -329,7 +330,7 @@ public final class FileTypeOptionPanelManager {
         
         this.addBottomPanel();
         
-        this.shareProtect(false); // TODO:!SharingSettings.DISABLE_SENSITIVE.getValue());
+        this.shareProtect(!SharingSettings.DISABLE_SENSITIVE.getValue());
         
         this.mainContainer.validate();
 
@@ -524,7 +525,7 @@ public final class FileTypeOptionPanelManager {
         
         this.disableSensitive = new JCheckBox(I18n.tr("Do Not Share Sensitive File Types"));        
         this.disableSensitive.setToolTipText(I18n.tr("This stops LimeWire from sharing certain files that may contain sensitive information."));
-        this.disableSensitive.setSelected(false); // TODO: SharingSettings.DISABLE_SENSITIVE.getValue());
+        this.disableSensitive.setSelected(SharingSettings.DISABLE_SENSITIVE.getValue());
         
         JPanel buffer = new JPanel(new BorderLayout());
         buffer.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
@@ -594,9 +595,8 @@ public final class FileTypeOptionPanelManager {
     }
 
     public boolean isDirty() {
-        return false;
-   //     return    !this.originalExtensions.equals(this.getExtensions())
-   //            || !this.disableSensitive.isSelected() == SharingSettings.DISABLE_SENSITIVE.getValue();
+        return    !this.originalExtensions.equals(this.getExtensions())
+               || !this.disableSensitive.isSelected() == SharingSettings.DISABLE_SENSITIVE.getValue();
     }
 
   
