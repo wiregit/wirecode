@@ -19,6 +19,10 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.library.Disposable;
+import org.limewire.ui.swing.library.LibrarySelectable;
+import org.limewire.ui.swing.library.Sharable;
+import org.limewire.ui.swing.library.sharing.FileShareModel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -29,7 +33,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
-public class LibraryTable<T extends FileItem> extends MouseableTable {
+public class LibraryTable<T extends FileItem> extends MouseableTable implements Sharable, Disposable, LibrarySelectable {
     
     private final LibraryTableFormat<T> format;
     private final TableColors tableColors;
@@ -124,7 +128,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            librarySharePanel.setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow())));
+            ((FileShareModel)librarySharePanel.getShareModel()).setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow())));
             librarySharePanel.show(shareEditor, getVisibleRect());
             shareEditor.cancelCellEditing();
         }
@@ -219,5 +223,18 @@ public class LibraryTable<T extends FileItem> extends MouseableTable {
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {           
             return table.isRowDisabled(adapter.row);
         }
+    }
+
+    @Override
+    public void selectAndScroll(Object selectedObject) {
+        LibraryTableModel<T> model = getLibraryTableModel();
+      for(int y=0; y < model.getRowCount(); y++) {
+          FileItem localFileItem = model.getElementAt(y);
+          if(selectedObject.equals(localFileItem.getUrn())) {
+              getSelectionModel().setSelectionInterval(y, y);
+              break;
+          }
+      }
+      ensureSelectionVisible();
     }
 }

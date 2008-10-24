@@ -9,7 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -17,14 +16,13 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
-import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -33,10 +31,12 @@ import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.images.ThumbnailManager;
+import org.limewire.ui.swing.library.Sharable;
+import org.limewire.ui.swing.library.sharing.FileShareModel;
+import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
-import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -48,7 +48,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
-public class LibraryImageSubPanel extends JPanel implements ListEventListener<LocalFileItem> {
+public class LibraryImageSubPanel extends JPanel implements ListEventListener<LocalFileItem>, Sharable {
     
     @Resource
     private Color lineColor = Color.BLACK;
@@ -61,18 +61,15 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     @Resource
     private int mainLabelFontSize = 12;
     
-    private final ImageList imageList;
+    private final ImageList imageList;    
     
-    private final JXButton shareFolderButton;
+    private ShareTableRendererEditor shareEditor;
     
-    private final Action shareAllAction = new AbstractAction(I18n.tr("Share Folder")){        
+    private  JXLayer<JComponent> layer;
+    
+    private Dimension buttonPanelDimension = new Dimension(ThumbnailManager.WIDTH,28);
+    
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-           throw new RuntimeException("Implement ME");
-        }
-        
-    };
     private EventList<LocalFileItem> currentEventList;
     private EventList<LocalFileItem> listSelection;    
     
@@ -90,13 +87,6 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         FontUtils.setSize(headerLabel, mainLabelFontSize);
         FontUtils.bold(headerLabel);
         
-        shareFolderButton = new JXButton(shareAllAction);
-        shareFolderButton.setHorizontalTextPosition(SwingConstants.LEFT);
-        shareFolderButton.setBackgroundPainter(new ButtonPainter());
-        shareFolderButton.setOpaque(false);
-        shareFolderButton.setFocusPainted(false);
-        shareFolderButton.setContentAreaFilled(false);
-    
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
         
@@ -108,26 +98,21 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         //imageList.setTransferHandler(transferHandler);
         imageList.setPopupHandler(new MyImageLibraryPopupHandler(this, params));
         
-        ImageCellRenderer renderer = new LibraryImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight(), thumbnailManager);
-        renderer.setButtonComponent(new ShareTableRendererEditor(null));
+        ImageCellRenderer renderer = new LibraryImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight() - 2, thumbnailManager);
+        renderer.setOpaque(false);
+        JComponent buttonRenderer = new ShareTableRendererEditor(null);
+        buttonRenderer.setPreferredSize(buttonPanelDimension);
+        buttonRenderer.setSize(buttonPanelDimension);
+        renderer.setButtonComponent(buttonRenderer);
         imageList.setImageCellRenderer(renderer);
-        
-        //TODO: share action
-        ShareTableRendererEditor panel = new ShareTableRendererEditor(null);
-        panel.setPreferredSize(new Dimension(ThumbnailManager.WIDTH,30));
-        panel.setSize(new Dimension(ThumbnailManager.WIDTH,30));
-        panel.setVisible(false);
-        
-        new MouseReaction(imageList, panel);
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remaining space
         setLayout(new MigLayout("gap 0, insets 18 4 10 4",     //layout constraints
                 "[] [] ",                       // column constraints
                 "[::30] [] [grow][grow]" ));    // row constraints
         
-        add(headerLabel, "gapbottom 4, push");       // first row
+        add(headerLabel, "gapbottom 4, push, wrap");       // first row
        // add(unShareButtonLabel, "gapbottom 2, split 2");
-        add(shareFolderButton, "gapbottom 2, wrap");
         
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");
@@ -136,15 +121,26 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        JXLayer<JComponent> l = new JXLayer<JComponent>(scrollPane, new  AbstractLayerUI<JComponent>());
-        l.getGlassPane().setLayout(null);
-        l.getGlassPane().add(panel);
+        layer = new JXLayer<JComponent>(scrollPane, new  AbstractLayerUI<JComponent>());
+        layer.getGlassPane().setLayout(null);
         //third row
-        add(l, "span 2, grow");
+        add(layer, "span 2, grow");
 
         eventList.addListEventListener(this);
         
       //  setVisible(false);
+    }
+    
+    public void enableSharing(LibrarySharePanel sharePanel){
+        shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Sharing"), sharePanel));
+        shareEditor.setPreferredSize(buttonPanelDimension);
+        shareEditor.setSize(buttonPanelDimension);
+        shareEditor.setOpaque(false);
+        shareEditor.setVisible(false);
+                
+        new MouseReaction(imageList, shareEditor);
+        
+        layer.getGlassPane().add(shareEditor);
     }
     
     public JList getList() {
@@ -231,6 +227,30 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
   
     public void dispose() {
         // TODO Auto-generated method stub
+        
+    }
+    
+    private class ShareAction extends AbstractAction {
+
+        
+        private LibrarySharePanel librarySharePanel;
+
+        public ShareAction(String text, LibrarySharePanel librarySharePanel){
+            super(text);
+            this.librarySharePanel = librarySharePanel;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ((FileShareModel)librarySharePanel.getShareModel()).setFileItem(shareEditor.getLocalFileItem());
+          
+            Rectangle bounds = shareEditor.getShareButton().getBounds();
+            Point convertedLocation = SwingUtilities.convertPoint(shareEditor, shareEditor.getShareButton().getLocation(), LibraryImageSubPanel.this.getParent());
+            bounds.x = convertedLocation.x;
+            bounds.y = convertedLocation.y;
+            librarySharePanel.show(bounds, ((JComponent)LibraryImageSubPanel.this.getParent()).getVisibleRect());
+            shareEditor.cancelCellEditing();
+        }
         
     }
 }

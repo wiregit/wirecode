@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.library;
 
-interface Disposable {
+public interface Disposable {
     
     public void dispose();
 

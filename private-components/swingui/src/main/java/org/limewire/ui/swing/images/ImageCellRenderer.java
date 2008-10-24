@@ -21,15 +21,6 @@ public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
     protected Border border;
     protected Border selectedBorder;
     
-    @Resource
-    protected Color cellBackgroundColor;
-    @Resource
-    protected Color cellBorderColor;
-    @Resource
-    protected Color cellBorderSelectionColor;
-    @Resource
-    protected Icon errorIcon;
-    
     private ThumbnailManager thumbnailManager;
     
     public ImageCellRenderer(int width, int height, ThumbnailManager thumbnailManager) {
@@ -37,12 +28,12 @@ public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
         
         this.thumbnailManager = thumbnailManager;
         
-        GuiUtils.assignResources(this);
+        ImageCellRendererParams params = new ImageCellRendererParams();
         
-        setBackground(this.cellBackgroundColor);
+        setBackground(params.cellBackgroundColor);
         
-        border = BorderFactory.createMatteBorder(1, 1, 1, 1, cellBorderColor);
-        selectedBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, cellBorderSelectionColor);
+        border = BorderFactory.createMatteBorder(1, 1, 1, 1, params.cellBorderColor);
+        selectedBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, params.cellBorderSelectionColor);
     }
     
     @Override
@@ -62,5 +53,20 @@ public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
             this.setBorder(border);
         
         return this;
+    }
+    
+    protected static class ImageCellRendererParams {
+        @Resource
+        protected Color cellBackgroundColor;
+        @Resource
+        protected Color cellBorderColor;
+        @Resource
+        protected Color cellBorderSelectionColor;
+        @Resource
+        protected Icon errorIcon;
+        
+        public ImageCellRendererParams(){
+            GuiUtils.assignResources(this);
+        }
     }
 }

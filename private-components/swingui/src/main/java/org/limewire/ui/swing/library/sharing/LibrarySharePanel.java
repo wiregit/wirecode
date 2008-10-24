@@ -16,10 +16,10 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -45,16 +45,6 @@ import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
-import org.limewire.core.settings.SharingSettings;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.RegisteringEventListener;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
@@ -62,8 +52,6 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.User;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -77,7 +65,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 
-public class LibrarySharePanel extends JXPanel implements RegisteringEventListener<RosterEvent>{
+public class LibrarySharePanel extends JXPanel implements PropertyChangeListener{
 
 
 
@@ -86,8 +74,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     private static final int BORDER_INSETS = 10;
     private static final int HGAP = 5;
     
+    private LibraryShareModel shareModel;
     
-    private  final SharingTarget GNUTELLA_SHARE = new SharingTarget(new Gnutella());
+    
+   // private  final SharingTarget GNUTELLA_SHARE = new SharingTarget(new Gnutella());
 
     private JTextField inputField;
 
@@ -99,7 +89,14 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
      * filtered list of unshared friends
      */
     private FilterList<SharingTarget> noShareFilterList;
+    /**
+     * list of shared friends
+     */
     private EventList<SharingTarget> shareFriendList;
+    /**
+     * list of all friends
+     */
+    private List<SharingTarget> allFriends;
 
     private JScrollPane shareScroll;
     private JScrollPane friendScroll;
@@ -112,14 +109,7 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     private JXPanel mainPanel;
     
-    private ShareListManager libraryManager;
-    
-    private LocalFileList gnutellaList;
-    
-    private ShapePainter shapePainter;
-    
-    private Map<SharingTarget, LocalFileList> friendListMap;
-    private LocalFileItem fileItem;
+    private ShapePainter shapePainter;    
     
     private int ledgeWidth;
     private int ledgeHeight;
@@ -165,13 +155,10 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
     
     
     @Inject
-    public LibrarySharePanel(ShareListManager libraryManager) {
+    public LibrarySharePanel(List<SharingTarget> allFriends) {
         GuiUtils.assignResources(this);
         
-        
-        this.libraryManager = libraryManager;
-        friendListMap = new ConcurrentHashMap<SharingTarget, LocalFileList>();   
-        gnutellaList = libraryManager.getGnutellaShareList();
+        this.allFriends = allFriends;
         
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setOpaque(false);
@@ -345,8 +332,6 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
                 
         add(mainPanel);
 
-        adjustSize();
-
         EventAnnotationProcessor.subscribe(this);   
         
         setKeyStrokes(this);
@@ -396,6 +381,14 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         });
     }
     
+    public void setShareModel(LibraryShareModel shareModel){
+        this.shareModel = shareModel;
+        shareModel.addPropertyChangeListener(this);
+    }
+    
+    public LibraryShareModel getShareModel(){
+        return shareModel;
+    }
 
     private void addSelectedFriend() {
         if (friendTable.getSelectedRow() >= 0) {
@@ -413,29 +406,29 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         component.getActionMap().put("down", down);       
     }
     
-    //@Override
-    public void show(Component c, Rectangle visibleRect){
+
+    public void show(Rectangle ledgeBounds, Rectangle visibleRect){
         inputField.setText(null);
         
-        ledgeWidth = c.getWidth();
-        ledgeHeight = c.getHeight();
+        ledgeWidth = ledgeBounds.width;
+        ledgeHeight = ledgeBounds.height;
         
         adjustSize();
         
         //favor ledge on top
-        boolean ledgeFitsOnBottom = c.getY() + c.getHeight() - getHeight() >= visibleRect.getY();
-        boolean ledgeFitsOnTop = c.getY() + getHeight() <= visibleRect.getHeight();
+        boolean ledgeFitsOnBottom = ledgeBounds.y + ledgeBounds.height - getHeight() >= visibleRect.getY();
+        boolean ledgeFitsOnTop = ledgeBounds.y + getHeight() <= visibleRect.getHeight();
  
         int y = 0; //y position for widget bounds
         if (ledgeFitsOnTop) {
-            y = c.getY();
+            y = ledgeBounds.y;
             ledgeY = 1;
         } else if (ledgeFitsOnBottom) {
-            y = c.getY() + c.getHeight() - getHeight();
-            ledgeY = getHeight() - c.getHeight() - 1;
+            y = ledgeBounds.y + ledgeBounds.height - getHeight();
+            ledgeY = getHeight() - ledgeBounds.height - 1;
         } else {
             y = (int) visibleRect.getY();
-            ledgeY = c.getY() - y;
+            ledgeY = ledgeBounds.y - y;
             if (ledgeY <= 0) {
                 ledgeY = 1;
             }
@@ -443,12 +436,28 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         
         adjustPainter();
         
-        setBounds(c.getX() - mainPanel.getWidth() - HGAP * 2,y, getWidth(), getHeight());
+        int xPos = ledgeFitsOnRight(ledgeBounds) ? getRightLedgeXPosition(ledgeBounds) : ledgeBounds.x;
+        
+        setBounds(xPos, y, getWidth(), getHeight());
         getParent().validate();
-        setVisible(true);
+        setVisible(true);    
+    }
+    
+    private boolean ledgeFitsOnRight(Rectangle ledgeBounds){
+        return getRightLedgeXPosition(ledgeBounds) >= 0;
+    }
+    
+    private int getRightLedgeXPosition(Rectangle ledgeBounds){
+        return ledgeBounds.x - mainPanel.getWidth() - HGAP * 2;
     }
 
-    //TODO: clean this up
+    
+    public void show(Component c, Rectangle visibleRect) {
+        show(c.getBounds(), visibleRect);
+    }
+    
+
+    //TODO: clean this up and move it to a separate component
     private void adjustPainter(){
         Area area = new Area(new RoundRectangle2D.Float(1, 1, mainPanel.getWidth() + HGAP * 2-1, getHeight()-2, BORDER_INSETS, BORDER_INSETS));
         Area area2 = new Area(new RoundRectangle2D.Float(mainPanel.getWidth() + HGAP * 2, ledgeY, ledgeWidth-1, ledgeHeight, BORDER_INSETS, BORDER_INSETS));
@@ -478,11 +487,8 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         shareFriendList.add(friend);
         noShareFriendList.remove(friend);
 
-        if (friend == GNUTELLA_SHARE) {
-            gnutellaList.addFile(fileItem.getFile());
-        } else {
-            friendListMap.get(friend).addFile(fileItem.getFile());
-        }
+        shareModel.shareFriend(friend);
+        
         adjustSize();
     }
     
@@ -491,16 +497,13 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         shareFriendList.remove(friend);
         noShareFriendList.add(friend);
         
-        if (friend == GNUTELLA_SHARE) {
-            gnutellaList.removeFile(fileItem.getFile());
-        } else {
-            friendListMap.get(friend).removeFile(fileItem.getFile());
-        }
+        shareModel.unshareFriend(friend);
+        
         adjustSize();
     }
     
     //TODO: clean this up
-    private void adjustSize(){
+    public void adjustSize(){
         int visibleRows = (noShareFriendList.size() < FRIEND_ROW_COUNT) ? noShareFriendList.size() : FRIEND_ROW_COUNT;
         friendTable.setVisibleRowCount(visibleRows);
         friendScroll.setVisible(noShareFriendList.size() > 0);
@@ -528,40 +531,16 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         repaint();
     }
     
-    
-    @Override
-    @SwingEDTEvent
-    public void handleEvent(final RosterEvent event) {
-        if(event.getType().equals(User.EventType.USER_ADDED)) {              
-            addFriend(new SharingTarget(event.getSource()));
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            removeFriend(new SharingTarget(event.getSource()));
-        }
-    }   
+     
     
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
         shareFriendList.clear();
         noShareFriendList.clear();
-        friendListMap.clear();
+        allFriends.clear();
     }
     
-
-
-    @Override
-    @Inject
-    public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
-        rosterEventListenerSupport.addListener(this);
-    }
-    
-    /**
-     * @param fileItem  The LocalFileItem whose sharing info will be displayed
-     */
-    public void setFileItem(LocalFileItem fileItem){
-        this.fileItem = fileItem;
-        loadSharedBuddies();
-    }
-    
+      
     //true if it is inside our funky shape
     @Override
     public boolean contains(int x, int y){
@@ -586,44 +565,30 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
         ((EventTableModel)friendTable.getModel()).dispose();
     }
     
-    private void removeFriend(SharingTarget friend) {
-        friendListMap.remove(friend);
-        shareFriendList.remove(friend);
-        noShareFriendList.remove(friend);
-    }
     
-    private void addFriend(SharingTarget friend) {
-        LocalFileList fileList = libraryManager.getOrCreateFriendShareList(friend.getFriend());
-        friendListMap.put(friend, fileList);
-        loadFriend(friend);
-    }
-    
-    private void loadSharedBuddies() {
+    private void reloadSharedBuddies() {
         shareFriendList.clear();
         noShareFriendList.clear();
 
-        if (fileItem.getCategory() != Category.DOCUMENT || SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
-            loadFriend(GNUTELLA_SHARE);
+        if (shareModel.isGnutellaNetworkSharable()) {
+            loadFriend(SharingTarget.GNUTELLA_SHARE);
         }
         
-        for (SharingTarget friend : friendListMap.keySet()) {
+        for (SharingTarget friend : allFriends) {
             loadFriend(friend);
         }
     }
     
     private void loadFriend(SharingTarget friend) {
-        if (isShared(fileItem, friend)) {
+        if (isShared(friend)) {
             shareFriendList.add(friend);
         } else {
             noShareFriendList.add(friend);
         }
     }
     
-    private boolean isShared(FileItem fileItem, SharingTarget friend){
-        if(friend == GNUTELLA_SHARE){
-            return gnutellaList.getSwingModel().contains(fileItem);
-        }
-        return friendListMap.get(friend).getSwingModel().contains(fileItem);
+    private boolean isShared(SharingTarget friend){
+        return shareModel.isShared(friend);
     }   
     
     private static class LibraryShareTableFormat implements WritableTableFormat<SharingTarget> {
@@ -674,41 +639,21 @@ public class LibrarySharePanel extends JXPanel implements RegisteringEventListen
             if (o1 == o2){
                 return 0;
             }
-            if(o1 == GNUTELLA_SHARE){
+            if(o1.isGnutellaNetwork()){
                 return -1;
             }
-            if(o2 == GNUTELLA_SHARE){
+            if(o2.isGnutellaNetwork()){
                 return 1;
             }
             return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
         }
         
     }
-    
-    private static class Gnutella implements Friend {
-        @Override
-        public boolean isAnonymous() {
-            return false;
-        }
-        
-        @Override
-        public String getId() {
-            return "_@_internal_@_";
-        }
 
-        @Override
-        public String getName() {
-            return I18n.tr("LimeWire Network");
-        }
-        
-        @Override
-        public String getRenderName() {
-            return getName();
-        }
-
-        public void setName(String name) {
-            
-        }
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // the share model file or cateogry has changed - reload friends.
+        reloadSharedBuddies();
     }
  
 }

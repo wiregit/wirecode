@@ -30,6 +30,7 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private JLabel gnutellaLabel;
     private JLabel friendsLabel;
     private JButton shareButton;
+    private LocalFileItem fileItem;
     
     public ShareTableRendererEditor(Action shareAction){
         GuiUtils.assignResources(this);
@@ -66,11 +67,21 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     
     @Override
     public void configure(LocalFileItem item) {
+        fileItem = item;
         gnutellaLabel.setVisible(item.isSharedWithGnutella());
         int friendCount = item.getFriendShareCount();
         friendsLabel.setVisible(friendCount > 0 && !item.isIncomplete());
         friendsLabel.setText(GuiUtils.toLocalizedInteger(item.getFriendShareCount()));
         shareButton.setVisible(item.isShareable() && !item.isIncomplete());
     }
+
+    public LocalFileItem getLocalFileItem() {
+        return fileItem;
+    }
+    
+    public JButton getShareButton(){
+        return shareButton;
+    }
+    
 
 }

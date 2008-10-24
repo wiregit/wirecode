@@ -13,6 +13,10 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
+import org.limewire.ui.swing.library.Disposable;
+import org.limewire.ui.swing.library.LibrarySelectable;
+import org.limewire.ui.swing.library.Sharable;
+import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -25,8 +29,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 
-public class LibraryImagePanel  extends JPanel implements ListEventListener<List<LocalFileItem>> {
-
+public class LibraryImagePanel  extends JPanel implements ListEventListener<List<LocalFileItem>>, Sharable, Disposable, LibrarySelectable {
     
  
     private final EventList<LocalFileItem> currentEventList;
@@ -53,6 +56,8 @@ public class LibraryImagePanel  extends JPanel implements ListEventListener<List
     private final String incomplete = I18n.tr("Incomplete Files");
 
     private ImageLibraryPopupParams params;
+
+    private LibrarySharePanel sharePanel;
     
     
     public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager) {       
@@ -71,9 +76,20 @@ public class LibraryImagePanel  extends JPanel implements ListEventListener<List
         panelMap = new ConcurrentHashMap<String, LibraryImageSubPanel>();
         
     }
+    
+    public void enableSharing(LibrarySharePanel sharePanel){
+        this.sharePanel = sharePanel;
+        for(LibraryImageSubPanel subPanel : panelMap.values()){
+            subPanel.enableSharing(sharePanel);
+        }
+    }
+    
     public void dispose() {
-        // TODO Auto-generated method stub
-        
+        for(LibraryImageSubPanel subPanel : panelMap.values()){
+            subPanel.dispose();
+        }
+        groupingList.removeListEventListener(this);
+        groupingList.dispose();
     }
 
     //TODO: thread safety
@@ -85,35 +101,30 @@ public class LibraryImagePanel  extends JPanel implements ListEventListener<List
                 final String parent = getParent(listChanges.getSourceList().get(listChanges.getIndex()).get(0));
                 final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
                 listMap.put(parent, newList);
-//                System.out.println("INSERT " + parent + " : " + newList);
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        LibraryImageSubPanel subPanel = new LibraryImageSubPanel(parent, newList, 
-                                fileList, panelIcon, thumbnailManager, params);
-                        panelMap.put(parent, subPanel);
-                        add(subPanel);
+                        createSubPanel(parent, newList);
                     }
                 });
-            } //else if (listChanges.getType() == ListEvent.DELETE){
-//                //TODO - delete row
-//            } else if (listChanges.getType() == ListEvent.UPDATE){
-//                List<LocalFileItem> subList = listChanges.getSourceList().get(listChanges.getIndex());
-//                Iterator<LocalFileItem>  iterator = subList.iterator();
-//                while (iterator.hasNext()) {
-//                    LocalFileItem fileItem = iterator.next();
-//                    System.out.println("UPDATE LIST - " + fileItem);
-//                    panelMap.get(getParent(fileItem)).getModel().addFileItem(fileItem);
-//                }
-//            }
+            } 
         }
+    
         
     }
     
     
+    private void createSubPanel(String parent, EventList<LocalFileItem> list){
+        LibraryImageSubPanel subPanel = new LibraryImageSubPanel(parent, list, 
+                fileList, panelIcon, thumbnailManager, params);
+        if(sharePanel != null){
+            subPanel.enableSharing(sharePanel);
+        }
+        panelMap.put(parent, subPanel);
+        add(subPanel);
+    }
     
     private String getParent(LocalFileItem localFileItem){
-      //  System.out.println(localFileItem + " parent is  " + (localFileItem.isIncomplete()? incomplete : localFileItem.getFile().getParent()));
         return localFileItem.isIncomplete()? incomplete : localFileItem.getFile().getParent();
     }
     
@@ -130,6 +141,12 @@ public class LibraryImagePanel  extends JPanel implements ListEventListener<List
             return getParent(item).equals(parentDirectory);
         }
         
+    }
+
+    @Override
+    public void selectAndScroll(Object selectedObject) {
+        //TODO selectAndScroll for library image table
+        throw new RuntimeException("Implement me");
     }
     
 }
