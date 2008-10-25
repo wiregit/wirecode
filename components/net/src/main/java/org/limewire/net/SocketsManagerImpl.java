@@ -158,7 +158,7 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
     }
     
     @Override
-    public void connect(Address address, final int timeout, final ConnectObserver observer) {
+    public <T extends ConnectObserver> T connect(Address address, final int timeout, final T observer) {
         // feel free to rework this logic with more use cases that don't fit the model
         // for example we're only doing one cycle of address resolution, might have to 
         // be done iteratively if addresses are resolved to address that need more resolution
@@ -181,6 +181,7 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
             }
         };
         resolve(address, timeout, proxy);
+        return observer;
     }
     
     private void connectUnresolved(Address address, int timeout, ConnectObserver observer) {

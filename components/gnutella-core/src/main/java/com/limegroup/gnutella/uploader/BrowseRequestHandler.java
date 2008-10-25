@@ -90,7 +90,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         }
         
         try {
-            Iterable<FileList> lists = browseRequestFileListProvider.getFileList(request, context);
+            Iterable<FileList> lists = browseRequestFileListProvider.getFileLists(request, context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
             for (FileList list : lists) {
                 iterables.add(list.threadSafeIterable());
@@ -131,8 +131,6 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
 
         public BrowseResponseEntity(HTTPUploader uploader, Iterable<FileDesc> files) {
             this.uploader = uploader;
-            // getting all file descs creates a copy, so we can thread-safely iterate
-            // not ideal memorywise though
             iterator = files.iterator();
 
             // XXX LW can't handle chunked responses: CORE-199

@@ -2,6 +2,9 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
 
+/**
+ * HttpException that carries an HTTP error code.
+ */
 public class HttpException extends IOException {
 
     private final int errorCode;

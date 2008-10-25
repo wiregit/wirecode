@@ -43,7 +43,6 @@ import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.StoreSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 
@@ -272,7 +271,7 @@ public class DefaultMessageHandler {
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         RouteTable routeTable = context.getRouteTable();
-        List<Contact> nodes = CollectionUtils.toList(
+        List<Contact> nodes = org.limewire.collection.CollectionUtils.toList(
                 routeTable.select(valueId, k, SelectMode.ALL));
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);

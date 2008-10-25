@@ -9,6 +9,11 @@ import org.apache.http.auth.Credentials;
 
 import com.google.inject.Singleton;
 
+/**
+ * Default implementation for {@link AuthenticatorRegistry}, also implements
+ * {@link Authenticator} forwarding all authentication requests to the registered
+ * authenticators.
+ */
 @Singleton
 public class AuthenticatorRegistryImpl implements Authenticator, AuthenticatorRegistry {
     
@@ -32,7 +37,7 @@ public class AuthenticatorRegistryImpl implements Authenticator, AuthenticatorRe
         return false;
     }
 
-    public void addAuthenticator(Authenticator authenticator) {
+    public void register(Authenticator authenticator) {
         lock.writeLock().lock();
         try {
             authenticators.add(authenticator);

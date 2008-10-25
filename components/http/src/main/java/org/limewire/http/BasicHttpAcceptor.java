@@ -32,7 +32,7 @@ import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
-import org.limewire.http.auth.RequestAuthenticator;
+import org.limewire.http.auth.AuthenticationInterceptor;
 import org.limewire.http.protocol.ExtendedAsyncNHttpServiceHandler;
 import org.limewire.http.protocol.HttpServiceEventListener;
 import org.limewire.http.protocol.LimeResponseConnControl;
@@ -61,7 +61,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
     public static final String[] DEFAULT_METHODS = new String[] { "GET",
             "HEAD", "POST", };
 
-    private final RequestAuthenticator requestAuthenticator;
+    private final AuthenticationInterceptor requestAuthenticator;
     
     private final String[] supportedMethods;
 
@@ -82,7 +82,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
     private AtomicBoolean started = new AtomicBoolean();
 
     public BasicHttpAcceptor(HttpParams params,
-                             RequestAuthenticator requestAuthenticator,
+                             AuthenticationInterceptor requestAuthenticator,
                              String... supportedMethods) {
         this.params = params;
         this.requestAuthenticator = requestAuthenticator;
@@ -91,12 +91,11 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
         this.registry = new SynchronizedNHttpRequestHandlerRegistry();
         this.processor = new SynchronizedHttpProcessor();
         
-        initializeDefaultInterceptor(requestAuthenticator);
+        initializeDefaultInterceptors();
     }
     
-    private void initializeDefaultInterceptor(RequestAuthenticator requestAuthenticator) {
+    private void initializeDefaultInterceptors() {
         // order doesn't play a role
-        // intercepts HTTP requests and responses
         addRequestInterceptor(requestAuthenticator);
         addResponseInterceptor(new ResponseDate());
         addResponseInterceptor(new ResponseServer());
@@ -242,7 +241,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
      */
     public void registerHandler(final String pattern,
             final NHttpRequestHandler handler) {
-        registry.register(pattern, requestAuthenticator.guardedHandler(pattern, handler));       
+        registry.register(pattern, requestAuthenticator.getGuardedHandler(pattern, handler));       
     }
 
     /**

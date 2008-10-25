@@ -89,19 +89,18 @@ public class BrowseHostHandler {
 
 
     /**
-     * @param guid The GUID you have associated on the front end with the
+     * @param sessionGuid The GUID you have associated on the front end with the
      *        results of this Browse Host request.
-     * @param serventID May be null, non-null if I need to push
      * @param clientProvider used to make an HTTP client request over an *incoming* Socket
      */
-    BrowseHostHandler(GUID guid, 
+    BrowseHostHandler(GUID sessionGuid, 
                       ActivityCallback activityCallback, SocketsManager socketsManager,
                       @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
                       MessageFactory messageFactory,
                       Provider<SocketWrappingHttpClient> clientProvider, 
                       NetworkManager networkManager,
                       PushEndpointFactory pushEndpointFactory) {
-        _guid = guid;
+        _guid = sessionGuid;
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.forMeReplyHandler = forMeReplyHandler;
@@ -114,10 +113,9 @@ public class BrowseHostHandler {
     public void browseHost(FriendPresence friendPresence, BrowseListener browseListener) {
         setState(STARTED);
         setState(CONNECTING);
-        BlockingConnectObserver connectObserver = new BlockingConnectObserver();
-        socketsManager.connect(friendPresence.getPresenceAddress(), (int)EXPIRE_TIME, connectObserver);
+        
         try {
-            Socket socket = connectObserver.getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
+            Socket socket = socketsManager.connect(friendPresence.getPresenceAddress(), (int)EXPIRE_TIME, new BlockingConnectObserver()).getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
             browseHost(socket, friendPresence);
             browseListener.browseFinished(true);
             return;

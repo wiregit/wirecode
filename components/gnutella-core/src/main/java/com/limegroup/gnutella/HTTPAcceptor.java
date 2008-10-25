@@ -21,7 +21,7 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.http.BasicHttpAcceptor;
 import org.limewire.http.HttpAcceptorListener;
-import org.limewire.http.auth.RequestAuthenticator;
+import org.limewire.http.auth.AuthenticationInterceptor;
 import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.statistic.Statistic;
@@ -48,7 +48,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
 
     @Inject
     public HTTPAcceptor(TcpBandwidthStatistics tcpBandwidthStatistics,
-                        RequestAuthenticator requestAuthenticator) {
+                        AuthenticationInterceptor requestAuthenticator) {
         super(createDefaultParams(LimeWireUtils.getHttpServer(),
                 Constants.TIMEOUT),
                 requestAuthenticator,

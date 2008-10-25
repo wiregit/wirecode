@@ -13,7 +13,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.limewire.http.auth.RequestAuthenticatorImpl;
+import org.limewire.http.auth.AuthenticationInterceptorImpl;
 import org.limewire.http.auth.AuthenticatorRegistryImpl;
 import org.limewire.http.handler.BasicMimeTypeProvider;
 import org.limewire.http.handler.FileRequestHandler;
@@ -68,7 +68,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
 
         httpAcceptor = new BasicHttpAcceptor(BasicHttpAcceptor
                 .createDefaultParams("agent", timeout),
-                new RequestAuthenticatorImpl(new AuthenticatorRegistryImpl()),
+                new AuthenticationInterceptorImpl(new AuthenticatorRegistryImpl()),
                 methods);
         httpAcceptor.start();
         

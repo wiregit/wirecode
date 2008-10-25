@@ -80,7 +80,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         ServerAuthState serverAuthState = new ServerAuthState();
         serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
-        Iterable<FileList> fileLists = friendFileListProvider.getFileList(request, httpContext);
+        Iterable<FileList> fileLists = friendFileListProvider.getFileLists(request, httpContext);
         assertSame(expectedFileList, fileLists.iterator().next());
         context.assertIsSatisfied();
     }
@@ -96,7 +96,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
         try {
-            friendFileListProvider.getFileList(request, httpContext);
+            friendFileListProvider.getFileLists(request, httpContext);
             fail("should have thrown exception");
         } catch (HttpException e) {
             assertEquals(404, e.getErrorCode());
@@ -114,7 +114,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
         try {
-            friendFileListProvider.getFileList(request, httpContext);
+            friendFileListProvider.getFileLists(request, httpContext);
             fail("should have thrown exception");
         } catch (HttpException e) {
             assertEquals(401, e.getErrorCode());

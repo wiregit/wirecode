@@ -273,7 +273,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
 
         Contact sender = ContactUtils.createCollisionPingSender(context.getLocalNode());
         PingIterator pinger = new PingIteratorFactory.CollisionPinger(
-                context, sender, CollectionUtils.toSet(collisions));
+                context, sender, org.limewire.collection.CollectionUtils.toSet(collisions));
         
         PingResponseHandler handler 
             = new PingResponseHandler(context, sender, pinger);
@@ -321,7 +321,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     private Collection<KUID> getBucketsToRefresh() {
-        List<KUID> bucketIds = CollectionUtils.toList(
+        List<KUID> bucketIds = org.limewire.collection.CollectionUtils.toList(
                 context.getRouteTable().getRefreshIDs(true));
         Collections.reverse(bucketIds);
         return bucketIds;

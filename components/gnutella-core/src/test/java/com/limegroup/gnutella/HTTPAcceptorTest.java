@@ -19,7 +19,7 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.cybergarage.http.HTTPStatus;
 import org.limewire.http.HttpAcceptorListener;
-import org.limewire.http.auth.RequestAuthenticatorImpl;
+import org.limewire.http.auth.AuthenticationInterceptorImpl;
 import org.limewire.http.auth.AuthenticatorRegistryImpl;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
@@ -51,7 +51,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
     protected void setUp() throws Exception {
         ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils(false));
         socketAcceptor = new SocketAcceptor(connectionDispatcher);
-        httpAcceptor = new HTTPAcceptor(null, new RequestAuthenticatorImpl(new AuthenticatorRegistryImpl()));
+        httpAcceptor = new HTTPAcceptor(null, new AuthenticationInterceptorImpl(new AuthenticatorRegistryImpl()));
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
         
         socketAcceptor.bind(PORT);

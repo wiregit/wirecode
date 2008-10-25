@@ -20,13 +20,9 @@
 package org.limewire.mojito.util;
 
 import java.util.AbstractCollection;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import org.limewire.mojito.settings.KademliaSettings;
 
@@ -36,30 +32,6 @@ import org.limewire.mojito.settings.KademliaSettings;
 public final class CollectionUtils {
     
     private CollectionUtils() {}
-    
-    /**
-     * Converts the given Collection to a Set (if it isn't
-     * already a Set)
-     */
-    public static <T> Set<T> toSet(Collection<T> c) {
-        if (c instanceof Set) {
-            return (Set<T>)c;
-        }
-        
-        return new LinkedHashSet<T>(c);
-    }
-    
-    /**
-     * Converts the given Collection to a List (if it isn't
-     * already a List)
-     */
-    public static <T> List<T> toList(Collection<T> c) {
-        if (c instanceof List) {
-            return (List<T>)c;
-        }
-        
-        return new ArrayList<T>(c);
-    }
     
     /**
      * Returns the given Collection as formatted String

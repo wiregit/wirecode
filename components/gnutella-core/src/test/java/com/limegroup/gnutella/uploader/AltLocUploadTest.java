@@ -62,6 +62,7 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileListProvider;
 import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -1413,9 +1414,11 @@ public class AltLocUploadTest extends LimeTestCase {
                 Provider<FileManager> fileManager,
                 Provider<ActivityCallback> activityCallback, 
                 TcpBandwidthStatistics tcpBandwidthStatistics,
-                Provider<GnutellaUploadFileListProvider> gnutellaBrowseRequestFileListProviderProvider) {
+                Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider,
+                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider) {
             super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor,
-                    fileManager, activityCallback, tcpBandwidthStatistics, gnutellaBrowseRequestFileListProviderProvider);
+                    fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
+                    gnutellaBrowseFileListProvider);
         }
 
         @Override

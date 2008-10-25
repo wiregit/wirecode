@@ -17,15 +17,21 @@ import org.apache.http.protocol.UriPatternMatcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-
+/**
+ * Default implementation of {@link AuthenticationInterceptor}. 
+ * <p>
+ * Intercepts {@link HttpRequest}, parses out authentication data and puts
+ * {@link ServerAuthState} into the {@link HttpContext} so it can be queried
+ * by other handlers for authentications state.
+ */
 @Singleton
-public class RequestAuthenticatorImpl implements RequestAuthenticator {
+public class AuthenticationInterceptorImpl implements AuthenticationInterceptor {
     
     final Authenticator authenticator;
     final UriPatternMatcher protectedURIs;
     
     @Inject
-    public RequestAuthenticatorImpl(Authenticator authenticator) {
+    public AuthenticationInterceptorImpl(Authenticator authenticator) {
         this.authenticator = authenticator;
         protectedURIs = new UriPatternMatcher();
     }
@@ -39,7 +45,7 @@ public class RequestAuthenticatorImpl implements RequestAuthenticator {
         }
         
         ServerAuthState authState = new ServerAuthState();
-        ServerAuthScheme authScheme = new BasicAuthScheme(authenticator);
+        ServerAuthScheme authScheme = new BasicServerAuthScheme(authenticator);
         authState.setScheme(authScheme);  // TODO other schemes, scheme registry, etc
         context.setAttribute(ServerAuthState.AUTH_STATE, authState);
         if(protectedURIs.lookup(request.getRequestLine().getUri()) != null) {
@@ -53,7 +59,7 @@ public class RequestAuthenticatorImpl implements RequestAuthenticator {
         }
     }
     
-    public NHttpRequestHandler guardedHandler(String url, NHttpRequestHandler handler) {
+    public NHttpRequestHandler getGuardedHandler(String url, NHttpRequestHandler handler) {
         if(isProtected(handler)) {
             protectedURIs.register(url, url);
             return new GuardingHandler(handler);

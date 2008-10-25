@@ -6,7 +6,7 @@ public class LimeWireHttpAuthModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(RequestAuthenticator.class).to(RequestAuthenticatorImpl.class);
+        bind(AuthenticationInterceptor.class).to(AuthenticationInterceptorImpl.class);
         bind(AuthenticatorRegistry.class).to(AuthenticatorRegistryImpl.class);
         bind(Authenticator.class).to(AuthenticatorRegistryImpl.class);
     }

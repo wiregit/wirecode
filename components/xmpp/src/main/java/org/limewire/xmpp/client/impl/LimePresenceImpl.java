@@ -1,7 +1,5 @@
 package org.limewire.xmpp.client.impl;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketCollector;
@@ -22,25 +20,21 @@ import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 
-import com.google.inject.internal.base.Objects;
-
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
 
-    private AtomicReference<Address> address;
-    private AtomicReference<byte []> authToken;
+    private volatile Address address;
+    private volatile byte[] authToken;
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, User user) {
         super(presence, connection, user);
-        address = new AtomicReference<Address>();
-        authToken = new AtomicReference<byte []>();
     }
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
         super(presence, connection, limePresence.getUser());
-        address = new AtomicReference<Address>(Objects.nonNull(limePresence, "limePresence").getPresenceAddress());
-        authToken = new AtomicReference<byte []>(Objects.nonNull(limePresence, "authToken").getAuthToken());
+        address = limePresence.getPresenceAddress();
+        authToken = limePresence.getAuthToken();
     }
 
     @Override
@@ -50,7 +44,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     @Override
     public Address getPresenceAddress() {
-        return address.get();
+        return address;
     }
 
     @Override
@@ -59,15 +53,15 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
 
     public void setPresenceAddress(Address address) {
-        this.address.set(address);
+        this.address = address;
     }
 
-    public byte [] getAuthToken() {
-        return authToken.get();
+    public byte[] getAuthToken() {
+        return authToken;
     }
 
-    public void setAuthToken(byte [] authToken) {
-        this.authToken.set(authToken);
+    public void setAuthToken(byte[] authToken) {
+        this.authToken = authToken;
     }
 
     void subscribeAndWaitForAddress() throws InvalidDataException {
@@ -85,7 +79,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         if (response instanceof ExceptionalAddressIQ) {
             throw new InvalidDataException(((ExceptionalAddressIQ)response).getException());
         }
-        address.set(response.getAddress());
+        address = response.getAddress();
         addressCollector.cancel();
 
         final AuthTokenIQ authTokenIQ = new AuthTokenIQ();
@@ -99,7 +93,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         if (authTokenResponse instanceof AuthTokenIQProvider.ExceptionalAuthTokenIQ) {
             throw new InvalidDataException(((AuthTokenIQProvider.ExceptionalAuthTokenIQ)authTokenResponse).getException());
         }
-        authToken.set(authTokenResponse.getAuthToken());
+        authToken = authTokenResponse.getAuthToken();
         authTokenCollector.cancel();
     }
 

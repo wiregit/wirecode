@@ -51,6 +51,7 @@ public class CoreGlueXMPPService implements Service {
     @Override
     public void stop() {
         httpAcceptor.get().unregisterHandler(FRIEND_BROWSE_PATTERN);
+        httpAcceptor.get().unregisterHandler(FRIEND_DOWNLOAD_PATTERN);
     }
 
 }

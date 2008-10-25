@@ -58,7 +58,7 @@ class FileRequestParser {
         }
     
         FileDesc desc = null;
-        for (FileList fileList : fileListProvider.getFileList(request, context)) {
+        for (FileList fileList : fileListProvider.getFileLists(request, context)) {
             desc = fileList.getFileDesc(urn);
             if (desc != null) {
                 break;

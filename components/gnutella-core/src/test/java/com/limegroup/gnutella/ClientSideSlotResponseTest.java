@@ -31,6 +31,7 @@ import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileListProvider;
 import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
 
 /**
@@ -138,9 +139,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
                 Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
                 Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
                 TcpBandwidthStatistics tcpBandwidthStatistics,
-                Provider<GnutellaUploadFileListProvider> gnutellaBrowseRequestFileListProviderProvider) {
+                Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider,
+                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider) {
             super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor,
-                    fileManager, activityCallback, tcpBandwidthStatistics, gnutellaBrowseRequestFileListProviderProvider);
+                    fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
+                    gnutellaBrowseFileListProvider);
         }
 		@Override
 		public synchronized boolean isServiceable() {

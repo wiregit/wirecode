@@ -16,7 +16,7 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.BasicHttpAcceptor;
-import org.limewire.http.auth.RequestAuthenticator;
+import org.limewire.http.auth.AuthenticationInterceptor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,7 +55,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
 
     @Inject
     public LocalHTTPAcceptor(ExternalControl externalControl,
-                        RequestAuthenticator requestAuthenticator) {
+                        AuthenticationInterceptor requestAuthenticator) {
         super(createDefaultParams(LimeWireUtils.getHttpServer(), Constants.TIMEOUT),
                 requestAuthenticator, SUPPORTED_METHODS);
         this.externalControl = externalControl;

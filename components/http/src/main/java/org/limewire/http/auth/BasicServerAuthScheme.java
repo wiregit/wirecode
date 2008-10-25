@@ -11,17 +11,21 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.message.BasicHeader;
 import org.limewire.util.StringUtils;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-@Singleton
-public class BasicAuthScheme implements ServerAuthScheme {
+/**
+ * Implements basic http authentication.
+ * 
+ * Parses http request for basic auth scheme headers, creates 
+ * {@link UsernamePasswordCredentials} and authenticates them against
+ * the given {@link Authenticator}.
+ * 
+ * This class is not threadsafe.
+ */
+public class BasicServerAuthScheme implements ServerAuthScheme {
     
     private final Authenticator authenticator;
     private boolean complete;
 
-    @Inject
-    public BasicAuthScheme(Authenticator authenticator) {
+    public BasicServerAuthScheme(Authenticator authenticator) {
         this.authenticator = authenticator;
     }
 
@@ -40,7 +44,7 @@ public class BasicAuthScheme implements ServerAuthScheme {
             if(st.hasMoreTokens()) {
                 if(st.nextToken().trim().equalsIgnoreCase("Basic")) {
                     if(st.hasMoreTokens()) {
-                        byte [] userNamePassword = Base64.decodeBase64(st.nextToken().trim().getBytes());
+                        byte [] userNamePassword = Base64.decodeBase64(StringUtils.toUTF8Bytes(st.nextToken().trim()));
                         Credentials credentials = new UsernamePasswordCredentials(StringUtils.getUTF8String(userNamePassword));
                         if(authenticator.authenticate(credentials)) {
                             return credentials;
@@ -52,6 +56,10 @@ public class BasicAuthScheme implements ServerAuthScheme {
         return null;
     }
 
+    /**
+     * Creates basic auth header with realm "secure".
+     * See {@link ServerAuthScheme#createChallenge()}.
+     */
     public Header createChallenge() {
         return new BasicHeader(AUTH.WWW_AUTH, "Basic realm=\"secure\"");
     }

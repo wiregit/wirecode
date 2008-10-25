@@ -20,6 +20,10 @@ import org.limewire.xmpp.api.client.XMPPService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Resolves addresses of type {@link XMPPAddress} by looking up the full jabber id 
+ * including resource in the logged in users.
+ */
 @Singleton
 public class XMPPAddressResolver implements AddressResolver {
 
@@ -87,14 +91,12 @@ public class XMPPAddressResolver implements AddressResolver {
 
     @Override
     public void resolve(Address address, int timeout, AddressResolutionObserver observer) {
-        if (address instanceof XMPPAddress) {
-            XMPPAddress xmppAddress = (XMPPAddress)address;
-            List<Address> resolvedAddresses = getResolvedAddresses(xmppAddress);
-            if (resolvedAddresses.isEmpty()) {
-                observer.handleIOException(new IOException("Could not be resolved"));
-            } else {
-                observer.resolved(resolvedAddresses.toArray(new Address[resolvedAddresses.size()]));
-            }
+        XMPPAddress xmppAddress = (XMPPAddress)address;
+        List<Address> resolvedAddresses = getResolvedAddresses(xmppAddress);
+        if (resolvedAddresses.isEmpty()) {
+            observer.handleIOException(new IOException("Could not be resolved"));
+        } else {
+            observer.resolved(resolvedAddresses.toArray(new Address[resolvedAddresses.size()]));
         }
     }
 

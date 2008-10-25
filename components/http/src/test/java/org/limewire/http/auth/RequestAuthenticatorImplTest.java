@@ -7,7 +7,6 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
@@ -28,7 +27,7 @@ public class RequestAuthenticatorImplTest extends BaseTestCase {
     private Mockery mockery;
     private Authenticator authenticator;
     private ProtectedHandler protectedHandler;
-    private RequestAuthenticatorImpl requestAuthenticatorImpl;
+    private AuthenticationInterceptorImpl requestAuthenticatorImpl;
     private NHttpRequestHandler guardedHandler;
 
     @Override
@@ -36,8 +35,8 @@ public class RequestAuthenticatorImplTest extends BaseTestCase {
         mockery = new Mockery();
         authenticator = mockery.mock(Authenticator.class);
         protectedHandler = new ProtectedHandler();
-        requestAuthenticatorImpl = new RequestAuthenticatorImpl(authenticator);
-        guardedHandler = requestAuthenticatorImpl.guardedHandler("/", protectedHandler);
+        requestAuthenticatorImpl = new AuthenticationInterceptorImpl(authenticator);
+        guardedHandler = requestAuthenticatorImpl.getGuardedHandler("/", protectedHandler);
     }
     
     
@@ -57,12 +56,12 @@ public class RequestAuthenticatorImplTest extends BaseTestCase {
 
     public void testGuardedHandlerDoesNotGuard() {
         Unprotectedhandler handler = new Unprotectedhandler();
-        assertSame(handler, requestAuthenticatorImpl.guardedHandler("blakjdlkjb", handler));
+        assertSame(handler, requestAuthenticatorImpl.getGuardedHandler("blakjdlkjb", handler));
     }
     
     public void testUnprotectedHandler() throws Exception {
         Unprotectedhandler handler = new Unprotectedhandler();
-        NHttpRequestHandler guardedHandler = requestAuthenticatorImpl.guardedHandler("/test/", handler);
+        NHttpRequestHandler guardedHandler = requestAuthenticatorImpl.getGuardedHandler("/test/", handler);
         HttpRequest request = new BasicHttpRequest("GET", "/test/");
         // this one on the other hand should be called
         handler.setShouldBeCalled(true);

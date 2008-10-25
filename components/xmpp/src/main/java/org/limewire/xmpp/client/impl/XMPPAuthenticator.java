@@ -9,6 +9,7 @@ import org.limewire.http.auth.AuthenticatorRegistry;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.security.SHA1;
+import org.limewire.security.SecurityUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -27,22 +28,22 @@ public class XMPPAuthenticator implements Authenticator {
     /**
      * Per session random seed.
      */
-    private final byte[] seed = new SecureRandom().generateSeed(SHA1.HASH_LENGTH);
+    private final byte[] seed = SecurityUtils.createSecureRandomNoBlock().generateSeed(SHA1.HASH_LENGTH);
     
     @Override
     @Inject
     public void register(AuthenticatorRegistry registry) {
-        registry.addAuthenticator(this);
+        registry.register(this);
     }
 
     /**
-     * Returns an base 64 encoded auth token for <code>username</code>.
+     * Returns an base 64 encoded auth token for <code>userId</code>.
      * 
      * @return the ascii-encoded auth token
      */
-    public String getAuthToken(String username) {
+    public String getAuthToken(String userId) {
         SHA1 sha1 = new SHA1();
-        byte[] hash = sha1.digest(StringUtils.toUTF8Bytes(username));
+        byte[] hash = sha1.digest(StringUtils.toUTF8Bytes(userId));
         for (int i = 0; i < hash.length; i++) {
             hash[i] = (byte)(hash[i] ^ seed[i]);
         }

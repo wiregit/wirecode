@@ -16,6 +16,9 @@ public interface LimeHttpClient extends HttpClient {
      */
     public void setParams(HttpParams params);
     
+    /**
+     * Set credentials that are used by the credentials provider.
+     */
     public void setCredentials(Credentials credentials);
 
     /**

@@ -1,6 +1,5 @@
 package org.limewire.core.impl.xmpp;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collections;
@@ -13,11 +12,23 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.http.auth.ServerAuthState;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.uploader.HttpException;
 import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
+/**
+ * Returns the appropriate friend file list for friend parsing the http request
+ * 
+ * the request URL has to be of the form
+ * 
+ * <pre>../../friend-id[/]</pre>
+ * 
+ * The parsed friend id will be checked against the credentials in the {@link ServerAuthState}
+ * of the {@link HttpContext}.
+ */
+@Singleton
 public class FriendFileListProvider implements HttpRequestFileListProvider {
 
     private final FileManager fileManager;
@@ -28,7 +39,7 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
     }
     
     @Override
-    public Iterable<FileList> getFileList(HttpRequest request, HttpContext httpContext) throws HttpException, IOException, org.apache.http.HttpException {
+    public Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) throws HttpException {
         ServerAuthState authState = (ServerAuthState)httpContext.getAttribute(ServerAuthState.AUTH_STATE);
         if(authState != null) {
             Credentials credentials = authState.getCredentials();

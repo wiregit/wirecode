@@ -2,6 +2,7 @@ package org.limewire.xmpp.client.impl.messages.authtoken;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class AuthTokenIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AuthTokenIQListener.class);
 
     private final XMPPConnection connection;
-    private final XMPPAuthenticator userStore;
+    private final XMPPAuthenticator authenticator;
      
     private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
     private final RosterEventHandler rosterEventHandler;
@@ -36,7 +37,7 @@ public class AuthTokenIQListener implements PacketListener {
     public AuthTokenIQListener(XMPPConnection connection,
             XMPPAuthenticator authenticator) {
         this.connection = connection;
-        this.userStore = authenticator;
+        this.authenticator = authenticator;
         this.rosterEventHandler = new RosterEventHandler();
     }
 
@@ -101,17 +102,13 @@ public class AuthTokenIQListener implements PacketListener {
     }
 
     private void sendResult(AuthTokenIQ packet) {
-        try {
-            byte [] authToken = userStore.getAuthToken(StringUtils.parseBareAddress(packet.getFrom())).getBytes("UTF-8");
-            AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
-            queryResult.setTo(packet.getFrom());
-            queryResult.setFrom(packet.getTo());
-            queryResult.setPacketID(packet.getPacketID());
-            queryResult.setType(IQ.Type.RESULT);
-            connection.sendPacket(queryResult);
-        } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
-        }        
+        byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(packet.getFrom())).getBytes(Charset.forName("UTF-8"));
+        AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
+        queryResult.setTo(packet.getFrom());
+        queryResult.setFrom(packet.getTo());
+        queryResult.setPacketID(packet.getPacketID());
+        queryResult.setType(IQ.Type.RESULT);
+        connection.sendPacket(queryResult);
     }
 
     public PacketFilter getPacketFilter() {

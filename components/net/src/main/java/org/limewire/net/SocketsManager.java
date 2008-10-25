@@ -193,8 +193,10 @@ public interface SocketsManager extends ListenerSupport<ConnectivityChangeEvent>
      * failure.
      * 
      * @param timeout timeout in milliseconds
+     * 
+     * @return the observer for fluent access
      */
-    public void connect(Address address, int timeout, ConnectObserver observer);
+    public <T extends ConnectObserver> T connect(Address address, int timeout, T observer);
     
     /**
      * Asynchronously resolves <code>address</code> to other addresses if 

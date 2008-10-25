@@ -24,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.limewire.collection.CollectionUtils;
+
 /**
  * TimeAwareIterable has a maximum time for which it's valid
  * and it takes the average time between next() and hasNext()

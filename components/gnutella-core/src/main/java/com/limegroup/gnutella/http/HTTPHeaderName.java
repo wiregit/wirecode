@@ -3,7 +3,6 @@ package com.limegroup.gnutella.http;
 import java.util.Locale;
 
 import org.apache.http.Header;
-import org.apache.http.auth.AUTH;
 import org.apache.http.message.BasicHeader;
 
 /** All HTTPHeaderNames. */
@@ -138,10 +137,7 @@ public enum HTTPHeaderName {
     TRANSFER_ENCODING("Transfer-Encoding"),
     
     /** The firwalled push proxy info of this client */
-    FW_NODE_INFO("X-FW-Node-Info"),
-    
-    /** Header name for basic access authentication. */
-    AUTHORIZATION(AUTH.WWW_AUTH_RESP);
+    FW_NODE_INFO("X-FW-Node-Info");
     
     /**
      * Constant for the HTTP header name as a string.

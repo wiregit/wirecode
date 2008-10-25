@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.uploader.authentication;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.http.HttpRequest;
@@ -10,8 +9,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.uploader.HttpException;
 
+/**
+ * Returns the file list for a public Gnutella browse of the client's shared
+ * files.
+ */
 @Singleton
 public class GnutellaBrowseFileListProvider implements HttpRequestFileListProvider {
 
@@ -22,9 +24,11 @@ public class GnutellaBrowseFileListProvider implements HttpRequestFileListProvid
         this.fileManager = fileManager;
     }
     
+    /**
+     * @return {@link FileManager#getGnutellaSharedFileList()}.
+     */
     @Override
-    public Iterable<FileList> getFileList(HttpRequest request, HttpContext httpContext)
-            throws HttpException, IOException, org.apache.http.HttpException {
+    public Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) {
         return Collections.singletonList(fileManager.getGnutellaSharedFileList());
     }
 
