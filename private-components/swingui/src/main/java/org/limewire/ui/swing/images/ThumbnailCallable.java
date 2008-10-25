@@ -114,7 +114,6 @@ public class ThumbnailCallable implements Callable<Void> {
                 return null;
             }
         }
-
         BufferedImage image = null;
         try {  
             URL url = file.toURI().toURL();

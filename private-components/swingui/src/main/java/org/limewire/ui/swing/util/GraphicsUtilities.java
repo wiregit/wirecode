@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.5 2008-10-24 23:10:52 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.6 2008-10-25 18:36:59 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -393,8 +393,8 @@ public class GraphicsUtilities {
         int width = image.getWidth();
         int height = image.getHeight();
 
-//        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
-        boolean isTranslucent = true;
+        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
+//        boolean isTranslucent = true;
         boolean isWidthGreater = width > height;
 
         if (isWidthGreater) {
@@ -424,39 +424,42 @@ public class GraphicsUtilities {
         int previousHeight = height;
 
         do {
-            if (width > maxTargetWidth) {
-                width /= 2;
-                if (width < maxTargetWidth) {
-                    width = maxTargetWidth;
+            try {
+                
+                if (width > maxTargetWidth) {
+                    width /= 2;
+                    if (width < maxTargetWidth) {
+                        width = maxTargetWidth;
+                    }
+                    height = (int) (width / ratioWH);
+                } else if (height > maxTargetHeight) {
+                    height /= 2;
+                    if (height < maxTargetHeight) {
+                        height = maxTargetHeight;
+                    }
+                    width = (int) (height / ratioHW);
                 }
-                height = (int) (width / ratioWH);
-            } else if (height > maxTargetHeight) {
-                height /= 2;
-                if (height < maxTargetHeight) {
-                    height = maxTargetHeight;
+    
+                if (temp == null || isTranslucent) { 
+                    try {
+                        temp = createCompatibleImage(image, width, height);
+                    } catch(Throwable e) {
+                        temp = new BufferedImage(width, height, image.getType());
+                    }
+                    if(g2 != null)
+                        g2.dispose();
+                    g2 = temp.createGraphics();
+                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
                 }
-                width = (int) (height / ratioHW);
-            }
-
-            if (temp == null || isTranslucent) {
-                try {
-                    temp = createCompatibleImage(image, width, height);
-                } catch(Throwable e) {
-                    temp = new BufferedImage(width, height, image.getType());
-                }
-                if(g2 != null)
-                    g2.dispose();
-                g2 = temp.createGraphics();
-                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            }
-            g2.drawImage(thumb, 0, 0, width, height,
-                    0, 0, previousWidth, previousHeight, null);
-
-            previousWidth = width;
-            previousHeight = height;
-
-            thumb = temp;
+                g2.drawImage(thumb, 0, 0, width, height,
+                        0, 0, previousWidth, previousHeight, null);
+    
+                previousWidth = width;
+                previousHeight = height;
+    
+                thumb = temp;
+            } catch(Throwable e) {}
         } while ( (width > maxTargetWidth) || (height > maxTargetHeight));
 
         g2.dispose();
@@ -466,9 +469,11 @@ public class GraphicsUtilities {
             g2 = temp.createGraphics();
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2.drawImage(thumb, 0, 0, width, height, null);
+            g2.drawImage(thumb, 0, 0, width, height, 0, 0, width, height, null);
             g2.dispose();
             thumb = temp;
+        } else { // if thumb is correct size, just convert it to a compatible image
+            thumb = toCompatibleImage(thumb);
         }
 
         return thumb;
