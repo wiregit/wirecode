@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.sharing;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.Network;
 import org.limewire.ui.swing.util.I18n;
 
 public class SharingTarget {
@@ -65,6 +66,11 @@ public class SharingTarget {
 
         public void setName(String name) {
             
+        }
+
+        @Override
+        public Network getNetwork() {
+            return null;
         }
     }
 

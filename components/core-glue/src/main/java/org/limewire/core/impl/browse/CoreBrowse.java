@@ -5,10 +5,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.io.Address;
 import org.limewire.io.IpPort;
 import org.limewire.util.Objects;
 
@@ -22,16 +22,16 @@ import com.limegroup.gnutella.messages.QueryReply;
 public class CoreBrowse implements Browse {    
     
     private final SearchServices searchServices;
-    private final Address addr;
+    private final FriendPresence friendPresence;
     private final QueryReplyListenerList listenerList;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private volatile byte[] browseGuid;
     private volatile QueryReplyListener listener;
 
     @AssistedInject
-    public CoreBrowse(@Assisted Address address, SearchServices searchServices,
+    public CoreBrowse(@Assisted FriendPresence friendPresence, SearchServices searchServices,
             QueryReplyListenerList listenerList) {
-        this.addr = Objects.nonNull(address, "address");
+        this.friendPresence = Objects.nonNull(friendPresence, "friendPresence");
         this.searchServices = searchServices;
         this.listenerList = listenerList;
     }
@@ -46,7 +46,7 @@ public class CoreBrowse implements Browse {
         listener = new BrowseResultAdapter(browseListener);
         listenerList.addQueryReplyListener(browseGuid, listener);
         
-        searchServices.doAsynchronousBrowseHost(addr, new GUID(browseGuid), browseListener);
+        searchServices.doAsynchronousBrowseHost(friendPresence, new GUID(browseGuid), browseListener);
     }
 
     @Override

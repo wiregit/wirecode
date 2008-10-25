@@ -1,5 +1,6 @@
 package org.limewire.http;
 
+import org.limewire.http.auth.LimeWireHttpAuthModule;
 import org.limewire.http.httpclient.LimeWireHttpClientModule;
 import org.limewire.inject.AbstractModule;
 
@@ -11,5 +12,6 @@ public class LimeWireHttpModule extends AbstractModule {
     @Override
     protected void configure() {
         binder().install(new LimeWireHttpClientModule());
+        binder().install(new LimeWireHttpAuthModule());
     }
 }

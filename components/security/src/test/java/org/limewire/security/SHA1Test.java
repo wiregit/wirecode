@@ -11,19 +11,18 @@
  * Sun may wish to change the following package name, if integrating this
  * class in the Sun JCE Security Provider for Java 1.5 (code-named Tiger).
  */
-package com.limegroup.gnutella.security;
+package org.limewire.security;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 
-import org.limewire.util.TestUtils;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.BaseTestCase;
+import org.limewire.util.TestUtils;
 
-public class SHA1Test extends LimeTestCase {
+public class SHA1Test extends BaseTestCase {
     
     private static final SHA1 hash = new SHA1();
     
@@ -94,7 +93,7 @@ public class SHA1Test extends LimeTestCase {
     }
     
     public void testFiles() throws Exception {
-        String dirString = "com/limegroup/gnutella";
+        String dirString = "org/limewire/security";
         File testDir = TestUtils.getResourceFile(dirString);
         assertTrue(testDir.isDirectory());
         int tested = testDirectory(testDir);

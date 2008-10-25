@@ -1,5 +1,11 @@
 package org.limewire.xmpp.client.impl.messages.address;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketFilter;
@@ -14,16 +20,10 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceListener;
-import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.client.impl.LimePresenceImpl;
 import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class AddressIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
@@ -92,10 +92,12 @@ public class AddressIQListener implements PacketListener {
         synchronized (this) {
             LimePresenceImpl presence = limePresences.get(iq.getFrom());
             if(presence != null) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("updating address on presence " + presence.getJID() + " to " + address);
+                if(iq.getAddress() != null) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("updating address on presence " + presence.getJID() + " to " + iq.getAddress());
+                    }
+                    presence.setPresenceAddress(iq.getAddress());
                 }
-                presence.setPresenceAddress(iq.getAddress());
             }
         }
     }

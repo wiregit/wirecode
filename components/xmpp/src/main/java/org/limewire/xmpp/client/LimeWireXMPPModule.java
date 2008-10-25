@@ -9,7 +9,10 @@ import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.client.impl.XMPPAddressResolver;
+import org.limewire.xmpp.client.impl.XMPPAddressSerializer;
 import org.limewire.xmpp.client.impl.XMPPServiceImpl;
+import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -34,5 +37,12 @@ public class LimeWireXMPPModule extends AbstractModule {
         EventMulticaster<XMPPConnectionEvent> connectionMulticaster = new EventMulticasterImpl<XMPPConnectionEvent>();
         bind(new TypeLiteral<EventListener<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<ListenerSupport<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
+        
+        // bind egearly, so it registers itself with SocketsManager
+        bind(XMPPAddressResolver.class).asEagerSingleton();
+        // dito
+        bind(XMPPAddressSerializer.class).asEagerSingleton();
+        
+        bind(XMPPAuthenticator.class).asEagerSingleton();
     }
 }

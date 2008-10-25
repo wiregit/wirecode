@@ -20,14 +20,12 @@ import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 
-import com.google.inject.internal.base.Objects;
-
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
 
-    private Address address;
-    private byte [] authToken;
+    private volatile Address address;
+    private volatile byte[] authToken;
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, User user) {
         super(presence, connection, user);
@@ -35,7 +33,8 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
     LimePresenceImpl(Presence presence, XMPPConnection connection, LimePresence limePresence) {
         super(presence, connection, limePresence.getUser());
-        address = Objects.nonNull(limePresence, "limePresence").getPresenceAddress();
+        address = limePresence.getPresenceAddress();
+        authToken = limePresence.getAuthToken();
     }
 
     @Override
@@ -57,11 +56,11 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         this.address = address;
     }
 
-    public byte [] getAuthToken() {
+    public byte[] getAuthToken() {
         return authToken;
     }
 
-    public void setAuthToken(byte [] authToken) {
+    public void setAuthToken(byte[] authToken) {
         this.authToken = authToken;
     }
 

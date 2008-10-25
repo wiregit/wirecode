@@ -14,8 +14,6 @@ public interface LimePresence extends Presence, FriendPresence {
      */
     public void offerFile(FileMetaData file);
 
-    byte [] getAuthToken();
-    
     /** Returns the containing user. */
     User getUser();
 

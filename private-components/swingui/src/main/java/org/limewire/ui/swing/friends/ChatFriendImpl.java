@@ -152,11 +152,6 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
         firePropertyChange("receivingUnviewedMessages", oldHasUnviewedMessages, hasMessages);
     }
 
-    @Override
-    public boolean jidBelongsTo(String jid) {
-        return user.jidBelongsTo(jid);
-    }
-
     public Presence getPresence() {
         synchronized (presenceLock) {
             return presence;

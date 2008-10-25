@@ -1,6 +1,7 @@
 package org.limewire.http.httpclient;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.Credentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.params.HttpParams;
 
@@ -14,6 +15,11 @@ public interface LimeHttpClient extends HttpClient {
      * @param params the params to use
      */
     public void setParams(HttpParams params);
+    
+    /**
+     * Set credentials that are used by the credentials provider.
+     */
+    public void setCredentials(Credentials credentials);
 
     /**
      * Does any necessary cleanup to allow 

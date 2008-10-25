@@ -30,7 +30,6 @@ import org.limewire.mojito.routing.RouteTable.PurgeMode;
 import org.limewire.mojito.routing.RouteTable.SelectMode;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.util.TestUtils;
 
@@ -606,7 +605,7 @@ public class RouteTableTest extends MojitoTestCase {
             KUID key = entry.getKey();
             KUID[] nodeIds = entry.getValue();
             
-            List<Contact> nodes = CollectionUtils.toList(routeTable.select(key, K));
+            List<Contact> nodes = org.limewire.collection.CollectionUtils.toList(routeTable.select(key, K));
             assertEquals(nodeIds.length, nodes.size());
             
             // Checks also the order
@@ -639,7 +638,7 @@ public class RouteTableTest extends MojitoTestCase {
             KUID key = entry.getKey();
             KUID[] nodeIds = entry.getValue();
             
-            List<Contact> nodes1 = CollectionUtils.toList(routeTable.select(key, K));
+            List<Contact> nodes1 = org.limewire.collection.CollectionUtils.toList(routeTable.select(key, K));
             assertEquals(nodeIds.length, nodes1.size());
             
             List<Contact> nodes2 = TrieUtils.select(trie, key, K);
@@ -728,7 +727,7 @@ public class RouteTableTest extends MojitoTestCase {
         
         // Select a random non-local Contact
         Random generator = new Random();
-        List<Contact> active = CollectionUtils.toList(routeTable.getActiveContacts());
+        List<Contact> active = org.limewire.collection.CollectionUtils.toList(routeTable.getActiveContacts());
         Contact node = null;
         for(int i = 0; i < 10 && node == null; i++) {
             int rand = generator.nextInt(active.size());

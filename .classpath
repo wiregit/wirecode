@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
+	<classpathentry kind="src" path="components/core-glue/src/test/java"/>
 	<classpathentry kind="src" output="components/player/build/tests" path="components/player/src/test/java"/>
 	<classpathentry kind="src" output="components/player/build/classes" path="components/player/src/main/java"/>
 	<classpathentry kind="src" output="components/player-api/build/classes" path="components/player-api/src/main/java"/>
@@ -137,7 +138,7 @@
 	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
 	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
 	<classpathentry kind="src" path="components/swarm/src/test/resources"/>
-	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-beta1.jar" sourcepath="lib/sources/httpclient-4.0-beta1.zip"/>
+	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-beta1.jar" sourcepath="lib/sources/httpclient-4.0-beta1-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2.jar" sourcepath="lib/sources/httpcore-4.0.beta2-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2.jar" sourcepath="lib/sources/httpcore-nio-4.0-beta2-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/swing-worker-1.1.jar"/>

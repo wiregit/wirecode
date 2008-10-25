@@ -824,4 +824,13 @@ public class NetworkUtilsTest extends BaseTestCase {
         address2[1] = 9;
         assertFalse(NetworkUtils.areInSameSiteLocalNetwork(address1, address2));
     }
+    
+    /**
+     * Ensures that the respective methods in {@link NetworkUtils} match the
+     * definition of {@link ConnectableImpl#INVALID_CONNECTABLE}.
+     */
+    public void testInvalidConnectableIsInvalid() {
+        assertFalse(NetworkUtils.isValidAddress(ConnectableImpl.INVALID_CONNECTABLE.getAddress()));
+        assertTrue(NetworkUtils.isValidPort(ConnectableImpl.INVALID_CONNECTABLE.getPort()));
+    }
 }

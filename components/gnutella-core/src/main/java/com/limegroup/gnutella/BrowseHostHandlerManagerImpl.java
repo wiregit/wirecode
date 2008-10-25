@@ -18,16 +18,13 @@ import org.limewire.lifecycle.Service;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
-import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.core.api.friend.FriendPresence;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.BrowseHostHandler.PushRequestDetails;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.MessageFactory;
 
 @Singleton
@@ -40,14 +37,11 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
 
     private final Provider<ActivityCallback> activityCallback;
     private final SocketsManager socketsManager;
-    private final Provider<PushDownloadManager> pushDownloadManager;
     private final Provider<ReplyHandler> forMeReplyHandler;
     private final ScheduledExecutorService backgroundExecutor;
-    private final RemoteFileDescFactory remoteFileDescFactory;
 
     private final MessageFactory messageFactory;
     private Provider<SocketWrappingHttpClient> clientProvider;
-    private final NetworkInstanceUtils networkInstanceUtils;
 
     private final NetworkManager networkManager;
 
@@ -58,23 +52,17 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
                                         ScheduledExecutorService backgroundExecutor,
                                         Provider<ActivityCallback> activityCallback,
                                         SocketsManager socketsManager,
-                                        Provider<PushDownloadManager> pushDownloadManager,
                                         @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
                                         MessageFactory messageFactory,
-                                        RemoteFileDescFactory remoteFileDescFactory,
                                         Provider<SocketWrappingHttpClient> clientProvider,
-                                        NetworkInstanceUtils networkInstanceUtils, 
                                         NetworkManager networkManager,
                                         PushEndpointFactory pushEndpointFactory) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
-        this.pushDownloadManager = pushDownloadManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
         this.backgroundExecutor = backgroundExecutor;
-        this.remoteFileDescFactory = remoteFileDescFactory;
         this.clientProvider = clientProvider;
-        this.networkInstanceUtils = networkInstanceUtils;
         this.networkManager = networkManager;
         this.pushEndpointFactory = pushEndpointFactory;
     }
@@ -110,18 +98,8 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
      *      com.limegroup.gnutella.GUID, com.limegroup.gnutella.GUID)
      */
     public BrowseHostHandler createBrowseHostHandler(GUID guid, GUID serventID) {
-        return new BrowseHostHandler(guid, serventID, 
-                    new BrowseHostCallback() {
-                        public void putInfo(GUID serventId, PushRequestDetails details) {
-                            synchronized(_pushedHosts) {
-                                // TODO this can only handle one push request at a time?
-                                // TODO second request overwrites first?
-                                _pushedHosts.put(serventId, details);
-                            }                
-                        }
-                    },
-                activityCallback.get(), socketsManager, pushDownloadManager,
-                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider, networkInstanceUtils,
+        return new BrowseHostHandler(guid, activityCallback.get(), socketsManager,
+                forMeReplyHandler, messageFactory, clientProvider, 
                 networkManager, pushEndpointFactory);
     }
 
@@ -139,10 +117,11 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
         }
         if (prd != null) {
             final BrowseHostHandler browseHostHandler = prd.getBrowseHostHandler();
+            final FriendPresence friendPresence = prd.getFriendPresence();
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
-                        browseHostHandler.browseHost(socket);
+                        browseHostHandler.browseHost(socket, friendPresence);
                     } catch (IOException e) {
                         LOG.debug("error while push transfer", e);
                         browseHostHandler.failed();
@@ -192,13 +171,8 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
 
     @Override
     public BrowseHostHandler createBrowseHostHandler(GUID browseGuid) {
-        return new BrowseHostHandler(browseGuid, null, 
-                new BrowseHostCallback() {
-                    public void putInfo(GUID serventId, PushRequestDetails details) {
-                    }
-                },
-                activityCallback.get(), socketsManager, pushDownloadManager,
-                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider, networkInstanceUtils,
+        return new BrowseHostHandler(browseGuid, activityCallback.get(), socketsManager,
+                forMeReplyHandler, messageFactory, clientProvider,
                 networkManager, pushEndpointFactory);
     }
 

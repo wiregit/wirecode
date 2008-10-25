@@ -27,8 +27,6 @@ public interface ChatFriend {
     
     Mode getMode();
     
-    boolean jidBelongsTo(String jid);
-    
     boolean isChatting();
     
     boolean isActiveConversation();

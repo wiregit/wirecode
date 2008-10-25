@@ -1,14 +1,10 @@
 package com.limegroup.gnutella;
 
-import java.util.Set;
-
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
-import org.limewire.io.Address;
-import org.limewire.io.Connectable;
-import org.limewire.io.IpPort;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.MediaType;
 
@@ -64,22 +60,6 @@ public class SearchServicesImpl implements SearchServices {
         this.queryRequestFactory = queryRequestFactory;
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.outOfBandStatistics = outOfBandStatistics;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.SearchServices#doAsynchronousBrowseHost(org.limewire.io.Connectable, com.limegroup.gnutella.GUID, com.limegroup.gnutella.GUID, java.util.Set, boolean)
-     */
-    public BrowseHostHandler doAsynchronousBrowseHost(
-      final Connectable host, GUID guid, GUID serventID, 
-      final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
-        final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid, serventID);
-        ThreadExecutor.startThread(new DebugRunnable(new Runnable() {
-            public void run() {
-                handler.browseHost(host, proxies, canDoFWTransfer);
-            }
-        }), "BrowseHoster" );
-        
-        return handler;
     }
 
     /* (non-Javadoc)
@@ -216,11 +196,11 @@ public class SearchServicesImpl implements SearchServices {
     }
 
     @Override
-    public BrowseHostHandler doAsynchronousBrowseHost(final Address address, GUID guid, final BrowseListener browseListener) {
+    public BrowseHostHandler doAsynchronousBrowseHost(final FriendPresence friendPresence, GUID guid, final BrowseListener browseListener) {
         final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid);
         ThreadExecutor.startThread(new DebugRunnable(new Runnable() {
             public void run() {
-                handler.browseHost(address, browseListener);
+                handler.browseHost(friendPresence, browseListener);
             }
         }), "BrowseHoster" );
         return handler;

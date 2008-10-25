@@ -9,15 +9,15 @@ import java.util.List;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.DownloadItem.ErrorState;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.LimePresence;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -75,7 +75,7 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 
     @Override
-    public DownloadItem addDownload(LimePresence presence, FileMetaData file) {
+    public DownloadItem addDownload(FriendPresence presence, FileMetaData file) {
         return new MockDownloadItem("download from 1 source", 0,
                 DownloadState.DOWNLOADING, Category.IMAGE);
     }

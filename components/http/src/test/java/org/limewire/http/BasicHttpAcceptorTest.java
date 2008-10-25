@@ -5,12 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.limewire.http.auth.AuthenticationInterceptorImpl;
+import org.limewire.http.auth.AuthenticatorRegistryImpl;
 import org.limewire.http.handler.BasicMimeTypeProvider;
 import org.limewire.http.handler.FileRequestHandler;
 import org.limewire.http.httpclient.HttpClientUtils;
@@ -19,8 +23,6 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.util.BaseTestCase;
-
-import junit.framework.Test;
 
 public class BasicHttpAcceptorTest extends BaseTestCase {
 
@@ -65,7 +67,9 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
         acceptor.bind(PORT);
 
         httpAcceptor = new BasicHttpAcceptor(BasicHttpAcceptor
-                .createDefaultParams("agent", timeout), methods);
+                .createDefaultParams("agent", timeout),
+                new AuthenticationInterceptorImpl(new AuthenticatorRegistryImpl()),
+                methods);
         httpAcceptor.start();
         
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, true, httpAcceptor.getHttpMethods());

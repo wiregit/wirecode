@@ -12,6 +12,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.io.Address;
@@ -258,6 +259,10 @@ public class RemoteFileDescAdapter implements SearchResult {
                             public void setName(String name) {
 
                             }
+
+                            public Network getNetwork() {
+                                return null;
+                            }
                         };
                     }
 
@@ -271,6 +276,9 @@ public class RemoteFileDescAdapter implements SearchResult {
                         return getFriend().getId();
                     }
 
+                    public byte[] getAuthToken() {
+                        return null;
+                    }
                 };
             }
         }
@@ -342,6 +350,10 @@ public class RemoteFileDescAdapter implements SearchResult {
                         public void setName(String name) {
 
                         }
+
+                        public Network getNetwork() {
+                            return null;
+                        }
                     };
                 }
 
@@ -358,6 +370,10 @@ public class RemoteFileDescAdapter implements SearchResult {
                 @Override
                 public String getPresenceId() {
                     return getFriend().getId();
+                }
+
+                public byte[] getAuthToken() {
+                    return null;
                 }
             };
         }

@@ -48,6 +48,8 @@ import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
+import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileListProvider;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
 
 /**
  * Manages {@link HTTPUploader} objects that are created by
@@ -199,13 +201,21 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private final Provider<HTTPAcceptor> httpAcceptor;
     
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
+
+    private final Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider;
+
+    private final Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider;
     
     @Inject
     public HTTPUploadManager(UploadSlotManager slotManager,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
             Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
             Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
-            TcpBandwidthStatistics tcpBandwidthStatistics) {
+            TcpBandwidthStatistics tcpBandwidthStatistics,
+            Provider<GnutellaUploadFileListProvider> gnutellaFileListProvider,
+            Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider) {
+        this.gnutellaUploadFileListProvider = gnutellaFileListProvider;
+        this.gnutellaBrowseFileListProvider = gnutellaBrowseFileListProvider;
         this.slotManager = Objects.nonNull(slotManager, "slotManager");
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.contentManager = contentManager;
@@ -243,7 +253,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         httpAcceptor.get().addAcceptorListener(responseListener);
 
         // browse
-        httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler());
+        httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler(gnutellaBrowseFileListProvider.get(), false));
 
         // push-proxy requests
         NHttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
@@ -251,7 +261,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         httpAcceptor.get().registerHandler("/gnet/push-proxy", pushProxyHandler);
 
         // uploads
-        FileRequestHandler fileRequestHandler = httpRequestHandlerFactory.createFileRequestHandler();
+        FileRequestHandler fileRequestHandler = httpRequestHandlerFactory.createFileRequestHandler(gnutellaUploadFileListProvider.get(), false);
         httpAcceptor.get().registerHandler("/get*", fileRequestHandler);
         httpAcceptor.get().registerHandler("/uri-res/*", fileRequestHandler);
         
