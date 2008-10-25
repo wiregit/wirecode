@@ -51,7 +51,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     
     private final CardLayout layout = new CardLayout();
     private final EventList<VisualSearchResult> baseEventList;
-    private ConfigurableTable<VisualSearchResult> resultsList;
+    private ListViewTable resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
     private final Search search;
     private final ResultDownloader resultDownloader;
@@ -92,7 +92,6 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             final ListViewRowHeightRule rowHeightRule) {
         resultsList = new ListViewTable();
         resultsList.setShowGrid(true, false);
-        //TODO - Get rid of this if the simplified list view stays
         preserver.addRowPreservationListener(resultsList);
         
         resultsList.setEventList(eventList);
@@ -109,7 +108,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
            new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList);
+                    remoteHostActions, navigator, resultsList, resultsList.getTableColors().selectionColor);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -120,7 +119,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList);
+                    remoteHostActions, navigator, resultsList, resultsList.getTableColors().selectionColor);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
@@ -146,24 +145,19 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        long loopStart = System.currentTimeMillis();
                         for(int row = 0; row < model.getRowCount(); row++) {
                             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
-                            long start = System.currentTimeMillis();
                             RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
                             if (result == null || result.isStale(vsr)) {
                                 result = rowHeightRule.getDisplayResult(vsr, searchInfo.getQuery());
                                 vsrToRowDisplayResultMap.put(vsr, result);
                             } 
-                            long end = System.currentTimeMillis();
                             int newRowHeight = result.getConfig().getRowHeight();
                             if (resultsList.getRowHeight(row) != newRowHeight) {
-                                LOG.debugf("Row: {0} vsr: {1} config: {2} elapsed: {3}", row, vsr.getHeading(), 
-                                        result.getConfig(), (end - start));
+                                LOG.debugf("Row: {0} vsr: {1} config: {2}", row, vsr.getHeading(), 
+                                        result.getConfig());
                                 resultsList.setRowHeight(row, newRowHeight);
                             }
-                            long loopEnd = System.currentTimeMillis() - loopStart;
-                            LOG.debugf("Total loop time: {0}", loopEnd);
                         }
                     }
                 });
@@ -304,7 +298,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         return visibileComponent;
     }
     
-    public static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
+    private static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
         
         public ListViewTable() {
             super(false);

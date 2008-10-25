@@ -42,6 +42,10 @@ public class MouseableTable extends StripedJXTable {
         return new TableColors();
     }
 	
+	public TableColors getTableColors() {
+	    return colors;
+	}
+	
 	public MouseableTable(TableModel model) {
 		super(model);
 		initialize();

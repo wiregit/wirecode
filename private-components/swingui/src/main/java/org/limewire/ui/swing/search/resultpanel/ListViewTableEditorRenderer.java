@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.EventObject;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -70,11 +71,10 @@ implements TableCellEditor, TableCellRenderer {
 
     private final String searchText;
     @Resource private Icon similarResultsIcon;
-    @Resource private Color headingLabelColor;
     @Resource private Color subHeadingLabelColor;
     @Resource private Color metadataLabelColor;
     @Resource private Color similarResultsBackgroundColor;
-    @Resource private Font headingFont;
+    @Resource private Color rowSelectionColor;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
     @Resource private Font similarResultsButtonFont;
@@ -102,6 +102,11 @@ implements TableCellEditor, TableCellRenderer {
     private JPanel centerPanel;
     private JXPanel searchResultTextPanel;
 
+    private int currentColumn;
+    private int currentRow;
+    private int mousePressedRow = -1;
+    private int mousePressedColumn = -1;
+
     //TODO - Remove RowColorResolver param if uniform background color change is made permanent
     @AssistedInject
     ListViewTableEditorRenderer(
@@ -112,6 +117,7 @@ implements TableCellEditor, TableCellRenderer {
         @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
         @Assisted RowColorResolver<VisualSearchResult> colorResolver,
+        @Assisted Color rowSelectionColor,
         SearchHeadingDocumentBuilder headingBuilder,
         ListViewRowHeightRule rowHeightRule) {
 
@@ -121,6 +127,7 @@ implements TableCellEditor, TableCellRenderer {
         this.searchText = searchText;
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
+        this.rowSelectionColor = rowSelectionColor;
         
         GuiUtils.assignResources(this);
 
@@ -139,6 +146,20 @@ implements TableCellEditor, TableCellRenderer {
         return vsr == null ? 0 : vsr.getSimilarResults().size();
     }
     
+    @Override
+    public boolean isCellEditable(EventObject e) {
+        if (e instanceof MouseEvent) {
+            MouseEvent event = (MouseEvent) e;
+            if (event.getID() == MouseEvent.MOUSE_PRESSED) {
+                //Cache the cell that's just been clicked on so that the editor component
+                //can draw the correct selection background color 
+                mousePressedRow = table.rowAtPoint(event.getPoint());
+                mousePressedColumn = table.columnAtPoint(event.getPoint());
+            }
+        }
+        return super.isCellEditable(e);
+    }
+
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, final int col) {
 
@@ -146,12 +167,28 @@ implements TableCellEditor, TableCellRenderer {
         this.table = table;
         LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
 
+        currentColumn = col;
+        currentRow = row;
+        
         actionButtonPanel =
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, col);
         
         if (editorComponent == null) {
-            editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0"));
+            editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
+
+                @Override
+                public void setBackground(final Color bg) {
+                    boolean editingColumn = mousePressedColumn == currentColumn;
+                    boolean editingRow = mousePressedRow == currentRow;
+                    boolean paintForCellSelection = editingColumn && editingRow;
+                    super.setBackground(paintForCellSelection ? rowSelectionColor : bg);
+                    if (paintForCellSelection) {
+                        mousePressedColumn = -1;
+                        mousePressedRow = -1;
+                    }
+                }
+            };
             
             itemIconLabel.addMouseListener(new MouseAdapter() {
                 @Override

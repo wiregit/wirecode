@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.awt.Color;
+
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -12,6 +14,6 @@ public interface ListViewTableEditorRendererFactory {
             String searchText, 
             RemoteHostActions fromActions, 
             Navigator navigator, 
-            RowColorResolver<VisualSearchResult> colorResolver);
+            RowColorResolver<VisualSearchResult> colorResolver, Color rowSelectionColor);
     
 }
