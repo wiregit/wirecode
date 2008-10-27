@@ -1,7 +1,7 @@
 package org.limewire.core.impl.xmpp;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 
 import org.apache.http.HttpRequest;
@@ -58,34 +58,29 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
         throw new HttpException("forbidden", HttpStatus.SC_FORBIDDEN);
     }
     
-    String parseFriend(HttpRequest request) throws HttpException {
+    String getFriend(HttpRequest request) throws HttpException {
         RequestLine requestLine = request.getRequestLine();
-        String uri;
         try {
-            uri = URLDecoder.decode(requestLine.getUri(), "UTF-8");
-            int lastSlash = uri.lastIndexOf('/');
-            // check for trailing slash
-            if (lastSlash == uri.length() - 1) {
-                lastSlash = uri.lastIndexOf('/', uri.length() - 2);
+            URI uri = new URI(requestLine.getUri());
+            String path = uri.getPath();
+            if (path == null) {
+                throw new HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
+            }
+            if (path.endsWith("/")) {
+                int previousSlash = path.lastIndexOf('/', path.length() - 2);
+                if (previousSlash != -1) {
+                    return path.substring(previousSlash + 1, path.length() - 1);
+                }
+            } else {
+                int lastSlash = path.lastIndexOf('/');
                 if (lastSlash != -1) {
-                    return uri.substring(lastSlash + 1, uri.length() - 1);
+                    return path.substring(lastSlash + 1);
                 }
             }
-            if (lastSlash != -1) {
-                return uri.substring(lastSlash + 1);
-            }
-        } catch (UnsupportedEncodingException e) {
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         throw new HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
-    }
-    
-    String getFriend(HttpRequest request) throws HttpException {
-        String friendId = parseFriend(request);
-        if (friendId.contains(":")) {
-            throw new HttpException("invalid friend id:" + String.valueOf(friendId), HttpStatus.SC_BAD_REQUEST);
-        }
-        return friendId;
     }
      
 }

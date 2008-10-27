@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
-import org.limewire.http.auth.Protected;
+import org.limewire.http.auth.RequiresAuthentication;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -36,7 +36,7 @@ public class BrowseRequestHandlerFactory {
         }
     }
     
-    @Protected 
+    @RequiresAuthentication 
     class ProtectedBrowseRequestHandler extends BrowseRequestHandler {
         ProtectedBrowseRequestHandler(HTTPUploadSessionManager sessionManager, Provider<ResponseFactory> responseFactory, OutgoingQueryReplyFactory outgoingQueryReplyFactory, HttpRequestFileListProvider browseRequestFileListProvider) {
             super(sessionManager, responseFactory, outgoingQueryReplyFactory, browseRequestFileListProvider);

@@ -21,6 +21,7 @@ public class AuthenticatorRegistryImpl implements Authenticator, AuthenticatorRe
     private final Set<Authenticator> authenticators = new HashSet<Authenticator>();
     
     public void register(AuthenticatorRegistry registry) {
+        // no-op since this is the registry itself
     }
 
     public boolean authenticate(Credentials credentials) {

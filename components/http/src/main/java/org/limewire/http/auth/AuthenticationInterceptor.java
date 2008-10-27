@@ -20,7 +20,13 @@ public interface AuthenticationInterceptor extends HttpRequestInterceptor {
      * How the {@link AuthenticationInterceptor} decides if an {@link NHttpRequestHandler}
      * wants protection is an implementation detail. The default implementation
      * {@link AuthenticationInterceptorImpl} checks if the handler class is annotated
-     * with {@link Protected}.
+     * with {@link RequiresAuthentication}.
      */
-    NHttpRequestHandler getGuardedHandler(String url, NHttpRequestHandler handler);
+    NHttpRequestHandler getGuardedHandler(String urlPattern, NHttpRequestHandler handler);
+    /**
+     * Unregisters a url pattern.
+     * 
+     * @param urlPattern might not be registered in the first place
+     */
+    void unregisterHandler(String urlPattern);
 }

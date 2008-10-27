@@ -27,8 +27,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class AuthenticationInterceptorImpl implements AuthenticationInterceptor {
     
-    final Authenticator authenticator;
-    final UriPatternMatcher protectedURIs;
+    private final Authenticator authenticator;
+    private final UriPatternMatcher protectedURIs;
     
     @Inject
     public AuthenticationInterceptorImpl(Authenticator authenticator) {
@@ -68,8 +68,13 @@ public class AuthenticationInterceptorImpl implements AuthenticationInterceptor 
         }
     }
     
+    @Override
+    public void unregisterHandler(String urlPattern) {
+        protectedURIs.unregister(urlPattern);
+    }
+    
     private boolean isProtected(NHttpRequestHandler handler) {
-        return handler.getClass().getAnnotation(Protected.class) != null;        
+        return handler.getClass().getAnnotation(RequiresAuthentication.class) != null;        
     }
     
     private class GuardingHandler implements NHttpRequestHandler {
@@ -101,6 +106,5 @@ public class AuthenticationInterceptorImpl implements AuthenticationInterceptor 
             }
         }
     }
-
     
 }

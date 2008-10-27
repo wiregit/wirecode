@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
-import org.limewire.http.auth.Protected;
+import org.limewire.http.auth.RequiresAuthentication;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -79,7 +79,7 @@ public class FileRequestHandlerFactoryImpl {
         }
     }
     
-    @Protected
+    @RequiresAuthentication
     class ProtectedFileRequestHandler extends FileRequestHandler {
         ProtectedFileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager, HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, AltLocManager altLocManager, AlternateLocationFactory alternateLocationFactory, Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache, PushEndpointFactory pushEndpointFactory, HashTreeWriteHandlerFactory tigerWriteHandlerFactory, HttpRequestFileListProvider fileListProvider) {
             super(sessionManager, fileManager, httpHeaderUtils, httpRequestHandlerFactory, creationTimeCache, fileResponseEntityFactory, altLocManager, alternateLocationFactory, downloadManager, tigerTreeCache, pushEndpointFactory, tigerWriteHandlerFactory, fileListProvider);

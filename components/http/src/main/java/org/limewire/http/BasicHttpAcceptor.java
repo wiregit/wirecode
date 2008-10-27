@@ -61,7 +61,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
     public static final String[] DEFAULT_METHODS = new String[] { "GET",
             "HEAD", "POST", };
 
-    private final AuthenticationInterceptor requestAuthenticator;
+    private final AuthenticationInterceptor authenticationInterceptor;
     
     private final String[] supportedMethods;
 
@@ -82,10 +82,10 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
     private AtomicBoolean started = new AtomicBoolean();
 
     public BasicHttpAcceptor(HttpParams params,
-                             AuthenticationInterceptor requestAuthenticator,
+                             AuthenticationInterceptor authenticationInterceptor,
                              String... supportedMethods) {
         this.params = params;
-        this.requestAuthenticator = requestAuthenticator;
+        this.authenticationInterceptor = authenticationInterceptor;
         this.supportedMethods = supportedMethods;
         
         this.registry = new SynchronizedNHttpRequestHandlerRegistry();
@@ -96,7 +96,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
     
     private void initializeDefaultInterceptors() {
         // order doesn't play a role
-        addRequestInterceptor(requestAuthenticator);
+        addRequestInterceptor(authenticationInterceptor);
         addResponseInterceptor(new ResponseDate());
         addResponseInterceptor(new ResponseServer());
         addResponseInterceptor(new ResponseContent());
@@ -241,7 +241,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
      */
     public void registerHandler(final String pattern,
             final NHttpRequestHandler handler) {
-        registry.register(pattern, requestAuthenticator.getGuardedHandler(pattern, handler));       
+        registry.register(pattern, authenticationInterceptor.getGuardedHandler(pattern, handler));       
     }
 
     /**
@@ -250,6 +250,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
      * @see #registerHandler(String, HttpRequestHandler)
      */
     public void unregisterHandler(final String pattern) {
+        authenticationInterceptor.unregisterHandler(pattern);
         registry.unregister(pattern);
     }
 

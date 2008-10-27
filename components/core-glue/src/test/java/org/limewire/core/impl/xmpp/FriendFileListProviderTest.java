@@ -41,10 +41,18 @@ public class FriendFileListProviderTest extends BaseTestCase {
     }
     
     public void testGetFriendForValidEntries() throws Exception {
-        BasicHttpRequest request = new BasicHttpRequest("GET", "/friend/me%40me.com");
-        assertEquals("me@me.com", friendFileListProvider.getFriend(request));
-        request = new BasicHttpRequest("GET", "/friend/me%40me.com/");
-        assertEquals("me@me.com", friendFileListProvider.getFriend(request));
+        String[] uris = new String[] {
+                "/friend/me%40me.com",
+                "/friend/me%40me.com/",
+                "/friend/me%40me.com?thumbnails=true",
+                "/friend/me%40me.com/?thumbnails=true",
+                "/me%40me.com",
+                "/me%40me.com/"
+        };
+        for (String uri : uris) {
+            BasicHttpRequest request = new BasicHttpRequest("GET", uri);
+            assertEquals("failed for uri: " + uri, "me@me.com", friendFileListProvider.getFriend(request));
+        }
     }
     
     public void testGetFriendForInvalidEntries() {
@@ -53,18 +61,21 @@ public class FriendFileListProviderTest extends BaseTestCase {
             friendFileListProvider.getFriend(request);
             fail("exception expected, not a valid request");
         } catch (HttpException he) {
+            assertEquals(400, he.getErrorCode());
         }
         request = new BasicHttpRequest("GET", "");
         try {
             friendFileListProvider.getFriend(request);
             fail("exception expected, not a valid request");
         } catch (HttpException he) {
+            assertEquals(400, he.getErrorCode());
         }
         request = new BasicHttpRequest("GET", "me:@me.com");
         try {
             friendFileListProvider.getFriend(request);
             fail("exception expected, not a valid request");
         } catch (HttpException he) {
+            assertEquals(400, he.getErrorCode());
         }
     }
     

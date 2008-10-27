@@ -22,7 +22,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 
-public class RequestAuthenticatorImplTest extends BaseTestCase {
+public class AuthenticationInterceptorImplTest extends BaseTestCase {
 
     private Mockery mockery;
     private Authenticator authenticator;
@@ -41,7 +41,7 @@ public class RequestAuthenticatorImplTest extends BaseTestCase {
     
     
     
-    public RequestAuthenticatorImplTest(String name) {
+    public AuthenticationInterceptorImplTest(String name) {
         super(name);
     }
 
@@ -165,7 +165,7 @@ public class RequestAuthenticatorImplTest extends BaseTestCase {
         
     }
     
-    @Protected
+    @RequiresAuthentication
     private class ProtectedHandler extends Handler {
         @Override
         public void handle(HttpRequest arg0, HttpResponse arg1, NHttpResponseTrigger arg2,

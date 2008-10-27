@@ -262,7 +262,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         // uploads
         FileRequestHandler fileRequestHandler = httpRequestHandlerFactory.createFileRequestHandler(gnutellaUploadFileListProvider.get(), false);
-        httpAcceptor.get().registerHandler("/get*", fileRequestHandler);
         httpAcceptor.get().registerHandler("/uri-res/*", fileRequestHandler);
         
         started = true;

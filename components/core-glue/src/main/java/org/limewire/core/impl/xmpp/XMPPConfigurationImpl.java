@@ -11,7 +11,7 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     private final XMPPUserSettings.XMPPUserConfiguration userConfiguration;
     private final EventListener<RosterEvent> rosterListener;
     private final XMPPErrorListener errorListener;
-    private String resource;
+    private final String resource;
 
     public XMPPConfigurationImpl(XMPPServerSettings.XMPPServerConfiguration serverConfiguration,
                                  XMPPUserSettings.XMPPUserConfiguration userConfiguration,

@@ -10,5 +10,5 @@ import java.lang.annotation.Documented;
 @Retention(value = RetentionPolicy.RUNTIME)
 @Documented
 /** Used to mark an HttpRequestHandler as needing authentication*/
-public @interface Protected {
+public @interface RequiresAuthentication {
 }
