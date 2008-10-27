@@ -108,12 +108,14 @@ class SearchHandlerImpl implements SearchHandler {
         } else {
              searchPanel.setStartingLimeWire(true);
              lifeCycleManager.addListener(new EventListener<LifeCycleEvent>() {
+                 final EventListener<LifeCycleEvent> eventListener = this;
                  public void handleEvent(LifeCycleEvent event) {
                      if(event == LifeCycleEvent.STARTED) {
                          SwingUtils.invokeLater(new Runnable() {
                              public void run() {
                                  searchPanel.setStartingLimeWire(false);
                                  search.start();
+                                 lifeCycleManager.removeListener(eventListener);
                              }
                          });
                      }
