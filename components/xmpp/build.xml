@@ -12,6 +12,7 @@
     <import file="../io/build.xml"/>
     <import file="../net/build.xml"/>
     <import file="../security/build.xml"/>
+    <import file="../http/build.xml"/>
     <import file="../xmpp-api/build.xml"/>
     
     <target name="initialize" depends="lw-common.initialize, lw-xmpp-api.initialize, lw-io.initialize, lw-net.initialize, lw-security.initialize" unless="initialized.xmpp">
@@ -21,6 +22,7 @@
                 <path refid="build.limewire.components.common.buildpath"/>
                 <path refid="build.limewire.components.net.buildpath"/>
                 <path refid="build.limewire.components.security.buildpath"/>
+		<path refid="build.limewire.components.http.buildpath"/>
                 <path refid="build.limewire.components.xmpp-api.buildpath"/>
 				<pathelement location="${limewire.lib.jars}/smack.jar"/>
 				<pathelement location="${limewire.lib.jars}/smackx.jar"/>

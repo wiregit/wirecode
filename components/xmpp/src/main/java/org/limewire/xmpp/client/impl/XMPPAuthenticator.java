@@ -1,7 +1,5 @@
 package org.limewire.xmpp.client.impl;
 
-import java.security.SecureRandom;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.Credentials;
 import org.limewire.http.auth.Authenticator;
