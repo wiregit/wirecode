@@ -56,27 +56,29 @@ public class FriendFileListProviderTest extends BaseTestCase {
     }
     
     public void testGetFriendForInvalidEntries() {
-        BasicHttpRequest request = new BasicHttpRequest("GET", "me%40me.com");
-        try {
-            friendFileListProvider.getFriend(request);
-            fail("exception expected, not a valid request");
-        } catch (HttpException he) {
-            assertEquals(400, he.getErrorCode());
+        String[] invalidUris = new String[] {
+                "me%40me.com",
+                "",
+         
+        };
+        for (String invalidUri : invalidUris) {
+            BasicHttpRequest request = new BasicHttpRequest("GET", invalidUri);
+            try {
+                friendFileListProvider.getFriend(request);
+                fail("exception expected, not a valid request: " + invalidUri);
+            } catch (HttpException he) {
+                assertEquals("expected 400 for: " + invalidUri,  400, he.getErrorCode());
+            }
         }
-        request = new BasicHttpRequest("GET", "");
-        try {
-            friendFileListProvider.getFriend(request);
-            fail("exception expected, not a valid request");
-        } catch (HttpException he) {
-            assertEquals(400, he.getErrorCode());
-        }
-        request = new BasicHttpRequest("GET", "me:@me.com");
-        try {
-            friendFileListProvider.getFriend(request);
-            fail("exception expected, not a valid request");
-        } catch (HttpException he) {
-            assertEquals(400, he.getErrorCode());
-        }
+    }
+    
+    /**
+     * Ensures even empty id is parsed correctly and doesn't cause any runtime
+     * exceptions.
+     */
+    public void testEmptyFriendId() throws Exception {
+        BasicHttpRequest request = new BasicHttpRequest("GET", "/friend//");
+        assertEquals("", friendFileListProvider.getFriend(request));
     }
     
     public void testGetFileList() throws Exception {

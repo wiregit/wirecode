@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.limewire.common.LimeWireCommonModule;
+import org.limewire.http.auth.LimeWireHttpAuthModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
@@ -75,6 +76,7 @@ public class XMPPServiceTest extends BaseTestCase {
     private Module [] getModules() {
         List<Module> modules = new ArrayList<Module>();
         modules.add(new LimeWireCommonModule());
+        modules.add(new LimeWireHttpAuthModule());
         modules.addAll(getServiceModules());
         return modules.toArray(new Module[modules.size()]);
     }

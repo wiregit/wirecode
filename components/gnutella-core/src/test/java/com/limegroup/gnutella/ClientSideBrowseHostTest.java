@@ -18,22 +18,25 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.io.IpPort;
+import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.Address;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.io.Address;
 import org.limewire.util.Base32;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.search.SearchResult;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryReplyFactory;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
@@ -75,6 +78,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setPort(SERVER_PORT);
+        networkManagerStub.setExternalAddress(new byte[] { (byte)129, 1, 4, 10 });
         Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class, new AbstractModule() {
             @Override
             protected void configure() {
@@ -110,9 +114,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             ss.setReuseAddress(true);
             ss.setSoTimeout(TIMEOUT);
 
-            // send a reply with some PushProxy info
-            IpPort[] proxies = new IpPortImpl[1];
-            proxies[0] = new IpPortImpl("127.0.0.1", 7000);
+            // send a reply
             Response[] res = new Response[1];
             res[0] = responseFactory.createResponse(10, 10, "boalt.org");
             m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 7000,
@@ -126,7 +128,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
             // tell the leaf to browse host the file, should result in direct HTTP
             // request
-            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(), new GUID(GUID.makeGuid()), new BrowseListener() {
+            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(callback.getRFD()), new GUID(), new BrowseListener() {
                 public void handleBrowseResult(SearchResult searchResult) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
@@ -182,24 +184,22 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             ss.setSoTimeout(TIMEOUT*4);
 
             // send a reply with some PushProxy info
-            //final PushProxyInterface[] proxies = 
-            //  new QueryReply.PushProxyContainer[1];
             final IpPortSet proxies = new IpPortSet();
             proxies.add(new IpPortImpl("127.0.0.1", 7000));
             Response[] res = new Response[1];
             res[0] = responseFactory.createResponse(10, 10, "nyu.edu");
             m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 6999,
-                    InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false,
+                    InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], true, false,
                     true, true, false, false, proxies);
             testUP[0].send(m);
             testUP[0].flush();
 
             // wait a while for Leaf to process result
             assertNotNull(callback.getRFD());
-
+            
             // tell the leaf to browse host the file, should result in PushProxy
             // request
-            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(), new GUID(GUID.makeGuid()), new BrowseListener() {
+            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(callback.getRFD()), new GUID(), new BrowseListener() {
                 public void handleBrowseResult(SearchResult searchResult) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
@@ -294,14 +294,10 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         } while (!(m instanceof QueryRequest)) ;
 
         // send a reply with some BAD PushProxy info
-        //final PushProxyInterface[] proxies = 
-        //  new QueryReply.PushProxyContainer[1];
-        final IpPortSet proxies = new IpPortSet();
-        proxies.add(new IpPortImpl("127.0.0.1", 7001));
-        Response[] res = new Response[1];
-        res[0] = responseFactory.createResponse(10, 10, "anita");
+        final IpPortSet proxies = new IpPortSet(new IpPortImpl("127.0.0.1", 7001));
+        Response[] res = new Response[] { responseFactory.createResponse(10, 10, "anita") };
         m = queryReplyFactory.createQueryReply(m.getGUID(), (byte) 1, 7000,
-                InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], false, false, true,
+                InetAddress.getLocalHost().getAddress(), 0, res, clientGUID, new byte[0], true, false, true,
                 true, false, false, proxies);
         testUP[0].send(m);
         testUP[0].flush();
@@ -310,7 +306,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         assertNotNull(callback.getRFD());
 
         // tell the leaf to browse host the file,
-        searchServices.doAsynchronousBrowseHost(new MockFriendPresence(), new GUID(GUID.makeGuid()), new BrowseListener() {
+        searchServices.doAsynchronousBrowseHost(new MockFriendPresence(callback.getRFD()), new GUID(), new BrowseListener() {
                 public void handleBrowseResult(SearchResult searchResult) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
@@ -408,7 +404,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         }
 
         public boolean isAnonymous() {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
+            return true;
         }
 
         public Network getNetwork() {
@@ -417,8 +413,15 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     }
     
     class MockFriendPresence implements FriendPresence {
+
+        private final RemoteFileDesc rfd;
+
+        public MockFriendPresence(RemoteFileDesc rfd) {
+            this.rfd = rfd;
+        }
+
         public Friend getFriend() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return new MockFriend();
         }
 
         public String getPresenceId() {
@@ -426,7 +429,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         }
 
         public Address getPresenceAddress() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return rfd.toAddress();
         }
 
         public byte[] getAuthToken() {

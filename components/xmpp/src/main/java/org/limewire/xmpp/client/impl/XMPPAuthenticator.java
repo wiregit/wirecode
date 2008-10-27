@@ -26,7 +26,11 @@ public class XMPPAuthenticator implements Authenticator {
     /**
      * Per session random seed.
      */
-    private final byte[] seed = SecurityUtils.createSecureRandomNoBlock().generateSeed(SHA1.HASH_LENGTH);
+    private final byte[] seed = new byte[SHA1.HASH_LENGTH];
+    
+    { 
+        SecurityUtils.createSecureRandomNoBlock().nextBytes(seed);
+    }
     
     @Override
     @Inject
