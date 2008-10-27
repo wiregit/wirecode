@@ -183,7 +183,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     void dispatch(ManagedListStatusEvent event) {
         managedListListenerSupport.broadcast(event);
-        System.out.println("dispatching event: " + event);
     }
 
     public FileDesc getFileDesc(File file) {
