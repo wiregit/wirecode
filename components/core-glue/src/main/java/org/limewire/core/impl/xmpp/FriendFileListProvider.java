@@ -58,6 +58,10 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
         throw new HttpException("forbidden", HttpStatus.SC_FORBIDDEN);
     }
     
+    /**
+     * Parses out the last element of the request uri's path and returns it.
+     * @throws HttpException if there was no such element
+     */
     String getFriend(HttpRequest request) throws HttpException {
         RequestLine requestLine = request.getRequestLine();
         try {
