@@ -209,7 +209,7 @@ public class SortAndFilterPanel extends JXPanel {
 
         // Created a SortedList that doesn't have a Comparator yet.
         final SortedList<VisualSearchResult> sortedList =
-            GlazedListsFactory.sortedList(simpleList, getFloatComparator(PropertyKey.RELEVANCE, false, false));
+            GlazedListsFactory.sortedList(simpleList, getRelevanceComparator());
 
         EventList<VisualSearchResult> filteredList =
             GlazedListsFactory.filterList(sortedList, editor);
@@ -304,6 +304,11 @@ public class SortAndFilterPanel extends JXPanel {
             final PropertyKey propertyKey, final boolean ascending) {
         return new SimilarResultsGroupingDelegateComparator(getStringComparator(propertyKey, ascending), getNameComparator(ascending));
     }
+    
+    @SuppressWarnings("unchecked")
+    private SimilarResultsGroupingDelegateComparator getRelevanceComparator() {
+        return new SimilarResultsGroupingDelegateComparator(getFloatComparator(PropertyKey.RELEVANCE, false, false), getNameComparator(true));
+    }
 
     @SuppressWarnings("unchecked")
     private SimilarResultsGroupingComparator getComparator(String item) {
@@ -371,7 +376,7 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         if (RELEVANCE_ITEM.equals(item)) {
-            return new SimilarResultsGroupingDelegateComparator(getFloatComparator(PropertyKey.RELEVANCE, false, false), getNameComparator(true));
+            return getRelevanceComparator();
         }
 
         if (SIZE_HIGH_TO_LOW.equals(item)) {
